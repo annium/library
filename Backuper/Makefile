@@ -1,23 +1,18 @@
-PROJECT_NAME := id
+PROJECT_NAME := backuper
 TAG_PREFIX := registry.annium.com/$(PROJECT_NAME)
 
-db-up api-up:
+api-up:
 	$(call up,$(subst -up,,$@))
 
-db-down api-down:
+api-down:
 	$(call down,$(subst -down,,$@))
 
-db-log api-log:
+api-log:
 	$(call log,$(subst -log,,$@))
 
 
-db-drop db-update migrations-add migrations-list migrations-remove:
-	@cd server && tools/ef-$@.sh
-
 publish-api:
-	@cp $$(find $$(dirname $$(realpath $$(which dotnet)))/sdk -type f -name ef.dll | grep netcoreapp2.2) server/src
-	$(call publish,api,server/src,Annium.Id.Api/Dockerfile)
-	@rm -f server/src/ef.dll
+	$(call publish,api,src,Backuper.Api/Dockerfile)
 
 
 define publish

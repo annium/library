@@ -2,7 +2,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
-namespace Backuper
+namespace Backuper.Api
 {
     internal class Program
     {

@@ -2,16 +2,16 @@ version: "3.6"
 services:
   api:
     build:
-      context: ../server/src
-      dockerfile: Annium.Id.Api/Dockerfile
-    image: id_api
-    container_name: id_api
+      context: ../src
+      dockerfile: Backuper.Api/Dockerfile
+    image: backuper
+    container_name: backuper_api
     restart: always
     ports:
-      - "9501:5000"
+      - "9991:5000"
     volumes:
       - "../run/configuration:/app/configuration"
-      - "../run/keys:/app/keys"
+      - "../run/data:/app/data"
     logging:
       driver: json-file
       options:

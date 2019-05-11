@@ -2,7 +2,7 @@ using System;
 using Annium.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Backuper
+namespace Backuper.Api
 {
     internal class ServicePack : ServicePackBase
     {

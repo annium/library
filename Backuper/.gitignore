@@ -1,12 +1,15 @@
 # editors
 /.vscode/
 
+# artifacts
+/run/
+
 # build
-/bin/
-/obj/
+bin/
+obj/
 
 # packages
-/*.nupkg
+*.nupkg
 
 # xs ignore patterns
 .xs.ignore

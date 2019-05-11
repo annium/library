@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 using NodaTime.Serialization.JsonNet;
 
-namespace Backuper
+namespace Backuper.Api
 {
     public class Startup<TServicePack> where TServicePack : ServicePackBase, new()
     {

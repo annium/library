@@ -1,0 +1,25 @@
+servers:
+  registry:
+    connection:
+      type: postgres
+      host: localhost
+      port: 5432
+      db: db
+      user: dbuser
+      pass: dbpass
+    plan:
+      local:
+        storage: local
+        interval: "0 5 * * 1"
+        notifications:
+          - slack
+storages:
+  local:
+    type: local
+    path: /annium/backups
+notifications:
+  slack:
+    type: slack
+    team: T12345678
+    channel: B12345768
+    token: OAuthTokenGoesHere
