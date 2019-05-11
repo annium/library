@@ -1,0 +1,15 @@
+# editors
+/.vscode/
+
+# build
+/bin/
+/obj/
+
+# packages
+/*.nupkg
+
+# xs ignore patterns
+.xs.ignore
+.xs.credentials
+nuget.config
+lcov.info

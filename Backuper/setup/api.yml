@@ -1,0 +1,23 @@
+version: "3.6"
+services:
+  api:
+    build:
+      context: ../server/src
+      dockerfile: Annium.Id.Api/Dockerfile
+    image: id_api
+    container_name: id_api
+    restart: always
+    ports:
+      - "9501:5000"
+    volumes:
+      - "../run/configuration:/app/configuration"
+      - "../run/keys:/app/keys"
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+        max-file: "1"
+networks:
+  default:
+    external:
+      name: backuper_net
