@@ -16,7 +16,7 @@ namespace Backuper.Notification.Abstract
             this.provider = provider;
         }
 
-        public async Task<Channel> GetChannelAsync(Configuration cfg)
+        public async Task<Channel> GetChannelAsync(string name, Configuration cfg)
         {
             var managerType = typeof(ChannelManager<>).MakeGenericType(cfg.GetType());
 
@@ -25,7 +25,7 @@ namespace Backuper.Notification.Abstract
 
             try
             {
-                var storage = (Channel) await ((Task<Channel>) getStorageAsync.Invoke(manager, new [] { cfg }));
+                var storage = (Channel) await ((Task<Channel>) getStorageAsync.Invoke(manager, new object[] { name, cfg }));
 
                 return storage;
             }

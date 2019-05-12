@@ -16,7 +16,7 @@ namespace Backuper.Connection.Abstract
             this.provider = provider;
         }
 
-        public async Task<Connection> GetConnectionAsync(Configuration cfg)
+        public async Task<Connection> GetConnectionAsync(string name, Configuration cfg)
         {
             var managerType = typeof(ConnectionManager<>).MakeGenericType(cfg.GetType());
 
@@ -25,7 +25,7 @@ namespace Backuper.Connection.Abstract
 
             try
             {
-                var storage = (Connection) await ((Task<Connection>) getStorageAsync.Invoke(manager, new [] { cfg }));
+                var storage = (Connection) await ((Task<Connection>) getStorageAsync.Invoke(manager, new object[] { name, cfg }));
 
                 return storage;
             }

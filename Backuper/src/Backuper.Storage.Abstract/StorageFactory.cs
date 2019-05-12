@@ -16,7 +16,7 @@ namespace Backuper.Storage.Abstract
             this.provider = provider;
         }
 
-        public async Task<Storage> GetStorageAsync(Configuration cfg)
+        public async Task<Storage> GetStorageAsync(string name, Configuration cfg)
         {
             var managerType = typeof(StorageManager<>).MakeGenericType(cfg.GetType());
 
@@ -25,7 +25,7 @@ namespace Backuper.Storage.Abstract
 
             try
             {
-                var storage = (Storage) await ((Task<Storage>) getStorageAsync.Invoke(manager, new [] { cfg }));
+                var storage = (Storage) await ((Task<Storage>) getStorageAsync.Invoke(manager, new object[] { name, cfg }));
 
                 return storage;
             }

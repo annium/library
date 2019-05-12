@@ -4,9 +4,9 @@ namespace Backuper.Storage.S3
 {
     public class StorageManager : Abstract.StorageManager<Configuration>
     {
-        public override Task<Abstract.Storage> GetStorageAsync(Configuration configuration)
+        public override Task<Abstract.Storage> GetStorageAsync(string name, Configuration configuration)
         {
-            return Task.FromResult<Abstract.Storage>(new Storage());
+            return Task.FromResult<Abstract.Storage>(new Storage(name));
         }
     }
 }

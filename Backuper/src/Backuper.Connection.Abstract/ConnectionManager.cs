@@ -4,6 +4,6 @@ namespace Backuper.Connection.Abstract
 {
     public abstract class ConnectionManager<T> where T : Configuration
     {
-        public abstract Task<Connection> GetConnectionAsync(T configuration);
+        public abstract Task<Connection> GetConnectionAsync(string name, T configuration);
     }
 }

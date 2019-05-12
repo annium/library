@@ -36,8 +36,8 @@ namespace Backuper.Api.State
 
         public async Task<State> GetState()
         {
-            var storages = await GetAllAsync(config.Storages, p => storageFactory.GetStorageAsync(p.Value));
-            var channels = await GetAllAsync(config.Notifications, p => channelFactory.GetChannelAsync(p.Value));
+            var storages = await GetAllAsync(config.Storages, p => storageFactory.GetStorageAsync(p.Key, p.Value));
+            var channels = await GetAllAsync(config.Notifications, p => channelFactory.GetChannelAsync(p.Key, p.Value));
 
             var servers = await GetAllAsync(config.Servers, p => GetServerAsync(storages, channels, p.Key, p.Value));
 
@@ -45,48 +45,37 @@ namespace Backuper.Api.State
         }
 
         private async Task<Server> GetServerAsync(
-            IReadOnlyDictionary<string, Storage.Abstract.Storage> storages,
-            IReadOnlyDictionary<string, Notification.Abstract.Channel> channels,
+            Storage.Abstract.Storage[] storages,
+            Notification.Abstract.Channel[] channels,
             string name,
             ServerConfiguration cfg
         )
         {
-            var connection = await connectionFactory.GetConnectionAsync(cfg.Connection);
-            var plans = cfg.Plans.ToDictionary(
-                p => p.Key,
-                p => ResolvePlan(name, p.Key, p.Value, storages, channels)
-            );
+            var connection = await connectionFactory.GetConnectionAsync(name, cfg.Connection);
+            var plans = cfg.Plans.Select(p => ResolvePlan(name, p.Key, p.Value, storages, channels)).ToArray();
 
-            return new Server(connection, plans);
+            return new Server(name, connection, plans);
         }
 
         private Plan ResolvePlan(
             string server,
             string name,
             PlanConfiguration cfg,
-            IReadOnlyDictionary<string, Storage.Abstract.Storage> storages,
-            IReadOnlyDictionary<string, Notification.Abstract.Channel> channels
+            Storage.Abstract.Storage[] storages,
+            Notification.Abstract.Channel[] channels
         ) => new Plan(
-            storages.FirstOrDefault(p => p.Key == cfg.Storage).Value ??
+            name,
+            storages.FirstOrDefault(s => s.Name == cfg.Storage) ??
             throw new InvalidOperationException($"Can't resolve storage {cfg.Storage} of plan {server}.{name}"),
                 intervalResolver.GetMatcher(cfg.Interval),
                 cfg.Notifications
-                .Select(c => channels.FirstOrDefault(p => p.Key == c).Value ??
-                    throw new InvalidOperationException($"Can't resolve notification channel {c} of plan {server}.{name}"))
+                .Select(n => channels.FirstOrDefault(c => c.Name == n) ??
+                    throw new InvalidOperationException($"Can't resolve notification channel {n} of plan {server}.{name}"))
                 .ToArray()
         );
 
-        private async Task<IReadOnlyDictionary<string, R>> GetAllAsync<C, R>(
+        private Task<R[]> GetAllAsync<C, R>(
             IReadOnlyDictionary<string, C> config, Func<KeyValuePair<string, C>, Task<R>> resolveAsync
-        )
-        {
-            return (await Task.WhenAll(config.Select(async pair =>
-                {
-                    var result = await resolveAsync(pair);
-
-                    return new KeyValuePair<string, R>(pair.Key, result);
-                })))
-                .ToDictionary(p => p.Key, p => p.Value);
-        }
+        ) => Task.WhenAll(config.Select(resolveAsync));
     }
 }
