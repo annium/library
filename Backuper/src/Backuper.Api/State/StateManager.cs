@@ -29,7 +29,7 @@ namespace Backuper.Api.State
                 throw new InvalidOperationException($"State is already set");
 
             this.state = state;
-            StartAsync().GetAwaiter();
+            StartAsync().GetAwaiter().GetResult();
         }
 
         private async Task StartAsync()

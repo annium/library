@@ -1,5 +1,7 @@
+using System;
 using System.Threading.Tasks;
 using Annium.Logging.Abstractions;
+using Npgsql;
 
 namespace Backuper.Connection.PostgreSQL
 {
@@ -16,11 +18,35 @@ namespace Backuper.Connection.PostgreSQL
             this.cfg = cfg;
         }
 
-        public override Task SetupAsync()
+        public override async Task SetupAsync()
         {
-            logger.Debug($"Setup PostgreSQL connection {Name}");
+            Debug("setup");
 
-            return Task.CompletedTask;
+            try
+            {
+                using(var cn = new NpgsqlConnection(GetConnectionString()))
+                {
+                    await cn.OpenAsync();
+                }
+                Debug("connection ok");
+            }
+            catch (PostgresException)
+            {
+                throw new InvalidOperationException(msg("connection failed"));
+            }
         }
+
+        private string GetConnectionString() => string.Join(';', new string[]
+        {
+            $"Host={cfg.Host}",
+            $"Port={cfg.Port}",
+            $"Database={cfg.Db}",
+            $"Username={cfg.User}",
+            $"Password={cfg.Pass}",
+        });
+
+        private void Debug(string message) => logger.Debug(msg(message));
+
+        private string msg(string message) => $"PostgreSQL {Name}: {message}";
     }
 }
