@@ -5,12 +5,15 @@ namespace Backuper.Connection.PostgreSQL
 {
     public class Connection : Abstract.Connection
     {
+        private readonly Configuration cfg;
+
         public Connection(
             string name,
+            Configuration cfg,
             ILogger logger
         ) : base(name, logger)
         {
-
+            this.cfg = cfg;
         }
 
         public override Task SetupAsync()

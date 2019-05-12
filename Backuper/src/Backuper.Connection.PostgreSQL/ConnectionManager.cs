@@ -16,7 +16,7 @@ namespace Backuper.Connection.PostgreSQL
 
         public override Task<Abstract.Connection> GetConnectionAsync(string name, Configuration configuration)
         {
-            return Task.FromResult<Abstract.Connection>(new Connection(name, logger));
+            return Task.FromResult<Abstract.Connection>(new Connection(name, configuration, logger));
         }
     }
 }
