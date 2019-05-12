@@ -32,7 +32,7 @@ namespace Backuper.Api
 
         public override void Register(IServiceCollection services, IServiceProvider provider)
         {
-            services.AddSingleton<State.StateManager>();
+            services.AddSingleton<State.StateFactory>();
 
             Mapper.AddConfiguration(ConfigureMapping());
             services.AddScheduler();
@@ -42,7 +42,7 @@ namespace Backuper.Api
         {
             try
             {
-                provider.GetRequiredService<State.StateManager>().GetState().GetAwaiter().GetResult();
+                provider.GetRequiredService<State.StateFactory>().GetState().GetAwaiter().GetResult();
             }
             catch (AggregateException ex)
             {

@@ -7,7 +7,7 @@ using Backuper.Api.Config;
 
 namespace Backuper.Api.State
 {
-    public class StateManager
+    public class StateFactory
     {
         private readonly Configuration config;
 
@@ -19,7 +19,7 @@ namespace Backuper.Api.State
 
         private readonly IIntervalResolver intervalResolver;
 
-        public StateManager(
+        public StateFactory(
             Configuration config,
             Connection.Abstract.ConnectionFactory connectionFactory,
             Storage.Abstract.StorageFactory storageFactory,
