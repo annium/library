@@ -8,4 +8,7 @@
         <DebugType>portable</DebugType>
         <WarningsAsErrors>true</WarningsAsErrors>
     </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Backuper.Storage.Abstract/Backuper.Storage.Abstract.csproj" />
+    </ItemGroup>
 </Project>

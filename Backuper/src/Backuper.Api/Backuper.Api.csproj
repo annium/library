@@ -11,11 +11,11 @@
     <ItemGroup>
         <ProjectReference Include="../Backuper.Connection.PostgreSQL/Backuper.Connection.PostgreSQL.csproj" />
         <ProjectReference Include="../Backuper.Notification.Slack/Backuper.Notification.Slack.csproj" />
-        <ProjectReference Include="../Backuper.Storage.LocalFS/Backuper.Storage.LocalFS.csproj" />
+        <ProjectReference Include="../Backuper.Storage.Local/Backuper.Storage.Local.csproj" />
+        <ProjectReference Include="../Backuper.Storage.S3/Backuper.Storage.S3.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Diagnostics.Debug" Version="0.1.0" />
-        <PackageReference Include="Annium.Extensions.Configuration" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.2.0" />
