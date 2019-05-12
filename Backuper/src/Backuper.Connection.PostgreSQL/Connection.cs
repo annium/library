@@ -47,6 +47,6 @@ namespace Backuper.Connection.PostgreSQL
 
         private void Debug(string message) => logger.Debug(msg(message));
 
-        private string msg(string message) => $"PostgreSQL {Name}: {message}";
+        private string msg(string message) => $"Connection PostgreSQL {Name}: {message}";
     }
 }

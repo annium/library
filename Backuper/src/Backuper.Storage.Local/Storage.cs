@@ -1,3 +1,4 @@
+using System.IO;
 using System.Threading.Tasks;
 using Annium.Logging.Abstractions;
 
@@ -18,9 +19,24 @@ namespace Backuper.Storage.Local
 
         public override Task SetupAsync()
         {
-            logger.Debug($"Setup local storage {Name}");
+            Debug("setup");
+
+            try
+            {
+                Directory.CreateDirectory(Path.Combine(cfg.Path, Name));
+                Debug("setup done");
+            }
+            catch
+            {
+                Debug("setup failed");
+                throw;
+            }
 
             return Task.CompletedTask;
         }
+
+        private void Debug(string message) => logger.Debug(msg(message));
+
+        private string msg(string message) => $"Storage local {Name}: {message}";
     }
 }
