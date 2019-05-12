@@ -20,6 +20,9 @@ namespace Backuper.Api.Config
 
         public async Task GetState()
         {
+            // having configuration - build state
+            // 1. resolve storage/notification references
+            // 2.
             await Task.CompletedTask;
 
             return;
