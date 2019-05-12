@@ -3,8 +3,10 @@ using System.IO;
 using Annium.Extensions.Configuration;
 using Annium.Extensions.DependencyInjection;
 using Annium.Extensions.Mapper;
+using Annium.Logging.Abstractions;
 using Backuper.Api.Config;
 using Microsoft.Extensions.DependencyInjection;
+using NodaTime;
 
 namespace Backuper.Api
 {
@@ -32,17 +34,25 @@ namespace Backuper.Api
 
         public override void Register(IServiceCollection services, IServiceProvider provider)
         {
+            services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
+
             services.AddSingleton<State.StateFactory>();
+            services.AddSingleton<State.StateManager>();
 
             Mapper.AddConfiguration(ConfigureMapping());
             services.AddScheduler();
+            services.AddConsole(new LoggerConfiguration(LogLevel.Trace));
         }
 
         public override void Setup(System.IServiceProvider provider)
         {
+            var stateFactory = provider.GetRequiredService<State.StateFactory>();
+            var stateManager = provider.GetRequiredService<State.StateManager>();
+
             try
             {
-                provider.GetRequiredService<State.StateFactory>().GetState().GetAwaiter().GetResult();
+                var state = stateFactory.GetState().GetAwaiter().GetResult();
+                stateManager.SetState(state);
             }
             catch (AggregateException ex)
             {
