@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Annium.Extensions.Jobs;
 using Backuper.Api.Config;
 
 namespace Backuper.Api.State
@@ -17,21 +16,17 @@ namespace Backuper.Api.State
 
         private readonly Notification.Abstract.ChannelFactory channelFactory;
 
-        private readonly IIntervalResolver intervalResolver;
-
         public StateFactory(
             Configuration config,
             Connection.Abstract.ConnectionFactory connectionFactory,
             Storage.Abstract.StorageFactory storageFactory,
-            Notification.Abstract.ChannelFactory channelFactory,
-            IIntervalResolver intervalResolver
+            Notification.Abstract.ChannelFactory channelFactory
         )
         {
             this.config = config;
             this.connectionFactory = connectionFactory;
             this.storageFactory = storageFactory;
             this.channelFactory = channelFactory;
-            this.intervalResolver = intervalResolver;
         }
 
         public async Task<State> GetState()
@@ -67,7 +62,7 @@ namespace Backuper.Api.State
             name,
             storages.FirstOrDefault(s => s.Name == cfg.Storage) ??
             throw new InvalidOperationException($"Can't resolve storage {cfg.Storage} of plan {server}.{name}"),
-                intervalResolver.GetMatcher(cfg.Interval),
+                cfg.Interval,
                 cfg.Notifications
                 .Select(n => channels.FirstOrDefault(c => c.Name == n) ??
                     throw new InvalidOperationException($"Can't resolve notification channel {n} of plan {server}.{name}"))

@@ -1,6 +1,3 @@
-using System;
-using NodaTime;
-
 namespace Backuper.Api.State
 {
     public class Plan
@@ -9,20 +6,20 @@ namespace Backuper.Api.State
 
         public Storage.Abstract.Storage Storage { get; }
 
-        public Func<Instant, bool> IsTime { get; }
+        public string Interval { get; }
 
         public Notification.Abstract.Channel[] Notifications { get; }
 
         public Plan(
             string name,
             Storage.Abstract.Storage storage,
-            Func<Instant, bool> isTime,
+            string interval,
             Notification.Abstract.Channel[] notifications
         )
         {
             Name = name;
             Storage = storage;
-            IsTime = isTime;
+            Interval = interval;
             Notifications = notifications;
         }
     }
