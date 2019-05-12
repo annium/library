@@ -22,5 +22,25 @@ namespace Backuper.Storage.S3
 
             return Task.CompletedTask;
         }
+
+        public override Task<string[]> ListAsync()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Task UploadAsync(string path, string name)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Task DownloadAsync(string name, string path)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Task DeleteAsync(string name)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

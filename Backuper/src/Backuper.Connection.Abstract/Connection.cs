@@ -19,5 +19,9 @@ namespace Backuper.Connection.Abstract
         }
 
         public abstract Task SetupAsync();
+
+        public abstract Task<string> BackupAsync();
+
+        public abstract Task RestoreAsync(string path);
     }
 }

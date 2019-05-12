@@ -8,6 +8,8 @@ namespace Backuper.Storage.Local
     {
         private readonly Configuration cfg;
 
+        private readonly string dir;
+
         public Storage(
             string name,
             Configuration cfg,
@@ -15,6 +17,7 @@ namespace Backuper.Storage.Local
         ) : base(name, logger)
         {
             this.cfg = cfg;
+            this.dir = Path.Combine(cfg.Path, Name);
         }
 
         public override Task SetupAsync()
@@ -23,7 +26,7 @@ namespace Backuper.Storage.Local
 
             try
             {
-                Directory.CreateDirectory(Path.Combine(cfg.Path, Name));
+                Directory.CreateDirectory(dir);
                 Debug("setup done");
             }
             catch
@@ -31,6 +34,52 @@ namespace Backuper.Storage.Local
                 Debug("setup failed");
                 throw;
             }
+
+            return Task.CompletedTask;
+        }
+
+        public override Task<string[]> ListAsync()
+        {
+            var entries = Directory.GetFiles(dir);
+
+            return Task.FromResult(entries);
+        }
+
+        public override async Task UploadAsync(string path, string name)
+        {
+            var target = Path.Combine(dir, name);
+            if (File.Exists(target))
+                throw new IOException($"File {name} already exists");
+
+            using(var srcStream = File.Open(path, FileMode.Open))
+            using(var tgtStream = File.Open(target, FileMode.CreateNew))
+            {
+                srcStream.Position = 0;
+                await srcStream.CopyToAsync(tgtStream);
+            }
+        }
+
+        public override async Task DownloadAsync(string name, string path)
+        {
+            var target = Path.Combine(dir, name);
+            if (!File.Exists(target))
+                throw new FileNotFoundException($"File {name} doesn't exist");
+
+            using(var srcStream = File.Open(target, FileMode.Open))
+            using(var tgtStream = File.Open(path, FileMode.CreateNew))
+            {
+                srcStream.Position = 0;
+                await srcStream.CopyToAsync(tgtStream);
+            }
+        }
+
+        public override Task DeleteAsync(string name)
+        {
+            var target = Path.Combine(dir, name);
+            if (!File.Exists(target))
+                throw new FileNotFoundException($"File {name} doesn't exist");
+
+            File.Delete(target);
 
             return Task.CompletedTask;
         }

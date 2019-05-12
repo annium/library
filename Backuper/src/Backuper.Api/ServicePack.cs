@@ -5,6 +5,7 @@ using Annium.Extensions.DependencyInjection;
 using Annium.Extensions.Mapper;
 using Annium.Logging.Abstractions;
 using Backuper.Api.Config;
+using Backuper.Api.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 
@@ -38,6 +39,8 @@ namespace Backuper.Api
 
             services.AddSingleton<State.StateFactory>();
             services.AddSingleton<State.StateManager>();
+            services.AddSingleton<Func<State.State>>(sp => () => sp.GetRequiredService<State.StateManager>().State);
+            services.AddSingleton<Namer>();
 
             Mapper.AddConfiguration(ConfigureMapping());
             services.AddScheduler();

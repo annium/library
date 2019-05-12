@@ -1,52 +1,93 @@
+using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Annium.AspNetCore.Extensions;
+using Backuper.Api.State;
+using Backuper.Api.Tools;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backuper.Api.Controllers
 {
     [Route("/")]
-    public class StateController : ControllerBase
+    public class StateController : ServerController
     {
-        public StateController()
-        {
+        private readonly Func<State.State> getState;
 
+        private readonly Namer namer;
+
+        public StateController(
+            Func<State.State> getState,
+            Namer namer
+        )
+        {
+            this.getState = getState;
+            this.namer = namer;
         }
 
         [HttpGet("state")]
         public IActionResult GetState()
         {
-            return Ok("State goes here");
+            return Ok(getState());
         }
 
-        [HttpGet("{server}/backups")]
-        public async Task<IActionResult> ListBackupsAsync(string server)
+        [HttpGet("{serverName}/backups/{planName}")]
+        public async Task<IActionResult> ListBackupsAsync(string serverName, string planName)
         {
-            await Task.CompletedTask;
+            var(server, plan, errorResult) = ResolveServerPlan(serverName, planName);
+            if (errorResult != null)
+                return errorResult;
 
-            return Ok(new [] { "a", "b" });
+            var backups = await plan.Storage.ListAsync();
+
+            return Ok(backups);
         }
 
-        [HttpPut("{server}/backups")]
-        public async Task<IActionResult> CreateBackupAsync(string server)
+        [HttpPut("{serverName}/backups/{planName}")]
+        public async Task<IActionResult> CreateBackupAsync(string serverName, string planName)
         {
-            await Task.CompletedTask;
+            var(server, plan, errorResult) = ResolveServerPlan(serverName, planName);
+            if (errorResult != null)
+                return errorResult;
 
-            return Ok("Backup complete");
+            var path = await server.Connection.BackupAsync();
+
+            var name = namer.GetName();
+            await plan.Storage.UploadAsync(path, name);
+
+            if (System.IO.File.Exists(path))
+                System.IO.File.Delete(path);
+
+            return Ok(name);
         }
 
-        [HttpPost("{server}/backups/{backupId}")]
-        public async Task<IActionResult> RestoreBackupAsync(string server, string backupId)
+        [HttpPost("{serverName}/backups/{planName}/{backupId}")]
+        public async Task<IActionResult> RestoreBackupAsync(string serverName, string planName, string backupId)
         {
             await Task.CompletedTask;
 
             return Ok("Restore complete");
         }
 
-        [HttpDelete("{server}/backups/{backupId}")]
-        public async Task<IActionResult> DeleteBackupAsync(string server, string backupId)
+        [HttpDelete("{serverName}/backups/{planName}/{backupId}")]
+        public async Task<IActionResult> DeleteBackupAsync(string serverName, string planName, string backupId)
         {
             await Task.CompletedTask;
 
             return Ok("Delete complete");
+        }
+
+        private(Server, Plan, IActionResult) ResolveServerPlan(string serverName, string planName)
+        {
+            var state = getState();
+            var server = state.Servers.FirstOrDefault(s => s.Name == serverName);
+            if (server == null)
+                return (null, null, NotFound($"Server {serverName} is not configured"));
+
+            var plan = server.Plans.FirstOrDefault(p => p.Name == planName);
+            if (plan == null)
+                return (null, null, NotFound($"Server {serverName} has no plan {planName}"));
+
+            return (server, plan, null);
         }
     }
 }

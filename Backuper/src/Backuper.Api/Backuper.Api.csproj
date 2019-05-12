@@ -15,6 +15,7 @@
         <ProjectReference Include="../Backuper.Storage.S3/Backuper.Storage.S3.csproj" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Annium.AspNetCore.Extensions" Version="0.1.0" />
         <PackageReference Include="Annium.Diagnostics.Debug" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Jobs" Version="0.1.0" />

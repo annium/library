@@ -16,7 +16,9 @@ namespace Backuper.Storage.S3
 
         public override Task<Abstract.Storage> GetStorageAsync(string name, Configuration configuration)
         {
-            return Task.FromResult<Abstract.Storage>(new Storage(name, configuration, logger));
+            var storage = new Storage(name, configuration, logger);
+
+            return Task.FromResult<Abstract.Storage>(storage);
         }
     }
 }
