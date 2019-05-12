@@ -6,7 +6,7 @@ namespace Backuper.Storage.Local
     {
         public override Task<Abstract.Storage> GetStorageAsync(Configuration configuration)
         {
-            throw new System.NotImplementedException();
+            return Task.FromResult<Abstract.Storage>(new Storage());
         }
     }
 }

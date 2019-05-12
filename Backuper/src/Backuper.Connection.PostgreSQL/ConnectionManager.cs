@@ -6,7 +6,7 @@ namespace Backuper.Connection.PostgreSQL
     {
         public override Task<Abstract.Connection> GetConnectionAsync(Configuration configuration)
         {
-            throw new System.NotImplementedException();
+            return Task.FromResult<Abstract.Connection>(new Connection());
         }
     }
 }

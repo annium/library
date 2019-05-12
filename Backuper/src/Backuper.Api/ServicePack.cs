@@ -12,8 +12,11 @@ namespace Backuper.Api
     {
         public ServicePack()
         {
+            Add<Connection.Abstract.ServicePack>();
             Add<Connection.PostgreSQL.ServicePack>();
+            Add<Notification.Abstract.ServicePack>();
             Add<Notification.Slack.ServicePack>();
+            Add<Storage.Abstract.ServicePack>();
             Add<Storage.Local.ServicePack>();
             Add<Storage.S3.ServicePack>();
         }
@@ -29,16 +32,17 @@ namespace Backuper.Api
 
         public override void Register(IServiceCollection services, IServiceProvider provider)
         {
-            services.AddSingleton<StateManager>();
+            services.AddSingleton<State.StateManager>();
 
             Mapper.AddConfiguration(ConfigureMapping());
+            services.AddScheduler();
         }
 
         public override void Setup(System.IServiceProvider provider)
         {
             try
             {
-                provider.GetRequiredService<StateManager>().GetState().GetAwaiter().GetResult();
+                provider.GetRequiredService<State.StateManager>().GetState().GetAwaiter().GetResult();
             }
             catch (AggregateException ex)
             {

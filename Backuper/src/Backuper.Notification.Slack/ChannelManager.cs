@@ -6,7 +6,7 @@ namespace Backuper.Notification.Slack
     {
         public override Task<Abstract.Channel> GetChannelAsync(Configuration configuration)
         {
-            throw new System.NotImplementedException();
+            return Task.FromResult<Abstract.Channel>(new Channel());
         }
     }
 }

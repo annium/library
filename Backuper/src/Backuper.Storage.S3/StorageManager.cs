@@ -6,7 +6,7 @@ namespace Backuper.Storage.S3
     {
         public override Task<Abstract.Storage> GetStorageAsync(Configuration configuration)
         {
-            throw new System.NotImplementedException();
+            return Task.FromResult<Abstract.Storage>(new Storage());
         }
     }
 }
