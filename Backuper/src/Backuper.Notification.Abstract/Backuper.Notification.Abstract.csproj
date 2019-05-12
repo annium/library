@@ -11,5 +11,6 @@
     <ItemGroup>
         <PackageReference Include="Annium.Extensions.Configuration" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.DependencyInjection" Version="0.1.0" />
+        <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
     </ItemGroup>
 </Project>
