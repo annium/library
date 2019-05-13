@@ -18,80 +18,49 @@ namespace Backuper.Connection.PostgreSQL
             Configuration cfg,
             IShell shell,
             ILogger logger
-        ) : base(name, logger)
+        ) : base("PostgreSQL", name, logger)
         {
             this.cfg = cfg;
             this.shell = shell;
         }
 
-        public override async Task SetupAsync()
+        protected override async Task DoSetupAsync()
         {
-            Debug("setup");
-
-            try
+            using(var conn = new NpgsqlConnection(GetConnectionString()))
             {
-                using(var conn = new NpgsqlConnection(GetConnectionString()))
-                {
-                    await conn.OpenAsync();
-                }
-                Debug("connection ok");
-            }
-            catch (PostgresException)
-            {
-                throw new InvalidOperationException(msg("connection failed"));
+                await conn.OpenAsync();
             }
         }
 
-        public override async Task<string> BackupAsync()
+        protected override async Task<string> DoBackupAsync()
         {
-            Debug("start backup");
             var path = Path.GetTempFileName();
-
-            try
-            {
-                var result = await shell
-                    .Cmd(
-                        "pg_dump -Fc -v",
-                        $"--dbname=postgresql://{cfg.User}:{cfg.Pass}@{cfg.Host}:{cfg.Port}/{cfg.Db}",
-                        $"-f {path}"
-                    )
-                    .Pipe(true)
-                    .RunAsync();
-                if (!result.IsSuccess)
-                    throw new InvalidOperationException(msg("backup failed"));
-
-                Debug("backup succeed");
-            }
-            catch
-            {
+            var result = await shell
+                .Cmd(
+                    "pg_dump -Fc -v",
+                    $"--dbname=postgresql://{cfg.User}:{cfg.Pass}@{cfg.Host}:{cfg.Port}/{cfg.Db}",
+                    $"-f {path}"
+                )
+                .Pipe(true)
+                .RunAsync();
+            if (!result.IsSuccess)
                 throw new InvalidOperationException(msg("backup failed"));
-            }
 
             return path;
         }
 
-        public override async Task RestoreAsync(string path)
+        protected override async Task DoRestoreAsync(string path)
         {
-            Debug("start restore");
-            try
-            {
-                var result = await shell
-                    .Cmd(
-                        "pg_restore -Fc --clean --if-exists -v",
-                        $"--dbname=postgresql://{cfg.User}:{cfg.Pass}@{cfg.Host}:{cfg.Port}/{cfg.Db}",
-                        path
-                    )
-                    .Pipe(true)
-                    .RunAsync();
-                if (!result.IsSuccess)
-                    throw new InvalidOperationException(msg("restore failed"));
-
-                Debug("restore succeed");
-            }
-            catch (PostgresException)
-            {
+            var result = await shell
+                .Cmd(
+                    "pg_restore -Fc --clean --if-exists -v",
+                    $"--dbname=postgresql://{cfg.User}:{cfg.Pass}@{cfg.Host}:{cfg.Port}/{cfg.Db}",
+                    path
+                )
+                .Pipe(true)
+                .RunAsync();
+            if (!result.IsSuccess)
                 throw new InvalidOperationException(msg("restore failed"));
-            }
         }
 
         private string GetConnectionString() => string.Join(';', new string[]
@@ -102,9 +71,5 @@ namespace Backuper.Connection.PostgreSQL
             $"Username={cfg.User}",
             $"Password={cfg.Pass}",
         });
-
-        private void Debug(string message) => logger.Debug(msg(message));
-
-        private string msg(string message) => $"Connection PostgreSQL {Name}: {message}";
     }
 }
