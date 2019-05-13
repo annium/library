@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Annium.Logging.Abstractions;
 
@@ -40,7 +41,7 @@ namespace Backuper.Storage.Local
 
         public override Task<string[]> ListAsync()
         {
-            var entries = Directory.GetFiles(dir);
+            var entries = Directory.GetFiles(dir).Select(e => Path.GetRelativePath(dir, e)).ToArray();
 
             return Task.FromResult(entries);
         }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Annium.AspNetCore.Extensions;
@@ -49,11 +50,14 @@ namespace Backuper.Api.Controllers
             if (errorResult != null)
                 return errorResult;
 
+            // create backup
             var path = await server.Connection.BackupAsync();
 
+            // upload backup
             var name = namer.GetName();
             await plan.Storage.UploadAsync(path, name);
 
+            // delete temp file
             if (System.IO.File.Exists(path))
                 System.IO.File.Delete(path);
 
@@ -63,7 +67,28 @@ namespace Backuper.Api.Controllers
         [HttpPost("{serverName}/backups/{planName}/{backupId}")]
         public async Task<IActionResult> RestoreBackupAsync(string serverName, string planName, string backupId)
         {
-            await Task.CompletedTask;
+            var(server, plan, errorResult) = ResolveServerPlan(serverName, planName);
+            if (errorResult != null)
+                return errorResult;
+
+            // ensure backup exists
+            var list = await plan.Storage.ListAsync();
+            if (!list.Contains(backupId))
+                return NotFound($"Backup {backupId} not found in storage");
+
+            // get temp file path
+            var path = Path.GetTempFileName();
+            System.IO.File.Delete(path);
+
+            // download backup to temp path
+            await plan.Storage.DownloadAsync(backupId, path);
+
+            // restore backup
+            await server.Connection.RestoreAsync(path);
+
+            // delete temp file
+            if (System.IO.File.Exists(path))
+                System.IO.File.Delete(path);
 
             return Ok("Restore complete");
         }
@@ -71,9 +96,18 @@ namespace Backuper.Api.Controllers
         [HttpDelete("{serverName}/backups/{planName}/{backupId}")]
         public async Task<IActionResult> DeleteBackupAsync(string serverName, string planName, string backupId)
         {
-            await Task.CompletedTask;
+            var(server, plan, errorResult) = ResolveServerPlan(serverName, planName);
+            if (errorResult != null)
+                return errorResult;
 
-            return Ok("Delete complete");
+            // ensure backup exists
+            var list = await plan.Storage.ListAsync();
+            if (!list.Contains(backupId))
+                return NotFound($"Backup {backupId} not found in storage");
+
+            await plan.Storage.DeleteAsync(backupId);
+
+            return NoContent();
         }
 
         private(Server, Plan, IActionResult) ResolveServerPlan(string serverName, string planName)

@@ -24,6 +24,7 @@ namespace Backuper.Api
 
         public void Configure(IApplicationBuilder app, IApplicationLifetime lifetime)
         {
+            app.UseExceptionMiddleware();
             app.UseCors(builder => builder
                 .SetIsOriginAllowed(o => true)
                 .AllowAnyMethod()

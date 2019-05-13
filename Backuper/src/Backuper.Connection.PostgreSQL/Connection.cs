@@ -30,9 +30,9 @@ namespace Backuper.Connection.PostgreSQL
 
             try
             {
-                using(var cn = new NpgsqlConnection(GetConnectionString()))
+                using(var conn = new NpgsqlConnection(GetConnectionString()))
                 {
-                    await cn.OpenAsync();
+                    await conn.OpenAsync();
                 }
                 Debug("connection ok");
             }
@@ -47,23 +47,51 @@ namespace Backuper.Connection.PostgreSQL
             Debug("start backup");
             var path = Path.GetTempFileName();
 
-            await shell
-                .Cmd(
-                    "pg_dump -Fc -v",
-                    $"--dbname=postgresql://{cfg.User}:{cfg.Pass}@{cfg.Host}:{cfg.Port}/{cfg.Db}",
-                    $"-f {path}"
-                )
-                .Pipe(true)
-                .RunAsync();
+            try
+            {
+                var result = await shell
+                    .Cmd(
+                        "pg_dump -Fc -v",
+                        $"--dbname=postgresql://{cfg.User}:{cfg.Pass}@{cfg.Host}:{cfg.Port}/{cfg.Db}",
+                        $"-f {path}"
+                    )
+                    .Pipe(true)
+                    .RunAsync();
+                if (!result.IsSuccess)
+                    throw new InvalidOperationException(msg("backup failed"));
 
-            Debug("complete backup");
+                Debug("backup succeed");
+            }
+            catch
+            {
+                throw new InvalidOperationException(msg("backup failed"));
+            }
 
             return path;
         }
 
-        public override Task RestoreAsync(string path)
+        public override async Task RestoreAsync(string path)
         {
-            throw new NotImplementedException();
+            Debug("start restore");
+            try
+            {
+                var result = await shell
+                    .Cmd(
+                        "pg_restore -Fc --clean --if-exists -v",
+                        $"--dbname=postgresql://{cfg.User}:{cfg.Pass}@{cfg.Host}:{cfg.Port}/{cfg.Db}",
+                        path
+                    )
+                    .Pipe(true)
+                    .RunAsync();
+                if (!result.IsSuccess)
+                    throw new InvalidOperationException(msg("restore failed"));
+
+                Debug("restore succeed");
+            }
+            catch (PostgresException)
+            {
+                throw new InvalidOperationException(msg("restore failed"));
+            }
         }
 
         private string GetConnectionString() => string.Join(';', new string[]
