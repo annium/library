@@ -15,38 +15,27 @@ namespace Backuper.Storage.Local
             string name,
             Configuration cfg,
             ILogger logger
-        ) : base(name, logger)
+        ) : base("local", name, logger)
         {
             this.cfg = cfg;
             this.dir = Path.Combine(cfg.Path, Name);
         }
 
-        public override Task SetupAsync()
+        protected override Task DoSetupAsync()
         {
-            Debug("setup");
-
-            try
-            {
-                Directory.CreateDirectory(dir);
-                Debug("setup done");
-            }
-            catch
-            {
-                Debug("setup failed");
-                throw;
-            }
+            Directory.CreateDirectory(dir);
 
             return Task.CompletedTask;
         }
 
-        public override Task<string[]> ListAsync()
+        protected override Task<string[]> DoListAsync()
         {
             var entries = Directory.GetFiles(dir).Select(e => Path.GetRelativePath(dir, e)).ToArray();
 
             return Task.FromResult(entries);
         }
 
-        public override async Task UploadAsync(string path, string name)
+        protected override async Task DoUploadAsync(string path, string name)
         {
             var target = Path.Combine(dir, name);
             if (File.Exists(target))
@@ -60,7 +49,7 @@ namespace Backuper.Storage.Local
             }
         }
 
-        public override async Task DownloadAsync(string name, string path)
+        protected override async Task DoDownloadAsync(string name, string path)
         {
             var target = Path.Combine(dir, name);
             if (!File.Exists(target))
@@ -74,7 +63,7 @@ namespace Backuper.Storage.Local
             }
         }
 
-        public override Task DeleteAsync(string name)
+        protected override Task DoDeleteAsync(string name)
         {
             var target = Path.Combine(dir, name);
             if (!File.Exists(target))
@@ -84,9 +73,5 @@ namespace Backuper.Storage.Local
 
             return Task.CompletedTask;
         }
-
-        private void Debug(string message) => logger.Debug(msg(message));
-
-        private string msg(string message) => $"Storage local {Name}: {message}";
     }
 }

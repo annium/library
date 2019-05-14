@@ -1,82 +1,27 @@
 using System.Threading.Tasks;
 using Annium.Logging.Abstractions;
+using Backuper.Shared;
 
 namespace Backuper.Connection.Abstract
 {
-    public abstract class Connection
+    public abstract class Connection : Resource
     {
-        public string Type { get; }
-
-        public string Name { get; }
-
-        private readonly ILogger logger;
-
         public Connection(
             string type,
             string name,
             ILogger logger
-        )
-        {
-            Type = type;
-            Name = name;
-            this.logger = logger;
-        }
+        ) : base(nameof(Connection), type, name, logger) { }
 
-        public async Task SetupAsync()
-        {
-            try
-            {
-                debug("setup start");
-                await DoSetupAsync();
-                debug("setup succeed");
-            }
-            catch
-            {
-                debug("setup failed");
-                throw;
-            }
-        }
+        public Task SetupAsync() => SafeAsync("setup", DoSetupAsync);
 
         protected abstract Task DoSetupAsync();
 
-        public async Task<string> BackupAsync()
-        {
-            try
-            {
-                debug("backup start");
-                var path = await DoBackupAsync();
-                debug("backup succeed");
-
-                return path;
-            }
-            catch
-            {
-                debug("backup failed");
-                throw;
-            }
-        }
+        public Task<string> BackupAsync() => SafeAsync("backup", DoBackupAsync);
 
         protected abstract Task<string> DoBackupAsync();
 
-        public async Task RestoreAsync(string path)
-        {
-            try
-            {
-                debug("restore start");
-                await DoRestoreAsync(path);
-                debug("restore succeed");
-            }
-            catch
-            {
-                debug("restore failed");
-                throw;
-            }
-        }
+        public Task RestoreAsync(string path) => SafeAsync("restore", () => DoRestoreAsync(path));
 
         protected abstract Task DoRestoreAsync(string path);
-
-        protected void debug(string message) => logger.Debug(msg(message));
-
-        protected string msg(string message) => $"Connection {Type} {Name}: {message}";
     }
 }

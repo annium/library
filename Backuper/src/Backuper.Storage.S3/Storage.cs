@@ -11,34 +11,34 @@ namespace Backuper.Storage.S3
             string name,
             Configuration cfg,
             ILogger logger
-        ) : base(name, logger)
+        ) : base("S3", name, logger)
         {
             this.cfg = cfg;
         }
 
-        public override Task SetupAsync()
+        protected override Task DoSetupAsync()
         {
-            logger.Debug($"Setup S3 storage {Name}");
-
             return Task.CompletedTask;
         }
 
-        public override Task<string[]> ListAsync()
+        protected override Task<string[]> DoListAsync()
+        {
+            debug("Setup");
+
+            throw new System.NotImplementedException();
+        }
+
+        protected override Task DoUploadAsync(string path, string name)
         {
             throw new System.NotImplementedException();
         }
 
-        public override Task UploadAsync(string path, string name)
+        protected override Task DoDownloadAsync(string name, string path)
         {
             throw new System.NotImplementedException();
         }
 
-        public override Task DownloadAsync(string name, string path)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public override Task DeleteAsync(string name)
+        protected override Task DoDeleteAsync(string name)
         {
             throw new System.NotImplementedException();
         }
