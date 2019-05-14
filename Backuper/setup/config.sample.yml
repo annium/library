@@ -11,6 +11,7 @@ servers:
       local:
         storage: local
         interval: "0 5 * * 1"
+        capacity: 10
         notifications:
           - slack
 storages:

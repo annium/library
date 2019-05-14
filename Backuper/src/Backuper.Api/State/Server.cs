@@ -18,5 +18,7 @@ namespace Backuper.Api.State
             Connection = connection;
             Plans = plans;
         }
+
+        public override string ToString() => Name;
     }
 }

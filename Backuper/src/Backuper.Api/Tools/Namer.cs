@@ -18,7 +18,7 @@ namespace Backuper.Api.Tools
         {
             var((year, month, day), (hour, min, _)) = getInstant().InUtc().LocalDateTime;
 
-            return $"{year}.{month}.{day}_{hour}.{min}.dump";
+            return $"{year:0000}.{month:00}.{day:00}_{hour:00}.{min:00}.dump";
         }
     }
 }

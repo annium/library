@@ -50,18 +50,52 @@ namespace Backuper.Api.Controllers
             if (errorResult != null)
                 return errorResult;
 
-            // create backup
-            var path = await server.Connection.BackupAsync();
+            var backupId = namer.GetName();
+            try
+            {
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start manual backup {backupId} procedure"));
 
-            // upload backup
-            var name = namer.GetName();
-            await plan.Storage.UploadAsync(path, name);
+                // cleanup
+                var deletedItems = (await plan.Storage.ListAsync()).OrderByDescending(i => i).Skip(plan.Capacity).ToArray();
+                if (deletedItems.Length > 0)
+                {
+                    await notifyAll(ch => ch.InfoAsync($"{server} {plan}: cleanup {deletedItems.Length} old backups"));
+                    foreach (var item in deletedItems)
+                    {
+                        await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete old backup {item}"));
+                        await plan.Storage.DeleteAsync(item);
+                    }
+                }
+                else
+                    await notifyAll(ch => ch.InfoAsync($"{server} {plan}: no cleanup needed"));
 
-            // delete temp file
-            if (System.IO.File.Exists(path))
-                System.IO.File.Delete(path);
+                // create backup
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: create backup {backupId}"));
+                var path = await server.Connection.BackupAsync();
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} created"));
 
-            return Ok(name);
+                // upload backup
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: upload backup {backupId}"));
+                await plan.Storage.UploadAsync(path, backupId);
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} uploaded"));
+
+                // delete temp file
+                if (System.IO.File.Exists(path))
+                    System.IO.File.Delete(path);
+
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: manual backup {backupId} procedure succeed"));
+
+                return Ok(backupId);
+            }
+            catch (Exception e)
+            {
+                await notifyAll(ch => ch.ErrorAsync($"{server} {plan}: manual backup {backupId} procedure failed: {e}"));
+
+                return ServerError(e.Message);
+            }
+
+            Task notifyAll(Func<Notification.Abstract.Channel, Task> notifyChannel) =>
+                Task.WhenAll(plan.Notifications.Select(notifyChannel));
         }
 
         [HttpPost("{serverName}/backups/{planName}/{backupId}")]
@@ -71,26 +105,50 @@ namespace Backuper.Api.Controllers
             if (errorResult != null)
                 return errorResult;
 
-            // ensure backup exists
-            var list = await plan.Storage.ListAsync();
-            if (!list.Contains(backupId))
-                return NotFound($"Backup {backupId} not found in storage");
+            try
+            {
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start restore {backupId} procedure"));
 
-            // get temp file path
-            var path = Path.GetTempFileName();
-            System.IO.File.Delete(path);
+                // ensure backup exists
+                var list = await plan.Storage.ListAsync();
+                if (!list.Contains(backupId))
+                {
+                    await notifyAll(ch => ch.WarnAsync($"{server} {plan}: backup {backupId} not found in storage"));
+                    return NotFound($"Backup {backupId} not found in storage");
+                }
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} found in storage"));
 
-            // download backup to temp path
-            await plan.Storage.DownloadAsync(backupId, path);
-
-            // restore backup
-            await server.Connection.RestoreAsync(path);
-
-            // delete temp file
-            if (System.IO.File.Exists(path))
+                // get temp file path
+                var path = Path.GetTempFileName();
                 System.IO.File.Delete(path);
 
-            return Ok("Restore complete");
+                // download backup to temp path
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: download backup {backupId}"));
+                await plan.Storage.DownloadAsync(backupId, path);
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} downloaded"));
+
+                // restore backup
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: restore backup {backupId}"));
+                await server.Connection.RestoreAsync(path);
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} restored"));
+
+                // delete temp file
+                if (System.IO.File.Exists(path))
+                    System.IO.File.Delete(path);
+
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: restore {backupId} procedure succeed"));
+
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                await notifyAll(ch => ch.ErrorAsync($"{server} {plan}: restore procedure failed: {e}"));
+
+                return ServerError(e.Message);
+            }
+
+            Task notifyAll(Func<Notification.Abstract.Channel, Task> notifyChannel) =>
+                Task.WhenAll(plan.Notifications.Select(notifyChannel));
         }
 
         [HttpDelete("{serverName}/backups/{planName}/{backupId}")]
@@ -100,14 +158,37 @@ namespace Backuper.Api.Controllers
             if (errorResult != null)
                 return errorResult;
 
-            // ensure backup exists
-            var list = await plan.Storage.ListAsync();
-            if (!list.Contains(backupId))
-                return NotFound($"Backup {backupId} not found in storage");
+            try
+            {
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start delete {backupId} procedure"));
 
-            await plan.Storage.DeleteAsync(backupId);
+                // ensure backup exists
+                var list = await plan.Storage.ListAsync();
+                if (!list.Contains(backupId))
+                {
+                    await notifyAll(ch => ch.WarnAsync($"{server} {plan}: backup {backupId} not found in storage"));
+                    return NotFound($"Backup {backupId} not found in storage");
+                }
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} found in storage"));
 
-            return NoContent();
+                // download backup to temp path
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete backup {backupId}"));
+                await plan.Storage.DeleteAsync(backupId);
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} deleted"));
+
+                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete {backupId} procedure succeed"));
+
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                await notifyAll(ch => ch.ErrorAsync($"{server} {plan}: delete {backupId} procedure failed: {e}"));
+
+                return ServerError(e.Message);
+            }
+
+            Task notifyAll(Func<Notification.Abstract.Channel, Task> notifyChannel) =>
+                Task.WhenAll(plan.Notifications.Select(notifyChannel));
         }
 
         private(Server, Plan, IActionResult) ResolveServerPlan(string serverName, string planName)

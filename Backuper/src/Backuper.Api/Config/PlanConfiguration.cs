@@ -6,6 +6,8 @@ namespace Backuper.Api.Config
 
         public string Interval { get; set; }
 
+        public int Capacity { get; set; }
+
         public string[] Notifications { get; set; }
     }
 }

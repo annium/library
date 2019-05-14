@@ -63,6 +63,7 @@ namespace Backuper.Api.State
             storages.FirstOrDefault(s => s.Name == cfg.Storage) ??
             throw new InvalidOperationException($"Can't resolve storage {cfg.Storage} of plan {server}.{name}"),
                 cfg.Interval,
+                cfg.Capacity,
                 cfg.Notifications
                 .Select(n => channels.FirstOrDefault(c => c.Name == n) ??
                     throw new InvalidOperationException($"Can't resolve notification channel {n} of plan {server}.{name}"))
