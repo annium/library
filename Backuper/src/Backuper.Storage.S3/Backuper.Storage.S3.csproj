@@ -11,4 +11,7 @@
     <ItemGroup>
         <ProjectReference Include="../Backuper.Storage.Abstract/Backuper.Storage.Abstract.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="AWSSDK.S3" Version="3.3.101" />
+    </ItemGroup>
 </Project>

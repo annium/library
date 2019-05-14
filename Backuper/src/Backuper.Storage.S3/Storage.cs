@@ -1,4 +1,10 @@
+using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Amazon;
+using Amazon.S3;
+using Amazon.S3.Model;
 using Annium.Logging.Abstractions;
 
 namespace Backuper.Storage.S3
@@ -6,6 +12,8 @@ namespace Backuper.Storage.S3
     public class Storage : Abstract.Storage
     {
         private readonly Configuration cfg;
+
+        private string dir;
 
         public Storage(
             string name,
@@ -16,31 +24,111 @@ namespace Backuper.Storage.S3
             this.cfg = cfg;
         }
 
-        protected override Task DoSetupAsync()
+        protected override async Task DoSetupAsync()
         {
-            return Task.CompletedTask;
+            if (Path.GetFullPath(cfg.Path) != cfg.Path)
+                throw new InvalidOperationException($"Path {cfg.Path} is not absolute");
+
+            dir = cfg.Path;
+
+            using(var s3 = GetClient())
+            {
+                var buckets = (await s3.ListBucketsAsync()).Buckets.Select(b => b.BucketName).ToArray();
+                if (buckets.Contains(cfg.Bucket))
+                    return;
+
+                await s3.PutBucketAsync(new PutBucketRequest { BucketName = cfg.Bucket });
+            }
         }
 
-        protected override Task<string[]> DoListAsync()
+        protected override async Task<string[]> DoListAsync()
         {
-            debug("Setup");
+            var req = new ListObjectsRequest
+            {
+                BucketName = cfg.Bucket,
+                MaxKeys = 100
+            };
 
-            throw new System.NotImplementedException();
+            using(var s3 = GetClient())
+            {
+                return (await s3.ListObjectsAsync(req)).S3Objects
+                    .Select(o => readKey(o.Key))
+                    .ToArray();
+            }
         }
 
-        protected override Task DoUploadAsync(string path, string name)
+        protected override async Task DoUploadAsync(string path, string name)
         {
-            throw new System.NotImplementedException();
+            var key = getKey(name);
+            var fs = File.Open(path, FileMode.Open);
+            var req = new PutObjectRequest
+            {
+                BucketName = cfg.Bucket,
+                Key = key,
+                InputStream = fs,
+            };
+
+            using(var s3 = GetClient())
+            {
+                await s3.PutObjectAsync(req);
+            }
         }
 
-        protected override Task DoDownloadAsync(string name, string path)
+        protected override async Task DoDownloadAsync(string name, string path)
         {
-            throw new System.NotImplementedException();
+            var key = getKey(name);
+            var req = new GetObjectRequest
+            {
+                BucketName = cfg.Bucket,
+                Key = key,
+            };
+
+            using(var s3 = GetClient())
+            {
+                using(var resStream = (await s3.GetObjectAsync(req)).ResponseStream)
+                using(var tgtStream = File.Open(path, FileMode.CreateNew))
+                {
+                    await resStream.CopyToAsync(tgtStream);
+                }
+            }
         }
 
-        protected override Task DoDeleteAsync(string name)
+        protected override async Task DoDeleteAsync(string name)
         {
-            throw new System.NotImplementedException();
+            var key = getKey(name);
+            var req = new DeleteObjectRequest
+            {
+                BucketName = cfg.Bucket,
+                Key = key
+            };
+
+            using(var s3 = GetClient())
+            {
+                await s3.DeleteObjectAsync(req);
+            }
         }
+
+        private IAmazonS3 GetClient()
+        {
+            if (string.IsNullOrWhiteSpace(cfg.AccessKey))
+                throw new ArgumentException("Access key is required");
+
+            if (string.IsNullOrWhiteSpace(cfg.AccessSecret))
+                throw new ArgumentException("Access secret is required");
+
+            if (string.IsNullOrWhiteSpace(cfg.Bucket))
+                throw new ArgumentException("Bucket name is required");
+
+            var s3cfg = new AmazonS3Config();
+            s3cfg.RegionEndpoint = RegionEndpoint.GetBySystemName(cfg.Region);
+            if (!string.IsNullOrWhiteSpace(cfg.Server))
+                s3cfg.ServiceURL = cfg.Server;
+
+            return new AmazonS3Client(cfg.AccessKey, cfg.AccessSecret, s3cfg);
+        }
+
+        private string getKey(string name) => cfg.Path == "/" ? name : Path.Combine(cfg.Path.Substring(1), name);
+
+        private string readKey(string key) => cfg.Path == "/" ? key : Path.GetRelativePath(cfg.Path, $"/{key}");
     }
 }

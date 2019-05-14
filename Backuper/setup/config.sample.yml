@@ -18,6 +18,14 @@ storages:
   local:
     type: local
     path: /annium/backups
+  s3:
+    type: s3
+    access_key: secret_access_key
+    access_secret: secret_access_secret
+    server: https://storage.yandexcloud.net
+    region: us-east-1
+    encryption_key: encryption_key
+    path: /annium/backups
 notifications:
   slack:
     type: slack

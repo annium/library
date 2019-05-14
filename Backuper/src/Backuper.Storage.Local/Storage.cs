@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace Backuper.Storage.Local
     {
         private readonly Configuration cfg;
 
-        private readonly string dir;
+        private string dir;
 
         public Storage(
             string name,
@@ -18,11 +19,14 @@ namespace Backuper.Storage.Local
         ) : base("local", name, logger)
         {
             this.cfg = cfg;
-            this.dir = Path.Combine(cfg.Path, Name);
         }
 
         protected override Task DoSetupAsync()
         {
+            if (Path.GetFullPath(cfg.Path) != cfg.Path)
+                throw new InvalidOperationException($"Path {cfg.Path} is not absolute");
+
+            dir = cfg.Path;
             Directory.CreateDirectory(dir);
 
             return Task.CompletedTask;
