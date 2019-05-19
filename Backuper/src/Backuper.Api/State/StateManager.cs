@@ -63,14 +63,14 @@ namespace Backuper.Api.State
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start scheduled backup {backupId} procedure"));
 
                 // cleanup
-                var deletedItems = (await plan.Storage.ListAsync()).OrderByDescending(i => i).Skip(plan.Capacity).ToArray();
+                var deletedItems = (await plan.Storage.ListAsync(server.Name)).OrderByDescending(i => i).Skip(plan.Capacity).ToArray();
                 if (deletedItems.Length > 0)
                 {
                     await notifyAll(ch => ch.InfoAsync($"{server} {plan}: cleanup {deletedItems.Length} old backups"));
                     foreach (var item in deletedItems)
                     {
                         await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete old backup {item}"));
-                        await plan.Storage.DeleteAsync(item);
+                        await plan.Storage.DeleteAsync(server.Name, item);
                     }
                 }
                 else
@@ -84,7 +84,7 @@ namespace Backuper.Api.State
                 // upload backup
                 var name = namer.GetName();
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: upload backup {backupId}"));
-                await plan.Storage.UploadAsync(path, name);
+                await plan.Storage.UploadAsync(path, server.Name, name);
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} uploaded"));
 
                 // delete temp file

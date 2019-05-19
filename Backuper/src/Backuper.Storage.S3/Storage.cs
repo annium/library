@@ -41,7 +41,7 @@ namespace Backuper.Storage.S3
             }
         }
 
-        protected override async Task<string[]> DoListAsync()
+        protected override async Task<string[]> DoListAsync(string folder)
         {
             var req = new ListObjectsRequest
             {
@@ -52,15 +52,15 @@ namespace Backuper.Storage.S3
             using(var s3 = GetClient())
             {
                 return (await s3.ListObjectsAsync(req)).S3Objects
-                    .Select(o => readKey(o.Key))
+                    .Select(o => readKey(folder, o.Key))
                     .ToArray();
             }
         }
 
-        protected override async Task DoUploadAsync(string path, string name)
+        protected override async Task DoUploadAsync(string source, string folder, string name)
         {
-            var key = getKey(name);
-            var fs = File.Open(path, FileMode.Open);
+            var key = getKey(folder, name);
+            var fs = File.Open(source, FileMode.Open);
             var req = new PutObjectRequest
             {
                 BucketName = cfg.Bucket,
@@ -74,9 +74,9 @@ namespace Backuper.Storage.S3
             }
         }
 
-        protected override async Task DoDownloadAsync(string name, string path)
+        protected override async Task DoDownloadAsync(string folder, string name, string target)
         {
-            var key = getKey(name);
+            var key = getKey(folder, name);
             var req = new GetObjectRequest
             {
                 BucketName = cfg.Bucket,
@@ -86,16 +86,16 @@ namespace Backuper.Storage.S3
             using(var s3 = GetClient())
             {
                 using(var resStream = (await s3.GetObjectAsync(req)).ResponseStream)
-                using(var tgtStream = File.Open(path, FileMode.CreateNew))
+                using(var tgtStream = File.Open(target, FileMode.CreateNew))
                 {
                     await resStream.CopyToAsync(tgtStream);
                 }
             }
         }
 
-        protected override async Task DoDeleteAsync(string name)
+        protected override async Task DoDeleteAsync(string folder, string name)
         {
-            var key = getKey(name);
+            var key = getKey(folder, name);
             var req = new DeleteObjectRequest
             {
                 BucketName = cfg.Bucket,
@@ -127,8 +127,10 @@ namespace Backuper.Storage.S3
             return new AmazonS3Client(cfg.AccessKey, cfg.AccessSecret, s3cfg);
         }
 
-        private string getKey(string name) => cfg.Path == "/" ? name : Path.Combine(cfg.Path.Substring(1), name);
+        private string getKey(string folder, string name) =>
+            Path.Combine(cfg.Path.Substring(1), folder, name);
 
-        private string readKey(string key) => cfg.Path == "/" ? key : Path.GetRelativePath(cfg.Path, $"/{key}");
+        private string readKey(string folder, string key) =>
+            Path.GetRelativePath(Path.Combine(cfg.Path, folder), $"/{key}");
     }
 }

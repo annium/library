@@ -16,20 +16,20 @@ namespace Backuper.Storage.Abstract
 
         protected abstract Task DoSetupAsync();
 
-        public Task<string[]> ListAsync() => SafeAsync("list", DoListAsync);
+        public Task<string[]> ListAsync(string folder) => SafeAsync("list", () => DoListAsync(folder));
 
-        protected abstract Task<string[]> DoListAsync();
+        protected abstract Task<string[]> DoListAsync(string folder);
 
-        public Task UploadAsync(string path, string name) => SafeAsync("upload", () => DoUploadAsync(path, name));
+        public Task UploadAsync(string source, string folder, string name) => SafeAsync("upload", () => DoUploadAsync(source, folder, name));
 
-        protected abstract Task DoUploadAsync(string path, string name);
+        protected abstract Task DoUploadAsync(string source, string folder, string name);
 
-        public Task DownloadAsync(string name, string path) => SafeAsync("download", () => DoDownloadAsync(name, path));
+        public Task DownloadAsync(string folder, string name, string target) => SafeAsync("download", () => DoDownloadAsync(folder, name, target));
 
-        protected abstract Task DoDownloadAsync(string name, string path);
+        protected abstract Task DoDownloadAsync(string folder, string name, string target);
 
-        public Task DeleteAsync(string name) => SafeAsync("upload", () => DoDeleteAsync(name));
+        public Task DeleteAsync(string folder, string name) => SafeAsync("upload", () => DoDeleteAsync(folder, name));
 
-        protected abstract Task DoDeleteAsync(string name);
+        protected abstract Task DoDeleteAsync(string folder, string name);
     }
 }

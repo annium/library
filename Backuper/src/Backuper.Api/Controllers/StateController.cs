@@ -38,7 +38,7 @@ namespace Backuper.Api.Controllers
             if (errorResult != null)
                 return errorResult;
 
-            var backups = await plan.Storage.ListAsync();
+            var backups = await plan.Storage.ListAsync(server.Name);
 
             return Ok(backups);
         }
@@ -56,14 +56,14 @@ namespace Backuper.Api.Controllers
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start manual backup {backupId} procedure"));
 
                 // cleanup
-                var deletedItems = (await plan.Storage.ListAsync()).OrderByDescending(i => i).Skip(plan.Capacity).ToArray();
+                var deletedItems = (await plan.Storage.ListAsync(server.Name)).OrderByDescending(i => i).Skip(plan.Capacity).ToArray();
                 if (deletedItems.Length > 0)
                 {
                     await notifyAll(ch => ch.InfoAsync($"{server} {plan}: cleanup {deletedItems.Length} old backups"));
                     foreach (var item in deletedItems)
                     {
                         await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete old backup {item}"));
-                        await plan.Storage.DeleteAsync(item);
+                        await plan.Storage.DeleteAsync(server.Name, item);
                     }
                 }
                 else
@@ -76,7 +76,7 @@ namespace Backuper.Api.Controllers
 
                 // upload backup
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: upload backup {backupId}"));
-                await plan.Storage.UploadAsync(path, backupId);
+                await plan.Storage.UploadAsync(path, server.Name, backupId);
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} uploaded"));
 
                 // delete temp file
@@ -110,7 +110,7 @@ namespace Backuper.Api.Controllers
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start restore {backupId} procedure"));
 
                 // ensure backup exists
-                var list = await plan.Storage.ListAsync();
+                var list = await plan.Storage.ListAsync(server.Name);
                 if (!list.Contains(backupId))
                 {
                     await notifyAll(ch => ch.WarnAsync($"{server} {plan}: backup {backupId} not found in storage"));
@@ -124,7 +124,7 @@ namespace Backuper.Api.Controllers
 
                 // download backup to temp path
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: download backup {backupId}"));
-                await plan.Storage.DownloadAsync(backupId, path);
+                await plan.Storage.DownloadAsync(server.Name, backupId, path);
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} downloaded"));
 
                 // restore backup
@@ -163,7 +163,7 @@ namespace Backuper.Api.Controllers
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start delete {backupId} procedure"));
 
                 // ensure backup exists
-                var list = await plan.Storage.ListAsync();
+                var list = await plan.Storage.ListAsync(server.Name);
                 if (!list.Contains(backupId))
                 {
                     await notifyAll(ch => ch.WarnAsync($"{server} {plan}: backup {backupId} not found in storage"));
@@ -173,7 +173,7 @@ namespace Backuper.Api.Controllers
 
                 // download backup to temp path
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete backup {backupId}"));
-                await plan.Storage.DeleteAsync(backupId);
+                await plan.Storage.DeleteAsync(server.Name, backupId);
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} deleted"));
 
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete {backupId} procedure succeed"));
