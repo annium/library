@@ -49,9 +49,14 @@ namespace Backuper.Storage.S3
                 MaxKeys = 100
             };
 
+            var prefix = getPrefix(folder);
+
             using(var s3 = GetClient())
             {
-                return (await s3.ListObjectsAsync(req)).S3Objects
+                var objects = (await s3.ListObjectsAsync(req)).S3Objects;
+
+                return objects
+                    .Where(o => Path.GetDirectoryName(o.Key) == prefix)
                     .Select(o => readKey(folder, o.Key))
                     .ToArray();
             }
@@ -126,6 +131,9 @@ namespace Backuper.Storage.S3
 
             return new AmazonS3Client(cfg.AccessKey, cfg.AccessSecret, s3cfg);
         }
+
+        private string getPrefix(string folder) =>
+            Path.Combine(cfg.Path.Substring(1), folder);
 
         private string getKey(string folder, string name) =>
             Path.Combine(cfg.Path.Substring(1), folder, name);

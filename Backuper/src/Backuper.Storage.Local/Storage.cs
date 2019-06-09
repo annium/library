@@ -35,6 +35,9 @@ namespace Backuper.Storage.Local
         protected override Task<string[]> DoListAsync(string folder)
         {
             var location = Path.Combine(dir, folder);
+            if (!Directory.Exists(location))
+                return Task.FromResult(Array.Empty<string>());
+
             var entries = Directory.GetFiles(location).Select(e => Path.GetRelativePath(location, e)).ToArray();
 
             return Task.FromResult(entries);
