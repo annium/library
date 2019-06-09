@@ -63,7 +63,7 @@ namespace Backuper.Api.State
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start scheduled backup {backupId} procedure"));
 
                 // cleanup
-                var deletedItems = (await plan.Storage.ListAsync(server.Name)).OrderByDescending(i => i).Skip(plan.Capacity).ToArray();
+                var deletedItems = (await plan.Storage.ListAsync(server.Name)).OrderByDescending(i => i).Skip(plan.Capacity - 1).ToArray();
                 if (deletedItems.Length > 0)
                 {
                     await notifyAll(ch => ch.InfoAsync($"{server} {plan}: cleanup {deletedItems.Length} old backups"));
