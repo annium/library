@@ -7,6 +7,7 @@
         <OutputType>Library</OutputType>
         <DebugType>portable</DebugType>
         <WarningsAsErrors>true</WarningsAsErrors>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Extensions.Configuration" Version="0.1.0" />
