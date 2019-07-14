@@ -44,7 +44,7 @@ namespace Backuper.Api
 
             Mapper.AddConfiguration(ConfigureMapping());
             services.AddScheduler();
-            services.AddConsole(new LoggerConfiguration(LogLevel.Trace));
+            services.AddConsoleLogger(new LoggerConfiguration(LogLevel.Trace));
         }
 
         public override void Setup(System.IServiceProvider provider)

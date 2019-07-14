@@ -10,7 +10,7 @@ namespace Backuper.Storage.Abstract
         {
             services.AddSingleton<StorageFactory>();
 
-            services.AddConsole(new LoggerConfiguration(LogLevel.Trace));
+            services.AddConsoleLogger(new LoggerConfiguration(LogLevel.Trace));
         }
     }
 }

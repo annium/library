@@ -10,7 +10,7 @@ namespace Backuper.Connection.Abstract
         {
             services.AddSingleton<ConnectionFactory>();
 
-            services.AddConsole(new LoggerConfiguration(LogLevel.Trace));
+            services.AddConsoleLogger(new LoggerConfiguration(LogLevel.Trace));
             services.AddShell();
         }
     }

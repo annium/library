@@ -10,7 +10,7 @@ namespace Backuper.Notification.Abstract
         {
             services.AddSingleton<ChannelFactory>();
 
-            services.AddConsole(new LoggerConfiguration(LogLevel.Trace));
+            services.AddConsoleLogger(new LoggerConfiguration(LogLevel.Trace));
         }
     }
 }
