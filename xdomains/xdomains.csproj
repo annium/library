@@ -17,6 +17,6 @@
         <PackageReference Include="Annium.Extensions.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Entrypoint" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
-        <PackageReference Include="NodaTime" Version="2.4.5" />
+        <PackageReference Include="NodaTime" Version="2.4.6" />
     </ItemGroup>
 </Project>
