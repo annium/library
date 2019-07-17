@@ -1,23 +1,28 @@
 using System.Threading.Tasks;
 using Annium.Extensions.Net.Http;
 using Annium.Logging.Abstractions;
+using Backuper.Notification.Abstract;
 
 namespace Backuper.Notification.Slack
 {
-    public class Channel : Abstract.Channel
+    public class Channel : IChannel
     {
         private readonly Configuration cfg;
 
         public Channel(
-            string name,
-            Configuration cfg,
-            ILogger logger
-        ) : base("Slack", name, logger)
+            Configuration cfg
+        )
         {
             this.cfg = cfg;
         }
 
-        protected override Task SendMessageAsync(LogLevel level, string message)
+        public Task InfoAsync(string message) => SendMessageAsync(LogLevel.Info, message);
+
+        public Task WarnAsync(string message) => SendMessageAsync(LogLevel.Warn, message);
+
+        public Task ErrorAsync(string message) => SendMessageAsync(LogLevel.Error, message);
+
+        private Task SendMessageAsync(LogLevel level, string message)
         {
             var url = $"https://hooks.slack.com/services/{cfg.Team}/{cfg.Channel}/{cfg.Token}";
             var text = $"{level} {message}";

@@ -4,30 +4,27 @@ using Annium.Logging.Abstractions;
 
 namespace Backuper.Shared
 {
-    public abstract class Resource
+    public class Resource<T> where T : class
     {
-        public string Category { get; }
-
-        public string Type { get; }
-
-        public string Name { get; }
-
+        protected T Entity { get; }
+        private readonly string category;
+        private readonly string type;
         private readonly ILogger logger;
 
         public Resource(
+            T entity,
             string category,
             string type,
-            string name,
             ILogger logger
         )
         {
-            Category = category;
-            Type = type;
-            Name = name;
+            Entity = entity;
+            this.category = category;
+            this.type = type;
             this.logger = logger;
         }
 
-        protected async Task<T> SafeAsync<T>(string operation, Func<Task<T>> handleAsync)
+        public async Task<TResult> SafeAsync<TResult>(string operation, Func<Task<TResult>> handleAsync)
         {
             try
             {
@@ -44,7 +41,7 @@ namespace Backuper.Shared
             }
         }
 
-        protected async Task SafeAsync(string operation, Func<Task> handleAsync)
+        public async Task SafeAsync(string operation, Func<Task> handleAsync)
         {
             try
             {
@@ -59,8 +56,8 @@ namespace Backuper.Shared
             }
         }
 
-        protected void debug(string message) => logger.Debug(msg(message));
+        private void debug(string message) => logger.Debug(msg(message));
 
-        protected string msg(string message) => $"{Category} {Type} {Name}: {message}";
+        private string msg(string message) => $"{category} {type}: {message}";
     }
 }

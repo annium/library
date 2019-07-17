@@ -1,8 +1,8 @@
 using Annium.Core.Application.Types;
 
-namespace Backuper.Storage.Abstract
+namespace Backuper.Notification.Abstract
 {
-    public abstract class Configuration
+    public abstract class ConfigurationBase
     {
         [ResolveField]
         public string Type { get; set; }

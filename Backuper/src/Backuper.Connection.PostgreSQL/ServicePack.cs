@@ -1,4 +1,8 @@
+using System;
 using Annium.Extensions.DependencyInjection;
+using Annium.Extensions.Shell;
+using Annium.Logging.Abstractions;
+using Backuper.Connection.Abstract;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backuper.Connection.PostgreSQL
@@ -7,7 +11,17 @@ namespace Backuper.Connection.PostgreSQL
     {
         public override void Register(IServiceCollection services, System.IServiceProvider provider)
         {
-            services.AddSingleton<Abstract.ConnectionManager<Configuration>, ConnectionManager>();
+            Func<IServiceProvider, Func<Configuration, IConnection>> factory =
+                sp => configuration => new ConnectionProxy(
+                    new Connection(
+                        configuration,
+                        sp.GetRequiredService<IShell>()
+                    ),
+                    configuration.Type,
+                    sp.GetRequiredService<ILogger<Connection>>()
+                );
+
+            services.AddSingleton<Func<Configuration, IConnection>>(factory);
         }
     }
 }

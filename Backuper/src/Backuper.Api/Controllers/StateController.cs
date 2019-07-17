@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Annium.AspNetCore.Extensions;
 using Backuper.Api.State;
 using Backuper.Api.Tools;
+using Backuper.Notification.Abstract;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backuper.Api.Controllers
@@ -38,7 +39,7 @@ namespace Backuper.Api.Controllers
             if (errorResult != null)
                 return errorResult;
 
-            var backups = await plan.Storage.ListAsync(server.Name);
+            var backups = await plan.Storage.ListAsync();
 
             return Ok(backups);
         }
@@ -56,14 +57,14 @@ namespace Backuper.Api.Controllers
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start manual backup {backupId} procedure"));
 
                 // cleanup
-                var deletedItems = (await plan.Storage.ListAsync(server.Name)).OrderByDescending(i => i).Skip(plan.Capacity - 1).ToArray();
+                var deletedItems = (await plan.Storage.ListAsync()).OrderByDescending(i => i).Skip(plan.Capacity - 1).ToArray();
                 if (deletedItems.Length > 0)
                 {
                     await notifyAll(ch => ch.InfoAsync($"{server} {plan}: cleanup {deletedItems.Length} old backups"));
                     foreach (var item in deletedItems)
                     {
                         await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete old backup {item}"));
-                        await plan.Storage.DeleteAsync(server.Name, item);
+                        await plan.Storage.DeleteAsync(item);
                     }
                 }
                 else
@@ -76,7 +77,8 @@ namespace Backuper.Api.Controllers
 
                 // upload backup
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: upload backup {backupId}"));
-                await plan.Storage.UploadAsync(path, server.Name, backupId);
+                using(var fs = System.IO.File.OpenRead(path))
+                await plan.Storage.UploadAsync(fs, backupId);
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} uploaded"));
 
                 // delete temp file
@@ -94,8 +96,8 @@ namespace Backuper.Api.Controllers
                 return ServerError(e.Message);
             }
 
-            Task notifyAll(Func<Notification.Abstract.Channel, Task> notifyChannel) =>
-                Task.WhenAll(plan.Notifications.Select(notifyChannel));
+            Task notifyAll(Func<IChannel, Task> notifyChannel) =>
+                Task.WhenAll(plan.Notifications.Values.Select(notifyChannel));
         }
 
         [HttpPost("{serverName}/backups/{planName}/{backupId}")]
@@ -110,7 +112,7 @@ namespace Backuper.Api.Controllers
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start restore {backupId} procedure"));
 
                 // ensure backup exists
-                var list = await plan.Storage.ListAsync(server.Name);
+                var list = await plan.Storage.ListAsync();
                 if (!list.Contains(backupId))
                 {
                     await notifyAll(ch => ch.WarnAsync($"{server} {plan}: backup {backupId} not found in storage"));
@@ -124,7 +126,9 @@ namespace Backuper.Api.Controllers
 
                 // download backup to temp path
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: download backup {backupId}"));
-                await plan.Storage.DownloadAsync(server.Name, backupId, path);
+                using(var ms = await plan.Storage.DownloadAsync(backupId))
+                using(var fs = System.IO.File.OpenWrite(path))
+                await ms.CopyToAsync(fs);
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} downloaded"));
 
                 // restore backup
@@ -147,8 +151,8 @@ namespace Backuper.Api.Controllers
                 return ServerError(e.Message);
             }
 
-            Task notifyAll(Func<Notification.Abstract.Channel, Task> notifyChannel) =>
-                Task.WhenAll(plan.Notifications.Select(notifyChannel));
+            Task notifyAll(Func<IChannel, Task> notifyChannel) =>
+                Task.WhenAll(plan.Notifications.Values.Select(notifyChannel));
         }
 
         [HttpDelete("{serverName}/backups/{planName}/{backupId}")]
@@ -163,7 +167,7 @@ namespace Backuper.Api.Controllers
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start delete {backupId} procedure"));
 
                 // ensure backup exists
-                var list = await plan.Storage.ListAsync(server.Name);
+                var list = await plan.Storage.ListAsync();
                 if (!list.Contains(backupId))
                 {
                     await notifyAll(ch => ch.WarnAsync($"{server} {plan}: backup {backupId} not found in storage"));
@@ -173,7 +177,7 @@ namespace Backuper.Api.Controllers
 
                 // download backup to temp path
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete backup {backupId}"));
-                await plan.Storage.DeleteAsync(server.Name, backupId);
+                await plan.Storage.DeleteAsync(backupId);
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} deleted"));
 
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete {backupId} procedure succeed"));
@@ -187,18 +191,18 @@ namespace Backuper.Api.Controllers
                 return ServerError(e.Message);
             }
 
-            Task notifyAll(Func<Notification.Abstract.Channel, Task> notifyChannel) =>
-                Task.WhenAll(plan.Notifications.Select(notifyChannel));
+            Task notifyAll(Func<IChannel, Task> notifyChannel) =>
+                Task.WhenAll(plan.Notifications.Values.Select(notifyChannel));
         }
 
         private(Server, Plan, IActionResult) ResolveServerPlan(string serverName, string planName)
         {
             var state = getState();
-            var server = state.Servers.FirstOrDefault(s => s.Name == serverName);
+            var server = state.Servers[serverName];
             if (server == null)
                 return (null, null, NotFound($"Server {serverName} is not configured"));
 
-            var plan = server.Plans.FirstOrDefault(p => p.Name == planName);
+            var plan = server.Plans[planName];
             if (plan == null)
                 return (null, null, NotFound($"Server {serverName} has no plan {planName}"));
 

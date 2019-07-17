@@ -1,17 +1,18 @@
+using System.Collections.Generic;
+using Backuper.Connection.Abstract;
+
 namespace Backuper.Api.State
 {
     public class Server
     {
         public string Name { get; }
-
-        public Connection.Abstract.Connection Connection { get; }
-
-        public Plan[] Plans { get; }
+        public IConnection Connection { get; }
+        public IReadOnlyDictionary<string, Plan> Plans { get; }
 
         public Server(
             string name,
-            Connection.Abstract.Connection connection,
-            Plan[] plans
+            IConnection connection,
+            IReadOnlyDictionary<string, Plan> plans
         )
         {
             Name = name;

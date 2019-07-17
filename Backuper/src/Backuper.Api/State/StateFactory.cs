@@ -2,7 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Annium.Storage.Abstractions;
 using Backuper.Api.Config;
+using Backuper.Connection.Abstract;
+using Backuper.Notification.Abstract;
+using Backuper.Storage;
 
 namespace Backuper.Api.State
 {
@@ -10,17 +14,17 @@ namespace Backuper.Api.State
     {
         private readonly Configuration config;
 
-        private readonly Connection.Abstract.ConnectionFactory connectionFactory;
+        private readonly ConnectionFactory connectionFactory;
 
-        private readonly Storage.Abstract.StorageFactory storageFactory;
+        private readonly StorageFactory storageFactory;
 
-        private readonly Notification.Abstract.ChannelFactory channelFactory;
+        private readonly ChannelFactory channelFactory;
 
         public StateFactory(
             Configuration config,
-            Connection.Abstract.ConnectionFactory connectionFactory,
-            Storage.Abstract.StorageFactory storageFactory,
-            Notification.Abstract.ChannelFactory channelFactory
+            ConnectionFactory connectionFactory,
+            StorageFactory storageFactory,
+            ChannelFactory channelFactory
         )
         {
             this.config = config;
@@ -29,49 +33,35 @@ namespace Backuper.Api.State
             this.channelFactory = channelFactory;
         }
 
-        public async Task<State> GetState()
+        public State GetState()
         {
-            var storages = await GetAllAsync(config.Storages, p => storageFactory.GetStorageAsync(p.Key, p.Value));
-            var channels = await GetAllAsync(config.Notifications, p => channelFactory.GetChannelAsync(p.Key, p.Value));
-
-            var servers = await GetAllAsync(config.Servers, p => GetServerAsync(storages, channels, p.Key, p.Value));
+            var servers = ResolveAll(config.Servers, ResolveServer);
 
             return new State(servers);
         }
 
-        private async Task<Server> GetServerAsync(
-            Storage.Abstract.Storage[] storages,
-            Notification.Abstract.Channel[] channels,
-            string name,
-            ServerConfiguration cfg
-        )
+        private Server ResolveServer(string name, ServerConfiguration cfg)
         {
-            var connection = await connectionFactory.GetConnectionAsync(name, cfg.Connection);
-            var plans = cfg.Plans.Select(p => ResolvePlan(name, p.Key, p.Value, storages, channels)).ToArray();
+            var connection = connectionFactory.CreateConnection(cfg.Connection);
+            var plans = ResolveAll(cfg.Plans, ResolvePlan);
 
             return new Server(name, connection, plans);
         }
 
-        private Plan ResolvePlan(
-            string server,
-            string name,
-            PlanConfiguration cfg,
-            Storage.Abstract.Storage[] storages,
-            Notification.Abstract.Channel[] channels
-        ) => new Plan(
-            name,
-            storages.FirstOrDefault(s => s.Name == cfg.Storage) ??
-            throw new InvalidOperationException($"Can't resolve storage {cfg.Storage} of plan {server}.{name}"),
-                cfg.Interval,
-                cfg.Capacity,
-                cfg.Notifications
-                .Select(n => channels.FirstOrDefault(c => c.Name == n) ??
-                    throw new InvalidOperationException($"Can't resolve notification channel {n} of plan {server}.{name}"))
-                .ToArray()
-        );
+        private Plan ResolvePlan(string name, PlanConfiguration cfg)
+        {
+            var storage = storageFactory.CreateStorage(cfg.Storage);
+            var channels = ResolveAll(cfg.Notifications, (n, c) => channelFactory.CreateChannel(c));
 
-        private Task<R[]> GetAllAsync<C, R>(
-            IReadOnlyDictionary<string, C> config, Func<KeyValuePair<string, C>, Task<R>> resolveAsync
-        ) => Task.WhenAll(config.Select(resolveAsync));
+            return new Plan(name, storage, cfg.Interval, cfg.Capacity, channels);
+        }
+
+        private IReadOnlyDictionary<string, R> ResolveAll<C, R>(
+            IDictionary<string, C> config,
+            Func<string, C, R> resolve
+        ) => config.ToDictionary(
+            pair => pair.Key,
+            pair => resolve(pair.Key, pair.Value)
+        );
     }
 }

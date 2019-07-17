@@ -1,4 +1,7 @@
+using System;
 using Annium.Extensions.DependencyInjection;
+using Annium.Logging.Abstractions;
+using Backuper.Notification.Abstract;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backuper.Notification.Slack
@@ -7,7 +10,14 @@ namespace Backuper.Notification.Slack
     {
         public override void Register(IServiceCollection services, System.IServiceProvider provider)
         {
-            services.AddSingleton<Abstract.ChannelManager<Configuration>, ChannelManager>();
+            Func<IServiceProvider, Func<Configuration, IChannel>> factory =
+                sp => configuration => new ChannelProxy(
+                    new Channel(configuration),
+                    configuration.Type,
+                    sp.GetRequiredService<ILogger<Channel>>()
+                );
+
+            services.AddSingleton<Func<Configuration, IChannel>>(factory);
         }
     }
 }

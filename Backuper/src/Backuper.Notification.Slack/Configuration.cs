@@ -3,7 +3,7 @@ using Annium.Core.Application.Types;
 namespace Backuper.Notification.Slack
 {
     [ResolveKey("slack")]
-    public class Configuration : Abstract.Configuration
+    public class Configuration : Abstract.ConfigurationBase
     {
         public string Team { get; set; }
 

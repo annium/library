@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backuper.Notification.Abstract
@@ -16,16 +15,15 @@ namespace Backuper.Notification.Abstract
             this.provider = provider;
         }
 
-        public async Task<Channel> GetChannelAsync(string name, Configuration cfg)
+        public IChannel CreateChannel(ConfigurationBase configuration)
         {
-            var managerType = typeof(ChannelManager<>).MakeGenericType(cfg.GetType());
+            var factoryType = typeof(Func<,>).MakeGenericType(configuration.GetType(), typeof(IChannel));
 
-            var manager = provider.GetRequiredService(managerType);
-            var getStorageAsync = managerType.GetMethod(nameof(ChannelManager<Configuration>.GetChannelAsync));
+            var factory = (Delegate) provider.GetRequiredService(factoryType);
 
             try
             {
-                var storage = (Channel) await ((Task<Channel>) getStorageAsync.Invoke(manager, new object[] { name, cfg }));
+                var storage = (IChannel) factory.DynamicInvoke(configuration);
 
                 return storage;
             }

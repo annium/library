@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backuper.Connection.Abstract
@@ -16,16 +15,15 @@ namespace Backuper.Connection.Abstract
             this.provider = provider;
         }
 
-        public async Task<Connection> GetConnectionAsync(string name, Configuration cfg)
+        public IConnection CreateConnection(ConfigurationBase configuration)
         {
-            var managerType = typeof(ConnectionManager<>).MakeGenericType(cfg.GetType());
+            var factoryType = typeof(Func<,>).MakeGenericType(configuration.GetType(), typeof(IConnection));
 
-            var manager = provider.GetRequiredService(managerType);
-            var getStorageAsync = managerType.GetMethod(nameof(ConnectionManager<Configuration>.GetConnectionAsync));
+            var factory = (Delegate) provider.GetRequiredService(factoryType);
 
             try
             {
-                var storage = (Connection) await ((Task<Connection>) getStorageAsync.Invoke(manager, new object[] { name, cfg }));
+                var storage = (IConnection) factory.DynamicInvoke(configuration);
 
                 return storage;
             }

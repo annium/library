@@ -12,8 +12,7 @@
     <ItemGroup>
         <ProjectReference Include="../Backuper.Connection.PostgreSQL/Backuper.Connection.PostgreSQL.csproj" />
         <ProjectReference Include="../Backuper.Notification.Slack/Backuper.Notification.Slack.csproj" />
-        <ProjectReference Include="../Backuper.Storage.Local/Backuper.Storage.Local.csproj" />
-        <ProjectReference Include="../Backuper.Storage.S3/Backuper.Storage.S3.csproj" />
+        <ProjectReference Include="../Backuper.Storage/Backuper.Storage.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.AspNetCore.Extensions" Version="0.1.0" />

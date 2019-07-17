@@ -3,28 +3,27 @@ using System.IO;
 using System.Threading.Tasks;
 using Annium.Extensions.Shell;
 using Annium.Logging.Abstractions;
+using Backuper.Connection.Abstract;
 using Npgsql;
 
 namespace Backuper.Connection.PostgreSQL
 {
-    public class Connection : Abstract.Connection
+    public class Connection : IConnection
     {
         private readonly Configuration cfg;
 
         private readonly IShell shell;
 
         public Connection(
-            string name,
             Configuration cfg,
-            IShell shell,
-            ILogger logger
-        ) : base("PostgreSQL", name, logger)
+            IShell shell
+        )
         {
             this.cfg = cfg;
             this.shell = shell;
         }
 
-        protected override async Task DoSetupAsync()
+        public async Task SetupAsync()
         {
             using(var conn = new NpgsqlConnection(GetConnectionString()))
             {
@@ -32,7 +31,7 @@ namespace Backuper.Connection.PostgreSQL
             }
         }
 
-        protected override async Task<string> DoBackupAsync()
+        public async Task<string> BackupAsync()
         {
             var path = Path.GetTempFileName();
             var result = await shell
@@ -44,12 +43,12 @@ namespace Backuper.Connection.PostgreSQL
                 .Pipe(true)
                 .RunAsync();
             if (!result.IsSuccess)
-                throw new InvalidOperationException(msg("backup failed"));
+                throw new InvalidOperationException("backup failed");
 
             return path;
         }
 
-        protected override async Task DoRestoreAsync(string path)
+        public async Task RestoreAsync(string path)
         {
             var result = await shell
                 .Cmd(
@@ -60,7 +59,7 @@ namespace Backuper.Connection.PostgreSQL
                 .Pipe(true)
                 .RunAsync();
             if (!result.IsSuccess)
-                throw new InvalidOperationException(msg("restore failed"));
+                throw new InvalidOperationException("restore failed");
         }
 
         private string GetConnectionString() => string.Join(';', new string[]

@@ -1,13 +1,16 @@
 using Annium.Extensions.DependencyInjection;
+using Annium.Logging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Backuper.Storage.Local
+namespace Backuper.Storage
 {
     public class ServicePack : ServicePackBase
     {
         public override void Register(IServiceCollection services, System.IServiceProvider provider)
         {
-            services.AddSingleton<Abstract.StorageManager<Configuration>, StorageManager>();
+            services.AddSingleton<StorageFactory>();
+
+            services.AddConsoleLogger(new LoggerConfiguration(LogLevel.Trace));
         }
     }
 }

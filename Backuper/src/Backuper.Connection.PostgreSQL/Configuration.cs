@@ -3,7 +3,7 @@ using Annium.Core.Application.Types;
 namespace Backuper.Connection.PostgreSQL
 {
     [ResolveKey("postgres")]
-    public class Configuration : Abstract.Configuration
+    public class Configuration : Abstract.ConfigurationBase
     {
         public string Host { get; set; }
 

@@ -19,13 +19,16 @@ namespace Backuper.Api
             Add<Connection.PostgreSQL.ServicePack>();
             Add<Notification.Abstract.ServicePack>();
             Add<Notification.Slack.ServicePack>();
-            Add<Storage.Abstract.ServicePack>();
-            Add<Storage.Local.ServicePack>();
-            Add<Storage.S3.ServicePack>();
+            Add<Storage.ServicePack>();
         }
 
         public override void Configure(IServiceCollection services)
         {
+            services
+                .AddStorage()
+                .AddFileSystemStorage()
+                .AddS3Storage();
+
             var configuration = new ConfigurationBuilder()
                 .AddYamlFile(Path.Combine("configuration", "config.yml"))
                 .Build<Configuration>();
@@ -54,7 +57,7 @@ namespace Backuper.Api
 
             try
             {
-                var state = stateFactory.GetState().GetAwaiter().GetResult();
+                var state = stateFactory.GetState();
                 stateManager.SetState(state);
             }
             catch (AggregateException ex)

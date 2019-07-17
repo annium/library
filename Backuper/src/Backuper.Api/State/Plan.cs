@@ -1,23 +1,23 @@
+using System.Collections.Generic;
+using Annium.Storage.Abstractions;
+using Backuper.Notification.Abstract;
+
 namespace Backuper.Api.State
 {
     public class Plan
     {
         public string Name { get; }
-
-        public Storage.Abstract.Storage Storage { get; }
-
+        public IStorage Storage { get; }
         public string Interval { get; }
-
         public int Capacity { get; }
-
-        public Notification.Abstract.Channel[] Notifications { get; }
+        public IReadOnlyDictionary<string, IChannel> Notifications { get; set; }
 
         public Plan(
             string name,
-            Storage.Abstract.Storage storage,
+            IStorage storage,
             string interval,
             int capacity,
-            Notification.Abstract.Channel[] notifications
+            IReadOnlyDictionary<string, IChannel> notifications
         )
         {
             Name = name;
