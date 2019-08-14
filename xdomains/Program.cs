@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
+using Annium.Core.Entrypoint;
 using Annium.Extensions.Arguments;
-using Annium.Extensions.Entrypoint;
 
 namespace xdomains
 {
@@ -17,7 +17,6 @@ namespace xdomains
         }
 
         public static int Main(string[] args) => new Entrypoint()
-            .UseServicePack<Annium.Extensions.Arguments.ServicePack>()
             .UseServicePack<ServicePack>()
             .Run(Run, args);
     }

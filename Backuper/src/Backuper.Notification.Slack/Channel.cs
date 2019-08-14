@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
-using Annium.Extensions.Net.Http;
 using Annium.Logging.Abstractions;
+using Annium.Net.Http;
 using Backuper.Notification.Abstract;
 
 namespace Backuper.Notification.Slack

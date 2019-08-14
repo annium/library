@@ -1,5 +1,5 @@
 using System;
-using Annium.Extensions.DependencyInjection;
+using Annium.Core.DependencyInjection;
 using Annium.Logging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
@@ -9,6 +9,11 @@ namespace xdomains
 {
     internal class ServicePack : ServicePackBase
     {
+        public override void Configure(IServiceCollection services)
+        {
+            services.AddSingleton(new LoggerConfiguration(LogLevel.Trace));
+        }
+
         public override void Register(IServiceCollection services, IServiceProvider provider)
         {
             services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
@@ -22,7 +27,8 @@ namespace xdomains
 
             services.AddSingleton<Settings>();
 
-            services.AddConsole(new LoggerConfiguration(LogLevel.Debug));
+            services.AddArguments();
+            services.AddConsoleLogger();
         }
 
         private void RegisterCommands(IServiceCollection services)

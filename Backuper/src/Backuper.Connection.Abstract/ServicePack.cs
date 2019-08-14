@@ -1,5 +1,4 @@
-using Annium.Extensions.DependencyInjection;
-using Annium.Logging.Abstractions;
+using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backuper.Connection.Abstract
@@ -10,7 +9,7 @@ namespace Backuper.Connection.Abstract
         {
             services.AddSingleton<ConnectionFactory>();
 
-            services.AddConsoleLogger(new LoggerConfiguration(LogLevel.Trace));
+            services.AddConsoleLogger();
             services.AddShell();
         }
     }

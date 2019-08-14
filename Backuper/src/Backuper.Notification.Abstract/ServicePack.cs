@@ -1,5 +1,4 @@
-using Annium.Extensions.DependencyInjection;
-using Annium.Logging.Abstractions;
+using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backuper.Notification.Abstract
@@ -10,7 +9,7 @@ namespace Backuper.Notification.Abstract
         {
             services.AddSingleton<ChannelFactory>();
 
-            services.AddConsoleLogger(new LoggerConfiguration(LogLevel.Trace));
+            services.AddConsoleLogger();
         }
     }
 }
