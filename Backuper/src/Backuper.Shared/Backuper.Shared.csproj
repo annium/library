@@ -13,7 +13,7 @@
     <ItemGroup>
         <PackageReference Include="Annium.Configuration.Abstractions" Version="0.1.0" />
         <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
-        <PackageReference Include="Annium.Net.Http" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
+        <PackageReference Include="Annium.Net.Http" Version="0.1.0" />
     </ItemGroup>
 </Project>
