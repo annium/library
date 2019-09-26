@@ -46,7 +46,7 @@ namespace Backuper.Api.Controllers
             return Ok(backups);
         }
 
-        [HttpPut("{serverName}/backups/{planName}")]
+        [HttpPost("{serverName}/backups/{planName}")]
         public async Task<IActionResult> CreateBackupAsync(string serverName, string planName)
         {
             var(server, plan, errorResult) = ResolveServerPlan(serverName, planName);

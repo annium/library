@@ -45,6 +45,7 @@ namespace Backuper.Api
             services.AddSingleton<Namer>();
 
             services.AddScheduler();
+            services.AddMediator();
             services.AddLogging(route => route.UseConsole());
         }
 
