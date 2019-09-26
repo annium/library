@@ -17,6 +17,9 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.AspNetCore.Extensions" Version="0.1.0" />
+        <PackageReference Include="Annium.Configuration.Yaml" Version="0.1.0" />
+        <PackageReference Include="Annium.Core.Mapper" Version="0.1.0" />
+        <PackageReference Include="Annium.Core.Mediator" Version="0.1.0" />
         <PackageReference Include="Annium.Diagnostics.Debug" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Jobs" Version="0.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />

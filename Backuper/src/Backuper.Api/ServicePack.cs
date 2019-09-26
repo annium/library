@@ -3,7 +3,6 @@ using System.IO;
 using Annium.Configuration.Abstractions;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
-using Annium.Logging.Abstractions;
 using Backuper.Api.Config;
 using Backuper.Api.Tools;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,8 +33,6 @@ namespace Backuper.Api
                 .Build<Configuration>();
 
             services.AddSingleton(configuration);
-
-            services.AddSingleton(new LoggerConfiguration(LogLevel.Trace));
         }
 
         public override void Register(IServiceCollection services, IServiceProvider provider)
@@ -47,9 +44,8 @@ namespace Backuper.Api
             services.AddSingleton<Func<State.State>>(sp => () => sp.GetRequiredService<State.StateManager>().State);
             services.AddSingleton<Namer>();
 
-            Mapper.AddConfiguration(ConfigureMapping());
             services.AddScheduler();
-            services.AddConsoleLogger();
+            services.AddLogging(route => route.UseConsole());
         }
 
         public override void Setup(System.IServiceProvider provider)
@@ -66,13 +62,6 @@ namespace Backuper.Api
             {
                 throw ex.InnerException;
             }
-        }
-
-        private MapperConfiguration ConfigureMapping()
-        {
-            var cfg = new MapperConfiguration();
-
-            return cfg;
         }
     }
 }

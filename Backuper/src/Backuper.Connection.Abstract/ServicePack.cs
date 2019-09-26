@@ -9,7 +9,7 @@ namespace Backuper.Connection.Abstract
         {
             services.AddSingleton<ConnectionFactory>();
 
-            services.AddConsoleLogger();
+            services.AddLogging(route => route.UseConsole());
             services.AddShell();
         }
     }

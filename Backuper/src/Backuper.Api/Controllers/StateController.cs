@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Annium.AspNetCore.Extensions;
+using Annium.Core.Mediator;
 using Backuper.Api.State;
 using Backuper.Api.Tools;
 using Backuper.Notification.Abstract;
@@ -19,8 +20,9 @@ namespace Backuper.Api.Controllers
 
         public StateController(
             Func<State.State> getState,
-            Namer namer
-        )
+            Namer namer,
+            IMediator mediator
+        ) : base(mediator)
         {
             this.getState = getState;
             this.namer = namer;

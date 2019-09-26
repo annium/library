@@ -9,7 +9,7 @@ namespace Backuper.Notification.Abstract
         {
             services.AddSingleton<ChannelFactory>();
 
-            services.AddConsoleLogger();
+            services.AddLogging(route => route.UseConsole());
         }
     }
 }
