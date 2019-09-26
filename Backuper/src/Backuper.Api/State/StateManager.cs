@@ -62,32 +62,22 @@ namespace Backuper.Api.State
             var backupId = namer.GetName();
             try
             {
-                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: start scheduled backup {backupId} procedure"));
-
                 // cleanup
                 var deletedItems = (await plan.Storage.ListAsync()).OrderByDescending(i => i).Skip(plan.Capacity - 1).ToArray();
                 if (deletedItems.Length > 0)
                 {
-                    await notifyAll(ch => ch.InfoAsync($"{server} {plan}: cleanup {deletedItems.Length} old backups"));
                     foreach (var item in deletedItems)
                     {
-                        await notifyAll(ch => ch.InfoAsync($"{server} {plan}: delete old backup {item}"));
                         await plan.Storage.DeleteAsync(item);
                     }
                 }
-                else
-                    await notifyAll(ch => ch.InfoAsync($"{server} {plan}: no cleanup needed"));
 
                 // create backup
-                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: create backup {backupId}"));
                 var path = await server.Connection.BackupAsync();
-                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} created"));
 
                 // upload backup
                 var name = namer.GetName();
-                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: upload backup {backupId}"));
                 using(var fs = File.OpenRead(path)) await plan.Storage.UploadAsync(fs, name);
-                await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} uploaded"));
 
                 // delete temp file
                 if (System.IO.File.Exists(path))
