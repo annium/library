@@ -17,7 +17,7 @@ namespace Backuper.Api.State
 
         private readonly ILogger<StateManager> logger;
 
-        public State State { get; private set; }
+        public State? State { get; private set; }
 
         public StateManager(
             IScheduler scheduler,
@@ -44,7 +44,7 @@ namespace Backuper.Api.State
             logger.Debug($"StateManager starting");
 
             logger.Debug($"Setup connections");
-            var connections = State.Servers.Values.Select(s => s.Connection).ToArray();
+            var connections = State!.Servers.Values.Select(s => s.Connection).ToArray();
             await Task.WhenAll(connections.Select(s => s.SetupAsync()));
 
             logger.Debug($"Setup storages");
@@ -53,8 +53,8 @@ namespace Backuper.Api.State
 
             logger.Debug($"Schedule operations");
             foreach (var server in State.Servers.Values)
-                foreach (var plan in server.Plans.Values)
-                    scheduler.Schedule(() => BackupAsync(server, plan), plan.Interval);
+            foreach (var plan in server.Plans.Values)
+                scheduler.Schedule(() => BackupAsync(server, plan), plan.Interval);
         }
 
         private async Task BackupAsync(Server server, Plan plan)
@@ -77,11 +77,11 @@ namespace Backuper.Api.State
 
                 // upload backup
                 var name = namer.GetName();
-                using(var fs = File.OpenRead(path)) await plan.Storage.UploadAsync(fs, name);
+                using (var fs = File.OpenRead(path)) await plan.Storage.UploadAsync(fs, name);
 
                 // delete temp file
-                if (System.IO.File.Exists(path))
-                    System.IO.File.Delete(path);
+                if (File.Exists(path))
+                    File.Delete(path);
 
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: scheduled backup {backupId} procedure succeed"));
             }

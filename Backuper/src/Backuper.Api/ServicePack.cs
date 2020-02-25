@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Annium.Configuration.Abstractions;
 using Annium.Core.DependencyInjection;
-using Annium.Core.Mapper;
 using Backuper.Api.Config;
+using Backuper.Api.State;
 using Backuper.Api.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
@@ -39,9 +39,9 @@ namespace Backuper.Api
         {
             services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
 
-            services.AddSingleton<State.StateFactory>();
-            services.AddSingleton<State.StateManager>();
-            services.AddSingleton<Func<State.State>>(sp => () => sp.GetRequiredService<State.StateManager>().State);
+            services.AddSingleton<StateFactory>();
+            services.AddSingleton<StateManager>();
+            services.AddSingleton<Func<State.State>>(sp => () => sp.GetRequiredService<StateManager>().State!);
             services.AddSingleton<Namer>();
 
             services.AddScheduler();
@@ -49,10 +49,10 @@ namespace Backuper.Api
             services.AddLogging(route => route.UseConsole());
         }
 
-        public override void Setup(System.IServiceProvider provider)
+        public override void Setup(IServiceProvider provider)
         {
-            var stateFactory = provider.GetRequiredService<State.StateFactory>();
-            var stateManager = provider.GetRequiredService<State.StateManager>();
+            var stateFactory = provider.GetRequiredService<StateFactory>();
+            var stateManager = provider.GetRequiredService<StateManager>();
 
             try
             {
@@ -61,7 +61,7 @@ namespace Backuper.Api
             }
             catch (AggregateException ex)
             {
-                throw ex.InnerException;
+                throw ex.InnerException!;
             }
         }
     }

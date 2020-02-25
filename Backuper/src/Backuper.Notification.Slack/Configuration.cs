@@ -5,10 +5,10 @@ namespace Backuper.Notification.Slack
     [ResolveKey("slack")]
     public class Configuration : Abstract.ConfigurationBase
     {
-        public string Team { get; set; }
+        public string Team { get; set; } = string.Empty;
 
-        public string Channel { get; set; }
+        public string Channel { get; set; } = string.Empty;
 
-        public string Token { get; set; }
+        public string Token { get; set; } = string.Empty;
     }
 }

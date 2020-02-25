@@ -1,32 +1,38 @@
 using System.IO;
+using Annium.Core.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Hosting;
 
 namespace Backuper.Api
 {
-    internal class Program
+    internal static class Program
     {
         internal static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
         }
 
-        private static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        private static IHostBuilder CreateHostBuilder(string[] args)
         {
-            return new WebHostBuilder()
-                .UseKestrel((KestrelServerOptions options) =>
+            return Host.CreateDefaultBuilder(args)
+                .UseServiceProviderFactory(new ServiceProviderFactory(b => b.UseServicePack<ServicePack>()))
+                .ConfigureLoggingBridge()
+                .ConfigureWebHostDefaults(builder =>
                 {
-                    var port = 5000;
-                    options.AddServerHeader = false;
-
-                    var httpsFile = Path.GetFullPath(Path.Combine("certs", "cert.pfx"));
-                    if (File.Exists(httpsFile))
-                        options.ListenAnyIP(port, listenOptions => listenOptions.UseHttps(httpsFile));
-                    else
-                        options.ListenAnyIP(port);
-                })
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseStartup<Startup<ServicePack>>();
+                    builder
+                        .UseContentRoot(Directory.GetCurrentDirectory())
+                        .UseKestrel(server =>
+                        {
+                            server.AddServerHeader = false;
+                            server.ListenAnyIP(5000, listen =>
+                            {
+                                var certFile = Path.GetFullPath(Path.Combine("certs", "cert.pfx"));
+                                if (File.Exists(certFile))
+                                    listen.UseHttps(certFile);
+                            });
+                        })
+                        .UseStartup<Startup>();
+                });
         }
     }
 }

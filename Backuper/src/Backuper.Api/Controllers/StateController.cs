@@ -37,7 +37,7 @@ namespace Backuper.Api.Controllers
         [HttpGet("{serverName}/backups/{planName}")]
         public async Task<IActionResult> ListBackupsAsync(string serverName, string planName)
         {
-            var(server, plan, errorResult) = ResolveServerPlan(serverName, planName);
+            var (_, plan, errorResult) = ResolveServerPlan(serverName, planName);
             if (errorResult != null)
                 return errorResult;
 
@@ -49,7 +49,7 @@ namespace Backuper.Api.Controllers
         [HttpPost("{serverName}/backups/{planName}")]
         public async Task<IActionResult> CreateBackupAsync(string serverName, string planName)
         {
-            var(server, plan, errorResult) = ResolveServerPlan(serverName, planName);
+            var (server, plan, errorResult) = ResolveServerPlan(serverName, planName);
             if (errorResult != null)
                 return errorResult;
 
@@ -79,8 +79,8 @@ namespace Backuper.Api.Controllers
 
                 // upload backup
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: upload backup {backupId}"));
-                using(var fs = System.IO.File.OpenRead(path))
-                await plan.Storage.UploadAsync(fs, backupId);
+                using (var fs = System.IO.File.OpenRead(path))
+                    await plan.Storage.UploadAsync(fs, backupId);
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} uploaded"));
 
                 // delete temp file
@@ -105,7 +105,7 @@ namespace Backuper.Api.Controllers
         [HttpPost("{serverName}/backups/{planName}/{backupId}")]
         public async Task<IActionResult> RestoreBackupAsync(string serverName, string planName, string backupId)
         {
-            var(server, plan, errorResult) = ResolveServerPlan(serverName, planName);
+            var (server, plan, errorResult) = ResolveServerPlan(serverName, planName);
             if (errorResult != null)
                 return errorResult;
 
@@ -120,6 +120,7 @@ namespace Backuper.Api.Controllers
                     await notifyAll(ch => ch.WarnAsync($"{server} {plan}: backup {backupId} not found in storage"));
                     return NotFound($"Backup {backupId} not found in storage");
                 }
+
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} found in storage"));
 
                 // get temp file path
@@ -128,9 +129,9 @@ namespace Backuper.Api.Controllers
 
                 // download backup to temp path
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: download backup {backupId}"));
-                using(var ms = await plan.Storage.DownloadAsync(backupId))
-                using(var fs = System.IO.File.OpenWrite(path))
-                await ms.CopyToAsync(fs);
+                using (var ms = await plan.Storage.DownloadAsync(backupId))
+                using (var fs = System.IO.File.OpenWrite(path))
+                    await ms.CopyToAsync(fs);
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} downloaded"));
 
                 // restore backup
@@ -160,7 +161,7 @@ namespace Backuper.Api.Controllers
         [HttpDelete("{serverName}/backups/{planName}/{backupId}")]
         public async Task<IActionResult> DeleteBackupAsync(string serverName, string planName, string backupId)
         {
-            var(server, plan, errorResult) = ResolveServerPlan(serverName, planName);
+            var (server, plan, errorResult) = ResolveServerPlan(serverName, planName);
             if (errorResult != null)
                 return errorResult;
 
@@ -175,6 +176,7 @@ namespace Backuper.Api.Controllers
                     await notifyAll(ch => ch.WarnAsync($"{server} {plan}: backup {backupId} not found in storage"));
                     return NotFound($"Backup {backupId} not found in storage");
                 }
+
                 await notifyAll(ch => ch.InfoAsync($"{server} {plan}: backup {backupId} found in storage"));
 
                 // download backup to temp path
@@ -197,16 +199,16 @@ namespace Backuper.Api.Controllers
                 Task.WhenAll(plan.Notifications.Values.Select(notifyChannel));
         }
 
-        private(Server, Plan, IActionResult) ResolveServerPlan(string serverName, string planName)
+        private (Server, Plan, IActionResult?) ResolveServerPlan(string serverName, string planName)
         {
             var state = getState();
             var server = state.Servers[serverName];
             if (server == null)
-                return (null, null, NotFound($"Server {serverName} is not configured"));
+                return (default!, default!, NotFound($"Server {serverName} is not configured"));
 
             var plan = server.Plans[planName];
             if (plan == null)
-                return (null, null, NotFound($"Server {serverName} has no plan {planName}"));
+                return (default!, default!, NotFound($"Server {serverName} has no plan {planName}"));
 
             return (server, plan, null);
         }

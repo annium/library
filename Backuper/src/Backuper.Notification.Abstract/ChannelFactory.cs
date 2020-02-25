@@ -23,13 +23,13 @@ namespace Backuper.Notification.Abstract
 
             try
             {
-                var storage = (IChannel) factory.DynamicInvoke(configuration);
+                var storage = (IChannel) factory.DynamicInvoke(configuration)!;
 
                 return storage;
             }
             catch (TargetInvocationException ex)
             {
-                throw ex.InnerException;
+                throw ex.InnerException!;
             }
         }
     }

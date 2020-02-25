@@ -23,13 +23,13 @@ namespace Backuper.Connection.Abstract
 
             try
             {
-                var storage = (IConnection) factory.DynamicInvoke(configuration);
+                var storage = (IConnection) factory.DynamicInvoke(configuration)!;
 
                 return storage;
             }
             catch (TargetInvocationException ex)
             {
-                throw ex.InnerException;
+                throw ex.InnerException!;
             }
         }
     }
