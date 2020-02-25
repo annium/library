@@ -20,7 +20,7 @@ namespace xdomains.Tools
         {
             var path = cache(domain);
 
-            return File.Exists(path) ? File.ReadAllText(path) : null;
+            return File.Exists(path) ? File.ReadAllText(path) : string.Empty;
         }
 
         public void Set(string domain, string resolution)

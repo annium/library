@@ -10,7 +10,7 @@ namespace xdomains
         public Settings()
         {
             var assemlyLocation = Assembly.GetExecutingAssembly().Location;
-            Root = Path.GetDirectoryName(assemlyLocation);
+            Root = Path.GetDirectoryName(assemlyLocation)!;
         }
 
         public string RootedPath(params string[] paths) => Path.Combine(Root, Path.Combine(paths));
