@@ -1,12 +1,12 @@
-FROM microsoft/dotnet:2.2-sdk-alpine as builder
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine as builder
 COPY . /src
 RUN dotnet publish -c release -o /app /src/Backuper.Api
 
-FROM microsoft/dotnet:2.2-runtime-alpine
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine
 RUN apk add --no-cache \
     curl \
     postgresql-client
 WORKDIR /app
 COPY --from=builder /app /app
 VOLUME [ "/app/configuration", "/app/data" ]
-CMD ["dotnet", "/app/Backuper.Api.dll"]
+CMD ["/app/Backuper.Api"]
