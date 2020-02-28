@@ -69,6 +69,8 @@ namespace Backuper.Connection.PostgreSQL
             $"Database={cfg.Db}",
             $"Username={cfg.User}",
             $"Password={cfg.Pass}",
+            "SSL Mode=Prefer",
+            "Trust Server Certificate=true",
         });
     }
 }
