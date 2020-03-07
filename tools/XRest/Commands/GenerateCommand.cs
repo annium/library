@@ -10,6 +10,7 @@ using Annium.Extensions.Arguments;
 using Annium.Extensions.Shell;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using xrest.Tools;
 
 namespace xrest.Commands
 {
@@ -17,14 +18,17 @@ namespace xrest.Commands
     {
         public override string Id { get; } = "gen";
         public override string Description { get; } = "generate client";
+        private readonly Generator generator;
         private readonly IShell shell;
         private readonly ILogger<GenerateCommand> logger;
 
         public GenerateCommand(
+            Generator generator,
             IShell shell,
             ILogger<GenerateCommand> logger
         )
         {
+            this.generator = generator;
             this.shell = shell;
             this.logger = logger;
         }
@@ -40,11 +44,14 @@ namespace xrest.Commands
 
             logger.Info($"Generate client for project '{cfg.ProjectName}'");
 
-            logger.Debug($"Build project '{cfg.ProjectName}'");
+            logger.Debug("Build project");
             await Build(cfg, token);
 
-            logger.Debug($"Build project '{cfg.ProjectName}'");
+            logger.Debug("Load types");
             var controllers = ResolveControllerTypes(cfg);
+
+            logger.Debug("Generate");
+            generator.Generate(controllers, cfg.Output);
         }
 
         private Task Build(GenerateCommandConfiguration cfg, CancellationToken token) => shell
@@ -65,9 +72,6 @@ namespace xrest.Commands
             try
             {
                 var assembly = new PluginLoadContext(assemblyPath).LoadFromAssemblyPath(assemblyPath);
-                // AssemblyLoadContext.Default.Load
-                // Directory.SetCurrentDirectory(assemblyRoot);
-                // var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
 
                 var result = assembly.GetExportedTypes()
                     .Where(x => (typeof(ControllerBase).IsAssignableFrom(x)))
@@ -90,7 +94,7 @@ namespace xrest.Commands
                 resolver = new AssemblyDependencyResolver(pluginPath);
             }
 
-            protected override Assembly Load(AssemblyName assemblyName)
+            protected override Assembly? Load(AssemblyName assemblyName)
             {
                 var assemblyPath = resolver.ResolveAssemblyToPath(assemblyName);
 
@@ -125,8 +129,13 @@ namespace xrest.Commands
 
         [Option("o", true)]
         [Help("Output directory. Will be removed if exists.")]
-        public string Output { get; set; } = string.Empty;
+        public string Output
+        {
+            get => output;
+            set => output = Path.GetFullPath(value);
+        }
 
         private string project = string.Empty;
+        private string output = string.Empty;
     }
 }

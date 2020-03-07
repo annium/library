@@ -12,6 +12,8 @@ namespace xrest
         {
             services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
 
+            services.AddSingleton<Tools.Generator>();
+
             RegisterCommands(services);
 
             services.AddArguments();
