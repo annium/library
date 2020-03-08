@@ -106,7 +106,7 @@ namespace xrest.Tools
 
             // Find where the method was originally declared
             var baseMethodInfo = methodInfo.GetBaseDefinition();
-            var declaringTypeInfo = baseMethodInfo.DeclaringType.GetTypeInfo();
+            var declaringTypeInfo = baseMethodInfo.DeclaringType!.GetTypeInfo();
 
             return
                 typeof(IDisposable).GetTypeInfo().IsAssignableFrom(declaringTypeInfo) &&

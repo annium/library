@@ -18,16 +18,19 @@ namespace xrest.Commands
     {
         public override string Id { get; } = "gen";
         public override string Description { get; } = "generate client";
+        private readonly Parser parser;
         private readonly Generator generator;
         private readonly IShell shell;
         private readonly ILogger<GenerateCommand> logger;
 
         public GenerateCommand(
+            Parser parser,
             Generator generator,
             IShell shell,
             ILogger<GenerateCommand> logger
         )
         {
+            this.parser = parser;
             this.generator = generator;
             this.shell = shell;
             this.logger = logger;
@@ -50,8 +53,11 @@ namespace xrest.Commands
             logger.Debug("Load types");
             var controllers = ResolveControllerTypes(cfg);
 
+            logger.Debug("Parse");
+            var data = parser.Parse(controllers);
+
             logger.Debug("Generate");
-            generator.Generate(controllers, cfg.Output);
+            generator.Generate(data, cfg.Output);
         }
 
         private Task Build(GenerateCommandConfiguration cfg, CancellationToken token) => shell
