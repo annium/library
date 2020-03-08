@@ -14,6 +14,7 @@ namespace xrest
 
             services.AddSingleton<Tools.Generator>();
             services.AddSingleton<Tools.Parser>();
+            services.AddSingleton<Tools.Writer>();
 
             RegisterCommands(services);
 

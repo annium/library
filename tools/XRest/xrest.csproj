@@ -19,5 +19,10 @@
         <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Shell" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
+        <PackageReference Include="Scriban" Version="2.1.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Templates/**" />
+        <EmbeddedResource Remove="Templates/.*" />
     </ItemGroup>
 </Project>
