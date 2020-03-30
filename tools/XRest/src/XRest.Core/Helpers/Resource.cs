@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace xrest.Tools
+namespace XRest.Core.Helpers
 {
     public class Resource
     {

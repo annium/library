@@ -2,7 +2,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace xrest.Tools
+namespace XRest.Core.Helpers
 {
     public static class ResourceLoader
     {
@@ -17,7 +17,7 @@ namespace xrest.Tools
                 .Select(r =>
                 {
                     var name = r.Substring(prefix.Length);
-                    var rs = assembly.GetManifestResourceStream(r) !;
+                    var rs = assembly.GetManifestResourceStream(r)!;
                     rs.Seek(0, SeekOrigin.Begin);
 
                     return new Resource(name, rs);
