@@ -3,9 +3,9 @@ using System.Threading;
 using Annium.Core.Entrypoint;
 using Annium.Extensions.Arguments;
 
-namespace xrest
+namespace XRest
 {
-    public class Program
+    internal static class Program
     {
         private static void Run(
             IServiceProvider provider,
@@ -16,7 +16,7 @@ namespace xrest
             new Commander(provider).Run<xrest.Commands.Group>(args, token);
         }
 
-        public static int Main(string[] args) => new Entrypoint()
+        internal static int Main(string[] args) => new Entrypoint()
             .UseServicePack<ServicePack>()
             .Run(Run, args);
     }

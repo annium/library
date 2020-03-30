@@ -7,7 +7,7 @@ namespace xrest.Tools
 {
     public static class TypeMap
     {
-        public static readonly ImmutableDictionary<Type, BaseType> BaseTypes = new Dictionary<Type, BaseType>()
+        public static readonly ImmutableDictionary<Type, BaseType> BaseTypes = new Dictionary<Type, BaseType>
         {
             { typeof(bool), BaseType.Boolean },
             { typeof(byte), BaseType.Number },

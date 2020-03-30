@@ -1,10 +1,8 @@
 using System;
 using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using NodaTime;
-using xrest.Commands;
 
-namespace xrest
+namespace XRest
 {
     internal class ServicePack : ServicePackBase
     {

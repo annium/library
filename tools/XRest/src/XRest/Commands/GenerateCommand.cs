@@ -48,7 +48,7 @@ namespace xrest.Commands
             logger.Info($"Generate client for project '{cfg.ProjectName}'");
 
             logger.Debug("Build project");
-            // await Build(cfg, token);
+            await Build(cfg, token);
 
             logger.Debug("Load types");
             var controllers = ResolveControllerTypes(cfg);
