@@ -7,7 +7,7 @@ using XRest.Core.Helpers;
 
 namespace XRest.Core.Components.Implementations
 {
-    internal class Writer : IWriter
+    internal class TemplateWriter : ITemplateWriter
     {
         public string Write<T>(string template, T data)
             where T : class

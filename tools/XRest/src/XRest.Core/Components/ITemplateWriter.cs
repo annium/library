@@ -1,6 +1,6 @@
 namespace XRest.Core.Components
 {
-    public interface IWriter
+    public interface ITemplateWriter
     {
         string Write<T>(string template, T data) where T : class;
     }

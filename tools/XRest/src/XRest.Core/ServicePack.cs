@@ -15,7 +15,7 @@ namespace XRest.Core
 
             services.AddSingleton<ILoader, Loader>();
             services.AddSingleton<IParser, Parser>();
-            services.AddSingleton<IWriter, Writer>();
+            services.AddSingleton<ITemplateWriter, TemplateWriter>();
         }
     }
 }
