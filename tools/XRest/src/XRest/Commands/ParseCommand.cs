@@ -3,8 +3,8 @@ using System.Threading;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using Annium.Serialization.Json;
+using XRest.Core.Components;
 using XRest.Core.Infrastructure.JsonConverters;
-using XRest.Core.Tools;
 
 namespace XRest.Commands
 {
@@ -12,13 +12,13 @@ namespace XRest.Commands
     {
         public override string Id { get; } = "parse";
         public override string Description { get; } = "parse API";
-        private readonly Loader _loader;
-        private readonly Parser _parser;
+        private readonly ILoader _loader;
+        private readonly IParser _parser;
         private readonly ILogger<ParseCommand> _logger;
 
         public ParseCommand(
-            Loader loader,
-            Parser parser,
+            ILoader loader,
+            IParser parser,
             ILogger<ParseCommand> logger
         )
         {

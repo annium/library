@@ -2,7 +2,8 @@ using System;
 using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
-using XRest.Core.Tools;
+using XRest.Core.Components;
+using XRest.Core.Components.Implementations;
 
 namespace XRest.Core
 {
@@ -12,9 +13,9 @@ namespace XRest.Core
         {
             services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
 
-            services.AddSingleton<Loader>();
-            services.AddSingleton<Parser>();
-            services.AddSingleton<Writer>();
+            services.AddSingleton<ILoader, Loader>();
+            services.AddSingleton<IParser, Parser>();
+            services.AddSingleton<IWriter, Writer>();
         }
     }
 }

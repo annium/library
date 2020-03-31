@@ -5,9 +5,9 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using XRest.Core.Helpers;
 
-namespace XRest.Core.Tools
+namespace XRest.Core.Components.Implementations
 {
-    public class Loader
+    internal class Loader : ILoader
     {
         public IReadOnlyCollection<Type> LoadControllerTypes(string assemblyPath)
         {

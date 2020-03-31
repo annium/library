@@ -5,9 +5,9 @@ using Scriban;
 using Scriban.Runtime;
 using XRest.Core.Helpers;
 
-namespace XRest.Core.Tools
+namespace XRest.Core.Components.Implementations
 {
-    public class Writer
+    internal class Writer : IWriter
     {
         public string Write<T>(string template, T data)
             where T : class

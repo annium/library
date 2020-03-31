@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using XRest.Core.Helpers;
 using XRest.Core.Models;
 
-namespace XRest.Core.Tools
+namespace XRest.Core.Components.Implementations
 {
-    public class Parser
+    internal class Parser : IParser
     {
         public ApiModel Parse(IReadOnlyCollection<Type> controllerTypes)
         {
@@ -20,7 +20,7 @@ namespace XRest.Core.Tools
             return new ApiModel(controllerModels);
         }
 
-        public ControllerModel ParseController(
+        private ControllerModel ParseController(
             Type controllerType
         )
         {
