@@ -64,9 +64,11 @@ namespace XRest.Core.Components.Implementations
                 .SingleOrDefault(x => x.GetCustomAttribute<FromBodyAttribute>() != null)?
                 .ParameterType;
 
+            var responseType = action.ReturnType == typeof(void) ? null : action.ReturnType;
+
             var auth = controllerAuth ?? ParseAuth(action.GetCustomAttributes()) ?? new AuthModel(false);
 
-            return new ActionModel(actionName, method, route, parameters, bodyType, auth);
+            return new ActionModel(actionName, method, route, parameters, bodyType, responseType, auth);
         }
 
         private AuthModel? ParseAuth(IEnumerable<Attribute> attributes)

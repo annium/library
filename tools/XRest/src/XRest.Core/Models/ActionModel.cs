@@ -11,6 +11,7 @@ namespace XRest.Core.Models
         public string Path { get; }
         public IReadOnlyCollection<ParameterModel> Parameters { get; }
         public Type? Body { get; }
+        public Type? Response { get; }
         public AuthModel Auth { get; }
 
         public ActionModel(
@@ -19,6 +20,7 @@ namespace XRest.Core.Models
             string path,
             IReadOnlyCollection<ParameterModel> parameters,
             Type? body,
+            Type? response,
             AuthModel auth
         )
         {
@@ -27,6 +29,7 @@ namespace XRest.Core.Models
             Path = path;
             Parameters = parameters;
             Body = body;
+            Response = response;
             Auth = auth;
         }
     }
