@@ -2,24 +2,22 @@ using System.IO;
 using System.Threading;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
-using Annium.Serialization.Json;
 using XRest.Core.Components;
-using XRest.Core.Infrastructure.JsonConverters;
 
-namespace XRest.Commands
+namespace XRest.TypeScript.Commands
 {
-    internal class ParseCommand : Command<ParseCommandConfiguration>
+    internal class GenerateCommand : Command<GenerateCommandConfiguration>
     {
-        public override string Id { get; } = "parse";
-        public override string Description { get; } = "parse API";
+        public override string Id { get; } = "gen";
+        public override string Description { get; } = "generate client";
         private readonly ILoader _loader;
         private readonly IParser _parser;
-        private readonly ILogger<ParseCommand> _logger;
+        private readonly ILogger<GenerateCommand> _logger;
 
-        public ParseCommand(
+        public GenerateCommand(
             ILoader loader,
             IParser parser,
-            ILogger<ParseCommand> logger
+            ILogger<GenerateCommand> logger
         )
         {
             _loader = loader;
@@ -27,7 +25,7 @@ namespace XRest.Commands
             _logger = logger;
         }
 
-        public override void Handle(ParseCommandConfiguration cfg, CancellationToken token)
+        public override void Handle(GenerateCommandConfiguration cfg, CancellationToken token)
         {
             _logger.Info($"Load '{cfg.ProjectName}' metadata from '{cfg.Assembly}'");
             var controllerTypes = _loader.LoadControllerTypes(cfg.Assembly);
@@ -35,19 +33,12 @@ namespace XRest.Commands
             _logger.Info($"Parse '{cfg.ProjectName}' metadata");
             var api = _parser.Parse(controllerTypes);
 
-            _logger.Debug($"Save '{cfg.ProjectName}' definition to '{cfg.Output}'");
-            if (!Directory.Exists(Path.GetDirectoryName(cfg.Output)))
-                Directory.CreateDirectory(Path.GetDirectoryName(cfg.Output));
-            var serializer = StringSerializer.Configure(opts =>
-            {
-                opts.Converters.Add(new TypeJsonConverter());
-                opts.WriteIndented = true;
-            });
-            File.WriteAllText(cfg.Output, serializer.Serialize(api));
+            // run same flow as parse to obtain ApiModel
+            //
         }
     }
 
-    internal class ParseCommandConfiguration
+    internal class GenerateCommandConfiguration
     {
         [Option("a", true)]
         [Help("Path to API assembly.")]
@@ -64,7 +55,7 @@ namespace XRest.Commands
         public string ProjectName { get; private set; } = string.Empty;
 
         [Option("o", true)]
-        [Help("Output file. Will be rewritten if exists.")]
+        [Help("Output directory. Will be removed if exists.")]
         public string Output
         {
             get => _output;

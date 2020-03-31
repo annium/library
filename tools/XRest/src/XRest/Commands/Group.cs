@@ -8,6 +8,7 @@ namespace XRest.Commands
 
         public Group()
         {
+            Add<XRest.TypeScript.Commands.Group>();
             Add<ParseCommand>();
         }
     }
