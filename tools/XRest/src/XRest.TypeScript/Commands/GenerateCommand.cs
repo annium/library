@@ -3,6 +3,7 @@ using System.Threading;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using XRest.Core.Components;
+using XRest.TypeScript.Components;
 
 namespace XRest.TypeScript.Commands
 {
@@ -12,29 +13,40 @@ namespace XRest.TypeScript.Commands
         public override string Description { get; } = "generate client";
         private readonly ILoader _loader;
         private readonly IParser _parser;
+        private readonly IProcessor _processor;
+        private readonly IWriter _writer;
         private readonly ILogger<GenerateCommand> _logger;
 
         public GenerateCommand(
             ILoader loader,
             IParser parser,
+            IProcessor processor,
+            IWriter writer,
             ILogger<GenerateCommand> logger
         )
         {
             _loader = loader;
             _parser = parser;
+            _processor = processor;
+            _writer = writer;
             _logger = logger;
         }
 
         public override void Handle(GenerateCommandConfiguration cfg, CancellationToken token)
         {
-            _logger.Info($"Load '{cfg.ProjectName}' metadata from '{cfg.Assembly}'");
+            _logger.Info($"Generate '{cfg.ProjectName}' client");
+
+            _logger.Info($"Load metadata from '{cfg.Assembly}'");
             var controllerTypes = _loader.LoadControllerTypes(cfg.Assembly);
 
-            _logger.Info($"Parse '{cfg.ProjectName}' metadata");
+            _logger.Info("Parse metadata");
             var api = _parser.Parse(controllerTypes);
 
-            // run same flow as parse to obtain ApiModel
-            //
+            _logger.Info("Process api model to api view");
+            var view = _processor.Process(api);
+
+            _logger.Info($"Write api view to {cfg.Output}");
+            _writer.Write(cfg.Output, view);
         }
     }
 
