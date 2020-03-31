@@ -1,21 +1,14 @@
 using System.IO;
 using System.Linq;
 using Annium.Extensions.Primitives;
-using Annium.Logging.Abstractions;
 using Scriban;
 using Scriban.Runtime;
+using XRest.Core.Helpers;
 
-namespace xrest.Tools
+namespace XRest.Core.Tools
 {
     public class Writer
     {
-        private readonly ILogger<Generator> logger;
-
-        public Writer(ILogger<Generator> logger)
-        {
-            this.logger = logger;
-        }
-
         public string Write<T>(string template, T data)
             where T : class
         {

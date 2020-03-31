@@ -1,51 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 
-namespace xrest.Tools
+namespace XRest.Core.Helpers
 {
-    internal static class Helper
+    internal static class ParseHelper
     {
-        public static bool IsDictionary(Type type) => type.GetInterfaces().Any(x =>
-        {
-            if (!x.IsGenericType)
-                return false;
-
-            var definition = x.GetGenericTypeDefinition();
-
-            return definition == typeof(Dictionary<,>) ||
-                definition == typeof(IDictionary<,>) ||
-                definition == typeof(ReadOnlyDictionary<,>) ||
-                definition == typeof(IReadOnlyDictionary<,>);
-        });
-
-        public static bool IsArray(Type type) => type.GetInterfaces().Any(x =>
-        {
-            if (!x.IsGenericType)
-                return false;
-
-            var definition = x.GetGenericTypeDefinition();
-            if (definition != typeof(IEnumerable<>))
-                return false;
-
-            return definition == typeof(IEnumerable<>) ||
-                definition.IsArray ||
-                definition == typeof(List<>) ||
-                definition == typeof(LinkedList<>) ||
-                definition == typeof(IList<>) ||
-                definition == typeof(IReadOnlyList<>) ||
-                definition == typeof(HashSet<>) ||
-                definition == typeof(ISet<>) ||
-                definition == typeof(Stack<>) ||
-                definition == typeof(Collection<>) ||
-                definition == typeof(ICollection<>) ||
-                definition == typeof(ReadOnlyCollection<>) ||
-                definition == typeof(IReadOnlyCollection<>);
-        });
-
         /// <summary>
         ///    From https://github.com/dotnet/aspnetcore/blob/master/src/Mvc/Mvc.Core/src/ApplicationModels/DefaultApplicationModelProvider.cs
         /// </summary>
@@ -93,11 +53,10 @@ namespace xrest.Tools
             return methodInfo.IsPublic;
         }
 
-
         /// <summary>
         ///    From https://github.com/dotnet/aspnetcore/blob/master/src/Mvc/Mvc.Core/src/ApplicationModels/DefaultApplicationModelProvider.cs
         /// </summary>
-        public static bool IsIDisposableMethod(MethodInfo methodInfo)
+        private static bool IsIDisposableMethod(MethodInfo methodInfo)
         {
             // Ideally we do not want Dispose method to be exposed as an action. However there are some scenarios where a user
             // might want to expose a method with name "Dispose" (even though they might not be really disposing resources)

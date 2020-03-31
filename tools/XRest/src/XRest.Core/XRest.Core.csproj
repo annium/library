@@ -14,7 +14,6 @@
     <ItemGroup>
         <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Primitives" Version="0.1.0" />
-        <PackageReference Include="Annium.Extensions.Shell" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Abstractions" Version="0.1.0" />
         <PackageReference Include="Scriban" Version="2.1.1" />
     </ItemGroup>

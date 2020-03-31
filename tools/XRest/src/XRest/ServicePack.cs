@@ -6,25 +6,23 @@ namespace XRest
 {
     internal class ServicePack : ServicePackBase
     {
+        public ServicePack()
+        {
+            Add<Core.ServicePack>();
+        }
+
         public override void Register(IServiceCollection services, IServiceProvider provider)
         {
-            services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
-
-            services.AddSingleton<Tools.Generator>();
-            services.AddSingleton<Tools.Parser>();
-            services.AddSingleton<Tools.Writer>();
-
             RegisterCommands(services);
 
             services.AddArguments();
             services.AddLogging(route => route.UseConsole(time: true, color: true));
-            services.AddShell();
         }
 
         private void RegisterCommands(IServiceCollection services)
         {
-            services.AddSingleton<Group>();
-            services.AddSingleton<GenerateCommand>();
+            services.AddSingleton<Commands.Group>();
+            services.AddSingleton<Commands.ParseCommand>();
         }
     }
 }

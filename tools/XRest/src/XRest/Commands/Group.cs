@@ -1,4 +1,4 @@
-namespace xrest.Commands
+namespace XRest.Commands
 {
     internal class Group : Annium.Extensions.Arguments.Group
     {
@@ -8,7 +8,7 @@ namespace xrest.Commands
 
         public Group()
         {
-            Add<GenerateCommand>();
+            Add<ParseCommand>();
         }
     }
 }

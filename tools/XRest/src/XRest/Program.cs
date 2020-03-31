@@ -13,7 +13,7 @@ namespace XRest
             CancellationToken token
         )
         {
-            new Commander(provider).Run<xrest.Commands.Group>(args, token);
+            new Commander(provider).Run<Commands.Group>(args, token);
         }
 
         internal static int Main(string[] args) => new Entrypoint()

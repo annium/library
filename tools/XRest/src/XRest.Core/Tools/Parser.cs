@@ -1,81 +1,79 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
-using Annium.Extensions.Primitives;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
+using XRest.Core.Helpers;
+using XRest.Core.Models;
 
-namespace xrest.Tools
+namespace XRest.Core.Tools
 {
     public class Parser
     {
-        public ApiData Parse(IReadOnlyCollection<Type> controllerTypes)
+        public ApiModel Parse(IReadOnlyCollection<Type> controllerTypes)
         {
-            var raw = controllerTypes.Select(ParseController).ToArray();
-            var allTypes = raw.SelectMany(x => x.types).ToArray();
+            var controllerModels = controllerTypes.Select(ParseController).ToArray();
 
-            var data = new ApiData();
-            data.SharedExports = allTypes.Where((x, i) => Array.LastIndexOf(allTypes, x) != i).Distinct().ToArray();
-            data.Services = raw.Select(x => BuildControllerData(x.name, x.methods, x.types, data.SharedExports)).ToArray();
-
-            return data;
+            return new ApiModel(controllerModels);
         }
 
-        private ControllerData BuildControllerData(
-            string name,
-            IReadOnlyCollection<MethodInfo> methods,
-            IReadOnlyCollection<Type> types,
-            IReadOnlyCollection<Type> sharedTypes
+        public ControllerModel ParseController(
+            Type controllerType
         )
         {
-            var data = new ControllerData
-            {
-                Name = name,
-                Methods = methods,
-            };
-            data.Exports = types.Except(sharedTypes).ToArray();
-            data.Imports = types.Except(data.Exports).ToArray();
+            var controllerName = controllerType.Name.Replace("Controller", string.Empty);
+            var controllerAuth = ParseAuth(controllerType.GetCustomAttributes());
+            var controllerRoute = controllerType.GetCustomAttribute<RouteAttribute>()?.Template;
 
-            return data;
+            var actions = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance).Where(ParseHelper.IsAction).ToArray();
+            var actionModels = actions.Select(x => ParseAction(controllerName, controllerAuth, controllerRoute, x)).ToArray();
+
+            return new ControllerModel(controllerName, actionModels);
         }
 
-        private (string name, IReadOnlyCollection<MethodInfo> methods, IReadOnlyCollection<Type> types) ParseController(Type controllerType)
+        private ActionModel ParseAction(
+            string controllerName,
+            AuthModel? controllerAuth,
+            string? controllerRoute,
+            MethodInfo action
+        )
         {
-            var actionMethods = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .Where(Helper.IsAction)
+            var actionName = action.Name;
+            var methodAttribute = action.GetCustomAttributes<HttpMethodAttribute>().FirstOrDefault();
+            var method = new HttpMethod(methodAttribute?.HttpMethods.FirstOrDefault() ?? HttpMethod.Get.Method);
+            var route = RouteHelper.BuildRoute(controllerName, controllerRoute, action.Name, methodAttribute?.Template);
+
+            var routeParameters = RouteHelper.ParseRouteParameters(route);
+
+            var parameters = action.GetParameters()
+                .Where(x => x.GetCustomAttribute<FromBodyAttribute>() is null)
+                .Select(x => new ParameterModel(
+                    x.Name!,
+                    routeParameters.Contains(x.Name)
+                        ? ParameterLocationEnum.Path
+                        : ParameterLocationEnum.Query,
+                    x.ParameterType
+                ))
+                .OrderBy(x => x.Name)
                 .ToArray();
 
-            var types = actionMethods.SelectMany(CollectTypes).Distinct().ToArray();
+            var bodyType = action.GetParameters()
+                .SingleOrDefault(x => x.GetCustomAttribute<FromBodyAttribute>() != null)?
+                .ParameterType;
 
-            return (controllerType.Name.CamelCase(), actionMethods, types);
+            var auth = controllerAuth ?? ParseAuth(action.GetCustomAttributes()) ?? new AuthModel(false);
+
+            return new ActionModel(actionName, method, route, parameters, bodyType, auth);
         }
 
-        private IEnumerable<Type> CollectTypes(MethodInfo action)
+        private AuthModel? ParseAuth(IEnumerable<Attribute> attributes)
         {
-            return action.GetParameters().SelectMany(x => CollectTypes(x.ParameterType)).Concat(CollectTypes(action.ReturnType));
-        }
+            var attribute = attributes.FirstOrDefault(x => x.GetType().Name == nameof(AuthorizeAttribute));
 
-        private IEnumerable<Type> CollectTypes(Type type)
-        {
-            // unmapped
-            if (type == typeof(void) || type == typeof(object))
-                return Enumerable.Empty<Type>();
-
-            if (TypeMap.BaseTypes.ContainsKey(type))
-                return Enumerable.Empty<Type>();
-
-            // tasks
-            if (type == typeof(Task))
-                return Enumerable.Empty<Type>();
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Task<>))
-                return CollectTypes(type.GenericTypeArguments[0]);
-
-            // dictionary & array
-            if (Helper.IsDictionary(type) || Helper.IsArray(type))
-                return Enumerable.Empty<Type>();
-
-            return type.GetProperties().Where(x => x.CanWrite && x.CanRead).SelectMany(x => CollectTypes(x.PropertyType)).Append(type);
+            return attribute is null ? null : new AuthModel(true);
         }
     }
 }
