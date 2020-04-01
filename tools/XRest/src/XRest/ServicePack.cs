@@ -18,7 +18,7 @@ namespace XRest
             RegisterCommands(services);
 
             services.AddArguments();
-            services.AddLogging(route => route.UseConsole(time: true, color: true));
+            services.AddLogging(route => route.UseConsole(time: true));
         }
 
         private void RegisterCommands(IServiceCollection services)
