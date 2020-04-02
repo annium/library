@@ -32,5 +32,7 @@ namespace XRest.Core.Models
             Response = response;
             Auth = auth;
         }
+
+        public override string ToString() => $"{Method} {Path}";
     }
 }

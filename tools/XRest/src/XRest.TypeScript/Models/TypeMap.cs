@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading.Tasks;
 using NodaTime;
 
 namespace XRest.TypeScript.Models
@@ -28,5 +29,11 @@ namespace XRest.TypeScript.Models
             { typeof(Instant), BaseType.Date },
             { typeof(Guid), BaseType.String },
         }.ToImmutableDictionary();
+
+        public static readonly ImmutableHashSet<Type> SkippedTypes = ImmutableHashSet.Create(
+            typeof(Task),
+            typeof(Task<>),
+            typeof(Nullable<>)
+        );
     }
 }

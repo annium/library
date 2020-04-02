@@ -2,7 +2,9 @@ using System.IO;
 using System.Threading;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
+using Annium.Serialization.Json;
 using XRest.Core.Components;
+using XRest.Core.Infrastructure.JsonConverters;
 using XRest.TypeScript.Components;
 
 namespace XRest.TypeScript.Commands
@@ -46,7 +48,16 @@ namespace XRest.TypeScript.Commands
             var view = _processor.Process(api);
 
             _logger.Info($"Write api view to {cfg.Output}");
-            _writer.Write(cfg.Output, view);
+            if (!Directory.Exists(Path.GetDirectoryName(cfg.Output)))
+                Directory.CreateDirectory(Path.GetDirectoryName(cfg.Output));
+            var serializer = StringSerializer.Configure(opts =>
+            {
+                opts.Converters.Add(new TypeJsonConverter());
+                opts.WriteIndented = true;
+            });
+            File.WriteAllText(cfg.Output, serializer.Serialize(view));
+
+            // _writer.Write(cfg.Output, view);
         }
     }
 

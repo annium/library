@@ -18,4 +18,7 @@
         <EmbeddedResource Include="Templates/**" />
         <EmbeddedResource Remove="Templates/.*" />
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Annium.Serialization.Json" Version="0.1.0" />
+    </ItemGroup>
 </Project>
