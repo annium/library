@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace XRest.TypeScript.Helpers
 {
@@ -20,5 +21,10 @@ namespace XRest.TypeScript.Helpers
 
         public static bool IsArray(Type type) => type.GetInterfaces()
             .Any(x => x.IsGenericType ? x.GetGenericTypeDefinition() == typeof(IEnumerable<>) : x == typeof(IEnumerable));
+
+        public static IReadOnlyCollection<PropertyInfo> GetProperties(Type type) => type
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
+            .Where(x => x.CanRead)
+            .ToArray();
     }
 }

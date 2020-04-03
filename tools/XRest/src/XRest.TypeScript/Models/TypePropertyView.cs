@@ -3,12 +3,12 @@ namespace XRest.TypeScript.Models
     internal class TypePropertyView
     {
         public string Name { get; }
-        public TypeReferenceView Type { get; }
+        public TypeView Type { get; }
         public bool IsOptional { get; }
 
         public TypePropertyView(
             string name,
-            TypeReferenceView type,
+            TypeView type,
             bool isOptional
         )
         {
@@ -16,5 +16,7 @@ namespace XRest.TypeScript.Models
             Type = type;
             IsOptional = isOptional;
         }
+
+        public override string ToString() => $"{Type} {Name}";
     }
 }

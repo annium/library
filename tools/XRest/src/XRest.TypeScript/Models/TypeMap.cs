@@ -6,9 +6,9 @@ using NodaTime;
 
 namespace XRest.TypeScript.Models
 {
-    public static class TypeMap
+    internal static class TypeMap
     {
-        public static readonly ImmutableDictionary<Type, BaseType> BaseTypes = new Dictionary<Type, BaseType>
+        public static readonly ImmutableDictionary<Type, TypeView> BaseTypes = new Dictionary<Type, TypeView>
         {
             { typeof(bool), BaseType.Boolean },
             { typeof(byte), BaseType.Number },

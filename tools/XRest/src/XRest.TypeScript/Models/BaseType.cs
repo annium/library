@@ -1,10 +1,10 @@
 namespace XRest.TypeScript.Models
 {
-    public enum BaseType
+    internal static class BaseType
     {
-        Boolean,
-        String,
-        Number,
-        Date,
+        public static TypeView Boolean { get; } = new TypeView("boolean");
+        public static TypeView String { get; } = new TypeView("string");
+        public static TypeView Number { get; } = new TypeView("number");
+        public static TypeView Date { get; } = new TypeView("Date");
     }
 }
