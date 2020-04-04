@@ -12,7 +12,7 @@ namespace XRest.Core.Components.Implementations
         public string Write<T>(string template, T data)
             where T : class
         {
-            var resource = ResourceLoader.Load(template).Single();
+            var resource = ResourceLoader.Load(template, System.Reflection.Assembly.GetCallingAssembly()).Single();
             var scriptObject = new ScriptObject();
             scriptObject.Import(data);
             scriptObject.Import(typeof(StringExtensions));
