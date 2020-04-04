@@ -1,0 +1,44 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using NodaTime;
+using XRest.TypeScript.Helpers;
+
+namespace XRest.TypeScript.Models
+{
+    internal static class Types
+    {
+        public static readonly TypeMap BuiltIn = new TypeMap()
+            .Register(typeof(void), BaseType.Void)
+            .Register(typeof(object), BaseType.Object)
+            .Register(typeof(bool), BaseType.Boolean)
+            .Register(typeof(byte), BaseType.Number)
+            .Register(typeof(sbyte), BaseType.Number)
+            .Register(typeof(char), BaseType.String)
+            .Register(typeof(decimal), BaseType.Number)
+            .Register(typeof(double), BaseType.Number)
+            .Register(typeof(float), BaseType.Number)
+            .Register(typeof(int), BaseType.Number)
+            .Register(typeof(uint), BaseType.Number)
+            .Register(typeof(long), BaseType.Number)
+            .Register(typeof(ulong), BaseType.Number)
+            .Register(typeof(short), BaseType.Number)
+            .Register(typeof(ushort), BaseType.Number)
+            .Register(typeof(string), BaseType.String)
+            .Register(typeof(DateTimeOffset), BaseType.Date)
+            .Register(typeof(DateTime), BaseType.Date)
+            .Register(typeof(Instant), BaseType.Date)
+            .Register(typeof(Guid), BaseType.String)
+            .Register(typeof(IDictionary), BaseType.Object)
+            .Register(typeof(IDictionary<,>), BaseType.Record)
+            .Register(typeof(IReadOnlyDictionary<,>), BaseType.Record)
+            .Register(typeof(IEnumerable<>), BaseType.Array)
+            .Register(typeof(Array), BaseType.Array);
+
+        public static readonly TypeSet Skipped = new TypeSet()
+            .Register(typeof(Task))
+            .Register(typeof(Task<>))
+            .Register(typeof(Nullable<>));
+    }
+}

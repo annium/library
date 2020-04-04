@@ -13,9 +13,10 @@ namespace XRest.TypeScript.Components.Implementations
         public ApiView Process(ApiModel api)
         {
             var raw = api.Controllers.Select(ParseController).ToArray();
+            var rawTypes = raw.SelectMany(x => x.types).Distinct().OrderBy(x => x.Name).ToArray();
 
             var typeRegistry = new TypeRegistry();
-            var allTypes = typeRegistry.Register(raw.SelectMany(x => x.types).Distinct().ToArray());
+            var allTypes = typeRegistry.Register(rawTypes).Distinct().OrderBy(x => x.Name).ToArray();
             var controllers = raw.Select(x => (x.controller, types: x.types.Select(typeRegistry.Resolve).ToArray())).ToArray();
 
             var sharedExports = CollectSharedTypes(allTypes, controllers.Select(x => x.types).ToArray());
@@ -95,19 +96,20 @@ namespace XRest.TypeScript.Components.Implementations
             Predicate<TypeView> register
         )
         {
+            // skip built-in types
+            if (Types.BuiltIn.Contains(type))
+                return;
+
+            // skip generic parameters
+            if (type.IsGenericTypeParameter)
+                return;
+
             // if not registered - already present in shared types
             if (!register(type))
                 return;
 
-            // if (!(type.BaseType is null))
-            //     register(type.BaseType);
-            //
-            // foreach (var @interface in type.Interfaces)
-            //     register(@interface);
-
             foreach (var property in type.Properties)
-                if (!TypeMap.BaseTypes.ContainsValue(property.Type) && !type.GenericParameters.Contains(property.Type))
-                    register(property.Type);
+                CollectSharedTypes(property.Type, register);
         }
 
         private (ControllerModel controller, IReadOnlyCollection<Type> types) ParseController(ControllerModel controller)
@@ -134,45 +136,25 @@ namespace XRest.TypeScript.Components.Implementations
             if (type is null)
                 return;
 
-            if (CollectDefinitionTypes(type, registerType))
-            {
-                // CollectInheritanceTypes(type, registerType);
-                CollectPropertyTypes(type, registerType);
-            }
+            var definition = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+            var isCollected = !Types.BuiltIn.Contains(definition) && !definition.IsSkipped() && registerType(definition);
+
+            if (type.IsGenericType)
+                foreach (var typeArgument in type.GenericTypeArguments)
+                    CollectTypes(typeArgument, registerType);
+
+            if (isCollected)
+                CollectPropertiesTypes(type, registerType);
         }
 
-        private bool CollectDefinitionTypes(Type type, Predicate<Type> registerType)
+        private void CollectPropertiesTypes(Type type, Predicate<Type> registerType)
         {
-            // if not generic type - return true, if type is not skipped and registered
-            if (!type.IsGenericType)
-                return !IsTypeSkipped(type) && registerType(type);
-
-            foreach (var typeArgument in type.GenericTypeArguments)
-                CollectTypes(typeArgument, registerType);
-
-            var definition = type.GetGenericTypeDefinition();
-
-            return !IsTypeSkipped(definition) && registerType(definition);
-        }
-
-        private void CollectPropertyTypes(Type type, Predicate<Type> registerType)
-        {
-            var propertyTypes = ProcessorHelper.GetProperties(type)
+            var propertyTypes = type.GetAllPublicProperties()
                 .Select(x => x.PropertyType)
                 .ToArray();
 
             foreach (var propertyType in propertyTypes)
                 CollectTypes(propertyType, registerType);
-        }
-
-        private bool IsTypeSkipped(Type type)
-        {
-            return type == typeof(void) ||
-                type == typeof(object) ||
-                TypeMap.BaseTypes.Keys.Any(x => x.FullName == type.FullName) ||
-                TypeMap.SkippedTypes.Any(x => x.FullName == type.FullName) ||
-                ProcessorHelper.IsDictionary(type) ||
-                ProcessorHelper.IsArray(type);
         }
     }
 }

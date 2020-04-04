@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text.Encodings.Web;
 using System.Threading;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
@@ -52,8 +53,10 @@ namespace XRest.TypeScript.Commands
                 Directory.CreateDirectory(Path.GetDirectoryName(cfg.Output));
             var serializer = StringSerializer.Configure(opts =>
             {
-                opts.Converters.Add(new TypeJsonConverter());
+                opts.Converters.Add(new Infrastructure.JsonConverters.HttpMethodJsonConverter());
+                opts.Converters.Add(new Infrastructure.JsonConverters.TypeViewJsonConverter());
                 opts.WriteIndented = true;
+                opts.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
             });
             File.WriteAllText(cfg.Output, serializer.Serialize(view));
 
