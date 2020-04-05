@@ -5,6 +5,8 @@ namespace XRest.TypeScript.Views.Types
 {
     internal class EnumView : DefinedTypeView
     {
+        public override TypeViewEnum Type { get; } = TypeViewEnum.Enum;
+
         public IReadOnlyDictionary<string, int> Values { get; }
 
         public EnumView(
