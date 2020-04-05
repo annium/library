@@ -1,4 +1,4 @@
-namespace XRest.TypeScript.Models
+namespace XRest.TypeScript.Views
 {
     internal static class BaseType
     {

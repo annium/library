@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using XRest.TypeScript.Models;
+using XRest.TypeScript.Views;
 
 namespace XRest.TypeScript.Helpers
 {

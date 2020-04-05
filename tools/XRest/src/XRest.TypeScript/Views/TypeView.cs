@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Annium.Data.Models;
 
-namespace XRest.TypeScript.Models
+namespace XRest.TypeScript.Views
 {
     internal class TypeView : Equatable<TypeView>
     {

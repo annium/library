@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace XRest.TypeScript.Models
+namespace XRest.TypeScript.Views
 {
     internal class ApiView
     {

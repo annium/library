@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using NodaTime;
 using XRest.TypeScript.Helpers;
 
-namespace XRest.TypeScript.Models
+namespace XRest.TypeScript.Views
 {
     internal static class Types
     {

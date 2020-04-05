@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using XRest.TypeScript.Models;
+using XRest.TypeScript.Views;
 
 namespace XRest.TypeScript.Helpers
 {

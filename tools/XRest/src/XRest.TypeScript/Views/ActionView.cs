@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 
-namespace XRest.TypeScript.Models
+namespace XRest.TypeScript.Views
 {
     internal class ActionView
     {

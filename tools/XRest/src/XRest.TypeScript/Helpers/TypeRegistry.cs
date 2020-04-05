@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Annium.Core.Reflection;
-using XRest.TypeScript.Models;
+using XRest.TypeScript.Views;
 
 namespace XRest.TypeScript.Helpers
 {

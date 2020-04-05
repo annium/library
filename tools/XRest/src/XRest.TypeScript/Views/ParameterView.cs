@@ -1,6 +1,6 @@
 using XRest.Core.Models;
 
-namespace XRest.TypeScript.Models
+namespace XRest.TypeScript.Views
 {
     internal class ParameterView
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using Annium.Extensions.Primitives;
 using XRest.Core.Models;
 using XRest.TypeScript.Helpers;
-using XRest.TypeScript.Models;
+using XRest.TypeScript.Views;
 
 namespace XRest.TypeScript.Components.Implementations
 {

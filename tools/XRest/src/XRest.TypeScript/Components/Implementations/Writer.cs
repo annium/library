@@ -1,7 +1,7 @@
 using System.IO;
 using Annium.Logging.Abstractions;
 using XRest.Core.Components;
-using XRest.TypeScript.Models;
+using XRest.TypeScript.Views;
 
 namespace XRest.TypeScript.Components.Implementations
 {
