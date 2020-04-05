@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace XRest.TypeScript.Views.Types
 {
@@ -64,7 +65,24 @@ namespace XRest.TypeScript.Views.Types
             if (arguments.Length != GenericParameters.Count)
                 throw new InvalidOperationException($"Expected {GenericParameters.Count} generic arguments");
 
-            return new ClassView(Name, arguments);
+            var view = new ClassView(Name, arguments);
+            var properties = Properties
+                .Select(property =>
+                {
+                    if (!(property.Type is GenericParameterView))
+                        return property;
+
+                    var genericParameterPosition = GenericParameters
+                        .Select((element, index) => (element, index))
+                        .First(x => x.element == property.Type)
+                        .index;
+
+                    return new TypePropertyView(property.Name, arguments[genericParameterPosition], property.IsOptional);
+                })
+                .ToArray();
+            view.Configure(properties);
+
+            return view;
         }
 
         public override string ToString()
