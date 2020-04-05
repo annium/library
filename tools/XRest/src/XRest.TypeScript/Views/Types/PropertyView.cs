@@ -1,3 +1,5 @@
+using Annium.Extensions.Primitives;
+
 namespace XRest.TypeScript.Views.Types
 {
     internal class TypePropertyView
@@ -12,7 +14,7 @@ namespace XRest.TypeScript.Views.Types
             bool isOptional
         )
         {
-            Name = name;
+            Name = name.CamelCase();
             Type = type;
             IsOptional = isOptional;
         }
