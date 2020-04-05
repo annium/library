@@ -6,9 +6,9 @@ export interface {{ type }} {
 }
 {{~ end ~}}
 {{~ for type in enums ~}}
-export interface {{ type }} {
+export enum {{ type }} {
 {{~ for value in type.values ~}}
-    {{ value.key }}: {{ value.value }}
+    {{ value.key }}= {{ value.value }},
 {{~ end ~}}
 }
 {{~ end ~}}
