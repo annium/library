@@ -1,5 +1,6 @@
 // imports
 import { HttpResponse } from '@annium/client-http'
+
 import {
 {{~ if has_private_actions ~}}
     privateApi,
@@ -8,6 +9,7 @@ import {
     publicApi,
 {{~ end ~}}
 } from '../api'
+
 import {
 {{~ for type in imports ~}}
     {{ type.name }},
