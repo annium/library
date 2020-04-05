@@ -1,6 +1,3 @@
-{{~ for type in interfaces ~}}
-{{ include 'Templates.Interface' type }}
-{{~ end ~}}
-{{~ for type in enums ~}}
-{{ include 'Templates.Enum' type }}
+{{~ for type in exports ~}}
+{{ include 'Templates.Type' type }}
 {{~ end ~}}
