@@ -1,14 +1,6 @@
-{{~ for type in classes ~}}
-export interface {{ type }} {
-    {{~ for property in type.properties ~}}
-    {{ property.name }}: {{ property.type }}{{ if property.is_optional }} | null{{ end }}
-    {{~ end ~}}
-}
+{{~ for type in interfaces ~}}
+{{ include 'Templates.Interface' type }}
 {{~ end ~}}
 {{~ for type in enums ~}}
-export enum {{ type }} {
-{{~ for value in type.values ~}}
-    {{ value.key }}= {{ value.value }},
-{{~ end ~}}
-}
+{{ include 'Templates.Enum' type }}
 {{~ end ~}}

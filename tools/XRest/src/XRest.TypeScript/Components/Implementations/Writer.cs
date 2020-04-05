@@ -29,7 +29,7 @@ namespace XRest.TypeScript.Components.Implementations
 
             var data = new
             {
-                Classes = api.SharedExports.OfType<ClassView>(),
+                Interfaces = api.SharedExports.OfType<ClassView>(),
                 Enums = api.SharedExports.OfType<EnumView>(),
             };
             Write(output, "shared.ts", "Templates.SharedExports", data);

@@ -1,0 +1,5 @@
+export interface {{ type }} {
+    {{~ for property in type.properties ~}}
+    {{ property.name }}: {{ property.type }}{{ if property.is_optional }} | null{{ end }}
+    {{~ end ~}}
+}
