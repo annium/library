@@ -120,6 +120,10 @@ namespace XRest.TypeScript.Views.Types
 
             var arguments = IsGenericTypeDefinition ? (IReadOnlyCollection<TypeView>) GenericParameters : GenericArguments;
 
+            // special handling for nullable
+            if (Name == BaseType.Nullable.Name)
+                return arguments.Single().ToString()!;
+
             // special handling for arrays
             if (Name == BaseType.Array.Name)
                 return $"{arguments.Single()}[]";

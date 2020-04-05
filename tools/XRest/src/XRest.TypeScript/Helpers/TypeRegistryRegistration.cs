@@ -77,7 +77,7 @@ namespace XRest.TypeScript.Helpers
             else
                 view = Resolve(property.PropertyType);
 
-            return new TypePropertyView(property.Name, view, false);
+            return new TypePropertyView(property.Name, view, view.Name == BaseType.Nullable.Name);
         }
     }
 }

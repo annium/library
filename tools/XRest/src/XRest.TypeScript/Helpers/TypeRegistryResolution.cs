@@ -60,6 +60,14 @@ namespace XRest.TypeScript.Helpers
                 return BaseType.Array.MakeGenericType(Resolve(elementType));
             }
 
+            // Nullable<>
+            if (definition == typeof(Nullable<>))
+            {
+                var elementType = Nullable.GetUnderlyingType(type)!;
+
+                return BaseType.Nullable.MakeGenericType(Resolve(elementType));
+            }
+
             var view = (ClassView) Resolve(definition);
             var arguments = type.GetGenericArguments().Select(Resolve).ToArray();
 
