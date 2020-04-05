@@ -1,4 +1,5 @@
 using XRest.Core.Models;
+using XRest.TypeScript.Views.Types;
 
 namespace XRest.TypeScript.Views
 {

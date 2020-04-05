@@ -5,6 +5,7 @@ using Annium.Extensions.Primitives;
 using XRest.Core.Models;
 using XRest.TypeScript.Helpers;
 using XRest.TypeScript.Views;
+using XRest.TypeScript.Views.Types;
 
 namespace XRest.TypeScript.Components.Implementations
 {
@@ -19,7 +20,7 @@ namespace XRest.TypeScript.Components.Implementations
             var allTypes = typeRegistry.Register(rawTypes).Distinct().OrderBy(x => x.Name).ToArray();
             var controllers = raw.Select(x => (x.controller, types: x.types.Select(typeRegistry.Resolve).ToArray())).ToArray();
 
-            var sharedExports = CollectSharedTypes(allTypes, controllers.Select(x => x.types).ToArray());
+            var sharedExports = CollectSharedTypes(allTypes, controllers.Select(x => x.types).ToArray()).OrderBy(x => x.Name).ToArray();
             var controllerViews = controllers.Select(x => BuildControllerView(typeRegistry, x.controller, sharedExports, x.types)).ToArray();
 
             return new ApiView(sharedExports, controllerViews);
@@ -76,8 +77,8 @@ namespace XRest.TypeScript.Components.Implementations
         }
 
         private IReadOnlyCollection<TypeView> CollectSharedTypes(
-            IReadOnlyCollection<TypeView> allTypes,
-            IReadOnlyCollection<TypeView[]> types
+            IReadOnlyCollection<DefinedTypeView> allTypes,
+            IReadOnlyCollection<DefinedTypeView[]> types
         )
         {
             var sharedTypes = new HashSet<TypeView>();
@@ -92,69 +93,37 @@ namespace XRest.TypeScript.Components.Implementations
         }
 
         private void CollectSharedTypes(
-            TypeView type,
-            Predicate<TypeView> register
+            DefinedTypeView type,
+            Predicate<DefinedTypeView> register
         )
         {
             // skip built-in types
-            if (Types.BuiltIn.Contains(type))
-                return;
-
-            // skip generic parameters
-            if (type.IsGenericTypeParameter)
+            if (KnownTypes.BuiltIn.Contains(type))
                 return;
 
             // if not registered - already present in shared types
             if (!register(type))
                 return;
 
-            foreach (var property in type.Properties)
-                CollectSharedTypes(property.Type, register);
+            if (type is ClassView classType)
+                foreach (var propertyType in classType.Properties.Select(x => x.Type).OfType<DefinedTypeView>())
+                    CollectSharedTypes(propertyType, register);
         }
 
         private (ControllerModel controller, IReadOnlyCollection<Type> types) ParseController(ControllerModel controller)
         {
-            var knownTypes = new HashSet<Type>();
+            var collector = new TypeCollector();
 
             foreach (var action in controller.Actions)
-                CollectTypes(action, knownTypes.Add);
+            {
+                foreach (var parameter in action.Parameters)
+                    collector.CollectTypes(parameter.Type);
 
-            return (controller, knownTypes);
-        }
+                collector.CollectTypes(action.Body);
+                collector.CollectTypes(action.Response);
+            }
 
-        private void CollectTypes(ActionModel action, Predicate<Type> registerType)
-        {
-            foreach (var parameter in action.Parameters)
-                CollectTypes(parameter.Type, registerType);
-
-            CollectTypes(action.Body, registerType);
-            CollectTypes(action.Response, registerType);
-        }
-
-        private void CollectTypes(Type? type, Predicate<Type> registerType)
-        {
-            if (type is null)
-                return;
-
-            var definition = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
-            var isCollected = !Types.BuiltIn.Contains(definition) && !definition.IsSkipped() && registerType(definition);
-
-            if (type.IsGenericType)
-                foreach (var typeArgument in type.GenericTypeArguments)
-                    CollectTypes(typeArgument, registerType);
-
-            if (isCollected)
-                CollectPropertiesTypes(type, registerType);
-        }
-
-        private void CollectPropertiesTypes(Type type, Predicate<Type> registerType)
-        {
-            var propertyTypes = type.GetAllPublicProperties()
-                .Select(x => x.PropertyType)
-                .ToArray();
-
-            foreach (var propertyType in propertyTypes)
-                CollectTypes(propertyType, registerType);
+            return (controller, collector.CollectedTypes);
         }
     }
 }

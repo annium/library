@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using XRest.TypeScript.Views;
+using XRest.TypeScript.Views.Types;
 
 namespace XRest.TypeScript.Helpers
 {
     internal class TypeMap
     {
-        private readonly IDictionary<Type, TypeView> _map = new Dictionary<Type, TypeView>();
+        private readonly IDictionary<Type, DefinedTypeView> _map = new Dictionary<Type, DefinedTypeView>();
 
-        public TypeMap Register(Type type, TypeView view)
+        public TypeMap Register(Type type, DefinedTypeView view)
         {
             _map[type] = view;
 
@@ -18,11 +18,11 @@ namespace XRest.TypeScript.Helpers
 
         public bool Contains(Type type) => _map.Keys.Any(Matcher(type));
 
-        public bool Contains(TypeView view) => _map.Values.Contains(view);
+        public bool Contains(DefinedTypeView view) => _map.Values.Contains(view);
 
-        public TypeView Get(Type type) => _map[_map.Keys.Single(Matcher(type))];
+        public DefinedTypeView Get(Type type) => _map[_map.Keys.Single(Matcher(type))];
 
-        public bool TryGet(Type type, out TypeView? view)
+        public bool TryGet(Type type, out DefinedTypeView? view)
         {
             var key = _map.Keys.SingleOrDefault(Matcher(type));
             view = key is null ? null : _map[key];

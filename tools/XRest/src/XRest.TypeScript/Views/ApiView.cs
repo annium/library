@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using XRest.TypeScript.Views.Types;
 
 namespace XRest.TypeScript.Views
 {

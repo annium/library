@@ -1,4 +1,4 @@
-namespace XRest.TypeScript.Views
+namespace XRest.TypeScript.Views.Types
 {
     internal class TypePropertyView
     {

@@ -1,7 +1,9 @@
 using System.IO;
+using System.Linq;
 using Annium.Logging.Abstractions;
 using XRest.Core.Components;
 using XRest.TypeScript.Views;
+using XRest.TypeScript.Views.Types;
 
 namespace XRest.TypeScript.Components.Implementations
 {
@@ -25,7 +27,12 @@ namespace XRest.TypeScript.Components.Implementations
                 Directory.Delete(output, true);
             Directory.CreateDirectory(output);
 
-            Write(output, "shared.ts", "Templates.SharedExports", new { Exports = api.SharedExports });
+            var data = new
+            {
+                Classes = api.SharedExports.OfType<ClassView>(),
+                Enums = api.SharedExports.OfType<EnumView>(),
+            };
+            Write(output, "shared.ts", "Templates.SharedExports", data);
         }
 
 

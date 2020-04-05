@@ -1,44 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Annium.Core.Reflection;
-using XRest.TypeScript.Views;
+using XRest.TypeScript.Views.Types;
 
 namespace XRest.TypeScript.Helpers
 {
-    internal class TypeRegistry
+    internal partial class TypeRegistry
     {
-        private readonly TypeMap _views = new TypeMap();
-
-        public IReadOnlyCollection<TypeView> Register(IReadOnlyCollection<Type> types) =>
-            types.Select(Register).ToArray();
-
-        public TypeView Register(Type type)
-        {
-            if (TryResolve(type, out var view))
-                return view!;
-
-            view = type.ContainsGenericParameters
-                ? new TypeView(
-                    $"{type.Name[..type.Name.IndexOf('`')]}T{type.GetTypeInfo().GenericTypeParameters.Length}",
-                    type.GetTypeInfo().GenericTypeParameters.Select(x => new TypeView(x.Name, true)).ToArray()
-                )
-                : new TypeView(type.Name, false);
-            _views.Register(type, view);
-
-            var properties = type.GetAllPublicProperties()
-                .Select(ProcessProperty)
-                .ToArray();
-
-            view.Configure(properties);
-
-            return view;
-        }
-
-        public TypeView Resolve(Type type)
+        public DefinedTypeView Resolve(Type type)
         {
             if (type.IsGenericType)
                 return ResolveGenericType(type);
@@ -54,7 +26,7 @@ namespace XRest.TypeScript.Helpers
             return ResolveInternal(type);
         }
 
-        private TypeView ResolveGenericType(Type type)
+        private DefinedTypeView ResolveGenericType(Type type)
         {
             var definition = type.GetGenericTypeDefinition();
 
@@ -88,26 +60,17 @@ namespace XRest.TypeScript.Helpers
                 return BaseType.Array.MakeGenericType(Resolve(elementType));
             }
 
-            var view = Resolve(definition);
+            var view = (ClassView) Resolve(definition);
             var arguments = type.GetGenericArguments().Select(Resolve).ToArray();
 
             return view.MakeGenericType(arguments);
         }
 
-        private TypePropertyView ProcessProperty(PropertyInfo property)
-        {
-            if (!TryResolve(property.PropertyType, out var view))
-                view = property.PropertyType.IsGenericParameter
-                    ? new TypeView(property.PropertyType.Name, true)
-                    : Register(property.PropertyType);
-
-            return new TypePropertyView(property.Name, view!, false);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool TryResolve(Type type, out DefinedTypeView? view) => _views.TryGet(type, out view) || KnownTypes.BuiltIn.TryGet(type, out view);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool TryResolve(Type type, out TypeView? view) => _views.TryGet(type, out view) || Types.BuiltIn.TryGet(type, out view);
-
-        private TypeView ResolveInternal(Type type)
+        private DefinedTypeView ResolveInternal(Type type)
         {
             if (TryResolve(type, out var view))
                 return view!;

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
+using XRest.TypeScript.Views.Types;
 
 namespace XRest.TypeScript.Views
 {

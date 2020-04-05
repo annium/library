@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using XRest.TypeScript.Views;
+using XRest.TypeScript.Views.Types;
 
 namespace XRest.TypeScript.Helpers
 {
@@ -14,7 +15,7 @@ namespace XRest.TypeScript.Helpers
             .Where(x => x.CanRead)
             .ToArray();
 
-        public static bool IsSkipped(this Type type) => Types.Skipped.Contains(type) || type.IsDictionary() || type.IsArray();
+        public static bool IsSkipped(this Type type) => KnownTypes.Skipped.Contains(type) || type.IsDictionary() || type.IsArray();
 
         public static bool IsDictionary(this Type type) => type.GetInterfaces().Any(x =>
         {

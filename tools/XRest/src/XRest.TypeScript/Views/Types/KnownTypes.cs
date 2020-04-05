@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using NodaTime;
 using XRest.TypeScript.Helpers;
 
-namespace XRest.TypeScript.Views
+namespace XRest.TypeScript.Views.Types
 {
-    internal static class Types
+    internal static class KnownTypes
     {
         public static readonly TypeMap BuiltIn = new TypeMap()
             .Register(typeof(void), BaseType.Void)
