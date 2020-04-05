@@ -1,7 +1,5 @@
-{{
-    if type.type == 'Class'
-        include 'Templates.Interface' type
-    else
-        include 'Templates.Enum' type
-    end
-}}
+export type {{ type }} = {
+    {{~ for property in type.properties ~}}
+    {{ property.name }}: {{ property.type }}{{ if property.is_optional }} | null{{ end }}
+    {{~ end ~}}
+}

@@ -1,10 +1,9 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Annium.Extensions.Primitives;
 using Annium.Logging.Abstractions;
 using XRest.Core.Components;
 using XRest.TypeScript.Views;
-using XRest.TypeScript.Views.Types;
 
 namespace XRest.TypeScript.Components.Implementations
 {
@@ -28,17 +27,10 @@ namespace XRest.TypeScript.Components.Implementations
                 Directory.Delete(output, true);
             Directory.CreateDirectory(output);
 
-            RenderSharedExports(output, api.SharedExports);
-        }
+            Write(output, "shared.ts", "Templates.SharedExports", new { Exports = api.SharedExports });
 
-        private void RenderSharedExports(string output, IReadOnlyCollection<TypeView> types)
-        {
-            var data = new
-            {
-                Interfaces = types.OfType<ClassView>(),
-                Enums = types.OfType<EnumView>(),
-            };
-            Write(output, "shared.ts", "Templates.SharedExports", data);
+            foreach (var controllerView in api.Controllers.Where(x => x.Actions.Count > 0))
+                Write(output, $"{controllerView.Name.CamelCase()}Service.ts", "Templates.Service", controllerView);
         }
 
         private void Write<T>(string output, string file, string template, T data)

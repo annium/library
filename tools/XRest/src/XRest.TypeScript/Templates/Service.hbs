@@ -1,0 +1,38 @@
+// imports
+import { HttpResponse } from '@annium/client-http'
+import {
+{{~ if has_private_actions ~}}
+    privateApi,
+{{~ end ~}}
+{{~ if has_public_actions ~}}
+    publicApi,
+{{~ end ~}}
+} from '../api'
+import {
+{{~ for type in imports ~}}
+    {{ type.name }},
+{{~ end ~}}
+} from './shared'
+
+// exports
+{{~ for type in exports ~}}
+{{ include 'Templates.BaseType' type }}
+{{~ end ~}}
+
+// service
+export const {{ name }}Service = {
+    {{~ for action in actions ~}}
+    {{ action.name }}: (
+        {{~ for parameter in action.parameters ~}}
+        {{ parameter.name }}: {{ parameter.type}},
+        {{~ end ~}}
+        {{~ if action.has_body ~}}
+        body: {{ action.body}},
+        {{~ end ~}}
+    ): Promise<{{action.response}}> => {{ if action.auth.is_enabled }}privateApi{{ else }}publicApi{{ end }}
+        .{{ action.method }}(
+            {{-}}'{{ action.path }}'{{ for parameter in action.route_parameters }}.replace('{ {{- parameter.name -}} }', {{ parameter.name}}){{~ end ~}},
+            {{-}} { {{~ for parameter in action.query_parameters }} {{ parameter.name }} {{~ if !for.last }}, {{~ end }} {{ end ~}} }
+            {{-}} {{~ if action.has_body ~}}, body{{~ end ~}}),
+    {{~ end ~}}
+}

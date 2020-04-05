@@ -8,23 +8,12 @@ namespace XRest.TypeScript.Views.Types
     {
         public override TypeViewEnum Type { get; } = TypeViewEnum.Class;
         public bool IsGenericType { get; }
-        public bool IsGenericTypeDefinition { get; }
+        public bool IsGenericTypeDefinition { get; private set; }
         public IReadOnlyCollection<DefinedTypeView> GenericArguments { get; } = Array.Empty<DefinedTypeView>();
         public IReadOnlyCollection<GenericParameterView> GenericParameters { get; } = Array.Empty<GenericParameterView>();
         public IReadOnlyCollection<TypePropertyView> Properties { get; private set; } = Array.Empty<TypePropertyView>();
+        private IReadOnlyCollection<TypePropertyView> _definitionProperties = Array.Empty<TypePropertyView>();
         private bool _isConfigured;
-
-        public ClassView(
-            string name,
-            IReadOnlyCollection<DefinedTypeView> genericArguments
-        ) : this(name)
-        {
-            if (genericArguments.Count == 0)
-                throw new ArgumentException("Generic arguments count must be greater than 0");
-
-            GenericArguments = genericArguments;
-            IsGenericType = true;
-        }
 
         public ClassView(
             string name,
@@ -45,7 +34,17 @@ namespace XRest.TypeScript.Views.Types
         {
         }
 
-        public void Configure(
+        private ClassView(
+            string name,
+            IReadOnlyCollection<GenericParameterView> genericParameters,
+            IReadOnlyCollection<DefinedTypeView> genericArguments
+        ) : this(name, genericParameters)
+        {
+            GenericArguments = genericArguments;
+            IsGenericTypeDefinition = false;
+        }
+
+        public ClassView Configure(
             IReadOnlyCollection<TypePropertyView> properties
         )
         {
@@ -54,6 +53,23 @@ namespace XRest.TypeScript.Views.Types
 
             Properties = properties;
             _isConfigured = true;
+
+            return this;
+        }
+
+        public ClassView Configure(
+            IReadOnlyCollection<TypePropertyView> definitionProperties,
+            IReadOnlyCollection<TypePropertyView> properties
+        )
+        {
+            if (_isConfigured)
+                throw new InvalidOperationException("ClassView is already configured");
+
+            _definitionProperties = properties;
+            Properties = properties;
+            _isConfigured = true;
+
+            return this;
         }
 
         public ClassView MakeGenericType(
@@ -66,7 +82,7 @@ namespace XRest.TypeScript.Views.Types
             if (arguments.Length != GenericParameters.Count)
                 throw new InvalidOperationException($"Expected {GenericParameters.Count} generic arguments");
 
-            var view = new ClassView(Name, arguments);
+            var view = new ClassView(Name, GenericParameters, arguments);
             var properties = Properties
                 .Select(property =>
                 {
@@ -81,9 +97,20 @@ namespace XRest.TypeScript.Views.Types
                     return new TypePropertyView(property.Name, arguments[genericParameterPosition], property.IsOptional);
                 })
                 .ToArray();
-            view.Configure(properties);
+            view.Configure(_definitionProperties, properties);
 
             return view;
+        }
+
+        public ClassView GetGenericDefinition()
+        {
+            if (!IsGenericType)
+                throw new InvalidOperationException($"{this} is not generic type");
+
+            if (IsGenericTypeDefinition)
+                return this;
+
+            return new ClassView(Name, GenericParameters).Configure(_definitionProperties, Array.Empty<TypePropertyView>());
         }
 
         public override string ToString()
@@ -97,7 +124,7 @@ namespace XRest.TypeScript.Views.Types
             if (Name == BaseType.Array.Name)
                 return $"{arguments.Single()}[]";
 
-            return $"{Name}<{string.Join(", ", arguments)}>";
+            return arguments.Count > 0 ? $"{Name}<{string.Join(", ", arguments)}>" : Name;
         }
     }
 }

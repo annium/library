@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Annium.Data.Operations;
 using NodaTime;
 using XRest.TypeScript.Helpers;
 
@@ -34,7 +35,9 @@ namespace XRest.TypeScript.Views.Types
             .Register(typeof(IDictionary<,>), BaseType.Record)
             .Register(typeof(IReadOnlyDictionary<,>), BaseType.Record)
             .Register(typeof(IEnumerable<>), BaseType.Array)
-            .Register(typeof(Array), BaseType.Array);
+            .Register(typeof(Array), BaseType.Array)
+            .Register(typeof(IResult), ExternalType.HttpResponseVoid)
+            .Register(typeof(IResult<>), ExternalType.HttpResponse);
 
         public static readonly TypeSet Skipped = new TypeSet()
             .Register(typeof(Task))

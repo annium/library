@@ -7,12 +7,12 @@ namespace XRest.TypeScript.Views
     {
         public string Name { get; }
         public ParameterLocationEnum Location { get; }
-        public TypeView Type { get; }
+        public DefinedTypeView Type { get; }
 
         public ParameterView(
             string name,
             ParameterLocationEnum location,
-            TypeView type
+            DefinedTypeView type
         )
         {
             Name = name;

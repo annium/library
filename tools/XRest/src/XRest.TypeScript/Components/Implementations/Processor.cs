@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Annium.Data.Operations;
 using Annium.Extensions.Primitives;
 using XRest.Core.Models;
 using XRest.TypeScript.Helpers;
@@ -33,10 +34,23 @@ namespace XRest.TypeScript.Components.Implementations
             IReadOnlyCollection<DefinedTypeView> types
         )
         {
-            var exports = types.Except(sharedTypes).ToArray();
-            var imports = types.Except(exports).ToArray();
+            var exports = types.Except(sharedTypes).OrderBy(x => x.Name).ToArray();
 
             var actions = model.Actions.Select(action => BuildActionView(typeRegistry, action)).ToArray();
+
+            var usedTypes = new HashSet<DefinedTypeView>();
+            foreach (var exportedType in exports)
+            {
+                usedTypes.Add(exportedType);
+                if (exportedType is ClassView exportedClass)
+                    foreach (var propertyType in exportedClass.Properties.Select(x => x.Type as DefinedTypeView).Where(x => !(x is null)))
+                        usedTypes.Add(propertyType!);
+            }
+
+            foreach (var type in actions.SelectMany(CollectionActionUsedTypes))
+                usedTypes.Add(type);
+
+            var imports = usedTypes.Except(exports).Where(x => !KnownTypes.BuiltIn.Contains(x)).OrderBy(x => x.Name).ToArray();
 
             return new ControllerView(model.Name.CamelCase(), imports, actions, exports);
         }
@@ -47,14 +61,36 @@ namespace XRest.TypeScript.Components.Implementations
         )
         {
             return new ActionView(
-                model.Name,
+                model.Name.CamelCase(),
                 model.Method,
                 model.Path,
                 model.Parameters.Select(x => BuildParameterView(typeRegistry, x)).ToArray(),
                 model.Body is null ? null : typeRegistry.Resolve(model.Body),
-                model.Response is null ? null : typeRegistry.Resolve(model.Response),
+                typeRegistry.Resolve(model.Response ?? typeof(IResult)),
                 BuildAuthView(model.Auth)
             );
+        }
+
+        private IReadOnlyCollection<DefinedTypeView> CollectionActionUsedTypes(ActionView action)
+        {
+            var usedTypes = new HashSet<DefinedTypeView>();
+
+            foreach (var parameter in action.Parameters)
+                CollectUsedTypes(parameter.Type);
+            if (action.HasBody)
+                CollectUsedTypes(action.Body!);
+            CollectUsedTypes(action.Response);
+
+            return usedTypes;
+
+            void CollectUsedTypes(DefinedTypeView view)
+            {
+                if (view is ClassView classView && classView.IsGenericType && usedTypes.Add(classView.GetGenericDefinition()))
+                    foreach (var genericArgument in classView.GenericArguments)
+                        CollectUsedTypes(genericArgument);
+                else
+                    usedTypes.Add(view);
+            }
         }
 
         private ParameterView BuildParameterView(

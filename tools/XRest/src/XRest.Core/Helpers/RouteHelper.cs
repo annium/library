@@ -8,7 +8,7 @@ namespace XRest.Core.Helpers
 {
     internal static class RouteHelper
     {
-        private static readonly Regex RouteRe = new Regex(@"\{([A-z0-9]+)[^}]+\}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly Regex RouteRe = new Regex(@"\{([A-z0-9]+)[^}]*\}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         public static string BuildRoute(
             string controllerName,
@@ -30,7 +30,7 @@ namespace XRest.Core.Helpers
                 sb.Append(actionRoute.Replace("[action]", actionName, StringComparison.InvariantCultureIgnoreCase));
             }
 
-            return sb.ToString();
+            return RouteRe.Replace(sb.ToString(), x => $"{{{x.Groups[1].Value}}}");
         }
 
         public static IReadOnlyCollection<string> ParseRouteParameters(string route)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using XRest.TypeScript.Views.Types;
 
 namespace XRest.TypeScript.Views
@@ -6,6 +7,8 @@ namespace XRest.TypeScript.Views
     internal class ControllerView
     {
         public string Name { get; }
+        public bool HasPublicActions => Actions.Any(x => !x.Auth.IsEnabled);
+        public bool HasPrivateActions => Actions.Any(x => x.Auth.IsEnabled);
         public IReadOnlyCollection<DefinedTypeView> Imports { get; }
         public IReadOnlyCollection<ActionView> Actions { get; }
         public IReadOnlyCollection<DefinedTypeView> Exports { get; }

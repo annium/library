@@ -16,6 +16,7 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Data.Models" Version="0.1.0" />
+        <PackageReference Include="Annium.Data.Operations" Version="0.1.0" />
         <PackageReference Include="Annium.Serialization.Json" Version="0.1.0" />
     </ItemGroup>
     <ItemGroup>
