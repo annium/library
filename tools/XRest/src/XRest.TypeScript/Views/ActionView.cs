@@ -10,8 +10,8 @@ namespace XRest.TypeScript.Views
         public HttpMethod Method { get; }
         public string Path { get; }
         public IReadOnlyCollection<ParameterView> Parameters { get; }
-        public TypeView? Body { get; }
-        public TypeView? Response { get; }
+        public DefinedTypeView? Body { get; }
+        public DefinedTypeView? Response { get; }
         public AuthView Auth { get; }
 
         public ActionView(
@@ -19,8 +19,8 @@ namespace XRest.TypeScript.Views
             HttpMethod method,
             string path,
             IReadOnlyCollection<ParameterView> parameters,
-            TypeView? body,
-            TypeView? response,
+            DefinedTypeView? body,
+            DefinedTypeView? response,
             AuthView auth
         )
         {

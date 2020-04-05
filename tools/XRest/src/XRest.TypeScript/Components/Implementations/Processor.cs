@@ -29,8 +29,8 @@ namespace XRest.TypeScript.Components.Implementations
         private ControllerView BuildControllerView(
             TypeRegistry typeRegistry,
             ControllerModel model,
-            IReadOnlyCollection<TypeView> sharedTypes,
-            IReadOnlyCollection<TypeView> types
+            IReadOnlyCollection<DefinedTypeView> sharedTypes,
+            IReadOnlyCollection<DefinedTypeView> types
         )
         {
             var exports = types.Except(sharedTypes).ToArray();
@@ -76,12 +76,12 @@ namespace XRest.TypeScript.Components.Implementations
             return new AuthView(model.IsEnabled);
         }
 
-        private IReadOnlyCollection<TypeView> CollectSharedTypes(
+        private IReadOnlyCollection<DefinedTypeView> CollectSharedTypes(
             IReadOnlyCollection<DefinedTypeView> allTypes,
             IReadOnlyCollection<DefinedTypeView[]> types
         )
         {
-            var sharedTypes = new HashSet<TypeView>();
+            var sharedTypes = new HashSet<DefinedTypeView>();
 
             foreach (var type in allTypes)
             {
