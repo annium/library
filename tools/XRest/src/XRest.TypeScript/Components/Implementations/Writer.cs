@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Annium.Logging.Abstractions;
@@ -27,14 +28,18 @@ namespace XRest.TypeScript.Components.Implementations
                 Directory.Delete(output, true);
             Directory.CreateDirectory(output);
 
+            RenderSharedExports(output, api.SharedExports);
+        }
+
+        private void RenderSharedExports(string output, IReadOnlyCollection<TypeView> types)
+        {
             var data = new
             {
-                Interfaces = api.SharedExports.OfType<ClassView>(),
-                Enums = api.SharedExports.OfType<EnumView>(),
+                Interfaces = types.OfType<ClassView>(),
+                Enums = types.OfType<EnumView>(),
             };
             Write(output, "shared.ts", "Templates.SharedExports", data);
         }
-
 
         private void Write<T>(string output, string file, string template, T data)
             where T : class
