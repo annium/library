@@ -21,8 +21,8 @@ import {
 {{ include 'Templates.BaseType' type }}
 {{~ end ~}}
 
-// service
-export const {{ name }}Service = {
+// api
+export const {{ name }}Api = {
     {{~ for action in actions ~}}
     {{ action.name }}: (
         {{~ for parameter in action.parameters ~}}

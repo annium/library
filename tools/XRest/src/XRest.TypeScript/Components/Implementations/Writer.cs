@@ -30,7 +30,7 @@ namespace XRest.TypeScript.Components.Implementations
             Write(output, "shared.ts", "Templates.SharedExports", new { Exports = api.SharedExports });
 
             foreach (var controllerView in api.Controllers.Where(x => x.Actions.Count > 0))
-                Write(output, $"{controllerView.Name.CamelCase()}Service.ts", "Templates.Service", controllerView);
+                Write(output, $"{controllerView.Name.CamelCase()}Api.ts", "Templates.Api", controllerView);
         }
 
         private void Write<T>(string output, string file, string template, T data)
