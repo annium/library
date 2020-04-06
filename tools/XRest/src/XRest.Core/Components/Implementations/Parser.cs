@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using Annium.Extensions.Primitives;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -50,13 +51,23 @@ namespace XRest.Core.Components.Implementations
 
             var parameters = action.GetParameters()
                 .Where(x => x.GetCustomAttribute<FromBodyAttribute>() is null)
-                .Select(x => new ParameterModel(
-                    x.Name!,
-                    routeParameters.Contains(x.Name)
-                        ? ParameterLocationEnum.Path
-                        : ParameterLocationEnum.Query,
-                    x.ParameterType
-                ))
+                .SelectMany(x =>
+                {
+                    if (routeParameters.Contains(x.Name))
+                        return new[] { new ParameterModel(x.Name!, ParameterLocationEnum.Path, x.ParameterType) };
+
+                    if (ParseHelper.IsAllowedQueryType(x.ParameterType))
+                        return new[] { new ParameterModel(x.Name!, ParameterLocationEnum.Query, x.ParameterType) };
+
+                    return x.ParameterType
+                        .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
+                        .Where(p => p.CanRead)
+                        .Select(p => new ParameterModel(
+                            p.Name.CamelCase(),
+                            ParameterLocationEnum.Query,
+                            p.PropertyType
+                        ));
+                })
                 .OrderBy(x => x.Name)
                 .ToArray();
 

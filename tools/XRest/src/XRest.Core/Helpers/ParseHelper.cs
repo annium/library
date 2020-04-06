@@ -1,11 +1,22 @@
 using System;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using NodaTime;
 
 namespace XRest.Core.Helpers
 {
     internal static class ParseHelper
     {
+        public static bool IsAllowedQueryType(Type type)
+        {
+            return type.IsPrimitive ||
+                type == typeof(string) ||
+                type == typeof(DateTime) ||
+                type == typeof(DateTimeOffset) ||
+                type == typeof(Instant) ||
+                type == typeof(Guid);
+        }
+
         /// <summary>
         ///    From https://github.com/dotnet/aspnetcore/blob/master/src/Mvc/Mvc.Core/src/ApplicationModels/DefaultApplicationModelProvider.cs
         /// </summary>
