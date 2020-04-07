@@ -27,7 +27,15 @@ namespace XRest.TypeScript.Helpers
                 definition == typeof(IReadOnlyDictionary<,>);
         });
 
-        public static bool IsArray(this Type type) => type.IsArray || type.GetInterfaces()
-            .Any(x => x.IsGenericType ? x.GetGenericTypeDefinition() == typeof(IEnumerable<>) : x == typeof(IEnumerable));
+        public static bool IsArray(this Type type)
+        {
+            if (type == typeof(string))
+                return false;
+            if (type.IsArray)
+                return true;
+
+            return type.GetInterfaces()
+                .Any(x => x.IsGenericType ? x.GetGenericTypeDefinition() == typeof(IEnumerable<>) : x == typeof(IEnumerable));
+        }
     }
 }
