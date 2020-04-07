@@ -1,11 +1,13 @@
 // imports
 import { HttpClient, HttpResponse } from '@annium/client-http'
 
+{{~ if imports.size > 0 ~}}
 import {
 {{~ for type in imports ~}}
     {{ type.name }},
 {{~ end ~}}
 } from './shared'
+{{~ end ~}}
 
 // exports
 {{~ for type in exports ~}}
