@@ -26,7 +26,7 @@ export const {{ name }}Api = (client: HttpClient) => ({
         {{~ end ~}}
     ): Promise<{{action.response}}> => client
         .{{ action.method }}(
-            {{-}}'{{ action.path }}'{{ for parameter in action.route_parameters }}.replace('{ {{- parameter.name -}} }', {{ parameter.name}}){{~ end ~}},
+            {{-}}`{{ action.path | string.replace "{" "${" }}`,
             {{-}} { {{~ for parameter in action.query_parameters }} {{ parameter.name }} {{~ if !for.last }}, {{~ end }} {{ end ~}} }
             {{-}} {{~ if action.has_body ~}}, body{{~ end ~}}),
     {{~ end ~}}
