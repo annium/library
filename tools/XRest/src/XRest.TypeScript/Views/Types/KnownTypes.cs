@@ -36,6 +36,7 @@ namespace XRest.TypeScript.Views.Types
             .Register(typeof(IReadOnlyDictionary<,>), BaseType.Record)
             .Register(typeof(IEnumerable<>), BaseType.Array)
             .Register(typeof(Array), BaseType.Array)
+            .Register(typeof(Nullable<>), BaseType.Nullable)
             .Register(typeof(IResult), ExternalType.HttpResponseVoid)
             .Register(typeof(IResult<>), ExternalType.HttpResponse);
 
