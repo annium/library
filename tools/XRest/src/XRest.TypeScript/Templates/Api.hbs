@@ -1,14 +1,5 @@
 // imports
-import { HttpResponse } from '@annium/client-http'
-
-import {
-{{~ if has_private_actions ~}}
-    privateApi,
-{{~ end ~}}
-{{~ if has_public_actions ~}}
-    publicApi,
-{{~ end ~}}
-} from '../api'
+import { HttpClient, HttpResponse } from '@annium/client-http'
 
 import {
 {{~ for type in imports ~}}
@@ -22,7 +13,7 @@ import {
 {{~ end ~}}
 
 // api
-export const {{ name }}Api = {
+export const {{ name }}Api = (client: HttpClient) => ({
     {{~ for action in actions ~}}
     {{ action.name }}: (
         {{~ for parameter in action.parameters ~}}
@@ -31,10 +22,10 @@ export const {{ name }}Api = {
         {{~ if action.has_body ~}}
         body: {{ action.body}},
         {{~ end ~}}
-    ): Promise<{{action.response}}> => {{ if action.auth.is_enabled }}privateApi{{ else }}publicApi{{ end }}
+    ): Promise<{{action.response}}> => client
         .{{ action.method }}(
             {{-}}'{{ action.path }}'{{ for parameter in action.route_parameters }}.replace('{ {{- parameter.name -}} }', {{ parameter.name}}){{~ end ~}},
             {{-}} { {{~ for parameter in action.query_parameters }} {{ parameter.name }} {{~ if !for.last }}, {{~ end }} {{ end ~}} }
             {{-}} {{~ if action.has_body ~}}, body{{~ end ~}}),
     {{~ end ~}}
-}
+})
