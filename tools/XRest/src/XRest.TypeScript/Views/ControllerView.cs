@@ -23,5 +23,7 @@ namespace XRest.TypeScript.Views
             Actions = actions;
             Exports = exports;
         }
+
+        public override string ToString() => Name;
     }
 }

@@ -39,6 +39,6 @@ namespace XRest.TypeScript.Views
             Auth = auth;
         }
 
-        public override string ToString() => $"{Method} {Path}";
+        public override string ToString() => $"{Method} {Path}" + (Auth.IsEnabled ? " [Auth]" : string.Empty);
     }
 }

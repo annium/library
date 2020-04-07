@@ -19,5 +19,7 @@ namespace XRest.TypeScript.Views
             Location = location;
             Type = type;
         }
+
+        public override string ToString() => $"[{Location}] {Type} {Name}";
     }
 }
