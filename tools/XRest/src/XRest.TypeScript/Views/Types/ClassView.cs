@@ -113,6 +113,8 @@ namespace XRest.TypeScript.Views.Types
             return new ClassView(Name, GenericParameters).Configure(_definitionProperties, Array.Empty<TypePropertyView>());
         }
 
+        public IReadOnlyCollection<DefinedTypeView> GetPropertyTypes() => Properties.Select(x => x.Type).OfType<DefinedTypeView>().Distinct().ToArray();
+
         public override string ToString()
         {
             if (!IsGenericType)
