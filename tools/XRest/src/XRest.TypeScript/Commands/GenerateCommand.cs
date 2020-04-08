@@ -47,6 +47,7 @@ namespace XRest.TypeScript.Commands
 
             _logger.Info($"Write api view to {cfg.Output}");
             _writer.Write(Path.Combine(cfg.Output, "client"), view);
+            _logger.Info($"Client written to {cfg.Output}");
         }
     }
 
