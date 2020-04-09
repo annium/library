@@ -7,11 +7,11 @@ namespace XRest.TypeScript.Views.Types
     {
         public override TypeViewEnum Type { get; } = TypeViewEnum.Enum;
 
-        public IReadOnlyDictionary<string, int> Values { get; }
+        public IReadOnlyDictionary<string, object> Values { get; }
 
         public EnumView(
             string name,
-            IReadOnlyDictionary<string, int> values
+            IReadOnlyDictionary<string, object> values
         ) : base(name)
         {
             if (values.Count == 0)

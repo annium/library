@@ -57,8 +57,9 @@ namespace XRest.TypeScript.Helpers
 
         private DefinedTypeView RegisterEnum(Type type)
         {
+            var underlyingType = Enum.GetUnderlyingType(type);
             var values = Enum.GetNames(type)
-                .Zip(Enum.GetValues(type).Cast<int>())
+                .Zip(Enum.GetValues(type).Cast<object>().Select(x => Convert.ChangeType(x, underlyingType)))
                 .ToDictionary(x => x.First, x => x.Second);
 
             var view = new EnumView(type.Name, values);
