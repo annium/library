@@ -23,19 +23,23 @@ namespace Xmg.Components.Implementations
             if (!File.Exists(assemblyPath))
                 throw new FileNotFoundException($"Assembly file '{assemblyPath}' missing.");
 
-            return LoadTypes(assemblyPath)
+            var assembly = _loadContextFactory.Create(assemblyPath).LoadFromAssemblyPath(assemblyPath);
+
+            var types = assembly.GetTypes();
+
+            return types
                 .Where(x => x.IsClass && !x.IsAbstract && !x.IsGenericType)
-                .Select(x => (x, i: x.GetInterfaces().SingleOrDefault(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(IEntityConfiguration<>))))
+                .Select(x => (
+                    x,
+                    i: x.GetInterfaces()
+                        .SingleOrDefault(y =>
+                            y.IsGenericType &&
+                            y.GetGenericTypeDefinition().FullName == typeof(IEntityConfiguration<>).FullName
+                        )
+                ))
                 .Where(p => p.i != null)
                 .Select(p => (p.x, p.i.GenericTypeArguments.Single()))
                 .ToArray();
-        }
-
-        private IReadOnlyCollection<Type> LoadTypes(string assemblyPath)
-        {
-            var assembly = _loadContextFactory.Create(assemblyPath).LoadFromAssemblyPath(assemblyPath);
-
-            return assembly.GetTypes();
         }
     }
 }
