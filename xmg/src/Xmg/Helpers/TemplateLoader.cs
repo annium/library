@@ -1,0 +1,46 @@
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using Annium.Core.Runtime.Resources;
+using Scriban;
+using Scriban.Parsing;
+using Scriban.Runtime;
+
+namespace Xmg.Helpers
+{
+    internal class TemplateLoader : ITemplateLoader
+    {
+        private readonly IResourceLoader _resourceLoader;
+        private readonly Assembly _templateAssembly;
+
+        public TemplateLoader(
+            IResourceLoader resourceLoader,
+            Assembly templateAssembly
+        )
+        {
+            _resourceLoader = resourceLoader;
+            _templateAssembly = templateAssembly;
+        }
+
+        public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName) => templateName;
+
+        public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+        {
+            var resource = _resourceLoader.Load(templatePath, _templateAssembly).Single();
+
+            using var reader = new StreamReader(resource.Content);
+
+            return reader.ReadToEnd();
+        }
+
+        public async ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+        {
+            var resource = _resourceLoader.Load(templatePath, _templateAssembly).Single();
+
+            using var reader = new StreamReader(resource.Content);
+
+            return await reader.ReadToEndAsync();
+        }
+    }
+}
