@@ -18,16 +18,9 @@
         <ProjectReference Include="../Xmg.Migration/Xmg.Migration/Xmg.Migration.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
-        <PackageReference Include="Annium.Core.Runtime" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
-        <PackageReference Include="Annium.Extensions.Primitives" Version="0.1.0" />
-        <PackageReference Include="Annium.linq2db.Extensions" Version="0.1.0" />
-        <PackageReference Include="Annium.Logging.Abstractions" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
-        <PackageReference Include="linq2db" Version="2.9.8" />
-        <PackageReference Include="Scriban" Version="2.1.1" />
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Templates/**" />

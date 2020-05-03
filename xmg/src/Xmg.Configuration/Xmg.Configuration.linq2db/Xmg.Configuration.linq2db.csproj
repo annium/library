@@ -14,4 +14,8 @@
     <ItemGroup>
         <ProjectReference Include="../Xmg.Configuration.Abstractions/Xmg.Configuration.Abstractions.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Annium.linq2db.Extensions" Version="0.1.0" />
+        <PackageReference Include="linq2db" Version="2.9.8" />
+    </ItemGroup>
 </Project>
