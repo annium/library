@@ -35,11 +35,8 @@ namespace Xmg.Commands
             var migrationVersion = _getInstant().ToDateTimeUtc().ToString("yyyyMMdd");
             var migrationName = "Init";
 
-            _logger.Debug($"Load '{cfg.ProjectName}' configurations from '{cfg.Assembly}'");
-            var (mappingSchema, entityTypes) = _loader.LoadMappingSchema(cfg.Assembly);
-            // var configurations = _loader.LoadConfigurationTypes(cfg.Assembly);
-
-            _logger.Debug($"Build '{cfg.ProjectName}' mapping schema");
+            _logger.Debug($"Load '{cfg.ProjectName}' mapping schema from '{cfg.Assembly}'");
+            var mappingSchema = _loader.LoadMappingSchema(cfg.Assembly);
 
             _logger.Debug($"Convert '{cfg.ProjectName}' mapping schema to Database model");
 

@@ -19,6 +19,7 @@
         <PackageReference Include="Annium.Core.Runtime" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Primitives" Version="0.1.0" />
+        <PackageReference Include="Annium.linq2db.Extensions" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Abstractions" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
         <PackageReference Include="linq2db" Version="2.9.8" />

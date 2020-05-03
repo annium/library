@@ -29,7 +29,6 @@ namespace Xmg
 
             // externals
             services.AddResourceLoader();
-            services.AddLoadContextFactories();
         }
 
         private void RegisterCommands(IServiceCollection services)
