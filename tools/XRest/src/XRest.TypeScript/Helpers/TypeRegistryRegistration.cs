@@ -76,6 +76,11 @@ namespace XRest.TypeScript.Helpers
             else if (property.PropertyType.IsGenericParameter)
                 view = new GenericParameterView(property.PropertyType.Name);
             else
+                // TODO: Resolve property with generic parameter used.This one breaks tons of logic:
+                // - need to pass down generic parameters through resolution flow
+                // - need to update ClassView (can consist of mixed DefinedType and GenericParameter)
+                // - will need to split TypeRegistry, because Resolve should return DefinedType
+                // Important! Review models' names. DefinedTypeView is BAD!
                 view = Resolve(property.PropertyType);
 
             return new TypePropertyView(property.Name, view, view.Name == BaseType.Nullable.Name);
