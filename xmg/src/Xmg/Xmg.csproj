@@ -14,6 +14,10 @@
         <ToolCommandName>xmg</ToolCommandName>
     </PropertyGroup>
     <ItemGroup>
+        <ProjectReference Include="../Xmg.Configuration/Xmg.Configuration/Xmg.Configuration.csproj" />
+        <ProjectReference Include="../Xmg.Migration/Xmg.Migration/Xmg.Migration.csproj" />
+    </ItemGroup>
+    <ItemGroup>
         <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Runtime" Version="0.1.0" />

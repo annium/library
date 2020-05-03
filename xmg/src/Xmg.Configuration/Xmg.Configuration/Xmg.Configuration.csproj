@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <PackageId>Xmg.Configuration</PackageId>
+        <PackageVersion>0.1.0</PackageVersion>
+        <Description>Xmg.Configuration</Description>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <OutputType>Library</OutputType>
+        <DebugType>portable</DebugType>
+        <LangVersion>latest</LangVersion>
+        <WarningsAsErrors>true</WarningsAsErrors>
+        <IsPackable>false</IsPackable>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Xmg.Configuration.linq2db/Xmg.Configuration.linq2db.csproj" />
+    </ItemGroup>
+</Project>
