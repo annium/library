@@ -1,17 +1,16 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
 using Annium.Core.Runtime.Loader;
-using Annium.linq2db.Extensions;
+using LinqToDB.Mapping;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Xmg.Components.Implementations
 {
     internal class Loader : ILoader
     {
+        private const string libraryFileExtension = ".dll";
         private readonly DirectoryLoadContextFactory _loadContextFactory;
 
         public Loader(
@@ -21,54 +20,98 @@ namespace Xmg.Components.Implementations
             _loadContextFactory = loadContextFactory;
         }
 
-        public IReadOnlyCollection<(Type configurationType, Type entityType)> LoadConfigurationTypes(string assemblyPath)
+        public (MappingSchema mappingSchema, Type[] entityTypes) LoadMappingSchema(string assemblyPath)
         {
             if (!File.Exists(assemblyPath))
                 throw new FileNotFoundException($"Assembly file '{assemblyPath}' missing.");
 
-            var loadContext = _loadContextFactory.Create(assemblyPath);
-            var types = CollectTypes(loadContext, assemblyPath).SelectMany(x => x).Distinct().ToArray();
+            var assembly = _loadContextFactory.Create(assemblyPath).LoadFromAssemblyPath(assemblyPath);
+            // if (assembly.EntryPoint is null)
+            //     throw new InvalidOperationException(
+            //         $"Assembly '{assembly.GetName().Name}' has no Entrypoint. This is required to collect configurations from referenced assemblies");
 
-            return types
-                .Where(x => x.IsClass && !x.IsAbstract && !x.IsGenericType)
-                .Select(x => (
-                    x,
-                    i: x.GetInterfaces()
-                        .SingleOrDefault(y =>
-                            y.IsGenericType &&
-                            y.GetGenericTypeDefinition().FullName == typeof(IEntityConfiguration<>).FullName
-                        )
-                ))
-                .Where(p => p.i != null)
-                .Select(p => (p.x, p.i.GenericTypeArguments.Single()))
-                .ToArray();
+            var types = LoadEntityTypes(assembly);
+            var mappingSchema = new MappingSchema();
+            // mappingSchema.GetMappingBuilder(assembly).ApplyConfigurations().SnakeCaseColumns();
+
+
+            return (mappingSchema, types);
         }
 
-        private IEnumerable<Type[]> CollectTypes(AssemblyLoadContext loadContext, string assemblyPath)
+        private Type[] CollectTypes(Assembly _assembly)
         {
-            var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
-            var compileLibraryNames = DependencyContext.Load(assembly).CompileLibraries.Select(x => x.Name).ToArray();
-            var directory = Path.GetDirectoryName(assemblyPath);
+            var core = typeof(object).Assembly.GetName();
+            var assemblyNames = DependencyContext.Load(_assembly).CompileLibraries
+                .Select(x => new AssemblyName(x.Name))
+                .Prepend(core)
+                .ToArray();
 
-            // fetch types from discoverable compile libraries (assembly must be among them, so processed as others)
-            foreach (var libraryName in compileLibraryNames)
+            var path = _assembly.Location;
+            if (!File.Exists(path))
+                return assemblyNames.SelectMany(GeneralAssemblyLoadTypes).ToArray();
+
+            var directory = Path.GetDirectoryName(path)!;
+            var loadContext = new DirectoryLoadContext(directory);
+            Directory.SetCurrentDirectory(directory);
+
+            return assemblyNames.SelectMany(LocatedAssemblyLoadTypes).ToArray();
+
+            static Type[] GeneralAssemblyLoadTypes(AssemblyName name)
             {
-                if (!File.Exists(Path.Combine(directory, $"{libraryName}.dll")))
-                    continue;
+                try
+                {
+                    return Assembly.Load(name).GetTypes();
+                }
+                catch
+                {
+                    return Type.EmptyTypes;
+                }
+            }
 
-                var libary = loadContext.LoadFromAssemblyName(new AssemblyName(libraryName));
-                yield return libary.GetTypes();
+            Type[] LocatedAssemblyLoadTypes(AssemblyName name)
+            {
+                var assemblyPath = Path.Combine(directory, $"{name.Name}{libraryFileExtension}");
+                var fileExists = File.Exists(assemblyPath);
+                var isSpecial = name.Name.Contains("Crypted");
+                try
+                {
+                    if (fileExists)
+                        return Assembly.LoadFrom(assemblyPath).GetTypes();
+
+                    return Assembly.Load(name).GetTypes();
+                }
+                catch (FileNotFoundException)
+                {
+                    return Type.EmptyTypes;
+                }
+                catch
+                {
+                    return Type.EmptyTypes;
+                }
             }
         }
 
-        //
-        // private IEnumerable<Type> CollectTypes(AssemblyLoadContext loadContext, Assembly assembly)
-        // {
-        //     var types = assembly.GetTypes();
-        //
-        //     var references = assembly.GetReferencedAssemblies().Select(loadContext.LoadFromAssemblyName).ToArray();
-        //
-        //     return references.SelectMany(x => CollectTypes(loadContext, x)).Concat(types).ToArray();
-        // }
+
+        private Type[] LoadEntityTypes(Assembly assembly)
+        {
+            var types = CollectTypes(assembly)
+                .Where(x => x.IsClass && !x.IsAbstract && !x.IsGenericType)
+                .ToArray();
+
+            var result = types
+                .Select(x =>
+                    x.GetInterfaces()
+                        .SingleOrDefault(y =>
+                            y.IsGenericType &&
+                            y.GetGenericTypeDefinition().FullName!.Contains("IEntityConfiguration")
+                        )?
+                        .GenericTypeArguments
+                        .Single()!
+                )
+                .Where(x => x != null)
+                .ToArray();
+
+            return result;
+        }
     }
 }

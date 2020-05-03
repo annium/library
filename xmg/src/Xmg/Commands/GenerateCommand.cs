@@ -36,7 +36,8 @@ namespace Xmg.Commands
             var migrationName = "Init";
 
             _logger.Debug($"Load '{cfg.ProjectName}' configurations from '{cfg.Assembly}'");
-            var configurations = _loader.LoadConfigurationTypes(cfg.Assembly);
+            var (mappingSchema, entityTypes) = _loader.LoadMappingSchema(cfg.Assembly);
+            // var configurations = _loader.LoadConfigurationTypes(cfg.Assembly);
 
             _logger.Debug($"Build '{cfg.ProjectName}' mapping schema");
 

@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
+using LinqToDB.Mapping;
 
 namespace Xmg.Components
 {
     public interface ILoader
     {
-        IReadOnlyCollection<(Type configurationType, Type entityType)> LoadConfigurationTypes(string assemblyPath);
+        (MappingSchema mappingSchema,Type[] entityTypes) LoadMappingSchema(string assemblyPath);
     }
 }
