@@ -14,4 +14,7 @@
     <ItemGroup>
         <ProjectReference Include="../Xmg.Migration.Abstractions/Xmg.Migration.Abstractions.csproj" />
     </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Include="Templates\Migration.hbs" />
+    </ItemGroup>
 </Project>

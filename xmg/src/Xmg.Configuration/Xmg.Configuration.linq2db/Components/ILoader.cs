@@ -1,6 +1,6 @@
 using LinqToDB.Mapping;
 
-namespace Xmg.Components
+namespace Xmg.Configuration.linq2db.Components
 {
     public interface ILoader
     {

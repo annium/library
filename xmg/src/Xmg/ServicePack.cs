@@ -3,8 +3,6 @@ using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 using Xmg.Commands;
-using Xmg.Components;
-using Xmg.Components.Implementations;
 
 namespace Xmg
 {
@@ -12,7 +10,8 @@ namespace Xmg
     {
         public ServicePack()
         {
-            Add<Core.ServicePack>();
+            Add<Configuration.ServicePack>();
+            Add<Migration.ServicePack>();
         }
 
         public override void Register(IServiceCollection services, IServiceProvider provider)
@@ -22,10 +21,6 @@ namespace Xmg
 
             services.AddArguments();
             services.AddLogging(route => route.UseConsole(time: true));
-
-
-            // components
-            services.AddSingleton<ILoader, Loader>();
         }
 
         private void RegisterCommands(IServiceCollection services)

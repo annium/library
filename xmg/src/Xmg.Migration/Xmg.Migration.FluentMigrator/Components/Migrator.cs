@@ -12,6 +12,8 @@ namespace Xmg.Migration.FluentMigrator.Components
 
         public IMigration CreateMigration(Database database, IConfiguration cfg)
         {
+            // var migrationVersion = _getInstant().ToDateTimeUtc().ToString("yyyyMMdd");
+            // var migrationName = "Init";
             throw new NotImplementedException();
         }
     }

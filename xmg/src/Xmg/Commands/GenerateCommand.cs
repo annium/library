@@ -1,29 +1,30 @@
-using System;
 using System.IO;
 using System.Threading;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
-using NodaTime;
-using Xmg.Components;
+using Xmg.Configuration.Abstractions;
+using Xmg.Configuration.Components;
+using Xmg.Migration.Abstractions;
+using Xmg.Migration.Components;
 
 namespace Xmg.Commands
 {
     internal class GenerateCommand : Command<GenerateCommandConfiguration>
     {
-        private readonly Func<Instant> _getInstant;
-        private readonly ILoader _loader;
+        private readonly IConfiguratorFactory _configuratorFactory;
+        private readonly IMigratorFactory _migratorFactory;
         private readonly ILogger<GenerateCommand> _logger;
         public override string Id { get; } = "gen";
         public override string Description { get; } = "generate Migration";
 
         public GenerateCommand(
-            Func<Instant> getInstant,
-            ILoader loader,
+            IConfiguratorFactory configuratorFactory,
+            IMigratorFactory migratorFactory,
             ILogger<GenerateCommand> logger
         )
         {
-            _getInstant = getInstant;
-            _loader = loader;
+            _configuratorFactory = configuratorFactory;
+            _migratorFactory = migratorFactory;
             _logger = logger;
         }
 
@@ -32,17 +33,15 @@ namespace Xmg.Commands
             CancellationToken token
         )
         {
-            var migrationVersion = _getInstant().ToDateTimeUtc().ToString("yyyyMMdd");
-            var migrationName = "Init";
-
-            _logger.Debug($"Load '{cfg.ProjectName}' mapping schema from '{cfg.Assembly}'");
-            var mappingSchema = _loader.LoadMappingSchema(cfg.Assembly);
+            _logger.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
+            var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
+            var database = configurator.LoadConfiguration(cfg);
 
             _logger.Debug($"Convert '{cfg.ProjectName}' mapping schema to Database model");
 
             _logger.Debug($"Convert '{cfg.ProjectName}' Database model to Database view");
 
-            _logger.Debug($"Save new migration '{migrationName} ({migrationVersion})' to {cfg.Output}");
+            // _logger.Debug($"Save new migration '{migrationName} ({migrationVersion})' to {cfg.Output}");
 
             /*
              generate flow:
@@ -57,8 +56,16 @@ namespace Xmg.Commands
     }
 
 
-    internal class GenerateCommandConfiguration
+    internal class GenerateCommandConfiguration : Configuration.Abstractions.IConfiguration, Migration.Abstractions.IConfiguration
     {
+        [Option("cp", true)]
+        [Help("Configuration provider.")]
+        public ConfigurationProvider ConfigurationProvider { get; set; }
+
+        [Option("mp", true)]
+        [Help("Migration provider.")]
+        public MigrationProvider MigrationProvider { get; set; }
+
         [Option("a", true)]
         [Help("Path to Db assembly.")]
         public string Assembly
@@ -80,6 +87,10 @@ namespace Xmg.Commands
             get => _output;
             set => _output = Path.GetFullPath(value);
         }
+
+        [Option("n", true)]
+        [Help("Migration name.")]
+        public string Name { get; set; }
 
         private string _assembly = string.Empty;
         private string _output = string.Empty;

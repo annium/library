@@ -3,7 +3,7 @@ using System.Reflection;
 using Annium.linq2db.Extensions;
 using LinqToDB.Mapping;
 
-namespace Xmg.Components.Implementations
+namespace Xmg.Configuration.linq2db.Components
 {
     internal class Loader : ILoader
     {

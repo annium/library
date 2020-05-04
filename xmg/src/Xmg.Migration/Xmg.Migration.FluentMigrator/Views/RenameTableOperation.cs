@@ -1,4 +1,4 @@
-namespace Xmg.Views
+namespace Xmg.Migration.FluentMigrator.Views
 {
     internal class RenameTableOperation
     {

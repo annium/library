@@ -17,6 +17,7 @@ namespace Xmg.Configuration.linq2db
         {
             // components
             services.AddSingleton<IConfigurator, Configurator>();
+            services.AddSingleton<ILoader, Loader>();
         }
     }
 }
