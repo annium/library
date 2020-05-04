@@ -5,13 +5,16 @@ using NodaTime;
 using Xmg.Commands;
 using Xmg.Components;
 using Xmg.Components.Implementations;
-using Xmg.Tools;
-using Xmg.Tools.Implementations;
 
 namespace Xmg
 {
     internal class ServicePack : ServicePackBase
     {
+        public ServicePack()
+        {
+            Add<Core.ServicePack>();
+        }
+
         public override void Register(IServiceCollection services, IServiceProvider provider)
         {
             services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
@@ -23,12 +26,6 @@ namespace Xmg
 
             // components
             services.AddSingleton<ILoader, Loader>();
-
-            // tools
-            services.AddSingleton<ITemplateWriter, TemplateWriter>();
-
-            // externals
-            services.AddResourceLoader();
         }
 
         private void RegisterCommands(IServiceCollection services)

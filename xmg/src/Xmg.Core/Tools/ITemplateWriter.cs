@@ -1,4 +1,4 @@
-namespace Xmg.Tools
+namespace Xmg.Core.Tools
 {
     public interface ITemplateWriter
     {

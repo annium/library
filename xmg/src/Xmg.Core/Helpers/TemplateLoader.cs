@@ -7,7 +7,7 @@ using Scriban;
 using Scriban.Parsing;
 using Scriban.Runtime;
 
-namespace Xmg.Helpers
+namespace Xmg.Core.Helpers
 {
     internal class TemplateLoader : ITemplateLoader
     {

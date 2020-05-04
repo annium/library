@@ -6,9 +6,9 @@ using Annium.Extensions.Primitives;
 using Scriban;
 using Scriban.Parsing;
 using Scriban.Runtime;
-using Xmg.Helpers;
+using Xmg.Core.Helpers;
 
-namespace Xmg.Tools.Implementations
+namespace Xmg.Core.Tools.Implementations
 {
     internal class TemplateWriter : ITemplateWriter
     {
