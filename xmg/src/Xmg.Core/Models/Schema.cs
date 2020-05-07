@@ -15,5 +15,7 @@ namespace Xmg.Core.Models
             Name = name;
             Tables = tables;
         }
+
+        public override string ToString() => Name;
     }
 }
