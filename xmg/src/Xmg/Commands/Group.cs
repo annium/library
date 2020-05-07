@@ -9,6 +9,7 @@ namespace Xmg.Commands
         public Group()
         {
             Add<GenerateCommand>();
+            Add<ParseCommand>();
         }
     }
 }

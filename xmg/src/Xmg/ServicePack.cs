@@ -1,8 +1,8 @@
 using System;
 using Annium.Core.DependencyInjection;
+using Annium.Extensions.Arguments;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
-using Xmg.Commands;
 
 namespace Xmg
 {
@@ -25,8 +25,12 @@ namespace Xmg
 
         private void RegisterCommands(IServiceCollection services)
         {
-            services.AddSingleton<Group>();
-            services.AddSingleton<GenerateCommand>();
+            services.SelectAssemblyTypes()
+                .Where(x => typeof(Group).IsAssignableFrom(x))
+                .RegisterSingleton();
+            services.SelectAssemblyTypes()
+                .Where(x => typeof(CommandBase).IsAssignableFrom(x))
+                .RegisterSingleton();
         }
     }
 }
