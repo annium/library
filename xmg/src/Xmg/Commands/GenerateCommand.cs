@@ -39,6 +39,7 @@ namespace Xmg.Commands
         )
         {
             _logger.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
+
             var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
             var configurationCfg = new Configuration.Abstractions.Config(cfg.Assembly);
             var database = configurator.LoadConfiguration(configurationCfg);
@@ -46,25 +47,18 @@ namespace Xmg.Commands
             var migrationName = cfg.Name;
             var migrationVersion = _getInstant().ToDateTimeOffset().ToString("yyyyMMdd");
 
+
             _logger.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");
+
             var migrator = _migratorFactory.GetForProvider(cfg.MigrationProvider);
-            var migrationCfg = new Migration.Abstractions.Config(migrationName, migrationVersion);
+            var migrationCfg = new Migration.Abstractions.Config(cfg.Namespace, migrationName, migrationVersion);
             var migration = migrator.CreateMigration(database, migrationCfg);
 
-            _logger.Debug($"Convert '{cfg.ProjectName}' Database model to Database view");
-
-
-            // _logger.Debug($"Save new migration '{migrationName} ({migrationVersion})' to {cfg.Output}");
-
-            /*
-             generate flow:
-             - load assembly types
-             - find out all configurations
-             - build MappingSchema with configurations
-             - somehow build resulting Database object from MappingSchema
-             - convert Database to DatabaseView
-             - render DatabaseView
-             */
+            _logger.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) files");
+            if (!Directory.Exists(cfg.Output))
+                Directory.CreateDirectory(cfg.Output);
+            foreach (var (file, content) in migration.Files)
+                File.WriteAllText(Path.Combine(cfg.Output, file), content);
         }
     }
 
@@ -100,6 +94,10 @@ namespace Xmg.Commands
             get => _output;
             set => _output = Path.GetFullPath(value);
         }
+
+        [Option("ns", true)]
+        [Help("Migrations namespace.")]
+        public string Namespace { get; set; } = string.Empty;
 
         [Option("n", true)]
         [Help("Migration name.")]
