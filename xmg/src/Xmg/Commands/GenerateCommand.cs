@@ -41,6 +41,7 @@ namespace Xmg.Commands
 
             _logger.Debug($"Convert '{cfg.ProjectName}' Database model to Database view");
 
+
             // _logger.Debug($"Save new migration '{migrationName} ({migrationVersion})' to {cfg.Output}");
 
             /*
@@ -90,7 +91,7 @@ namespace Xmg.Commands
 
         [Option("n", true)]
         [Help("Migration name.")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         private string _assembly = string.Empty;
         private string _output = string.Empty;

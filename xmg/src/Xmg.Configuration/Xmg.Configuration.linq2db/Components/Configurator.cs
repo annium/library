@@ -1,4 +1,3 @@
-using System;
 using Xmg.Configuration.Abstractions;
 using Xmg.Configuration.Abstractions.Components;
 using Xmg.Core.Models;
@@ -8,21 +7,25 @@ namespace Xmg.Configuration.linq2db.Components
     internal class Configurator : IConfigurator
     {
         private readonly ILoader _loader;
+        private readonly IMetadataProcessor _metadataProcessor;
         public ConfigurationProvider Provider => ConfigurationProvider.linq2db;
 
         public Configurator(
-            ILoader loader
+            ILoader loader,
+            IMetadataProcessor metadataProcessor
         )
         {
             _loader = loader;
+            _metadataProcessor = metadataProcessor;
         }
 
 
         public Database LoadConfiguration(IConfiguration cfg)
         {
-            var mappingSchema = _loader.LoadMappingSchema(cfg.Assembly);
+            var metadata = _loader.LoadMetadata(cfg.Assembly);
+            var database = _metadataProcessor.Process(metadata);
 
-            throw new NotImplementedException();
+            return database;
         }
     }
 }
