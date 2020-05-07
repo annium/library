@@ -6,7 +6,7 @@ namespace Xmg.Core.Models
     {
         public string Name { get; }
         public IReadOnlyCollection<TableColumn> Columns { get; }
-        public TablePrimaryKeyConstraint PrimaryKey { get; }
+        public TablePrimaryKeyConstraint? PrimaryKey { get; }
         public IReadOnlyCollection<TableIndex> Indexes { get; }
         public IReadOnlyCollection<TableForeignKeyConstraint> ForeignKeys { get; }
 
@@ -24,5 +24,7 @@ namespace Xmg.Core.Models
             Indexes = indexes;
             ForeignKeys = foreignKeys;
         }
+
+        public override string ToString() => Name;
     }
 }

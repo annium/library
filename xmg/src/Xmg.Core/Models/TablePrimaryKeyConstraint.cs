@@ -16,6 +16,8 @@ namespace Xmg.Core.Models
             Name = BuildName();
         }
 
+        public override string ToString() => Name;
+
         private string BuildName()
         {
             var sb = new StringBuilder("PK_");
