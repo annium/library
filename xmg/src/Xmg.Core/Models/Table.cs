@@ -13,7 +13,7 @@ namespace Xmg.Core.Models
         public Table(
             string name,
             IReadOnlyCollection<TableColumn> columns,
-            TablePrimaryKeyConstraint primaryKey,
+            TablePrimaryKeyConstraint? primaryKey,
             IReadOnlyCollection<TableIndex> indexes,
             IReadOnlyCollection<TableForeignKeyConstraint> foreignKeys
         )

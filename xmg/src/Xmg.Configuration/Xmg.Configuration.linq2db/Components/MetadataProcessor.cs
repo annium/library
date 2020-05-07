@@ -32,19 +32,19 @@ namespace Xmg.Configuration.linq2db.Components
         private (string schema, Table table) ProcessTable(LDatabase database, LTable table)
         {
             var columns = table.Columns
-                .Select(x => ProcessColumn(table, x))
+                .Select(x => ProcessColumn(table, x)!)
                 .Where(x => x != null)
                 .ToArray();
 
             var primaryKey = ResolvePrimaryKey(table.Columns);
 
             var foreignKeys = table.Columns
-                .Select(x => ProcessForeignKey(database, table, x))
+                .Select(x => ProcessForeignKey(database, table, x)!)
                 .Where(x => x != null)
                 .ToArray();
 
             return (
-                table.Schema,
+                table.Schema ?? string.Empty,
                 new Table(
                     table.Name,
                     columns,
@@ -79,14 +79,14 @@ namespace Xmg.Configuration.linq2db.Components
         {
             var primaryKeyColumns = columns
                 .Where(x => x.Attribute.IsColumn && x.PrimaryKey != null)
-                .OrderBy(x => x.PrimaryKey.Order)
+                .OrderBy(x => x.PrimaryKey!.Order)
                 .Select(x => x.Name)
                 .ToArray();
 
             return primaryKeyColumns.Length > 0 ? new TablePrimaryKeyConstraint(primaryKeyColumns) : null;
         }
 
-        private TableForeignKeyConstraint ProcessForeignKey(LDatabase db, LTable table, LTableColumn column)
+        private TableForeignKeyConstraint? ProcessForeignKey(LDatabase db, LTable table, LTableColumn column)
         {
             if (column.Association is null)
                 return null;

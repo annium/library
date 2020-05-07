@@ -6,19 +6,19 @@ namespace Xmg.Core.Models
     public class TableForeignKeyConstraint
     {
         public string Name { get; }
-        public string ForeignSchema { get; }
+        public string? ForeignSchema { get; }
         public string ForeignTable { get; }
         public string ForeignColumn { get; }
-        public string PrimarySchema { get; }
+        public string? PrimarySchema { get; }
         public string PrimaryTable { get; }
         public string PrimaryColumn { get; }
         public Rule Rule { get; }
 
         public TableForeignKeyConstraint(
-            string foreignSchema,
+            string? foreignSchema,
             string foreignTable,
             string foreignColumn,
-            string primarySchema,
+            string? primarySchema,
             string primaryTable,
             string primaryColumn,
             Rule rule
