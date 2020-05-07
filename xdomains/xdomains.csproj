@@ -16,7 +16,7 @@
         <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
-        <PackageReference Include="NodaTime" Version="2.4.7" />
+        <PackageReference Include="NodaTime" Version="2.4.8" />
     </ItemGroup>
     <ItemGroup>
         <None Update="zones.txt" CopyToOutputDirectory="PreserveNewest" />
