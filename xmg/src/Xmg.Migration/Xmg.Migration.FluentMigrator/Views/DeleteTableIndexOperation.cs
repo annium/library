@@ -1,6 +1,7 @@
 namespace Xmg.Migration.FluentMigrator.Views
 {
-    internal class DeleteTableIndexOperation
+    internal class DeleteTableIndexOperation : IMigrationOperation
     {
+        // TODO: implement
     }
 }

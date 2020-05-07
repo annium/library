@@ -1,6 +1,7 @@
 namespace Xmg.Migration.FluentMigrator.Views
 {
-    internal class AlterTableOperation
+    internal class AlterTableOperation : IMigrationOperation
     {
+        // TODO: implement
     }
 }
