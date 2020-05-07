@@ -8,7 +8,7 @@ using Xmg.Configuration.Components;
 
 namespace Xmg.Commands
 {
-    internal class ParseCommand : Command<ParseCommandConfiguration>
+    internal class ParseCommand : Command<ParseCommandConfig>
     {
         private readonly IConfiguratorFactory _configuratorFactory;
         private readonly ILogger<ParseCommand> _logger;
@@ -25,13 +25,13 @@ namespace Xmg.Commands
         }
 
         public override void Handle(
-            ParseCommandConfiguration cfg,
+            ParseCommandConfig cfg,
             CancellationToken token
         )
         {
             _logger.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
             var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
-            var database = configurator.LoadConfiguration(cfg);
+            var database = configurator.LoadConfiguration(new Config(cfg.Assembly));
 
             _logger.Debug($"Save '{cfg.ProjectName}' configuration to {cfg.Output}");
             var serializer = StringSerializer.Configure(opts => { opts.WriteIndented = true; });
@@ -40,10 +40,10 @@ namespace Xmg.Commands
     }
 
 
-    internal class ParseCommandConfiguration : IConfiguration, Migration.Abstractions.IConfiguration
+    internal class ParseCommandConfig
     {
         [Option("cp", true)]
-        [Help("Configuration provider.")]
+        [Help("Config provider.")]
         public ConfigurationProvider ConfigurationProvider { get; set; }
 
         [Option("a", true)]

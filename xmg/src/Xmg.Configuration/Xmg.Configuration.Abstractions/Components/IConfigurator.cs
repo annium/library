@@ -5,6 +5,6 @@ namespace Xmg.Configuration.Abstractions.Components
     public interface IConfigurator
     {
         ConfigurationProvider Provider { get; }
-        Database LoadConfiguration(IConfiguration cfg);
+        Database LoadConfiguration(Config cfg);
     }
 }

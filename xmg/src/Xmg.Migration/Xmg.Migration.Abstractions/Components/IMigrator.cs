@@ -6,6 +6,6 @@ namespace Xmg.Migration.Abstractions.Components
     public interface IMigrator
     {
         MigrationProvider Provider { get; }
-        IMigration CreateMigration(Database database, IConfiguration cfg);
+        IMigration CreateMigration(Database database, Config cfg);
     }
 }

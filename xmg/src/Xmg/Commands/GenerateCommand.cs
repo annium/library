@@ -1,7 +1,9 @@
+using System;
 using System.IO;
 using System.Threading;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
+using NodaTime;
 using Xmg.Configuration.Abstractions;
 using Xmg.Configuration.Components;
 using Xmg.Migration.Abstractions;
@@ -9,8 +11,9 @@ using Xmg.Migration.Components;
 
 namespace Xmg.Commands
 {
-    internal class GenerateCommand : Command<GenerateCommandConfiguration>
+    internal class GenerateCommand : Command<GenerateCommandConfig>
     {
+        private readonly Func<Instant> _getInstant;
         private readonly IConfiguratorFactory _configuratorFactory;
         private readonly IMigratorFactory _migratorFactory;
         private readonly ILogger<GenerateCommand> _logger;
@@ -18,26 +21,35 @@ namespace Xmg.Commands
         public override string Description { get; } = "generate Migration";
 
         public GenerateCommand(
+            Func<Instant> getInstant,
             IConfiguratorFactory configuratorFactory,
             IMigratorFactory migratorFactory,
             ILogger<GenerateCommand> logger
         )
         {
+            _getInstant = getInstant;
             _configuratorFactory = configuratorFactory;
             _migratorFactory = migratorFactory;
             _logger = logger;
         }
 
         public override void Handle(
-            GenerateCommandConfiguration cfg,
+            GenerateCommandConfig cfg,
             CancellationToken token
         )
         {
             _logger.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
             var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
-            var database = configurator.LoadConfiguration(cfg);
+            var configurationCfg = new Configuration.Abstractions.Config(cfg.Assembly);
+            var database = configurator.LoadConfiguration(configurationCfg);
 
-            _logger.Debug($"Convert '{cfg.ProjectName}' mapping schema to Database model");
+            var migrationName = cfg.Name;
+            var migrationVersion = _getInstant().ToDateTimeOffset().ToString("yyyyMMdd");
+
+            _logger.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");
+            var migrator = _migratorFactory.GetForProvider(cfg.MigrationProvider);
+            var migrationCfg = new Migration.Abstractions.Config(migrationName, migrationVersion);
+            var migration = migrator.CreateMigration(database, migrationCfg);
 
             _logger.Debug($"Convert '{cfg.ProjectName}' Database model to Database view");
 
@@ -57,10 +69,10 @@ namespace Xmg.Commands
     }
 
 
-    internal class GenerateCommandConfiguration : Configuration.Abstractions.IConfiguration, Migration.Abstractions.IConfiguration
+    internal class GenerateCommandConfig
     {
         [Option("cp", true)]
-        [Help("Configuration provider.")]
+        [Help("Config provider.")]
         public ConfigurationProvider ConfigurationProvider { get; set; }
 
         [Option("mp", true)]

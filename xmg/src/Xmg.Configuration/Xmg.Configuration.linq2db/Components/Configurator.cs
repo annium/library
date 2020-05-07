@@ -20,7 +20,7 @@ namespace Xmg.Configuration.linq2db.Components
         }
 
 
-        public Database LoadConfiguration(IConfiguration cfg)
+        public Database LoadConfiguration(Config cfg)
         {
             var metadata = _loader.LoadMetadata(cfg.Assembly);
             var database = _metadataProcessor.Process(metadata);
