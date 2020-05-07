@@ -1,9 +1,9 @@
-using LinqToDB.Mapping;
+using LDatabase = Annium.linq2db.Extensions.Models.Database;
 
 namespace Xmg.Configuration.linq2db.Components
 {
-    public interface ILoader
+    internal interface ILoader
     {
-        MappingSchema LoadMappingSchema(string assemblyPath);
+        LDatabase LoadMetadata(string assemblyPath);
     }
 }
