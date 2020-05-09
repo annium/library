@@ -1,10 +1,26 @@
 using System.Data;
 using FluentMigrator;
 
-namespace {{namespace}}
+namespace {{ namespace }}
 {
-    [Migration({{version}})]
-    public class {{name}} : Migration
+    [Migration({{ version }})]
+    public class {{ name }} : Migration
     {
+        public override void Up()
+        {
+            {{~ for group in up ~}}
+            {{~ if !for.first ~}}
+
+            {{~ end ~}}
+            // {{ group.name }}
+            {{~ for operation in group.operations ~}}
+            {{ operation }};
+            {{~ end ~}}
+            {{~ end ~}}
+        }
+
+        public override void Down()
+        {
+        }
     }
 }
