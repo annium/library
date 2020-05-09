@@ -1,6 +1,8 @@
+using Xmg.Migration.Abstractions.Views;
+
 namespace Xmg.Migration.FluentMigrator.Views
 {
-    internal class AlterTableOperation : IMigrationOperation
+    internal class AlterTableOperation : IAlterTableOperation
     {
         // TODO: implement
     }

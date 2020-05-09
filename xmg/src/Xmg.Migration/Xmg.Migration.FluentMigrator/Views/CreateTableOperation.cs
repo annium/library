@@ -1,10 +1,11 @@
 using System.Text;
 using Xmg.Core.Models;
+using Xmg.Migration.Abstractions.Views;
 using Xmg.Migration.FluentMigrator.Views.Syntax;
 
 namespace Xmg.Migration.FluentMigrator.Views
 {
-    internal class CreateTableOperation : IMigrationOperation
+    internal class CreateTableOperation : ICreateTableOperation
     {
         private readonly string? _schema;
         private readonly Table _table;

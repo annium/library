@@ -1,9 +1,10 @@
 using System.Text;
 using Xmg.Core.Models;
+using Xmg.Migration.Abstractions.Views;
 
 namespace Xmg.Migration.FluentMigrator.Views
 {
-    internal class CreateTableForeignKeyOperation : IMigrationOperation
+    internal class CreateTableForeignKeyOperation : ICreateTableForeignKeyOperation
     {
         private readonly TableForeignKeyConstraint _key;
 

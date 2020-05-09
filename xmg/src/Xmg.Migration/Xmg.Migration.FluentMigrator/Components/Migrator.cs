@@ -5,6 +5,7 @@ using Xmg.Core.Tools;
 using Xmg.Core.Views;
 using Xmg.Migration.Abstractions;
 using Xmg.Migration.Abstractions.Components;
+using Xmg.Migration.Abstractions.Views;
 using Xmg.Migration.FluentMigrator.Views;
 
 namespace Xmg.Migration.FluentMigrator.Components
@@ -45,27 +46,27 @@ namespace Xmg.Migration.FluentMigrator.Components
             return result;
         }
 
-        private IEnumerable<MigrationOperationGroup> GetUpOperations(Database database)
+        private IEnumerable<OperationGroup> GetUpOperations(Database database)
         {
             foreach (var schema in database.Schemas)
             {
                 // create schema
                 if (!string.IsNullOrWhiteSpace(schema.Name))
-                    yield return new MigrationOperationGroup(
+                    yield return new OperationGroup(
                         $"Create schema {schema.Name}",
                         new CreateSchemaOperation(schema.Name)
                     );
 
                 // create tables in schema
                 foreach (var table in schema.Tables)
-                    yield return new MigrationOperationGroup(
+                    yield return new OperationGroup(
                         $"Create table {table.Name}",
                         CreateTableOperations(schema.Name, table).ToArray()
                     );
             }
         }
 
-        private IEnumerable<IMigrationOperation> CreateTableOperations(string? schema, Table table)
+        private IEnumerable<IOperation> CreateTableOperations(string? schema, Table table)
         {
             yield return new CreateTableOperation(schema, table);
 
@@ -76,20 +77,20 @@ namespace Xmg.Migration.FluentMigrator.Components
                 yield return new CreateTableForeignKeyOperation(foreignKey);
         }
 
-        private IEnumerable<MigrationOperationGroup> GetDownOperations(Database database)
+        private IEnumerable<OperationGroup> GetDownOperations(Database database)
         {
             foreach (var schema in database.Schemas)
             {
                 // delete tables in schema
                 foreach (var table in schema.Tables)
-                    yield return new MigrationOperationGroup(
+                    yield return new OperationGroup(
                         $"Delete table {table.Name}",
                         new DeleteTableOperation(schema.Name, table.Name)
                     );
 
                 // delete schema
                 if (!string.IsNullOrWhiteSpace(schema.Name))
-                    yield return new MigrationOperationGroup(
+                    yield return new OperationGroup(
                         $"Delete schema {schema.Name}",
                         new DeleteSchemaOperation(schema.Name)
                     );

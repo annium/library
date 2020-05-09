@@ -1,6 +1,8 @@
+using Xmg.Migration.Abstractions.Views;
+
 namespace Xmg.Migration.FluentMigrator.Views
 {
-    internal class DeleteSchemaOperation : IMigrationOperation
+    internal class DeleteSchemaOperation : IDeleteSchemaOperation
     {
         private readonly string _schema;
 

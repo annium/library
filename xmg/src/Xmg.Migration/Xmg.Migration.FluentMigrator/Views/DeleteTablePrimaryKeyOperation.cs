@@ -1,6 +1,8 @@
+using Xmg.Migration.Abstractions.Views;
+
 namespace Xmg.Migration.FluentMigrator.Views
 {
-    internal class DeleteTablePrimaryKeyOperation : IMigrationOperation
+    internal class DeleteTablePrimaryKeyOperation : IDeleteTablePrimaryKeyOperation
     {
         // TODO: implement
     }

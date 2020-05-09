@@ -1,6 +1,8 @@
+using Xmg.Migration.Abstractions.Views;
+
 namespace Xmg.Migration.FluentMigrator.Views
 {
-    internal class CreateSchemaOperation : IMigrationOperation
+    internal class CreateSchemaOperation : ICreateSchemaOperation
     {
         public string Name { get; }
 

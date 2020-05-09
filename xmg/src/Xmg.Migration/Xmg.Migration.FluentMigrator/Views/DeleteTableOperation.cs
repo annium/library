@@ -1,8 +1,9 @@
 using System.Text;
+using Xmg.Migration.Abstractions.Views;
 
 namespace Xmg.Migration.FluentMigrator.Views
 {
-    internal class DeleteTableOperation : IMigrationOperation
+    internal class DeleteTableOperation : IDeleteTableOperation
     {
         private readonly string? _schema;
         private readonly string _table;

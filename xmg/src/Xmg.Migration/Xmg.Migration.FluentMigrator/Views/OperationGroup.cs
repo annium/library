@@ -1,24 +1,25 @@
 using System.Collections.Generic;
+using Xmg.Migration.Abstractions.Views;
 
 namespace Xmg.Migration.FluentMigrator.Views
 {
-    internal class MigrationOperationGroup
+    internal class OperationGroup
     {
         public string Name { get; }
-        public IReadOnlyCollection<IMigrationOperation> Operations { get; }
+        public IReadOnlyCollection<IOperation> Operations { get; }
 
-        public MigrationOperationGroup(
+        public OperationGroup(
             string name,
-            IReadOnlyCollection<IMigrationOperation> operations
+            IReadOnlyCollection<IOperation> operations
         )
         {
             Name = name;
             Operations = operations;
         }
 
-        public MigrationOperationGroup(
+        public OperationGroup(
             string name,
-            params IMigrationOperation[] operations
+            params IOperation[] operations
         )
         {
             Name = name;
