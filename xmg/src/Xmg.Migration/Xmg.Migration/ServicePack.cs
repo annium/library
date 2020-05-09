@@ -1,6 +1,7 @@
 using System;
 using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Xmg.Migration.Abstractions.Components;
 using Xmg.Migration.Components;
 
 namespace Xmg.Migration
@@ -16,6 +17,7 @@ namespace Xmg.Migration
         {
             // components
             services.AddSingleton<IMigratorFactory, MigratorFactory>();
+            services.AddSingleton<IMigrationOrganizer, MigrationOrganizer>();
         }
     }
 }
