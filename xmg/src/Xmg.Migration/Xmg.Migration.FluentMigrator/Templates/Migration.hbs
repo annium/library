@@ -1,4 +1,3 @@
-using System.Data;
 using FluentMigrator;
 
 namespace {{ namespace }}
@@ -21,6 +20,15 @@ namespace {{ namespace }}
 
         public override void Down()
         {
+            {{~ for group in down ~}}
+            {{~ if !for.first ~}}
+
+            {{~ end ~}}
+            // {{ group.name }}
+            {{~ for operation in group.operations ~}}
+            {{ operation }};
+            {{~ end ~}}
+            {{~ end ~}}
         }
     }
 }

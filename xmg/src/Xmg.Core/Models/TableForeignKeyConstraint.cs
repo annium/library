@@ -1,4 +1,3 @@
-using System.Data;
 using System.Text;
 
 namespace Xmg.Core.Models
@@ -12,7 +11,6 @@ namespace Xmg.Core.Models
         public string? PrimarySchema { get; }
         public string PrimaryTable { get; }
         public string PrimaryColumn { get; }
-        public Rule Rule { get; }
 
         public TableForeignKeyConstraint(
             string? foreignSchema,
@@ -20,8 +18,7 @@ namespace Xmg.Core.Models
             string foreignColumn,
             string? primarySchema,
             string primaryTable,
-            string primaryColumn,
-            Rule rule
+            string primaryColumn
         )
         {
             ForeignSchema = foreignSchema;
@@ -30,7 +27,6 @@ namespace Xmg.Core.Models
             PrimarySchema = primarySchema;
             PrimaryTable = primaryTable;
             PrimaryColumn = primaryColumn;
-            Rule = rule;
             Name = BuildName();
         }
 

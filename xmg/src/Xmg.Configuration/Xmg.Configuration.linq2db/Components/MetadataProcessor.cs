@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using Annium.Core.Reflection;
 using LinqToDB.Extensions;
@@ -36,7 +35,7 @@ namespace Xmg.Configuration.linq2db.Components
                 .Where(x => x != null)
                 .ToArray();
 
-            var primaryKey = ResolvePrimaryKey(table.Columns);
+            var primaryKey = ResolvePrimaryKey(table.Schema, table.Name, table.Columns);
 
             var foreignKeys = table.Columns
                 .Select(x => ProcessForeignKey(database, table, x)!)
@@ -75,7 +74,7 @@ namespace Xmg.Configuration.linq2db.Components
             );
         }
 
-        private TablePrimaryKeyConstraint? ResolvePrimaryKey(IReadOnlyCollection<LTableColumn> columns)
+        private TablePrimaryKeyConstraint? ResolvePrimaryKey(string? schema, string table, IReadOnlyCollection<LTableColumn>? columns)
         {
             var primaryKeyColumns = columns
                 .Where(x => x.Attribute.IsColumn && x.PrimaryKey != null)
@@ -83,7 +82,7 @@ namespace Xmg.Configuration.linq2db.Components
                 .Select(x => x.Name)
                 .ToArray();
 
-            return primaryKeyColumns.Length > 0 ? new TablePrimaryKeyConstraint(primaryKeyColumns) : null;
+            return primaryKeyColumns.Length > 0 ? new TablePrimaryKeyConstraint(schema, table, primaryKeyColumns) : null;
         }
 
         private TableForeignKeyConstraint? ProcessForeignKey(LDatabase db, LTable table, LTableColumn column)
@@ -116,8 +115,7 @@ namespace Xmg.Configuration.linq2db.Components
                 foreignColumn.Name,
                 primaryTable.Schema,
                 primaryTable.Name,
-                primaryColumn.Name,
-                Rule.None
+                primaryColumn.Name
             );
         }
 

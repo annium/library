@@ -7,11 +7,17 @@ namespace Xmg.Core.Models
     {
         public string Name { get; }
         public IReadOnlyCollection<string> Columns { get; }
+        private readonly string? _schema;
+        private readonly string _table;
 
         public TablePrimaryKeyConstraint(
+            string? schema,
+            string table,
             IReadOnlyCollection<string> columns
         )
         {
+            _schema = schema;
+            _table = table;
             Columns = columns;
             Name = BuildName();
         }
@@ -20,9 +26,11 @@ namespace Xmg.Core.Models
 
         private string BuildName()
         {
-            var sb = new StringBuilder("PK_");
+            var sb = new StringBuilder("PK");
 
-            sb.Append(string.Join('_', Columns));
+            if (!string.IsNullOrWhiteSpace(_schema))
+                sb.Append($"_{_schema}");
+            sb.Append($"_{_table}");
 
             return sb.ToString();
         }
