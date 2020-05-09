@@ -12,13 +12,16 @@ namespace Xmg.Migration.FluentMigrator.Components
 {
     internal class Migrator : IMigrator
     {
+        private readonly IMigrationOrganizer _organizer;
         private readonly ITemplateWriter _templateWriter;
         public MigrationProvider Provider => MigrationProvider.FluentMigrator;
 
         public Migrator(
+            IMigrationOrganizer organizer,
             ITemplateWriter templateWriter
         )
         {
+            _organizer = organizer;
             _templateWriter = templateWriter;
         }
 
@@ -37,7 +40,7 @@ namespace Xmg.Migration.FluentMigrator.Components
                 Namespace = cfg.MigrationNamespace,
                 Name = cfg.MigrationName,
                 Version = cfg.MigrationVersion,
-                Up = GetUpOperations(database).ToArray(),
+                Up = _organizer.OrganizeUp(GetUpOperations(database).ToArray()),
                 Down = GetDownOperations(database).ToArray(),
             };
 
@@ -46,23 +49,18 @@ namespace Xmg.Migration.FluentMigrator.Components
             return result;
         }
 
-        private IEnumerable<OperationGroup> GetUpOperations(Database database)
+        private IEnumerable<IOperation> GetUpOperations(Database database)
         {
             foreach (var schema in database.Schemas)
             {
                 // create schema
                 if (!string.IsNullOrWhiteSpace(schema.Name))
-                    yield return new OperationGroup(
-                        $"Create schema {schema.Name}",
-                        new CreateSchemaOperation(schema.Name)
-                    );
+                    yield return new CreateSchemaOperation(schema.Name);
 
                 // create tables in schema
                 foreach (var table in schema.Tables)
-                    yield return new OperationGroup(
-                        $"Create table {table.Name}",
-                        CreateTableOperations(schema.Name, table).ToArray()
-                    );
+                foreach (var operation in CreateTableOperations(schema.Name, table).ToArray())
+                    yield return operation;
             }
         }
 
@@ -77,23 +75,17 @@ namespace Xmg.Migration.FluentMigrator.Components
                 yield return new CreateTableForeignKeyOperation(foreignKey);
         }
 
-        private IEnumerable<OperationGroup> GetDownOperations(Database database)
+        private IEnumerable<IOperation> GetDownOperations(Database database)
         {
             foreach (var schema in database.Schemas)
             {
                 // delete tables in schema
                 foreach (var table in schema.Tables)
-                    yield return new OperationGroup(
-                        $"Delete table {table.Name}",
-                        new DeleteTableOperation(schema.Name, table.Name)
-                    );
+                    yield return new DeleteTableOperation(schema.Name, table.Name);
 
                 // delete schema
                 if (!string.IsNullOrWhiteSpace(schema.Name))
-                    yield return new OperationGroup(
-                        $"Delete schema {schema.Name}",
-                        new DeleteSchemaOperation(schema.Name)
-                    );
+                    yield return new DeleteSchemaOperation(schema.Name);
             }
         }
     }

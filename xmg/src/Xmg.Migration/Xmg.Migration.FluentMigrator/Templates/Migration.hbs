@@ -7,27 +7,21 @@ namespace {{ namespace }}
     {
         public override void Up()
         {
-            {{~ for group in up ~}}
+            {{~ for operation in up ~}}
             {{~ if !for.first ~}}
 
             {{~ end ~}}
-            // {{ group.name }}
-            {{~ for operation in group.operations ~}}
             {{ operation }};
-            {{~ end ~}}
             {{~ end ~}}
         }
 
         public override void Down()
         {
-            {{~ for group in down ~}}
+            {{~ for operation in down ~}}
             {{~ if !for.first ~}}
 
             {{~ end ~}}
-            // {{ group.name }}
-            {{~ for operation in group.operations ~}}
             {{ operation }};
-            {{~ end ~}}
             {{~ end ~}}
         }
     }
