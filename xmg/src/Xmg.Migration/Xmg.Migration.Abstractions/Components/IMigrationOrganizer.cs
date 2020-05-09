@@ -5,7 +5,6 @@ namespace Xmg.Migration.Abstractions.Components
 {
     public interface IMigrationOrganizer
     {
-        IReadOnlyCollection<IOperation> OrganizeUp(IReadOnlyCollection<IOperation> operations);
-        IReadOnlyCollection<IOperation> OrganizeDown(IReadOnlyCollection<IOperation> operations);
+        IReadOnlyCollection<IOperation> Organize(IReadOnlyCollection<IOperation> operations);
     }
 }

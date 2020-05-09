@@ -40,8 +40,8 @@ namespace Xmg.Migration.FluentMigrator.Components
                 Namespace = cfg.MigrationNamespace,
                 Name = cfg.MigrationName,
                 Version = cfg.MigrationVersion,
-                Up = _organizer.OrganizeUp(GetUpOperations(database).ToArray()),
-                Down = _organizer.OrganizeUp(GetDownOperations(database).ToArray()),
+                Up = _organizer.Organize(GetUpOperations(database).ToArray()),
+                Down = _organizer.Organize(GetDownOperations(database).ToArray()),
             };
 
             var result = _templateWriter.Write("Templates.Migration", data);
