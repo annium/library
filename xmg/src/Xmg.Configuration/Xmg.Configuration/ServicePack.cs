@@ -16,6 +16,8 @@ namespace Xmg.Configuration
         {
             // components
             services.AddSingleton<IConfiguratorFactory, ConfiguratorFactory>();
+
+            services.AddLoadContextFactories();
         }
     }
 }

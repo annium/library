@@ -35,13 +35,13 @@ namespace Debugger
                 return LoadFromAssemblyPath(assemblyPath);
             }
 
-            return null;
+            return default!;
         }
 
         protected override Assembly Load(AssemblyName assemblyName)
         {
-            if (assemblyName.Name.StartsWith("Amazon.Lambda.Core"))
-                return null;
+            if (assemblyName.Name!.StartsWith("Amazon.Lambda.Core"))
+                return default!;
 
             var assemblyPath = _builtInResolver.ResolveAssemblyToPath(assemblyName);
             if (assemblyPath == null || !File.Exists(assemblyPath))
@@ -54,7 +54,7 @@ namespace Debugger
                 return LoadFromAssemblyPath(assemblyPath);
             }
 
-            return null;
+            return default!;
         }
 
         protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
@@ -139,7 +139,7 @@ namespace Debugger
                     }
                 }
 
-                return null;
+                return default!;
             }
         }
     }
