@@ -1,7 +1,6 @@
 using System.IO;
 using System.Linq;
 using Annium.Extensions.Primitives;
-using Annium.Logging.Abstractions;
 using XRest.Core.Components;
 using XRest.TypeScript.Views;
 
@@ -9,15 +8,12 @@ namespace XRest.TypeScript.Components.Implementations
 {
     internal class Writer : IWriter
     {
-        private readonly ILogger<Writer> _logger;
         private readonly ITemplateWriter _templateWriter;
 
         public Writer(
-            ILogger<Writer> logger,
             ITemplateWriter templateWriter
         )
         {
-            _logger = logger;
             _templateWriter = templateWriter;
         }
 
@@ -29,8 +25,18 @@ namespace XRest.TypeScript.Components.Implementations
 
             Write(output, "shared.ts", "Templates.SharedExports", new { Exports = api.SharedExports });
 
-            foreach (var controllerView in api.Controllers.Where(x => x.Actions.Count > 0))
-                Write(output, $"{controllerView.Name.CamelCase()}Api.ts", "Templates.Api", controllerView);
+            foreach (var group in api.Controllers.Where(x => x.Actions.Count > 0).GroupBy(x => x.Area))
+            foreach (var controllerView in group)
+            {
+                var directory = output;
+                if (!string.IsNullOrWhiteSpace(group.Key))
+                {
+                    directory = Path.Combine(output, group.Key);
+                    Directory.CreateDirectory(directory);
+                }
+
+                Write(directory, $"{controllerView.Name.CamelCase()}Api.ts", "Templates.Api", controllerView);
+            }
         }
 
         private void Write<T>(string output, string file, string template, T data)

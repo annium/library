@@ -11,6 +11,7 @@ namespace XRest.Core.Helpers
         private static readonly Regex RouteRe = new Regex(@"\{([A-z0-9]+)[^}]*\}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         public static string BuildRoute(
+            string? controllerArea,
             string controllerName,
             string? controllerRoute,
             string actionName,
@@ -20,7 +21,12 @@ namespace XRest.Core.Helpers
             var sb = new StringBuilder();
 
             if (!string.IsNullOrWhiteSpace(controllerRoute))
-                sb.Append(controllerRoute.Replace("[controller]", controllerName, StringComparison.InvariantCultureIgnoreCase));
+            {
+                var route = controllerRoute.Replace("[controller]", controllerName, StringComparison.InvariantCultureIgnoreCase);
+                if (!string.IsNullOrWhiteSpace(controllerArea))
+                    route = route.Replace("[area]", controllerArea, StringComparison.InvariantCultureIgnoreCase);
+                sb.Append(route);
+            }
 
             if (!string.IsNullOrWhiteSpace(actionRoute))
             {

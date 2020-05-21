@@ -39,7 +39,7 @@ namespace XRest.TypeScript.Components.Implementations
             var usedTypes = new UsedTypeViewsCollector().CollectUsedTypeViews(exports, actions);
             var imports = usedTypes.Except(exports).OrderBy(x => x.Name).ToArray();
 
-            return new ControllerView(model.Name.CamelCase(), imports, actions, exports);
+            return new ControllerView(model.Area?.CamelCase(), model.Name.CamelCase(), imports, actions, exports);
         }
 
         private ActionView BuildActionView(

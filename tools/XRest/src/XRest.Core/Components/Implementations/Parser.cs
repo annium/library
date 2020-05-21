@@ -25,17 +25,19 @@ namespace XRest.Core.Components.Implementations
             Type controllerType
         )
         {
+            var controllerArea = controllerType.GetCustomAttribute<AreaAttribute>()?.RouteValue;
             var controllerName = controllerType.Name.Replace("Controller", string.Empty);
             var controllerAuth = ParseAuth(controllerType.GetCustomAttributes());
             var controllerRoute = controllerType.GetCustomAttribute<RouteAttribute>()?.Template;
 
             var actions = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance).Where(ParseHelper.IsAction).ToArray();
-            var actionModels = actions.Select(x => ParseAction(controllerName, controllerAuth, controllerRoute, x)).ToArray();
+            var actionModels = actions.Select(x => ParseAction(controllerArea, controllerName, controllerAuth, controllerRoute, x)).ToArray();
 
-            return new ControllerModel(controllerName, actionModels);
+            return new ControllerModel(controllerArea, controllerName, actionModels);
         }
 
         private ActionModel ParseAction(
+            string? controllerArea,
             string controllerName,
             AuthModel? controllerAuth,
             string? controllerRoute,
@@ -45,7 +47,7 @@ namespace XRest.Core.Components.Implementations
             var actionName = action.Name;
             var methodAttribute = action.GetCustomAttributes<HttpMethodAttribute>().FirstOrDefault();
             var method = new HttpMethod(methodAttribute?.HttpMethods.FirstOrDefault() ?? HttpMethod.Get.Method);
-            var route = RouteHelper.BuildRoute(controllerName, controllerRoute, action.Name, methodAttribute?.Template);
+            var route = RouteHelper.BuildRoute(controllerArea, controllerName, controllerRoute, action.Name, methodAttribute?.Template);
 
             var routeParameters = RouteHelper.ParseRouteParameters(route);
 
