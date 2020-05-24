@@ -46,7 +46,7 @@ namespace XRest.Dotnet.Commands
             var view = _processor.Process(Path.GetFileName(cfg.Output), api);
 
             _logger.Info($"Write api view to {cfg.Output}");
-            _writer.Write(cfg.Output, view);
+            _writer.Write(cfg.Output, view, cfg.TestClient);
             _logger.Info($"Client written to {cfg.Output}");
         }
     }
@@ -74,6 +74,10 @@ namespace XRest.Dotnet.Commands
             get => _output;
             set => _output = Path.GetFullPath(value);
         }
+
+        [Option("t")]
+        [Help("Generate test client. Is not ensuring success code and returns data wrapped in responses.")]
+        public bool TestClient { get; set; }
 
         private string _assembly = string.Empty;
         private string _output = string.Empty;

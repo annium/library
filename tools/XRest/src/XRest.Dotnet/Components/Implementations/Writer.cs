@@ -16,7 +16,7 @@ namespace XRest.Dotnet.Components.Implementations
             _templateWriter = templateWriter;
         }
 
-        public void Write(string output, ClientContainerView client)
+        public void Write(string output, ClientContainerView client, bool generateTestClient)
         {
             Write(output, "RequestFactory", "Templates.RequestFactory", new
             {
@@ -28,23 +28,23 @@ namespace XRest.Dotnet.Components.Implementations
                 Usages = new[] { "Annium.Net.Http" },
                 Namespace = client.Namespace,
             });
-            WriteClientContainer(output, client.Namespace, client);
+            WriteClientContainer(output, client.Namespace, client, generateTestClient);
         }
 
-        private void WriteAbstractClient(string rootDir, string rootNs, IClientView abstraction)
+        private void WriteAbstractClient(string rootDir, string rootNs, IClientView abstraction, bool generateTestClient)
         {
             switch (abstraction)
             {
                 case ClientContainerView container:
-                    WriteClientContainer(rootDir, rootNs, container);
+                    WriteClientContainer(rootDir, rootNs, container, generateTestClient);
                     break;
                 case ClientView client:
-                    WriteClient(rootDir, rootNs, client);
+                    WriteClient(rootDir, rootNs, client, generateTestClient);
                     break;
             }
         }
 
-        private void WriteClientContainer(string rootDir, string rootNs, ClientContainerView container)
+        private void WriteClientContainer(string rootDir, string rootNs, ClientContainerView container, bool generateTestClient)
         {
             var output = GetOutputPath(rootDir, rootNs, container.Namespace);
             if (!Directory.Exists(output))
@@ -53,16 +53,16 @@ namespace XRest.Dotnet.Components.Implementations
             Write(output, container.Type, "Templates.ClientContainer", container);
 
             foreach (var client in container.Clients)
-                WriteAbstractClient(rootDir, rootNs, client);
+                WriteAbstractClient(rootDir, rootNs, client, generateTestClient);
         }
 
-        private void WriteClient(string rootDir, string rootNs, ClientView client)
+        private void WriteClient(string rootDir, string rootNs, ClientView client, bool generateTestClient)
         {
             var output = GetOutputPath(rootDir, rootNs, client.Namespace);
             if (!Directory.Exists(output))
                 Directory.CreateDirectory(output);
 
-            Write(output, client.Type, "Templates.Client", client);
+            Write(output, client.Type, generateTestClient ? "Templates.TestClient" : "Templates.Client", client);
         }
 
         private void Write<T>(string output, string fileName, string template, T data)
