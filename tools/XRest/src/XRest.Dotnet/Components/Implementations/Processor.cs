@@ -47,6 +47,7 @@ namespace XRest.Dotnet.Components.Implementations
                 .Where(x => !IsBaseType(x))
                 .Select(x => x.Namespace!)
                 .Append("Annium.Net.Http")
+                .Append("System.Threading.Tasks")
                 .ToArray();
             var ns = string.IsNullOrWhiteSpace(controller.Area)
                 ? BuildNamespace(projectName, Clients)
