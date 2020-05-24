@@ -17,7 +17,8 @@ namespace {{ namespace }}
         {{~ end ~}}
         )
         {
-            return await Request.{{ action.method }}({{~ if action.has_path_parameters ~}}${{~ end ~}}"{{ action.path }}")
+            return await Request.Clone()
+                .{{ action.method }}({{~ if action.path_parameters.size > 0 ~}}${{~ end ~}}"{{ action.path }}")
                 {{~ for parameter in action.query_parameters ~}}
                 .Param("{{ parameter.name }}", {{ parameter.name }})
                 {{~ end ~}}
