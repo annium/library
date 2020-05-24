@@ -14,4 +14,8 @@
     <ItemGroup>
         <ProjectReference Include="../XRest.Core/XRest.Core.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Templates/**" />
+        <EmbeddedResource Remove="Templates/.*" />
+    </ItemGroup>
 </Project>

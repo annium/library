@@ -1,0 +1,8 @@
+{{~ for ns in usages ~}}
+using {{ ns }};
+{{~ end ~}}
+
+namespace {{ namespace }}
+{
+    public delegate IHttpRequest RequestFactory();
+}

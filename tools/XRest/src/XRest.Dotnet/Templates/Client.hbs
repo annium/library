@@ -1,0 +1,32 @@
+{{~ for ns in usages ~}}
+using {{ ns }};
+{{~ end ~}}
+
+namespace {{ namespace }}
+{
+    public class {{ type }} : ClientBase
+    {
+        public {{ type }}(RequestFactory requestFactory) : base(requestFactory)
+        {
+        }
+        {{~ for action in actions ~}}
+
+        public async {{ if action.has_response }}Task<{{ action.response }}>{{ else }}Task{{ end }} {{ action.name }}(
+        {{~ for parameter in action.parameters ~}}
+            {{ parameter.type}} {{ parameter.name }}{{~ if !for.last }},{{~ end }}
+        {{~ end ~}}
+        )
+        {
+            return await Client.{{ action.method }}({{~ if action.has_path_parameters ~}}${{~ end ~}}"{{ action.path }}")
+                {{~ for parameter in action.query_parameters ~}}
+                .Param("{{ parameter.name }}", {{ parameter.name }})
+                {{~ end ~}}
+                {{~ if action.has_body ~}}
+                .JsonContent(body)
+                {{~ end ~}}
+                .EnsureSuccessStatusCode()
+                .{{ if action.has_response }}AsAsync<{{ action.response }}>{{ else }}AsAsync{{ end }}();
+        }
+        {{~ end ~}}
+    }
+}
