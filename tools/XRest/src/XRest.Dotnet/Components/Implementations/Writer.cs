@@ -18,11 +18,12 @@ namespace XRest.Dotnet.Components.Implementations
 
         public void Write(string output, ClientContainerView client, bool generateTestClient)
         {
-            Write(output, "RequestFactory", "Templates.RequestFactory", new
-            {
-                Usages = new[] { "Annium.Net.Http" },
-                Namespace = client.Namespace,
-            });
+            if (!generateTestClient)
+                Write(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
+                {
+                    Usages = new[] { "Annium.Net.Http" },
+                    Namespace = client.Namespace,
+                });
             Write(output, "ClientBase", "Templates.ClientBase", new
             {
                 Usages = new[] { "Annium.Net.Http" },

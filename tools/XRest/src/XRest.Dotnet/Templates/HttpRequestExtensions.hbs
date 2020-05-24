@@ -1,0 +1,11 @@
+{{~ for ns in usages ~}}
+using {{ ns }};
+{{~ end ~}}
+
+namespace {{ namespace }}
+{
+    public static class HttpRequestExtensions
+    {
+        public static Client Client(this IHttpRequest request) => new Client(request);
+    }
+}

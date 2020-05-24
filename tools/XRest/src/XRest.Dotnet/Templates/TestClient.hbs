@@ -6,7 +6,7 @@ namespace {{ namespace }}
 {
     public class {{ type }} : ClientBase
     {
-        public {{ type }}(RequestFactory requestFactory) : base(requestFactory)
+        public {{ type }}(IHttpRequest request) : base(request)
         {
         }
         {{~ for action in actions ~}}
@@ -17,7 +17,7 @@ namespace {{ namespace }}
         {{~ end ~}}
         )
         {
-            return await Client.{{ action.method }}({{~ if action.has_path_parameters ~}}${{~ end ~}}"{{ action.path }}")
+            return await Request.{{ action.method }}({{~ if action.has_path_parameters ~}}${{~ end ~}}"{{ action.path }}")
                 {{~ for parameter in action.query_parameters ~}}
                 .Param("{{ parameter.name }}", {{ parameter.name }})
                 {{~ end ~}}

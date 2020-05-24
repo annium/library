@@ -34,7 +34,7 @@ namespace XRest.Dotnet.Components.Implementations
 
         private ClientContainerView BuildContainerView(string ns, string name, string type, IReadOnlyCollection<IClientView> clients)
         {
-            var usages = BuildUsages(ns, clients.Select(x => x.Namespace));
+            var usages = BuildUsages(ns, clients.Select(x => x.Namespace).Append("Annium.Net.Http"));
 
             return new ClientContainerView(usages, ns, name, type, clients);
         }

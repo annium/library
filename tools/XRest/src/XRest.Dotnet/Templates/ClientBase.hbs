@@ -6,12 +6,11 @@ namespace {{ namespace }}
 {
     public abstract class ClientBase
     {
-        protected IHttpRequest Client => _requestFactory();
-        private readonly RequestFactory _requestFactory;
+        protected IHttpRequest Request { get; }
 
-        protected ClientBase(RequestFactory requestFactory)
+        protected ClientBase(IHttpRequest request)
         {
-           _requestFactory = requestFactory;
+           Request = request;
         }
     }
 }

@@ -12,10 +12,10 @@ namespace {{ namespace }}
         public {{ client.type }} {{ client.name }} { get; }
         {{~ end ~}}
 
-        public {{ type }}(RequestFactory requestFactory)
+        public {{ type }}(IHttpRequest request)
         {
             {{~ for client in clients ~}}
-            {{ client.name }} = new {{ client.type }}(requestFactory);
+            {{ client.name }} = new {{ client.type }}(request);
             {{~ end ~}}
         }
     }
