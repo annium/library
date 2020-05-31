@@ -2,63 +2,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
-using Annium.Core.DependencyInjection;
 using Annium.Extensions.Primitives;
-using Annium.Serialization.Abstractions;
-using Annium.Serialization.Json;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using XRest.Core.Helpers;
-using XRest.Core.Infrastructure.JsonConverters;
 using XRest.Core.Models;
 
-namespace XRest.AspNetCore
+namespace XRest.Plugins.AspNetCore
 {
-    public class XRestMiddleware
+    internal class ApiModelBuilder
     {
         private const string RouteArea = "area";
         private const string RouteController = "controller";
-
         private const string BindingBody = "Body";
 
-        private readonly RequestDelegate _next;
-        private readonly IApiDescriptionGroupCollectionProvider _descriptionProvider;
-
-        private readonly ISerializer<string> _serializer = StringSerializer.Configure(opts =>
+        public ApiModel Build(IReadOnlyCollection<ApiDescription> apiDescriptions)
         {
-            opts.Converters.Add(new TypeJsonConverter());
-            opts.WriteIndented = true;
-            opts.ConfigureDefault();
-        });
-
-        public XRestMiddleware(
-            RequestDelegate next,
-            IApiDescriptionGroupCollectionProvider descriptionProvider
-        )
-        {
-            _next = next;
-            _descriptionProvider = descriptionProvider;
-        }
-
-        public async Task Invoke(HttpContext context)
-        {
-            if (!context.Request.Path.StartsWithSegments("/.xrest"))
-            {
-                await _next(context);
-                return;
-            }
-
-            var apiModel = BuildApiModel();
-            await context.Response.WriteAsync(_serializer.Serialize(apiModel));
-        }
-
-        private ApiModel BuildApiModel()
-        {
-            var controllerActions = _descriptionProvider.ApiDescriptionGroups.Items
-                .SelectMany(x => x.Items)
+            var controllerActions = apiDescriptions
                 .Select(x => x.ActionDescriptor)
                 .OfType<ControllerActionDescriptor>()
                 .GroupBy(x => x.ControllerTypeInfo)

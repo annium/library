@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Builder;
-using XRest.AspNetCore;
+using XRest.Plugins.AspNetCore;
 
 namespace Annium.Core.DependencyInjection
 {
