@@ -11,4 +11,7 @@
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
     </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../XRest.Core/XRest.Core.csproj" />
+    </ItemGroup>
 </Project>
