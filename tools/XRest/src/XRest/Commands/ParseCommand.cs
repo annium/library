@@ -1,53 +1,63 @@
+using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
+using Annium.Core.DependencyInjection;
+using Annium.Core.Mapper;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using Annium.Serialization.Json;
-using XRest.Core.Components;
-using XRest.Core.Infrastructure.JsonConverters;
+using XRest.Core.Views;
+using XRest.Sources;
+using XRest.Sources.Components;
 
 namespace XRest.Commands
 {
-    internal class ParseCommand : Command<ParseCommandConfiguration>
+    internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>
     {
         public override string Id { get; } = "parse";
         public override string Description { get; } = "parse API";
         private readonly ILoader _loader;
-        private readonly IParser _parser;
+        private readonly IMapper _mapper;
         private readonly ILogger<ParseCommand> _logger;
 
         public ParseCommand(
             ILoader loader,
-            IParser parser,
+            IMapper mapper,
             ILogger<ParseCommand> logger
         )
         {
             _loader = loader;
-            _parser = parser;
+            _mapper = mapper;
             _logger = logger;
         }
 
-        public override void Handle(ParseCommandConfiguration cfg, CancellationToken token)
+        public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken token)
         {
-            _logger.Info($"Load '{cfg.ProjectName}' metadata from '{cfg.Assembly}'");
-            var controllerTypes = _loader.LoadControllerTypes(cfg.Assembly);
+            _logger.Info($"Load '{cfg.ProjectName}' model");
+            var model = await _loader.Load(cfg);
 
-            _logger.Info($"Parse '{cfg.ProjectName}' metadata");
-            var api = _parser.Parse(controllerTypes);
+            _logger.Debug($"Save '{cfg.ProjectName}' model view to '{cfg.Output}'");
+            var view = _mapper.Map<ApiView>(model);
+            SaveView(cfg.Output, view);
+        }
 
-            _logger.Debug($"Save '{cfg.ProjectName}' definition to '{cfg.Output}'");
-            if (!Directory.Exists(Path.GetDirectoryName(cfg.Output)))
-                Directory.CreateDirectory(Path.GetDirectoryName(cfg.Output));
+        private void SaveView(string output, ApiView view)
+        {
+            if (!Directory.Exists(Path.GetDirectoryName(output)))
+                Directory.CreateDirectory(Path.GetDirectoryName(output));
+
             var serializer = StringSerializer.Configure(opts =>
             {
-                opts.Converters.Add(new TypeJsonConverter());
                 opts.WriteIndented = true;
+                opts.ConfigureDefault();
             });
-            File.WriteAllText(cfg.Output, serializer.Serialize(api));
+
+            File.WriteAllText(output, serializer.Serialize(view));
         }
     }
 
-    internal class ParseCommandConfiguration
+    internal class ParseCommandConfiguration : ISourceLoaderConfiguration
     {
         [Option("a", true)]
         [Help("Path to API assembly.")]
@@ -60,6 +70,10 @@ namespace XRest.Commands
                 ProjectName = Path.GetFileNameWithoutExtension(value);
             }
         }
+
+        [Option("s")]
+        [Help("Server to load model from.")]
+        public Uri Server { get; set; } = default!;
 
         public string ProjectName { get; private set; } = string.Empty;
 

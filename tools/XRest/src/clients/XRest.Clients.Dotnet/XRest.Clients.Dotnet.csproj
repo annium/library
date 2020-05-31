@@ -13,6 +13,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="../../XRest.Core/XRest.Core.csproj" />
+        <ProjectReference Include="..\..\sources\XRest.Sources\XRest.Sources.csproj" />
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Templates/**" />

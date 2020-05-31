@@ -1,49 +1,46 @@
+using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using XRest.Clients.TypeScript.Components;
-using XRest.Core.Components;
+using XRest.Sources;
+using XRest.Sources.Components;
 
 namespace XRest.Clients.TypeScript.Commands
 {
-    internal class GenerateCommand : Command<GenerateCommandConfiguration>
+    internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>
     {
         public override string Id { get; } = "gen";
         public override string Description { get; } = "generate client";
         private readonly ILoader _loader;
-        private readonly IParser _parser;
         private readonly IProcessor _processor;
         private readonly IWriter _writer;
         private readonly ILogger<GenerateCommand> _logger;
 
         public GenerateCommand(
             ILoader loader,
-            IParser parser,
             IProcessor processor,
             IWriter writer,
             ILogger<GenerateCommand> logger
         )
         {
             _loader = loader;
-            _parser = parser;
             _processor = processor;
             _writer = writer;
             _logger = logger;
         }
 
-        public override void Handle(GenerateCommandConfiguration cfg, CancellationToken token)
+        public override async Task HandleAsync(GenerateCommandConfiguration cfg, CancellationToken token)
         {
             _logger.Info($"Generate '{cfg.ProjectName}' client");
 
-            _logger.Info($"Load metadata from '{cfg.Assembly}'");
-            var controllerTypes = _loader.LoadControllerTypes(cfg.Assembly);
-
-            _logger.Info("Parse metadata");
-            var api = _parser.Parse(controllerTypes);
+            _logger.Info($"Load '{cfg.ProjectName}' model");
+            var model = await _loader.Load(cfg);
 
             _logger.Info("Process api model to api view");
-            var view = _processor.Process(api);
+            var view = _processor.Process(model);
 
             _logger.Info($"Write api view to {cfg.Output}");
             _writer.Write(cfg.Output, view);
@@ -51,7 +48,7 @@ namespace XRest.Clients.TypeScript.Commands
         }
     }
 
-    internal class GenerateCommandConfiguration
+    internal class GenerateCommandConfiguration : ISourceLoaderConfiguration
     {
         [Option("a", true)]
         [Help("Path to API assembly.")]
@@ -64,6 +61,10 @@ namespace XRest.Clients.TypeScript.Commands
                 ProjectName = Path.GetFileNameWithoutExtension(value);
             }
         }
+
+        [Option("s")]
+        [Help("Server to load model from.")]
+        public Uri Server { get; set; } = default!;
 
         public string ProjectName { get; private set; } = string.Empty;
 

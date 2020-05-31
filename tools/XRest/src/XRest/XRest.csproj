@@ -16,6 +16,7 @@
     <ItemGroup>
         <ProjectReference Include="../clients/XRest.Clients.Dotnet/XRest.Clients.Dotnet.csproj" />
         <ProjectReference Include="../clients/XRest.Clients.TypeScript/XRest.Clients.TypeScript.csproj" />
+        <ProjectReference Include="../sources/XRest.Sources/XRest.Sources.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
