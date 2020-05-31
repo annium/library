@@ -12,7 +12,6 @@ namespace XRest.Core.Models
         public IReadOnlyCollection<ParameterModel> Parameters { get; }
         public Type? Body { get; }
         public Type? Response { get; }
-        public AuthModel Auth { get; }
 
         public ActionModel(
             string name,
@@ -20,8 +19,7 @@ namespace XRest.Core.Models
             string path,
             IReadOnlyCollection<ParameterModel> parameters,
             Type? body,
-            Type? response,
-            AuthModel auth
+            Type? response
         )
         {
             Name = name;
@@ -30,7 +28,6 @@ namespace XRest.Core.Models
             Parameters = parameters;
             Body = body;
             Response = response;
-            Auth = auth;
         }
 
         public override string ToString() => $"{Method} {Path}";

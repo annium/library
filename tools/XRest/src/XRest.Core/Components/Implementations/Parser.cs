@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using Annium.Extensions.Primitives;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using XRest.Core.Helpers;
@@ -27,11 +26,10 @@ namespace XRest.Core.Components.Implementations
         {
             var controllerArea = controllerType.GetCustomAttribute<AreaAttribute>()?.RouteValue;
             var controllerName = controllerType.Name.Replace("Controller", string.Empty);
-            var controllerAuth = ParseAuth(controllerType.GetCustomAttributes());
             var controllerRoute = controllerType.GetCustomAttribute<RouteAttribute>()?.Template;
 
             var actions = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance).Where(ParseHelper.IsAction).ToArray();
-            var actionModels = actions.Select(x => ParseAction(controllerArea, controllerName, controllerAuth, controllerRoute, x)).ToArray();
+            var actionModels = actions.Select(x => ParseAction(controllerArea, controllerName, controllerRoute, x)).ToArray();
 
             return new ControllerModel(controllerArea, controllerName, actionModels);
         }
@@ -39,7 +37,6 @@ namespace XRest.Core.Components.Implementations
         private ActionModel ParseAction(
             string? controllerArea,
             string controllerName,
-            AuthModel? controllerAuth,
             string? controllerRoute,
             MethodInfo action
         )
@@ -79,16 +76,7 @@ namespace XRest.Core.Components.Implementations
 
             var responseType = action.ReturnType == typeof(void) ? null : action.ReturnType;
 
-            var auth = controllerAuth ?? ParseAuth(action.GetCustomAttributes()) ?? new AuthModel(false);
-
-            return new ActionModel(actionName, method, route, parameters, bodyType, responseType, auth);
-        }
-
-        private AuthModel? ParseAuth(IEnumerable<Attribute> attributes)
-        {
-            var attribute = attributes.FirstOrDefault(x => x.GetType().Name == nameof(AuthorizeAttribute));
-
-            return attribute is null ? null : new AuthModel(true);
+            return new ActionModel(actionName, method, route, parameters, bodyType, responseType);
         }
     }
 }

@@ -18,7 +18,6 @@ namespace XRest.Clients.TypeScript.Views
         public bool HasBody => !(Body is null);
         public DefinedTypeView? Body { get; }
         public DefinedTypeView Response { get; }
-        public AuthView Auth { get; }
 
         public ActionView(
             string name,
@@ -26,8 +25,7 @@ namespace XRest.Clients.TypeScript.Views
             string path,
             IReadOnlyCollection<ParameterView> parameters,
             DefinedTypeView? body,
-            DefinedTypeView response,
-            AuthView auth
+            DefinedTypeView response
         )
         {
             Name = name;
@@ -36,9 +34,8 @@ namespace XRest.Clients.TypeScript.Views
             Parameters = parameters;
             Body = body;
             Response = response;
-            Auth = auth;
         }
 
-        public override string ToString() => $"{Method} {Path}" + (Auth.IsEnabled ? " [Auth]" : string.Empty);
+        public override string ToString() => $"{Method} {Path}";
     }
 }

@@ -87,8 +87,7 @@ namespace XRest.Plugins.AspNetCore
                     route,
                     parameters,
                     body,
-                    response,
-                    new AuthModel(false)
+                    response
                 );
         }
     }

@@ -53,8 +53,7 @@ namespace XRest.Clients.TypeScript.Components.Implementations
                 model.Path,
                 model.Parameters.Select(x => BuildParameterView(typeRegistry, x)).ToArray(),
                 model.Body is null ? null : typeRegistry.Resolve(model.Body),
-                typeRegistry.Resolve(model.Response ?? typeof(IResult)),
-                BuildAuthView(model.Auth)
+                typeRegistry.Resolve(model.Response ?? typeof(IResult))
             );
         }
 
@@ -68,13 +67,6 @@ namespace XRest.Clients.TypeScript.Components.Implementations
                 model.Location,
                 typeRegistry.Resolve(model.Type)
             );
-        }
-
-        private AuthView BuildAuthView(
-            AuthModel model
-        )
-        {
-            return new AuthView(model.IsEnabled);
         }
 
         private IReadOnlyCollection<DefinedTypeView> CollectSharedTypes(
