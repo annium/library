@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace XRest.Core.Helpers
 {
-    internal static class RouteHelper
+    public static class RouteHelper
     {
         private static readonly Regex RouteRe = new Regex(@"\{([A-z0-9]+)[^}]*\}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 

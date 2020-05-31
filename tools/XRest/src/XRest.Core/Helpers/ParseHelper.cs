@@ -5,7 +5,7 @@ using NodaTime;
 
 namespace XRest.Core.Helpers
 {
-    internal static class ParseHelper
+    public static class ParseHelper
     {
         public static bool IsAllowedQueryType(Type type)
         {
