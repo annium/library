@@ -12,8 +12,7 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../../XRest.Core/XRest.Core.csproj" />
-        <ProjectReference Include="..\..\sources\XRest.Sources\XRest.Sources.csproj" />
+        <ProjectReference Include="../../sources/XRest.Sources/XRest.Sources.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Data.Models" Version="0.1.0" />

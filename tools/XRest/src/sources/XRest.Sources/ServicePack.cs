@@ -8,6 +8,12 @@ namespace XRest.Sources
 {
     public class ServicePack : ServicePackBase
     {
+        public ServicePack()
+        {
+            Add<Api.ServicePack>();
+            Add<Assembly.ServicePack>();
+        }
+
         public override void Register(IServiceCollection services, IServiceProvider provider)
         {
             services.AddSingleton<ILoader, Loader>();

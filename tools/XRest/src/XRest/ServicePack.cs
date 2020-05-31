@@ -11,6 +11,7 @@ namespace XRest
             Add<Core.ServicePack>();
             Add<Clients.Dotnet.ServicePack>();
             Add<Clients.TypeScript.ServicePack>();
+            Add<Sources.ServicePack>();
         }
 
         public override void Register(IServiceCollection services, IServiceProvider provider)
