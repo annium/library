@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Annium.Core.Mapper;
 using Annium.Serialization.Abstractions;
@@ -39,6 +40,7 @@ namespace XRest.Plugins.AspNetCore
             var model = new ApiModelBuilder().Build(apiDescriptions);
             var view = _mapper.Map<ApiView>(model);
 
+            context.Response.ContentType = MediaTypeNames.Application.Json;
             await context.Response.WriteAsync(_serializer.Serialize(view));
         }
     }

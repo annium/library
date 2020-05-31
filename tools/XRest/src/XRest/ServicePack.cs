@@ -20,6 +20,7 @@ namespace XRest
 
             services.AddArguments();
             services.AddLogging(route => route.UseConsole(time: true));
+            services.AddMapper();
         }
 
         private void RegisterCommands(IServiceCollection services)

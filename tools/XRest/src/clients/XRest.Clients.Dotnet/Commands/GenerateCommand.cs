@@ -36,7 +36,6 @@ namespace XRest.Clients.Dotnet.Commands
         {
             _logger.Info($"Generate '{cfg.ProjectName}' client");
 
-
             _logger.Info($"Load '{cfg.ProjectName}' model");
             var model = await _loader.Load(cfg);
 

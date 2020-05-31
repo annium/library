@@ -18,17 +18,23 @@ namespace XRest.Clients.Dotnet.Components.Implementations
 
         public void Write(string output, ClientContainerView client, bool generateTestClient)
         {
+            if (Directory.Exists(output))
+                Directory.Delete(output, true);
+            Directory.CreateDirectory(output);
+
             if (!generateTestClient)
                 Write(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
                 {
                     Usages = new[] { "Annium.Net.Http" },
-                    Namespace = client.Namespace,
+                    client.Namespace,
                 });
+
             Write(output, "ClientBase", "Templates.ClientBase", new
             {
                 Usages = new[] { "Annium.Net.Http" },
-                Namespace = client.Namespace,
+                client.Namespace,
             });
+
             WriteClientContainer(output, client.Namespace, client, generateTestClient);
         }
 

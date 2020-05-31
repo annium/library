@@ -8,16 +8,19 @@ namespace XRest.Core.Views.Profiles
     {
         public TypeViewSerializationProfile()
         {
-            Map<Type, TypeView>(x => BuildTypeView(x));
+            Map<Type?, TypeView?>(x => BuildTypeView(x));
         }
 
-        private TypeView BuildTypeView(Type type)
+        private TypeView? BuildTypeView(Type? type)
         {
+            if (type is null)
+                return null;
+
             if (!type.IsGenericType)
                 return new TypeView { FullName = type.FullName! };
 
             var definition = type.GetGenericTypeDefinition();
-            var arguments = type.GetGenericArguments().Select(BuildTypeView).ToArray();
+            var arguments = type.GetGenericArguments().Select(x => BuildTypeView(x)!).ToArray();
 
             return new TypeView
             {

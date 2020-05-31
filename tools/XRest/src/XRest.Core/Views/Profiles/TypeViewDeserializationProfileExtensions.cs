@@ -13,19 +13,22 @@ namespace XRest.Core.Views.Profiles
         {
             var types = TypeManager.GetInstance(assembly).Types;
 
-            profile.Map<TypeView, Type>(x => ResolveType(types, x));
+            profile.Map<TypeView?, Type?>(x => ResolveType(types, x));
 
             return profile;
         }
 
-        private static Type ResolveType(IReadOnlyCollection<Type> types, TypeView view)
+        private static Type? ResolveType(IReadOnlyCollection<Type> types, TypeView? view)
         {
+            if (view is null)
+                return null;
+
             var type = Resolve(view.FullName);
 
             if (!type.IsGenericType)
                 return type;
 
-            var arguments = view.GenericArguments.Select(x => ResolveType(types, x)).ToArray();
+            var arguments = view.GenericArguments.Select(x => ResolveType(types, x)!).ToArray();
 
             return type.MakeGenericType(arguments);
 

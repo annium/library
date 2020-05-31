@@ -6,7 +6,7 @@ namespace XRest.Core.Views
     public class ActionView
     {
         public string Name { get; set; } = string.Empty;
-        public HttpMethod Method { get; set; } = default!;
+        public string Method { get; set; } = string.Empty;
         public string Path { get; set; } = string.Empty;
         public ParameterView[] Parameters { get; set; } = Array.Empty<ParameterView>();
         public TypeView? Body { get; set; }
