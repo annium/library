@@ -15,6 +15,8 @@ namespace XRest.Core
 
             services.AddSingleton<IAssemblyLoader, AssemblyLoader>();
             services.AddSingleton<ITemplateWriter, TemplateWriter>();
+
+            services.AddMapper();
         }
     }
 }
