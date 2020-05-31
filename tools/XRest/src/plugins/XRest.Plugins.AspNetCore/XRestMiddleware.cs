@@ -1,32 +1,29 @@
 using System.Linq;
 using System.Threading.Tasks;
-using Annium.Core.DependencyInjection;
+using Annium.Core.Mapper;
 using Annium.Serialization.Abstractions;
 using Annium.Serialization.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using XRest.Core.Infrastructure.JsonConverters;
+using XRest.Core.Views;
 
 namespace XRest.Plugins.AspNetCore
 {
     internal class XRestMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly IMapper _mapper;
         private readonly IApiDescriptionGroupCollectionProvider _descriptionProvider;
-
-        private readonly ISerializer<string> _serializer = StringSerializer.Configure(opts =>
-        {
-            opts.Converters.Add(new TypeJsonConverter());
-            opts.WriteIndented = true;
-            opts.ConfigureDefault();
-        });
+        private readonly ISerializer<string> _serializer = StringSerializer.Default;
 
         public XRestMiddleware(
             RequestDelegate next,
+            IMapper mapper,
             IApiDescriptionGroupCollectionProvider descriptionProvider
         )
         {
             _next = next;
+            _mapper = mapper;
             _descriptionProvider = descriptionProvider;
         }
 
@@ -39,9 +36,10 @@ namespace XRest.Plugins.AspNetCore
             }
 
             var apiDescriptions = _descriptionProvider.ApiDescriptionGroups.Items.SelectMany(x => x.Items).ToArray();
-            var apiModel = new ApiModelBuilder().Build(apiDescriptions);
+            var model = new ApiModelBuilder().Build(apiDescriptions);
+            var view = _mapper.Map<ApiView>(model);
 
-            await context.Response.WriteAsync(_serializer.Serialize(apiModel));
+            await context.Response.WriteAsync(_serializer.Serialize(view));
         }
     }
 }
