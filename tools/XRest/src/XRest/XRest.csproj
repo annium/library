@@ -14,8 +14,8 @@
         <ToolCommandName>xrest</ToolCommandName>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../XRest.Dotnet/XRest.Dotnet.csproj" />
-        <ProjectReference Include="../XRest.TypeScript/XRest.TypeScript.csproj" />
+        <ProjectReference Include="../clients/XRest.Clients.Dotnet/XRest.Clients.Dotnet.csproj" />
+        <ProjectReference Include="../clients/XRest.Clients.TypeScript/XRest.Clients.TypeScript.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
