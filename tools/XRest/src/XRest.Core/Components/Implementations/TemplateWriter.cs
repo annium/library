@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Annium.Core.Runtime.Resources;
 using Annium.Extensions.Primitives;
 using Scriban;
 using Scriban.Parsing;
@@ -11,6 +12,15 @@ namespace XRest.Core.Components.Implementations
 {
     internal class TemplateWriter : ITemplateWriter
     {
+        private readonly IResourceLoader _resourceLoader;
+
+        public TemplateWriter(
+            IResourceLoader resourceLoader
+        )
+        {
+            _resourceLoader = resourceLoader;
+        }
+
         public string Write<T>(string template, T data)
             where T : class
         {
@@ -22,11 +32,11 @@ namespace XRest.Core.Components.Implementations
             ctx.PushGlobal(scriptObject);
 
             var templateAssembly = Assembly.GetCallingAssembly();
-            ctx.TemplateLoader = new TemplateLoader(templateAssembly);
+            ctx.TemplateLoader = new TemplateLoader(templateAssembly, _resourceLoader);
 
-            var resource = ResourceLoader.Load(template, templateAssembly).Single();
+            var resource = _resourceLoader.Load(template, templateAssembly).Single();
             using var reader = new StreamReader(resource.Content);
-            var tpl = Template.Parse(reader.ReadToEnd(),lexerOptions:new LexerOptions{});
+            var tpl = Template.Parse(reader.ReadToEnd(), lexerOptions: new LexerOptions());
 
             return tpl.Render(ctx);
         }

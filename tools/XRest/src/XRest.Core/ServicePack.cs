@@ -13,8 +13,7 @@ namespace XRest.Core
         {
             services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
 
-            services.AddSingleton<ILoader, Loader>();
-            services.AddSingleton<IParser, Parser>();
+            services.AddSingleton<IAssemblyLoader, AssemblyLoader>();
             services.AddSingleton<ITemplateWriter, TemplateWriter>();
         }
     }
