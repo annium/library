@@ -18,9 +18,8 @@ namespace XRest.Clients.Dotnet.Components.Implementations
 
         public void Write(string output, ClientContainerView client, bool generateTestClient)
         {
-            if (Directory.Exists(output))
-                Directory.Delete(output, true);
-            Directory.CreateDirectory(output);
+            if (!Directory.Exists(output))
+                Directory.CreateDirectory(output);
 
             if (!generateTestClient)
                 Write(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
