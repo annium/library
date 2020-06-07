@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace XRest.Plugins.AspNetCore
+namespace Annium.Core.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
