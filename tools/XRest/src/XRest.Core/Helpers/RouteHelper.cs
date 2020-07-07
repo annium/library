@@ -36,7 +36,12 @@ namespace XRest.Core.Helpers
                 sb.Append(actionRoute.Replace("[action]", actionName, StringComparison.InvariantCultureIgnoreCase));
             }
 
-            return RouteRe.Replace(sb.ToString(), x => $"{{{x.Groups[1].Value}}}");
+            return NormalizeRoute(sb.ToString());
+        }
+
+        public static string NormalizeRoute(string route)
+        {
+            return RouteRe.Replace(route, x => $"{{{x.Groups[1].Value}}}");
         }
 
         public static IReadOnlyCollection<string> ParseRouteParameters(string route)

@@ -53,7 +53,7 @@ namespace XRest.Plugins.AspNetCore
                 .Select(x => new HttpMethod(x))
                 .ToArray();
 
-            var route = action.AttributeRouteInfo.Template;
+            var route = RouteHelper.NormalizeRoute(action.AttributeRouteInfo.Template);
             var routeParameters = RouteHelper.ParseRouteParameters(route);
 
             var parameters = action.Parameters
