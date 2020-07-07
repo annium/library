@@ -28,6 +28,19 @@ namespace XRest.Clients.Dotnet.Components.Implementations
                     client.Namespace,
                 });
 
+            Write(output, "HttpResponseExtensions", "Templates.HttpResponseExtensions", new
+            {
+                Usages = new[]
+                {
+                    "System.Collections.Generic",
+                    "System.Linq",
+                    "System.Threading.Tasks",
+                    "Annium.Data.Operations",
+                    "Annium.Net.Http",
+                },
+                client.Namespace,
+            });
+
             Write(output, "ClientBase", "Templates.ClientBase", new
             {
                 Usages = new[] { "Annium.Net.Http" },
