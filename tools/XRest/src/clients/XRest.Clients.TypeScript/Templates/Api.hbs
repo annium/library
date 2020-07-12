@@ -7,10 +7,11 @@ import {
   {{ type.name }},
 {{~ end ~}}
 } from {{ if area ~}}'../shared'{{~ else ~}}'./shared'{{~ end ~}}
-{{~ end ~}}
+{{~ end }}
 
 // exports
-{{~ for type in exports ~}}
+
+{{ for type in exports ~}}
 {{ include 'Templates.BaseType' type }}
 {{~ end ~}}
 
