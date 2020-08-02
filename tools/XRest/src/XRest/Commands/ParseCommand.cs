@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
+using Annium.Core.Runtime.Types;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using Annium.Serialization.Json;
@@ -18,16 +19,19 @@ namespace XRest.Commands
         public override string Id { get; } = "parse";
         public override string Description { get; } = "parse API";
         private readonly ILoader _loader;
+        private readonly ITypeManager _typeManager;
         private readonly IMapper _mapper;
         private readonly ILogger<ParseCommand> _logger;
 
         public ParseCommand(
             ILoader loader,
+            ITypeManager typeManager,
             IMapper mapper,
             ILogger<ParseCommand> logger
         )
         {
             _loader = loader;
+            _typeManager = typeManager;
             _mapper = mapper;
             _logger = logger;
         }
@@ -50,7 +54,7 @@ namespace XRest.Commands
             var serializer = StringSerializer.Configure(opts =>
             {
                 opts.WriteIndented = true;
-                opts.ConfigureDefault();
+                opts.ConfigureDefault(_typeManager);
             });
 
             File.WriteAllText(output, serializer.Serialize(view));

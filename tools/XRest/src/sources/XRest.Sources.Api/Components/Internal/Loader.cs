@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Annium.Core.Mapper;
+using Annium.Core.Mapper.Internal;
 using Annium.Net.Http;
 using XRest.Core;
 using XRest.Core.Components;
@@ -13,12 +14,21 @@ namespace XRest.Sources.Api.Components.Internal
     internal class Loader : ILoader
     {
         private readonly IAssemblyLoader _assemblyLoader;
+        private readonly IHttpRequestFactory _httpRequestFactory;
+        private readonly IMapper _mapper;
+        private readonly IMapBuilder _mapBuilder;
 
         public Loader(
-            IAssemblyLoader assemblyLoader
+            IAssemblyLoader assemblyLoader,
+            IHttpRequestFactory httpRequestFactory,
+            IMapper mapper,
+            IMapBuilder mapBuilder
         )
         {
             _assemblyLoader = assemblyLoader;
+            _httpRequestFactory = httpRequestFactory;
+            _mapper = mapper;
+            _mapBuilder = mapBuilder;
         }
 
         public async Task<ApiModel> Load(
@@ -27,10 +37,10 @@ namespace XRest.Sources.Api.Components.Internal
         )
         {
             var assembly = _assemblyLoader.LoadFromPath(assemblyPath);
-            Mapper.AddConfiguration(x => x.ConfigureForTypeViewDeserialization(assembly));
+            _mapBuilder.AddProfile(x => x.ConfigureForTypeViewDeserialization(assembly));
 
-            var view = await Http.Open(apiUri).Get(Constants.ApiSourceEndpoint).AsAsync<ApiView>();
-            var model = Mapper.Map<ApiModel>(view);
+            var view = await _httpRequestFactory.Get(apiUri).Get(Constants.ApiSourceEndpoint).AsAsync<ApiView>();
+            var model = _mapper.Map<ApiModel>(view);
 
             return model;
         }

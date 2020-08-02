@@ -5,10 +5,10 @@ namespace XRest.Core.Components.Implementations
 {
     internal class AssemblyLoader : IAssemblyLoader
     {
-        private readonly PluginLoadContextFactory _loadContextFactory;
+        private readonly IPluginLoadContextFactory _loadContextFactory;
 
         public AssemblyLoader(
-            PluginLoadContextFactory loadContextFactory
+            IPluginLoadContextFactory loadContextFactory
         )
         {
             _loadContextFactory = loadContextFactory;

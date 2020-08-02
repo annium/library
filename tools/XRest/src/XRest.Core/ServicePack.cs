@@ -1,11 +1,9 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Annium.Core.Mapper;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 using XRest.Core.Components;
 using XRest.Core.Components.Implementations;
-using XRest.Core.Views.Profiles;
 
 namespace XRest.Core
 {
@@ -13,12 +11,12 @@ namespace XRest.Core
     {
         public override void Register(IServiceCollection services, IServiceProvider provider)
         {
+            services.AddRuntimeTools(GetType().Assembly);
             services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
 
             services.AddSingleton<IAssemblyLoader, AssemblyLoader>();
             services.AddSingleton<ITemplateWriter, TemplateWriter>();
 
-            Mapper.AddProfile(new HttpMethodProfile());
             services.AddResourceLoader();
             services.AddLoadContextFactories();
         }
