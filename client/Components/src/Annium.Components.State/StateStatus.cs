@@ -1,4 +1,4 @@
-namespace Annium.Components.Forms
+namespace Annium.Components.State
 {
     public struct StateStatus
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Annium.Testing;
 using Xunit;
 
-namespace Annium.Components.Forms.Tests
+namespace Annium.Components.State.Tests
 {
     public class ComplexTest : TestBase
     {

@@ -1,12 +1,12 @@
-using Annium.Components.Forms;
-using Annium.Components.Forms.Internal;
+using Annium.Components.State;
+using Annium.Components.State.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Annium.Core.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddFormsState(
+        public static IServiceCollection AddComponentStateFactory(
             this IServiceCollection services
         )
         {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using NodaTime;
 
-namespace Annium.Components.Forms
+namespace Annium.Components.State
 {
     public interface IMapContainer<TKey, TValue> : IState<IReadOnlyDictionary<TKey, TValue>>
         where TKey : notnull

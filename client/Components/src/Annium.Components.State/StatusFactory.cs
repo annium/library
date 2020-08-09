@@ -1,4 +1,4 @@
-namespace Annium.Components.Forms
+namespace Annium.Components.State
 {
     public static class StatusFactory
     {

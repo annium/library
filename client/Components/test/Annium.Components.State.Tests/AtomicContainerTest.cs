@@ -1,7 +1,7 @@
 using Annium.Testing;
 using Xunit;
 
-namespace Annium.Components.Forms.Tests
+namespace Annium.Components.State.Tests
 {
     public class AtomicContainerTest : TestBase
     {

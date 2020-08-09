@@ -8,7 +8,7 @@ using Annium.Data.Models.Extensions;
 using Annium.Extensions.Primitives;
 using NodaTime;
 
-namespace Annium.Components.Forms.Internal
+namespace Annium.Components.State.Internal
 {
     internal class ArrayContainer<T> : ObservableContainer, IArrayContainer<T>
         where T : notnull, new()

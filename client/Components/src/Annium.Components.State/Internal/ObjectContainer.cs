@@ -6,7 +6,7 @@ using System.Reflection;
 using Annium.Extensions.Primitives;
 using NodaTime;
 
-namespace Annium.Components.Forms.Internal
+namespace Annium.Components.State.Internal
 {
     internal class ObjectContainer<T> : ObservableContainer, IObjectContainer<T>
         where T : notnull, new()

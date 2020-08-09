@@ -2,7 +2,7 @@ using System;
 using System.Reactive;
 using System.Reactive.Linq;
 
-namespace Annium.Components.Forms.Internal
+namespace Annium.Components.State.Internal
 {
     internal class ObservableContainer
     {
