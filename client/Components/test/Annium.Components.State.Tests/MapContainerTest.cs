@@ -44,7 +44,7 @@ namespace Annium.Components.State.Tests
             state.Changed.Subscribe(log.Add);
 
             // act
-            state.Set(initialValue);
+            state.Set(initialValue).IsFalse();
 
             // assert
             state.Value.IsEqual(initialValue);
@@ -54,7 +54,7 @@ namespace Annium.Components.State.Tests
             log.IsEmpty();
 
             // act
-            state.Set(otherValue);
+            state.Set(otherValue).IsTrue();
 
             // assert
             state.Value.IsEqual(otherValue);
@@ -64,7 +64,7 @@ namespace Annium.Components.State.Tests
             log.Has(1);
 
             // act
-            state.Set(initialValue);
+            state.Set(initialValue).IsTrue();
 
             // assert
             state.Value.IsEqual(initialValue);
@@ -86,7 +86,7 @@ namespace Annium.Components.State.Tests
             state.Changed.Subscribe(log.Add);
 
             // act
-            state.Set(otherValue);
+            state.Set(otherValue).IsTrue();
             state.At(x => x["c"]).SetStatus(Status.Validating);
 
             // assert
@@ -195,7 +195,7 @@ namespace Annium.Components.State.Tests
             // act
             state.Remove("a");
             state.Add("e", 9);
-            state.Set(initialValue);
+            state.Set(initialValue).IsTrue();
 
             // assert
             state.HasChanged.IsFalse();

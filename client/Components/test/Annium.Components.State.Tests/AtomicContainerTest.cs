@@ -38,7 +38,7 @@ namespace Annium.Components.State.Tests
             state.Changed.Subscribe(log.Add);
 
             // act
-            state.Set(other);
+            state.Set(other).IsTrue();
 
             // assert
             state.Value.IsEqual(other);
@@ -47,7 +47,7 @@ namespace Annium.Components.State.Tests
             log.Has(1);
 
             // act
-            state.Set(initial);
+            state.Set(initial).IsTrue();
 
             // assert
             state.Value.IsEqual(initial);
@@ -66,7 +66,7 @@ namespace Annium.Components.State.Tests
             var other = 10;
             var state = factory.Create(initial);
             state.Changed.Subscribe(log.Add);
-            state.Set(other);
+            state.Set(other).IsTrue();
 
             // act
             state.Reset();
