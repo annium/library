@@ -1,0 +1,19 @@
+﻿@using Annium.Components.State
+
+@typeparam TValue
+
+<MatTextField
+    Value="@State.Value"
+    OnInput="@(e => State.Set((TValue) e.Value))"
+    @attributes="Attributes">
+</MatTextField>
+
+@code {
+
+    [Parameter]
+    public IAtomicContainer<TValue> State { get; set; } = default!;
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> Attributes { get; set; } = default!;
+
+}
