@@ -50,11 +50,14 @@ namespace Annium.Components.State.Internal
         public bool Set(T value)
         {
             var changed = false;
-            foreach (var property in Properties)
+            using (Mute())
             {
-                var state = _states[property];
-                var propertyValue = property.GetMethod.Invoke(value, Array.Empty<object>());
-                changed = (bool) state.Set.Invoke(state.Ref, new[] { propertyValue }) || changed;
+                foreach (var property in Properties)
+                {
+                    var state = _states[property];
+                    var propertyValue = property.GetMethod.Invoke(value, Array.Empty<object>());
+                    changed = (bool) state.Set.Invoke(state.Ref, new[] { propertyValue }) || changed;
+                }
             }
 
             if (changed)
@@ -65,8 +68,12 @@ namespace Annium.Components.State.Internal
 
         public void Reset()
         {
-            foreach (var property in Properties)
-                _states[property].Ref.Reset();
+            using (Mute())
+            {
+                foreach (var property in Properties)
+                    _states[property].Ref.Reset();
+            }
+
             OnChanged();
         }
 

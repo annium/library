@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using Annium.Testing;
 using Xunit;
 
@@ -11,11 +13,13 @@ namespace Annium.Components.State.Tests
         public void Init_Ok()
         {
             // arrange
+            var log = new List<Unit>();
             var factory = GetFactory();
             var initialValue = Arrange();
 
             // act
             var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
 
             // assert
             state.Value.IsEqual(initialValue);
@@ -25,16 +29,19 @@ namespace Annium.Components.State.Tests
             state.HasBeenTouched.IsFalse();
             state.IsStatus(Status.None).IsTrue();
             state.HasStatus(Status.None).IsTrue();
+            log.IsEmpty();
         }
 
         [Fact]
         public void Set_Ok()
         {
             // arrange
+            var log = new List<Unit>();
             var factory = GetFactory();
             var initialValue = Arrange();
             var otherValue = new[] { 4, 2 };
             var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
 
             // act
             state.Set(initialValue.ToArray());
@@ -44,6 +51,7 @@ namespace Annium.Components.State.Tests
             state.At(x => x[0]).Value.IsEqual(initialValue.At(0));
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsFalse();
+            log.IsEmpty();
 
             // act
             state.Set(otherValue);
@@ -53,6 +61,7 @@ namespace Annium.Components.State.Tests
             state.At(x => x[0]).Value.IsEqual(otherValue.At(0));
             state.HasChanged.IsTrue();
             state.HasBeenTouched.IsTrue();
+            log.Has(1);
 
             // act
             state.Set(initialValue.ToArray());
@@ -62,16 +71,19 @@ namespace Annium.Components.State.Tests
             state.At(x => x[0]).Value.IsEqual(initialValue.At(0));
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsTrue();
+            log.Has(2);
         }
 
         [Fact]
         public void Reset_Ok()
         {
             // arrange
+            var log = new List<Unit>();
             var factory = GetFactory();
             var initialValue = Arrange();
             var otherValue = new[] { 4, 2 };
             var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
 
             // act
             state.Set(otherValue);
@@ -83,6 +95,7 @@ namespace Annium.Components.State.Tests
             state.HasBeenTouched.IsTrue();
             state.IsStatus(Status.None, Status.Validating).IsTrue();
             state.HasStatus(Status.Validating).IsTrue();
+            log.Has(2);
 
             // act
             state.Reset();
@@ -94,15 +107,18 @@ namespace Annium.Components.State.Tests
             state.HasBeenTouched.IsFalse();
             state.IsStatus(Status.None).IsTrue();
             state.HasStatus(Status.None).IsTrue();
+            log.Has(3);
         }
 
         [Fact]
         public void Status_Ok()
         {
             // arrange
+            var log = new List<Unit>();
             var factory = GetFactory();
             var initialValue = Arrange();
             var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
 
             // act
             state.At(x => x[0]).SetStatus(Status.Validating);
@@ -113,15 +129,18 @@ namespace Annium.Components.State.Tests
             state.HasStatus(Status.None, Status.Validating).IsTrue();
             state.HasStatus(Status.None, Status.Error).IsTrue();
             state.HasStatus(Status.Error).IsFalse();
+            log.Has(1);
         }
 
         [Fact]
         public void Add_Ok()
         {
             // arrange
+            var log = new List<Unit>();
             var factory = GetFactory();
             var initialValue = Arrange();
             var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
 
             // act
             state.Add(10);
@@ -130,15 +149,18 @@ namespace Annium.Components.State.Tests
             state.Value.IsEqual(new[] { 2, 8, 10 });
             state.HasChanged.IsTrue();
             state.HasBeenTouched.IsTrue();
+            log.Has(1);
         }
 
         [Fact]
         public void Insert_Ok()
         {
             // arrange
+            var log = new List<Unit>();
             var factory = GetFactory();
             var initialValue = Arrange();
             var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
 
             // act
             state.Insert(0, 10);
@@ -147,15 +169,18 @@ namespace Annium.Components.State.Tests
             state.Value.IsEqual(new[] { 10, 2, 8 });
             state.HasChanged.IsTrue();
             state.HasBeenTouched.IsTrue();
+            log.Has(1);
         }
 
         [Fact]
         public void RemoveAt_Ok()
         {
             // arrange
+            var log = new List<Unit>();
             var factory = GetFactory();
             var initialValue = Arrange();
             var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
 
             // act
             state.RemoveAt(1);
@@ -164,15 +189,18 @@ namespace Annium.Components.State.Tests
             state.Value.IsEqual(new[] { 2 });
             state.HasChanged.IsTrue();
             state.HasBeenTouched.IsTrue();
+            log.Has(1);
         }
 
         [Fact]
         public void HasChanged_Ok()
         {
             // arrange
+            var log = new List<Unit>();
             var factory = GetFactory();
             var initialValue = Arrange();
             var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
 
             // act
             state.RemoveAt(0);
@@ -182,6 +210,7 @@ namespace Annium.Components.State.Tests
             // assert
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsTrue();
+            log.Has(3);
         }
 
         private IReadOnlyCollection<int> Arrange() => new[] { 2, 8 };

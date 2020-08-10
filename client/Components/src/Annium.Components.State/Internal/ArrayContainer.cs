@@ -39,22 +39,25 @@ namespace Annium.Components.State.Internal
         {
             var changed = false;
 
-            var updated = Math.Min(_states.Count, value.Length);
-            for (int i = 0; i < updated; i++)
-                changed = _states[i].Ref.Set(value[i]) || changed;
-
-            var added = Math.Max(value.Length - _states.Count, 0) + updated;
-            for (int i = updated; i < added; i++)
+            using (Mute())
             {
-                AddInternal(_states.Count, value[i]);
-                changed = true;
-            }
+                var updated = Math.Min(_states.Count, value.Length);
+                for (int i = 0; i < updated; i++)
+                    changed = _states[i].Ref.Set(value[i]) || changed;
 
-            var removed = Math.Max(_states.Count - value.Length, 0) + updated;
-            for (int i = updated; i < removed; i++)
-            {
-                RemoveInternal(i);
-                changed = true;
+                var added = Math.Max(value.Length - _states.Count, 0) + updated;
+                for (int i = updated; i < added; i++)
+                {
+                    AddInternal(_states.Count, value[i]);
+                    changed = true;
+                }
+
+                var removed = Math.Max(_states.Count - value.Length, 0) + updated;
+                for (int i = updated; i < removed; i++)
+                {
+                    RemoveInternal(i);
+                    changed = true;
+                }
             }
 
             if (changed)
@@ -68,11 +71,14 @@ namespace Annium.Components.State.Internal
 
         public void Reset()
         {
-            _states.Clear();
-            foreach (var item in _initialValue)
+            using (Mute())
             {
-                var state = (IState<T>) Factory.Invoke(_stateFactory, new[] { (object) item });
-                _states.Add(new StateReference(state, state.Changed.Subscribe(_ => OnChanged())));
+                _states.Clear();
+                foreach (var item in _initialValue)
+                {
+                    var state = (IState<T>) Factory.Invoke(_stateFactory, new[] { (object) item });
+                    _states.Add(new StateReference(state, state.Changed.Subscribe(_ => OnChanged())));
+                }
             }
 
             _hasBeenTouched = false;
@@ -119,21 +125,24 @@ namespace Annium.Components.State.Internal
 
         public void Add(T item)
         {
-            AddInternal(_states.Count, item);
+            using (Mute())
+                AddInternal(_states.Count, item);
             _hasBeenTouched = true;
             OnChanged();
         }
 
         public void Insert(int index, T item)
         {
-            AddInternal(index, item);
+            using (Mute())
+                AddInternal(index, item);
             _hasBeenTouched = true;
             OnChanged();
         }
 
         public void RemoveAt(int index)
         {
-            _states.RemoveAt(index);
+            using (Mute())
+                _states.RemoveAt(index);
             _hasBeenTouched = true;
             OnChanged();
         }

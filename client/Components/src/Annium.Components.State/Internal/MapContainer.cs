@@ -40,18 +40,20 @@ namespace Annium.Components.State.Internal
         public bool Set(IReadOnlyDictionary<TKey, TValue> value)
         {
             var changed = false;
-
-            foreach (var key in _states.Keys.ToArray())
-                if (!value.ContainsKey(key))
-                    _states.Remove(key);
-            foreach (var (key, item) in value)
+            using (Mute())
             {
-                if (_states.TryGetValue(key, out var state))
-                    changed = state.Ref.Set(item) || changed;
-                else
+                foreach (var key in _states.Keys.ToArray())
+                    if (!value.ContainsKey(key))
+                        _states.Remove(key);
+                foreach (var (key, item) in value)
                 {
-                    AddInternal(key, item);
-                    changed = true;
+                    if (_states.TryGetValue(key, out var state))
+                        changed = state.Ref.Set(item) || changed;
+                    else
+                    {
+                        AddInternal(key, item);
+                        changed = true;
+                    }
                 }
             }
 
@@ -66,9 +68,12 @@ namespace Annium.Components.State.Internal
 
         public void Reset()
         {
-            _states.Clear();
-            foreach (var (key, item) in _initialValue)
-                AddInternal(key, item);
+            using (Mute())
+            {
+                _states.Clear();
+                foreach (var (key, item) in _initialValue)
+                    AddInternal(key, item);
+            }
 
             _hasBeenTouched = false;
             OnChanged();
@@ -114,14 +119,16 @@ namespace Annium.Components.State.Internal
 
         public void Add(TKey key, TValue item)
         {
-            AddInternal(key, item);
+            using (Mute())
+                AddInternal(key, item);
             _hasBeenTouched = true;
             OnChanged();
         }
 
         public void Remove(TKey key)
         {
-            RemoveInternal(key);
+            using (Mute())
+                RemoveInternal(key);
             _hasBeenTouched = true;
             OnChanged();
         }
