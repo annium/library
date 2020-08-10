@@ -35,22 +35,35 @@ namespace Annium.Components.State.Internal
             Reset();
         }
 
-        public void Set(T[] value)
+        public bool Set(T[] value)
         {
+            var changed = false;
+
             var updated = Math.Min(_states.Count, value.Length);
             for (int i = 0; i < updated; i++)
-                _states[i].Ref.Set(value[i]);
+                changed = _states[i].Ref.Set(value[i]) || changed;
 
             var added = Math.Max(value.Length - _states.Count, 0) + updated;
             for (int i = updated; i < added; i++)
+            {
                 AddInternal(_states.Count, value[i]);
+                changed = true;
+            }
 
             var removed = Math.Max(_states.Count - value.Length, 0) + updated;
             for (int i = updated; i < removed; i++)
+            {
                 RemoveInternal(i);
+                changed = true;
+            }
 
-            _hasBeenTouched = true;
-            OnChanged();
+            if (changed)
+            {
+                _hasBeenTouched = true;
+                OnChanged();
+            }
+
+            return changed;
         }
 
         public void Reset()

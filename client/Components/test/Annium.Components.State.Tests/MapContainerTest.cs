@@ -43,7 +43,7 @@ namespace Annium.Components.State.Tests
             state.Value.IsEqual(initialValue);
             state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
             state.HasChanged.IsFalse();
-            state.HasBeenTouched.IsTrue();
+            state.HasBeenTouched.IsFalse();
 
             // act
             state.Set(otherValue);

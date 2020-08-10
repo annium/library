@@ -6,7 +6,7 @@ namespace Annium.Components.State
     public interface IState<T> : IState
     {
         T Value { get; }
-        void Set(T value);
+        bool Set(T value);
     }
 
     public interface IState

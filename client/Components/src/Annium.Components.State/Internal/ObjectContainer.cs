@@ -47,16 +47,20 @@ namespace Annium.Components.State.Internal
             _states = states;
         }
 
-        public void Set(T value)
+        public bool Set(T value)
         {
+            var changed = false;
             foreach (var property in Properties)
             {
                 var state = _states[property];
                 var propertyValue = property.GetMethod.Invoke(value, Array.Empty<object>());
-                state.Set.Invoke(state.Ref, new[] { propertyValue });
+                changed = (bool) state.Set.Invoke(state.Ref, new[] { propertyValue }) || changed;
             }
 
-            OnChanged();
+            if (changed)
+                OnChanged();
+
+            return changed;
         }
 
         public void Reset()

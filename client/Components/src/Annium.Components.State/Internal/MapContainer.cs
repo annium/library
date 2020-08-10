@@ -37,21 +37,31 @@ namespace Annium.Components.State.Internal
             Reset();
         }
 
-        public void Set(IReadOnlyDictionary<TKey, TValue> value)
+        public bool Set(IReadOnlyDictionary<TKey, TValue> value)
         {
+            var changed = false;
+
             foreach (var key in _states.Keys.ToArray())
                 if (!value.ContainsKey(key))
                     _states.Remove(key);
             foreach (var (key, item) in value)
             {
                 if (_states.TryGetValue(key, out var state))
-                    state.Ref.Set(item);
+                    changed = state.Ref.Set(item) || changed;
                 else
+                {
                     AddInternal(key, item);
+                    changed = true;
+                }
             }
 
-            _hasBeenTouched = true;
-            OnChanged();
+            if (changed)
+            {
+                _hasBeenTouched = true;
+                OnChanged();
+            }
+
+            return changed;
         }
 
         public void Reset()

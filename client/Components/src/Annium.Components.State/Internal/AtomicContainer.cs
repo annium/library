@@ -17,11 +17,16 @@ namespace Annium.Components.State.Internal
             Value = _initialValue = initialValue;
         }
 
-        public void Set(T value)
+        public bool Set(T value)
         {
+            if (value.Equals(Value))
+                return false;
+
             Value = value;
             HasBeenTouched = true;
             OnChanged();
+
+            return true;
         }
 
         public void Reset()
@@ -36,6 +41,9 @@ namespace Annium.Components.State.Internal
 
         public void SetStatus(Status status, string message)
         {
+            if (status == Status && message == Message)
+                return;
+
             Status = status;
             Message = message;
             OnChanged();
