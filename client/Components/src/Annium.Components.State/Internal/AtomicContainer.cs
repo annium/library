@@ -8,8 +8,9 @@ namespace Annium.Components.State.Internal
         public T Value { get; private set; }
         public bool HasChanged => !Value.Equals(_initialValue);
         public bool HasBeenTouched { get; private set; }
+        public Status Status { get; private set; }
+        public string Message { get; private set; } = string.Empty;
         private readonly T _initialValue;
-        private Status _status;
 
         public AtomicContainer(T initialValue)
         {
@@ -27,20 +28,23 @@ namespace Annium.Components.State.Internal
         {
             Value = _initialValue;
             HasBeenTouched = false;
-            _status = Status.None;
+            Status = Status.None;
             OnChanged();
         }
 
-        public void SetStatus(Status status)
+        public void SetStatus(Status status) => SetStatus(status, string.Empty);
+
+        public void SetStatus(Status status, string message)
         {
-            _status = status;
+            Status = status;
+            Message = message;
             OnChanged();
         }
 
         public bool IsStatus(params Status[] statuses)
         {
             foreach (var status in statuses)
-                if (_status == status)
+                if (Status == status)
                     return true;
 
             return false;
@@ -49,7 +53,7 @@ namespace Annium.Components.State.Internal
         public bool HasStatus(params Status[] statuses)
         {
             foreach (var status in statuses)
-                if (_status == status)
+                if (Status == status)
                     return true;
 
             return false;
