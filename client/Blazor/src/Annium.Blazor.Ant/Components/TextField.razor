@@ -1,0 +1,9 @@
+﻿@typeparam TValue
+
+<AntDesign.Input
+    TValue="TValue"
+    Value="@State.Value"
+    OnInput="@(e => State.Set((TValue) e.Value))"
+    @attributes="Attributes">
+    @ChildContent
+</AntDesign.Input>

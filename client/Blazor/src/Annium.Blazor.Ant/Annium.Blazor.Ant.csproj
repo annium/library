@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
     <PropertyGroup>
-        <PackageId>Annium.Blazor.AntDesign</PackageId>
+        <PackageId>Annium.Blazor.Ant</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
-        <Description>Annium.Blazor.AntDesign</Description>
+        <Description>Annium.Blazor.Ant</Description>
         <TargetFramework>netstandard2.1</TargetFramework>
         <OutputType>Library</OutputType>
         <DebugType>portable</DebugType>
@@ -13,8 +13,11 @@
         <RazorLangVersion>3.0</RazorLangVersion>
     </PropertyGroup>
     <ItemGroup>
+        <ProjectReference Include="../Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="AntDesign" Version="0.2.0" />
         <PackageReference Include="BlazorStyled" Version="3.0.0" />
-        <PackageReference Include="MatBlazor" Version="2.6.2" />
         <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.5" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.5" />
     </ItemGroup>
