@@ -9,6 +9,25 @@ namespace Annium.Blazor.Core.Tools
     {
         private readonly List<Func<T, string>> _rules = new List<Func<T, string>>();
 
+        public ClassBuilder()
+        {
+        }
+
+        private ClassBuilder(IEnumerable<Func<T, string>> rules)
+        {
+            _rules = rules.ToList();
+        }
+
+        public ClassBuilder<T> Clone()
+        {
+            return new ClassBuilder<T>(_rules);
+        }
+
+        public string Build(T data)
+        {
+            return string.Join(" ", _rules.Select(x => x(data)).Where(x => !string.IsNullOrWhiteSpace(x)));
+        }
+
         public ClassBuilder<T> With(string className) =>
             Rule(_ => className);
 
@@ -39,11 +58,6 @@ namespace Annium.Blazor.Core.Tools
         public ClassBuilder<T> With<TK>(Func<T, TK> getKey, IDictionary<TK, string> dictionary) =>
             Rule(x => dictionary.TryGetValue(getKey(x), out var value) ? value : string.Empty);
 
-        public string Build(T data)
-        {
-            return string.Join(" ", _rules.Select(x => x(data)).Where(x => !string.IsNullOrWhiteSpace(x)));
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ClassBuilder<T> Rule(Func<T, string> process)
         {
@@ -56,6 +70,25 @@ namespace Annium.Blazor.Core.Tools
     public class ClassBuilder
     {
         private readonly List<Func<string>> _rules = new List<Func<string>>();
+
+        public ClassBuilder()
+        {
+        }
+
+        private ClassBuilder(IEnumerable<Func<string>> rules)
+        {
+            _rules = rules.ToList();
+        }
+
+        public ClassBuilder Clone()
+        {
+            return new ClassBuilder(_rules);
+        }
+
+        public string Build()
+        {
+            return string.Join(" ", _rules.Select(x => x()).Where(x => !string.IsNullOrWhiteSpace(x)));
+        }
 
         public ClassBuilder With(string className) =>
             Rule(() => className);
@@ -71,11 +104,6 @@ namespace Annium.Blazor.Core.Tools
 
         public ClassBuilder With<TK>(TK key, IDictionary<TK, string> dictionary) =>
             Rule(() => dictionary.TryGetValue(key, out var value) ? value : string.Empty);
-
-        public string Build()
-        {
-            return string.Join(" ", _rules.Select(x => x()).Where(x => !string.IsNullOrWhiteSpace(x)));
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ClassBuilder Rule(Func<string> process)

@@ -25,11 +25,28 @@ namespace Annium.Blazor.Core.Tests.Tools
                 .With(x => !x.Name.IsNullOrWhiteSpace(), x => $"{x.Name}_val-if-value")
                 .With(x => x.Gender, genderClasses);
 
-            // assert
+            // act
             var unnamed = cb.Build(new User());
-            unnamed.IsEqual("plain plain-if get get-if _val _val-if male");
             var named = cb.Build(new User { Gender = Gender.Female, Name = "x" });
+
+            // assert
+            unnamed.IsEqual("plain plain-if get get-if _val _val-if male");
             named.IsEqual("plain plain-if plain-if-value get get-if get-if-value x_val x_val-if x_val-if-value female");
+        }
+
+        [Fact]
+        public void ClassBuilderT_Clone_Works()
+        {
+            // arrange
+            var cb = new ClassBuilder<User>().With("plain");
+
+            // act
+            var one = cb.Clone().With("one").Build(new User());
+            var two = cb.Clone().With("two").Build(new User());
+
+            // assert
+            one.IsEqual("plain one");
+            two.IsEqual("plain two");
         }
 
         [Fact]
@@ -44,9 +61,26 @@ namespace Annium.Blazor.Core.Tests.Tools
                 .With(() => false, () => "get-if")
                 .With(Gender.Male, genderClasses);
 
-            // assert
+            // act
             var className = cb.Build();
+
+            // assert
             className.IsEqual("plain plain-if get male");
+        }
+
+        [Fact]
+        public void ClassBuilder_Clone_Works()
+        {
+            // arrange
+            var cb = new ClassBuilder().With("plain");
+
+            // act
+            var one = cb.Clone().With("one").Build();
+            var two = cb.Clone().With("two").Build();
+
+            // assert
+            one.IsEqual("plain one");
+            two.IsEqual("plain two");
         }
 
         private class User
