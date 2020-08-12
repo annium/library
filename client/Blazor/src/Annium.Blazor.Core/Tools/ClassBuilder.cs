@@ -9,7 +9,8 @@ namespace Annium.Blazor.Core.Tools
     {
         private readonly List<Func<T, string>> _rules = new List<Func<T, string>>();
 
-        public ClassBuilder<T> With(string className) => Rule(_ => className);
+        public ClassBuilder<T> With(string className) =>
+            Rule(_ => className);
 
         public ClassBuilder<T> With(Func<bool> predicate, string className) =>
             Rule(_ => predicate() ? className : string.Empty);
@@ -45,6 +46,39 @@ namespace Annium.Blazor.Core.Tools
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ClassBuilder<T> Rule(Func<T, string> process)
+        {
+            _rules.Add(process);
+
+            return this;
+        }
+    }
+
+    public class ClassBuilder
+    {
+        private readonly List<Func<string>> _rules = new List<Func<string>>();
+
+        public ClassBuilder With(string className) =>
+            Rule(() => className);
+
+        public ClassBuilder With(Func<bool> predicate, string className) =>
+            Rule(() => predicate() ? className : string.Empty);
+
+        public ClassBuilder With(Func<string> fetch) =>
+            Rule(fetch);
+
+        public ClassBuilder With(Func<bool> predicate, Func<string> fetch) =>
+            Rule(() => predicate() ? fetch() : string.Empty);
+
+        public ClassBuilder With<TK>(TK key, IDictionary<TK, string> dictionary) =>
+            Rule(() => dictionary.TryGetValue(key, out var value) ? value : string.Empty);
+
+        public string Build()
+        {
+            return string.Join(" ", _rules.Select(x => x()).Where(x => !string.IsNullOrWhiteSpace(x)));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ClassBuilder Rule(Func<string> process)
         {
             _rules.Add(process);
 
