@@ -1,34 +1,13 @@
-﻿@using Annium.Components.State
-@using Annium.Blazor.Core.Tools
-@using Microsoft.AspNetCore.Components.Forms
+﻿@namespace Annium.Blazor.MatBlazor.Components
 
 @typeparam TValue
 
 <MatTextField
     Value="@State.Value"
     OnInput="@(e => State.Set((TValue) e.Value))"
-    Class="@ClassMap.New("mdc-text-field--invalid", State.IsStatus(Status.Error)).ToString()"
+    Class="@ClassName"
     HelperTextValidation="@true"
     HelperText="@State.Message"
     OnFocusOut="@(_ => StateHasChanged())"
     @attributes="Attributes">
 </MatTextField>
-
-@code {
-
-    [Parameter]
-    public IAtomicContainer<TValue> State { get; set; } = default!;
-
-    [Parameter]
-    public string? Class { get; set; }
-
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IReadOnlyDictionary<string, object> Attributes { get; set; } = default!;
-
-    protected override void OnInitialized()
-    {
-        var editContext = new EditContext(State.Value);
-        editContext.NotifyValidationStateChanged();
-    }
-
-}
