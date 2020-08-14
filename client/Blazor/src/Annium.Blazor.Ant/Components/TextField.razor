@@ -1,9 +1,18 @@
-﻿@typeparam TValue
+﻿@namespace Annium.Blazor.Ant.Components
+
+@typeparam TValue
 
 <AntDesign.Input
     TValue="TValue"
-    Value="@State.Value"
-    OnInput="@(e => State.Set((TValue) e.Value))"
+    Value="@InternalState.Value"
+    OnInput="@(e => InternalState.Set((TValue) e.Value))"
     @attributes="Attributes">
     @ChildContent
 </AntDesign.Input>
+
+<Styled @bind-Classname="ErrorClassName">
+    > input {
+    border-color: #ff4d4f;
+    box-shadow: 0 0 0 2px rgba(255, 77, 79, .2);
+    }
+</Styled>
