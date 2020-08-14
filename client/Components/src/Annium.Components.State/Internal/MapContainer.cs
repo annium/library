@@ -18,6 +18,7 @@ namespace Annium.Components.State.Internal
         public IReadOnlyDictionary<TKey, TValue> Value => CreateValue();
         public bool HasChanged => !Value.IsShallowEqual(_initialValue, _mapper);
         public bool HasBeenTouched => _hasBeenTouched || _states.Values.Any(x => x.Ref.HasBeenTouched);
+        public IReadOnlyDictionary<TKey, IState> Children => _states.ToDictionary(x => x.Key, x => (IState) x.Value.Ref);
         private readonly IStateFactory _stateFactory;
         private readonly IReadOnlyDictionary<TKey, TValue> _initialValue;
         private readonly IMapper _mapper;

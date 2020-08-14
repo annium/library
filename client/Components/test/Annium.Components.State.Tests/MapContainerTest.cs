@@ -23,6 +23,9 @@ namespace Annium.Components.State.Tests
 
             // assert
             state.Value.IsEqual(initialValue);
+            var children = state.Children;
+            foreach (var itemKey in initialValue.Keys)
+                children.At(itemKey).IsEqual(state.At(x => x[itemKey]));
             var key = initialValue.Keys.First();
             state.At(x => x[key]).Value.IsEqual(initialValue.At(key));
             state.HasChanged.IsFalse();

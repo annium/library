@@ -22,6 +22,8 @@ namespace Annium.Components.State.Tests
 
             // assert
             state.Value.IsEqual(initialValue);
+            state.Children.At(nameof(User.Age)).IsEqual(state.At(x => x.Age));
+            state.Children.At(nameof(User.Name)).IsEqual(state.At(x => x.Name));
             state.At(x => x.Name).Value.IsEqual(initialValue.Name);
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsFalse();

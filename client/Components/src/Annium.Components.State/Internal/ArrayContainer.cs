@@ -17,6 +17,7 @@ namespace Annium.Components.State.Internal
         public T[] Value => CreateValue();
         public bool HasChanged => !Value.IsShallowEqual(_initialValue, _mapper);
         public bool HasBeenTouched => _hasBeenTouched || _states.Any(x => x.Ref.HasBeenTouched);
+        public IReadOnlyList<IState> Children => _states.Select(x => x.Ref).ToArray();
         private readonly IStateFactory _stateFactory;
         private readonly IEnumerable<T> _initialValue;
         private readonly IMapper _mapper;

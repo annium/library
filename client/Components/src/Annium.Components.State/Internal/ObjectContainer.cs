@@ -26,6 +26,7 @@ namespace Annium.Components.State.Internal
         public T Value => CreateValue();
         public bool HasChanged => _states.Values.Any(x => x.Ref.HasChanged);
         public bool HasBeenTouched => _states.Values.Any(x => x.Ref.HasBeenTouched);
+        public IReadOnlyDictionary<string, IState> Children => _states.ToDictionary(x => x.Key.Name, x => x.Value.Ref);
         private readonly IReadOnlyDictionary<PropertyInfo, StateReference> _states;
 
         public ObjectContainer(
