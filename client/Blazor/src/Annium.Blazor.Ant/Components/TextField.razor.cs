@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Annium.Blazor.Core.Tools;
 using Annium.Components.State;
 using Microsoft.AspNetCore.Components;
 
@@ -25,15 +24,5 @@ namespace Annium.Blazor.Ant.Components
         public string? InputClass { get; set; }
 
         private IAtomicContainer<TValue> InternalState => State ?? FormItem.State;
-        private string ClassName => _classBuilder.Build();
-        private string ErrorClassName { get; set; } = default!;
-
-        private readonly ClassBuilder _classBuilder;
-
-        public TextField()
-        {
-            _classBuilder = new ClassBuilder()
-                .With(() => InternalState.HasStatus(Status.Error), () => ErrorClassName);
-        }
     }
 }
