@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Ant.Components
 {
-    public partial class FormItem<TValue> : IFormItem<TValue>
+    public partial class FormField<TValue> : IFormField<TValue>
         where TValue : IEquatable<TValue>
     {
         [Parameter]
@@ -18,11 +18,11 @@ namespace Annium.Blazor.Ant.Components
         public string? WrapperClass { get; set; }
 
         private string WrapperClassName => _wrapperClassBuilder.Clone().With(WrapperClass ?? string.Empty).Build();
-        private readonly ClassBuilder _wrapperClassBuilder;
+        private readonly IClassBuilder _wrapperClassBuilder;
 
-        public FormItem()
+        public FormField()
         {
-            _wrapperClassBuilder = new ClassBuilder()
+            _wrapperClassBuilder = ClassBuilder
                 .With("ant-form-item")
                 .With(() => State.HasStatus(Status.Error), "ant-form-item-has-error");
         }

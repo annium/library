@@ -1,116 +1,42 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
+using Annium.Blazor.Core.Internal.Tools;
 
 namespace Annium.Blazor.Core.Tools
 {
-    public class ClassBuilder<T>
+    public static class ClassBuilder<T>
     {
-        private readonly List<Func<T, string>> _rules = new List<Func<T, string>>();
+        public static IClassBuilder<T> With(string? className) => new ClassBuilderInstance<T>().With(className);
 
-        public ClassBuilder()
-        {
-        }
+        public static IClassBuilder<T> With(Func<bool> predicate, string? className) => new ClassBuilderInstance<T>().With(predicate, className);
 
-        private ClassBuilder(IEnumerable<Func<T, string>> rules)
-        {
-            _rules = rules.ToList();
-        }
+        public static IClassBuilder<T> With(Func<T, bool> predicate, string? className) => new ClassBuilderInstance<T>().With(predicate, className);
 
-        public ClassBuilder<T> Clone()
-        {
-            return new ClassBuilder<T>(_rules);
-        }
+        public static IClassBuilder<T> With(Func<string?> fetch) => new ClassBuilderInstance<T>().With(fetch);
 
-        public string Build(T data)
-        {
-            return string.Join(" ", _rules.Select(x => x(data)).Where(x => !string.IsNullOrWhiteSpace(x)));
-        }
+        public static IClassBuilder<T> With(Func<T, string?> fetch) => new ClassBuilderInstance<T>().With(fetch);
 
-        public ClassBuilder<T> With(string className) =>
-            Rule(_ => className);
+        public static IClassBuilder<T> With(Func<bool> predicate, Func<string?> fetch) => new ClassBuilderInstance<T>().With(predicate, fetch);
 
-        public ClassBuilder<T> With(Func<bool> predicate, string className) =>
-            Rule(_ => predicate() ? className : string.Empty);
+        public static IClassBuilder<T> With(Func<T, bool> predicate, Func<string?> fetch) => new ClassBuilderInstance<T>().With(predicate, fetch);
 
-        public ClassBuilder<T> With(Func<T, bool> predicate, string className) =>
-            Rule(x => predicate(x) ? className : string.Empty);
+        public static IClassBuilder<T> With(Func<bool> predicate, Func<T, string?> fetch) => new ClassBuilderInstance<T>().With(predicate, fetch);
 
-        public ClassBuilder<T> With(Func<string> fetch) =>
-            Rule(_ => fetch());
+        public static IClassBuilder<T> With(Func<T, bool> predicate, Func<T, string?> fetch) => new ClassBuilderInstance<T>().With(predicate, fetch);
 
-        public ClassBuilder<T> With(Func<T, string> fetch) =>
-            Rule(fetch);
-
-        public ClassBuilder<T> With(Func<bool> predicate, Func<string> fetch) =>
-            Rule(_ => predicate() ? fetch() : string.Empty);
-
-        public ClassBuilder<T> With(Func<T, bool> predicate, Func<string> fetch) =>
-            Rule(x => predicate(x) ? fetch() : string.Empty);
-
-        public ClassBuilder<T> With(Func<bool> predicate, Func<T, string> fetch) =>
-            Rule(x => predicate() ? fetch(x) : string.Empty);
-
-        public ClassBuilder<T> With(Func<T, bool> predicate, Func<T, string> fetch) =>
-            Rule(x => predicate(x) ? fetch(x) : string.Empty);
-
-        public ClassBuilder<T> With<TK>(Func<T, TK> getKey, IDictionary<TK, string> dictionary) =>
-            Rule(x => dictionary.TryGetValue(getKey(x), out var value) ? value : string.Empty);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ClassBuilder<T> Rule(Func<T, string> process)
-        {
-            _rules.Add(process);
-
-            return this;
-        }
+        public static IClassBuilder<T> With<TK>(Func<T, TK> getKey, IDictionary<TK, string?> dictionary) => new ClassBuilderInstance<T>().With(getKey, dictionary);
     }
 
-    public class ClassBuilder
+    public static class ClassBuilder
     {
-        private readonly List<Func<string>> _rules = new List<Func<string>>();
+        public static IClassBuilder With(string? className) => new ClassBuilderInstance().With(className);
 
-        public ClassBuilder()
-        {
-        }
+        public static IClassBuilder With(Func<bool> predicate, string? className) => new ClassBuilderInstance().With(className);
 
-        private ClassBuilder(IEnumerable<Func<string>> rules)
-        {
-            _rules = rules.ToList();
-        }
+        public static IClassBuilder With(Func<string?> fetch) => new ClassBuilderInstance().With(fetch);
 
-        public ClassBuilder Clone()
-        {
-            return new ClassBuilder(_rules);
-        }
+        public static IClassBuilder With(Func<bool> predicate, Func<string?> fetch) => new ClassBuilderInstance().With(predicate, fetch);
 
-        public string Build()
-        {
-            return string.Join(" ", _rules.Select(x => x()).Where(x => !string.IsNullOrWhiteSpace(x)));
-        }
-
-        public ClassBuilder With(string className) =>
-            Rule(() => className);
-
-        public ClassBuilder With(Func<bool> predicate, string className) =>
-            Rule(() => predicate() ? className : string.Empty);
-
-        public ClassBuilder With(Func<string> fetch) =>
-            Rule(fetch);
-
-        public ClassBuilder With(Func<bool> predicate, Func<string> fetch) =>
-            Rule(() => predicate() ? fetch() : string.Empty);
-
-        public ClassBuilder With<TK>(TK key, IDictionary<TK, string> dictionary) =>
-            Rule(() => dictionary.TryGetValue(key, out var value) ? value : string.Empty);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ClassBuilder Rule(Func<string> process)
-        {
-            _rules.Add(process);
-
-            return this;
-        }
+        public static IClassBuilder With<TK>(TK key, IDictionary<TK, string?> dictionary) => new ClassBuilderInstance().With(key, dictionary);
     }
 }

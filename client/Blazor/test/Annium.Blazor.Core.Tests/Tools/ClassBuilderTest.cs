@@ -12,8 +12,8 @@ namespace Annium.Blazor.Core.Tests.Tools
         public void ClassBuilderT_Works()
         {
             // arrange
-            var genderClasses = new Dictionary<Gender, string> { { Gender.Male, "male" }, { Gender.Female, "female" } };
-            var cb = new ClassBuilder<User>()
+            var genderClasses = new Dictionary<Gender, string?> { { Gender.Male, "male" }, { Gender.Female, "female" } };
+            var cb = ClassBuilder<User>
                 .With("plain")
                 .With(() => true, "plain-if")
                 .With(x => !x.Name.IsNullOrWhiteSpace(), "plain-if-value")
@@ -38,7 +38,7 @@ namespace Annium.Blazor.Core.Tests.Tools
         public void ClassBuilderT_Clone_Works()
         {
             // arrange
-            var cb = new ClassBuilder<User>().With("plain");
+            var cb = ClassBuilder<User>.With("plain");
 
             // act
             var one = cb.Clone().With("one").Build(new User());
@@ -53,8 +53,8 @@ namespace Annium.Blazor.Core.Tests.Tools
         public void ClassBuilder_Works()
         {
             // arrange
-            var genderClasses = new Dictionary<Gender, string> { { Gender.Male, "male" }, { Gender.Female, "female" } };
-            var cb = new ClassBuilder()
+            var genderClasses = new Dictionary<Gender, string?> { { Gender.Male, "male" }, { Gender.Female, "female" } };
+            var cb = ClassBuilder
                 .With("plain")
                 .With(() => true, "plain-if")
                 .With(() => "get")
@@ -72,7 +72,7 @@ namespace Annium.Blazor.Core.Tests.Tools
         public void ClassBuilder_Clone_Works()
         {
             // arrange
-            var cb = new ClassBuilder().With("plain");
+            var cb = ClassBuilder.With("plain");
 
             // act
             var one = cb.Clone().With("one").Build();

@@ -19,11 +19,11 @@ namespace Annium.Blazor.MatBlazor.Components
 
         public string ClassName => _classBuilder.Clone().With(Class ?? string.Empty).Build();
 
-        private readonly ClassBuilder _classBuilder;
+        private readonly IClassBuilder _classBuilder;
 
         public TextField()
         {
-            _classBuilder = new ClassBuilder()
+            _classBuilder = ClassBuilder
                 .With(() => State.IsStatus(Status.Error), "mdc-text-field--invalid");
         }
     }

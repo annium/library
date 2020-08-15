@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Ant.Components
 {
-    public partial class Checkbox
+    public partial class CheckboxField
     {
         [Parameter]
         public IAtomicContainer<bool> State { get; set; } = default!;

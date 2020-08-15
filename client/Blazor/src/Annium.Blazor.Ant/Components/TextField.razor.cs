@@ -8,7 +8,7 @@ namespace Annium.Blazor.Ant.Components
     public partial class TextField<TValue> where TValue : IEquatable<TValue>
     {
         [CascadingParameter]
-        public IFormItem<TValue> FormItem { get; set; } = default!;
+        public IFormField<TValue> FormField { get; set; } = default!;
 
         [Parameter]
         public IAtomicContainer<TValue> State { get; set; } = default!;
@@ -23,6 +23,6 @@ namespace Annium.Blazor.Ant.Components
         [Parameter]
         public string? InputClass { get; set; }
 
-        private IAtomicContainer<TValue> InternalState => State ?? FormItem.State;
+        private IAtomicContainer<TValue> InternalState => State ?? FormField.State;
     }
 }
