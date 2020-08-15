@@ -19,11 +19,14 @@ namespace Annium.Blazor.Core.Extensions
         private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<ComponentBase, IState>>> Observables =
             new ConcurrentDictionary<Type, IReadOnlyCollection<Func<ComponentBase, IState>>>();
 
-        public static void ObserveState(this ComponentBase component)
+        public static IDisposable ObserveState(this ComponentBase component)
         {
             var observables = Observables.GetOrAdd(component.GetType(), DiscoverObservables);
-            foreach (var observable in observables)
-                observable(component).Changed.Subscribe(_ => StateHasChanged.Invoke(component, EmptyArgs));
+
+            return new ObserverDisposer(observables.Select(
+                x => x(component).Changed
+                    .Subscribe(_ => StateHasChanged.Invoke(component, EmptyArgs))
+            ).ToArray());
         }
 
         private static IReadOnlyCollection<Func<ComponentBase, IState>> DiscoverObservables(Type type)
@@ -44,6 +47,23 @@ namespace Annium.Blazor.Core.Extensions
                 accessors.Add(component => (IState) field.GetValue(component));
 
             return accessors;
+        }
+
+        private class ObserverDisposer : IDisposable
+        {
+            private IReadOnlyCollection<IDisposable> _disposables;
+
+            public ObserverDisposer(IReadOnlyCollection<IDisposable> disposables)
+            {
+                _disposables = disposables;
+            }
+
+            public void Dispose()
+            {
+                foreach (var disposable in _disposables)
+                    disposable.Dispose();
+                _disposables = default!;
+            }
         }
     }
 }
