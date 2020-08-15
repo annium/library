@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reactive;
+using Annium.Extensions.Validation;
 using Annium.Testing;
 using Xunit;
 
@@ -138,6 +139,42 @@ namespace Annium.Components.State.Tests
             log.Has(1);
         }
 
+        [Fact]
+        public void Validation_Ok()
+        {
+            // arrange
+            var log = new List<Unit>();
+            var factory = GetFactory();
+            var validator = GetValidator<User>();
+            var initialValue = Arrange();
+            var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
+            state.UseValidator(validator);
+
+            // act
+            state.Set(new User
+            {
+                Age = 10,
+                Name = "No",
+            });
+
+            // assert
+            state.IsStatus(Status.Error).IsTrue();
+
+            // act
+            state.Set(new User
+            {
+                Age = 20,
+                Name = "Name",
+            });
+
+            // assert
+            state.IsStatus(Status.None).IsTrue();
+
+            // assert
+            log.Has(2);
+        }
+
         private User Arrange() => new User
         {
             Name = "Max",
@@ -147,7 +184,16 @@ namespace Annium.Components.State.Tests
         private class User
         {
             public string Name { get; set; } = string.Empty;
-            public uint Age { get; set; }
+            public int Age { get; set; }
+        }
+
+        private class UserValidator : Validator<User>
+        {
+            public UserValidator()
+            {
+                Field(x => x.Age).GreaterThan(18);
+                Field(x => x.Name).Required().MinLength(3);
+            }
         }
     }
 }

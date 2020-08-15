@@ -8,7 +8,7 @@ namespace Annium.Components.State
     public interface IObjectContainer<T> : IState<T>
         where T : notnull, new()
     {
-        IReadOnlyDictionary<string,IState> Children { get; }
+        IReadOnlyDictionary<string, IState> Children { get; }
         IArrayContainer<TI> At<TI>(Expression<Func<T, IEnumerable<TI>>> ex) where TI : notnull, new();
         IMapContainer<TK, TV> At<TK, TV>(Expression<Func<T, IEnumerable<KeyValuePair<TK, TV>>>> ex) where TK : notnull where TV : notnull, new();
         IAtomicContainer<sbyte> At(Expression<Func<T, sbyte>> ex);
@@ -28,5 +28,6 @@ namespace Annium.Components.State
         IAtomicContainer<DateTimeOffset> At(Expression<Func<T, DateTimeOffset>> ex);
         IAtomicContainer<Instant> At(Expression<Func<T, Instant>> ex);
         IObjectContainer<TI> At<TI>(Expression<Func<T, TI>> ex) where TI : notnull, new();
+        IDisposable Mute();
     }
 }

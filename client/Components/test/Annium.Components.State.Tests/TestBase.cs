@@ -1,4 +1,5 @@
 using Annium.Core.DependencyInjection;
+using Annium.Extensions.Validation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Annium.Components.State.Tests
@@ -11,5 +12,12 @@ namespace Annium.Components.State.Tests
             .AddComponentStateFactory()
             .BuildServiceProvider()
             .GetRequiredService<IStateFactory>();
+
+        protected IValidator<T> GetValidator<T>() => new ServiceCollection()
+            .AddRuntimeTools(GetType().Assembly)
+            .AddValidation()
+            .AddLocalization(opts => opts.UseInMemoryStorage())
+            .BuildServiceProvider()
+            .GetRequiredService<IValidator<T>>();
     }
 }

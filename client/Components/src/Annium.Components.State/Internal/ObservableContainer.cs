@@ -18,17 +18,17 @@ namespace Annium.Components.State.Internal
             );
         }
 
-        protected void OnChanged()
-        {
-            if (!_isMuted)
-                StateChanged.Invoke();
-        }
-
-        protected MuteScope Mute()
+        public IDisposable Mute()
         {
             _isMuted = true;
 
             return new MuteScope(this);
+        }
+
+        protected void OnChanged()
+        {
+            if (!_isMuted)
+                StateChanged.Invoke();
         }
 
         private void Unmute() => _isMuted = false;
