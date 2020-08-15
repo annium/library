@@ -7,6 +7,6 @@
         @ChildContent
     </CascadingValue>
     <div class="ant-form-item-explain">
-        @State.Message
+        @(State.HasBeenTouched ? State.Message : string.Empty)
     </div>
 </div>

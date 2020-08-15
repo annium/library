@@ -24,7 +24,7 @@ namespace Annium.Blazor.Ant.Components
         {
             _wrapperClassBuilder = ClassBuilder
                 .With("ant-form-item")
-                .With(() => State.HasStatus(Status.Error), "ant-form-item-has-error");
+                .With(() => State.HasBeenTouched && State.HasStatus(Status.Error), "ant-form-item-has-error");
         }
     }
 }
