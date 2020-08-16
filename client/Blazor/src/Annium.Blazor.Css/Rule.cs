@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Annium.Blazor.Css.Internal;
@@ -31,28 +31,25 @@ namespace Annium.Blazor.Css
             => new CssRuleInternal($"@media {query}");
 
 #if DEBUG
-        public static CssRule Class([CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
-            => new CssRuleInternal($"{string.Empty}{RuleType.Class}{GenerateName(line, member)}");
+        public static CssRule Class([CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
+            => new CssRuleInternal($"{string.Empty}{RuleType.Class}{GenerateName(line, file, member)}");
 
-        public static CssRule TagClass(string tag, [CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
-            => new CssRuleInternal($"{tag}{RuleType.Class}{GenerateName(line, member)}");
+        public static CssRule TagClass(string tag, [CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
+            => new CssRuleInternal($"{tag}{RuleType.Class}{GenerateName(line, file, member)}");
 
-        public static CssRule Id([CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
-            => new CssRuleInternal($"{string.Empty}{RuleType.Id}{GenerateName(line, member)}");
+        public static CssRule Id([CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
+            => new CssRuleInternal($"{string.Empty}{RuleType.Id}{GenerateName(line, file, member)}");
 
-        public static CssRule TagId(string tag, [CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
-            => new CssRuleInternal($"{tag}{RuleType.Id}{GenerateName(line, member)}");
+        public static CssRule TagId(string tag, [CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
+            => new CssRuleInternal($"{tag}{RuleType.Id}{GenerateName(line, file, member)}");
 
         private static readonly IDictionary<Type, int> TypeRules = new Dictionary<Type, int>();
-        private static string GenerateName(int line, string member)
+        private static string GenerateName(int line, string file, string member)
         {
-            var st = new StackTrace();
-            var frame = st.GetFrames()[2];
-            var method = frame.GetMethod();
-            var type = method.DeclaringType;
-            var typeName = type.FullName.Replace('.', '-');
+            var fileName = Path.GetFileNameWithoutExtension(file).Replace(".razor", string.Empty);
+            var memberName = member == ".ctor" ? "constructor" : member;
 
-            return $"{typeName}_{member}_{line}";
+            return $"{fileName}_{memberName}_{line}";
         }
 #else
         public static CssRule Class()

@@ -52,6 +52,7 @@ namespace Annium.Blazor.Css.Internal
 
         public CssRuleInternal(string selector)
         {
+            Name = selector.Split('#', '.').Last();
             _selector = selector;
         }
 

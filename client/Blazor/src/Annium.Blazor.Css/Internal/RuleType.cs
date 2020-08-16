@@ -1,17 +1,12 @@
 namespace Annium.Blazor.Css.Internal
 {
-    internal class RuleType
+    internal class RuleType : ImplicitString<RuleType>
     {
         public static readonly RuleType Id = new RuleType("#");
         public static readonly RuleType Class = new RuleType(".");
 
-        private readonly string _type;
-
-        private RuleType(string type)
+        private RuleType(string type) : base(type)
         {
-            _type = type;
         }
-
-        public override string ToString() => _type;
     }
 }
