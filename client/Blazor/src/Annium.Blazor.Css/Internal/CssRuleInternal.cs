@@ -38,6 +38,9 @@ namespace Annium.Blazor.Css.Internal
 
         private static void WriteCss(CssRuleInternal rule, StringBuilder sb)
         {
+            if (rule._properties.Count == 0 && rule._rules.Count == 0)
+                return;
+
             sb.Append($"{rule._selector}{{");
 
             foreach (var property in rule._properties.Select(PropertyToCss))
