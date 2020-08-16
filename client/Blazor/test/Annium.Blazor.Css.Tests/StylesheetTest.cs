@@ -27,7 +27,7 @@ namespace Annium.Blazor.Css.Tests
 
     internal class Styles : IRuleSet
     {
-        private IRule _html = Rule.Tag("html")
+        private CssRule _html = Rule.Tag("html")
             .Set("display", "flex")
             .Set("width", "100%")
             .Set("min-height", "100vh");

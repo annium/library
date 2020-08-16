@@ -8,22 +8,22 @@ namespace Annium.Blazor.Css.Internal
 {
     internal class StyleSheet : IStyleSheet
     {
-        private static IReadOnlyCollection<IRule> GetRules(IRuleSet set)
+        private static IReadOnlyCollection<CssRule> GetRules(IRuleSet set)
         {
-            var rules = new List<IRule>();
+            var rules = new List<CssRule>();
             var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
             var properties = set.GetType().GetProperties(flags)
-                .Where(x => x.PropertyType.IsAssignableFrom(typeof(IRule)))
+                .Where(x => x.PropertyType.IsAssignableFrom(typeof(CssRule)))
                 .ToArray();
             foreach (var property in properties)
-                rules.Add((IRule) property.GetMethod.Invoke(set, Array.Empty<object>()));
+                rules.Add((CssRule) property.GetMethod.Invoke(set, Array.Empty<object>()));
 
             var fields = set.GetType().GetFields(flags)
-                .Where(x => x.FieldType.IsAssignableFrom(typeof(IRule)))
+                .Where(x => x.FieldType.IsAssignableFrom(typeof(CssRule)))
                 .ToArray();
             foreach (var field in fields)
-                rules.Add((IRule) field.GetValue(set));
+                rules.Add((CssRule) field.GetValue(set));
 
             return rules;
         }

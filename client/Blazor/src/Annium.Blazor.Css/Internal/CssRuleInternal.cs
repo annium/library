@@ -6,26 +6,26 @@ using System.Text;
 
 namespace Annium.Blazor.Css.Internal
 {
-    internal class RuleInternal : IRule
+    internal class CssRuleInternal : CssRule
     {
         private readonly string _selector;
-        private readonly IList<RuleInternal> _rules = new List<RuleInternal>();
+        private readonly IList<CssRuleInternal> _rules = new List<CssRuleInternal>();
         private readonly IDictionary<string, string> _properties = new Dictionary<string, string>();
 
 #if DEBUG
         private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}: {pair.Value};";
 
-        private static void WriteCss(RuleInternal rule, StringBuilder sb, int indent = 0)
+        private static void WriteCss(CssRuleInternal cssRule, StringBuilder sb, int indent = 0)
         {
             var indentation = new string(' ', indent);
             var propertyIndentation = new string(' ', indent + 2);
 
-            sb.AppendLine($"{indentation}{rule._selector} {{");
+            sb.AppendLine($"{indentation}{cssRule._selector} {{");
 
-            foreach (var property in rule._properties.Select(PropertyToCss))
+            foreach (var property in cssRule._properties.Select(PropertyToCss))
                 sb.AppendLine($"{propertyIndentation}{property}");
 
-            foreach (var innerRule in rule._rules)
+            foreach (var innerRule in cssRule._rules)
             {
                 sb.AppendLine();
                 WriteCss(innerRule, sb, indent + 2);
@@ -36,7 +36,7 @@ namespace Annium.Blazor.Css.Internal
 #else
         private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}:{pair.Value};";
 
-        private static void WriteCss(RuleInternal rule, StringBuilder sb)
+        private static void WriteCss(CssRuleInternal rule, StringBuilder sb)
         {
             sb.Append($"{rule._selector}{{");
 
@@ -50,31 +50,31 @@ namespace Annium.Blazor.Css.Internal
         }
 #endif
 
-        public RuleInternal(string selector)
+        public CssRuleInternal(string selector)
         {
             _selector = selector;
         }
 
-        public IRule Set(string property, string value)
+        public override CssRule Set(string property, string value)
         {
             _properties[property] = value;
 
             return this;
         }
 
-        public IRule And(string selector, Action<IRule> configure) => AddRule($"&{selector}", configure);
+        public override CssRule And(string selector, Action<CssRule> configure) => AddRule($"&{selector}", configure);
 
 #if DEBUG
-        public IRule Child(string selector, Action<IRule> configure) => AddRule($"> {selector}", configure);
+        public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($"> {selector}", configure);
 #else
-        public IRule Child(string selector, Action<IRule> configure) => AddRule($">{selector}", configure);
+        public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($">{selector}", configure);
 #endif
 
-        public IRule Inheritor(string selector, Action<IRule> configure) => AddRule(selector, configure);
+        public override CssRule Inheritor(string selector, Action<CssRule> configure) => AddRule(selector, configure);
 
         public override string ToString() => _selector;
 
-        public string ToCss()
+        public override string ToCss()
         {
             var sb = new StringBuilder(GetSizeEstimation());
 
@@ -84,9 +84,9 @@ namespace Annium.Blazor.Css.Internal
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private IRule AddRule(string selector, Action<IRule> configure)
+        private CssRule AddRule(string selector, Action<CssRule> configure)
         {
-            var rule = new RuleInternal(selector);
+            var rule = new CssRuleInternal(selector);
             configure(rule);
             _rules.Add(rule);
 

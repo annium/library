@@ -9,39 +9,39 @@ namespace Annium.Blazor.Css
 {
     public static class Rule
     {
-        public static IRule Class(string name)
-            => new RuleInternal($"{string.Empty}{RuleType.Class}{name}");
+        public static CssRule Class(string name)
+            => new CssRuleInternal($"{string.Empty}{RuleType.Class}{name}");
 
-        public static IRule Tag(string tag)
-            => new RuleInternal(tag);
+        public static CssRule Tag(string tag)
+            => new CssRuleInternal(tag);
 
-        public static IRule TagClass(string tag, string name)
-            => new RuleInternal($"{tag}{RuleType.Class}{name}");
+        public static CssRule TagClass(string tag, string name)
+            => new CssRuleInternal($"{tag}{RuleType.Class}{name}");
 
-        public static IRule Id(string name)
-            => new RuleInternal($"{string.Empty}{RuleType.Id}{name}");
+        public static CssRule Id(string name)
+            => new CssRuleInternal($"{string.Empty}{RuleType.Id}{name}");
 
-        public static IRule TagId(string tag, string name)
-            => new RuleInternal($"{tag}{RuleType.Id}{name}");
+        public static CssRule TagId(string tag, string name)
+            => new CssRuleInternal($"{tag}{RuleType.Id}{name}");
 
-        public static IRule Custom(string selector)
-            => new RuleInternal(selector);
+        public static CssRule Custom(string selector)
+            => new CssRuleInternal(selector);
 
-        public static IRule Media(string query)
-            => new RuleInternal($"@media {query}");
+        public static CssRule Media(string query)
+            => new CssRuleInternal($"@media {query}");
 
 #if DEBUG
-        public static IRule Class([CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
-            => new RuleInternal($"{string.Empty}{RuleType.Class}{GenerateName(line, member)}");
+        public static CssRule Class([CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
+            => new CssRuleInternal($"{string.Empty}{RuleType.Class}{GenerateName(line, member)}");
 
-        public static IRule TagClass(string tag, [CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
-            => new RuleInternal($"{tag}{RuleType.Class}{GenerateName(line, member)}");
+        public static CssRule TagClass(string tag, [CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
+            => new CssRuleInternal($"{tag}{RuleType.Class}{GenerateName(line, member)}");
 
-        public static IRule Id([CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
-            => new RuleInternal($"{string.Empty}{RuleType.Id}{GenerateName(line, member)}");
+        public static CssRule Id([CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
+            => new CssRuleInternal($"{string.Empty}{RuleType.Id}{GenerateName(line, member)}");
 
-        public static IRule TagId(string tag, [CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
-            => new RuleInternal($"{tag}{RuleType.Id}{GenerateName(line, member)}");
+        public static CssRule TagId(string tag, [CallerLineNumber] int line = 0, [CallerMemberName] string member = "")
+            => new CssRuleInternal($"{tag}{RuleType.Id}{GenerateName(line, member)}");
 
         private static readonly IDictionary<Type, int> TypeRules = new Dictionary<Type, int>();
         private static string GenerateName(int line, string member)
@@ -55,16 +55,16 @@ namespace Annium.Blazor.Css
             return $"{typeName}_{member}_{line}";
         }
 #else
-        public static IRule Class()
+        public static CssRule Class()
             => new RuleInternal($"{string.Empty}{RuleType.Class}{GenerateName()}");
 
-        public static IRule TagClass(string tag)
+        public static CssRule TagClass(string tag)
             => new RuleInternal($"{tag}{RuleType.Class}{GenerateName()}");
 
-        public static IRule Id()
+        public static CssRule Id()
             => new RuleInternal($"{string.Empty}{RuleType.Id}{GenerateName()}");
 
-        public static IRule TagId(string tag)
+        public static CssRule TagId(string tag)
             => new RuleInternal($"{tag}{RuleType.Id}{GenerateName()}");
 
         private static int _index = 0;
