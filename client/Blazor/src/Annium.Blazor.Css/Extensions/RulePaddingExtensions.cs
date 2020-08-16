@@ -1,3 +1,5 @@
+using static System.FormattableString;
+
 namespace Annium.Blazor.Css
 {
     public static class RulePaddingExtensions
@@ -6,120 +8,120 @@ namespace Annium.Blazor.Css
             rule.Set("padding", padding);
 
         public static CssRule PaddingPx(this CssRule rule, double padding) =>
-            rule.Padding($"{padding}px");
+            rule.Padding(Invariant($"{padding}px"));
 
         public static CssRule PaddingEm(this CssRule rule, double padding) =>
-            rule.Padding($"{padding}em");
+            rule.Padding(Invariant($"{padding}em"));
 
         public static CssRule PaddingRem(this CssRule rule, double padding) =>
-            rule.Padding($"{padding}rem");
+            rule.Padding(Invariant($"{padding}rem"));
 
         public static CssRule PaddingPercent(this CssRule rule, double padding) =>
-            rule.Padding($"{padding}%");
+            rule.Padding(Invariant($"{padding}%"));
 
         public static CssRule Padding(this CssRule rule, string paddingVertical, string paddingHorizontal)
-            => rule.Set("padding", $"{paddingVertical} {paddingHorizontal}");
+            => rule.Set("padding", Invariant($"{paddingVertical} {paddingHorizontal}"));
 
         public static CssRule PaddingPx(this CssRule rule, double paddingVertical, double paddingHorizontal) =>
-            rule.Padding($"{paddingVertical}px", $"{paddingHorizontal}px");
+            rule.Padding(Invariant($"{paddingVertical}px"), Invariant($"{paddingHorizontal}px"));
 
         public static CssRule PaddingEm(this CssRule rule, double paddingVertical, double paddingHorizontal) =>
-            rule.Padding($"{paddingVertical}em", $"{paddingHorizontal}em");
+            rule.Padding(Invariant($"{paddingVertical}em"), Invariant($"{paddingHorizontal}em"));
 
         public static CssRule PaddingRem(this CssRule rule, double paddingVertical, double paddingHorizontal) =>
-            rule.Padding($"{paddingVertical}rem", $"{paddingHorizontal}rem");
+            rule.Padding(Invariant($"{paddingVertical}rem"), Invariant($"{paddingHorizontal}rem"));
 
         public static CssRule PaddingPercent(this CssRule rule, double paddingVertical, double paddingHorizontal) =>
-            rule.Padding($"{paddingVertical}%", $"{paddingHorizontal}%");
+            rule.Padding(Invariant($"{paddingVertical}%"), Invariant($"{paddingHorizontal}%"));
 
         public static CssRule Padding(this CssRule rule, string paddingTop, string paddingHorizontal, string paddingBottom) =>
-            rule.Set("padding", $"{paddingTop} {paddingHorizontal} {paddingBottom}");
+            rule.Set("padding", Invariant($"{paddingTop} {paddingHorizontal} {paddingBottom}"));
 
         public static CssRule PaddingPx(this CssRule rule, double paddingTop, double paddingHorizontal, double paddingBottom) =>
-            rule.Padding($"{paddingTop}px", $"{paddingHorizontal}px", $"{paddingBottom}px");
+            rule.Padding(Invariant($"{paddingTop}px"), Invariant($"{paddingHorizontal}px"), Invariant($"{paddingBottom}px"));
 
         public static CssRule PaddingEm(this CssRule rule, double paddingTop, double paddingHorizontal, double paddingBottom) =>
-            rule.Padding($"{paddingTop}em", $"{paddingHorizontal}em", $"{paddingBottom}em");
+            rule.Padding(Invariant($"{paddingTop}em"), Invariant($"{paddingHorizontal}em"), Invariant($"{paddingBottom}em"));
 
         public static CssRule PaddingRem(this CssRule rule, double paddingTop, double paddingHorizontal, double paddingBottom) =>
-            rule.Padding($"{paddingTop}rem", $"{paddingHorizontal}rem", $"{paddingBottom}rem");
+            rule.Padding(Invariant($"{paddingTop}rem"), Invariant($"{paddingHorizontal}rem"), Invariant($"{paddingBottom}rem"));
 
         public static CssRule PaddingPercent(this CssRule rule, double paddingTop, double paddingHorizontal, double paddingBottom) =>
-            rule.Padding($"{paddingTop}%", $"{paddingHorizontal}%", $"{paddingBottom}%");
+            rule.Padding(Invariant($"{paddingTop}%"), Invariant($"{paddingHorizontal}%"), Invariant($"{paddingBottom}%"));
 
         public static CssRule Padding(this CssRule rule, string paddingTop, string paddingRight, string paddingBottom, string paddingLeft)
-            => rule.Set("padding", $"{paddingTop} {paddingRight} {paddingBottom} {paddingLeft}");
+            => rule.Set("padding", Invariant($"{paddingTop} {paddingRight} {paddingBottom} {paddingLeft}"));
 
         public static CssRule PaddingPx(this CssRule rule, double paddingTop, double paddingRight, double paddingBottom, double paddingLeft) =>
-            rule.Padding($"{paddingTop}px", $"{paddingRight}px", $"{paddingBottom}px", $"{paddingLeft}px");
+            rule.Padding(Invariant($"{paddingTop}px"), Invariant($"{paddingRight}px"), Invariant($"{paddingBottom}px"), Invariant($"{paddingLeft}px"));
 
         public static CssRule PaddingEm(this CssRule rule, double paddingTop, double paddingRight, double paddingBottom, double paddingLeft) =>
-            rule.Padding($"{paddingTop}em", $"{paddingRight}em", $"{paddingBottom}em", $"{paddingLeft}em");
+            rule.Padding(Invariant($"{paddingTop}em"), Invariant($"{paddingRight}em"), Invariant($"{paddingBottom}em"), Invariant($"{paddingLeft}em"));
 
         public static CssRule PaddingRem(this CssRule rule, double paddingTop, double paddingRight, double paddingBottom, double paddingLeft) =>
-            rule.Padding($"{paddingTop}rem", $"{paddingRight}rem", $"{paddingBottom}rem", $"{paddingLeft}rem");
+            rule.Padding(Invariant($"{paddingTop}rem"), Invariant($"{paddingRight}rem"), Invariant($"{paddingBottom}rem"), Invariant($"{paddingLeft}rem"));
 
         public static CssRule PaddingPercent(this CssRule rule, double paddingTop, double paddingRight, double paddingBottom, double paddingLeft) =>
-            rule.Padding($"{paddingTop}%", $"{paddingRight}%", $"{paddingBottom}%", $"{paddingLeft}%");
+            rule.Padding(Invariant($"{paddingTop}%"), Invariant($"{paddingRight}%"), Invariant($"{paddingBottom}%"), Invariant($"{paddingLeft}%"));
 
         public static CssRule PaddingLeft(this CssRule rule, string padding) =>
             rule.Set("padding-left", padding);
 
         public static CssRule PaddingLeftPx(this CssRule rule, double padding) =>
-            rule.PaddingLeft($"{padding}px");
+            rule.PaddingLeft(Invariant($"{padding}px"));
 
         public static CssRule PaddingLeftEm(this CssRule rule, double padding) =>
-            rule.PaddingLeft($"{padding}em");
+            rule.PaddingLeft(Invariant($"{padding}em"));
 
         public static CssRule PaddingLeftRem(this CssRule rule, double padding) =>
-            rule.PaddingLeft($"{padding}rem");
+            rule.PaddingLeft(Invariant($"{padding}rem"));
 
         public static CssRule PaddingLeftPercent(this CssRule rule, double padding) =>
-            rule.PaddingLeft($"{padding}%");
+            rule.PaddingLeft(Invariant($"{padding}%"));
 
         public static CssRule PaddingTop(this CssRule rule, string padding) =>
             rule.Set("padding-top", padding);
 
         public static CssRule PaddingTopPx(this CssRule rule, double padding) =>
-            rule.PaddingTop($"{padding}px");
+            rule.PaddingTop(Invariant($"{padding}px"));
 
         public static CssRule PaddingTopEm(this CssRule rule, double padding) =>
-            rule.PaddingTop($"{padding}em");
+            rule.PaddingTop(Invariant($"{padding}em"));
 
         public static CssRule PaddingTopRem(this CssRule rule, double padding) =>
-            rule.PaddingTop($"{padding}rem");
+            rule.PaddingTop(Invariant($"{padding}rem"));
 
         public static CssRule PaddingTopPercent(this CssRule rule, double padding) =>
-            rule.PaddingTop($"{padding}%");
+            rule.PaddingTop(Invariant($"{padding}%"));
 
         public static CssRule PaddingRight(this CssRule rule, string padding) =>
             rule.Set("padding-right", padding);
 
         public static CssRule PaddingRightPx(this CssRule rule, double padding) =>
-            rule.PaddingRight($"{padding}px");
+            rule.PaddingRight(Invariant($"{padding}px"));
 
         public static CssRule PaddingRightEm(this CssRule rule, double padding) =>
-            rule.PaddingRight($"{padding}em");
+            rule.PaddingRight(Invariant($"{padding}em"));
 
         public static CssRule PaddingRightRem(this CssRule rule, double padding) =>
-            rule.PaddingRight($"{padding}rem");
+            rule.PaddingRight(Invariant($"{padding}rem"));
 
         public static CssRule PaddingRightPercent(this CssRule rule, double padding) =>
-            rule.PaddingRight($"{padding}%");
+            rule.PaddingRight(Invariant($"{padding}%"));
 
         public static CssRule PaddingBottom(this CssRule rule, string padding) =>
             rule.Set("padding-bottom", padding);
 
         public static CssRule PaddingBottomPx(this CssRule rule, double padding) =>
-            rule.PaddingBottom($"{padding}px");
+            rule.PaddingBottom(Invariant($"{padding}px"));
 
         public static CssRule PaddingBottomEm(this CssRule rule, double padding) =>
-            rule.PaddingBottom($"{padding}em");
+            rule.PaddingBottom(Invariant($"{padding}em"));
 
         public static CssRule PaddingBottomRem(this CssRule rule, double padding) =>
-            rule.PaddingBottom($"{padding}rem");
+            rule.PaddingBottom(Invariant($"{padding}rem"));
 
         public static CssRule PaddingBottomPercent(this CssRule rule, double padding) =>
-            rule.PaddingBottom($"{padding}%");
+            rule.PaddingBottom(Invariant($"{padding}%"));
     }
 }

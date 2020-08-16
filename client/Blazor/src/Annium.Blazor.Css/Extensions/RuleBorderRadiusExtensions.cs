@@ -1,3 +1,5 @@
+using static System.FormattableString;
+
 namespace Annium.Blazor.Css
 {
     public static class RuleBorderRadiusExtensions
@@ -6,120 +8,120 @@ namespace Annium.Blazor.Css
             rule.Set("border-radius", borderRadius);
 
         public static CssRule BorderRadiusPx(this CssRule rule, double borderRadius) =>
-            rule.BorderRadius($"{borderRadius}px");
+            rule.BorderRadius(Invariant($"{borderRadius}px"));
 
         public static CssRule BorderRadiusEm(this CssRule rule, double borderRadius) =>
-            rule.BorderRadius($"{borderRadius}em");
+            rule.BorderRadius(Invariant($"{borderRadius}em"));
 
         public static CssRule BorderRadiusRem(this CssRule rule, double borderRadius) =>
-            rule.BorderRadius($"{borderRadius}rem");
+            rule.BorderRadius(Invariant($"{borderRadius}rem"));
 
         public static CssRule BorderRadiusPercent(this CssRule rule, double borderRadius) =>
-            rule.BorderRadius($"{borderRadius}%");
+            rule.BorderRadius(Invariant($"{borderRadius}%"));
 
         public static CssRule BorderRadius(this CssRule rule, string borderRadiusTopLeftBottomRight, string borderRadiusTopRightBottomLeft)
-            => rule.Set("border-radius", $"{borderRadiusTopLeftBottomRight} {borderRadiusTopRightBottomLeft}");
+            => rule.Set("border-radius", Invariant($"{borderRadiusTopLeftBottomRight} {borderRadiusTopRightBottomLeft}"));
 
         public static CssRule BorderRadiusPx(this CssRule rule, double borderRadiusTopLeftBottomRight, double borderRadiusTopRightBottomLeft) =>
-            rule.BorderRadius($"{borderRadiusTopLeftBottomRight}px", $"{borderRadiusTopRightBottomLeft}px");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeftBottomRight}px"), Invariant($"{borderRadiusTopRightBottomLeft}px"));
 
         public static CssRule BorderRadiusEm(this CssRule rule, double borderRadiusTopLeftBottomRight, double borderRadiusTopRightBottomLeft) =>
-            rule.BorderRadius($"{borderRadiusTopLeftBottomRight}em", $"{borderRadiusTopRightBottomLeft}em");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeftBottomRight}em"), Invariant($"{borderRadiusTopRightBottomLeft}em"));
 
         public static CssRule BorderRadiusRem(this CssRule rule, double borderRadiusTopLeftBottomRight, double borderRadiusTopRightBottomLeft) =>
-            rule.BorderRadius($"{borderRadiusTopLeftBottomRight}rem", $"{borderRadiusTopRightBottomLeft}rem");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeftBottomRight}rem"), Invariant($"{borderRadiusTopRightBottomLeft}rem"));
 
         public static CssRule BorderRadiusPercent(this CssRule rule, double borderRadiusTopLeftBottomRight, double borderRadiusTopRightBottomLeft) =>
-            rule.BorderRadius($"{borderRadiusTopLeftBottomRight}%", $"{borderRadiusTopRightBottomLeft}%");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeftBottomRight}%"), Invariant($"{borderRadiusTopRightBottomLeft}%"));
 
         public static CssRule BorderRadius(this CssRule rule, string borderRadiusTopLeft, string borderRadiusTopRightBottomLeft, string borderRadiusBottomRight) =>
-            rule.Set("border-radius", $"{borderRadiusTopLeft} {borderRadiusTopRightBottomLeft} {borderRadiusBottomRight}");
+            rule.Set("border-radius", Invariant($"{borderRadiusTopLeft} {borderRadiusTopRightBottomLeft} {borderRadiusBottomRight}"));
 
         public static CssRule BorderRadiusPx(this CssRule rule, double borderRadiusTopLeft, double borderRadiusTopRightBottomLeft, double borderRadiusBottomRight) =>
-            rule.BorderRadius($"{borderRadiusTopLeft}px", $"{borderRadiusTopRightBottomLeft}px", $"{borderRadiusBottomRight}px");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeft}px"), Invariant($"{borderRadiusTopRightBottomLeft}px"), Invariant($"{borderRadiusBottomRight}px"));
 
         public static CssRule BorderRadiusEm(this CssRule rule, double borderRadiusTopLeft, double borderRadiusTopRightBottomLeft, double borderRadiusBottomRight) =>
-            rule.BorderRadius($"{borderRadiusTopLeft}em", $"{borderRadiusTopRightBottomLeft}em", $"{borderRadiusBottomRight}em");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeft}em"), Invariant($"{borderRadiusTopRightBottomLeft}em"), Invariant($"{borderRadiusBottomRight}em"));
 
         public static CssRule BorderRadiusRem(this CssRule rule, double borderRadiusTopLeft, double borderRadiusTopRightBottomLeft, double borderRadiusBottomRight) =>
-            rule.BorderRadius($"{borderRadiusTopLeft}rem", $"{borderRadiusTopRightBottomLeft}rem", $"{borderRadiusBottomRight}rem");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeft}rem"), Invariant($"{borderRadiusTopRightBottomLeft}rem"), Invariant($"{borderRadiusBottomRight}rem"));
 
         public static CssRule BorderRadiusPercent(this CssRule rule, double borderRadiusTopLeft, double borderRadiusTopRightBottomLeft, double borderRadiusBottomRight) =>
-            rule.BorderRadius($"{borderRadiusTopLeft}%", $"{borderRadiusTopRightBottomLeft}%", $"{borderRadiusBottomRight}%");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeft}%"), Invariant($"{borderRadiusTopRightBottomLeft}%"), Invariant($"{borderRadiusBottomRight}%"));
 
         public static CssRule BorderRadius(this CssRule rule, string borderRadiusTopLeft, string borderRadiusTopRight, string borderRadiusBottomRight, string borderRadiusBottomLeft)
-            => rule.Set("border-radius", $"{borderRadiusTopLeft} {borderRadiusTopRight} {borderRadiusBottomRight} {borderRadiusBottomLeft}");
+            => rule.Set("border-radius", Invariant($"{borderRadiusTopLeft} {borderRadiusTopRight} {borderRadiusBottomRight} {borderRadiusBottomLeft}"));
 
         public static CssRule BorderRadiusPx(this CssRule rule, double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomRight, double borderRadiusBottomLeft) =>
-            rule.BorderRadius($"{borderRadiusTopLeft}px", $"{borderRadiusTopRight}px", $"{borderRadiusBottomRight}px", $"{borderRadiusBottomLeft}px");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeft}px"), Invariant($"{borderRadiusTopRight}px"), Invariant($"{borderRadiusBottomRight}px"), Invariant($"{borderRadiusBottomLeft}px"));
 
         public static CssRule BorderRadiusEm(this CssRule rule, double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomRight, double borderRadiusBottomLeft) =>
-            rule.BorderRadius($"{borderRadiusTopLeft}em", $"{borderRadiusTopRight}em", $"{borderRadiusBottomRight}em", $"{borderRadiusBottomLeft}em");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeft}em"), Invariant($"{borderRadiusTopRight}em"), Invariant($"{borderRadiusBottomRight}em"), Invariant($"{borderRadiusBottomLeft}em"));
 
         public static CssRule BorderRadiusRem(this CssRule rule, double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomRight, double borderRadiusBottomLeft) =>
-            rule.BorderRadius($"{borderRadiusTopLeft}rem", $"{borderRadiusTopRight}rem", $"{borderRadiusBottomRight}rem", $"{borderRadiusBottomLeft}rem");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeft}rem"), Invariant($"{borderRadiusTopRight}rem"), Invariant($"{borderRadiusBottomRight}rem"), Invariant($"{borderRadiusBottomLeft}rem"));
 
         public static CssRule BorderRadiusPercent(this CssRule rule, double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomRight, double borderRadiusBottomLeft) =>
-            rule.BorderRadius($"{borderRadiusTopLeft}%", $"{borderRadiusTopRight}%", $"{borderRadiusBottomRight}%", $"{borderRadiusBottomLeft}%");
+            rule.BorderRadius(Invariant($"{borderRadiusTopLeft}%"), Invariant($"{borderRadiusTopRight}%"), Invariant($"{borderRadiusBottomRight}%"), Invariant($"{borderRadiusBottomLeft}%"));
 
         public static CssRule BorderRadiusTopLeft(this CssRule rule, string borderRadius) =>
             rule.Set("border-top-left-radius", borderRadius);
 
         public static CssRule BorderRadiusTopLeftPx(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusTopLeft($"{borderRadius}px");
+            rule.BorderRadiusTopLeft(Invariant($"{borderRadius}px"));
 
         public static CssRule BorderRadiusTopLeftEm(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusTopLeft($"{borderRadius}em");
+            rule.BorderRadiusTopLeft(Invariant($"{borderRadius}em"));
 
         public static CssRule BorderRadiusTopLeftRem(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusTopLeft($"{borderRadius}rem");
+            rule.BorderRadiusTopLeft(Invariant($"{borderRadius}rem"));
 
         public static CssRule BorderRadiusTopLeftPercent(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusTopLeft($"{borderRadius}%");
+            rule.BorderRadiusTopLeft(Invariant($"{borderRadius}%"));
 
         public static CssRule BorderRadiusTopRight(this CssRule rule, string borderRadius) =>
             rule.Set("border-top-right-radius", borderRadius);
 
         public static CssRule BorderRadiusTopRightPx(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusTopRight($"{borderRadius}px");
+            rule.BorderRadiusTopRight(Invariant($"{borderRadius}px"));
 
         public static CssRule BorderRadiusTopRightEm(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusTopRight($"{borderRadius}em");
+            rule.BorderRadiusTopRight(Invariant($"{borderRadius}em"));
 
         public static CssRule BorderRadiusTopRightRem(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusTopRight($"{borderRadius}rem");
+            rule.BorderRadiusTopRight(Invariant($"{borderRadius}rem"));
 
         public static CssRule BorderRadiusTopRightPercent(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusTopRight($"{borderRadius}%");
+            rule.BorderRadiusTopRight(Invariant($"{borderRadius}%"));
 
         public static CssRule BorderRadiusBottomRight(this CssRule rule, string borderRadius) =>
             rule.Set("border-bottom-right-radius", borderRadius);
 
         public static CssRule BorderRadiusBottomRightPx(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusBottomRight($"{borderRadius}px");
+            rule.BorderRadiusBottomRight(Invariant($"{borderRadius}px"));
 
         public static CssRule BorderRadiusBottomRightEm(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusBottomRight($"{borderRadius}em");
+            rule.BorderRadiusBottomRight(Invariant($"{borderRadius}em"));
 
         public static CssRule BorderRadiusBottomRightRem(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusBottomRight($"{borderRadius}rem");
+            rule.BorderRadiusBottomRight(Invariant($"{borderRadius}rem"));
 
         public static CssRule BorderRadiusBottomRightPercent(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusBottomRight($"{borderRadius}%");
+            rule.BorderRadiusBottomRight(Invariant($"{borderRadius}%"));
 
         public static CssRule BorderRadiusBottomLeft(this CssRule rule, string borderRadius) =>
             rule.Set("border-bottom-left-radius", borderRadius);
 
         public static CssRule BorderRadiusBottomLeftPx(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusBottomLeft($"{borderRadius}px");
+            rule.BorderRadiusBottomLeft(Invariant($"{borderRadius}px"));
 
         public static CssRule BorderRadiusBottomLeftEm(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusBottomLeft($"{borderRadius}em");
+            rule.BorderRadiusBottomLeft(Invariant($"{borderRadius}em"));
 
         public static CssRule BorderRadiusBottomLeftRem(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusBottomLeft($"{borderRadius}rem");
+            rule.BorderRadiusBottomLeft(Invariant($"{borderRadius}rem"));
 
         public static CssRule BorderRadiusBottomLeftPercent(this CssRule rule, double borderRadius) =>
-            rule.BorderRadiusBottomLeft($"{borderRadius}%");
+            rule.BorderRadiusBottomLeft(Invariant($"{borderRadius}%"));
     }
 }
