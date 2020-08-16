@@ -18,4 +18,9 @@
     <ItemGroup>
         <PackageReference Include="MatBlazor" Version="2.6.2" />
     </ItemGroup>
+    <ItemGroup>
+        <Content Update="Components\_Imports.razor">
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </Content>
+    </ItemGroup>
 </Project>

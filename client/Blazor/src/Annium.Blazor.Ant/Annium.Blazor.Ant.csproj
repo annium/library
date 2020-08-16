@@ -18,4 +18,9 @@
     <ItemGroup>
         <PackageReference Include="AntDesign" Version="0.2.0" />
     </ItemGroup>
+    <ItemGroup>
+        <Content Update="Components\_Imports.razor">
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </Content>
+    </ItemGroup>
 </Project>
