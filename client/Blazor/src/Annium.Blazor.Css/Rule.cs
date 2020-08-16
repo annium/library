@@ -9,6 +9,9 @@ namespace Annium.Blazor.Css
 {
     public static class Rule
     {
+        private static int _index = 0;
+        private static int Index => Interlocked.Increment(ref _index);
+
         public static CssRule Class(string name)
             => new CssRuleInternal($"{string.Empty}{RuleType.Class}{name}");
 
@@ -49,28 +52,22 @@ namespace Annium.Blazor.Css
             var fileName = Path.GetFileNameWithoutExtension(file).Replace(".razor", string.Empty);
             var memberName = member == ".ctor" ? "constructor" : member;
 
-            return $"{fileName}_{memberName}_{line}";
+            return $"{fileName}_{memberName}_{line}_{Index}";
         }
 #else
         public static CssRule Class()
-            => new RuleInternal($"{string.Empty}{RuleType.Class}{GenerateName()}");
+            => new CssRuleInternal($"{string.Empty}{RuleType.Class}{GenerateName()}");
 
         public static CssRule TagClass(string tag)
-            => new RuleInternal($"{tag}{RuleType.Class}{GenerateName()}");
+            => new CssRuleInternal($"{tag}{RuleType.Class}{GenerateName()}");
 
         public static CssRule Id()
-            => new RuleInternal($"{string.Empty}{RuleType.Id}{GenerateName()}");
+            => new CssRuleInternal($"{string.Empty}{RuleType.Id}{GenerateName()}");
 
         public static CssRule TagId(string tag)
-            => new RuleInternal($"{tag}{RuleType.Id}{GenerateName()}");
+            => new CssRuleInternal($"{tag}{RuleType.Id}{GenerateName()}");
 
-        private static int _index = 0;
-        private static string GenerateName()
-        {
-            var index = Interlocked.Increment(ref _index);
-
-            return $"a{index}";
-        }
+        private static string GenerateName() => $"a{Index}";
 #endif
     }
 }
