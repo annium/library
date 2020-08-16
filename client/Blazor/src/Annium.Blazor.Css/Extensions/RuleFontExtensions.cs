@@ -5,6 +5,7 @@ namespace Annium.Blazor.Css
 {
     public static class RuleFontExtensions
     {
+        public static CssRule FontFamily(this CssRule rule, string fontFamily) => rule.Set("font-family", fontFamily);
         public static CssRule FontSize(this CssRule rule, string fontSize) => rule.Set("font-size", fontSize);
         public static CssRule FontSizePx(this CssRule rule, double fontSize) => rule.Set("font-size", Invariant($"{fontSize}px"));
         public static CssRule FontSizeEm(this CssRule rule, double fontSize) => rule.Set("font-size", Invariant($"{fontSize}em"));

@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Annium.Blazor.Css.Internal;
 
@@ -47,9 +50,16 @@ namespace Annium.Blazor.Css
             => new CssRuleInternal($"{tag}{RuleType.Id}{GenerateName(line, file, member)}");
 
         private static readonly IDictionary<Type, int> TypeRules = new Dictionary<Type, int>();
+
         private static string GenerateName(int line, string file, string member)
         {
-            var fileName = Path.GetFileNameWithoutExtension(file).Replace(".razor", string.Empty);
+            var filePath = Regex.Replace(file, "(.razor|.cs|[:#.])", string.Empty)
+                .Replace(':', '-')
+                .TrimStart(Path.DirectorySeparatorChar)
+                .Split(Path.DirectorySeparatorChar)
+                .ToArray();
+            var fileName = string.Join('-', filePath.Length > 4 ? filePath.TakeLast(4) : filePath);
+            ;
             var memberName = member == ".ctor" ? "constructor" : member;
 
             return $"{fileName}_{memberName}_{line}_{Index}";

@@ -1,3 +1,4 @@
+using System.Reflection;
 using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,7 +9,7 @@ namespace Annium.Blazor.Css
         public static IServiceCollection AddCssRules(this IServiceCollection services)
         {
             // register rule sets
-            services.AddAllTypes()
+            services.AddAssemblyTypes(Assembly.GetCallingAssembly())
                 .AssignableTo<IRuleSet>()
                 .AsImplementedInterfaces()
                 .AsSelf()

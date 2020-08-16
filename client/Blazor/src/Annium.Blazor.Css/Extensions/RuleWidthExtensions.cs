@@ -1,7 +1,7 @@
 using static System.FormattableString;
 namespace Annium.Blazor.Css
 {
-    public static class RuleWidthHeightExtensions
+    public static class RuleWidthExtensions
     {
         public static CssRule Width(this CssRule rule, string width) => rule.Set("width", width);
         public static CssRule WidthPx(this CssRule rule, int width) => rule.Width(Invariant($"{width}px"));
