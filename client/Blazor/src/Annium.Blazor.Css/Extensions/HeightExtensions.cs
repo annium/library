@@ -2,7 +2,7 @@ using static System.FormattableString;
 
 namespace Annium.Blazor.Css
 {
-    public static class RuleHeightExtensions
+    public static class HeightExtensions
     {
         public static CssRule Height(this CssRule rule, string height) => rule.Set("height", height);
         public static CssRule HeightPx(this CssRule rule, int height) => rule.Height(Invariant($"{height}px"));

@@ -2,7 +2,7 @@ using static System.FormattableString;
 
 namespace Annium.Blazor.Css
 {
-    public static class RulePaddingExtensions
+    public static class PaddingExtensions
     {
         public static CssRule Padding(this CssRule rule, string padding) =>
             rule.Set("padding", padding);

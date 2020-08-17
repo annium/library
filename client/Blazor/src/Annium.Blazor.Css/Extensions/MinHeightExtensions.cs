@@ -2,7 +2,7 @@ using static System.FormattableString;
 
 namespace Annium.Blazor.Css
 {
-    public static class RuleMinHeightExtensions
+    public static class MinHeightExtensions
     {
         public static CssRule MinHeight(this CssRule rule, string minHeight) => rule.Set("minHeight", minHeight);
         public static CssRule MinHeightPx(this CssRule rule, int minHeight) => rule.MinHeight(Invariant($"{minHeight}px"));

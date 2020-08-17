@@ -1,8 +1,6 @@
-using Annium.Blazor.Css.Internal;
-
 namespace Annium.Blazor.Css
 {
-    public static class RuleFlexboxExtensions
+    public static class FlexboxExtensions
     {
         public static CssRule FlexRow(this CssRule rule, AlignItems alignItems, JustifyContent justifyContent, bool inline = false) =>
             rule.FlexBox(FlexDirection.Row, alignItems, justifyContent, inline);

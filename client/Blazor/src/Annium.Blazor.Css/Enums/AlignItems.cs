@@ -1,4 +1,6 @@
-namespace Annium.Blazor.Css.Internal
+using Annium.Blazor.Css.Internal;
+
+namespace Annium.Blazor.Css
 {
     public class AlignItems : ImplicitString<AlignItems>
     {

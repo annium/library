@@ -2,7 +2,7 @@ using static System.FormattableString;
 
 namespace Annium.Blazor.Css
 {
-    public static class RuleBorderRadiusExtensions
+    public static class BorderRadiusExtensions
     {
         public static CssRule BorderRadius(this CssRule rule, string borderRadius) =>
             rule.Set("border-radius", borderRadius);

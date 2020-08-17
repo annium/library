@@ -2,7 +2,7 @@ using static System.FormattableString;
 
 namespace Annium.Blazor.Css
 {
-    public static class RuleMarginExtensions
+    public static class MarginExtensions
     {
         public static CssRule Margin(this CssRule rule, string margin) =>
             rule.Set("margin", margin);
