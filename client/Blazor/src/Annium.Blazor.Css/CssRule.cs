@@ -2,6 +2,11 @@ using System;
 
 namespace Annium.Blazor.Css
 {
+    public abstract class CssTopLevelRule : CssRule
+    {
+        public abstract CssTopLevelRule Media(string query, Action<CssRule> configure);
+    }
+
     public abstract class CssRule
     {
         public string Name { get; protected set; } = string.Empty;

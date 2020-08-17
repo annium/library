@@ -15,38 +15,35 @@ namespace Annium.Blazor.Css
         private static int _index = 0;
         private static int Index => Interlocked.Increment(ref _index);
 
-        public static CssRule Class(string name)
+        public static CssTopLevelRule Class(string name)
             => new CssRuleInternal($"{string.Empty}{RuleType.Class}{name}");
 
-        public static CssRule Tag(string tag)
+        public static CssTopLevelRule Tag(string tag)
             => new CssRuleInternal(tag);
 
-        public static CssRule TagClass(string tag, string name)
+        public static CssTopLevelRule TagClass(string tag, string name)
             => new CssRuleInternal($"{tag}{RuleType.Class}{name}");
 
-        public static CssRule Id(string name)
+        public static CssTopLevelRule Id(string name)
             => new CssRuleInternal($"{string.Empty}{RuleType.Id}{name}");
 
-        public static CssRule TagId(string tag, string name)
+        public static CssTopLevelRule TagId(string tag, string name)
             => new CssRuleInternal($"{tag}{RuleType.Id}{name}");
 
-        public static CssRule Custom(string selector)
+        public static CssTopLevelRule Custom(string selector)
             => new CssRuleInternal(selector);
 
-        public static CssRule Media(string query)
-            => new CssRuleInternal($"@media {query}");
-
 #if DEBUG
-        public static CssRule Class([CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
+        public static CssTopLevelRule Class([CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
             => new CssRuleInternal($"{string.Empty}{RuleType.Class}{GenerateName(line, file, member)}");
 
-        public static CssRule TagClass(string tag, [CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
+        public static CssTopLevelRule TagClass(string tag, [CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
             => new CssRuleInternal($"{tag}{RuleType.Class}{GenerateName(line, file, member)}");
 
-        public static CssRule Id([CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
+        public static CssTopLevelRule Id([CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
             => new CssRuleInternal($"{string.Empty}{RuleType.Id}{GenerateName(line, file, member)}");
 
-        public static CssRule TagId(string tag, [CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
+        public static CssTopLevelRule TagId(string tag, [CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
             => new CssRuleInternal($"{tag}{RuleType.Id}{GenerateName(line, file, member)}");
 
         private static readonly IDictionary<Type, int> TypeRules = new Dictionary<Type, int>();
@@ -65,16 +62,16 @@ namespace Annium.Blazor.Css
             return $"{fileName}_{memberName}_{line}_{Index}";
         }
 #else
-        public static CssRule Class()
+        public static CssTopLevelRule Class()
             => new CssRuleInternal($"{string.Empty}{RuleType.Class}{GenerateName()}");
 
-        public static CssRule TagClass(string tag)
+        public static CssTopLevelRule TagClass(string tag)
             => new CssRuleInternal($"{tag}{RuleType.Class}{GenerateName()}");
 
-        public static CssRule Id()
+        public static CssTopLevelRule Id()
             => new CssRuleInternal($"{string.Empty}{RuleType.Id}{GenerateName()}");
 
-        public static CssRule TagId(string tag)
+        public static CssTopLevelRule TagId(string tag)
             => new CssRuleInternal($"{tag}{RuleType.Id}{GenerateName()}");
 
         private static string GenerateName() => $"a{Index}";

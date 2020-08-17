@@ -6,50 +6,70 @@ using System.Text;
 
 namespace Annium.Blazor.Css.Internal
 {
-    internal class CssRuleInternal : CssRule
+    internal class CssRuleInternal : CssTopLevelRule
     {
         private readonly string _selector;
         private readonly IList<CssRuleInternal> _rules = new List<CssRuleInternal>();
+        private readonly IDictionary<string, CssRuleInternal> _media = new Dictionary<string, CssRuleInternal>();
         private readonly IDictionary<string, string> _properties = new Dictionary<string, string>();
 
 #if DEBUG
+        private const int INDENT = 2;
         private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}: {pair.Value};";
 
-        private static void WriteCss(CssRuleInternal cssRule, StringBuilder sb, int indent = 0)
+        private static void WriteCss(string inheritedSelector, CssRuleInternal rule, StringBuilder sb, int indent = 0)
         {
-            var indentation = new string(' ', indent);
-            var propertyIndentation = new string(' ', indent + 2);
+            var i1 = new string(' ', indent);
+            var i2 = new string(' ', indent + INDENT);
 
-            sb.AppendLine($"{indentation}{cssRule._selector} {{");
+            // this rule
+            sb.AppendLine($"{i1}{inheritedSelector}{rule._selector} {{");
+            foreach (var property in rule._properties.Select(PropertyToCss))
+                sb.AppendLine($"{i2}{property}");
+            sb.AppendLine($"{i1}}}");
 
-            foreach (var property in cssRule._properties.Select(PropertyToCss))
-                sb.AppendLine($"{propertyIndentation}{property}");
-
-            foreach (var innerRule in cssRule._rules)
+            // inner rules
+            foreach (var innerRule in rule._rules)
             {
                 sb.AppendLine();
-                WriteCss(innerRule, sb, indent + 2);
+                WriteCss($"{inheritedSelector}{rule._selector}", innerRule, sb, indent);
             }
 
-            sb.AppendLine($"{indentation}}}");
+            // media rules
+            foreach (var (query, mediaRule) in rule._media)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"{i1}{query} {{");
+                WriteCss(inheritedSelector, mediaRule, sb, indent + INDENT);
+                sb.AppendLine($"{i1}}}");
+            }
         }
 #else
         private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}:{pair.Value};";
 
-        private static void WriteCss(CssRuleInternal rule, StringBuilder sb)
+        private static void WriteCss(string inheritedSelector, CssRuleInternal rule, StringBuilder sb)
         {
-            if (rule._properties.Count == 0 && rule._rules.Count == 0)
+            // skip
+            if (rule._properties.Count == 0 && rule._rules.Count == 0 && rule._media.Count == 0)
                 return;
 
-            sb.Append($"{rule._selector}{{");
-
+            // this rule
+            sb.Append($"{inheritedSelector}{rule._selector}{{");
             foreach (var property in rule._properties.Select(PropertyToCss))
                 sb.Append(property);
-
-            foreach (var innerRule in rule._rules)
-                WriteCss(innerRule, sb);
-
             sb.Append("}");
+
+            // inner rules
+            foreach (var innerRule in rule._rules)
+                WriteCss($"{inheritedSelector}{rule._selector}", innerRule, sb);
+
+            // media rules
+            foreach (var (query, mediaRule) in rule._media)
+            {
+                sb.AppendLine($"{query} {{");
+                WriteCss(inheritedSelector, mediaRule, sb);
+                sb.AppendLine("}");
+            }
         }
 #endif
 
@@ -66,15 +86,24 @@ namespace Annium.Blazor.Css.Internal
             return this;
         }
 
-        public override CssRule And(string selector, Action<CssRule> configure) => AddRule($"&{selector}", configure);
+        public override CssRule And(string selector, Action<CssRule> configure) => AddRule(selector, configure);
 
 #if DEBUG
-        public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($"> {selector}", configure);
+        public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($" > {selector}", configure);
 #else
         public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($">{selector}", configure);
 #endif
 
-        public override CssRule Inheritor(string selector, Action<CssRule> configure) => AddRule(selector, configure);
+        public override CssRule Inheritor(string selector, Action<CssRule> configure) => AddRule($" {selector}", configure);
+
+        public override CssTopLevelRule Media(string query, Action<CssRule> configure)
+        {
+            var rule = new CssRuleInternal(_selector);
+            configure(rule);
+            _media[$"@media {query}"] = rule;
+
+            return this;
+        }
 
         public override string ToString() => _selector;
 
@@ -82,7 +111,7 @@ namespace Annium.Blazor.Css.Internal
         {
             var sb = new StringBuilder(GetSizeEstimation());
 
-            WriteCss(this, sb);
+            WriteCss(string.Empty, this, sb);
 
             return sb.ToString();
         }
