@@ -35,13 +35,13 @@ namespace Annium.Blazor.Core.Extensions
             var accessors = new List<Func<ComponentBase, IState>>();
 
             var properties = type.GetProperties(flags)
-                .Where(x => x.PropertyType.IsAssignableFrom(typeof(IState)))
+                .Where(x => x.PropertyType.IsDerivedFrom(typeof(IState)))
                 .ToArray();
             foreach (var property in properties)
                 accessors.Add(component => (IState) property.GetMethod.Invoke(component, EmptyArgs));
 
             var fields = type.GetFields(flags)
-                .Where(x => x.FieldType.IsAssignableFrom(typeof(IState)))
+                .Where(x => x.FieldType.IsDerivedFrom(typeof(IState)))
                 .ToArray();
             foreach (var field in fields)
                 accessors.Add(component => (IState) field.GetValue(component));
