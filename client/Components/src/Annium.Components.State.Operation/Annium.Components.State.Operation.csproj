@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <PackageId>Annium.Components.State</PackageId>
+        <PackageId>Annium.Components.State.Operation</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
-        <Description>Annium.Components.State</Description>
+        <Description>Annium.Components.State.Operation</Description>
         <TargetFramework>netstandard2.1</TargetFramework>
         <OutputType>Library</OutputType>
         <DebugType>portable</DebugType>
@@ -12,7 +12,6 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../Annium.Components.State.Form/Annium.Components.State.Form.csproj" />
-        <ProjectReference Include="../Annium.Components.State.Operation/Annium.Components.State.Operation.csproj" />
+        <ProjectReference Include="../Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
     </ItemGroup>
 </Project>
