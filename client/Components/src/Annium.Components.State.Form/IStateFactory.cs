@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using NodaTime;
 
-namespace Annium.Components.State
+namespace Annium.Components.State.Form
 {
     public interface IStateFactory
     {

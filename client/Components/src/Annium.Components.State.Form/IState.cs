@@ -1,7 +1,7 @@
 using System;
 using System.Reactive;
 
-namespace Annium.Components.State
+namespace Annium.Components.State.Form
 {
     public interface IState<T> : IState
     {

@@ -1,4 +1,4 @@
-namespace Annium.Components.State
+namespace Annium.Components.State.Form
 {
     public interface IStatusContainer
     {

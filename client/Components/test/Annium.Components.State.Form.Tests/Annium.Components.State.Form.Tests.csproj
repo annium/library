@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <PackageId>Annium.Components.State.Tests</PackageId>
+        <PackageId>Annium.Components.State.Form.Tests</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
-        <Description>Annium.Components.State.Tests</Description>
+        <Description>Annium.Components.State.Form.Tests</Description>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <OutputType>Library</OutputType>
         <DebugType>portable</DebugType>
@@ -13,7 +13,7 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../../src/Annium.Components.State/Annium.Components.State.csproj" />
+        <ProjectReference Include="../../src/Annium.Components.State.Form/Annium.Components.State.Form.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Localization.InMemory" Version="0.1.0" />

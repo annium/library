@@ -8,7 +8,7 @@ using Annium.Data.Models.Extensions;
 using Annium.Extensions.Primitives;
 using NodaTime;
 
-namespace Annium.Components.State.Internal
+namespace Annium.Components.State.Form.Internal
 {
     internal class MapContainer<TKey, TValue> : ObservableContainer, IMapContainer<TKey, TValue>
         where TKey : notnull

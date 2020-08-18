@@ -4,7 +4,7 @@ using System.Reactive;
 using Annium.Testing;
 using Xunit;
 
-namespace Annium.Components.State.Tests
+namespace Annium.Components.State.Form.Tests
 {
     public class ComplexTest : TestBase
     {

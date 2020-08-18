@@ -1,6 +1,6 @@
 using System;
 
-namespace Annium.Components.State.Internal
+namespace Annium.Components.State.Form.Internal
 {
     internal class AtomicContainer<T> : ObservableContainer, IAtomicContainer<T>
         where T : IEquatable<T>

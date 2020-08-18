@@ -6,7 +6,7 @@ using Annium.Core.Mapper;
 using Annium.Core.Reflection;
 using NodaTime;
 
-namespace Annium.Components.State.Internal
+namespace Annium.Components.State.Form.Internal
 {
     internal class StateFactory : IStateFactory
     {

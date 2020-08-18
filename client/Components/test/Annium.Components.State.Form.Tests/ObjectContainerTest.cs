@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Reactive;
+using Annium.Components.State.Form.Extensions;
 using Annium.Extensions.Validation;
 using Annium.Testing;
 using Xunit;
 
-namespace Annium.Components.State.Tests
+namespace Annium.Components.State.Form.Tests
 {
     public class ObjectContainerTest : TestBase
     {

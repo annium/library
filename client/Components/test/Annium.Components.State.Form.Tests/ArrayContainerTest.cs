@@ -5,9 +5,9 @@ using System.Reactive;
 using Annium.Testing;
 using Xunit;
 
-namespace Annium.Components.State.Tests
+namespace Annium.Components.State.Form.Tests
 {
-    public class MapContainerTest : TestBase
+    public class ArrayContainerTest : TestBase
     {
         [Fact]
         public void Init_Ok()
@@ -24,10 +24,10 @@ namespace Annium.Components.State.Tests
             // assert
             state.Value.IsEqual(initialValue);
             var children = state.Children;
-            foreach (var itemKey in initialValue.Keys)
-                children.At(itemKey).IsEqual(state.At(x => x[itemKey]));
-            var key = initialValue.Keys.First();
-            state.At(x => x[key]).Value.IsEqual(initialValue.At(key));
+            foreach (var j in Enumerable.Range(0, children.Count - 1))
+                children.At(j).IsEqual(state.At(x => x[j]));
+            var i = 0;
+            state.At(x => x[i]).Value.IsEqual(initialValue.At(0));
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsFalse();
             state.IsStatus(Status.None).IsTrue();
@@ -42,16 +42,16 @@ namespace Annium.Components.State.Tests
             var log = new List<Unit>();
             var factory = GetFactory();
             var initialValue = Arrange();
-            var otherValue = ArrangeOther();
+            var otherValue = new[] { 4, 2 };
             var state = factory.Create(initialValue);
             state.Changed.Subscribe(log.Add);
 
             // act
-            state.Set(initialValue).IsFalse();
+            state.Set(initialValue.ToArray()).IsFalse();
 
             // assert
             state.Value.IsEqual(initialValue);
-            state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
+            state.At(x => x[0]).Value.IsEqual(initialValue.At(0));
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsFalse();
             log.IsEmpty();
@@ -61,17 +61,17 @@ namespace Annium.Components.State.Tests
 
             // assert
             state.Value.IsEqual(otherValue);
-            state.At(x => x["c"]).Value.IsEqual(otherValue.At("c"));
+            state.At(x => x[0]).Value.IsEqual(otherValue.At(0));
             state.HasChanged.IsTrue();
             state.HasBeenTouched.IsTrue();
             log.Has(1);
 
             // act
-            state.Set(initialValue).IsTrue();
+            state.Set(initialValue.ToArray()).IsTrue();
 
             // assert
             state.Value.IsEqual(initialValue);
-            state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
+            state.At(x => x[0]).Value.IsEqual(initialValue.At(0));
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsTrue();
             log.Has(2);
@@ -84,13 +84,13 @@ namespace Annium.Components.State.Tests
             var log = new List<Unit>();
             var factory = GetFactory();
             var initialValue = Arrange();
-            var otherValue = ArrangeOther();
+            var otherValue = new[] { 4, 2 };
             var state = factory.Create(initialValue);
             state.Changed.Subscribe(log.Add);
 
             // act
             state.Set(otherValue).IsTrue();
-            state.At(x => x["c"]).SetStatus(Status.Validating);
+            state.At(x => x[0]).SetStatus(Status.Validating);
 
             // assert
             state.Value.IsEqual(otherValue);
@@ -105,7 +105,7 @@ namespace Annium.Components.State.Tests
 
             // assert
             state.Value.IsEqual(initialValue);
-            state.At(x => x["c"]).Value.IsEqual(initialValue.At("c"));
+            state.At(x => x[0]).Value.IsEqual(initialValue.At(0));
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsFalse();
             state.IsStatus(Status.None).IsTrue();
@@ -124,7 +124,7 @@ namespace Annium.Components.State.Tests
             state.Changed.Subscribe(log.Add);
 
             // act
-            state.At(x => x["a"]).SetStatus(Status.Validating);
+            state.At(x => x[0]).SetStatus(Status.Validating);
 
             // assert
             state.IsStatus(Status.None, Status.Validating).IsTrue();
@@ -146,23 +146,17 @@ namespace Annium.Components.State.Tests
             state.Changed.Subscribe(log.Add);
 
             // act
-            state.Add("d", 7);
+            state.Add(10);
 
             // assert
-            state.Value.IsEqual(new Dictionary<string, int>
-            {
-                { "a", 2 },
-                { "b", 4 },
-                { "c", 8 },
-                { "d", 7 },
-            });
+            state.Value.IsEqual(new[] { 2, 8, 10 });
             state.HasChanged.IsTrue();
             state.HasBeenTouched.IsTrue();
             log.Has(1);
         }
 
         [Fact]
-        public void Remove_Ok()
+        public void Insert_Ok()
         {
             // arrange
             var log = new List<Unit>();
@@ -172,14 +166,30 @@ namespace Annium.Components.State.Tests
             state.Changed.Subscribe(log.Add);
 
             // act
-            state.Remove("b");
+            state.Insert(0, 10);
 
             // assert
-            state.Value.IsEqual(new Dictionary<string, int>
-            {
-                { "a", 2 },
-                { "c", 8 },
-            });
+            state.Value.IsEqual(new[] { 10, 2, 8 });
+            state.HasChanged.IsTrue();
+            state.HasBeenTouched.IsTrue();
+            log.Has(1);
+        }
+
+        [Fact]
+        public void RemoveAt_Ok()
+        {
+            // arrange
+            var log = new List<Unit>();
+            var factory = GetFactory();
+            var initialValue = Arrange();
+            var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
+
+            // act
+            state.RemoveAt(1);
+
+            // assert
+            state.Value.IsEqual(new[] { 2 });
             state.HasChanged.IsTrue();
             state.HasBeenTouched.IsTrue();
             log.Has(1);
@@ -196,9 +206,9 @@ namespace Annium.Components.State.Tests
             state.Changed.Subscribe(log.Add);
 
             // act
-            state.Remove("a");
-            state.Add("e", 9);
-            state.Set(initialValue).IsTrue();
+            state.RemoveAt(0);
+            state.Add(1);
+            state.Set(initialValue.ToArray()).IsTrue();
 
             // assert
             state.HasChanged.IsFalse();
@@ -206,17 +216,6 @@ namespace Annium.Components.State.Tests
             log.Has(3);
         }
 
-        private IReadOnlyDictionary<string, int> Arrange() => new Dictionary<string, int>
-        {
-            { "a", 2 },
-            { "b", 4 },
-            { "c", 8 },
-        };
-
-        private IReadOnlyDictionary<string, int> ArrangeOther() => new Dictionary<string, int>
-        {
-            { "a", 2 },
-            { "c", 4 }
-        };
+        private IReadOnlyCollection<int> Arrange() => new[] { 2, 8 };
     }
 }

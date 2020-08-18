@@ -2,14 +2,14 @@ using Annium.Core.DependencyInjection;
 using Annium.Extensions.Validation;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Annium.Components.State.Tests
+namespace Annium.Components.State.Form.Tests
 {
     public abstract class TestBase
     {
         protected IStateFactory GetFactory() => new ServiceCollection()
             .AddRuntimeTools(GetType().Assembly)
             .AddMapper()
-            .AddComponentStateFactory()
+            .AddComponentFormStateFactory()
             .BuildServiceProvider()
             .GetRequiredService<IStateFactory>();
 
