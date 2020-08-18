@@ -16,8 +16,8 @@ namespace Annium.Blazor.Core.Extensions
 
         private static readonly object[] EmptyArgs = Array.Empty<object>();
 
-        private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<ComponentBase, IState>>> Observables =
-            new ConcurrentDictionary<Type, IReadOnlyCollection<Func<ComponentBase, IState>>>();
+        private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IState>>> Observables =
+            new ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IState>>>();
 
         public static IDisposable ObserveState(this ComponentBase component)
         {
@@ -29,22 +29,33 @@ namespace Annium.Blazor.Core.Extensions
             ).ToArray());
         }
 
-        private static IReadOnlyCollection<Func<ComponentBase, IState>> DiscoverObservables(Type type)
+        public static IDisposable ObserveState<T>(this ComponentBase component, T target)
+            where T : notnull
+        {
+            var observables = Observables.GetOrAdd(target.GetType(), DiscoverObservables);
+
+            return new ObserverDisposer(observables.Select(
+                x => x(target).Changed
+                    .Subscribe(_ => StateHasChanged.Invoke(component, EmptyArgs))
+            ).ToArray());
+        }
+
+        private static IReadOnlyCollection<Func<object, IState>> DiscoverObservables(Type type)
         {
             var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-            var accessors = new List<Func<ComponentBase, IState>>();
+            var accessors = new List<Func<object, IState>>();
 
             var properties = type.GetProperties(flags)
                 .Where(x => x.PropertyType.IsDerivedFrom(typeof(IState)))
                 .ToArray();
             foreach (var property in properties)
-                accessors.Add(component => (IState) property.GetMethod.Invoke(component, EmptyArgs));
+                accessors.Add(instance => (IState) property.GetMethod.Invoke(instance, EmptyArgs));
 
             var fields = type.GetFields(flags)
                 .Where(x => x.FieldType.IsDerivedFrom(typeof(IState)))
                 .ToArray();
             foreach (var field in fields)
-                accessors.Add(component => (IState) field.GetValue(component));
+                accessors.Add(instance => (IState) field.GetValue(instance));
 
             return accessors;
         }
