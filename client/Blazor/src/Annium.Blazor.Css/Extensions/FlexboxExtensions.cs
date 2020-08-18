@@ -22,7 +22,7 @@ namespace Annium.Blazor.Css
             rule.Set("display", inline ? "inline-flex" : "flex");
             rule.Set("flex-direction", direction);
             rule.Set("align-items", alignItems);
-            rule.Set("justify-content", alignItems);
+            rule.Set("justify-content", justifyContent);
 
             return rule;
         }
