@@ -13,7 +13,7 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../../src/Annium.Components.State.Form/Annium.Components.State.Form.csproj" />
+        <ProjectReference Include="../../src/Annium.Components.State.Forms/Annium.Components.State.Forms.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Localization.InMemory" Version="0.1.0" />

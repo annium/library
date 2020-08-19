@@ -12,7 +12,7 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../Annium.Components.State.Form/Annium.Components.State.Form.csproj" />
-        <ProjectReference Include="../Annium.Components.State.Operation/Annium.Components.State.Operation.csproj" />
+        <ProjectReference Include="../Annium.Components.State.Forms/Annium.Components.State.Forms.csproj" />
+        <ProjectReference Include="../Annium.Components.State.Operations/Annium.Components.State.Operations.csproj" />
     </ItemGroup>
 </Project>
