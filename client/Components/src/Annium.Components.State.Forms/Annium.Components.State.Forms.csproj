@@ -20,6 +20,5 @@
         <PackageReference Include="Annium.Extensions.Primitives" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Validation" Version="0.1.0" />
         <PackageReference Include="NodaTime" Version="3.0.0" />
-        <PackageReference Include="System.Reactive" Version="4.4.1" />
     </ItemGroup>
 </Project>
