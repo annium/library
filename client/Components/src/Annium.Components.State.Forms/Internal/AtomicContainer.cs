@@ -1,8 +1,9 @@
 using System;
+using Annium.Components.State.Core;
 
-namespace Annium.Components.State.Form.Internal
+namespace Annium.Components.State.Forms.Internal
 {
-    internal class AtomicContainer<T> : ObservableContainer, IAtomicContainer<T>
+    internal class AtomicContainer<T> : ObservableState, IAtomicContainer<T>
         where T : IEquatable<T>
     {
         public T Value { get; private set; }
@@ -24,7 +25,7 @@ namespace Annium.Components.State.Form.Internal
 
             Value = value;
             HasBeenTouched = true;
-            OnChanged();
+            NotifyChanged();
 
             return true;
         }
@@ -34,7 +35,7 @@ namespace Annium.Components.State.Form.Internal
             Value = _initialValue;
             HasBeenTouched = false;
             Status = Status.None;
-            OnChanged();
+            NotifyChanged();
         }
 
         public void SetStatus(Status status) => SetStatus(status, string.Empty);
@@ -46,7 +47,7 @@ namespace Annium.Components.State.Form.Internal
 
             Status = status;
             Message = message;
-            OnChanged();
+            NotifyChanged();
         }
 
         public bool IsStatus(params Status[] statuses)

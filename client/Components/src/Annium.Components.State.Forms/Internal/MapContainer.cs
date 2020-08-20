@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Annium.Components.State.Core;
 using Annium.Core.Mapper;
 using Annium.Data.Models.Extensions;
 using Annium.Extensions.Primitives;
 using NodaTime;
 
-namespace Annium.Components.State.Form.Internal
+namespace Annium.Components.State.Forms.Internal
 {
-    internal class MapContainer<TKey, TValue> : ObservableContainer, IMapContainer<TKey, TValue>
+    internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey, TValue>
         where TKey : notnull
         where TValue : notnull, new()
     {
@@ -61,7 +62,7 @@ namespace Annium.Components.State.Form.Internal
             if (changed)
             {
                 _hasBeenTouched = true;
-                OnChanged();
+                NotifyChanged();
             }
 
             return changed;
@@ -77,7 +78,7 @@ namespace Annium.Components.State.Form.Internal
             }
 
             _hasBeenTouched = false;
-            OnChanged();
+            NotifyChanged();
         }
 
         public bool IsStatus(params Status[] statuses)
@@ -123,7 +124,7 @@ namespace Annium.Components.State.Form.Internal
             using (Mute())
                 AddInternal(key, item);
             _hasBeenTouched = true;
-            OnChanged();
+            NotifyChanged();
         }
 
         public void Remove(TKey key)
@@ -131,7 +132,7 @@ namespace Annium.Components.State.Form.Internal
             using (Mute())
                 RemoveInternal(key);
             _hasBeenTouched = true;
-            OnChanged();
+            NotifyChanged();
         }
 
         private TX At<TX>(LambdaExpression ex) where TX : IState
@@ -172,7 +173,7 @@ namespace Annium.Components.State.Form.Internal
         private void AddInternal(TKey key, TValue item)
         {
             var state = (IState<TValue>) Factory.Invoke(_stateFactory, new[] { (object) item });
-            _states[key] = new StateReference(state, state.Changed.Subscribe(_ => OnChanged()));
+            _states[key] = new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged()));
         }
 
         private void RemoveInternal(TKey key)

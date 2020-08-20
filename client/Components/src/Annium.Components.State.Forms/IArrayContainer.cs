@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using NodaTime;
 
-namespace Annium.Components.State.Form
+namespace Annium.Components.State.Forms
 {
     public interface IArrayContainer<T> : IState<T[]>
         where T : notnull, new()

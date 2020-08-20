@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using Annium.Testing;
 using Xunit;
 
-namespace Annium.Components.State.Form.Tests
+namespace Annium.Components.State.Forms.Tests
 {
-    public class ComplexTest : TestBase
+    public class MapContainerTest : TestBase
     {
         [Fact]
         public void Init_Ok()
@@ -22,7 +23,11 @@ namespace Annium.Components.State.Form.Tests
 
             // assert
             state.Value.IsEqual(initialValue);
-            state.At(x => x.Author).At(x => x.Name).Value.IsEqual(initialValue.Author.Name);
+            var children = state.Children;
+            foreach (var itemKey in initialValue.Keys)
+                children.At(itemKey).IsEqual(state.At(x => x[itemKey]));
+            var key = initialValue.Keys.First();
+            state.At(x => x[key]).Value.IsEqual(initialValue.At(key));
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsFalse();
             state.IsStatus(Status.None).IsTrue();
@@ -46,7 +51,7 @@ namespace Annium.Components.State.Form.Tests
 
             // assert
             state.Value.IsEqual(initialValue);
-            state.At(x => x.Name).Value.IsEqual(initialValue.Name);
+            state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsFalse();
             log.IsEmpty();
@@ -56,9 +61,7 @@ namespace Annium.Components.State.Form.Tests
 
             // assert
             state.Value.IsEqual(otherValue);
-            state.At(x => x.Name).Value.IsEqual(otherValue.Name);
-            state.At(x => x.Author).Value.IsEqual(otherValue.Author);
-            state.At(x => x.Messages).Value.IsEqual(otherValue.Messages);
+            state.At(x => x["c"]).Value.IsEqual(otherValue.At("c"));
             state.HasChanged.IsTrue();
             state.HasBeenTouched.IsTrue();
             log.Has(1);
@@ -68,9 +71,7 @@ namespace Annium.Components.State.Form.Tests
 
             // assert
             state.Value.IsEqual(initialValue);
-            state.At(x => x.Name).Value.IsEqual(initialValue.Name);
-            state.At(x => x.Author).Value.IsEqual(initialValue.Author);
-            state.At(x => x.Messages).Value.IsEqual(initialValue.Messages);
+            state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsTrue();
             log.Has(2);
@@ -89,7 +90,7 @@ namespace Annium.Components.State.Form.Tests
 
             // act
             state.Set(otherValue).IsTrue();
-            state.At(x => x.Name).SetStatus(Status.Validating);
+            state.At(x => x["c"]).SetStatus(Status.Validating);
 
             // assert
             state.Value.IsEqual(otherValue);
@@ -104,7 +105,7 @@ namespace Annium.Components.State.Form.Tests
 
             // assert
             state.Value.IsEqual(initialValue);
-            state.At(x => x.Messages).At(x => x[0]).At(x => x.Text).Value.IsEqual(initialValue.Messages.At(0).Text);
+            state.At(x => x["c"]).Value.IsEqual(initialValue.At("c"));
             state.HasChanged.IsFalse();
             state.HasBeenTouched.IsFalse();
             state.IsStatus(Status.None).IsTrue();
@@ -123,7 +124,7 @@ namespace Annium.Components.State.Form.Tests
             state.Changed.Subscribe(log.Add);
 
             // act
-            state.At(x => x.Name).SetStatus(Status.Validating);
+            state.At(x => x["a"]).SetStatus(Status.Validating);
 
             // assert
             state.IsStatus(Status.None, Status.Validating).IsTrue();
@@ -134,36 +135,88 @@ namespace Annium.Components.State.Form.Tests
             log.Has(1);
         }
 
-        private Blog Arrange() => new Blog
+        [Fact]
+        public void Add_Ok()
         {
-            Name = "Sample",
-            Author = new User { Name = "Max" },
-            Messages = new[] { new Message { Text = "one", IsRead = true }, new Message { Text = "two" } },
+            // arrange
+            var log = new List<Unit>();
+            var factory = GetFactory();
+            var initialValue = Arrange();
+            var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
+
+            // act
+            state.Add("d", 7);
+
+            // assert
+            state.Value.IsEqual(new Dictionary<string, int>
+            {
+                { "a", 2 },
+                { "b", 4 },
+                { "c", 8 },
+                { "d", 7 },
+            });
+            state.HasChanged.IsTrue();
+            state.HasBeenTouched.IsTrue();
+            log.Has(1);
+        }
+
+        [Fact]
+        public void Remove_Ok()
+        {
+            // arrange
+            var log = new List<Unit>();
+            var factory = GetFactory();
+            var initialValue = Arrange();
+            var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
+
+            // act
+            state.Remove("b");
+
+            // assert
+            state.Value.IsEqual(new Dictionary<string, int>
+            {
+                { "a", 2 },
+                { "c", 8 },
+            });
+            state.HasChanged.IsTrue();
+            state.HasBeenTouched.IsTrue();
+            log.Has(1);
+        }
+
+        [Fact]
+        public void HasChanged_Ok()
+        {
+            // arrange
+            var log = new List<Unit>();
+            var factory = GetFactory();
+            var initialValue = Arrange();
+            var state = factory.Create(initialValue);
+            state.Changed.Subscribe(log.Add);
+
+            // act
+            state.Remove("a");
+            state.Add("e", 9);
+            state.Set(initialValue).IsTrue();
+
+            // assert
+            state.HasChanged.IsFalse();
+            state.HasBeenTouched.IsTrue();
+            log.Has(3);
+        }
+
+        private IReadOnlyDictionary<string, int> Arrange() => new Dictionary<string, int>
+        {
+            { "a", 2 },
+            { "b", 4 },
+            { "c", 8 },
         };
 
-        private Blog ArrangeOther() => new Blog
+        private IReadOnlyDictionary<string, int> ArrangeOther() => new Dictionary<string, int>
         {
-            Name = "Demo",
-            Author = new User { Name = "Lex" },
-            Messages = new[] { new Message { Text = "three", IsRead = true }, new Message { Text = "four" }, new Message { Text = "five", IsRead = true } },
+            { "a", 2 },
+            { "c", 4 }
         };
-
-        private class Blog
-        {
-            public string Name { get; set; } = string.Empty;
-            public User Author { get; set; } = default!;
-            public IEnumerable<Message> Messages { get; set; } = Array.Empty<Message>();
-        }
-
-        private class User
-        {
-            public string Name { get; set; } = string.Empty;
-        }
-
-        private class Message
-        {
-            public string Text { get; set; } = string.Empty;
-            public bool IsRead { get; set; }
-        }
     }
 }

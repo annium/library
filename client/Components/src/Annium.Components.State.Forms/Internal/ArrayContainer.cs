@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Annium.Components.State.Core;
 using Annium.Core.Mapper;
 using Annium.Data.Models.Extensions;
 using Annium.Extensions.Primitives;
 using NodaTime;
 
-namespace Annium.Components.State.Form.Internal
+namespace Annium.Components.State.Forms.Internal
 {
-    internal class ArrayContainer<T> : ObservableContainer, IArrayContainer<T>
+    internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
         where T : notnull, new()
     {
         private static MethodInfo Factory { get; } = StateFactory.ResolveFactory(typeof(T));
@@ -64,7 +65,7 @@ namespace Annium.Components.State.Form.Internal
             if (changed)
             {
                 _hasBeenTouched = true;
-                OnChanged();
+                NotifyChanged();
             }
 
             return changed;
@@ -78,12 +79,12 @@ namespace Annium.Components.State.Form.Internal
                 foreach (var item in _initialValue)
                 {
                     var state = (IState<T>) Factory.Invoke(_stateFactory, new[] { (object) item });
-                    _states.Add(new StateReference(state, state.Changed.Subscribe(_ => OnChanged())));
+                    _states.Add(new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
                 }
             }
 
             _hasBeenTouched = false;
-            OnChanged();
+            NotifyChanged();
         }
 
         public bool IsStatus(params Status[] statuses)
@@ -129,7 +130,7 @@ namespace Annium.Components.State.Form.Internal
             using (Mute())
                 AddInternal(_states.Count, item);
             _hasBeenTouched = true;
-            OnChanged();
+            NotifyChanged();
         }
 
         public void Insert(int index, T item)
@@ -137,7 +138,7 @@ namespace Annium.Components.State.Form.Internal
             using (Mute())
                 AddInternal(index, item);
             _hasBeenTouched = true;
-            OnChanged();
+            NotifyChanged();
         }
 
         public void RemoveAt(int index)
@@ -145,7 +146,7 @@ namespace Annium.Components.State.Form.Internal
             using (Mute())
                 _states.RemoveAt(index);
             _hasBeenTouched = true;
-            OnChanged();
+            NotifyChanged();
         }
 
         private TX At<TX>(LambdaExpression ex) where TX : IState
@@ -188,7 +189,7 @@ namespace Annium.Components.State.Form.Internal
         private void AddInternal(int index, T item)
         {
             var state = (IState<T>) Factory.Invoke(_stateFactory, new[] { (object) item });
-            _states.Insert(index, new StateReference(state, state.Changed.Subscribe(_ => OnChanged())));
+            _states.Insert(index, new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
         }
 
         private void RemoveInternal(int index)

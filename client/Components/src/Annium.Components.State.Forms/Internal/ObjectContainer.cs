@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Annium.Components.State.Core;
 using Annium.Extensions.Primitives;
 using NodaTime;
 
-namespace Annium.Components.State.Form.Internal
+namespace Annium.Components.State.Forms.Internal
 {
-    internal class ObjectContainer<T> : ObservableContainer, IObjectContainer<T>
+    internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
         where T : notnull, new()
     {
         // ReSharper disable once StaticMemberInGenericType
@@ -39,7 +40,7 @@ namespace Annium.Components.State.Form.Internal
             {
                 var create = Factories[property];
                 var @ref = (IState) create.Invoke(stateFactory, new[] { property.GetMethod.Invoke(initialValue, Array.Empty<object>()) });
-                @ref.Changed.Subscribe(_ => OnChanged());
+                @ref.Changed.Subscribe(_ => NotifyChanged());
                 var get = @ref.GetType().GetProperty(nameof(IState<object>.Value)).GetMethod;
                 var set = @ref.GetType().GetMethod(nameof(IState<object>.Set));
                 states[property] = new StateReference(@ref, get, set);
@@ -62,7 +63,7 @@ namespace Annium.Components.State.Form.Internal
             }
 
             if (changed)
-                OnChanged();
+                NotifyChanged();
 
             return changed;
         }
@@ -75,7 +76,7 @@ namespace Annium.Components.State.Form.Internal
                     _states[property].Ref.Reset();
             }
 
-            OnChanged();
+            NotifyChanged();
         }
 
         public bool IsStatus(params Status[] statuses)

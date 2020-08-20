@@ -2,7 +2,7 @@ using Annium.Core.DependencyInjection;
 using Annium.Extensions.Validation;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Annium.Components.State.Form.Tests
+namespace Annium.Components.State.Forms.Tests
 {
     public abstract class TestBase
     {

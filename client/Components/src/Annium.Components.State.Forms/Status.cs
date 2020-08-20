@@ -1,4 +1,4 @@
-namespace Annium.Components.State.Form
+namespace Annium.Components.State.Forms
 {
     public enum Status
     {

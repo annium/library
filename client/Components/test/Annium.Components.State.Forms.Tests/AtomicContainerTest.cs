@@ -4,7 +4,7 @@ using System.Reactive;
 using Annium.Testing;
 using Xunit;
 
-namespace Annium.Components.State.Form.Tests
+namespace Annium.Components.State.Forms.Tests
 {
     public class AtomicContainerTest : TestBase
     {

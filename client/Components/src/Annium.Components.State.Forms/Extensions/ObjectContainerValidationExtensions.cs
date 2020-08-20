@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Annium.Data.Operations;
 using Annium.Extensions.Validation;
 
-namespace Annium.Components.State.Form.Extensions
+namespace Annium.Components.State.Forms.Extensions
 {
     public static class ObjectContainerValidationExtensions
     {
