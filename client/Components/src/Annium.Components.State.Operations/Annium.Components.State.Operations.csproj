@@ -14,4 +14,7 @@
     <ItemGroup>
         <ProjectReference Include="../Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Annium.Data.Operations" Version="0.1.0" />
+    </ItemGroup>
 </Project>
