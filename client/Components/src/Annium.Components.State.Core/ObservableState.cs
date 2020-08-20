@@ -25,7 +25,7 @@ namespace Annium.Components.State.Core
             return new MuteScope(this);
         }
 
-        protected void OnChanged()
+        protected void NotifyChanged()
         {
             if (!_isMuted)
                 StateChanged.Invoke();
