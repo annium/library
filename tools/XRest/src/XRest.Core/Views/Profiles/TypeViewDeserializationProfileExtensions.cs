@@ -32,7 +32,12 @@ namespace XRest.Core.Views.Profiles
 
             return type.MakeGenericType(arguments);
 
-            Type Resolve(string fullName) => types.Single(x => x.FullName == fullName);
+            Type Resolve(string fullName)
+            {
+                var result = types.SingleOrDefault(x => x.FullName == fullName);
+
+                return result ?? throw new InvalidOperationException($"Type with full name '{fullName}' not found");
+            }
         }
     }
 }

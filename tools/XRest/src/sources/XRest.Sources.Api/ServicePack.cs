@@ -10,6 +10,7 @@ namespace XRest.Sources.Api
     {
         public override void Register(IServiceCollection services, IServiceProvider provider)
         {
+            services.AddHttpRequestFactory();
             services.AddSingleton<ILoader, Loader>();
         }
     }
