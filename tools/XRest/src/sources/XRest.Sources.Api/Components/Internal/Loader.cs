@@ -39,7 +39,7 @@ namespace XRest.Sources.Api.Components.Internal
             var assembly = _assemblyLoader.LoadFromPath(assemblyPath);
             _mapBuilder.AddProfile(x => x.ConfigureForTypeViewDeserialization(assembly));
 
-            var view = await _httpRequestFactory.Get(apiUri).Get(Constants.ApiSourceEndpoint).AsAsync<ApiView>();
+            var view = await _httpRequestFactory.New(apiUri).Get(Constants.ApiSourceEndpoint).AsAsync<ApiView>();
             var model = _mapper.Map<ApiModel>(view);
 
             return model;
