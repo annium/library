@@ -2,7 +2,7 @@
     <PropertyGroup>
         <PackageId>Annium.Components.State.Forms.Tests</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
-        <Description>Annium.Components.State.Form.Tests</Description>
+        <Description>Annium.Components.State.Forms.Tests</Description>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <OutputType>Library</OutputType>
         <DebugType>portable</DebugType>
