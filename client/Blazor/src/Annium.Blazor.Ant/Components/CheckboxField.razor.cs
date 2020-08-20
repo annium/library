@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using Annium.Components.State;
-using Annium.Components.State.Form;
+using Annium.Components.State.Forms;
 using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Ant.Components
