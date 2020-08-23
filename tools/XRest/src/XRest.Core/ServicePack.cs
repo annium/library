@@ -14,11 +14,10 @@ namespace XRest.Core
             services.AddRuntimeTools(GetType().Assembly);
             services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
 
-            services.AddSingleton<IAssemblyLoader, AssemblyLoader>();
             services.AddSingleton<ITemplateWriter, TemplateWriter>();
 
+            services.AddAssemblyLoader();
             services.AddResourceLoader();
-            services.AddLoadContextFactories();
         }
     }
 }
