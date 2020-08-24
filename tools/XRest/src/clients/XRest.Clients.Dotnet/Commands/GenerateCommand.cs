@@ -40,7 +40,8 @@ namespace XRest.Clients.Dotnet.Commands
             var model = await _loader.Load(cfg);
 
             _logger.Info("Process api model to api view");
-            var view = _processor.Process(Path.GetFileName(cfg.Output), model);
+            var ns = string.IsNullOrWhiteSpace(cfg.Namespace) ? Path.GetFileName(cfg.Output) : cfg.Namespace;
+            var view = _processor.Process(ns, model);
 
             _logger.Info($"Write api view to {cfg.Output}");
             _writer.Write(cfg.Output, view, cfg.TestClient);
@@ -75,6 +76,10 @@ namespace XRest.Clients.Dotnet.Commands
             get => _output;
             set => _output = Path.GetFullPath(value);
         }
+
+        [Option("ns")]
+        [Help("Root namespace for created classes.")]
+        public string Namespace { get; set; } = string.Empty;
 
         [Option("t")]
         [Help("Generate test client. Is not ensuring success code and returns data wrapped in responses.")]

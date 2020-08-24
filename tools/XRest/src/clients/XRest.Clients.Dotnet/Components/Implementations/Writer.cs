@@ -21,25 +21,43 @@ namespace XRest.Clients.Dotnet.Components.Implementations
             if (!Directory.Exists(output))
                 Directory.CreateDirectory(output);
 
-            if (!generateTestClient)
+            if (generateTestClient)
+            {
+
+                Write(output, "HttpResponseExtensions", "Templates.HttpResponseTestExtensions", new
+                {
+                    Usages = new[]
+                    {
+                        "System.Collections.Generic",
+                        "System.Linq",
+                        "System.Threading.Tasks",
+                        "Annium.Data.Operations",
+                        "Annium.Net.Http",
+                    },
+                    client.Namespace,
+                });
+            }
+            else
+            {
                 Write(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
                 {
                     Usages = new[] { "Annium.Net.Http" },
                     client.Namespace,
                 });
 
-            Write(output, "HttpResponseExtensions", "Templates.HttpResponseExtensions", new
-            {
-                Usages = new[]
+                Write(output, "HttpResponseExtensions", "Templates.HttpResponseExtensions", new
                 {
-                    "System.Collections.Generic",
-                    "System.Linq",
-                    "System.Threading.Tasks",
-                    "Annium.Data.Operations",
-                    "Annium.Net.Http",
-                },
-                client.Namespace,
-            });
+                    Usages = new[]
+                    {
+                        "System.Collections.Generic",
+                        "System.Linq",
+                        "System.Threading.Tasks",
+                        "Annium.Data.Operations",
+                        "Annium.Net.Http",
+                    },
+                    client.Namespace,
+                });
+            }
 
             Write(output, "ClientBase", "Templates.ClientBase", new
             {
