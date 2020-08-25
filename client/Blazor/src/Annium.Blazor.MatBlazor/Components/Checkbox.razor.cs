@@ -16,6 +16,5 @@ namespace Annium.Blazor.MatBlazor.Components
 
         [Parameter]
         public bool Disabled { get; set; }
-
     }
 }
