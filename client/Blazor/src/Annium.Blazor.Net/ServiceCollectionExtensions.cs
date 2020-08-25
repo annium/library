@@ -1,4 +1,6 @@
+using System.Reflection;
 using Annium.Blazor.Net.Internal;
+using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Annium.Blazor.Net
@@ -8,6 +10,14 @@ namespace Annium.Blazor.Net
         public static IServiceCollection AddHostHttpRequestFactory(this IServiceCollection services)
         {
             services.AddSingleton<IHostHttpRequestFactory, HostHttpRequestFactory>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddApiServices(this IServiceCollection services)
+        {
+            services.AddAllTypes(Assembly.GetCallingAssembly()).AssignableTo<IApi>().AsSelf().SingleInstance();
+            services.AddAllTypes(Assembly.GetCallingAssembly()).AssignableTo<IApiService>().AsSelf().SingleInstance();
 
             return services;
         }
