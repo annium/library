@@ -8,7 +8,7 @@ namespace Annium.Blazor.Core.Extensions
     public static class ComponentBaseStateExtensions
     {
         private static readonly MethodInfo StateHasChanged = typeof(ComponentBase)
-            .GetMethod("StateHasChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+            .GetMethod("StateHasChanged", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
         private static readonly object[] EmptyArgs = Array.Empty<object>();
 

@@ -1,5 +1,4 @@
-using System;
-using System.Reactive;
+using Annium.Components.State.Core;
 
 namespace Annium.Components.State.Forms
 {
@@ -9,9 +8,8 @@ namespace Annium.Components.State.Forms
         bool Set(T value);
     }
 
-    public interface IState
+    public interface IState : IObservableState
     {
-        IObservable<Unit> Changed { get; }
         bool HasChanged { get; }
         bool HasBeenTouched { get; }
         void Reset();
