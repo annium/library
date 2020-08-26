@@ -28,6 +28,5 @@ namespace Annium.Components.State.Forms
         IAtomicContainer<DateTimeOffset> At(Expression<Func<T, DateTimeOffset>> ex);
         IAtomicContainer<Instant> At(Expression<Func<T, Instant>> ex);
         IObjectContainer<TI> At<TI>(Expression<Func<T, TI>> ex) where TI : notnull, new();
-        IDisposable Mute();
     }
 }
