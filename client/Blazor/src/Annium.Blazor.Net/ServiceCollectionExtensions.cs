@@ -16,8 +16,16 @@ namespace Annium.Blazor.Net
 
         public static IServiceCollection AddApiServices(this IServiceCollection services)
         {
-            services.AddAllTypes(Assembly.GetCallingAssembly()).AssignableTo<IApi>().AsSelf().SingleInstance();
-            services.AddAllTypes(Assembly.GetCallingAssembly()).AssignableTo<IApiService>().AsSelf().SingleInstance();
+            services.AddAllTypes(Assembly.GetCallingAssembly())
+                .AssignableTo<IApi>()
+                .Where(x => x.IsClass)
+                .AsImplementedInterfaces()
+                .SingleInstance();
+            services.AddAllTypes(Assembly.GetCallingAssembly())
+                .AssignableTo<IApiService>()
+                .Where(x => x.IsClass)
+                .AsImplementedInterfaces()
+                .SingleInstance();
 
             return services;
         }
