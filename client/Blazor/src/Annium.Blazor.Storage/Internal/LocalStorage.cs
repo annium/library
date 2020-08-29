@@ -5,7 +5,10 @@ namespace Annium.Blazor.Storage.Internal
 {
     internal class LocalStorage : StorageBase, ILocalStorage
     {
-        public LocalStorage(IJSRuntime js, ISerializer<string> serializer) : base(js, serializer, "localStorage")
+        public LocalStorage(
+            IJSInProcessRuntime js,
+            ISerializer<string> serializer
+        ) : base(js, serializer, "localStorage")
         {
         }
     }

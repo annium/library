@@ -5,7 +5,10 @@ namespace Annium.Blazor.Storage.Internal
 {
     internal class SessionStorage : StorageBase, ISessionStorage
     {
-        public SessionStorage(IJSRuntime js, ISerializer<string> serializer) : base(js, serializer, "sessionStorage")
+        public SessionStorage(
+            IJSInProcessRuntime js,
+            ISerializer<string> serializer
+        ) : base(js, serializer, "sessionStorage")
         {
         }
     }

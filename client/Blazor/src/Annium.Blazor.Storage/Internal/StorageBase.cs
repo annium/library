@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Annium.Serialization.Abstractions;
 using Microsoft.JSInterop;
 
@@ -9,13 +8,13 @@ namespace Annium.Blazor.Storage.Internal
 {
     internal class StorageBase : IStorageBase
     {
-        private readonly IJSRuntime _js;
+        private readonly IJSInProcessRuntime _js;
         private readonly ISerializer<string> _serializer;
 
         private readonly string _storage;
 
-        public StorageBase(
-            IJSRuntime js,
+        protected StorageBase(
+            IJSInProcessRuntime js,
             ISerializer<string> serializer,
             string storage
         )
@@ -25,29 +24,28 @@ namespace Annium.Blazor.Storage.Internal
             _storage = storage;
         }
 
-        public async ValueTask<IReadOnlyCollection<string>> GetKeysAsync()
+        public IReadOnlyCollection<string> GetKeys()
         {
-            var length = await _js.InvokeAsync<int>("eval", $"{_storage}.length");
+            var length = _js.Invoke<int>("eval", $"{_storage}.length");
 
             if (length == 0)
                 return Array.Empty<string>();
 
-            var keys = await Task.WhenAll(
-                Enumerable.Range(0, length)
-                    .Select(async i => await _js.InvokeAsync<string>($"{_storage}.key", i))
-            );
+            var keys = Enumerable.Range(0, length)
+                .Select(i => _js.Invoke<string>($"{_storage}.key", i))
+                .ToArray();
 
             return keys;
         }
 
-        public ValueTask<bool> HasKeyAsync(string key)
+        public bool HasKey(string key)
         {
-            return _js.InvokeAsync<bool>($"{_storage}.hasOwnProperty", key);
+            return _js.Invoke<bool>($"{_storage}.hasOwnProperty", key);
         }
 
-        public async ValueTask<T> GetAsync<T>(string key)
+        public T Get<T>(string key)
         {
-            var raw = await _js.InvokeAsync<string>($"{_storage}.getItem", key);
+            var raw = _js.Invoke<string>($"{_storage}.getItem", key);
 
             if (string.IsNullOrWhiteSpace(raw))
                 throw new KeyNotFoundException($"Key {key} is not found in {_storage}");
@@ -57,26 +55,26 @@ namespace Annium.Blazor.Storage.Internal
             return value;
         }
 
-        public async ValueTask<bool> SetAsync<T>(string key, T value)
+        public bool Set<T>(string key, T value)
         {
-            var raw = _serializer.Serialize<T>(value);
-            var hasKey = await HasKeyAsync(key);
-            await _js.InvokeVoidAsync($"{_storage}.setItem", key, raw);
+            var raw = _serializer.Serialize(value);
+            var hasKey = HasKey(key);
+            _js.InvokeVoid($"{_storage}.setItem", key, raw);
 
             return !hasKey;
         }
 
-        public async ValueTask<bool> RemoveAsync(string key)
+        public bool Remove(string key)
         {
-            var hasKey = await HasKeyAsync(key);
-            await _js.InvokeVoidAsync($"{_storage}.removeItem", key);
+            var hasKey = HasKey(key);
+            _js.InvokeVoid($"{_storage}.removeItem", key);
 
             return hasKey;
         }
 
-        public ValueTask ClearAsync()
+        public void Clear()
         {
-            return _js.InvokeVoidAsync($"{_storage}.clear");
+            _js.InvokeVoid($"{_storage}.clear");
         }
     }
 }
