@@ -9,6 +9,7 @@ namespace Annium.Components.State.Operations.Internal
     {
         public IReadOnlyCollection<string> PlainErrors { get; private set; } = Array.Empty<string>();
         public IReadOnlyDictionary<string, IReadOnlyCollection<string>> LabeledErrors { get; private set; } = new Dictionary<string, IReadOnlyCollection<string>>();
+        public bool IsOk => PlainErrors.Count == 0 && LabeledErrors.Count == 0;
         public bool HasErrors => PlainErrors.Count > 0 || LabeledErrors.Count > 0;
         public bool IsLoading { get; private set; }
         public bool IsLoaded => HasSucceed || HasFailed;
