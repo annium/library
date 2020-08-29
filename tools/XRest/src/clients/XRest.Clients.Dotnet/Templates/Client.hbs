@@ -25,8 +25,7 @@ namespace {{ namespace }}
                 {{~ if action.has_body ~}}
                 .JsonContent(body)
                 {{~ end ~}}
-                .EnsureSuccessStatusCode()
-                .{{ if action.has_response }}AsAsync<{{ action.response }}>{{ else }}AsAsync{{ end }}();
+                .{{ if action.has_response }}AsAsync{{ else }}AsAsync{{ end }}({{ action.response_default }});
         }
         {{~ end ~}}
     }
