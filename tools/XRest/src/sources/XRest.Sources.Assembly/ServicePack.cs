@@ -2,7 +2,7 @@ using System;
 using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using XRest.Sources.Assembly.Components;
-using XRest.Sources.Assembly.Components.Implementations;
+using XRest.Sources.Assembly.Components.Internal;
 
 namespace XRest.Sources.Assembly
 {

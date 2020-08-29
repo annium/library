@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using XRest.Core.Helpers;
 using XRest.Core.Models;
 
-namespace XRest.Sources.Assembly.Components.Implementations
+namespace XRest.Sources.Assembly.Components.Internal
 {
     internal class Parser : IParser
     {

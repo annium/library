@@ -37,6 +37,9 @@ namespace XRest.Sources.Api.Components.Internal
             string assemblyPath
         )
         {
+            if (!File.Exists(assemblyPath))
+                throw new FileNotFoundException($"Assembly file '{assemblyPath}' missing.");
+
             var loader = _assemblyLoaderBuilder.UseFileSystemLoader(Path.GetDirectoryName(assemblyPath)!).Build();
             var name = Path.GetFileNameWithoutExtension(assemblyPath);
             var assembly = loader.Load(name);
@@ -44,6 +47,7 @@ namespace XRest.Sources.Api.Components.Internal
 
             var view = await _httpRequestFactory.New(apiUri).Get(Constants.ApiSourceEndpoint).AsAsync<ApiView>();
             var model = _mapper.Map<ApiModel>(view);
+            model.Assembly = assembly;
 
             return model;
         }
