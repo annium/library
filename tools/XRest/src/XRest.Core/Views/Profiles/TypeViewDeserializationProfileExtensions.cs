@@ -11,7 +11,7 @@ namespace XRest.Core.Views.Profiles
     {
         public static Profile ConfigureForTypeViewDeserialization(this Profile profile, Assembly assembly)
         {
-            var types = TypeManager.GetInstance(assembly).Types;
+            var types = TypeManager.GetInstance(assembly, false).Types;
 
             profile.Map<TypeView?, Type?>(x => ResolveType(types, x));
 

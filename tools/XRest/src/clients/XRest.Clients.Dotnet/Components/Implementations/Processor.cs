@@ -20,7 +20,7 @@ namespace XRest.Clients.Dotnet.Components.Implementations
 
         public ClientContainerView Process(string ns, ApiModel api)
         {
-            var tm = TypeManager.GetInstance(api.Assembly);
+            var tm = TypeManager.GetInstance(api.Assembly, false);
             var clients = api.Controllers
                 .GroupBy(x => (x.Area ?? string.Empty).PascalCase())
                 .ToDictionary(x => x.Key, x => x.Select(xx => ParseController(ns, xx, tm)).ToArray());
