@@ -12,7 +12,7 @@ namespace Annium.Blazor.Css.Tests
         {
             // arrange
             var styleSheet = new ServiceCollection()
-                .AddRuntimeTools(GetType().Assembly)
+                .AddRuntimeTools(GetType().Assembly, false)
                 .AddCssRules()
                 .BuildServiceProvider()
                 .GetRequiredService<IStyleSheet>();

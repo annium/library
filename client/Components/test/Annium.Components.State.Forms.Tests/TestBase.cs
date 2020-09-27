@@ -7,14 +7,14 @@ namespace Annium.Components.State.Forms.Tests
     public abstract class TestBase
     {
         protected IStateFactory GetFactory() => new ServiceCollection()
-            .AddRuntimeTools(GetType().Assembly)
+            .AddRuntimeTools(GetType().Assembly, false)
             .AddMapper()
             .AddComponentFormStateFactory()
             .BuildServiceProvider()
             .GetRequiredService<IStateFactory>();
 
         protected IValidator<T> GetValidator<T>() => new ServiceCollection()
-            .AddRuntimeTools(GetType().Assembly)
+            .AddRuntimeTools(GetType().Assembly, false)
             .AddValidation()
             .AddLocalization(opts => opts.UseInMemoryStorage())
             .BuildServiceProvider()

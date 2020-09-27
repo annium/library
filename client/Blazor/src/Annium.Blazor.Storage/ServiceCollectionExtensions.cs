@@ -12,7 +12,7 @@ namespace Annium.Core.DependencyInjection
             services.AddSingleton<ILocalStorage, LocalStorage>();
             services.AddSingleton<ISessionStorage, SessionStorage>();
 
-            services.AddAllTypes(Assembly.GetCallingAssembly())
+            services.AddAllTypes(Assembly.GetCallingAssembly(), false)
                 .AssignableTo<IStore>()
                 .Where(x => x.IsClass)
                 .AsImplementedInterfaces()
