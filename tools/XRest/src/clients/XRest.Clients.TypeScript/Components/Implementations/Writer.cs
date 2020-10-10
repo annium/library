@@ -23,7 +23,8 @@ namespace XRest.Clients.TypeScript.Components.Implementations
                 Directory.Delete(output, true);
             Directory.CreateDirectory(output);
 
-            Write(output, "shared.ts", "Templates.SharedExports", new { Exports = api.SharedExports });
+            if (api.SharedExports.Count > 0)
+                Write(output, "shared.ts", "Templates.SharedExports", new { Exports = api.SharedExports });
 
             foreach (var group in api.Controllers.Where(x => x.Actions.Count > 0).GroupBy(x => x.Area))
             foreach (var controllerView in group)
