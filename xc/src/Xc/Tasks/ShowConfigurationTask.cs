@@ -1,10 +1,10 @@
-using Xc.Cfg;
+using Xc.Setup;
 
 namespace Xc.Tasks
 {
-    internal class ShowConfigurationTask : IActionTask<Configuration, string>
+    internal class ShowConfigurationTask : IActionTask<RootSetup, string>
     {
-        public void Execute(Configuration cfg, string root)
+        public void Execute(RootSetup cfg, string root)
         {
             throw new System.NotImplementedException();
         }

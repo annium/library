@@ -1,14 +1,14 @@
-using Xc.Cfg;
+using Xc.Setup;
 
 namespace Xc.Tasks
 {
-    internal class CleanTask : IActionTask<Configuration>
+    internal class CleanTask : IActionTask<RootSetup>
     {
         public CleanTask()
         {
         }
 
-        public void Execute(Configuration cfg)
+        public void Execute(RootSetup cfg)
         {
             throw new System.NotImplementedException();
         }

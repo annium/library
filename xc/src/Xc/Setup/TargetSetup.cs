@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 
-namespace Xc.Cfg
+namespace Xc.Setup
 {
-    internal class TargetConfiguration
+    internal class TargetSetup
     {
         public IReadOnlyCollection<string> Copy { get; }
         public IReadOnlyCollection<string> To { get; }
 
-        public TargetConfiguration(
+        public TargetSetup(
             IReadOnlyCollection<string> copy,
             IReadOnlyCollection<string> to
         )
