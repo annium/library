@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Xc.Config
+namespace Xc.Cfg
 {
     internal class TargetConfiguration
     {

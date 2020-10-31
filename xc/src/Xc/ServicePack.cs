@@ -2,6 +2,7 @@ using System;
 using Annium.Core.DependencyInjection;
 using Annium.Extensions.Arguments;
 using Microsoft.Extensions.DependencyInjection;
+using Xc.Tasks;
 
 namespace Xc
 {
@@ -32,6 +33,11 @@ namespace Xc
                 .AssignableTo<CommandBase>()
                 .AsSelf()
                 .SingleInstance();
+            services.AddAssemblyTypes(GetType().Assembly)
+                .AssignableTo<ITask>()
+                .AsSelf()
+                .AsSelfFactory()
+                .InstancePerDependency();
         }
     }
 }

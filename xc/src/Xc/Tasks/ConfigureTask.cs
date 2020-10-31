@@ -1,16 +1,17 @@
-using System.Threading.Tasks;
+using System;
+using Xc.Cfg;
 
 namespace Xc.Tasks
 {
-    internal class ConfigureTask : ITask
+    internal class ConfigureTask : IActionTask<Configuration, string>
     {
         public ConfigureTask()
         {
         }
 
-        public void Execute()
+        public void Execute(Configuration cfg, string env)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

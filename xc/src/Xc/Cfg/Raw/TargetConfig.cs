@@ -1,6 +1,6 @@
 using System;
 
-namespace Xc.Config.Raw
+namespace Xc.Cfg.Raw
 {
     internal class TargetConfig
     {

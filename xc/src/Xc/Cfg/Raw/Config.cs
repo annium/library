@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Xc.Config.Raw
+namespace Xc.Cfg.Raw
 {
     internal class Config
     {
