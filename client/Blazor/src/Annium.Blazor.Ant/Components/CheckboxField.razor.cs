@@ -6,6 +6,9 @@ namespace Annium.Blazor.Ant.Components
 {
     public partial class CheckboxField
     {
+        [CascadingParameter]
+        public IFormField<bool> FormField { get; set; } = default!;
+
         [Parameter]
         public IAtomicContainer<bool> State { get; set; } = default!;
 
@@ -14,5 +17,7 @@ namespace Annium.Blazor.Ant.Components
 
         [Parameter(CaptureUnmatchedValues = true)]
         public IReadOnlyDictionary<string, object> Attributes { get; set; } = default!;
+
+        private IAtomicContainer<bool> InternalState => State ?? FormField.State;
     }
 }

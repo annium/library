@@ -1,11 +1,14 @@
 ﻿@namespace Annium.Blazor.Ant.Components
 
+@using Annium.Core.Mapper
 @typeparam TValue
 
-<AntDesign.Input
+@inject IMapper mapper
+
+<Input
     TValue="TValue"
-    Value="@InternalState.Value"
-    OnInput="@(e => InternalState.Set((TValue) e.Value))"
-    Attributes="@Attributes">
+    Value="@Value"
+    OnInput="@SetValue"
+    @attributes="Attributes">
     @ChildContent
-</AntDesign.Input>
+</Input>

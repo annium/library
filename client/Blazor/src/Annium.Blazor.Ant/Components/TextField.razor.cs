@@ -16,12 +16,21 @@ namespace Annium.Blazor.Ant.Components
         [Parameter]
         public RenderFragment? ChildContent { get; set; }
 
-
         [Parameter(CaptureUnmatchedValues = true)]
         public IReadOnlyDictionary<string, object> Attributes { get; set; } = default!;
 
-        [Parameter]
-        public string? InputClass { get; set; }
+        private TValue Value => InternalState.Value;
+
+        private void SetValue(ChangeEventArgs args)
+        {
+            try
+            {
+                InternalState.Set(mapper.Map<TValue>(args.Value));
+            }
+            catch
+            {
+            }
+        }
 
         private IAtomicContainer<TValue> InternalState => State ?? FormField.State;
     }
