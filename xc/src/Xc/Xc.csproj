@@ -14,10 +14,10 @@
         <ToolCommandName>xc</ToolCommandName>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../../../../backend/base/Configuration/src/Annium.Configuration.Yaml/Annium.Configuration.Yaml.csproj" />
-        <ProjectReference Include="../../../../backend/base/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
-        <ProjectReference Include="../../../../backend/base/Core/src/Annium.Core.Entrypoint/Annium.Core.Entrypoint.csproj" />
-        <ProjectReference Include="../../../../backend/base/Extensions/src/Annium.Extensions.Arguments/Annium.Extensions.Arguments.csproj" />
-        <ProjectReference Include="../../../../backend/base/Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj" />
+        <PackageReference Include="Annium.Configuration.Yaml" Version="0.1.0" />
+        <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
+        <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
+        <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
+        <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
     </ItemGroup>
 </Project>
