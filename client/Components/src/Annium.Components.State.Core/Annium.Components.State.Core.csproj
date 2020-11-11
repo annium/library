@@ -3,7 +3,7 @@
         <PackageId>Annium.Components.State.Core</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
         <Description>Annium.Components.State.Core</Description>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <OutputType>Library</OutputType>
         <DebugType>portable</DebugType>
         <LangVersion>latest</LangVersion>
@@ -12,7 +12,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="Annium.Core.Primitives" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Reflection" Version="0.1.0" />
-        <PackageReference Include="System.Reactive" Version="4.4.1" />
+        <PackageReference Include="System.Reactive" Version="5.0.0" />
     </ItemGroup>
 </Project>

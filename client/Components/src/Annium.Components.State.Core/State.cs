@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Annium.Core.Primitives;
 using Annium.Core.Reflection;
 
 namespace Annium.Components.State.Core
@@ -19,10 +20,11 @@ namespace Annium.Components.State.Core
         {
             var observables = Observables.GetOrAdd(target.GetType(), DiscoverObservables);
 
-            return new ObserverDisposer(observables.Select(
-                x => x(target).Changed
-                    .Subscribe(_ => handleChange())
-            ).ToArray());
+            var disposable = Disposable.Box();
+            foreach (var subscription in observables.Select(x => x(target).Changed.Subscribe(_ => handleChange())))
+                disposable.Add(subscription);
+
+            return disposable;
         }
 
         private static IReadOnlyCollection<Func<object, IObservableState>> DiscoverObservables(Type type)
@@ -34,32 +36,15 @@ namespace Annium.Components.State.Core
                 .Where(x => x.PropertyType.IsDerivedFrom(typeof(IObservableState)))
                 .ToArray();
             foreach (var property in properties)
-                accessors.Add(instance => (IObservableState) property.GetMethod.Invoke(instance, EmptyArgs));
+                accessors.Add(instance => (IObservableState) property.GetMethod!.Invoke(instance, EmptyArgs)!);
 
             var fields = type.GetFields(flags)
                 .Where(x => x.FieldType.IsDerivedFrom(typeof(IObservableState)))
                 .ToArray();
             foreach (var field in fields)
-                accessors.Add(instance => (IObservableState) field.GetValue(instance));
+                accessors.Add(instance => (IObservableState) field.GetValue(instance)!);
 
             return accessors;
-        }
-
-        private class ObserverDisposer : IDisposable
-        {
-            private IReadOnlyCollection<IDisposable> _disposables;
-
-            public ObserverDisposer(IReadOnlyCollection<IDisposable> disposables)
-            {
-                _disposables = disposables;
-            }
-
-            public void Dispose()
-            {
-                foreach (var disposable in _disposables)
-                    disposable.Dispose();
-                _disposables = default!;
-            }
         }
     }
 }

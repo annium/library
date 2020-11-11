@@ -17,13 +17,13 @@ namespace Annium.Blazor.Css.Internal
                 .Where(x => x.PropertyType.IsAssignableFrom(typeof(CssRule)))
                 .ToArray();
             foreach (var property in properties)
-                rules.Add((CssRule) property.GetMethod.Invoke(set, Array.Empty<object>()));
+                rules.Add((CssRule) property.GetMethod!.Invoke(set, Array.Empty<object>())!);
 
             var fields = set.GetType().GetFields(flags)
                 .Where(x => x.FieldType.IsAssignableFrom(typeof(CssRule)))
                 .ToArray();
             foreach (var field in fields)
-                rules.Add((CssRule) field.GetValue(set));
+                rules.Add((CssRule) field.GetValue(set)!);
 
             return rules;
         }

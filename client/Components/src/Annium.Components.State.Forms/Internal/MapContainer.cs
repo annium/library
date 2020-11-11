@@ -172,7 +172,7 @@ namespace Annium.Components.State.Forms.Internal
 
         private void AddInternal(TKey key, TValue item)
         {
-            var state = (IState<TValue>) Factory.Invoke(_stateFactory, new[] { (object) item });
+            var state = (IState<TValue>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
             _states[key] = new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged()));
         }
 

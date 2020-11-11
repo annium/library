@@ -78,7 +78,7 @@ namespace Annium.Components.State.Forms.Internal
                 _states.Clear();
                 foreach (var item in _initialValue)
                 {
-                    var state = (IState<T>) Factory.Invoke(_stateFactory, new[] { (object) item });
+                    var state = (IState<T>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
                     _states.Add(new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
                 }
             }
@@ -188,7 +188,7 @@ namespace Annium.Components.State.Forms.Internal
 
         private void AddInternal(int index, T item)
         {
-            var state = (IState<T>) Factory.Invoke(_stateFactory, new[] { (object) item });
+            var state = (IState<T>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
             _states.Insert(index, new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
         }
 

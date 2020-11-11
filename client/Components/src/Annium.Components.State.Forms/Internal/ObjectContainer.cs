@@ -39,10 +39,10 @@ namespace Annium.Components.State.Forms.Internal
             foreach (var property in Properties)
             {
                 var create = Factories[property];
-                var @ref = (IState) create.Invoke(stateFactory, new[] { property.GetMethod.Invoke(initialValue, Array.Empty<object>()) });
+                var @ref = (IState) create.Invoke(stateFactory, new[] { property.GetMethod!.Invoke(initialValue, Array.Empty<object>())! })!;
                 @ref.Changed.Subscribe(_ => NotifyChanged());
-                var get = @ref.GetType().GetProperty(nameof(IState<object>.Value)).GetMethod;
-                var set = @ref.GetType().GetMethod(nameof(IState<object>.Set));
+                var get = @ref.GetType().GetProperty(nameof(IState<object>.Value))!.GetMethod!;
+                var set = @ref.GetType().GetMethod(nameof(IState<object>.Set))!;
                 states[property] = new StateReference(@ref, get, set);
             }
 
@@ -57,8 +57,8 @@ namespace Annium.Components.State.Forms.Internal
                 foreach (var property in Properties)
                 {
                     var state = _states[property];
-                    var propertyValue = property.GetMethod.Invoke(value, Array.Empty<object>());
-                    changed = (bool) state.Set.Invoke(state.Ref, new[] { propertyValue }) || changed;
+                    var propertyValue = property.GetMethod!.Invoke(value, Array.Empty<object>())!;
+                    changed = (bool) state.Set.Invoke(state.Ref, new[] { propertyValue })! || changed;
                 }
             }
 
@@ -123,7 +123,7 @@ namespace Annium.Components.State.Forms.Internal
             foreach (var property in Properties)
             {
                 var state = _states[property];
-                property.SetMethod.Invoke(value, new[] { state.Get.Invoke(state.Ref, Array.Empty<object>()) });
+                property.SetMethod!.Invoke(value, new[] { state.Get.Invoke(state.Ref, Array.Empty<object>()) });
             }
 
             return value;

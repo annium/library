@@ -28,6 +28,8 @@ namespace Annium.Components.State.Forms.Internal
                 return inferCandidate.MakeGenericMethod(type);
 
             var args = parameterType.ResolveGenericArgumentsByImplementation(type);
+            if (args is null)
+                throw new InvalidOperationException($"Failed to resolve state factory for {type}");
 
             return inferCandidate.MakeGenericMethod(args);
         }
