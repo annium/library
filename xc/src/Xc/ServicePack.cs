@@ -18,7 +18,6 @@ namespace Xc
             RegisterCommands(services);
 
             services.AddArguments();
-            services.AddConfigurationBuilder();
             services.AddLogging(route => route.UseConsole());
             services.AddMapper();
         }

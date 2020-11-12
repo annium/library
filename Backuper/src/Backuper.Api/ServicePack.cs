@@ -28,11 +28,7 @@ namespace Backuper.Api
                 .AddFileSystemStorage()
                 .AddS3Storage();
 
-            var configuration = new ConfigurationBuilder()
-                .AddYamlFile(Path.Combine("configuration", "config.yml"))
-                .Build<Configuration>();
-
-            services.AddSingleton(configuration);
+            services.AddConfiguration<Configuration>(x => x.AddYamlFile(Path.Combine("configuration", "config.yml")));
         }
 
         public override void Register(IServiceCollection services, IServiceProvider provider)

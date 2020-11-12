@@ -1,6 +1,6 @@
-using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Annium.Core.Runtime.Resources;
 using Scriban;
@@ -29,18 +29,14 @@ namespace Xmg.Core.Helpers
         {
             var resource = _resourceLoader.Load(templatePath, _templateAssembly).Single();
 
-            using var reader = new StreamReader(resource.Content);
-
-            return reader.ReadToEnd();
+            return Encoding.UTF8.GetString(resource.Content.Span);
         }
 
-        public async ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+        public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
         {
             var resource = _resourceLoader.Load(templatePath, _templateAssembly).Single();
 
-            using var reader = new StreamReader(resource.Content);
-
-            return await reader.ReadToEndAsync();
+            return new ValueTask<string>(Encoding.UTF8.GetString(resource.Content.Span));
         }
     }
 }

@@ -1,9 +1,10 @@
-using Annium.Core.Reflection;
+using Annium.Core.Runtime.Types;
+using Backuper.Connection.Abstract;
 
 namespace Backuper.Connection.PostgreSQL
 {
-    [ResolveKey("postgres")]
-    public class Configuration : Abstract.ConfigurationBase
+    [ResolutionKeyValue("postgres")]
+    public class Configuration : ConfigurationBase
     {
         public string Host { get; set; } = string.Empty;
 

@@ -37,7 +37,7 @@ namespace Debugger
                     i: x.GetInterfaces().SingleOrDefault(i => i.IsGenericType && predicate(i.GetGenericTypeDefinition()))
                 ))
                 .Where(p => p.i != null)
-                .Select(p => (p.x, p.i.GenericTypeArguments.Single()))
+                .Select(p => (p.x, p.i!.GenericTypeArguments.Single()))
                 .ToArray();
 
             return configurationTypes;

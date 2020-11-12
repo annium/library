@@ -1,6 +1,6 @@
-using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Annium.Core.Runtime.Resources;
 using Annium.Extensions.Primitives;
 using Scriban;
@@ -35,8 +35,8 @@ namespace Xmg.Core.Tools.Implementations
             ctx.TemplateLoader = new TemplateLoader(_resourceLoader, templateAssembly);
 
             var resource = _resourceLoader.Load(template, templateAssembly).Single();
-            using var reader = new StreamReader(resource.Content);
-            var tpl = Template.Parse(reader.ReadToEnd(), lexerOptions: new LexerOptions { });
+            var content = Encoding.UTF8.GetString(resource.Content.Span);
+            var tpl = Template.Parse(content, lexerOptions: new LexerOptions());
 
             return tpl.Render(ctx);
         }

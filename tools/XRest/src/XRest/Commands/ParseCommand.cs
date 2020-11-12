@@ -49,7 +49,7 @@ namespace XRest.Commands
         private void SaveView(string output, ApiView view)
         {
             if (!Directory.Exists(Path.GetDirectoryName(output)))
-                Directory.CreateDirectory(Path.GetDirectoryName(output));
+                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
 
             var serializer = StringSerializer.Configure(opts =>
             {

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Annium.AspNetCore.Extensions;
 using Annium.Core.Mediator;
@@ -21,8 +22,9 @@ namespace Backuper.Api.Controllers
         public StateController(
             Func<State.State> getState,
             Namer namer,
-            IMediator mediator
-        ) : base(mediator)
+            IMediator mediator,
+            IServiceProvider sp
+        ) : base(mediator, sp)
         {
             this.getState = getState;
             this.namer = namer;
@@ -95,7 +97,7 @@ namespace Backuper.Api.Controllers
             {
                 await notifyAll(ch => ch.ErrorAsync($"{server} {plan}: manual backup {backupId} procedure failed: {e}"));
 
-                return ServerError(e.Message);
+                return new ObjectResult(e.Message) { StatusCode = (int) HttpStatusCode.InternalServerError };
             }
 
             Task notifyAll(Func<IChannel, Task> notifyChannel) =>
@@ -151,7 +153,7 @@ namespace Backuper.Api.Controllers
             {
                 await notifyAll(ch => ch.ErrorAsync($"{server} {plan}: restore procedure failed: {e}"));
 
-                return ServerError(e.Message);
+                return new ObjectResult(e.Message) { StatusCode = (int) HttpStatusCode.InternalServerError };
             }
 
             Task notifyAll(Func<IChannel, Task> notifyChannel) =>
@@ -192,7 +194,7 @@ namespace Backuper.Api.Controllers
             {
                 await notifyAll(ch => ch.ErrorAsync($"{server} {plan}: delete {backupId} procedure failed: {e}"));
 
-                return ServerError(e.Message);
+                return new ObjectResult(e.Message) { StatusCode = (int) HttpStatusCode.InternalServerError };
             }
 
             Task notifyAll(Func<IChannel, Task> notifyChannel) =>

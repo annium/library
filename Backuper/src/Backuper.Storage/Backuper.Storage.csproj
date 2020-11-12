@@ -3,10 +3,10 @@
         <PackageId>Backuper.Storage</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
         <Description>Backuper.Storage</Description>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <OutputType>Library</OutputType>
         <DebugType>portable</DebugType>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>preview</LangVersion>
         <WarningsAsErrors>true</WarningsAsErrors>
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>

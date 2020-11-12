@@ -20,17 +20,17 @@ namespace Xmg
             RegisterCommands(services);
 
             services.AddArguments();
-            services.AddLogging(route => route.UseConsole(time: true));
+            services.AddLogging(route => route.UseConsole());
         }
 
         private void RegisterCommands(IServiceCollection services)
         {
-            services.SelectAssemblyTypes()
+            services.AddAssemblyTypes(GetType().Assembly)
                 .Where(x => typeof(Group).IsAssignableFrom(x))
-                .RegisterSingleton();
-            services.SelectAssemblyTypes()
+                .SingleInstance();
+            services.AddAssemblyTypes(GetType().Assembly)
                 .Where(x => typeof(CommandBase).IsAssignableFrom(x))
-                .RegisterSingleton();
+                .SingleInstance();
         }
     }
 }

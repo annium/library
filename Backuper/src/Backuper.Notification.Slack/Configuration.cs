@@ -1,9 +1,10 @@
-using Annium.Core.Reflection;
+using Annium.Core.Runtime.Types;
+using Backuper.Notification.Abstract;
 
 namespace Backuper.Notification.Slack
 {
-    [ResolveKey("slack")]
-    public class Configuration : Abstract.ConfigurationBase
+    [ResolutionKeyValue("slack")]
+    public class Configuration : ConfigurationBase
     {
         public string Team { get; set; } = string.Empty;
 

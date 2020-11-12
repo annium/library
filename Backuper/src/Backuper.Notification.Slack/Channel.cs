@@ -7,12 +7,15 @@ namespace Backuper.Notification.Slack
 {
     public class Channel : IChannel
     {
+        private readonly IHttpRequestFactory _httpRequestFactory;
         private readonly Configuration cfg;
 
         public Channel(
+            IHttpRequestFactory httpRequestFactory,
             Configuration cfg
         )
         {
+            _httpRequestFactory = httpRequestFactory;
             this.cfg = cfg;
         }
 
@@ -27,7 +30,7 @@ namespace Backuper.Notification.Slack
             var url = $"https://hooks.slack.com/services/{cfg.Team}/{cfg.Channel}/{cfg.Token}";
             var text = $"{level} {message}";
 
-            return Http.Open().Post(url).JsonContent(new { text }).RunAsync();
+            return _httpRequestFactory.New().Post(url).JsonContent(new { text }).RunAsync();
         }
     }
 }

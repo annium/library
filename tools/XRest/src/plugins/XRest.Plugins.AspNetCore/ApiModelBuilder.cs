@@ -47,17 +47,17 @@ namespace XRest.Plugins.AspNetCore
 
         private IEnumerable<ActionModel> BuildActionModel(ControllerActionDescriptor action)
         {
-            var methods = action.ActionConstraints
+            var methods = action.ActionConstraints!
                 .OfType<HttpMethodActionConstraint>()
                 .SelectMany(x => x.HttpMethods)
                 .Select(x => new HttpMethod(x))
                 .ToArray();
 
-            var route = RouteHelper.NormalizeRoute(action.AttributeRouteInfo.Template);
+            var route = RouteHelper.NormalizeRoute(action.AttributeRouteInfo!.Template!);
             var routeParameters = RouteHelper.ParseRouteParameters(route);
 
             var parameters = action.Parameters
-                .Where(x => x.BindingInfo?.BindingSource.Id != BindingBody)
+                .Where(x => x.BindingInfo.BindingSource!.Id != BindingBody)
                 .SelectMany(x =>
                 {
                     if (routeParameters.Contains(x.Name))
@@ -77,7 +77,7 @@ namespace XRest.Plugins.AspNetCore
                 })
                 .OrderBy(x => x.Name)
                 .ToArray();
-            var body = action.Parameters.SingleOrDefault(x => x.BindingInfo?.BindingSource.Id == BindingBody)?.ParameterType;
+            var body = action.Parameters.SingleOrDefault(x => x.BindingInfo.BindingSource!.Id == BindingBody)?.ParameterType;
             var response = action.MethodInfo.ReturnType;
 
             foreach (var method in methods)

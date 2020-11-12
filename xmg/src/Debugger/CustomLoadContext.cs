@@ -30,7 +30,7 @@ namespace Debugger
         {
             string assemblyPath = _customDefaultContextResolver.ResolveAssemblyToPath(assemblyName);
 
-            if (assemblyPath != null)
+            if (assemblyPath != null!)
             {
                 return LoadFromAssemblyPath(assemblyPath);
             }
@@ -49,7 +49,7 @@ namespace Debugger
                 assemblyPath = _customResolver.ResolveAssemblyToPath(assemblyName);
             }
 
-            if (assemblyPath != null)
+            if (assemblyPath != null!)
             {
                 return LoadFromAssemblyPath(assemblyPath);
             }
@@ -114,13 +114,12 @@ namespace Debugger
                     return false;
                 }
 
-                RuntimeLibrary library =
-                    this._dependencyContext.RuntimeLibraries.FirstOrDefault(NamesMatch);
+                RuntimeLibrary library = _dependencyContext.RuntimeLibraries.FirstOrDefault(NamesMatch)!;
 
-                if (library == null)
-                    library = this._dependencyContext.RuntimeLibraries.FirstOrDefault(ResourceAssetPathMatch);
+                if (library == null!)
+                    library = _dependencyContext.RuntimeLibraries.FirstOrDefault(ResourceAssetPathMatch)!;
 
-                if (library != null)
+                if (library != null!)
                 {
                     var wrapper = new CompilationLibrary(
                         library.Type,
@@ -132,7 +131,7 @@ namespace Debugger
                         library.Serviceable);
 
                     var assemblies = new List<string>();
-                    this._assemblyResolver.TryResolveAssemblyPaths(wrapper, assemblies);
+                    _assemblyResolver.TryResolveAssemblyPaths(wrapper, assemblies);
                     if (assemblies.Count > 0)
                     {
                         return assemblies[0];

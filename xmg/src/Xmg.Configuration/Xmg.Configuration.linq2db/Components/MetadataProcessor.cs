@@ -32,14 +32,14 @@ namespace Xmg.Configuration.linq2db.Components
         {
             var columns = table.Columns
                 .Select(x => ProcessColumn(table, x)!)
-                .Where(x => x != null)
+                .Where(x => x != null!)
                 .ToArray();
 
             var primaryKey = ResolvePrimaryKey(table.Schema, table.Name, table.Columns);
 
             var foreignKeys = table.Columns
                 .Select(x => ProcessForeignKey(database, table, x)!)
-                .Where(x => x != null)
+                .Where(x => x != null!)
                 .ToArray();
 
             return (
@@ -74,7 +74,7 @@ namespace Xmg.Configuration.linq2db.Components
             );
         }
 
-        private TablePrimaryKeyConstraint? ResolvePrimaryKey(string? schema, string table, IReadOnlyCollection<LTableColumn>? columns)
+        private TablePrimaryKeyConstraint? ResolvePrimaryKey(string? schema, string table, IReadOnlyCollection<LTableColumn> columns)
         {
             var primaryKeyColumns = columns
                 .Where(x => x.Attribute.IsColumn && x.PrimaryKey != null)
