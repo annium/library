@@ -25,7 +25,7 @@ namespace Annium.Blazor.Ant.Components
         {
             try
             {
-                InternalState.Set(mapper.Map<TValue>(args.Value));
+                InternalState.Set(mapper.Map<TValue>(args.Value!));
             }
             catch
             {
