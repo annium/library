@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 using Xmg.Migration.Abstractions.Components;
 using Xmg.Migration.FluentMigrator.Components;
 
@@ -13,10 +12,10 @@ namespace Xmg.Migration.FluentMigrator
             Add<Core.ServicePack>();
         }
 
-        public override void Register(IServiceCollection services, IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
             // components
-            services.AddSingleton<IMigrator, Migrator>();
+            container.Add<IMigrator, Migrator>().Singleton();
         }
     }
 }

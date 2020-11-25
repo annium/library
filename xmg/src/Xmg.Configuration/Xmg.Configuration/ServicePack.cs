@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 using Xmg.Configuration.Components;
 
 namespace Xmg.Configuration
@@ -12,12 +11,12 @@ namespace Xmg.Configuration
             Add<linq2db.ServicePack>();
         }
 
-        public override void Register(IServiceCollection services, IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
             // components
-            services.AddSingleton<IConfiguratorFactory, ConfiguratorFactory>();
+            container.Add<IConfiguratorFactory, ConfiguratorFactory>().Singleton();
 
-            services.AddAssemblyLoader();
+            container.AddAssemblyLoader();
         }
     }
 }

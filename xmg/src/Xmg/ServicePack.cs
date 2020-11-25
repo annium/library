@@ -1,8 +1,7 @@
 using System;
 using Annium.Core.DependencyInjection;
+using Annium.Core.Runtime.Types;
 using Annium.Extensions.Arguments;
-using Microsoft.Extensions.DependencyInjection;
-using NodaTime;
 
 namespace Xmg
 {
@@ -14,23 +13,24 @@ namespace Xmg
             Add<Migration.ServicePack>();
         }
 
-        public override void Register(IServiceCollection services, IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
-            RegisterCommands(services);
+            container.AddTimeProvider();
+            RegisterCommands(container);
 
-            services.AddArguments();
-            services.AddLogging(route => route.UseConsole());
+            container.AddArguments();
+            container.AddJsonSerializers((sp, opts) => opts.ConfigureDefault(sp.Resolve<ITypeManager>()));
+            container.AddLogging(route => route.UseConsole());
         }
 
-        private void RegisterCommands(IServiceCollection services)
+        private void RegisterCommands(IServiceContainer container)
         {
-            services.AddAssemblyTypes(GetType().Assembly)
+            container.AddAll(GetType().Assembly)
                 .Where(x => typeof(Group).IsAssignableFrom(x))
-                .SingleInstance();
-            services.AddAssemblyTypes(GetType().Assembly)
+                .Singleton();
+            container.AddAll(GetType().Assembly)
                 .Where(x => typeof(CommandBase).IsAssignableFrom(x))
-                .SingleInstance();
+                .Singleton();
         }
     }
 }

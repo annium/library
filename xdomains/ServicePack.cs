@@ -1,35 +1,34 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using NodaTime;
+using xdomains.Commands;
 using xdomains.Tools;
 
 namespace xdomains
 {
     internal class ServicePack : ServicePackBase
     {
-        public override void Register(IServiceCollection services, IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
+            container.AddTimeProvider();
 
-            RegisterCommands(services);
+            RegisterCommands(container);
 
-            services.AddSingleton<Cache>();
-            services.AddSingleton<Parser>();
-            services.AddSingleton<Resolver>();
-            services.AddSingleton<Worker>();
+            container.Add<Cache>().Singleton();
+            container.Add<Parser>().Singleton();
+            container.Add<Resolver>().Singleton();
+            container.Add<Worker>().Singleton();
 
-            services.AddSingleton<Settings>();
+            container.Add<Settings>().Singleton();
 
-            services.AddArguments();
-            services.AddLogging(route => route.UseConsole());
+            container.AddArguments();
+            container.AddLogging(route => route.UseConsole());
         }
 
-        private void RegisterCommands(IServiceCollection services)
+        private void RegisterCommands(IServiceContainer container)
         {
-            services.AddSingleton<Commands.Group>();
-            services.AddSingleton<Commands.CleanupCommand>();
-            services.AddSingleton<Commands.QueryCommand>();
+            container.Add<Group>().Singleton();
+            container.Add<CleanupCommand>().Singleton();
+            container.Add<QueryCommand>().Singleton();
         }
     }
 }

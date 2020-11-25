@@ -1,15 +1,15 @@
+using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Backuper.Notification.Abstract
 {
     public class ServicePack : ServicePackBase
     {
-        public override void Register(IServiceCollection services, System.IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            services.AddSingleton<ChannelFactory>();
+            container.Add<ChannelFactory>().Singleton();
 
-            services.AddLogging(route => route.UseConsole());
+            container.AddLogging(route => route.UseConsole());
         }
     }
 }

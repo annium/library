@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 using XRest.Sources.Components;
 using XRest.Sources.Components.Internal;
 
@@ -14,9 +13,9 @@ namespace XRest.Sources
             Add<Assembly.ServicePack>();
         }
 
-        public override void Register(IServiceCollection services, IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            services.AddSingleton<ILoader, Loader>();
+            container.Add<ILoader, Loader>().Singleton();
         }
     }
 }

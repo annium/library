@@ -6,7 +6,6 @@ using Backuper.Api.Config;
 using Backuper.Api.State;
 using Backuper.Api.Tools;
 using Microsoft.Extensions.DependencyInjection;
-using NodaTime;
 
 namespace Backuper.Api
 {
@@ -21,28 +20,28 @@ namespace Backuper.Api
             Add<Storage.ServicePack>();
         }
 
-        public override void Configure(IServiceCollection services)
+        public override void Configure(IServiceContainer container)
         {
-            services
+            container
                 .AddStorage()
                 .AddFileSystemStorage()
                 .AddS3Storage();
 
-            services.AddConfiguration<Configuration>(x => x.AddYamlFile(Path.Combine("configuration", "config.yml")));
+            container.AddConfiguration<Configuration>(x => x.AddYamlFile(Path.Combine("configuration", "config.yml")));
         }
 
-        public override void Register(IServiceCollection services, IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
+            container.AddTimeProvider();
 
-            services.AddSingleton<StateFactory>();
-            services.AddSingleton<StateManager>();
-            services.AddSingleton<Func<State.State>>(sp => () => sp.GetRequiredService<StateManager>().State!);
-            services.AddSingleton<Namer>();
+            container.Add<StateFactory>().AsSelf().Singleton();
+            container.Add<StateManager>().AsSelf().Singleton();
+            container.Add<Func<State.State>>(sp => () => sp.GetRequiredService<StateManager>().State!).Singleton();
+            container.Add<Namer>().AsSelf().Singleton();
 
-            services.AddScheduler();
-            services.AddMediator();
-            services.AddLogging(route => route.UseConsole());
+            container.AddScheduler();
+            container.AddMediator();
+            container.AddLogging(route => route.UseConsole());
         }
 
         public override void Setup(IServiceProvider provider)

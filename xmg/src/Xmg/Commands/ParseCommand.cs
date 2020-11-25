@@ -1,8 +1,10 @@
 using System.IO;
+using System.Net.Mime;
 using System.Threading;
+using Annium.Core.DependencyInjection;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
-using Annium.Serialization.Json;
+using Annium.Serialization.Abstractions;
 using Xmg.Configuration.Abstractions;
 using Xmg.Configuration.Components;
 
@@ -12,16 +14,19 @@ namespace Xmg.Commands
     {
         private readonly IConfiguratorFactory _configuratorFactory;
         private readonly ILogger<ParseCommand> _logger;
+        private readonly ISerializer<string> _serializer;
         public override string Id { get; } = "parse";
         public override string Description { get; } = "parse database configuration";
 
         public ParseCommand(
             IConfiguratorFactory configuratorFactory,
-            ILogger<ParseCommand> logger
+            ILogger<ParseCommand> logger,
+            IIndex<string, ISerializer<string>> serializers
         )
         {
             _configuratorFactory = configuratorFactory;
             _logger = logger;
+            _serializer = serializers[MediaTypeNames.Application.Json];
         }
 
         public override void Handle(
@@ -34,8 +39,7 @@ namespace Xmg.Commands
             var database = configurator.LoadConfiguration(new Config(cfg.Assembly));
 
             _logger.Debug($"Save '{cfg.ProjectName}' configuration to {cfg.Output}");
-            var serializer = StringSerializer.Configure(opts => { opts.WriteIndented = true; });
-            File.WriteAllText(cfg.Output, serializer.Serialize(database));
+            File.WriteAllText(cfg.Output, _serializer.Serialize(database));
         }
     }
 

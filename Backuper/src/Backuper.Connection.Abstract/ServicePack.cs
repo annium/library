@@ -1,16 +1,16 @@
+using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Backuper.Connection.Abstract
 {
     public class ServicePack : ServicePackBase
     {
-        public override void Register(IServiceCollection services, System.IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            services.AddSingleton<ConnectionFactory>();
+            container.Add<ConnectionFactory>().Singleton();
 
-            services.AddLogging(route => route.UseConsole());
-            services.AddShell();
+            container.AddLogging(route => route.UseConsole());
+            container.AddShell();
         }
     }
 }

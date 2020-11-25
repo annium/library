@@ -1,6 +1,6 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
+using XRest.Commands;
 
 namespace XRest
 {
@@ -14,19 +14,19 @@ namespace XRest
             Add<Sources.ServicePack>();
         }
 
-        public override void Register(IServiceCollection services, IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            RegisterCommands(services);
+            RegisterCommands(container);
 
-            services.AddArguments();
-            services.AddLogging(route => route.UseConsole());
-            services.AddMapper();
+            container.AddArguments();
+            container.AddLogging(route => route.UseConsole());
+            container.AddMapper();
         }
 
-        private void RegisterCommands(IServiceCollection services)
+        private void RegisterCommands(IServiceContainer container)
         {
-            services.AddSingleton<Commands.Group>();
-            services.AddSingleton<Commands.ParseCommand>();
+            container.Add<Group>().Singleton();
+            container.Add<ParseCommand>().Singleton();
         }
     }
 }

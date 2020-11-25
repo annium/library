@@ -1,7 +1,6 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using NodaTime;
+using Annium.Core.Runtime.Types;
 using XRest.Core.Components;
 using XRest.Core.Components.Implementations;
 
@@ -9,15 +8,16 @@ namespace XRest.Core
 {
     public class ServicePack : ServicePackBase
     {
-        public override void Register(IServiceCollection services, IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            services.AddRuntimeTools(GetType().Assembly, true);
-            services.AddSingleton<Func<Instant>>(SystemClock.Instance.GetCurrentInstant);
+            container.AddRuntimeTools(GetType().Assembly, true);
+            container.AddTimeProvider();
+            container.AddJsonSerializers((sp, opts) => opts.ConfigureDefault(sp.Resolve<ITypeManager>()));
 
-            services.AddSingleton<ITemplateWriter, TemplateWriter>();
+            container.Add<ITemplateWriter, TemplateWriter>().Singleton();
 
-            services.AddAssemblyLoader();
-            services.AddResourceLoader();
+            container.AddAssemblyLoader();
+            container.AddResourceLoader();
         }
     }
 }

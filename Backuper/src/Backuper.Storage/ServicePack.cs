@@ -1,15 +1,15 @@
+using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Backuper.Storage
 {
     public class ServicePack : ServicePackBase
     {
-        public override void Register(IServiceCollection services, System.IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            services.AddSingleton<StorageFactory>();
+            container.Add<StorageFactory>().Singleton();
 
-            services.AddLogging(route => route.UseConsole());
+            container.AddLogging(route => route.UseConsole());
         }
     }
 }

@@ -1,13 +1,13 @@
 using System;
 using System.IO;
+using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
-using Annium.Core.Runtime.Types;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
-using Annium.Serialization.Json;
+using Annium.Serialization.Abstractions;
 using XRest.Core.Views;
 using XRest.Sources;
 using XRest.Sources.Components;
@@ -19,21 +19,21 @@ namespace XRest.Commands
         public override string Id { get; } = "parse";
         public override string Description { get; } = "parse API";
         private readonly ILoader _loader;
-        private readonly ITypeManager _typeManager;
+        private readonly ISerializer<string> _serializer;
         private readonly IMapper _mapper;
         private readonly ILogger<ParseCommand> _logger;
 
         public ParseCommand(
             ILoader loader,
-            ITypeManager typeManager,
             IMapper mapper,
-            ILogger<ParseCommand> logger
+            ILogger<ParseCommand> logger,
+            IIndex<string,ISerializer<string>> serializers
         )
         {
             _loader = loader;
-            _typeManager = typeManager;
             _mapper = mapper;
             _logger = logger;
+            _serializer = serializers[MediaTypeNames.Application.Json];
         }
 
         public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken token)
@@ -51,13 +51,7 @@ namespace XRest.Commands
             if (!Directory.Exists(Path.GetDirectoryName(output)))
                 Directory.CreateDirectory(Path.GetDirectoryName(output)!);
 
-            var serializer = StringSerializer.Configure(opts =>
-            {
-                opts.WriteIndented = true;
-                opts.ConfigureDefault(_typeManager);
-            });
-
-            File.WriteAllText(output, serializer.Serialize(view));
+            File.WriteAllText(output, _serializer.Serialize(view));
         }
     }
 

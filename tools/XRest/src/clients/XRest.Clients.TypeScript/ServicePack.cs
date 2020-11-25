@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 using XRest.Clients.TypeScript.Commands;
 using XRest.Clients.TypeScript.Components;
 using XRest.Clients.TypeScript.Components.Implementations;
@@ -9,19 +8,19 @@ namespace XRest.Clients.TypeScript
 {
     public class ServicePack : ServicePackBase
     {
-        public override void Register(IServiceCollection services, IServiceProvider provider)
+        public override void Register(IServiceContainer container, IServiceProvider provider)
         {
             // components
-            services.AddSingleton<IProcessor, Processor>();
-            services.AddSingleton<IWriter, Writer>();
+            container.Add<IProcessor, Processor>().Singleton();
+            container.Add<IWriter, Writer>().Singleton();
 
-            RegisterCommands(services);
+            RegisterCommands(container);
         }
 
-        private void RegisterCommands(IServiceCollection services)
+        private void RegisterCommands(IServiceContainer container)
         {
-            services.AddSingleton<Group>();
-            services.AddSingleton<GenerateCommand>();
+            container.Add<Group>().Singleton();
+            container.Add<GenerateCommand>().Singleton();
         }
     }
 }
