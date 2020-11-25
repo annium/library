@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Annium.Data.Operations;
-using Annium.Extensions.Primitives;
+using Annium.Core.Primitives;
 using XRest.Clients.TypeScript.Helpers;
 using XRest.Clients.TypeScript.Views;
 using XRest.Clients.TypeScript.Views.Types;

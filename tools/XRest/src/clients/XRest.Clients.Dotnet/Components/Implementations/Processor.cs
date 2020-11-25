@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Annium.Core.Reflection;
 using Annium.Core.Runtime.Types;
 using Annium.Data.Operations;
-using Annium.Extensions.Primitives;
+using Annium.Core.Primitives;
 using XRest.Clients.Dotnet.Views;
 using XRest.Core.Models;
 using static XRest.Clients.Dotnet.Helpers.ProcessorHelper;

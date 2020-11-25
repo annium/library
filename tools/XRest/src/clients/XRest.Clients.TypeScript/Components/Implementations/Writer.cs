@@ -1,6 +1,6 @@
 using System.IO;
 using System.Linq;
-using Annium.Extensions.Primitives;
+using Annium.Core.Primitives;
 using XRest.Clients.TypeScript.Views;
 using XRest.Core.Components;
 
