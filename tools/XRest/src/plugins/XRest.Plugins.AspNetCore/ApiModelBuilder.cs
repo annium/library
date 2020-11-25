@@ -57,7 +57,7 @@ namespace XRest.Plugins.AspNetCore
             var routeParameters = RouteHelper.ParseRouteParameters(route);
 
             var parameters = action.Parameters
-                .Where(x => x.BindingInfo.BindingSource!.Id != BindingBody)
+                .Where(x => x.BindingInfo?.BindingSource?.Id != BindingBody)
                 .SelectMany(x =>
                 {
                     if (routeParameters.Contains(x.Name))
@@ -77,7 +77,7 @@ namespace XRest.Plugins.AspNetCore
                 })
                 .OrderBy(x => x.Name)
                 .ToArray();
-            var body = action.Parameters.SingleOrDefault(x => x.BindingInfo.BindingSource!.Id == BindingBody)?.ParameterType;
+            var body = action.Parameters.SingleOrDefault(x => x.BindingInfo?.BindingSource?.Id == BindingBody)?.ParameterType;
             var response = action.MethodInfo.ReturnType;
 
             foreach (var method in methods)
