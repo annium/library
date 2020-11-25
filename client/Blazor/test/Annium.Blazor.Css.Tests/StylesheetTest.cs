@@ -1,6 +1,5 @@
 using Annium.Core.DependencyInjection;
 using Annium.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Annium.Blazor.Css.Tests
@@ -11,11 +10,11 @@ namespace Annium.Blazor.Css.Tests
         public void Stylesheet_Works()
         {
             // arrange
-            var styleSheet = new ServiceCollection()
+            var styleSheet = new ServiceContainer()
                 .AddRuntimeTools(GetType().Assembly, false)
                 .AddCssRules()
                 .BuildServiceProvider()
-                .GetRequiredService<IStyleSheet>();
+                .Resolve<IStyleSheet>();
 
             // act
             var css = styleSheet.ToCss();
