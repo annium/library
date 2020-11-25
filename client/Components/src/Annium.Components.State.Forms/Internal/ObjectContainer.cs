@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Annium.Components.State.Core;
-using Annium.Extensions.Primitives;
+using Annium.Core.Primitives;
 using NodaTime;
 
 namespace Annium.Components.State.Forms.Internal

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Annium.Blazor.Core.Tools;
-using Annium.Extensions.Primitives;
+using Annium.Core.Primitives;
 using Annium.Testing;
 using Xunit;
 
