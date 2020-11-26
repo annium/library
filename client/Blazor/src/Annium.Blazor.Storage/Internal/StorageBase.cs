@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
+using Annium.Core.DependencyInjection;
 using Annium.Serialization.Abstractions;
 using Microsoft.JSInterop;
 
@@ -15,12 +17,12 @@ namespace Annium.Blazor.Storage.Internal
 
         protected StorageBase(
             IJSRuntime js,
-            ISerializer<string> serializer,
+            IIndex<string, ISerializer<string>> serializers,
             string storage
         )
         {
             _js = (IJSInProcessRuntime) js;
-            _serializer = serializer;
+            _serializer = serializers[MediaTypeNames.Application.Json];
             _storage = storage;
         }
 
