@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Annium.Core.Runtime.Types;
 using Annium.Extensions.Arguments;
 
 namespace Xmg
@@ -19,7 +18,7 @@ namespace Xmg
             RegisterCommands(container);
 
             container.AddArguments();
-            container.AddJsonSerializers((sp, opts) => opts.ConfigureDefault(sp.Resolve<ITypeManager>()));
+            container.AddJsonSerializers();
             container.AddLogging(route => route.UseConsole());
         }
 

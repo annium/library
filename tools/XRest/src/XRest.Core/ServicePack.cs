@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Annium.Core.Runtime.Types;
 using XRest.Core.Components;
 using XRest.Core.Components.Implementations;
 
@@ -12,7 +11,7 @@ namespace XRest.Core
         {
             container.AddRuntimeTools(GetType().Assembly, true);
             container.AddTimeProvider();
-            container.AddJsonSerializers((sp, opts) => opts.ConfigureDefault(sp.Resolve<ITypeManager>()));
+            container.AddJsonSerializers();
 
             container.Add<ITemplateWriter, TemplateWriter>().Singleton();
 
