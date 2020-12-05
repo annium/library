@@ -19,8 +19,8 @@ namespace XRest.Clients.TypeScript
 
         private void RegisterCommands(IServiceContainer container)
         {
-            container.Add<Group>().Singleton();
-            container.Add<GenerateCommand>().Singleton();
+            container.Add<Group>().AsSelf().Singleton();
+            container.Add<GenerateCommand>().AsSelf().Singleton();
         }
     }
 }

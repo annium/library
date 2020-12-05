@@ -25,8 +25,8 @@ namespace XRest
 
         private void RegisterCommands(IServiceContainer container)
         {
-            container.Add<Group>().Singleton();
-            container.Add<ParseCommand>().Singleton();
+            container.Add<Group>().AsSelf().Singleton();
+            container.Add<ParseCommand>().AsSelf().Singleton();
         }
     }
 }
