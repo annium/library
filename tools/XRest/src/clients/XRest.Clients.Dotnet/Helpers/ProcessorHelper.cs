@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace XRest.Clients.Dotnet.Helpers
 {
@@ -28,18 +26,5 @@ namespace XRest.Clients.Dotnet.Helpers
         };
 
         public static bool IsBaseType(Type type) => BaseTypeNames.ContainsKey(type);
-
-        public static IReadOnlyCollection<string> BuildUsages(string ns, IEnumerable<string> references)
-        {
-            return references
-                .Where(x => !ns.Contains(x))
-                .Distinct()
-                .OrderBy(x => !x.StartsWith("System")).ThenBy(x => x)
-                .ToArray();
-        }
-
-        public static string BuildPath(params string?[] parts) => Path.Combine(parts.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x!).ToArray());
-
-        public static string BuildNamespace(params string?[] parts) => string.Join('.', parts.Where(x => !string.IsNullOrWhiteSpace(x)));
     }
 }

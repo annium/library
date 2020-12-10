@@ -6,6 +6,6 @@ namespace {{ namespace }}
 {
     public static class HttpRequestExtensions
     {
-        public static Client Client(this IHttpRequest request) => new Client(request);
+        public static Root Client(this IHttpRequest request) => new Root(request);
     }
 }

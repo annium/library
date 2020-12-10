@@ -6,7 +6,9 @@ using Annium.Core.Reflection;
 using Annium.Core.Runtime.Types;
 using Annium.Data.Operations;
 using Annium.Core.Primitives;
+using XRest.Clients.Dotnet.Extensions;
 using XRest.Clients.Dotnet.Views;
+using XRest.Core.Extensions;
 using XRest.Core.Models;
 using static XRest.Clients.Dotnet.Helpers.ProcessorHelper;
 
@@ -14,52 +16,93 @@ namespace XRest.Clients.Dotnet.Components.Implementations
 {
     internal class Processor : IProcessor
     {
-        private const string Areas = "Areas";
+        private static readonly Namespace AnniumNetHttp = Namespace.New("Annium.Net.Http");
         private const string Client = "Client";
-        private const string Clients = "Clients";
+        private const string Root = "Root";
 
-        public ClientContainerView Process(string ns, ApiModel api)
+        public ClientContainerView Process(Namespace ns, ApiModel api)
         {
             var tm = TypeManager.GetInstance(api.Assembly, false);
-            var clients = api.Controllers
-                .GroupBy(x => (x.Area ?? string.Empty).PascalCase())
-                .ToDictionary(x => x.Key, x => x.Select(xx => ParseController(ns, xx, tm)).ToArray());
-
-            var containers = clients
-                .Where(x => !string.IsNullOrWhiteSpace(x.Key))
-                .Select(x => BuildContainerView(BuildNamespace(ns, Areas, x.Key!), x.Key!, $"{x.Key!}{Client}", x.Value))
+            var candidates = api.Controllers
+                .Select(x => ParseController(ns, x, tm))
                 .ToArray();
 
-            if (clients.TryGetValue(string.Empty, out var rootClients))
-                return BuildContainerView(ns, Client, Client, containers.Concat<IClientView>(rootClients).ToArray());
+            var node = BuildClientNode(ns, Client, Root, candidates);
 
-            return BuildContainerView(ns, Client, Client, containers);
+            return node;
+            // var containers = clients
+            //     .Where(x => !string.IsNullOrWhiteSpace(x.Key))
+            //     .Select(x => BuildContainerView(BuildNamespace(ns, x.Key!), x.Key!, $"{x.Key!}{Client}", x.Value))
+            //     .ToArray();
+            //
+            // if (clients.TryGetValue(string.Empty, out var rootClients))
+            //     return BuildContainerView(ns, Client, Client, containers.Concat<IClientView>(rootClients).ToArray());
+            //
+            // return BuildContainerView(ns, Client, Client, containers);
         }
 
-        private ClientContainerView BuildContainerView(string ns, string name, string type, IReadOnlyCollection<IClientView> clients)
+        private ClientContainerView BuildClientNode(Namespace ns, string name, string type, IReadOnlyCollection<ClientCandidate> candidates)
         {
-            var usages = BuildUsages(ns, clients.Select(x => x.Namespace).Append("Annium.Net.Http"));
+            if (candidates.Count == 0)
+                throw new ArgumentException("Can't build container without clients");
 
-            return new ClientContainerView(usages, ns, name, type, clients);
+            if (candidates.Count == 1)
+                return new ClientContainerView(
+                    new[] { candidates.First().Namespace, AnniumNetHttp }.ToUsagesFrom(ns).ToUsageStrings(),
+                    ns.ToString(),
+                    name,
+                    type,
+                    candidates.Select(x => (ClientView) x).ToArray()
+                );
+
+            var lookup = candidates.ToLookup(x => x.Namespace == ns);
+
+            var children = lookup[true].ToArray();
+
+            var ancestors = lookup[false]
+                .GroupBy(x => ns.Append(x.Namespace.From(ns).First()).ToNamespace())
+                .ToDictionary(
+                    x => x.Key,
+                    x => BuildClientNode(x.Key, x.Key.Last(), $"{x.Key.Last()}{Root}", x.ToArray())
+                );
+
+            var usages = children
+                .Select(x => x.Namespace)
+                .Append(AnniumNetHttp)
+                .Concat(ancestors.Keys)
+                .ToUsagesFrom(ns)
+                .ToUsageStrings();
+
+            var clients = ancestors.Values
+                .OrderBy(x => x.Namespace.ToString())
+                .Concat<IClientView>(children.Select(x => (ClientView) x).OrderBy(x => x.Namespace))
+                .ToArray();
+
+            return new ClientContainerView(usages, ns.ToString(), name, type, clients);
         }
+        //
+        // private ClientContainerView BuildContainerView(string ns, string name, string type, IReadOnlyCollection<IClientView> clients)
+        // {
+        //     var usages = BuildUsages(ns, clients.Select(x => x.Namespace).Append("Annium.Net.Http"));
+        //
+        //     return new ClientContainerView(usages, ns, name, type, clients);
+        // }
 
-        private ClientView ParseController(string projectName, ControllerModel controller, ITypeManager tm)
+        private ClientCandidate ParseController(Namespace rootNs, ControllerModel controller, ITypeManager tm)
         {
-            var references = controller.Actions
+            var ns = rootNs.Concat(controller.Namespace).ToNamespace();
+            var usages = controller.Actions
                 .SelectMany(x => CollectReferences(x, tm))
                 .Distinct()
                 .Where(x => !IsBaseType(x))
                 .Select(x => x.Namespace!)
                 .Append("Annium.Net.Http")
                 .Append("System.Threading.Tasks")
-                .ToArray();
-            var ns = string.IsNullOrWhiteSpace(controller.Area)
-                ? BuildNamespace(projectName, Clients)
-                : BuildNamespace(projectName, Areas, controller.Area.PascalCase(), Clients);
-            var usages = BuildUsages(ns, references);
+                .Select(Namespace.New)
+                .ToUsagesFrom(ns);
             var actions = controller.Actions.Select(x => ParseAction(x, tm)).ToArray();
 
-            return new ClientView(
+            return new ClientCandidate(
                 usages,
                 ns,
                 controller.Name,

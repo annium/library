@@ -5,6 +5,6 @@ namespace XRest.Clients.Dotnet.Components
 {
     internal interface IProcessor
     {
-        ClientContainerView Process(string ns, ApiModel api);
+        ClientContainerView Process(Namespace ns, ApiModel api);
     }
 }

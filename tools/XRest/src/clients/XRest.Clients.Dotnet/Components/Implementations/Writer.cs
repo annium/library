@@ -1,6 +1,8 @@
 using System.IO;
 using XRest.Clients.Dotnet.Views;
 using XRest.Core.Components;
+using XRest.Core.Extensions;
+using XRest.Core.Models;
 using static XRest.Clients.Dotnet.Helpers.WriterHelper;
 
 namespace XRest.Clients.Dotnet.Components.Implementations
@@ -23,7 +25,6 @@ namespace XRest.Clients.Dotnet.Components.Implementations
 
             if (generateTestClient)
             {
-
                 Write(output, "HttpResponseExtensions", "Templates.HttpResponseTestExtensions", new
                 {
                     Usages = new[]
@@ -65,10 +66,10 @@ namespace XRest.Clients.Dotnet.Components.Implementations
                 client.Namespace,
             });
 
-            WriteClientContainer(output, client.Namespace, client, generateTestClient);
+            WriteClientContainer(output, client.Namespace.ToNamespace(), client, generateTestClient);
         }
 
-        private void WriteAbstractClient(string rootDir, string rootNs, IClientView abstraction, bool generateTestClient)
+        private void WriteAbstractClient(string rootDir, Namespace rootNs, IClientView abstraction, bool generateTestClient)
         {
             switch (abstraction)
             {
@@ -81,9 +82,9 @@ namespace XRest.Clients.Dotnet.Components.Implementations
             }
         }
 
-        private void WriteClientContainer(string rootDir, string rootNs, ClientContainerView container, bool generateTestClient)
+        private void WriteClientContainer(string rootDir, Namespace rootNs, ClientContainerView container, bool generateTestClient)
         {
-            var output = GetOutputPath(rootDir, rootNs, container.Namespace);
+            var output = GetOutputPath(rootDir, rootNs, container.Namespace.ToNamespace());
             if (!Directory.Exists(output))
                 Directory.CreateDirectory(output);
 
@@ -93,9 +94,9 @@ namespace XRest.Clients.Dotnet.Components.Implementations
                 WriteAbstractClient(rootDir, rootNs, client, generateTestClient);
         }
 
-        private void WriteClient(string rootDir, string rootNs, ClientView client, bool generateTestClient)
+        private void WriteClient(string rootDir, Namespace rootNs, ClientView client, bool generateTestClient)
         {
-            var output = GetOutputPath(rootDir, rootNs, client.Namespace);
+            var output = GetOutputPath(rootDir, rootNs, client.Namespace.ToNamespace());
             if (!Directory.Exists(output))
                 Directory.CreateDirectory(output);
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using XRest.Clients.Dotnet.Components;
+using XRest.Core.Models;
 using XRest.Sources;
 using XRest.Sources.Components;
 
@@ -40,7 +41,7 @@ namespace XRest.Clients.Dotnet.Commands
             var model = await _loader.Load(cfg);
 
             _logger.Info("Process api model to api view");
-            var ns = string.IsNullOrWhiteSpace(cfg.Namespace) ? Path.GetFileName(cfg.Output) : cfg.Namespace;
+            var ns = Namespace.New(string.IsNullOrWhiteSpace(cfg.Namespace) ? Path.GetFileName(cfg.Output) : cfg.Namespace);
             var view = _processor.Process(ns, model);
 
             _logger.Info($"Write api view to {cfg.Output}");
