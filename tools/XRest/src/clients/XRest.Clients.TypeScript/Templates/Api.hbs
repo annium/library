@@ -6,8 +6,8 @@ import {
 {{~ for type in imports ~}}
   {{ type.name }},
 {{~ end ~}}
-} from {{ if area ~}}'../shared'{{~ else ~}}'./shared'{{~ end ~}}
-{{~ end }}
+} from '{{~ import_source ~}}'
+{{~ end ~}}
 
 // exports
 

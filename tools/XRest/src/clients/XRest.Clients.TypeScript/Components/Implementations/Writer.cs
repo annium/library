@@ -3,6 +3,7 @@ using System.Linq;
 using Annium.Core.Primitives;
 using XRest.Clients.TypeScript.Views;
 using XRest.Core.Components;
+using XRest.Core.Models;
 
 namespace XRest.Clients.TypeScript.Components.Implementations
 {
@@ -26,15 +27,10 @@ namespace XRest.Clients.TypeScript.Components.Implementations
             if (api.SharedExports.Count > 0)
                 Write(output, "shared.ts", "Templates.SharedExports", new { Exports = api.SharedExports });
 
-            foreach (var group in api.Controllers.Where(x => x.Actions.Count > 0).GroupBy(x => x.Area))
-            foreach (var controllerView in group)
+            foreach (var controllerView in api.Controllers.Where(x => x.Actions.Count > 0))
             {
-                var directory = output;
-                if (!string.IsNullOrWhiteSpace(group.Key))
-                {
-                    directory = Path.Combine(output, group.Key);
-                    Directory.CreateDirectory(directory);
-                }
+                var directory = Namespace.New(controllerView.Namespace).ToPath(output);
+                Directory.CreateDirectory(directory);
 
                 Write(directory, $"{controllerView.Name.CamelCase()}Api.ts", "Templates.Api", controllerView);
             }

@@ -30,15 +30,6 @@ namespace XRest.Clients.Dotnet.Components.Implementations
             var node = BuildClientNode(ns, Client, Root, candidates);
 
             return node;
-            // var containers = clients
-            //     .Where(x => !string.IsNullOrWhiteSpace(x.Key))
-            //     .Select(x => BuildContainerView(BuildNamespace(ns, x.Key!), x.Key!, $"{x.Key!}{Client}", x.Value))
-            //     .ToArray();
-            //
-            // if (clients.TryGetValue(string.Empty, out var rootClients))
-            //     return BuildContainerView(ns, Client, Client, containers.Concat<IClientView>(rootClients).ToArray());
-            //
-            // return BuildContainerView(ns, Client, Client, containers);
         }
 
         private ClientContainerView BuildClientNode(Namespace ns, string name, string type, IReadOnlyCollection<ClientCandidate> candidates)
@@ -80,13 +71,6 @@ namespace XRest.Clients.Dotnet.Components.Implementations
 
             return new ClientContainerView(usages, ns.ToString(), name, type, clients);
         }
-        //
-        // private ClientContainerView BuildContainerView(string ns, string name, string type, IReadOnlyCollection<IClientView> clients)
-        // {
-        //     var usages = BuildUsages(ns, clients.Select(x => x.Namespace).Append("Annium.Net.Http"));
-        //
-        //     return new ClientContainerView(usages, ns, name, type, clients);
-        // }
 
         private ClientCandidate ParseController(Namespace rootNs, ControllerModel controller, ITypeManager tm)
         {

@@ -6,6 +6,7 @@ using Annium.Core.Primitives;
 using XRest.Clients.TypeScript.Helpers;
 using XRest.Clients.TypeScript.Views;
 using XRest.Clients.TypeScript.Views.Types;
+using XRest.Core.Extensions;
 using XRest.Core.Models;
 
 namespace XRest.Clients.TypeScript.Components.Implementations
@@ -39,7 +40,7 @@ namespace XRest.Clients.TypeScript.Components.Implementations
             var usedTypes = new UsedTypeViewsCollector().CollectUsedTypeViews(exports, actions);
             var imports = usedTypes.Except(exports).OrderBy(x => x.Name).ToArray();
 
-            return new ControllerView("area", model.Name.CamelCase(), imports, actions, exports);
+            return new ControllerView(model.Namespace.Select(x => x.CamelCase()).ToNamespaceString(), model.Name.CamelCase(), imports, actions, exports);
         }
 
         private ActionView BuildActionView(
