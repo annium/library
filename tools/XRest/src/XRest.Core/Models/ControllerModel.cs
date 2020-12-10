@@ -4,17 +4,17 @@ namespace XRest.Core.Models
 {
     public class ControllerModel
     {
-        public string? Area { get; }
+        public Namespace Namespace { get; }
         public string Name { get; }
         public IReadOnlyCollection<ActionModel> Actions { get; }
 
         public ControllerModel(
-            string? area,
+            Namespace @namespace,
             string name,
             IReadOnlyCollection<ActionModel> actions
         )
         {
-            Area = area;
+            Namespace = @namespace;
             Name = name;
             Actions = actions;
         }
