@@ -12,28 +12,9 @@ namespace XRest.Core.Models
     {
         #region static
 
-        public static Namespace New(string ns)
-        {
-            if (string.IsNullOrWhiteSpace(ns))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(ns));
+        public static Namespace New(string ns) => New(ns.ToNamespaceArray());
 
-            var src = ns.ToNamespaceArray();
-            if (src.Any(string.IsNullOrWhiteSpace))
-                throw new ArgumentException($"Namespace {ns} contains empty parts");
-
-            return new Namespace(src);
-        }
-
-        public static Namespace New(IReadOnlyCollection<string> ns)
-        {
-            if (ns is null)
-                throw new ArgumentNullException(nameof(ns));
-
-            if (ns.Any(string.IsNullOrWhiteSpace))
-                throw new ArgumentException($"Namespace {ns.ToNamespaceString()} contains empty parts");
-
-            return new Namespace(ns.ToArray());
-        }
+        public static Namespace New(IEnumerable<string> ns) => new(ns.ToArray().EnsureValidNamespace());
 
         #endregion
 
