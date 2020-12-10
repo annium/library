@@ -6,6 +6,7 @@ using System.Reflection;
 using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
+using XRest.Core.Extensions;
 using XRest.Core.Helpers;
 using XRest.Core.Models;
 
@@ -13,6 +14,9 @@ namespace XRest.Sources.Assembly.Components.Internal
 {
     internal class Parser : IParser
     {
+        private const string Controller = "Controller";
+        private const string Controllers = "Controllers";
+
         public ApiModel Parse(IReadOnlyCollection<Type> controllerTypes)
         {
             var controllerModels = controllerTypes.Select(ParseController).ToArray();
@@ -24,14 +28,22 @@ namespace XRest.Sources.Assembly.Components.Internal
             Type controllerType
         )
         {
-            var controllerArea = controllerType.GetCustomAttribute<AreaAttribute>()?.RouteValue;
-            var controllerName = controllerType.Name.Replace("Controller", string.Empty);
-            var controllerRoute = controllerType.GetCustomAttribute<RouteAttribute>()?.Template;
+            var nsParts = (controllerType.Namespace ?? string.Empty)
+                .ToNamespaceArray()
+                .SkipWhile(x => x != Controllers)
+                .Skip(1)
+                .ToList();
+            var area = controllerType.GetCustomAttribute<AreaAttribute>()?.RouteValue;
+            if (area is not null)
+                nsParts.Insert(0, area.PascalCase());
+            var ns = Namespace.New(nsParts);
+            var name = controllerType.Name.Replace(Controller, string.Empty);
+            var route = controllerType.GetCustomAttribute<RouteAttribute>()?.Template;
 
             var actions = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance).Where(ParseHelper.IsAction).ToArray();
-            var actionModels = actions.Select(x => ParseAction(controllerArea, controllerName, controllerRoute, x)).ToArray();
+            var actionModels = actions.Select(x => ParseAction(area, name, route, x)).ToArray();
 
-            return new ControllerModel(controllerArea, controllerName, actionModels);
+            return new ControllerModel(ns, name, actionModels);
         }
 
         private ActionModel ParseAction(
