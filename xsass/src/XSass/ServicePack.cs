@@ -1,5 +1,9 @@
 using System;
+using Annium.Configuration.Abstractions;
 using Annium.Core.DependencyInjection;
+using Annium.Logging.Abstractions;
+using XSass.Internal;
+using XSass.Internal.Components;
 
 namespace XSass
 {
@@ -7,17 +11,18 @@ namespace XSass
     {
         public override void Configure(IServiceContainer container)
         {
-            // register configurations
+            container.AddRuntimeTools(GetType().Assembly, false);
+            container.AddMapper();
+            container.AddConfiguration<Configuration>(x => x.AddYamlFile("xsass.yml", true));
+            container.AddTimeProvider();
         }
 
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            // register and setup services
-        }
-
-        public override void Setup(IServiceProvider provider)
-        {
-            // setup post-configured services
+            Action<LogRoute> logRoute = provider.Resolve<Configuration>().Debug ? route => route.UseConsole() : _ => { };
+            container.AddLogging(logRoute);
+            container.Add<Compiler>().AsSelf().Singleton();
+            container.Add<Crawler>().AsSelf().Singleton();
         }
     }
 }
