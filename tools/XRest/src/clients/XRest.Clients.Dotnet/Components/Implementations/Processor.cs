@@ -75,16 +75,17 @@ namespace XRest.Clients.Dotnet.Components.Implementations
         private ClientCandidate ParseController(Namespace rootNs, ControllerModel controller, ITypeManager tm)
         {
             var ns = rootNs.Concat(controller.Namespace).ToNamespace();
-            var usages = controller.Actions
-                .SelectMany(x => CollectReferences(x, tm))
+            var namespaces = new List<Namespace>();
+            var actions = controller.Actions.Select(x => ParseAction(x, tm, namespaces.Add)).ToArray();
+            namespaces.AddRange(controller.Actions
+                .SelectMany(x => CollectReferences(x, tm, namespaces.Add))
                 .Distinct()
                 .Where(x => !IsBaseType(x))
                 .Select(x => x.Namespace!)
                 .Append("Annium.Net.Http")
                 .Append("System.Threading.Tasks")
-                .Select(Namespace.New)
-                .ToUsagesFrom(ns);
-            var actions = controller.Actions.Select(x => ParseAction(x, tm)).ToArray();
+                .Select(Namespace.New));
+            var usages = namespaces.ToUsagesFrom(ns);
 
             return new ClientCandidate(
                 usages,
@@ -95,7 +96,7 @@ namespace XRest.Clients.Dotnet.Components.Implementations
             );
         }
 
-        private IReadOnlyCollection<Type> CollectReferences(ActionModel action, ITypeManager tm)
+        private IReadOnlyCollection<Type> CollectReferences(ActionModel action, ITypeManager tm, Action<Namespace> addUsage)
         {
             var references = new HashSet<Type>();
 
@@ -109,8 +110,8 @@ namespace XRest.Clients.Dotnet.Components.Implementations
             {
                 CollectTypeReferences(action.Response);
                 var response = ResolveResponseType(action.Response);
-                var (_, responseType) = ResolveResponseKindAndInnerType(response);
-                var defaultType = ResolveTypeDefaultType(responseType, tm);
+                var (_, responseType) = ResolveResponseKindAndInnerType(response, addUsage);
+                var defaultType = ResolveTypeDefaultType(responseType, tm, addUsage);
                 if (defaultType != null)
                     CollectTypeReferences(action.Response);
             }
@@ -128,7 +129,7 @@ namespace XRest.Clients.Dotnet.Components.Implementations
         }
 
 
-        private ActionView ParseAction(ActionModel action, ITypeManager tm)
+        private ActionView ParseAction(ActionModel action, ITypeManager tm, Action<Namespace> addUsage)
         {
             var pathParameters = action.Parameters
                 .Where(x => x.Location == ParameterLocationEnum.Path)
@@ -141,9 +142,9 @@ namespace XRest.Clients.Dotnet.Components.Implementations
                 .ToArray();
 
             var response = ResolveResponseType(action.Response);
-            var (kind, responseType) = ResolveResponseKindAndInnerType(response);
-            var defaultType = ResolveTypeDefaultType(responseType, tm);
-            var responseDefault = GetDefaultExpression(kind, responseType, defaultType);
+            var (kind, responseType) = ResolveResponseKindAndInnerType(response, addUsage);
+            var defaultType = ResolveTypeDefaultType(responseType, tm, addUsage);
+            var responseDefault = GetDefaultExpression(kind, responseType, defaultType, addUsage);
 
             return new ActionView(
                 action.Name,
@@ -168,17 +169,25 @@ namespace XRest.Clients.Dotnet.Components.Implementations
             return type;
         }
 
-        private (ResponseKind, Type?) ResolveResponseKindAndInnerType(Type? type)
+        private (ResponseKind, Type?) ResolveResponseKindAndInnerType(Type? type, Action<Namespace> addUsage)
         {
             if (type is null)
                 return (ResponseKind.None, null);
 
             if (type.FullName == typeof(IResult).FullName)
+            {
+                addUsage(Namespace.Of(typeof(IResult)));
+
                 return (ResponseKind.Result, null);
+            }
 
             var isGenericResult = type.IsGenericType && type.GetGenericTypeDefinition().FullName == typeof(IResult<>).FullName;
             if (isGenericResult)
+            {
+                addUsage(Namespace.Of(typeof(IResult<>)));
+
                 return (ResponseKind.DataResult, type.GetGenericArguments()[0]);
+            }
 
             return (ResponseKind.Plain, type);
         }
@@ -188,8 +197,9 @@ namespace XRest.Clients.Dotnet.Components.Implementations
         /// </summary>
         /// <param name="type"></param>
         /// <param name="tm"></param>
+        /// <param name="addUsage"></param>
         /// <returns></returns>
-        private Type? ResolveTypeDefaultType(Type? type, ITypeManager tm)
+        private Type? ResolveTypeDefaultType(Type? type, ITypeManager tm, Action<Namespace> addUsage)
         {
             if (type is null)
                 return null;
@@ -214,11 +224,16 @@ namespace XRest.Clients.Dotnet.Components.Implementations
                 var elementType = enumerableImplementation.GetGenericArguments()[0];
                 var keyValueImplementation = elementType.GetTargetImplementation(typeof(KeyValuePair<,>));
 
-                var enumerableDefault = keyValueImplementation is null
-                    ? elementType.MakeArrayType()
-                    : typeof(Dictionary<,>).MakeGenericType(keyValueImplementation.GetGenericArguments());
+                if (keyValueImplementation is null)
+                {
+                    addUsage(Namespace.Of(typeof(Array)));
 
-                return enumerableDefault;
+                    return elementType.MakeArrayType();
+                }
+
+                addUsage(Namespace.Of(typeof(Dictionary<,>)));
+
+                return typeof(Dictionary<,>).MakeGenericType(keyValueImplementation.GetGenericArguments());
             }
 
             // special handling for IEnumerable and friends
@@ -231,26 +246,32 @@ namespace XRest.Clients.Dotnet.Components.Implementations
             return defaultType;
         }
 
-        private string GetDefaultExpression(ResponseKind kind, Type? responseType, Type? defaultType) => kind switch
+        private string GetDefaultExpression(ResponseKind kind, Type? responseType, Type? defaultType, Action<Namespace> addUsage) => kind switch
         {
-            ResponseKind.Plain  => GetDefaultExpression(defaultType),
+            ResponseKind.Plain  => GetDefaultExpression(defaultType, addUsage),
             ResponseKind.Result => @"Result.New().Error(""Request failed"")",
             ResponseKind.DataResult => responseType!.FullName == defaultType!.FullName
-                ? $@"Result.New({GetDefaultExpression(defaultType)}).Error(""Request failed"")"
-                : $@"Result.New<{responseType.FriendlyName()}>({GetDefaultExpression(defaultType)}).Error(""Request failed"")",
+                ? $@"Result.New({GetDefaultExpression(defaultType, addUsage)}).Error(""Request failed"")"
+                : $@"Result.New<{responseType.FriendlyName()}>({GetDefaultExpression(defaultType, addUsage)}).Error(""Request failed"")",
             _ => string.Empty,
         };
 
-        private string GetDefaultExpression(Type? type)
+        private string GetDefaultExpression(Type? type, Action<Namespace> addUsage)
         {
             if (type is null)
                 return string.Empty;
+
+            addUsage(Namespace.Of(type));
 
             if (type.IsValueType)
                 return $"default({type.FriendlyName()})";
 
             if (type.IsArray)
+            {
+                addUsage(Namespace.Of(typeof(Array)));
+
                 return $"Array.Empty<{type.GetElementType()!.FriendlyName()}>()";
+            }
 
             return $"new {type.FriendlyName()}()";
         }

@@ -10,6 +10,7 @@ namespace XRest.Clients.Dotnet.Extensions
             this IEnumerable<Namespace> references,
             Namespace target
         ) => references
+            .ToArray()
             .Where(x => !target.StartsWith(x))
             .Distinct()
             .OrderBy(x => x.FirstOrDefault() != "System").ThenBy(x => x.ToString())

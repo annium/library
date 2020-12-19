@@ -12,6 +12,7 @@ namespace XRest.Core.Models
     {
         #region static
 
+        public static Namespace Of(Type type) => New(type.Namespace!.ToNamespaceArray());
         public static Namespace New(string ns) => New(ns.ToNamespaceArray());
 
         public static Namespace New(IEnumerable<string> ns) => new(ns.ToArray().EnsureValidNamespace());

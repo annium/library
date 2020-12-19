@@ -30,6 +30,6 @@ namespace XRest.Clients.Dotnet.Views
         public override string ToString() => Name;
 
         public static explicit operator ClientView(ClientCandidate x) =>
-            new ClientView(x.Usages.Select(y => y.ToString()).ToArray(), x.Namespace.ToString(), x.Name, x.Type, x.Actions);
+            new(x.Usages.Select(y => y.ToString()).ToArray(), x.Namespace.ToString(), x.Name, x.Type, x.Actions);
     }
 }
