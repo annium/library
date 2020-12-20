@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Annium.Blazor.Routing.Internal.Implementations.Locations;
 using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Blazor.Routing.Internal.Routes;
 using Annium.Core.Mapper;
-using Annium.Core.Primitives;
 using Annium.Data.Models.Extensions;
 using Microsoft.AspNetCore.Components;
 
@@ -15,9 +13,9 @@ namespace Annium.Blazor.Routing.Internal.Implementations.Routes
     internal class Route<TData> : RouteBase, IRoute<TData>
         where TData : notnull, new()
     {
+        private readonly TData _default = new();
+        private readonly IReadOnlyDictionary<string, object> _defaultParameters;
         private readonly IMapper _mapper;
-        private static readonly IReadOnlyCollection<PropertyInfo> Properties = DataModel.ResolveProperties<TData>();
-
         private readonly ILocationPath _path;
         private readonly ILocationQuery _query;
         private readonly IDataModel _model;
@@ -31,14 +29,16 @@ namespace Annium.Blazor.Routing.Internal.Implementations.Routes
             IMapper mapper
         ) : base(navigationManager, template, pageType)
         {
+            var properties = DataModel.ResolveProperties<TData>();
             _mapper = mapper;
-            var (path, pathProperties) = LocationPath.Parse(template, Properties, mapper);
-            var queryProperties = Properties.Except(pathProperties).ToArray();
+            var (path, pathProperties) = LocationPath.Parse(template, properties, mapper);
+            var queryProperties = properties.Except(pathProperties).ToArray();
             _path = path;
             _query = LocationQuery.Create(queryProperties, mapper);
-            _model = DataModel.Create<TData>(Properties, mapper);
+            _model = DataModel.Create<TData>(properties, mapper);
             _pathModel = DataModel.Create<TData>(pathProperties, mapper);
             _queryModel = DataModel.Create<TData>(queryProperties, mapper);
+            _defaultParameters = _model.ToParams(_default);
         }
 
         public string Link(TData data)
@@ -67,13 +67,13 @@ namespace Annium.Blazor.Routing.Internal.Implementations.Routes
                 return false;
 
             // if data is default - default match is default
-            if (data is null || data.Equals(default))
+            if (data is null || data.Equals(_default))
                 return true;
 
             // get parameters with non-default values
             var parameters = _model.ToParams(data)
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                .Where(x => x.Value is not null && !x.Value.Equals(x.Value.GetType().DefaultValue()))
+                .Where(x => x.Value is not null && !x.Value.Equals(_defaultParameters[x.Key]))
                 .ToDictionary(x => x.Key, x => x.Value);
 
             // ensure all parameter values are equal to match values

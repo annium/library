@@ -83,7 +83,7 @@ namespace Annium.Blazor.Routing.Internal.Implementations
                     continue;
 
                 var type = property.PropertyType;
-                parameters[name] = _mapper.Map(type.IsEnumerable() ? value.ToArray() : value.FirstOrDefault(), type);
+                parameters[name] = _mapper.Map(type.IsEnumerable() ? value.ToArray() : value.FirstOrDefault()!, type);
             }
 
             return parameters;

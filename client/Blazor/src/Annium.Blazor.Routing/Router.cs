@@ -70,7 +70,7 @@ namespace Annium.Blazor.Routing
             NavigationManager.LocationChanged -= HandleLocationChanged;
         }
 
-        private void HandleLocationChanged(object sender, LocationChangedEventArgs args)
+        private void HandleLocationChanged(object? sender, LocationChangedEventArgs args)
         {
             _location = args.Location;
             Refresh();

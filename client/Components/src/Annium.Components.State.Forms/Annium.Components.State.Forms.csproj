@@ -15,7 +15,6 @@
         <ProjectReference Include="../Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Annium.Core.Primitives" Version="0.1.0" />
         <PackageReference Include="Annium.Data.Models" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Validation" Version="0.1.0" />
     </ItemGroup>

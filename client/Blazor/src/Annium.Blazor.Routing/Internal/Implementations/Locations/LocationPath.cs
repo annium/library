@@ -55,6 +55,9 @@ namespace Annium.Blazor.Routing.Internal.Implementations.Locations
 
         public LocationMatch Match(IReadOnlyList<string> segments, PathMatch match)
         {
+            if (segments.Count > _segments.Count)
+                return LocationMatch.Empty;
+
             if (match == PathMatch.Exact && segments.Count != _segments.Count)
                 return LocationMatch.Empty;
 

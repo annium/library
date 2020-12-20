@@ -1,11 +1,10 @@
 using System.Runtime.CompilerServices;
-using Annium.Blazor.Routing.Internal;
+using Annium.Blazor.Routing;
 using Annium.Blazor.Routing.Internal.Implementations;
-using Annium.Core.DependencyInjection;
 
 [assembly: InternalsVisibleTo("Annium.Blazor.Routing.Tests")]
 
-namespace Annium.Blazor.Routing
+namespace Annium.Core.DependencyInjection
 {
     public static class ServiceContainerExtensions
     {

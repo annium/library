@@ -1,6 +1,7 @@
-using System.Linq;
+using System;
 using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Blazor.Routing.Internal.Routes;
+using Annium.Core.Primitives;
 using Annium.Testing;
 using Xunit;
 
@@ -79,16 +80,12 @@ namespace Annium.Blazor.Routing.Tests
         public sealed record SearchData
         {
             public Sex Sex { get; init; }
-            public string[] Name { get; init; }
+            public string[] Name { get; init; } = Array.Empty<string>();
             public int Age { get; init; }
 
-            public bool Equals(SearchData? other)
-            {
-                if (other is null)
-                    return false;
+            public bool Equals(SearchData? other) => other is not null && GetHashCode() == other.GetHashCode();
 
-                return Sex == other.Sex && Name.SequenceEqual(other.Name) && Age == other.Age;
-            }
+            public override int GetHashCode() => HashCode.Combine((int) Sex, HashCodeSeq.Combine(Name), Age);
         }
 
         public enum Sex
