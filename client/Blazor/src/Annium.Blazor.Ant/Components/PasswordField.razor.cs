@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Annium.Components.State.Forms;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace Annium.Blazor.Ant.Components
 {
@@ -11,6 +12,9 @@ namespace Annium.Blazor.Ant.Components
 
         [Parameter]
         public IAtomicContainer<string> State { get; set; } = default!;
+
+        [Parameter]
+        public EventCallback<KeyboardEventArgs> OnPressEnter { get; set; }
 
         [Parameter]
         public RenderFragment? ChildContent { get; set; }
