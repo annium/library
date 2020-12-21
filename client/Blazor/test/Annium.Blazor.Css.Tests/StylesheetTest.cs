@@ -10,21 +10,24 @@ namespace Annium.Blazor.Css.Tests
         public void Stylesheet_Works()
         {
             // arrange
-            var styleSheet = new ServiceContainer()
+            var sp = new ServiceContainer()
                 .AddRuntimeTools(GetType().Assembly, false)
-                .AddCssRules()
-                .BuildServiceProvider()
-                .Resolve<IStyleSheet>();
+                .AddCss()
+                .BuildServiceProvider();
+            var styleSheet = sp.Resolve<IStyleSheet>();
 
-            // act
-            var css = styleSheet.ToCss();
+            // assert: before any RuleSet resolved - it's empty
+            styleSheet.Css.Is(string.Empty);
+
+            // act - resolve RuleSet
+            sp.Resolve<Styles>();
 
             // assert
-            css.IsNotDefault();
+            styleSheet.Css.IsNot(string.Empty);
         }
     }
 
-    internal class Styles : IRuleSet
+    internal class Styles : RuleSet
     {
         private CssRule _html = Rule.Tag("html")
             .Set("display", "flex")

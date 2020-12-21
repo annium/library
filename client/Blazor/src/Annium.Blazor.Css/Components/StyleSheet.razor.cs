@@ -1,13 +1,21 @@
+using System;
+using Microsoft.AspNetCore.Components;
+
 namespace Annium.Blazor.Css
 {
-    public partial class StyleSheet
+    public partial class StyleSheet : IDisposable
     {
-        public string Styles { get; private set; } = default!;
+        [Inject]
+        internal Internal.StyleSheet Sheet { get; set; } = default!;
 
         protected override void OnInitialized()
         {
-            Styles = Sheet.ToCss();
-            StateHasChanged();
+            Sheet.CssChanged += StateHasChanged;
+        }
+
+        public void Dispose()
+        {
+            Sheet.CssChanged -= StateHasChanged;
         }
     }
 }

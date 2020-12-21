@@ -2,51 +2,55 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Annium.Blazor.Css.Internal
 {
     internal class StyleSheet : IStyleSheet
     {
-        private static IReadOnlyCollection<CssRule> GetRules(IRuleSet set)
+        public static StyleSheet Instance = new();
+
+        private static IReadOnlyCollection<CssRule> GetRules(RuleSet set)
         {
             var rules = new List<CssRule>();
             var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
             var properties = set.GetType().GetProperties(flags)
-                .Where(x => x.PropertyType.IsAssignableFrom(typeof(CssRule)))
+                .Where(x => x.CanRead && x.PropertyType.IsAssignableFrom(typeof(CssRule)))
                 .ToArray();
             foreach (var property in properties)
-                rules.Add((CssRule) property.GetMethod!.Invoke(set, Array.Empty<object>())!);
+                rules.Add(
+                    (CssRule) property.GetMethod!.Invoke(set, Array.Empty<object>())! ??
+                    throw new InvalidOperationException($"Property {property} contains empty rule")
+                );
 
             var fields = set.GetType().GetFields(flags)
                 .Where(x => x.FieldType.IsAssignableFrom(typeof(CssRule)))
                 .ToArray();
             foreach (var field in fields)
-                rules.Add((CssRule) field.GetValue(set)!);
+                rules.Add(
+                    (CssRule) field.GetValue(set)! ??
+                    throw new InvalidOperationException($"Field {field} contains empty rule")
+                );
 
             return rules;
         }
 
-        private readonly IReadOnlyCollection<IRuleSet> _ruleSets;
+        public string Css { get; private set; } = string.Empty;
+        public event Action CssChanged = delegate { };
 
-        public StyleSheet(IEnumerable<IRuleSet> ruleSets)
+        private StyleSheet()
         {
-            _ruleSets = ruleSets.ToArray();
         }
 
-        public string ToCss()
+        public void Render(RuleSet ruleSet)
         {
-            var sb = new StringBuilder();
-
 #if DEBUG
             var separator = Environment.NewLine;
 #else
             var separator = string.Empty;
 #endif
-            sb.AppendJoin(separator, _ruleSets.SelectMany(GetRules).Select(x => x.ToCss()));
-
-            return sb.ToString();
+            Css += string.Join(separator, GetRules(ruleSet).Select(x => x.ToCss()));
+            CssChanged.Invoke();
         }
     }
 }
