@@ -54,7 +54,6 @@ namespace XRest.Clients.Dotnet.Components.Implementations
                         "System.Linq",
                         "System.Threading.Tasks",
                         "Annium.Data.Operations",
-                        "Annium.Net.Http",
                     },
                     client.Namespace,
                 });
