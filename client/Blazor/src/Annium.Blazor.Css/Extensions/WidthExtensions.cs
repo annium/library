@@ -1,4 +1,5 @@
 using static System.FormattableString;
+
 namespace Annium.Blazor.Css
 {
     public static class WidthExtensions
