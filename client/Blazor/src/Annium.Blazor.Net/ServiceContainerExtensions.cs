@@ -19,12 +19,12 @@ namespace Annium.Core.DependencyInjection
                 .AssignableTo<IApi>()
                 .Where(x => x.IsClass)
                 .AsInterfaces()
-                .Singleton();
+                .Scoped();
             container.AddAll(Assembly.GetCallingAssembly(), false)
                 .AssignableTo<IApiService>()
                 .Where(x => x.IsClass)
                 .AsInterfaces()
-                .Singleton();
+                .Scoped();
 
             return container;
         }

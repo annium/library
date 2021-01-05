@@ -15,7 +15,7 @@ namespace Annium.Core.DependencyInjection
                 .AssignableTo<IStore>()
                 .Where(x => x.IsClass)
                 .AsInterfaces()
-                .Singleton();
+                .Scoped();
 
             return container;
         }
