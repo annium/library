@@ -15,7 +15,7 @@
         <ProjectReference Include="../Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="MatBlazor" Version="2.7.0" />
+        <PackageReference Include="MatBlazor" Version="2.8.0" />
     </ItemGroup>
     <ItemGroup>
         <Content Update="Components\_Imports.razor">

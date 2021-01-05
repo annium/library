@@ -15,11 +15,6 @@
         <ProjectReference Include="../Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="AntDesign" Version="0.3.0" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Update="Components\_Imports.razor">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
+        <PackageReference Include="AntDesign" Version="0.4.1" />
     </ItemGroup>
 </Project>
