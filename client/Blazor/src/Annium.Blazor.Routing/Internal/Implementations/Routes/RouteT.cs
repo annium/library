@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Annium.Blazor.Routing.Internal.Implementations.Locations;
 using Annium.Blazor.Routing.Internal.Locations;
-using Annium.Blazor.Routing.Internal.Routes;
 using Annium.Core.Mapper;
 using Annium.Data.Models.Extensions;
 using Microsoft.AspNetCore.Components;
@@ -119,6 +118,14 @@ namespace Annium.Blazor.Routing.Internal.Implementations.Routes
             var values = queryMatch.RouteValues.Merge(pathMatch.RouteValues);
 
             return new LocationMatch(true, values);
+        }
+
+        public IRoute Bind(TData data)
+        {
+            var pathParams = _pathModel.ToParams(data);
+            var path = _path.Link(pathParams);
+
+            return new Route(NavigationManager, path, PageType, _mapper);
         }
     }
 }

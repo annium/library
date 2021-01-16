@@ -1,7 +1,6 @@
-using Annium.Blazor.Routing.Internal.Implementations.Routes;
 using Annium.Blazor.Routing.Internal.Locations;
 
-namespace Annium.Blazor.Routing.Internal.Routes
+namespace Annium.Blazor.Routing
 {
     public interface IRoute
     {
