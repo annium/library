@@ -19,6 +19,7 @@ namespace Annium.Components.State.Forms
         IAtomicContainer<double> Create(double initialValue);
         IAtomicContainer<string> Create(string initialValue);
         IAtomicContainer<bool> Create(bool initialValue);
+        IAtomicContainer<Guid> Create(Guid initialValue);
         IAtomicContainer<DateTime> Create(DateTime initialValue);
         IAtomicContainer<DateTimeOffset> Create(DateTimeOffset initialValue);
         IAtomicContainer<Instant> Create(Instant initialValue);
