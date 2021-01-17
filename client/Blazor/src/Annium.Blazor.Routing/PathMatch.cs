@@ -1,4 +1,4 @@
-namespace Annium.Blazor.Routing.Internal.Locations
+namespace Annium.Blazor.Routing
 {
     public enum PathMatch
     {
