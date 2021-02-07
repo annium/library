@@ -26,6 +26,6 @@
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Microsoft" Version="0.1.0" />
         <PackageReference Include="Annium.NodaTime.Serialization.Json" Version="0.1.0" />
-        <PackageReference Include="NodaTime" Version="3.0.4" />
+        <PackageReference Include="NodaTime" Version="3.0.5" />
     </ItemGroup>
 </Project>
