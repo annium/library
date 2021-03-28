@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Entrypoint;
-using Annium.Core.Primitives.Threading;
+using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
 using Annium.Infrastructure.MessageBus.Node;
 
@@ -22,7 +22,7 @@ namespace MessageBus.Sink
             var cfg = provider.Resolve<EndpointsConfiguration>();
             Console.WriteLine($"Start sink with PUB {cfg.PubEndpoint} / SUB {cfg.SubEndpoint}");
 
-            socket.Listen(string.Empty).Subscribe(x => logger.Info(x));
+            socket.Subscribe(x => logger.Info(x));
 
             await token;
         }
