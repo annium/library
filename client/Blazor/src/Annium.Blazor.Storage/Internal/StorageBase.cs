@@ -17,12 +17,12 @@ namespace Annium.Blazor.Storage.Internal
 
         protected StorageBase(
             IJSRuntime js,
-            IIndex<string, ISerializer<string>> serializers,
+            IIndex<SerializerKey, ISerializer<string>> serializers,
             string storage
         )
         {
             _js = (IJSInProcessRuntime) js;
-            _serializer = serializers[MediaTypeNames.Application.Json];
+            _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
             _storage = storage;
         }
 

@@ -12,8 +12,7 @@ namespace Annium.Components.State.Core
     {
         private static readonly object[] EmptyArgs = Array.Empty<object>();
 
-        private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IObservableState>>> Observables =
-            new ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IObservableState>>>();
+        private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IObservableState>>> Observables = new();
 
         public static IDisposable Observe<T>(T target, Action handleChange)
             where T : notnull
@@ -21,8 +20,7 @@ namespace Annium.Components.State.Core
             var observables = Observables.GetOrAdd(target.GetType(), DiscoverObservables);
 
             var disposable = Disposable.Box();
-            foreach (var subscription in observables.Select(x => x(target).Changed.Subscribe(_ => handleChange())))
-                disposable.Add(subscription);
+            disposable += observables.Select(x => x(target).Changed.Subscribe(_ => handleChange()));
 
             return disposable;
         }

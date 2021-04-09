@@ -8,7 +8,7 @@ namespace Annium.Blazor.Storage.Internal
     {
         public LocalStorage(
             IJSRuntime js,
-            IIndex<string, ISerializer<string>> serializers
+            IIndex<SerializerKey, ISerializer<string>> serializers
         ) : base(js, serializers, "localStorage")
         {
         }
