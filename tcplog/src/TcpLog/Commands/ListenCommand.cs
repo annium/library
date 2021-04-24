@@ -65,6 +65,8 @@ namespace TcpLog.Commands
                 catch (SocketException)
                 {
                 }
+
+                _logger.Debug("Client disconnected");
             }
 
             server.Stop();
