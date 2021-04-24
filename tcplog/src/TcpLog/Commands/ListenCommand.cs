@@ -39,18 +39,19 @@ namespace TcpLog.Commands
             // accept single client
             while (!ct.IsCancellationRequested)
             {
+                var pool = ArrayPool<byte>.Shared;
+                var buffer = pool.Rent(1024);
+
                 try
                 {
                     var client = await server.AcceptTcpClientAsync();
                     _logger.Debug("Client connected");
                     var ns = client.GetStream();
 
-                    var pool = ArrayPool<byte>.Shared;
-                    var buffer = pool.Rent(1024);
                     while (client.Connected)
                     {
-                        await ns.ReadAsync(buffer, ct);
-                        Console.Write(Encoding.UTF8.GetString(buffer));
+                        var bytes = await ns.ReadAsync(buffer, 0, buffer.Length, ct);
+                        Console.Write(Encoding.UTF8.GetString(buffer[..bytes]));
                     }
                 }
                 catch (OperationCanceledException)
@@ -64,6 +65,10 @@ namespace TcpLog.Commands
                 }
                 catch (SocketException)
                 {
+                }
+                finally
+                {
+                    pool.Return(buffer);
                 }
 
                 _logger.Debug("Client disconnected");
