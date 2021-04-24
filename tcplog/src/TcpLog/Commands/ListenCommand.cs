@@ -1,12 +1,11 @@
 using System;
 using System.Buffers;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Annium.Core.Primitives;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 
@@ -30,7 +29,7 @@ namespace TcpLog.Commands
             CancellationToken ct
         )
         {
-            var endpoint = ParseEndpoint(cfg.Endpoint, 1111);
+            var endpoint = IPEndPointExt.Parse(cfg.Endpoint, 1111);
             _logger.Info($"Listen at {endpoint}");
             var server = new TcpListener(endpoint);
             server.Start();
@@ -69,27 +68,6 @@ namespace TcpLog.Commands
             }
 
             server.Stop();
-        }
-
-        private IPEndPoint ParseEndpoint(string endpoint, int defaultPort)
-        {
-            if (!IsValidPort(defaultPort))
-                throw new ArgumentOutOfRangeException(nameof(defaultPort));
-
-            if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
-                return new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), defaultPort);
-
-            var port = IsValidPort(uri.Port) ? uri.Port : defaultPort;
-
-            if (uri.Host.Any(char.IsLetter))
-                return new IPEndPoint(Dns.GetHostAddresses(uri.Host).First(), port);
-
-            if (IPAddress.TryParse(uri.Host, out var ipAddress))
-                return new IPEndPoint(ipAddress, port);
-
-            return new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), port);
-
-            static bool IsValidPort(int x) => x > 0 && x < 65536;
         }
     }
 
