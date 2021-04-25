@@ -45,9 +45,10 @@ namespace TcpLog.Commands
                 var pool = ArrayPool<byte>.Shared;
                 var buffer = pool.Rent(1024);
 
+                TcpClient client = default!;
                 try
                 {
-                    var client = await server.AcceptTcpClientAsync();
+                    client = await server.AcceptTcpClientAsync();
                     _logger.Debug("Client connected");
                     var ns = client.GetStream();
 
@@ -56,27 +57,33 @@ namespace TcpLog.Commands
                         var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                         cts.CancelAfter(2000);
                         var bytes = await ns.ReadAsync(buffer, 0, buffer.Length, cts.Token);
-                        if (bytes == 0)
-                            break;
+
                         Console.Write(Encoding.UTF8.GetString(buffer[..bytes]));
                     }
                 }
                 catch (OperationCanceledException)
                 {
+                    _logger.Debug(nameof(OperationCanceledException));
                 }
-                catch (ObjectDisposedException)
+                catch (ObjectDisposedException e)
                 {
+                    _logger.Debug($"{nameof(ObjectDisposedException)}: {e}");
                 }
-                catch (IOException)
+                catch (IOException e)
                 {
+                    _logger.Debug($"{nameof(IOException)}: {e}");
                 }
-                catch (SocketException)
+                catch (SocketException e)
                 {
+                    _logger.Debug($"{nameof(SocketException)}: {e}");
                 }
                 finally
                 {
                     pool.Return(buffer);
                 }
+
+                client.Close();
+                client.Dispose();
 
                 _logger.Debug("Client disconnected");
             }
