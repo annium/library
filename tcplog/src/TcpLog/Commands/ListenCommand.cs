@@ -32,6 +32,9 @@ namespace TcpLog.Commands
             var endpoint = IPEndPointExt.Parse(cfg.Endpoint, 1111);
             _logger.Info($"Listen at {endpoint}");
             var server = new TcpListener(endpoint);
+            server.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 2);
+            server.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 2);
+            server.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, 2);
             server.Start();
 
             ct.Register(server.Stop);
@@ -50,7 +53,11 @@ namespace TcpLog.Commands
 
                     while (client.Connected)
                     {
-                        var bytes = await ns.ReadAsync(buffer, 0, buffer.Length, ct);
+                        var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                        cts.CancelAfter(2000);
+                        var bytes = await ns.ReadAsync(buffer, 0, buffer.Length, cts.Token);
+                        if (bytes == 0)
+                            break;
                         Console.Write(Encoding.UTF8.GetString(buffer[..bytes]));
                     }
                 }
