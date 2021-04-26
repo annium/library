@@ -30,7 +30,8 @@ namespace TcpLog.Commands
         )
         {
             var endpoint = IPEndPointExt.Parse(cfg.Endpoint, 1111);
-            _logger.Info($"Listen at {endpoint}");
+            _logger.Info($"Listen at {endpoint} {(cfg.KeepAlive > 0 ? $"with KeepAlive {cfg.KeepAlive}s" : "w/o KeepAlive")}");
+            Func<byte[], NetworkStream, Task<int>> receive = cfg.KeepAlive > 0 ? ReceiveKeepAlive : Receive;
             var server = new TcpListener(endpoint);
             server.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 2);
             server.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 2);
@@ -45,7 +46,7 @@ namespace TcpLog.Commands
                 var pool = ArrayPool<byte>.Shared;
                 var buffer = pool.Rent(1024);
 
-                TcpClient client = default!;
+                TcpClient? client = default!;
                 try
                 {
                     client = await server.AcceptTcpClientAsync();
@@ -54,10 +55,7 @@ namespace TcpLog.Commands
 
                     while (client.Connected)
                     {
-                        var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-                        cts.CancelAfter(2000);
-                        var bytes = await ns.ReadAsync(buffer, 0, buffer.Length, cts.Token);
-
+                        var bytes = await receive(buffer, ns);
                         Console.Write(Encoding.UTF8.GetString(buffer[..bytes]));
                     }
                 }
@@ -82,13 +80,29 @@ namespace TcpLog.Commands
                     pool.Return(buffer);
                 }
 
-                client.Close();
-                client.Dispose();
+                if (client is not null!)
+                {
+                    client.Close();
+                    client.Dispose();
+                }
 
                 _logger.Debug("Client disconnected");
             }
 
             server.Stop();
+
+            async Task<int> ReceiveKeepAlive(byte[] buffer, NetworkStream ns)
+            {
+                var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                cts.CancelAfter(TimeSpan.FromSeconds(cfg.KeepAlive));
+
+                return await ns.ReadAsync(buffer, 0, buffer.Length, cts.Token);
+            }
+
+            async Task<int> Receive(byte[] buffer, NetworkStream ns)
+            {
+                return await ns.ReadAsync(buffer, 0, buffer.Length, ct);
+            }
         }
     }
 
@@ -97,5 +111,9 @@ namespace TcpLog.Commands
         [Position(1, isRequired: false)]
         [Help("Endpoint to listen")]
         public string Endpoint { get; set; } = "localhost:1111";
+
+        [Option("k", isRequired: false)]
+        [Help("Keep connection alive")]
+        public uint KeepAlive { get; set; } = 0;
     }
 }
