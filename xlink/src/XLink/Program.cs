@@ -9,7 +9,7 @@ namespace XLink
         private static void Run(
             IServiceProvider provider,
             string[] args,
-            CancellationToken token
+            CancellationToken ct
         )
         {
             Console.WriteLine("Hello from XLink");

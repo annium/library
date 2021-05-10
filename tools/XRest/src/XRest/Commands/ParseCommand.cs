@@ -36,7 +36,7 @@ namespace XRest.Commands
             _serializer = serializers[MediaTypeNames.Application.Json];
         }
 
-        public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken token)
+        public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken ct)
         {
             _logger.Info($"Load '{cfg.ProjectName}' model");
             var model = await _loader.Load(cfg);

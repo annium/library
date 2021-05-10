@@ -35,7 +35,7 @@ namespace Xmg.Commands
 
         public override void Handle(
             GenerateCommandConfig cfg,
-            CancellationToken token
+            CancellationToken ct
         )
         {
             _logger.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");

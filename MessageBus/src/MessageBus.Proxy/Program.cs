@@ -11,7 +11,7 @@ namespace MessageBus.Proxy
         private static void Run(
             IServiceProvider provider,
             string[] args,
-            CancellationToken token
+            CancellationToken ct
         )
         {
             var cfg = provider.Resolve<Configuration>();
@@ -24,7 +24,7 @@ namespace MessageBus.Proxy
             publisher.Bind(cfg.SubEndpoint);
 
             var proxy = new NetMQ.Proxy(subscriber, publisher);
-            token.Register(proxy.Stop);
+            ct.Register(proxy.Stop);
             proxy.Start();
         }
 

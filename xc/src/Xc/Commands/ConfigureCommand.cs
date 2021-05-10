@@ -8,7 +8,7 @@ namespace Xc.Commands
         public override string Id { get; } = "configure";
         public override string Description { get; } = "configure solution";
 
-        public override void Handle(RootCommandConfiguration cfg, CancellationToken token)
+        public override void Handle(RootCommandConfiguration cfg, CancellationToken ct)
         {
             throw new System.NotImplementedException();
         }

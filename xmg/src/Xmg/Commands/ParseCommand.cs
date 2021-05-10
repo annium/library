@@ -31,7 +31,7 @@ namespace Xmg.Commands
 
         public override void Handle(
             ParseCommandConfig cfg,
-            CancellationToken token
+            CancellationToken ct
         )
         {
             _logger.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");

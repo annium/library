@@ -30,7 +30,7 @@ namespace xdomains.Tools
             string[] query,
             string[] zones,
             int degreeOfParallelism,
-            CancellationToken token
+            CancellationToken ct
         )
         {
             var domains = GetDomains(query, zones).ToArray();
@@ -43,7 +43,7 @@ namespace xdomains.Tools
             var i = -1;
             Trace();
 
-            await CheckDomains(domains, handleResolved, degreeOfParallelism, token);
+            await CheckDomains(domains, handleResolved, degreeOfParallelism, ct);
 
             void handleResolved(string domain, string result)
             {
@@ -74,13 +74,13 @@ namespace xdomains.Tools
                     yield return $"{name}{zone}";
         }
 
-        private Task CheckDomains(string[] domains, Action<string, string> done, int degreeOfParallelism, CancellationToken token)
+        private Task CheckDomains(string[] domains, Action<string, string> done, int degreeOfParallelism, CancellationToken ct)
         {
             var semaphore = new Semaphore(degreeOfParallelism, degreeOfParallelism);
 
             return Task.WhenAll(domains.Select(async domain =>
             {
-                if (token.IsCancellationRequested)
+                if (ct.IsCancellationRequested)
                     return string.Empty;
 
                 semaphore.WaitOne();

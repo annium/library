@@ -19,7 +19,7 @@ namespace xdomains.Commands
             this.cache = cache;
         }
 
-        public override void Handle(CleanupCommandConfiguration cfg, CancellationToken token)
+        public override void Handle(CleanupCommandConfiguration cfg, CancellationToken ct)
         {
             cache.Cleanup();
         }

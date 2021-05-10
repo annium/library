@@ -13,7 +13,7 @@ namespace MessageBus.Sink
     {
         private static async Task Run(
             IServiceProvider provider,
-            CancellationToken token
+            CancellationToken ct
         )
         {
             var logger = provider.Resolve<ILogger<Program>>();
@@ -24,7 +24,7 @@ namespace MessageBus.Sink
 
             socket.Subscribe(x => logger.Info(x));
 
-            await token;
+            await ct;
         }
 
         public static Task<int> Main() => new Entrypoint()

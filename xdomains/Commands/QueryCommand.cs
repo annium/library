@@ -23,12 +23,12 @@ namespace xdomains.Commands
             this.worker = worker;
         }
 
-        public override Task HandleAsync(QueryCommandConfiguration cfg, CancellationToken token)
+        public override Task HandleAsync(QueryCommandConfiguration cfg, CancellationToken ct)
         {
             var query = File.ReadAllLines("query.txt").OfType<string>().ToArray();
             var filter = cfg.Filter ? File.ReadAllLines("filter.txt").OfType<string>().ToArray() : Array.Empty<string>();
 
-            return worker.RunAsync(query, filter, cfg.DegreeOfParallelism, token);
+            return worker.RunAsync(query, filter, cfg.DegreeOfParallelism, ct);
         }
     }
 

@@ -18,7 +18,7 @@ namespace Xc.Commands
             _createLoadSetupTask = createLoadSetupTask;
         }
 
-        public override void Handle(RootCommandConfiguration cfg, CancellationToken token)
+        public override void Handle(RootCommandConfiguration cfg, CancellationToken ct)
         {
             var setup = _createLoadSetupTask().Execute(cfg.Path);
         }

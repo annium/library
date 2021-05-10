@@ -13,7 +13,7 @@ namespace XSass
     {
         private static async Task Run(
             IServiceProvider provider,
-            CancellationToken token
+            CancellationToken ct
         )
         {
             var configuration = provider.Resolve<Configuration>();

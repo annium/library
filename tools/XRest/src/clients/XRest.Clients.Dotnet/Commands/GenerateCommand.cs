@@ -33,7 +33,7 @@ namespace XRest.Clients.Dotnet.Commands
             _logger = logger;
         }
 
-        public override async Task HandleAsync(GenerateCommandConfiguration cfg, CancellationToken token)
+        public override async Task HandleAsync(GenerateCommandConfiguration cfg, CancellationToken ct)
         {
             _logger.Info($"Generate '{cfg.ProjectName}' client");
 
