@@ -1,4 +1,3 @@
-using System.Reflection;
 using Annium.Blazor.Net;
 using Annium.Blazor.Net.Internal;
 
@@ -15,12 +14,12 @@ namespace Annium.Core.DependencyInjection
 
         public static IServiceContainer AddApiServices(this IServiceContainer container)
         {
-            container.AddAll(Assembly.GetCallingAssembly(), false)
+            container.AddAll()
                 .AssignableTo<IApi>()
                 .Where(x => x.IsClass)
                 .AsInterfaces()
                 .Scoped();
-            container.AddAll(Assembly.GetCallingAssembly(), false)
+            container.AddAll()
                 .AssignableTo<IApiService>()
                 .Where(x => x.IsClass)
                 .AsInterfaces()
