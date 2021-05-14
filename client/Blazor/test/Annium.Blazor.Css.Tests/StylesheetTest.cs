@@ -1,3 +1,4 @@
+using System.Threading;
 using Annium.Core.DependencyInjection;
 using Annium.Testing;
 using Xunit;
@@ -21,6 +22,8 @@ namespace Annium.Blazor.Css.Tests
 
             // act - resolve RuleSet
             sp.Resolve<Styles>();
+
+            SpinWait.SpinUntil(() => styleSheet.Css.Length > 0, 100);
 
             // assert
             styleSheet.Css.IsNot(string.Empty);

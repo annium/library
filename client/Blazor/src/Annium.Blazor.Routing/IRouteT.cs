@@ -1,5 +1,3 @@
-using Annium.Blazor.Routing.Internal.Locations;
-
 namespace Annium.Blazor.Routing
 {
     public interface IRoute<TData>

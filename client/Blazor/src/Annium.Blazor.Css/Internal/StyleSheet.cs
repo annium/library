@@ -7,7 +7,7 @@ namespace Annium.Blazor.Css.Internal
 {
     internal class StyleSheet : IStyleSheet
     {
-        public static StyleSheet Instance = new();
+        public static readonly StyleSheet Instance = new();
 
         private static IReadOnlyCollection<CssRule> GetRules(RuleSet set)
         {

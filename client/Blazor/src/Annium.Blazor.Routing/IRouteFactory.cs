@@ -1,5 +1,3 @@
-using Annium.Blazor.Routing.Internal.Routes;
-
 namespace Annium.Blazor.Routing
 {
     public interface IRouteFactory

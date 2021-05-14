@@ -1,6 +1,5 @@
 using System;
-using Annium.Blazor.Routing.Internal.Locations;
-using Annium.Blazor.Routing.Internal.Routes;
+using Annium.Core.Mapper.Attributes;
 using Annium.Core.Primitives;
 using Annium.Testing;
 using Xunit;
@@ -88,6 +87,7 @@ namespace Annium.Blazor.Routing.Tests
             public override int GetHashCode() => HashCode.Combine((int) Sex, HashCodeSeq.Combine(Name), Age);
         }
 
+        [AutoMapped]
         public enum Sex
         {
             Male,
