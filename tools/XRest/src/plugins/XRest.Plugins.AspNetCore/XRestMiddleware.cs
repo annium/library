@@ -21,13 +21,13 @@ namespace XRest.Plugins.AspNetCore
             RequestDelegate next,
             IMapper mapper,
             IApiDescriptionGroupCollectionProvider descriptionProvider,
-            IIndex<string, ISerializer<string>> serializers
+            IIndex<SerializerKey, ISerializer<string>> serializers
         )
         {
             _next = next;
             _mapper = mapper;
             _descriptionProvider = descriptionProvider;
-            _serializer = serializers[MediaTypeNames.Application.Json];
+            _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
         }
 
         public async Task Invoke(HttpContext context)

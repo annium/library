@@ -27,13 +27,13 @@ namespace XRest.Commands
             ILoader loader,
             IMapper mapper,
             ILogger<ParseCommand> logger,
-            IIndex<string,ISerializer<string>> serializers
+            IIndex<SerializerKey,ISerializer<string>> serializers
         )
         {
             _loader = loader;
             _mapper = mapper;
             _logger = logger;
-            _serializer = serializers[MediaTypeNames.Application.Json];
+            _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
         }
 
         public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken ct)
