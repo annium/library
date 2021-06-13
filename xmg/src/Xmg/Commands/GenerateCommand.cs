@@ -11,14 +11,14 @@ using Xmg.Migration.Components;
 
 namespace Xmg.Commands
 {
-    internal class GenerateCommand : Command<GenerateCommandConfig>
+    internal class GenerateCommand : Command<GenerateCommandConfig>, ILogSubject
     {
+        public override string Id { get; } = "gen";
+        public override string Description { get; } = "generate Migration";
+        public ILogger Logger { get; }
         private readonly Func<Instant> _getInstant;
         private readonly IConfiguratorFactory _configuratorFactory;
         private readonly IMigratorFactory _migratorFactory;
-        private readonly ILogger<GenerateCommand> _logger;
-        public override string Id { get; } = "gen";
-        public override string Description { get; } = "generate Migration";
 
         public GenerateCommand(
             Func<Instant> getInstant,
@@ -30,7 +30,7 @@ namespace Xmg.Commands
             _getInstant = getInstant;
             _configuratorFactory = configuratorFactory;
             _migratorFactory = migratorFactory;
-            _logger = logger;
+            Logger = logger;
         }
 
         public override void Handle(
@@ -38,7 +38,7 @@ namespace Xmg.Commands
             CancellationToken ct
         )
         {
-            _logger.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
+            this.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
 
             var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
             var configurationCfg = new Configuration.Abstractions.Config(cfg.Assembly);
@@ -48,13 +48,13 @@ namespace Xmg.Commands
             var migrationVersion = _getInstant().ToDateTimeOffset().ToString("yyyyMMdd");
 
 
-            _logger.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");
+            this.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");
 
             var migrator = _migratorFactory.GetForProvider(cfg.MigrationProvider);
             var migrationCfg = new Migration.Abstractions.Config(cfg.Namespace, migrationName, migrationVersion);
             var migration = migrator.CreateMigration(database, migrationCfg);
 
-            _logger.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) files");
+            this.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) files");
             if (!Directory.Exists(cfg.Output))
                 Directory.CreateDirectory(cfg.Output);
             foreach (var (file, content) in migration.Files)

@@ -10,13 +10,13 @@ using Xmg.Configuration.Components;
 
 namespace Xmg.Commands
 {
-    internal class ParseCommand : Command<ParseCommandConfig>
+    internal class ParseCommand : Command<ParseCommandConfig>, ILogSubject
     {
-        private readonly IConfiguratorFactory _configuratorFactory;
-        private readonly ILogger<ParseCommand> _logger;
-        private readonly ISerializer<string> _serializer;
         public override string Id { get; } = "parse";
         public override string Description { get; } = "parse database configuration";
+        public ILogger Logger { get; }
+        private readonly IConfiguratorFactory _configuratorFactory;
+        private readonly ISerializer<string> _serializer;
 
         public ParseCommand(
             IConfiguratorFactory configuratorFactory,
@@ -25,7 +25,7 @@ namespace Xmg.Commands
         )
         {
             _configuratorFactory = configuratorFactory;
-            _logger = logger;
+            Logger = logger;
             _serializer = serializers[MediaTypeNames.Application.Json];
         }
 
@@ -34,11 +34,11 @@ namespace Xmg.Commands
             CancellationToken ct
         )
         {
-            _logger.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
+            this.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
             var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
             var database = configurator.LoadConfiguration(new Config(cfg.Assembly));
 
-            _logger.Debug($"Save '{cfg.ProjectName}' configuration to {cfg.Output}");
+            this.Debug($"Save '{cfg.ProjectName}' configuration to {cfg.Output}");
             File.WriteAllText(cfg.Output, _serializer.Serialize(database));
         }
     }

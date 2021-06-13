@@ -6,11 +6,11 @@ using Annium.Logging.Abstractions;
 
 namespace XSass.Internal.Components
 {
-    internal class Crawler
+    internal class Crawler : ILogSubject
     {
+        public ILogger Logger { get; }
         private readonly Configuration _cfg;
         private readonly Compiler _compiler;
-        private readonly ILogger<Crawler> _logger;
 
         public Crawler(
             Configuration cfg,
@@ -20,12 +20,12 @@ namespace XSass.Internal.Components
         {
             _cfg = cfg;
             _compiler = compiler;
-            _logger = logger;
+            Logger = logger;
         }
 
         public async Task Run(string directory)
         {
-            _logger.Debug($"Run in {directory}");
+            this.Debug($"Run in {directory}");
             if (_cfg.Include.Length == 0)
                 await Process(directory);
             else
@@ -34,7 +34,7 @@ namespace XSass.Internal.Components
 
         private async Task Process(string directory)
         {
-            _logger.Debug($"Process {directory}");
+            this.Debug($"Process {directory}");
             var files = Directory.EnumerateFiles(directory)
                 .Where(file => _cfg.Extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)));
 

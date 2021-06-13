@@ -6,10 +6,10 @@ using XRest.Core.Models;
 
 namespace XRest.Sources.Components.Internal
 {
-    internal class Loader : ILoader
+    internal class Loader : ILoader, ILogSubject
     {
+        public ILogger Logger { get; }
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<Loader> _logger;
 
         public Loader(
             IServiceProvider serviceProvider,
@@ -17,7 +17,7 @@ namespace XRest.Sources.Components.Internal
         )
         {
             _serviceProvider = serviceProvider;
-            _logger = logger;
+            Logger = logger;
         }
 
         public async Task<ApiModel> Load(ISourceLoaderConfiguration cfg)
@@ -30,7 +30,7 @@ namespace XRest.Sources.Components.Internal
 
         private async Task<ApiModel> LoadFromApi(ISourceLoaderConfiguration cfg)
         {
-            _logger.Info($"Loading from server '{cfg.Server}'");
+            this.Info($"Loading from server '{cfg.Server}'");
 
             var loader = _serviceProvider.GetRequiredService<Sources.Api.Components.ILoader>();
 
@@ -39,7 +39,7 @@ namespace XRest.Sources.Components.Internal
 
         private ApiModel LoadFromAssembly(ISourceLoaderConfiguration cfg)
         {
-            _logger.Info($"Loading from assembly '{cfg.Assembly}'");
+            this.Info($"Loading from assembly '{cfg.Assembly}'");
 
             var loader = _serviceProvider.GetRequiredService<Sources.Assembly.Components.ILoader>();
 

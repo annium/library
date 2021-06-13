@@ -10,14 +10,14 @@ using XRest.Sources.Components;
 
 namespace XRest.Clients.TypeScript.Commands
 {
-    internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>
+    internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILogSubject
     {
         public override string Id { get; } = "gen";
         public override string Description { get; } = "generate client";
+        public ILogger Logger { get; }
         private readonly ILoader _loader;
         private readonly IProcessor _processor;
         private readonly IWriter _writer;
-        private readonly ILogger<GenerateCommand> _logger;
 
         public GenerateCommand(
             ILoader loader,
@@ -29,22 +29,22 @@ namespace XRest.Clients.TypeScript.Commands
             _loader = loader;
             _processor = processor;
             _writer = writer;
-            _logger = logger;
+            Logger = logger;
         }
 
         public override async Task HandleAsync(GenerateCommandConfiguration cfg, CancellationToken ct)
         {
-            _logger.Info($"Generate '{cfg.ProjectName}' client");
+            this.Info($"Generate '{cfg.ProjectName}' client");
 
-            _logger.Info($"Load '{cfg.ProjectName}' model");
+            this.Info($"Load '{cfg.ProjectName}' model");
             var model = await _loader.Load(cfg);
 
-            _logger.Info("Process api model to api view");
+            this.Info("Process api model to api view");
             var view = _processor.Process(model);
 
-            _logger.Info($"Write api view to {cfg.Output}");
+            this.Info($"Write api view to {cfg.Output}");
             _writer.Write(cfg.Output, view);
-            _logger.Info($"Client written to {cfg.Output}");
+            this.Info($"Client written to {cfg.Output}");
         }
     }
 

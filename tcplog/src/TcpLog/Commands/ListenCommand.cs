@@ -11,17 +11,17 @@ using Annium.Logging.Abstractions;
 
 namespace TcpLog.Commands
 {
-    internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>
+    internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, ILogSubject
     {
-        private readonly ILogger<ListenCommand> _logger;
         public override string Id { get; } = string.Empty;
         public override string Description { get; } = "listen";
+        public ILogger Logger { get; }
 
         public ListenCommand(
             ILogger<ListenCommand> logger
         )
         {
-            _logger = logger;
+            Logger = logger;
         }
 
         public override async Task HandleAsync(
@@ -30,7 +30,7 @@ namespace TcpLog.Commands
         )
         {
             var endpoint = IPEndPointExt.Parse(cfg.Endpoint, 1111);
-            _logger.Info($"Listen at {endpoint} {(cfg.KeepAlive > 0 ? $"with KeepAlive {cfg.KeepAlive}s" : "w/o KeepAlive")}");
+            this.Info($"Listen at {endpoint} {(cfg.KeepAlive > 0 ? $"with KeepAlive {cfg.KeepAlive}s" : "w/o KeepAlive")}");
             Func<byte[], NetworkStream, Task<int>> receive = cfg.KeepAlive > 0 ? ReceiveKeepAlive : Receive;
             var server = new TcpListener(endpoint);
             server.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 2);
@@ -50,7 +50,7 @@ namespace TcpLog.Commands
                 try
                 {
                     client = await server.AcceptTcpClientAsync();
-                    _logger.Debug("Client connected");
+                    this.Debug("Client connected");
                     var ns = client.GetStream();
 
                     while (client.Connected)
@@ -61,19 +61,19 @@ namespace TcpLog.Commands
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.Debug(nameof(OperationCanceledException));
+                    this.Debug(nameof(OperationCanceledException));
                 }
                 catch (ObjectDisposedException e)
                 {
-                    _logger.Debug($"{nameof(ObjectDisposedException)}: {e}");
+                    this.Debug($"{nameof(ObjectDisposedException)}: {e}");
                 }
                 catch (IOException e)
                 {
-                    _logger.Debug($"{nameof(IOException)}: {e}");
+                    this.Debug($"{nameof(IOException)}: {e}");
                 }
                 catch (SocketException e)
                 {
-                    _logger.Debug($"{nameof(SocketException)}: {e}");
+                    this.Debug($"{nameof(SocketException)}: {e}");
                 }
                 finally
                 {
@@ -86,7 +86,7 @@ namespace TcpLog.Commands
                     client.Dispose();
                 }
 
-                _logger.Debug("Client disconnected");
+                this.Debug("Client disconnected");
             }
 
             server.Stop();

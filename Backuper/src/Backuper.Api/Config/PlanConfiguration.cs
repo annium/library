@@ -11,6 +11,6 @@ namespace Backuper.Api.Config
 
         public int Capacity { get; set; }
 
-        public Dictionary<string, Notification.Abstract.ConfigurationBase> Notifications { get; set; } = new Dictionary<string, ConfigurationBase>();
+        public Dictionary<string, ConfigurationBase> Notifications { get; set; } = new Dictionary<string, ConfigurationBase>();
     }
 }

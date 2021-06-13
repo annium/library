@@ -4,37 +4,36 @@ namespace xdomains.Tools
 {
     internal class Cache
     {
-        private const string cacheDir = "cache";
-
-        private readonly Settings settings;
+        private const string CacheDir = "cache";
+        private readonly Settings _settings;
 
         public Cache(
             Settings settings
         )
         {
-            this.settings = settings;
-            Directory.CreateDirectory(settings.RootedPath(cacheDir));
+            _settings = settings;
+            Directory.CreateDirectory(settings.RootedPath(CacheDir));
         }
 
         public string Get(string domain)
         {
-            var path = cache(domain);
+            var path = CachePath(domain);
 
             return File.Exists(path) ? File.ReadAllText(path) : string.Empty;
         }
 
         public void Set(string domain, string resolution)
         {
-            File.WriteAllText(cache(domain), resolution);
+            File.WriteAllText(CachePath(domain), resolution);
         }
 
         public void Cleanup()
         {
-            foreach (var file in Directory.GetFiles(settings.RootedPath(cacheDir)))
+            foreach (var file in Directory.GetFiles(_settings.RootedPath(CacheDir)))
                 if (File.ReadAllText(file).Contains("exceed"))
                     File.Delete(file);
         }
 
-        private string cache(string domain) => settings.RootedPath(cacheDir, domain);
+        private string CachePath(string domain) => _settings.RootedPath(CacheDir, domain);
     }
 }

@@ -14,34 +14,34 @@ using XRest.Sources.Components;
 
 namespace XRest.Commands
 {
-    internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>
+    internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ILogSubject
     {
         public override string Id { get; } = "parse";
         public override string Description { get; } = "parse API";
         private readonly ILoader _loader;
         private readonly ISerializer<string> _serializer;
         private readonly IMapper _mapper;
-        private readonly ILogger<ParseCommand> _logger;
+        public ILogger Logger { get; }
 
         public ParseCommand(
             ILoader loader,
             IMapper mapper,
             ILogger<ParseCommand> logger,
-            IIndex<SerializerKey,ISerializer<string>> serializers
+            IIndex<SerializerKey, ISerializer<string>> serializers
         )
         {
             _loader = loader;
             _mapper = mapper;
-            _logger = logger;
+            Logger = logger;
             _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
         }
 
         public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken ct)
         {
-            _logger.Info($"Load '{cfg.ProjectName}' model");
+            this.Info($"Load '{cfg.ProjectName}' model");
             var model = await _loader.Load(cfg);
 
-            _logger.Debug($"Save '{cfg.ProjectName}' model view to '{cfg.Output}'");
+            this.Debug($"Save '{cfg.ProjectName}' model view to '{cfg.Output}'");
             var view = _mapper.Map<ApiView>(model);
             SaveView(cfg.Output, view);
         }

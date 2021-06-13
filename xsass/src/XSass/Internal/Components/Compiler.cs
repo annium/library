@@ -7,18 +7,18 @@ using LibSassHost;
 
 namespace XSass.Internal.Components
 {
-    internal class Compiler
+    internal class Compiler : ILogSubject
     {
+        public ILogger Logger { get; }
         private const string CSS = ".css";
         private readonly CompilationOptions _opts;
-        private readonly ILogger<Compiler> _logger;
 
         public Compiler(
             Configuration cfg,
             ILogger<Compiler> logger
         )
         {
-            _logger = logger;
+            Logger = logger;
             _opts = new CompilationOptions
             {
                 IncludePaths = new List<string> { cfg.Root }
@@ -38,17 +38,17 @@ namespace XSass.Internal.Components
             var fileInfo = new FileInfo(file);
             if (fileInfo.Name.StartsWith("_"))
             {
-                _logger.Trace($"Compile: skip private {file}");
+                this.Trace($"Compile: skip private {file}");
                 return;
             }
 
-            _logger.Debug($"Compile: process {file}");
+            this.Debug($"Compile: process {file}");
             var result = SassCompiler.CompileFile(file, options: _opts);
             var newFile = fileInfo.FullName.Replace(fileInfo.Extension, CSS);
 
             if (File.Exists(newFile) && result.CompiledContent == await File.ReadAllTextAsync(newFile))
             {
-                _logger.Trace($"Compile: skip unchanged {file}");
+                this.Trace($"Compile: skip unchanged {file}");
                 return;
             }
 

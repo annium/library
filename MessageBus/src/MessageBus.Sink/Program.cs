@@ -16,13 +16,13 @@ namespace MessageBus.Sink
             CancellationToken ct
         )
         {
-            var logger = provider.Resolve<ILogger<Program>>();
+            var logSubject = provider.Resolve<ILogSubject<Program>>();
             var socket = provider.Resolve<IMessageBusSocket>();
 
             var cfg = provider.Resolve<EndpointsConfiguration>();
             Console.WriteLine($"Start sink with PUB {cfg.PubEndpoint} / SUB {cfg.SubEndpoint}");
 
-            socket.Subscribe(x => logger.Info(x));
+            socket.Subscribe(x => logSubject.Info(x));
 
             await ct;
         }

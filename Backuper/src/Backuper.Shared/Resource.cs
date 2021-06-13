@@ -4,12 +4,13 @@ using Annium.Logging.Abstractions;
 
 namespace Backuper.Shared
 {
-    public class Resource<T> where T : class
+    public class Resource<T> : ILogSubject
+        where T : class
     {
+        public ILogger Logger { get; }
         protected T Entity { get; }
-        private readonly string category;
-        private readonly string type;
-        private readonly ILogger logger;
+        private readonly string _category;
+        private readonly string _type;
 
         public Resource(
             T entity,
@@ -19,24 +20,24 @@ namespace Backuper.Shared
         )
         {
             Entity = entity;
-            this.category = category;
-            this.type = type;
-            this.logger = logger;
+            _category = category;
+            _type = type;
+            Logger = logger;
         }
 
         public async Task<TResult> SafeAsync<TResult>(string operation, Func<Task<TResult>> handleAsync)
         {
             try
             {
-                debug($"{operation} start");
+                Debug($"{operation} start");
                 var result = await handleAsync();
-                debug($"{operation} succeed");
+                Debug($"{operation} succeed");
 
                 return result;
             }
             catch
             {
-                debug($"{operation} failed");
+                Debug($"{operation} failed");
                 throw;
             }
         }
@@ -45,19 +46,19 @@ namespace Backuper.Shared
         {
             try
             {
-                debug($"{operation} start");
+                Debug($"{operation} start");
                 await handleAsync();
-                debug($"{operation} succeed");
+                Debug($"{operation} succeed");
             }
             catch
             {
-                debug($"{operation} failed");
+                Debug($"{operation} failed");
                 throw;
             }
         }
 
-        private void debug(string message) => logger.Debug(msg(message));
+        private void Debug(string message) => LogSubjectExtensions.Debug(this, Msg(message));
 
-        private string msg(string message) => $"{category} {type}: {message}";
+        private string Msg(string message) => $"{_category} {_type}: {message}";
     }
 }
