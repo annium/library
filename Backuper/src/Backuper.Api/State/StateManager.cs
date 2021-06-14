@@ -40,17 +40,17 @@ namespace Backuper.Api.State
 
         private async Task StartAsync()
         {
-            this.Debug($"StateManager starting");
+            this.Log().Debug($"StateManager starting");
 
-            this.Debug($"Setup connections");
+            this.Log().Debug($"Setup connections");
             var connections = State!.Servers.Values.Select(s => s.Connection).ToArray();
             await Task.WhenAll(connections.Select(s => s.SetupAsync()));
 
-            this.Debug($"Setup storages");
+            this.Log().Debug($"Setup storages");
             var storages = State.Servers.Values.SelectMany(s => s.Plans.Values).Select(p => p.Storage).ToArray();
             await Task.WhenAll(storages.Select(s => s.SetupAsync()));
 
-            this.Debug($"Schedule operations");
+            this.Log().Debug($"Schedule operations");
             foreach (var server in State.Servers.Values)
             foreach (var plan in server.Plans.Values)
                 _scheduler.Schedule(() => BackupAsync(server, plan), plan.Interval);

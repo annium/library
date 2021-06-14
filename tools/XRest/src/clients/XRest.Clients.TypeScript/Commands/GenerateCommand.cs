@@ -34,17 +34,17 @@ namespace XRest.Clients.TypeScript.Commands
 
         public override async Task HandleAsync(GenerateCommandConfiguration cfg, CancellationToken ct)
         {
-            this.Info($"Generate '{cfg.ProjectName}' client");
+            this.Log().Info($"Generate '{cfg.ProjectName}' client");
 
-            this.Info($"Load '{cfg.ProjectName}' model");
+            this.Log().Info($"Load '{cfg.ProjectName}' model");
             var model = await _loader.Load(cfg);
 
-            this.Info("Process api model to api view");
+            this.Log().Info("Process api model to api view");
             var view = _processor.Process(model);
 
-            this.Info($"Write api view to {cfg.Output}");
+            this.Log().Info($"Write api view to {cfg.Output}");
             _writer.Write(cfg.Output, view);
-            this.Info($"Client written to {cfg.Output}");
+            this.Log().Info($"Client written to {cfg.Output}");
         }
     }
 

@@ -22,7 +22,7 @@ namespace MessageBus.Sink
             var cfg = provider.Resolve<EndpointsConfiguration>();
             Console.WriteLine($"Start sink with PUB {cfg.PubEndpoint} / SUB {cfg.SubEndpoint}");
 
-            socket.Subscribe(x => logSubject.Info(x));
+            socket.Subscribe(x => logSubject.Log().Info(x));
 
             await ct;
         }

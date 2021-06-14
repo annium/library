@@ -38,10 +38,10 @@ namespace XRest.Commands
 
         public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken ct)
         {
-            this.Info($"Load '{cfg.ProjectName}' model");
+            this.Log().Info($"Load '{cfg.ProjectName}' model");
             var model = await _loader.Load(cfg);
 
-            this.Debug($"Save '{cfg.ProjectName}' model view to '{cfg.Output}'");
+            this.Log().Debug($"Save '{cfg.ProjectName}' model view to '{cfg.Output}'");
             var view = _mapper.Map<ApiView>(model);
             SaveView(cfg.Output, view);
         }

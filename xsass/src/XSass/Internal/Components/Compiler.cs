@@ -38,17 +38,17 @@ namespace XSass.Internal.Components
             var fileInfo = new FileInfo(file);
             if (fileInfo.Name.StartsWith("_"))
             {
-                this.Trace($"Compile: skip private {file}");
+                this.Log().Trace($"Compile: skip private {file}");
                 return;
             }
 
-            this.Debug($"Compile: process {file}");
+            this.Log().Debug($"Compile: process {file}");
             var result = SassCompiler.CompileFile(file, options: _opts);
             var newFile = fileInfo.FullName.Replace(fileInfo.Extension, CSS);
 
             if (File.Exists(newFile) && result.CompiledContent == await File.ReadAllTextAsync(newFile))
             {
-                this.Trace($"Compile: skip unchanged {file}");
+                this.Log().Trace($"Compile: skip unchanged {file}");
                 return;
             }
 

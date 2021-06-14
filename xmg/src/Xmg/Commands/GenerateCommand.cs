@@ -38,7 +38,7 @@ namespace Xmg.Commands
             CancellationToken ct
         )
         {
-            this.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
+            this.Log().Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
 
             var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
             var configurationCfg = new Configuration.Abstractions.Config(cfg.Assembly);
@@ -48,13 +48,13 @@ namespace Xmg.Commands
             var migrationVersion = _getInstant().ToDateTimeOffset().ToString("yyyyMMdd");
 
 
-            this.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");
+            this.Log().Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");
 
             var migrator = _migratorFactory.GetForProvider(cfg.MigrationProvider);
             var migrationCfg = new Migration.Abstractions.Config(cfg.Namespace, migrationName, migrationVersion);
             var migration = migrator.CreateMigration(database, migrationCfg);
 
-            this.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) files");
+            this.Log().Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) files");
             if (!Directory.Exists(cfg.Output))
                 Directory.CreateDirectory(cfg.Output);
             foreach (var (file, content) in migration.Files)

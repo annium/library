@@ -30,7 +30,7 @@ namespace XRest.Sources.Components.Internal
 
         private async Task<ApiModel> LoadFromApi(ISourceLoaderConfiguration cfg)
         {
-            this.Info($"Loading from server '{cfg.Server}'");
+            this.Log().Info($"Loading from server '{cfg.Server}'");
 
             var loader = _serviceProvider.GetRequiredService<Sources.Api.Components.ILoader>();
 
@@ -39,7 +39,7 @@ namespace XRest.Sources.Components.Internal
 
         private ApiModel LoadFromAssembly(ISourceLoaderConfiguration cfg)
         {
-            this.Info($"Loading from assembly '{cfg.Assembly}'");
+            this.Log().Info($"Loading from assembly '{cfg.Assembly}'");
 
             var loader = _serviceProvider.GetRequiredService<Sources.Assembly.Components.ILoader>();
 

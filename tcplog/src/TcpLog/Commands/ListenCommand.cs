@@ -30,7 +30,7 @@ namespace TcpLog.Commands
         )
         {
             var endpoint = IPEndPointExt.Parse(cfg.Endpoint, 1111);
-            this.Info($"Listen at {endpoint} {(cfg.KeepAlive > 0 ? $"with KeepAlive {cfg.KeepAlive}s" : "w/o KeepAlive")}");
+            this.Log().Info($"Listen at {endpoint} {(cfg.KeepAlive > 0 ? $"with KeepAlive {cfg.KeepAlive}s" : "w/o KeepAlive")}");
             Func<byte[], NetworkStream, Task<int>> receive = cfg.KeepAlive > 0 ? ReceiveKeepAlive : Receive;
             var server = new TcpListener(endpoint);
             server.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 2);
@@ -50,7 +50,7 @@ namespace TcpLog.Commands
                 try
                 {
                     client = await server.AcceptTcpClientAsync();
-                    this.Debug("Client connected");
+                    this.Log().Debug("Client connected");
                     var ns = client.GetStream();
 
                     while (client.Connected)
@@ -61,19 +61,19 @@ namespace TcpLog.Commands
                 }
                 catch (OperationCanceledException)
                 {
-                    this.Debug(nameof(OperationCanceledException));
+                    this.Log().Debug(nameof(OperationCanceledException));
                 }
                 catch (ObjectDisposedException e)
                 {
-                    this.Debug($"{nameof(ObjectDisposedException)}: {e}");
+                    this.Log().Debug($"{nameof(ObjectDisposedException)}: {e}");
                 }
                 catch (IOException e)
                 {
-                    this.Debug($"{nameof(IOException)}: {e}");
+                    this.Log().Debug($"{nameof(IOException)}: {e}");
                 }
                 catch (SocketException e)
                 {
-                    this.Debug($"{nameof(SocketException)}: {e}");
+                    this.Log().Debug($"{nameof(SocketException)}: {e}");
                 }
                 finally
                 {
@@ -86,7 +86,7 @@ namespace TcpLog.Commands
                     client.Dispose();
                 }
 
-                this.Debug("Client disconnected");
+                this.Log().Debug("Client disconnected");
             }
 
             server.Stop();

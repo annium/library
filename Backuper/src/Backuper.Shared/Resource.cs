@@ -57,7 +57,7 @@ namespace Backuper.Shared
             }
         }
 
-        private void Debug(string message) => LogSubjectExtensions.Debug(this, Msg(message));
+        private void Debug(string message) => this.Log().Debug(Msg(message));
 
         private string Msg(string message) => $"{_category} {_type}: {message}";
     }

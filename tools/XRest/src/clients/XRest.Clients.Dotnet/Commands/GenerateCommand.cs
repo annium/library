@@ -35,18 +35,18 @@ namespace XRest.Clients.Dotnet.Commands
 
         public override async Task HandleAsync(GenerateCommandConfiguration cfg, CancellationToken ct)
         {
-            this.Info($"Generate '{cfg.ProjectName}' client");
+            this.Log().Info($"Generate '{cfg.ProjectName}' client");
 
-            this.Info($"Load '{cfg.ProjectName}' model");
+            this.Log().Info($"Load '{cfg.ProjectName}' model");
             var model = await _loader.Load(cfg);
 
-            this.Info("Process api model to api view");
+            this.Log().Info("Process api model to api view");
             var ns = Namespace.New(string.IsNullOrWhiteSpace(cfg.Namespace) ? Path.GetFileName(cfg.Output) : cfg.Namespace);
             var view = _processor.Process(ns, model);
 
-            this.Info($"Write api view to {cfg.Output}");
+            this.Log().Info($"Write api view to {cfg.Output}");
             _writer.Write(cfg.Output, view, cfg.TestClient);
-            this.Info($"Client written to {cfg.Output}");
+            this.Log().Info($"Client written to {cfg.Output}");
         }
     }
 

@@ -18,9 +18,9 @@ namespace XSass
         {
             var configuration = provider.Resolve<Configuration>();
             var logSubject = provider.Resolve<ILogSubject<Program>>();
-            logSubject.Info($"Sass compilation at: {configuration.Root}");
+            logSubject.Log().Info($"Sass compilation at: {configuration.Root}");
             await provider.Resolve<Crawler>().Run(configuration.Root);
-            logSubject.Info("Sass compilation succeed");
+            logSubject.Log().Info("Sass compilation succeed");
         }
 
         internal static Task<int> Main() => new Entrypoint()

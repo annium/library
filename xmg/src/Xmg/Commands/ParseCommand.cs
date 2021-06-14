@@ -34,11 +34,11 @@ namespace Xmg.Commands
             CancellationToken ct
         )
         {
-            this.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
+            this.Log().Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
             var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
             var database = configurator.LoadConfiguration(new Config(cfg.Assembly));
 
-            this.Debug($"Save '{cfg.ProjectName}' configuration to {cfg.Output}");
+            this.Log().Debug($"Save '{cfg.ProjectName}' configuration to {cfg.Output}");
             File.WriteAllText(cfg.Output, _serializer.Serialize(database));
         }
     }

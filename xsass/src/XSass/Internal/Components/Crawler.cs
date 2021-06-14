@@ -25,7 +25,7 @@ namespace XSass.Internal.Components
 
         public async Task Run(string directory)
         {
-            this.Debug($"Run in {directory}");
+            this.Log().Debug($"Run in {directory}");
             if (_cfg.Include.Length == 0)
                 await Process(directory);
             else
@@ -34,7 +34,7 @@ namespace XSass.Internal.Components
 
         private async Task Process(string directory)
         {
-            this.Debug($"Process {directory}");
+            this.Log().Debug($"Process {directory}");
             var files = Directory.EnumerateFiles(directory)
                 .Where(file => _cfg.Extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)));
 
