@@ -1,4 +1,4 @@
-namespace TcpLog.Commands
+namespace XLog.Commands
 {
     public class Group : Annium.Extensions.Arguments.Group
     {

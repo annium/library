@@ -3,7 +3,7 @@ using System.Threading;
 using Annium.Core.Entrypoint;
 using Annium.Extensions.Arguments;
 
-namespace TcpLog
+namespace XLog
 {
     internal static class Program
     {

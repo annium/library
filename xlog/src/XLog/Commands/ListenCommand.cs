@@ -9,7 +9,7 @@ using Annium.Core.Primitives;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 
-namespace TcpLog.Commands
+namespace XLog.Commands
 {
     internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, ILogSubject
     {

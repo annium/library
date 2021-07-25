@@ -1,7 +1,7 @@
 using System;
 using Annium.Core.DependencyInjection;
 
-namespace TcpLog
+namespace XLog
 {
     internal class ServicePack : ServicePackBase
     {
