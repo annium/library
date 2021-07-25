@@ -1,13 +1,15 @@
 REGISTRY := registry.annium.com
 
-install:
-	./tcplog/scripts/nix_install.sh
-	./xc/scripts/nix_install.sh
-	./xdomains/scripts/nix_install.sh
-	./xlink/scripts/nix_install.sh
-	./xmg/scripts/nix_install.sh
-	./xrest/scripts/nix_install.sh
-	./xws/scripts/nix_install.sh
+install: install-xc install-xdomains install-xlink install-xlog install-xmg install-xrest install-xws
+
+uninstall: uninstall-xc uninstall-xdomains uninstall-xlink uninstall-xlog uninstall-xmg uninstall-xrest uninstall-xws
+
+install-xc install-xdomains install-xlink install-xlog install-xmg install-xrest install-xws:
+	./$(subst install-,,$@)/scripts/nix_install.sh
+
+uninstall-xc uninstall-xdomains uninstall-xlink uninstall-xlog uninstall-xmg uninstall-xrest uninstall-xws:
+	./$(subst uninstall-,,$@)/scripts/nix_uninstall.sh
+
 
 publish:
 	$(call publish,MessageBus/src/MessageBus.Proxy,mbus.proxy)
