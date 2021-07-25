@@ -13,7 +13,7 @@ namespace xdomains
             CancellationToken ct
         )
         {
-            new Commander(provider).Run<Commands.Group>(args, ct);
+            Commander.Run<Commands.Group>(provider, args, ct);
         }
 
         public static int Main(string[] args) => new Entrypoint()

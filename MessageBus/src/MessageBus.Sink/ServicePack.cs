@@ -18,7 +18,7 @@ namespace MessageBus.Sink
                 .AddYamlFile("configuration.yml")
                 .AddCommandLineArgs()
             );
-            container.AddMessageBus((sp, opts) => opts
+            container.AddNetMQMessageBus((sp, opts) => opts
                 .WithSerializer(sp.Resolve<ISerializer<string>>())
                 .WithEndpoints(sp.Resolve<EndpointsConfiguration>())
             );

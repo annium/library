@@ -13,7 +13,7 @@ namespace TcpLog
             CancellationToken ct
         )
         {
-            new Commander(provider).Run<Commands.Group>(args, ct);
+            Commander.Run<Commands.Group>(provider, args, ct);
         }
 
         internal static int Main(string[] args) => new Entrypoint()
