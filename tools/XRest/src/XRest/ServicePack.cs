@@ -16,17 +16,9 @@ namespace XRest
 
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            RegisterCommands(container);
-
             container.AddArguments();
             container.AddLogging(route => route.UseConsole());
             container.AddMapper();
-        }
-
-        private void RegisterCommands(IServiceContainer container)
-        {
-            container.Add<Group>().AsSelf().Singleton();
-            container.Add<ParseCommand>().AsSelf().Singleton();
         }
     }
 }

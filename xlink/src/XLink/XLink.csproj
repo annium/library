@@ -8,8 +8,10 @@
         <DebugType>portable</DebugType>
         <LangVersion>9.0</LangVersion>
         <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>false</IsPackable>
+        <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>xlink</ToolCommandName>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />

@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.DependencyInjection;
-using xdomains.Commands;
 using xdomains.Tools;
 
 namespace xdomains
@@ -9,26 +8,19 @@ namespace xdomains
     {
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
+            container.AddRuntimeTools(GetType().Assembly, false);
             container.AddTimeProvider();
+            container.AddMapper();
 
-            RegisterCommands(container);
+            container.Add<Cache>().AsSelf().Singleton();
+            container.Add<Parser>().AsSelf().Singleton();
+            container.Add<Resolver>().AsSelf().Singleton();
+            container.Add<Worker>().AsSelf().Singleton();
 
-            container.Add<Cache>().Singleton();
-            container.Add<Parser>().Singleton();
-            container.Add<Resolver>().Singleton();
-            container.Add<Worker>().Singleton();
-
-            container.Add<Settings>().Singleton();
+            container.Add<Settings>().AsSelf().Singleton();
 
             container.AddArguments();
             container.AddLogging(route => route.UseConsole());
-        }
-
-        private void RegisterCommands(IServiceContainer container)
-        {
-            container.Add<Group>().Singleton();
-            container.Add<CleanupCommand>().Singleton();
-            container.Add<QueryCommand>().Singleton();
         }
     }
 }

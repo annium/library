@@ -12,9 +12,6 @@ namespace TcpLog
             container.AddMapper();
             container.AddLogging(route => route.UseConsole(color: true));
             container.AddArguments();
-
-            container.Add<Commands.Group>().AsSelf().Singleton();
-            container.Add<Commands.ListenCommand>().AsSelf().Singleton();
         }
     }
 }

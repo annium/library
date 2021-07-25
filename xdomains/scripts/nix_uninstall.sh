@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 echo "Uninstall."
-dotnet tool uninstall -g xlink
+dotnet tool uninstall -g xdomains

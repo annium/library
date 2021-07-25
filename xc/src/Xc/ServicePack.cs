@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Annium.Extensions.Arguments;
 using Xc.Tasks;
 
 namespace Xc
@@ -14,25 +13,13 @@ namespace Xc
 
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            RegisterCommands(container);
-
             container.AddArguments();
             container.AddLogging(route => route.UseConsole());
             container.AddMapper();
-        }
 
-        private void RegisterCommands(IServiceContainer container)
-        {
-            container.AddAll(GetType().Assembly)
-                .AssignableTo<Group>()
-                .AsSelf()
-                .Singleton();
-            container.AddAll(GetType().Assembly)
-                .AssignableTo<CommandBase>()
-                .AsSelf()
-                .Singleton();
             container.AddAll(GetType().Assembly)
                 .AssignableTo<ITask>()
+                .Where(x => x.IsClass)
                 .AsSelf()
                 .AsSelfFactory()
                 .Transient();
