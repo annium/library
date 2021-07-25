@@ -1,13 +1,13 @@
 REGISTRY := registry.annium.com
 
-install: install-xc install-xdomains install-xlink install-xlog install-xmg install-xrest install-xws
+install: install-xc install-xdomains install-xlink install-xmg install-xrest install-xws
 
-uninstall: uninstall-xc uninstall-xdomains uninstall-xlink uninstall-xlog uninstall-xmg uninstall-xrest uninstall-xws
+uninstall: uninstall-xc uninstall-xdomains uninstall-xlink uninstall-xmg uninstall-xrest uninstall-xws
 
-install-xc install-xdomains install-xlink install-xlog install-xmg install-xrest install-xws:
+install-xc install-xdomains install-xlink install-xmg install-xrest install-xws:
 	./$(subst install-,,$@)/scripts/nix_install.sh
 
-uninstall-xc uninstall-xdomains uninstall-xlink uninstall-xlog uninstall-xmg uninstall-xrest uninstall-xws:
+uninstall-xc uninstall-xdomains uninstall-xlink uninstall-xmg uninstall-xrest uninstall-xws:
 	./$(subst uninstall-,,$@)/scripts/nix_uninstall.sh
 
 

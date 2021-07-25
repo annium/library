@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.DependencyInjection;
-using XRest.Commands;
 
 namespace XRest
 {
@@ -12,6 +11,11 @@ namespace XRest
             Add<Clients.Dotnet.ServicePack>();
             Add<Clients.TypeScript.ServicePack>();
             Add<Sources.ServicePack>();
+        }
+
+        public override void Configure(IServiceContainer container)
+        {
+            container.AddRuntimeTools(GetType().Assembly, true);
         }
 
         public override void Register(IServiceContainer container, IServiceProvider provider)

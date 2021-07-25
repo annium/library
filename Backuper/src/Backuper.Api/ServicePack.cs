@@ -22,6 +22,7 @@ namespace Backuper.Api
 
         public override void Configure(IServiceContainer container)
         {
+            container.AddRuntimeTools(GetType().Assembly, false);
             container
                 .AddStorage()
                 .AddFileSystemStorage()

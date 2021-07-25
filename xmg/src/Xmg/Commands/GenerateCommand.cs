@@ -1,13 +1,13 @@
-using System;
 using System.IO;
 using System.Threading;
+using Annium.Core.Runtime.Time;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
-using NodaTime;
 using Xmg.Configuration.Abstractions;
 using Xmg.Configuration.Components;
 using Xmg.Migration.Abstractions;
 using Xmg.Migration.Components;
+using Config = Xmg.Configuration.Abstractions.Config;
 
 namespace Xmg.Commands
 {
@@ -16,18 +16,18 @@ namespace Xmg.Commands
         public override string Id { get; } = "gen";
         public override string Description { get; } = "generate Migration";
         public ILogger Logger { get; }
-        private readonly Func<Instant> _getInstant;
+        private readonly ITimeProvider _timeProvider;
         private readonly IConfiguratorFactory _configuratorFactory;
         private readonly IMigratorFactory _migratorFactory;
 
         public GenerateCommand(
-            Func<Instant> getInstant,
+            ITimeProvider timeProvider,
             IConfiguratorFactory configuratorFactory,
             IMigratorFactory migratorFactory,
             ILogger<GenerateCommand> logger
         )
         {
-            _getInstant = getInstant;
+            _timeProvider = timeProvider;
             _configuratorFactory = configuratorFactory;
             _migratorFactory = migratorFactory;
             Logger = logger;
@@ -41,11 +41,11 @@ namespace Xmg.Commands
             this.Log().Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
 
             var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
-            var configurationCfg = new Configuration.Abstractions.Config(cfg.Assembly);
+            var configurationCfg = new Config(cfg.Assembly);
             var database = configurator.LoadConfiguration(configurationCfg);
 
             var migrationName = cfg.Name;
-            var migrationVersion = _getInstant().ToDateTimeOffset().ToString("yyyyMMdd");
+            var migrationVersion = _timeProvider.Now.ToDateTimeOffset().ToString("yyyyMMdd");
 
 
             this.Log().Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");

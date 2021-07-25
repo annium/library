@@ -11,12 +11,17 @@ namespace Xmg
             Add<Migration.ServicePack>();
         }
 
+        public override void Configure(IServiceContainer container)
+        {
+            container.AddRuntimeTools(GetType().Assembly, true);
+        }
+
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
             container.AddTimeProvider();
-
+            container.AddMapper();
             container.AddArguments();
-            container.AddJsonSerializers();
+            container.AddJsonSerializers().SetDefault();
             container.AddLogging(route => route.UseConsole());
         }
     }

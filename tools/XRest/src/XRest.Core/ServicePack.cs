@@ -9,9 +9,8 @@ namespace XRest.Core
     {
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            container.AddRuntimeTools(GetType().Assembly, true);
             container.AddTimeProvider();
-            container.AddJsonSerializers();
+            container.AddJsonSerializers().SetDefault();
 
             container.Add<ITemplateWriter, TemplateWriter>().Singleton();
 
