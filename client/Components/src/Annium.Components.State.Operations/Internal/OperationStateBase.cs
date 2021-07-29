@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Annium.Components.State.Core;
+using Annium.Core.Primitives;
 using Annium.Data.Operations;
 
 namespace Annium.Components.State.Operations.Internal
 {
     internal abstract class OperationStateBase : ObservableState, IOperationStateBase
     {
+        public string PlainError => PlainErrors.Join("; ");
         public IReadOnlyCollection<string> PlainErrors { get; private set; } = Array.Empty<string>();
         public IReadOnlyDictionary<string, IReadOnlyCollection<string>> LabeledErrors { get; private set; } = new Dictionary<string, IReadOnlyCollection<string>>();
         public bool IsOk => PlainErrors.Count == 0 && LabeledErrors.Count == 0;
