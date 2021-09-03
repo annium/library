@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Annium.Components.State.Core;
-using Annium.Core.Primitives;
+using Annium.Core.Primitives.Collections.Generic;
 using Annium.Data.Operations;
 
 namespace Annium.Components.State.Operations.Internal
