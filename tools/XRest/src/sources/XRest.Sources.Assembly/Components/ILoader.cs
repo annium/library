@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using XRest.Core.Models;
 
 namespace XRest.Sources.Assembly.Components

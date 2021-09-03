@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace XLink
 {

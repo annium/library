@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Entrypoint;
-using Annium.Core.Primitives;
+using Annium.Core.Primitives.Threading;
 using Annium.Logging.Abstractions;
 using Annium.Infrastructure.MessageBus.Node;
 
