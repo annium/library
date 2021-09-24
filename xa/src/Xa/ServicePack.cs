@@ -5,19 +5,13 @@ namespace Xa
 {
     internal class ServicePack : ServicePackBase
     {
-        public override void Configure(IServiceContainer container)
-        {
-            // register configurations
-        }
-
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            // register and setup services
-        }
-
-        public override void Setup(IServiceProvider provider)
-        {
-            // setup post-configured services
+            container.AddRuntimeTools(GetType().Assembly, true);
+            container.AddTimeProvider();
+            container.AddArguments();
+            container.AddLogging(route => route.UseConsole());
+            container.AddMapper();
         }
     }
 }

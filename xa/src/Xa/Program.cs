@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Annium.Core.Entrypoint;
+using Annium.Extensions.Arguments;
 
 namespace Xa
 {
@@ -12,7 +13,7 @@ namespace Xa
             CancellationToken ct
         )
         {
-            Console.WriteLine("Hello from Xa");
+            Commander.Run<Commands.Group>(provider, args, ct);
         }
 
         internal static int Main(string[] args) => new Entrypoint()
