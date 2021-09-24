@@ -19,7 +19,7 @@ namespace XSass
 
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            Action<LogRoute> logRoute = provider.Resolve<Configuration>().Debug ? route => route.UseConsole() : _ => { };
+            Action<LogRoute<DefaultLogContext>> logRoute = provider.Resolve<Configuration>().Debug ? route => route.UseConsole() : _ => { };
             container.AddLogging(logRoute);
             container.Add<Compiler>().AsSelf().Singleton();
             container.Add<Crawler>().AsSelf().Singleton();
