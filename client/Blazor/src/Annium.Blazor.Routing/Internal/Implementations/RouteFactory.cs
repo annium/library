@@ -21,7 +21,7 @@ namespace Annium.Blazor.Routing.Internal.Implementations
             _mapper = mapper;
         }
 
-        public IRoute<TData> Create<TPage, TData>(string template, TData data = default)
+        public IRoute<TData> Create<TPage, TData>(string template)
             where TPage : notnull
             where TData : notnull, new()
         {
