@@ -1,11 +1,10 @@
 using Xmg.Core.Models;
 using Xmg.Core.Views;
 
-namespace Xmg.Migration.Abstractions.Components
+namespace Xmg.Migration.Abstractions.Components;
+
+public interface IMigrator
 {
-    public interface IMigrator
-    {
-        MigrationProvider Provider { get; }
-        IMigration CreateMigration(Database database, Config cfg);
-    }
+    MigrationProvider Provider { get; }
+    IMigration CreateMigration(Database database, Config cfg);
 }

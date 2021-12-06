@@ -1,7 +1,6 @@
-namespace XRest.Core
+namespace XRest.Core;
+
+public static class Constants
 {
-    public static class Constants
-    {
-        public const string ApiSourceEndpoint = ".xrest";
-    }
+    public const string ApiSourceEndpoint = ".xrest";
 }

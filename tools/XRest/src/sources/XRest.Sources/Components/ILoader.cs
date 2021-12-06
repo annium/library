@@ -1,10 +1,9 @@
 using System.Threading.Tasks;
 using XRest.Core.Models;
 
-namespace XRest.Sources.Components
+namespace XRest.Sources.Components;
+
+public interface ILoader
 {
-    public interface ILoader
-    {
-        Task<ApiModel> Load(ISourceLoaderConfiguration cfg);
-    }
+    Task<ApiModel> Load(ISourceLoaderConfiguration cfg);
 }

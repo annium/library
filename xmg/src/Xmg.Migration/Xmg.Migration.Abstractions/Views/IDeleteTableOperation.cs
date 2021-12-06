@@ -1,7 +1,6 @@
-namespace Xmg.Migration.Abstractions.Views
-{
-    public class IDeleteTableOperation : IOperation
-    {
+namespace Xmg.Migration.Abstractions.Views;
 
-    }
+public class IDeleteTableOperation : IOperation
+{
+
 }

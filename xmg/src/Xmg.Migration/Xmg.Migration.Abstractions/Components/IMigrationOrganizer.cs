@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using Xmg.Migration.Abstractions.Views;
 
-namespace Xmg.Migration.Abstractions.Components
+namespace Xmg.Migration.Abstractions.Components;
+
+public interface IMigrationOrganizer
 {
-    public interface IMigrationOrganizer
-    {
-        IReadOnlyCollection<IOperation> Organize(IReadOnlyCollection<IOperation> operations);
-    }
+    IReadOnlyCollection<IOperation> Organize(IReadOnlyCollection<IOperation> operations);
 }

@@ -1,7 +1,6 @@
-namespace Xmg.Migration.Abstractions.Views
-{
-    public interface IRenameTableColumnOperation : IOperation
-    {
+namespace Xmg.Migration.Abstractions.Views;
 
-    }
+public interface IRenameTableColumnOperation : IOperation
+{
+
 }

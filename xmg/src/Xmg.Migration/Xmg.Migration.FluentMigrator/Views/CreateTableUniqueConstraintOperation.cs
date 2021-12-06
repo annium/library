@@ -1,9 +1,8 @@
 using Xmg.Migration.Abstractions.Views;
 
-namespace Xmg.Migration.FluentMigrator.Views
+namespace Xmg.Migration.FluentMigrator.Views;
+
+internal class CreateTableUniqueConstraintOperation : ICreateTableUniqueConstraintOperation
 {
-    internal class CreateTableUniqueConstraintOperation : ICreateTableUniqueConstraintOperation
-    {
-        // TODO: implement
-    }
+    // TODO: implement
 }

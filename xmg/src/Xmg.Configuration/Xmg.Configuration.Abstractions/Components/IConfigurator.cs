@@ -1,10 +1,9 @@
 using Xmg.Core.Models;
 
-namespace Xmg.Configuration.Abstractions.Components
+namespace Xmg.Configuration.Abstractions.Components;
+
+public interface IConfigurator
 {
-    public interface IConfigurator
-    {
-        ConfigurationProvider Provider { get; }
-        Database LoadConfiguration(Config cfg);
-    }
+    ConfigurationProvider Provider { get; }
+    Database LoadConfiguration(Config cfg);
 }

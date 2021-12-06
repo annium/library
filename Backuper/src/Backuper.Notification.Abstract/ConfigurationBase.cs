@@ -1,10 +1,9 @@
 using Annium.Core.Runtime.Types;
 
-namespace Backuper.Notification.Abstract
+namespace Backuper.Notification.Abstract;
+
+public abstract class ConfigurationBase
 {
-    public abstract class ConfigurationBase
-    {
-        [ResolutionKey]
-        public string Type { get; set; } = string.Empty;
-    }
+    [ResolutionKey]
+    public string Type { get; set; } = string.Empty;
 }

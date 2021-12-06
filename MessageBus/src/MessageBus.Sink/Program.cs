@@ -7,28 +7,27 @@ using Annium.Core.Primitives.Threading;
 using Annium.Logging.Abstractions;
 using Annium.Infrastructure.MessageBus.Node;
 
-namespace MessageBus.Sink
+namespace MessageBus.Sink;
+
+public class Program
 {
-    public class Program
+    private static async Task Run(
+        IServiceProvider provider,
+        CancellationToken ct
+    )
     {
-        private static async Task Run(
-            IServiceProvider provider,
-            CancellationToken ct
-        )
-        {
-            var logSubject = provider.Resolve<ILogSubject<Program>>();
-            var socket = provider.Resolve<IMessageBusSocket>();
+        var logSubject = provider.Resolve<ILogSubject<Program>>();
+        var socket = provider.Resolve<IMessageBusSocket>();
 
-            var cfg = provider.Resolve<EndpointsConfiguration>();
-            Console.WriteLine($"Start sink with PUB {cfg.PubEndpoint} / SUB {cfg.SubEndpoint}");
+        var cfg = provider.Resolve<EndpointsConfiguration>();
+        Console.WriteLine($"Start sink with PUB {cfg.PubEndpoint} / SUB {cfg.SubEndpoint}");
 
-            socket.Subscribe(x => logSubject.Log().Info(x));
+        socket.Subscribe(x => logSubject.Log().Info(x));
 
-            await ct;
-        }
-
-        public static Task<int> Main() => new Entrypoint()
-            .UseServicePack<ServicePack>()
-            .Run(Run);
+        await ct;
     }
+
+    public static Task<int> Main() => new Entrypoint()
+        .UseServicePack<ServicePack>()
+        .Run(Run);
 }

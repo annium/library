@@ -1,9 +1,8 @@
-namespace XRest.Clients.TypeScript.Views.Types
+namespace XRest.Clients.TypeScript.Views.Types;
+
+public enum TypeViewEnum
 {
-    public enum TypeViewEnum
-    {
-        Class,
-        Enum,
-        GenericParameter,
-    }
+    Class,
+    Enum,
+    GenericParameter,
 }

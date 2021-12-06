@@ -1,25 +1,24 @@
 using XRest.Clients.TypeScript.Views.Types;
 using XRest.Core.Models;
 
-namespace XRest.Clients.TypeScript.Views
+namespace XRest.Clients.TypeScript.Views;
+
+internal class ParameterView
 {
-    internal class ParameterView
+    public string Name { get; }
+    public ParameterLocationEnum Location { get; }
+    public DefinedTypeView Type { get; }
+
+    public ParameterView(
+        string name,
+        ParameterLocationEnum location,
+        DefinedTypeView type
+    )
     {
-        public string Name { get; }
-        public ParameterLocationEnum Location { get; }
-        public DefinedTypeView Type { get; }
-
-        public ParameterView(
-            string name,
-            ParameterLocationEnum location,
-            DefinedTypeView type
-        )
-        {
-            Name = name;
-            Location = location;
-            Type = type;
-        }
-
-        public override string ToString() => $"[{Location}] {Type} {Name}";
+        Name = name;
+        Location = location;
+        Type = type;
     }
+
+    public override string ToString() => $"[{Location}] {Type} {Name}";
 }

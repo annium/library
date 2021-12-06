@@ -1,9 +1,8 @@
 using XRest.Core.Models;
 
-namespace XRest.Sources.Assembly.Components
+namespace XRest.Sources.Assembly.Components;
+
+public interface ILoader
 {
-    public interface ILoader
-    {
-        ApiModel Load(string assemblyPath);
-    }
+    ApiModel Load(string assemblyPath);
 }

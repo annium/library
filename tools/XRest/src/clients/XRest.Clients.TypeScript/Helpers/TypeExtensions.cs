@@ -5,45 +5,44 @@ using System.Linq;
 using System.Reflection;
 using XRest.Clients.TypeScript.Views.Types;
 
-namespace XRest.Clients.TypeScript.Helpers
+namespace XRest.Clients.TypeScript.Helpers;
+
+internal static class ProcessorTypeExtensions
 {
-    internal static class ProcessorTypeExtensions
+    public static IReadOnlyCollection<PropertyInfo> GetAllPublicProperties(this Type type) => type
+        .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
+        .Where(x => x.CanRead)
+        .ToArray();
+
+    public static bool IsSkipped(this Type type) =>
+        KnownTypes.Skipped.Contains(type) || type.IsDictionary() || type.IsArray();
+
+    public static bool IsDictionary(this Type type) =>
+        type.IsDictionaryType() ||
+        type.GetInterfaces().Any(IsDictionaryType);
+
+    public static bool IsArray(this Type type)
     {
-        public static IReadOnlyCollection<PropertyInfo> GetAllPublicProperties(this Type type) => type
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
-            .Where(x => x.CanRead)
-            .ToArray();
+        if (type == typeof(string))
+            return false;
 
-        public static bool IsSkipped(this Type type) =>
-            KnownTypes.Skipped.Contains(type) || type.IsDictionary() || type.IsArray();
+        if (type.IsArray)
+            return true;
 
-        public static bool IsDictionary(this Type type) =>
-            type.IsDictionaryType() ||
-            type.GetInterfaces().Any(IsDictionaryType);
+        return type.GetInterfaces()
+            .Any(x => x.IsGenericType
+                ? x.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                : x == typeof(IEnumerable));
+    }
 
-        public static bool IsArray(this Type type)
-        {
-            if (type == typeof(string))
-                return false;
+    private static bool IsDictionaryType(this Type type)
+    {
+        if (!type.IsGenericType)
+            return type == typeof(IDictionary);
 
-            if (type.IsArray)
-                return true;
+        var definition = type.GetGenericTypeDefinition();
 
-            return type.GetInterfaces()
-                .Any(x => x.IsGenericType
-                    ? x.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-                    : x == typeof(IEnumerable));
-        }
-
-        private static bool IsDictionaryType(this Type type)
-        {
-            if (!type.IsGenericType)
-                return type == typeof(IDictionary);
-
-            var definition = type.GetGenericTypeDefinition();
-
-            return definition == typeof(IDictionary<,>) ||
-                   definition == typeof(IReadOnlyDictionary<,>);
-        }
+        return definition == typeof(IDictionary<,>) ||
+               definition == typeof(IReadOnlyDictionary<,>);
     }
 }

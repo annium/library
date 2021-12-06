@@ -1,13 +1,12 @@
 using System.Threading.Tasks;
 
-namespace Backuper.Notification.Abstract
+namespace Backuper.Notification.Abstract;
+
+public interface IChannel
 {
-    public interface IChannel
-    {
-        Task InfoAsync(string message);
+    Task InfoAsync(string message);
 
-        Task WarnAsync(string message);
+    Task WarnAsync(string message);
 
-        Task ErrorAsync(string message);
-    }
+    Task ErrorAsync(string message);
 }

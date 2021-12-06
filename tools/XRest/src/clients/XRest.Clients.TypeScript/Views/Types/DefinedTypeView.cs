@@ -1,9 +1,8 @@
-namespace XRest.Clients.TypeScript.Views.Types
+namespace XRest.Clients.TypeScript.Views.Types;
+
+internal abstract class DefinedTypeView : TypeView
 {
-    internal abstract class DefinedTypeView : TypeView
+    protected DefinedTypeView(string name) : base(name)
     {
-        protected DefinedTypeView(string name) : base(name)
-        {
-        }
     }
 }

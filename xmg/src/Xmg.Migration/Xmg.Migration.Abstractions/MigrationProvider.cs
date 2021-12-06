@@ -1,7 +1,6 @@
-namespace Xmg.Migration.Abstractions
+namespace Xmg.Migration.Abstractions;
+
+public enum MigrationProvider
 {
-    public enum MigrationProvider
-    {
-        FluentMigrator,
-    }
+    FluentMigrator,
 }

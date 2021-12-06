@@ -1,25 +1,24 @@
 using System;
 using System.Collections.Generic;
 
-namespace XRest.Clients.TypeScript.Views.Types
+namespace XRest.Clients.TypeScript.Views.Types;
+
+internal class EnumView : DefinedTypeView
 {
-    internal class EnumView : DefinedTypeView
+    public override TypeViewEnum Type { get; } = TypeViewEnum.Enum;
+
+    public IReadOnlyDictionary<string, object> Values { get; }
+
+    public EnumView(
+        string name,
+        IReadOnlyDictionary<string, object> values
+    ) : base(name)
     {
-        public override TypeViewEnum Type { get; } = TypeViewEnum.Enum;
+        if (values.Count == 0)
+            throw new ArgumentException($"Enum '{this}' values count must be greater than 0");
 
-        public IReadOnlyDictionary<string, object> Values { get; }
-
-        public EnumView(
-            string name,
-            IReadOnlyDictionary<string, object> values
-        ) : base(name)
-        {
-            if (values.Count == 0)
-                throw new ArgumentException($"Enum '{this}' values count must be greater than 0");
-
-            Values = values;
-        }
-
-        public override string ToString() => Name;
+        Values = values;
     }
+
+    public override string ToString() => Name;
 }

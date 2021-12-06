@@ -1,7 +1,6 @@
-namespace Xmg.Configuration.Abstractions
+namespace Xmg.Configuration.Abstractions;
+
+public enum ConfigurationProvider
 {
-    public enum ConfigurationProvider
-    {
-        linq2db,
-    }
+    linq2db,
 }

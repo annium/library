@@ -3,19 +3,18 @@ using Annium.Core.DependencyInjection;
 using XRest.Core.Components;
 using XRest.Core.Components.Implementations;
 
-namespace XRest.Core
+namespace XRest.Core;
+
+public class ServicePack : ServicePackBase
 {
-    public class ServicePack : ServicePackBase
+    public override void Register(IServiceContainer container, IServiceProvider provider)
     {
-        public override void Register(IServiceContainer container, IServiceProvider provider)
-        {
-            container.AddTime().WithRealTime().SetDefault();
-            container.AddJsonSerializers().SetDefault();
+        container.AddTime().WithRealTime().SetDefault();
+        container.AddJsonSerializers().SetDefault();
 
-            container.Add<ITemplateWriter, TemplateWriter>().Singleton();
+        container.Add<ITemplateWriter, TemplateWriter>().Singleton();
 
-            container.AddAssemblyLoader();
-            container.AddResourceLoader();
-        }
+        container.AddAssemblyLoader();
+        container.AddResourceLoader();
     }
 }

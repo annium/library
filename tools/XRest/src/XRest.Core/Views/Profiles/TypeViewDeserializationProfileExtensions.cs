@@ -5,39 +5,38 @@ using System.Reflection;
 using Annium.Core.Mapper;
 using Annium.Core.Runtime.Types;
 
-namespace XRest.Core.Views.Profiles
+namespace XRest.Core.Views.Profiles;
+
+public static class TypeViewDeserializationProfileExtensions
 {
-    public static class TypeViewDeserializationProfileExtensions
+    public static Profile ConfigureForTypeViewDeserialization(this Profile profile, Assembly assembly)
     {
-        public static Profile ConfigureForTypeViewDeserialization(this Profile profile, Assembly assembly)
+        var types = TypeManager.GetInstance(assembly, false).Types;
+
+        profile.Map<TypeView?, Type?>(x => ResolveType(types, x));
+
+        return profile;
+    }
+
+    private static Type? ResolveType(IReadOnlyCollection<Type> types, TypeView? view)
+    {
+        if (view is null)
+            return null;
+
+        var type = Resolve(view.FullName);
+
+        if (!type.IsGenericType)
+            return type;
+
+        var arguments = view.GenericArguments.Select(x => ResolveType(types, x)!).ToArray();
+
+        return type.MakeGenericType(arguments);
+
+        Type Resolve(string fullName)
         {
-            var types = TypeManager.GetInstance(assembly, false).Types;
+            var result = types.SingleOrDefault(x => x.FullName == fullName);
 
-            profile.Map<TypeView?, Type?>(x => ResolveType(types, x));
-
-            return profile;
-        }
-
-        private static Type? ResolveType(IReadOnlyCollection<Type> types, TypeView? view)
-        {
-            if (view is null)
-                return null;
-
-            var type = Resolve(view.FullName);
-
-            if (!type.IsGenericType)
-                return type;
-
-            var arguments = view.GenericArguments.Select(x => ResolveType(types, x)!).ToArray();
-
-            return type.MakeGenericType(arguments);
-
-            Type Resolve(string fullName)
-            {
-                var result = types.SingleOrDefault(x => x.FullName == fullName);
-
-                return result ?? throw new InvalidOperationException($"Type with full name '{fullName}' not found");
-            }
+            return result ?? throw new InvalidOperationException($"Type with full name '{fullName}' not found");
         }
     }
 }

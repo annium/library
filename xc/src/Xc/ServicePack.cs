@@ -2,24 +2,23 @@ using System;
 using Annium.Core.DependencyInjection;
 using Xc.Tasks;
 
-namespace Xc
-{
-    internal class ServicePack : ServicePackBase
-    {
-        public override void Register(IServiceContainer container, IServiceProvider provider)
-        {
-            container.AddRuntimeTools(GetType().Assembly, true);
-            container.AddTime().WithRealTime().SetDefault();
-            container.AddArguments();
-            container.AddLogging(route => route.UseConsole());
-            container.AddMapper();
+namespace Xc;
 
-            container.AddAll(GetType().Assembly)
-                .AssignableTo<ITask>()
-                .Where(x => x.IsClass)
-                .AsSelf()
-                .AsSelfFactory()
-                .Transient();
-        }
+internal class ServicePack : ServicePackBase
+{
+    public override void Register(IServiceContainer container, IServiceProvider provider)
+    {
+        container.AddRuntimeTools(GetType().Assembly, true);
+        container.AddTime().WithRealTime().SetDefault();
+        container.AddArguments();
+        container.AddLogging(route => route.UseConsole());
+        container.AddMapper();
+
+        container.AddAll(GetType().Assembly)
+            .AssignableTo<ITask>()
+            .Where(x => x.IsClass)
+            .AsSelf()
+            .AsSelfFactory()
+            .Transient();
     }
 }

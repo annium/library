@@ -1,17 +1,16 @@
 using System;
 using Annium.Core.DependencyInjection;
 
-namespace XLog
+namespace XLog;
+
+internal class ServicePack : ServicePackBase
 {
-    internal class ServicePack : ServicePackBase
+    public override void Register(IServiceContainer container, IServiceProvider provider)
     {
-        public override void Register(IServiceContainer container, IServiceProvider provider)
-        {
-            container.AddRuntimeTools(GetType().Assembly, false);
-            container.AddTime().WithRealTime().SetDefault();
-            container.AddMapper();
-            container.AddLogging(route => route.UseConsole(color: true));
-            container.AddArguments();
-        }
+        container.AddRuntimeTools(GetType().Assembly, false);
+        container.AddTime().WithRealTime().SetDefault();
+        container.AddMapper();
+        container.AddLogging(route => route.UseConsole(color: true));
+        container.AddArguments();
     }
 }

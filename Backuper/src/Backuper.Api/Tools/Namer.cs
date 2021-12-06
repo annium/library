@@ -1,23 +1,22 @@
 using Annium.Core.Primitives;
 
-namespace Backuper.Api.Tools
+namespace Backuper.Api.Tools;
+
+public class Namer
 {
-    public class Namer
+    private readonly ITimeProvider _timeProvider;
+
+    public Namer(
+        ITimeProvider timeProvider
+    )
     {
-        private readonly ITimeProvider _timeProvider;
+        _timeProvider = timeProvider;
+    }
 
-        public Namer(
-            ITimeProvider timeProvider
-        )
-        {
-            _timeProvider = timeProvider;
-        }
+    public string GetName()
+    {
+        var ((year, month, day), (hour, min, _)) = _timeProvider.Now.InUtc().LocalDateTime;
 
-        public string GetName()
-        {
-            var ((year, month, day), (hour, min, _)) = _timeProvider.Now.InUtc().LocalDateTime;
-
-            return $"{year:0000}.{month:00}.{day:00}_{hour:00}.{min:00}.dump";
-        }
+        return $"{year:0000}.{month:00}.{day:00}_{hour:00}.{min:00}.dump";
     }
 }

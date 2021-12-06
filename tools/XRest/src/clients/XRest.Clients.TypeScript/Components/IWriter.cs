@@ -1,9 +1,8 @@
 using XRest.Clients.TypeScript.Views;
 
-namespace XRest.Clients.TypeScript.Components
+namespace XRest.Clients.TypeScript.Components;
+
+internal interface IWriter
 {
-    internal interface IWriter
-    {
-        void Write(string output, ApiView api);
-    }
+    void Write(string output, ApiView api);
 }

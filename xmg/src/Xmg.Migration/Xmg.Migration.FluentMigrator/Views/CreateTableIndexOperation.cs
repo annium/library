@@ -1,9 +1,8 @@
 using Xmg.Migration.Abstractions.Views;
 
-namespace Xmg.Migration.FluentMigrator.Views
+namespace Xmg.Migration.FluentMigrator.Views;
+
+internal class CreateTableIndexOperation : ICreateTableIndexOperation
 {
-    internal class CreateTableIndexOperation : ICreateTableIndexOperation
-    {
-        // TODO: implement
-    }
+    // TODO: implement
 }

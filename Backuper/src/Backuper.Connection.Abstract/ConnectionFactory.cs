@@ -2,35 +2,34 @@ using System;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Backuper.Connection.Abstract
+namespace Backuper.Connection.Abstract;
+
+public class ConnectionFactory
 {
-    public class ConnectionFactory
+    private readonly IServiceProvider provider;
+
+    public ConnectionFactory(
+        IServiceProvider provider
+    )
     {
-        private readonly IServiceProvider provider;
+        this.provider = provider;
+    }
 
-        public ConnectionFactory(
-            IServiceProvider provider
-        )
+    public IConnection CreateConnection(ConfigurationBase configuration)
+    {
+        var factoryType = typeof(Func<,>).MakeGenericType(configuration.GetType(), typeof(IConnection));
+
+        var factory = (Delegate) provider.GetRequiredService(factoryType);
+
+        try
         {
-            this.provider = provider;
+            var storage = (IConnection) factory.DynamicInvoke(configuration)!;
+
+            return storage;
         }
-
-        public IConnection CreateConnection(ConfigurationBase configuration)
+        catch (TargetInvocationException ex)
         {
-            var factoryType = typeof(Func<,>).MakeGenericType(configuration.GetType(), typeof(IConnection));
-
-            var factory = (Delegate) provider.GetRequiredService(factoryType);
-
-            try
-            {
-                var storage = (IConnection) factory.DynamicInvoke(configuration)!;
-
-                return storage;
-            }
-            catch (TargetInvocationException ex)
-            {
-                throw ex.InnerException!;
-            }
+            throw ex.InnerException!;
         }
     }
 }

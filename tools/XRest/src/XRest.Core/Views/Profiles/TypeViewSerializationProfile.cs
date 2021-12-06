@@ -2,31 +2,30 @@ using System;
 using System.Linq;
 using Annium.Core.Mapper;
 
-namespace XRest.Core.Views.Profiles
+namespace XRest.Core.Views.Profiles;
+
+public class TypeViewSerializationProfile : Profile
 {
-    public class TypeViewSerializationProfile : Profile
+    public TypeViewSerializationProfile()
     {
-        public TypeViewSerializationProfile()
+        Map<Type?, TypeView?>(x => BuildTypeView(x));
+    }
+
+    private TypeView? BuildTypeView(Type? type)
+    {
+        if (type is null)
+            return null;
+
+        if (!type.IsGenericType)
+            return new TypeView { FullName = type.FullName! };
+
+        var definition = type.GetGenericTypeDefinition();
+        var arguments = type.GetGenericArguments().Select(x => BuildTypeView(x)!).ToArray();
+
+        return new TypeView
         {
-            Map<Type?, TypeView?>(x => BuildTypeView(x));
-        }
-
-        private TypeView? BuildTypeView(Type? type)
-        {
-            if (type is null)
-                return null;
-
-            if (!type.IsGenericType)
-                return new TypeView { FullName = type.FullName! };
-
-            var definition = type.GetGenericTypeDefinition();
-            var arguments = type.GetGenericArguments().Select(x => BuildTypeView(x)!).ToArray();
-
-            return new TypeView
-            {
-                FullName = definition.FullName!,
-                GenericArguments = arguments,
-            };
-        }
+            FullName = definition.FullName!,
+            GenericArguments = arguments,
+        };
     }
 }

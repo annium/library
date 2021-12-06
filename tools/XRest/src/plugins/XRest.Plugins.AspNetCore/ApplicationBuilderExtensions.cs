@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using XRest.Plugins.AspNetCore;
 
-namespace Annium.Core.DependencyInjection
+namespace Annium.Core.DependencyInjection;
+
+public static class ApplicationBuilderExtensions
 {
-    public static class ApplicationBuilderExtensions
+    public static IApplicationBuilder UseXRest(this IApplicationBuilder builder)
     {
-        public static IApplicationBuilder UseXRest(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<XRestMiddleware>();
-        }
+        return builder.UseMiddleware<XRestMiddleware>();
     }
 }

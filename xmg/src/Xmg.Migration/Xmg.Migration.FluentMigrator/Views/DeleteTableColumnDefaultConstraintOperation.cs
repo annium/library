@@ -1,9 +1,8 @@
 using Xmg.Migration.Abstractions.Views;
 
-namespace Xmg.Migration.FluentMigrator.Views
+namespace Xmg.Migration.FluentMigrator.Views;
+
+internal class DeleteTableColumnDefaultConstraintOperation : IAlterTableColumnOperation
 {
-    internal class DeleteTableColumnDefaultConstraintOperation : IAlterTableColumnOperation
-    {
-        // TODO: implement
-    }
+    // TODO: implement
 }

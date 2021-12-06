@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 
-namespace Xmg.Core.Views
+namespace Xmg.Core.Views;
+
+public interface IMigration
 {
-    public interface IMigration
-    {
-        IReadOnlyDictionary<string, string> Files { get; }
-    }
+    IReadOnlyDictionary<string, string> Files { get; }
 }

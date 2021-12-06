@@ -4,16 +4,15 @@ using Annium.Extensions.Shell;
 using Annium.Logging.Abstractions;
 using Backuper.Connection.Abstract;
 
-namespace Backuper.Connection.PostgreSQL
-{
-    public class ServicePack : ServicePackBase
-    {
-        public override void Register(IServiceContainer container, IServiceProvider provider)
-        {
-            Func<Configuration, IConnection> Factory(IServiceProvider sp) => configuration =>
-                new ConnectionProxy(new Connection(configuration, sp.Resolve<IShell>()), configuration.Type, sp.Resolve<ILogger<Connection>>());
+namespace Backuper.Connection.PostgreSQL;
 
-            container.Add(Factory).AsSelf().Singleton();
-        }
+public class ServicePack : ServicePackBase
+{
+    public override void Register(IServiceContainer container, IServiceProvider provider)
+    {
+        Func<Configuration, IConnection> Factory(IServiceProvider sp) => configuration =>
+            new ConnectionProxy(new Connection(configuration, sp.Resolve<IShell>()), configuration.Type, sp.Resolve<ILogger<Connection>>());
+
+        container.Add(Factory).AsSelf().Singleton();
     }
 }

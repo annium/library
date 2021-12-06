@@ -1,17 +1,16 @@
 using System;
 using Annium.Core.DependencyInjection;
 
-namespace Xa
+namespace Xa;
+
+internal class ServicePack : ServicePackBase
 {
-    internal class ServicePack : ServicePackBase
+    public override void Register(IServiceContainer container, IServiceProvider provider)
     {
-        public override void Register(IServiceContainer container, IServiceProvider provider)
-        {
-            container.AddRuntimeTools(GetType().Assembly, true);
-            container.AddTime().WithRealTime().SetDefault();
-            container.AddArguments();
-            container.AddLogging(route => route.UseConsole());
-            container.AddMapper();
-        }
+        container.AddRuntimeTools(GetType().Assembly, true);
+        container.AddTime().WithRealTime().SetDefault();
+        container.AddArguments();
+        container.AddLogging(route => route.UseConsole());
+        container.AddMapper();
     }
 }

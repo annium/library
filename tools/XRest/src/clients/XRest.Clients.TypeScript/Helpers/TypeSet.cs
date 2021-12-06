@@ -2,19 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace XRest.Clients.TypeScript.Helpers
+namespace XRest.Clients.TypeScript.Helpers;
+
+internal class TypeSet
 {
-    internal class TypeSet
+    private readonly HashSet<Type> _set = new HashSet<Type>();
+
+    public TypeSet Register(Type type)
     {
-        private readonly HashSet<Type> _set = new HashSet<Type>();
+        _set.Add(type);
 
-        public TypeSet Register(Type type)
-        {
-            _set.Add(type);
-
-            return this;
-        }
-
-        public bool Contains(Type type) => _set.Any(x => x.FullName == type.FullName);
+        return this;
     }
+
+    public bool Contains(Type type) => _set.Any(x => x.FullName == type.FullName);
 }

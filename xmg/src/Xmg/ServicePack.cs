@@ -1,28 +1,27 @@
 using System;
 using Annium.Core.DependencyInjection;
 
-namespace Xmg
+namespace Xmg;
+
+internal class ServicePack : ServicePackBase
 {
-    internal class ServicePack : ServicePackBase
+    public ServicePack()
     {
-        public ServicePack()
-        {
-            Add<Configuration.ServicePack>();
-            Add<Migration.ServicePack>();
-        }
+        Add<Configuration.ServicePack>();
+        Add<Migration.ServicePack>();
+    }
 
-        public override void Configure(IServiceContainer container)
-        {
-            container.AddRuntimeTools(GetType().Assembly, true);
-        }
+    public override void Configure(IServiceContainer container)
+    {
+        container.AddRuntimeTools(GetType().Assembly, true);
+    }
 
-        public override void Register(IServiceContainer container, IServiceProvider provider)
-        {
-            container.AddTime().WithRealTime().SetDefault();
-            container.AddMapper();
-            container.AddArguments();
-            container.AddJsonSerializers().SetDefault();
-            container.AddLogging(route => route.UseConsole());
-        }
+    public override void Register(IServiceContainer container, IServiceProvider provider)
+    {
+        container.AddTime().WithRealTime().SetDefault();
+        container.AddMapper();
+        container.AddArguments();
+        container.AddJsonSerializers().SetDefault();
+        container.AddLogging(route => route.UseConsole());
     }
 }

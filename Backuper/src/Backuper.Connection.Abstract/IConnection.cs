@@ -1,13 +1,12 @@
 using System.Threading.Tasks;
 
-namespace Backuper.Connection.Abstract
+namespace Backuper.Connection.Abstract;
+
+public interface IConnection
 {
-    public interface IConnection
-    {
-        Task SetupAsync();
+    Task SetupAsync();
 
-        Task<string> BackupAsync();
+    Task<string> BackupAsync();
 
-        Task RestoreAsync(string path);
-    }
+    Task RestoreAsync(string path);
 }

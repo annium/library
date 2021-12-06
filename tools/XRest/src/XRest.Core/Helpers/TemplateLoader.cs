@@ -7,36 +7,35 @@ using Scriban;
 using Scriban.Parsing;
 using Scriban.Runtime;
 
-namespace XRest.Core.Helpers
+namespace XRest.Core.Helpers;
+
+internal class TemplateLoader : ITemplateLoader
 {
-    internal class TemplateLoader : ITemplateLoader
+    private readonly Assembly _templateAssembly;
+    private readonly IResourceLoader _resourceLoader;
+
+    public TemplateLoader(
+        Assembly templateAssembly,
+        IResourceLoader resourceLoader
+    )
     {
-        private readonly Assembly _templateAssembly;
-        private readonly IResourceLoader _resourceLoader;
+        _templateAssembly = templateAssembly;
+        _resourceLoader = resourceLoader;
+    }
 
-        public TemplateLoader(
-            Assembly templateAssembly,
-            IResourceLoader resourceLoader
-        )
-        {
-            _templateAssembly = templateAssembly;
-            _resourceLoader = resourceLoader;
-        }
+    public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName) => templateName;
 
-        public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName) => templateName;
+    public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+    {
+        var resource = _resourceLoader.Load(templatePath, _templateAssembly).Single();
 
-        public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
-        {
-            var resource = _resourceLoader.Load(templatePath, _templateAssembly).Single();
+        return Encoding.UTF8.GetString(resource.Content.Span);
+    }
 
-            return Encoding.UTF8.GetString(resource.Content.Span);
-        }
+    public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+    {
+        var resource = _resourceLoader.Load(templatePath, _templateAssembly).Single();
 
-        public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
-        {
-            var resource = _resourceLoader.Load(templatePath, _templateAssembly).Single();
-
-            return new ValueTask<string>(Encoding.UTF8.GetString(resource.Content.Span));
-        }
+        return new ValueTask<string>(Encoding.UTF8.GetString(resource.Content.Span));
     }
 }

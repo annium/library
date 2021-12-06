@@ -1,7 +1,6 @@
-namespace Xmg.Migration.Abstractions.Views
-{
-    public interface ICreateSchemaOperation : IOperation
-    {
+namespace Xmg.Migration.Abstractions.Views;
 
-    }
+public interface ICreateSchemaOperation : IOperation
+{
+
 }

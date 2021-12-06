@@ -10,46 +10,45 @@ using XRest.Core.Models;
 using XRest.Core.Views;
 using XRest.Core.Views.Profiles;
 
-namespace XRest.Sources.Api.Components.Internal
+namespace XRest.Sources.Api.Components.Internal;
+
+internal class Loader : ILoader
 {
-    internal class Loader : ILoader
+    private readonly IAssemblyLoaderBuilder _assemblyLoaderBuilder;
+    private readonly IHttpRequestFactory _httpRequestFactory;
+    private readonly IMapper _mapper;
+    private readonly IMapBuilder _mapBuilder;
+
+    public Loader(
+        IAssemblyLoaderBuilder assemblyLoaderBuilder,
+        IHttpRequestFactory httpRequestFactory,
+        IMapper mapper,
+        IMapBuilder mapBuilder
+    )
     {
-        private readonly IAssemblyLoaderBuilder _assemblyLoaderBuilder;
-        private readonly IHttpRequestFactory _httpRequestFactory;
-        private readonly IMapper _mapper;
-        private readonly IMapBuilder _mapBuilder;
+        _assemblyLoaderBuilder = assemblyLoaderBuilder;
+        _httpRequestFactory = httpRequestFactory;
+        _mapper = mapper;
+        _mapBuilder = mapBuilder;
+    }
 
-        public Loader(
-            IAssemblyLoaderBuilder assemblyLoaderBuilder,
-            IHttpRequestFactory httpRequestFactory,
-            IMapper mapper,
-            IMapBuilder mapBuilder
-        )
-        {
-            _assemblyLoaderBuilder = assemblyLoaderBuilder;
-            _httpRequestFactory = httpRequestFactory;
-            _mapper = mapper;
-            _mapBuilder = mapBuilder;
-        }
+    public async Task<ApiModel> Load(
+        Uri apiUri,
+        string assemblyPath
+    )
+    {
+        if (!File.Exists(assemblyPath))
+            throw new FileNotFoundException($"Assembly file '{assemblyPath}' missing.");
 
-        public async Task<ApiModel> Load(
-            Uri apiUri,
-            string assemblyPath
-        )
-        {
-            if (!File.Exists(assemblyPath))
-                throw new FileNotFoundException($"Assembly file '{assemblyPath}' missing.");
+        var loader = _assemblyLoaderBuilder.UseFileSystemLoader(Path.GetDirectoryName(assemblyPath)!).Build();
+        var name = Path.GetFileNameWithoutExtension(assemblyPath);
+        var assembly = loader.Load(name);
+        _mapBuilder.AddProfile(x => x.ConfigureForTypeViewDeserialization(assembly));
 
-            var loader = _assemblyLoaderBuilder.UseFileSystemLoader(Path.GetDirectoryName(assemblyPath)!).Build();
-            var name = Path.GetFileNameWithoutExtension(assemblyPath);
-            var assembly = loader.Load(name);
-            _mapBuilder.AddProfile(x => x.ConfigureForTypeViewDeserialization(assembly));
+        var view = await _httpRequestFactory.New(apiUri).Get(Constants.ApiSourceEndpoint).AsAsync<ApiView>();
+        var model = _mapper.Map<ApiModel>(view);
+        model.Assembly = assembly;
 
-            var view = await _httpRequestFactory.New(apiUri).Get(Constants.ApiSourceEndpoint).AsAsync<ApiView>();
-            var model = _mapper.Map<ApiModel>(view);
-            model.Assembly = assembly;
-
-            return model;
-        }
+        return model;
     }
 }

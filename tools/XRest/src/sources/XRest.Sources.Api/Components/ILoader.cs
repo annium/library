@@ -2,10 +2,9 @@ using System;
 using System.Threading.Tasks;
 using XRest.Core.Models;
 
-namespace XRest.Sources.Api.Components
+namespace XRest.Sources.Api.Components;
+
+public interface ILoader
 {
-    public interface ILoader
-    {
-        Task<ApiModel> Load(Uri apiUri, string assemblyPath);
-    }
+    Task<ApiModel> Load(Uri apiUri, string assemblyPath);
 }

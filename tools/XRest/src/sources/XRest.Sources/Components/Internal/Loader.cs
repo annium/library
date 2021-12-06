@@ -4,46 +4,45 @@ using Annium.Logging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using XRest.Core.Models;
 
-namespace XRest.Sources.Components.Internal
+namespace XRest.Sources.Components.Internal;
+
+internal class Loader : ILoader, ILogSubject
 {
-    internal class Loader : ILoader, ILogSubject
+    public ILogger Logger { get; }
+    private readonly IServiceProvider _serviceProvider;
+
+    public Loader(
+        IServiceProvider serviceProvider,
+        ILogger<Loader> logger
+    )
     {
-        public ILogger Logger { get; }
-        private readonly IServiceProvider _serviceProvider;
+        _serviceProvider = serviceProvider;
+        Logger = logger;
+    }
 
-        public Loader(
-            IServiceProvider serviceProvider,
-            ILogger<Loader> logger
-        )
-        {
-            _serviceProvider = serviceProvider;
-            Logger = logger;
-        }
+    public async Task<ApiModel> Load(ISourceLoaderConfiguration cfg)
+    {
+        if (cfg.Server is null)
+            return LoadFromAssembly(cfg);
 
-        public async Task<ApiModel> Load(ISourceLoaderConfiguration cfg)
-        {
-            if (cfg.Server is null)
-                return LoadFromAssembly(cfg);
+        return await LoadFromApi(cfg);
+    }
 
-            return await LoadFromApi(cfg);
-        }
+    private async Task<ApiModel> LoadFromApi(ISourceLoaderConfiguration cfg)
+    {
+        this.Log().Info($"Loading from server '{cfg.Server}'");
 
-        private async Task<ApiModel> LoadFromApi(ISourceLoaderConfiguration cfg)
-        {
-            this.Log().Info($"Loading from server '{cfg.Server}'");
+        var loader = _serviceProvider.GetRequiredService<Sources.Api.Components.ILoader>();
 
-            var loader = _serviceProvider.GetRequiredService<Sources.Api.Components.ILoader>();
+        return await loader.Load(cfg.Server!, cfg.Assembly);
+    }
 
-            return await loader.Load(cfg.Server!, cfg.Assembly);
-        }
+    private ApiModel LoadFromAssembly(ISourceLoaderConfiguration cfg)
+    {
+        this.Log().Info($"Loading from assembly '{cfg.Assembly}'");
 
-        private ApiModel LoadFromAssembly(ISourceLoaderConfiguration cfg)
-        {
-            this.Log().Info($"Loading from assembly '{cfg.Assembly}'");
+        var loader = _serviceProvider.GetRequiredService<Sources.Assembly.Components.ILoader>();
 
-            var loader = _serviceProvider.GetRequiredService<Sources.Assembly.Components.ILoader>();
-
-            return loader.Load(cfg.Assembly);
-        }
+        return loader.Load(cfg.Assembly);
     }
 }

@@ -1,10 +1,9 @@
 using System;
 
-namespace XRest.Sources
+namespace XRest.Sources;
+
+public interface ISourceLoaderConfiguration
 {
-    public interface ISourceLoaderConfiguration
-    {
-        Uri? Server { get; }
-        string Assembly { get; }
-    }
+    Uri? Server { get; }
+    string Assembly { get; }
 }

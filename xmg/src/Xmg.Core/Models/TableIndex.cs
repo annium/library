@@ -1,36 +1,35 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Xmg.Core.Models
+namespace Xmg.Core.Models;
+
+public class TableIndex
 {
-    public class TableIndex
+    public string Name { get; }
+    public IReadOnlyCollection<string> Columns { get; }
+    public bool IsUnique { get; }
+
+    public TableIndex(
+        IReadOnlyCollection<string> columns,
+        bool isUnique
+    )
     {
-        public string Name { get; }
-        public IReadOnlyCollection<string> Columns { get; }
-        public bool IsUnique { get; }
+        Columns = columns;
+        IsUnique = isUnique;
+        Name = BuildName();
+    }
 
-        public TableIndex(
-            IReadOnlyCollection<string> columns,
-            bool isUnique
-        )
-        {
-            Columns = columns;
-            IsUnique = isUnique;
-            Name = BuildName();
-        }
+    public override string ToString() => Name;
 
-        public override string ToString() => Name;
+    private string BuildName()
+    {
+        var sb = new StringBuilder("IX_");
 
-        private string BuildName()
-        {
-            var sb = new StringBuilder("IX_");
+        sb.Append(string.Join('_', Columns));
 
-            sb.Append(string.Join('_', Columns));
+        if (IsUnique)
+            sb.Append("_unique");
 
-            if (IsUnique)
-                sb.Append("_unique");
-
-            return sb.ToString();
-        }
+        return sb.ToString();
     }
 }

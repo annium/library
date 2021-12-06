@@ -1,20 +1,19 @@
 using System.Collections.Generic;
 
-namespace Xc.Setup
+namespace Xc.Setup;
+
+internal class RootSetup
 {
-    internal class RootSetup
+    public string Source { get; }
+
+    public IReadOnlyDictionary<string, IReadOnlyDictionary<string, TargetSetup>> Targets { get; }
+
+    public RootSetup(
+        string source,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, TargetSetup>> targets
+    )
     {
-        public string Source { get; }
-
-        public IReadOnlyDictionary<string, IReadOnlyDictionary<string, TargetSetup>> Targets { get; }
-
-        public RootSetup(
-            string source,
-            IReadOnlyDictionary<string, IReadOnlyDictionary<string, TargetSetup>> targets
-        )
-        {
-            Source = source;
-            Targets = targets;
-        }
+        Source = source;
+        Targets = targets;
     }
 }

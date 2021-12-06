@@ -1,8 +1,7 @@
-namespace XRest.Core.Models
+namespace XRest.Core.Models;
+
+public enum ParameterLocationEnum
 {
-    public enum ParameterLocationEnum
-    {
-        Path,
-        Query,
-    }
+    Path,
+    Query,
 }

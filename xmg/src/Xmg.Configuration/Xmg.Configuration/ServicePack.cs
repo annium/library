@@ -2,21 +2,20 @@ using System;
 using Annium.Core.DependencyInjection;
 using Xmg.Configuration.Components;
 
-namespace Xmg.Configuration
+namespace Xmg.Configuration;
+
+public class ServicePack : ServicePackBase
 {
-    public class ServicePack : ServicePackBase
+    public ServicePack()
     {
-        public ServicePack()
-        {
-            Add<linq2db.ServicePack>();
-        }
+        Add<linq2db.ServicePack>();
+    }
 
-        public override void Register(IServiceContainer container, IServiceProvider provider)
-        {
-            // components
-            container.Add<IConfiguratorFactory, ConfiguratorFactory>().Singleton();
+    public override void Register(IServiceContainer container, IServiceProvider provider)
+    {
+        // components
+        container.Add<IConfiguratorFactory, ConfiguratorFactory>().Singleton();
 
-            container.AddAssemblyLoader();
-        }
+        container.AddAssemblyLoader();
     }
 }

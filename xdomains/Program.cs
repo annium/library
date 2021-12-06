@@ -3,21 +3,20 @@ using System.Threading;
 using Annium.Core.Entrypoint;
 using Annium.Extensions.Arguments;
 
-namespace xdomains
-{
-    public class Program
-    {
-        private static void Run(
-            IServiceProvider provider,
-            string[] args,
-            CancellationToken ct
-        )
-        {
-            Commander.Run<Commands.Group>(provider, args, ct);
-        }
+namespace xdomains;
 
-        public static int Main(string[] args) => new Entrypoint()
-            .UseServicePack<ServicePack>()
-            .Run(Run, args);
+public class Program
+{
+    private static void Run(
+        IServiceProvider provider,
+        string[] args,
+        CancellationToken ct
+    )
+    {
+        Commander.Run<Commands.Group>(provider, args, ct);
     }
+
+    public static int Main(string[] args) => new Entrypoint()
+        .UseServicePack<ServicePack>()
+        .Run(Run, args);
 }

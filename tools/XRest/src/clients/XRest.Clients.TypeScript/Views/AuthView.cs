@@ -1,12 +1,11 @@
-namespace XRest.Clients.TypeScript.Views
-{
-    internal class AuthView
-    {
-        public bool IsEnabled { get; }
+namespace XRest.Clients.TypeScript.Views;
 
-        public AuthView(bool isEnabled)
-        {
-            IsEnabled = isEnabled;
-        }
+internal class AuthView
+{
+    public bool IsEnabled { get; }
+
+    public AuthView(bool isEnabled)
+    {
+        IsEnabled = isEnabled;
     }
 }

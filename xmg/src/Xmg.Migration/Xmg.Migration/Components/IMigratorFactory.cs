@@ -1,10 +1,9 @@
 using Xmg.Migration.Abstractions;
 using Xmg.Migration.Abstractions.Components;
 
-namespace Xmg.Migration.Components
+namespace Xmg.Migration.Components;
+
+public interface IMigratorFactory
 {
-    public interface IMigratorFactory
-    {
-        IMigrator GetForProvider(MigrationProvider provider);
-    }
+    IMigrator GetForProvider(MigrationProvider provider);
 }

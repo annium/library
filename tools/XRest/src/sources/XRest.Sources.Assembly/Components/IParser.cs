@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using XRest.Core.Models;
 
-namespace XRest.Sources.Assembly.Components
+namespace XRest.Sources.Assembly.Components;
+
+internal interface IParser
 {
-    internal interface IParser
-    {
-        ApiModel Parse(IReadOnlyCollection<Type> controllerTypes);
-    }
+    ApiModel Parse(IReadOnlyCollection<Type> controllerTypes);
 }

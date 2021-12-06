@@ -4,74 +4,73 @@ using System.Runtime.CompilerServices;
 using XRest.Clients.TypeScript.Views;
 using XRest.Clients.TypeScript.Views.Types;
 
-namespace XRest.Clients.TypeScript.Helpers
+namespace XRest.Clients.TypeScript.Helpers;
+
+internal class UsedTypeViewsCollector
 {
-    internal class UsedTypeViewsCollector
+    public IReadOnlyCollection<DefinedTypeView> CollectUsedTypeViews(
+        IReadOnlyCollection<DefinedTypeView> exports,
+        IReadOnlyCollection<ActionView> actions
+    )
     {
-        public IReadOnlyCollection<DefinedTypeView> CollectUsedTypeViews(
-            IReadOnlyCollection<DefinedTypeView> exports,
-            IReadOnlyCollection<ActionView> actions
-        )
+        var registry = new Registry();
+
+        foreach (var export in exports)
+            CollectTypes(export, registry, true);
+
+        foreach (var action in actions)
+            CollectionActionTypes(action, registry);
+
+        return registry.Items;
+    }
+
+    private void CollectionActionTypes(ActionView action, Registry registry)
+    {
+        foreach (var parameter in action.Parameters)
+            CollectTypes(parameter.Type, registry, false);
+        if (action.HasBody)
+            CollectTypes(action.Body!, registry, false);
+        CollectTypes(action.Response, registry, false);
+    }
+
+    private void CollectTypes(DefinedTypeView view, Registry registry, bool collectProperties)
+    {
+        var definition = view switch
         {
-            var registry = new Registry();
+            ClassView cv => cv.IsGenericType ? cv.GetGenericDefinition() : cv,
+            _            => view,
+        };
+        var isBuiltIn = KnownTypes.BuiltIn.Contains(definition);
+        var isRegistered = !isBuiltIn && registry.Register(definition);
 
-            foreach (var export in exports)
-                CollectTypes(export, registry, true);
-
-            foreach (var action in actions)
-                CollectionActionTypes(action, registry);
-
-            return registry.Items;
-        }
-
-        private void CollectionActionTypes(ActionView action, Registry registry)
+        if (view is ClassView classView)
         {
-            foreach (var parameter in action.Parameters)
-                CollectTypes(parameter.Type, registry, false);
-            if (action.HasBody)
-                CollectTypes(action.Body!, registry, false);
-            CollectTypes(action.Response, registry, false);
+            if (classView.IsGenericType && (isBuiltIn || isRegistered))
+                CollectGenericArgumentsTypes(classView, registry);
+            if (!isBuiltIn && isRegistered && collectProperties)
+                CollectPropertiesTypes(classView, registry);
         }
+    }
 
-        private void CollectTypes(DefinedTypeView view, Registry registry, bool collectProperties)
-        {
-            var definition = view switch
-            {
-                ClassView cv => cv.IsGenericType ? cv.GetGenericDefinition() : cv,
-                _            => view,
-            };
-            var isBuiltIn = KnownTypes.BuiltIn.Contains(definition);
-            var isRegistered = !isBuiltIn && registry.Register(definition);
+    private void CollectGenericArgumentsTypes(ClassView x, Registry registry)
+    {
+        foreach (var genericArgument in x.GenericArguments)
+            CollectTypes(genericArgument, registry, false);
+    }
 
-            if (view is ClassView classView)
-            {
-                if (classView.IsGenericType && (isBuiltIn || isRegistered))
-                    CollectGenericArgumentsTypes(classView, registry);
-                if (!isBuiltIn && isRegistered && collectProperties)
-                    CollectPropertiesTypes(classView, registry);
-            }
-        }
+    private void CollectPropertiesTypes(ClassView x, Registry registry)
+    {
+        foreach (var property in x.GetPropertyTypes())
+            CollectTypes(property, registry, false);
+    }
 
-        private void CollectGenericArgumentsTypes(ClassView x, Registry registry)
-        {
-            foreach (var genericArgument in x.GenericArguments)
-                CollectTypes(genericArgument, registry, false);
-        }
+    private class Registry
+    {
+        public IReadOnlyCollection<DefinedTypeView> Items => _set.ToArray();
 
-        private void CollectPropertiesTypes(ClassView x, Registry registry)
-        {
-            foreach (var property in x.GetPropertyTypes())
-                CollectTypes(property, registry, false);
-        }
+        private readonly HashSet<DefinedTypeView> _set = new HashSet<DefinedTypeView>();
 
-        private class Registry
-        {
-            public IReadOnlyCollection<DefinedTypeView> Items => _set.ToArray();
-
-            private readonly HashSet<DefinedTypeView> _set = new HashSet<DefinedTypeView>();
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Register(DefinedTypeView view) => _set.Add(view);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Register(DefinedTypeView view) => _set.Add(view);
     }
 }

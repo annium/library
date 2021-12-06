@@ -3,31 +3,30 @@ using Annium.Core.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Backuper.Api
-{
-    public class Startup
-    {
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddCors();
-            services.AddControllers()
-                .AddDefaultJsonOptions();
-        }
+namespace Backuper.Api;
 
-        public void Configure(IApplicationBuilder app)
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddCors();
+        services.AddControllers()
+            .AddDefaultJsonOptions();
+    }
+
+    public void Configure(IApplicationBuilder app)
+    {
+        app.UseExceptionMiddleware();
+        app.UseRouting();
+        app.UseCors(builder => builder
+            .SetIsOriginAllowed(o => true)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .SetPreflightMaxAge(TimeSpan.FromDays(7)));
+        app.UseEndpoints(endpoints =>
         {
-            app.UseExceptionMiddleware();
-            app.UseRouting();
-            app.UseCors(builder => builder
-                .SetIsOriginAllowed(o => true)
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials()
-                .SetPreflightMaxAge(TimeSpan.FromDays(7)));
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-        }
+            endpoints.MapControllers();
+        });
     }
 }

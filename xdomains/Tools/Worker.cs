@@ -5,91 +5,90 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace xdomains.Tools
+namespace xdomains.Tools;
+
+internal class Worker
 {
-    internal class Worker
+    private readonly Resolver resolver;
+
+    private readonly Parser parser;
+
+    private readonly Settings settings;
+
+    public Worker(
+        Resolver resolver,
+        Parser parser,
+        Settings settings
+    )
     {
-        private readonly Resolver resolver;
+        this.resolver = resolver;
+        this.parser = parser;
+        this.settings = settings;
+    }
 
-        private readonly Parser parser;
+    public async Task RunAsync(
+        string[] query,
+        string[] zones,
+        int degreeOfParallelism,
+        CancellationToken ct
+    )
+    {
+        var domains = GetDomains(query, zones).ToArray();
 
-        private readonly Settings settings;
+        Directory.CreateDirectory("results");
+        foreach (var domain in query)
+            File.WriteAllText(Path.Combine("results", $"{domain}.txt"), string.Empty);
 
-        public Worker(
-            Resolver resolver,
-            Parser parser,
-            Settings settings
-        )
+        var locker = new object();
+        var i = -1;
+        Trace();
+
+        await CheckDomains(domains, handleResolved, degreeOfParallelism, ct);
+
+        void handleResolved(string domain, string result)
         {
-            this.resolver = resolver;
-            this.parser = parser;
-            this.settings = settings;
-        }
+            var isFree = parser.IsFree(result);
 
-        public async Task RunAsync(
-            string[] query,
-            string[] zones,
-            int degreeOfParallelism,
-            CancellationToken ct
-        )
-        {
-            var domains = GetDomains(query, zones).ToArray();
-
-            Directory.CreateDirectory("results");
-            foreach (var domain in query)
-                File.WriteAllText(Path.Combine("results", $"{domain}.txt"), string.Empty);
-
-            var locker = new object();
-            var i = -1;
-            Trace();
-
-            await CheckDomains(domains, handleResolved, degreeOfParallelism, ct);
-
-            void handleResolved(string domain, string result)
+            lock(locker)
             {
-                var isFree = parser.IsFree(result);
-
-                lock(locker)
-                {
-                    Trace();
-                    if (isFree)
-                        File.AppendAllLines(Path.Combine("results", $"{domain.Split('.')[0]}.txt"), new [] { domain });
-                }
-            }
-
-            void Trace()
-            {
-                Console.CursorLeft = 0;
-                Console.Write($"{++i}/{domains.Length}");
+                Trace();
+                if (isFree)
+                    File.AppendAllLines(Path.Combine("results", $"{domain.Split('.')[0]}.txt"), new [] { domain });
             }
         }
 
-        private IEnumerable<string> GetDomains(string[] query, string[] zones)
+        void Trace()
         {
-            if (zones.Length == 0)
-                zones = File.ReadAllLines(settings.RootedPath("zones.txt"));
-
-            foreach (var name in query)
-                foreach (var zone in zones)
-                    yield return $"{name}{zone}";
+            Console.CursorLeft = 0;
+            Console.Write($"{++i}/{domains.Length}");
         }
+    }
 
-        private Task CheckDomains(string[] domains, Action<string, string> done, int degreeOfParallelism, CancellationToken ct)
+    private IEnumerable<string> GetDomains(string[] query, string[] zones)
+    {
+        if (zones.Length == 0)
+            zones = File.ReadAllLines(settings.RootedPath("zones.txt"));
+
+        foreach (var name in query)
+        foreach (var zone in zones)
+            yield return $"{name}{zone}";
+    }
+
+    private Task CheckDomains(string[] domains, Action<string, string> done, int degreeOfParallelism, CancellationToken ct)
+    {
+        var semaphore = new Semaphore(degreeOfParallelism, degreeOfParallelism);
+
+        return Task.WhenAll(domains.Select(async domain =>
         {
-            var semaphore = new Semaphore(degreeOfParallelism, degreeOfParallelism);
+            if (ct.IsCancellationRequested)
+                return string.Empty;
 
-            return Task.WhenAll(domains.Select(async domain =>
-            {
-                if (ct.IsCancellationRequested)
-                    return string.Empty;
+            semaphore.WaitOne();
+            var result = await resolver.ResolveAsync(domain);
+            semaphore.Release();
+            done(domain, result);
 
-                semaphore.WaitOne();
-                var result = await resolver.ResolveAsync(domain);
-                semaphore.Release();
-                done(domain, result);
-
-                return result;
-            }));
-        }
+            return result;
+        }));
     }
 }
