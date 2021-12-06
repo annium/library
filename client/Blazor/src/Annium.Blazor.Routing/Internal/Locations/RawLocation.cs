@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Annium.Blazor.Routing.Internal.Implementations;
 using Annium.Core.Primitives;
-using Microsoft.AspNetCore.WebUtilities;
+using Annium.Net.Base;
 using Microsoft.Extensions.Primitives;
 
 namespace Annium.Blazor.Routing.Internal.Locations
