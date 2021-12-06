@@ -1,9 +1,8 @@
 using Annium.Net.Http;
 
-namespace Annium.Blazor.Net
+namespace Annium.Blazor.Net;
+
+public interface IHostHttpRequestFactory
 {
-    public interface IHostHttpRequestFactory
-    {
-        IHttpRequest New();
-    }
+    IHttpRequest New();
 }

@@ -1,9 +1,8 @@
 using System;
 
-namespace Annium.Components.State.Forms
+namespace Annium.Components.State.Forms;
+
+public interface IAtomicContainer<T> : IState<T>, IStatusContainer
+    where T : IEquatable<T>
 {
-    public interface IAtomicContainer<T> : IState<T>, IStatusContainer
-        where T : IEquatable<T>
-    {
-    }
 }

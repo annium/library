@@ -1,7 +1,6 @@
-namespace Annium.Blazor.Css
+namespace Annium.Blazor.Css;
+
+public interface IStyleSheet
 {
-    public interface IStyleSheet
-    {
-        string Css { get; }
-    }
+    string Css { get; }
 }

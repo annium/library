@@ -1,11 +1,10 @@
-namespace Annium.Components.State.Forms
+namespace Annium.Components.State.Forms;
+
+public enum Status
 {
-    public enum Status
-    {
-        None,
-        Loading,
-        Validating,
-        Success,
-        Error,
-    }
+    None,
+    Loading,
+    Validating,
+    Success,
+    Error,
 }

@@ -6,43 +6,42 @@ using System.Reflection;
 using Annium.Core.Primitives;
 using Annium.Core.Reflection;
 
-namespace Annium.Components.State.Core
+namespace Annium.Components.State.Core;
+
+public static class State
 {
-    public static class State
+    private static readonly object[] EmptyArgs = Array.Empty<object>();
+
+    private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IObservableState>>> Observables = new();
+
+    public static IDisposable Observe<T>(T target, Action handleChange)
+        where T : notnull
     {
-        private static readonly object[] EmptyArgs = Array.Empty<object>();
+        var observables = Observables.GetOrAdd(target.GetType(), DiscoverObservables);
 
-        private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IObservableState>>> Observables = new();
+        var disposable = Disposable.Box();
+        disposable += observables.Select(x => x(target).Changed.Subscribe(_ => handleChange()));
 
-        public static IDisposable Observe<T>(T target, Action handleChange)
-            where T : notnull
-        {
-            var observables = Observables.GetOrAdd(target.GetType(), DiscoverObservables);
+        return disposable;
+    }
 
-            var disposable = Disposable.Box();
-            disposable += observables.Select(x => x(target).Changed.Subscribe(_ => handleChange()));
+    private static IReadOnlyCollection<Func<object, IObservableState>> DiscoverObservables(Type type)
+    {
+        var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        var accessors = new List<Func<object, IObservableState>>();
 
-            return disposable;
-        }
+        var properties = type.GetProperties(flags)
+            .Where(x => x.PropertyType.IsDerivedFrom(typeof(IObservableState)))
+            .ToArray();
+        foreach (var property in properties)
+            accessors.Add(instance => (IObservableState) property.GetMethod!.Invoke(instance, EmptyArgs)!);
 
-        private static IReadOnlyCollection<Func<object, IObservableState>> DiscoverObservables(Type type)
-        {
-            var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-            var accessors = new List<Func<object, IObservableState>>();
+        var fields = type.GetFields(flags)
+            .Where(x => x.FieldType.IsDerivedFrom(typeof(IObservableState)))
+            .ToArray();
+        foreach (var field in fields)
+            accessors.Add(instance => (IObservableState) field.GetValue(instance)!);
 
-            var properties = type.GetProperties(flags)
-                .Where(x => x.PropertyType.IsDerivedFrom(typeof(IObservableState)))
-                .ToArray();
-            foreach (var property in properties)
-                accessors.Add(instance => (IObservableState) property.GetMethod!.Invoke(instance, EmptyArgs)!);
-
-            var fields = type.GetFields(flags)
-                .Where(x => x.FieldType.IsDerivedFrom(typeof(IObservableState)))
-                .ToArray();
-            foreach (var field in fields)
-                accessors.Add(instance => (IObservableState) field.GetValue(instance)!);
-
-            return accessors;
-        }
+        return accessors;
     }
 }

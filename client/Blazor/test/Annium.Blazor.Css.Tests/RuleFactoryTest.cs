@@ -1,21 +1,20 @@
 using Annium.Testing;
 using Xunit;
 
-namespace Annium.Blazor.Css.Tests
+namespace Annium.Blazor.Css.Tests;
+
+public class RuleFactoryTest
 {
-    public class RuleFactoryTest
+    [Fact]
+    public void Rule_Class_Auto_Ok()
     {
-        [Fact]
-        public void Rule_Class_Auto_Ok()
-        {
-            // arrange
-            var rule = Rule.Class();
+        // arrange
+        var rule = Rule.Class();
 
-            // act
-            var name = rule.ToString();
+        // act
+        var name = rule.ToString();
 
-            // assert
-            name.IsNotDefault();
-        }
+        // assert
+        name.IsNotDefault();
     }
 }

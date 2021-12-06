@@ -1,22 +1,21 @@
 using Annium.Data.Operations;
 
-namespace Annium.Components.State.Operations.Internal
+namespace Annium.Components.State.Operations.Internal;
+
+internal class OperationState : OperationStateBase, IOperationState
 {
-    internal class OperationState : OperationStateBase, IOperationState
+    public void Succeed()
     {
-        public void Succeed()
-        {
-            SucceedInternal();
-        }
+        SucceedInternal();
+    }
 
-        public void Fail(IResultBase result)
-        {
-            FailInternal(result);
-        }
+    public void Fail(IResultBase result)
+    {
+        FailInternal(result);
+    }
 
-        public void Reset()
-        {
-            ResetInternal();
-        }
+    public void Reset()
+    {
+        ResetInternal();
     }
 }

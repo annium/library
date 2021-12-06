@@ -1,11 +1,10 @@
 using System;
 using System.Reactive;
 
-namespace Annium.Components.State.Core
+namespace Annium.Components.State.Core;
+
+public interface IObservableState
 {
-    public interface IObservableState
-    {
-        IObservable<Unit> Changed { get; }
-        IDisposable Mute();
-    }
+    IObservable<Unit> Changed { get; }
+    IDisposable Mute();
 }

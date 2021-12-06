@@ -1,19 +1,18 @@
 using System.Collections.Generic;
 
-namespace Annium.Blazor.Storage
+namespace Annium.Blazor.Storage;
+
+public interface IStorageBase
 {
-    public interface IStorageBase
-    {
-        IReadOnlyCollection<string> GetKeys();
+    IReadOnlyCollection<string> GetKeys();
 
-        bool HasKey(string key);
+    bool HasKey(string key);
 
-        T Get<T>(string key);
+    T Get<T>(string key);
 
-        bool Set<T>(string key, T value);
+    bool Set<T>(string key, T value);
 
-        bool Remove(string key);
+    bool Remove(string key);
 
-        void Clear();
-    }
+    void Clear();
 }

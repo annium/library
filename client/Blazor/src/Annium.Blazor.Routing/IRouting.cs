@@ -1,7 +1,6 @@
-namespace Annium.Blazor.Routing
-{
-    public interface IRouting
-    {
+namespace Annium.Blazor.Routing;
 
-    }
+public interface IRouting
+{
+
 }

@@ -1,8 +1,7 @@
-namespace Annium.Blazor.Routing
+namespace Annium.Blazor.Routing;
+
+public enum PathMatch
 {
-    public enum PathMatch
-    {
-        Exact = 0,
-        Start = 1,
-    }
+    Exact = 0,
+    Start = 1,
 }

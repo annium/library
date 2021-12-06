@@ -5,218 +5,217 @@ using System.Reactive;
 using Annium.Testing;
 using Xunit;
 
-namespace Annium.Components.State.Forms.Tests
+namespace Annium.Components.State.Forms.Tests;
+
+public class MapContainerTest : TestBase
 {
-    public class MapContainerTest : TestBase
+    [Fact]
+    public void Init_Ok()
     {
-        [Fact]
-        public void Init_Ok()
-        {
-            // arrange
-            var log = new List<Unit>();
-            var factory = GetFactory();
-            var initialValue = Arrange();
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initialValue = Arrange();
 
-            // act
-            var state = factory.Create(initialValue);
-            state.Changed.Subscribe(log.Add);
+        // act
+        var state = factory.Create(initialValue);
+        state.Changed.Subscribe(log.Add);
 
-            // assert
-            state.Value.IsEqual(initialValue);
-            var children = state.Children;
-            foreach (var itemKey in initialValue.Keys)
-                children.At(itemKey).IsEqual(state.At(x => x[itemKey]));
-            var key = initialValue.Keys.First();
-            state.At(x => x[key]).Value.IsEqual(initialValue.At(key));
-            state.HasChanged.IsFalse();
-            state.HasBeenTouched.IsFalse();
-            state.IsStatus(Status.None).IsTrue();
-            state.HasStatus(Status.None).IsTrue();
-            log.IsEmpty();
-        }
+        // assert
+        state.Value.IsEqual(initialValue);
+        var children = state.Children;
+        foreach (var itemKey in initialValue.Keys)
+            children.At(itemKey).IsEqual(state.At(x => x[itemKey]));
+        var key = initialValue.Keys.First();
+        state.At(x => x[key]).Value.IsEqual(initialValue.At(key));
+        state.HasChanged.IsFalse();
+        state.HasBeenTouched.IsFalse();
+        state.IsStatus(Status.None).IsTrue();
+        state.HasStatus(Status.None).IsTrue();
+        log.IsEmpty();
+    }
 
-        [Fact]
-        public void Set_Ok()
-        {
-            // arrange
-            var log = new List<Unit>();
-            var factory = GetFactory();
-            var initialValue = Arrange();
-            var otherValue = ArrangeOther();
-            var state = factory.Create(initialValue);
-            state.Changed.Subscribe(log.Add);
+    [Fact]
+    public void Set_Ok()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initialValue = Arrange();
+        var otherValue = ArrangeOther();
+        var state = factory.Create(initialValue);
+        state.Changed.Subscribe(log.Add);
 
-            // act
-            state.Set(initialValue).IsFalse();
+        // act
+        state.Set(initialValue).IsFalse();
 
-            // assert
-            state.Value.IsEqual(initialValue);
-            state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
-            state.HasChanged.IsFalse();
-            state.HasBeenTouched.IsFalse();
-            log.IsEmpty();
+        // assert
+        state.Value.IsEqual(initialValue);
+        state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
+        state.HasChanged.IsFalse();
+        state.HasBeenTouched.IsFalse();
+        log.IsEmpty();
 
-            // act
-            state.Set(otherValue).IsTrue();
+        // act
+        state.Set(otherValue).IsTrue();
 
-            // assert
-            state.Value.IsEqual(otherValue);
-            state.At(x => x["c"]).Value.IsEqual(otherValue.At("c"));
-            state.HasChanged.IsTrue();
-            state.HasBeenTouched.IsTrue();
-            log.Has(1);
+        // assert
+        state.Value.IsEqual(otherValue);
+        state.At(x => x["c"]).Value.IsEqual(otherValue.At("c"));
+        state.HasChanged.IsTrue();
+        state.HasBeenTouched.IsTrue();
+        log.Has(1);
 
-            // act
-            state.Set(initialValue).IsTrue();
+        // act
+        state.Set(initialValue).IsTrue();
 
-            // assert
-            state.Value.IsEqual(initialValue);
-            state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
-            state.HasChanged.IsFalse();
-            state.HasBeenTouched.IsTrue();
-            log.Has(2);
-        }
+        // assert
+        state.Value.IsEqual(initialValue);
+        state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
+        state.HasChanged.IsFalse();
+        state.HasBeenTouched.IsTrue();
+        log.Has(2);
+    }
 
-        [Fact]
-        public void Reset_Ok()
-        {
-            // arrange
-            var log = new List<Unit>();
-            var factory = GetFactory();
-            var initialValue = Arrange();
-            var otherValue = ArrangeOther();
-            var state = factory.Create(initialValue);
-            state.Changed.Subscribe(log.Add);
+    [Fact]
+    public void Reset_Ok()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initialValue = Arrange();
+        var otherValue = ArrangeOther();
+        var state = factory.Create(initialValue);
+        state.Changed.Subscribe(log.Add);
 
-            // act
-            state.Set(otherValue).IsTrue();
-            state.At(x => x["c"]).SetStatus(Status.Validating);
+        // act
+        state.Set(otherValue).IsTrue();
+        state.At(x => x["c"]).SetStatus(Status.Validating);
 
-            // assert
-            state.Value.IsEqual(otherValue);
-            state.HasChanged.IsTrue();
-            state.HasBeenTouched.IsTrue();
-            state.IsStatus(Status.None, Status.Validating).IsTrue();
-            state.HasStatus(Status.Validating).IsTrue();
-            log.Has(2);
+        // assert
+        state.Value.IsEqual(otherValue);
+        state.HasChanged.IsTrue();
+        state.HasBeenTouched.IsTrue();
+        state.IsStatus(Status.None, Status.Validating).IsTrue();
+        state.HasStatus(Status.Validating).IsTrue();
+        log.Has(2);
 
-            // act
-            state.Reset();
+        // act
+        state.Reset();
 
-            // assert
-            state.Value.IsEqual(initialValue);
-            state.At(x => x["c"]).Value.IsEqual(initialValue.At("c"));
-            state.HasChanged.IsFalse();
-            state.HasBeenTouched.IsFalse();
-            state.IsStatus(Status.None).IsTrue();
-            state.HasStatus(Status.None).IsTrue();
-            log.Has(3);
-        }
+        // assert
+        state.Value.IsEqual(initialValue);
+        state.At(x => x["c"]).Value.IsEqual(initialValue.At("c"));
+        state.HasChanged.IsFalse();
+        state.HasBeenTouched.IsFalse();
+        state.IsStatus(Status.None).IsTrue();
+        state.HasStatus(Status.None).IsTrue();
+        log.Has(3);
+    }
 
-        [Fact]
-        public void Status_Ok()
-        {
-            // arrange
-            var log = new List<Unit>();
-            var factory = GetFactory();
-            var initialValue = Arrange();
-            var state = factory.Create(initialValue);
-            state.Changed.Subscribe(log.Add);
+    [Fact]
+    public void Status_Ok()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initialValue = Arrange();
+        var state = factory.Create(initialValue);
+        state.Changed.Subscribe(log.Add);
 
-            // act
-            state.At(x => x["a"]).SetStatus(Status.Validating);
+        // act
+        state.At(x => x["a"]).SetStatus(Status.Validating);
 
-            // assert
-            state.IsStatus(Status.None, Status.Validating).IsTrue();
-            state.IsStatus(Status.Validating).IsFalse();
-            state.HasStatus(Status.None, Status.Validating).IsTrue();
-            state.HasStatus(Status.None, Status.Error).IsTrue();
-            state.HasStatus(Status.Error).IsFalse();
-            log.Has(1);
-        }
+        // assert
+        state.IsStatus(Status.None, Status.Validating).IsTrue();
+        state.IsStatus(Status.Validating).IsFalse();
+        state.HasStatus(Status.None, Status.Validating).IsTrue();
+        state.HasStatus(Status.None, Status.Error).IsTrue();
+        state.HasStatus(Status.Error).IsFalse();
+        log.Has(1);
+    }
 
-        [Fact]
-        public void Add_Ok()
-        {
-            // arrange
-            var log = new List<Unit>();
-            var factory = GetFactory();
-            var initialValue = Arrange();
-            var state = factory.Create(initialValue);
-            state.Changed.Subscribe(log.Add);
+    [Fact]
+    public void Add_Ok()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initialValue = Arrange();
+        var state = factory.Create(initialValue);
+        state.Changed.Subscribe(log.Add);
 
-            // act
-            state.Add("d", 7);
+        // act
+        state.Add("d", 7);
 
-            // assert
-            state.Value.IsEqual(new Dictionary<string, int>
-            {
-                { "a", 2 },
-                { "b", 4 },
-                { "c", 8 },
-                { "d", 7 },
-            });
-            state.HasChanged.IsTrue();
-            state.HasBeenTouched.IsTrue();
-            log.Has(1);
-        }
-
-        [Fact]
-        public void Remove_Ok()
-        {
-            // arrange
-            var log = new List<Unit>();
-            var factory = GetFactory();
-            var initialValue = Arrange();
-            var state = factory.Create(initialValue);
-            state.Changed.Subscribe(log.Add);
-
-            // act
-            state.Remove("b");
-
-            // assert
-            state.Value.IsEqual(new Dictionary<string, int>
-            {
-                { "a", 2 },
-                { "c", 8 },
-            });
-            state.HasChanged.IsTrue();
-            state.HasBeenTouched.IsTrue();
-            log.Has(1);
-        }
-
-        [Fact]
-        public void HasChanged_Ok()
-        {
-            // arrange
-            var log = new List<Unit>();
-            var factory = GetFactory();
-            var initialValue = Arrange();
-            var state = factory.Create(initialValue);
-            state.Changed.Subscribe(log.Add);
-
-            // act
-            state.Remove("a");
-            state.Add("e", 9);
-            state.Set(initialValue).IsTrue();
-
-            // assert
-            state.HasChanged.IsFalse();
-            state.HasBeenTouched.IsTrue();
-            log.Has(3);
-        }
-
-        private IReadOnlyDictionary<string, int> Arrange() => new Dictionary<string, int>
+        // assert
+        state.Value.IsEqual(new Dictionary<string, int>
         {
             { "a", 2 },
             { "b", 4 },
             { "c", 8 },
-        };
+            { "d", 7 },
+        });
+        state.HasChanged.IsTrue();
+        state.HasBeenTouched.IsTrue();
+        log.Has(1);
+    }
 
-        private IReadOnlyDictionary<string, int> ArrangeOther() => new Dictionary<string, int>
+    [Fact]
+    public void Remove_Ok()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initialValue = Arrange();
+        var state = factory.Create(initialValue);
+        state.Changed.Subscribe(log.Add);
+
+        // act
+        state.Remove("b");
+
+        // assert
+        state.Value.IsEqual(new Dictionary<string, int>
         {
             { "a", 2 },
-            { "c", 4 }
-        };
+            { "c", 8 },
+        });
+        state.HasChanged.IsTrue();
+        state.HasBeenTouched.IsTrue();
+        log.Has(1);
     }
+
+    [Fact]
+    public void HasChanged_Ok()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initialValue = Arrange();
+        var state = factory.Create(initialValue);
+        state.Changed.Subscribe(log.Add);
+
+        // act
+        state.Remove("a");
+        state.Add("e", 9);
+        state.Set(initialValue).IsTrue();
+
+        // assert
+        state.HasChanged.IsFalse();
+        state.HasBeenTouched.IsTrue();
+        log.Has(3);
+    }
+
+    private IReadOnlyDictionary<string, int> Arrange() => new Dictionary<string, int>
+    {
+        { "a", 2 },
+        { "b", 4 },
+        { "c", 8 },
+    };
+
+    private IReadOnlyDictionary<string, int> ArrangeOther() => new Dictionary<string, int>
+    {
+        { "a", 2 },
+        { "c", 4 }
+    };
 }

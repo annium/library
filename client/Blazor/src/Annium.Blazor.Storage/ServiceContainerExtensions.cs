@@ -1,22 +1,21 @@
 using Annium.Blazor.Storage;
 using Annium.Blazor.Storage.Internal;
 
-namespace Annium.Core.DependencyInjection
+namespace Annium.Core.DependencyInjection;
+
+public static class ServiceContainerExtensions
 {
-    public static class ServiceContainerExtensions
+    public static IServiceContainer AddStorages(this IServiceContainer container)
     {
-        public static IServiceContainer AddStorages(this IServiceContainer container)
-        {
-            container.Add<ILocalStorage, LocalStorage>().Singleton();
-            container.Add<ISessionStorage, SessionStorage>().Singleton();
+        container.Add<ILocalStorage, LocalStorage>().Singleton();
+        container.Add<ISessionStorage, SessionStorage>().Singleton();
 
-            container.AddAll()
-                .AssignableTo<IStore>()
-                .Where(x => x.IsClass)
-                .AsInterfaces()
-                .Scoped();
+        container.AddAll()
+            .AssignableTo<IStore>()
+            .Where(x => x.IsClass)
+            .AsInterfaces()
+            .Scoped();
 
-            return container;
-        }
+        return container;
     }
 }

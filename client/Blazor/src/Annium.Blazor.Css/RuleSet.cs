@@ -1,12 +1,11 @@
 using System.Threading.Tasks;
 
-namespace Annium.Blazor.Css
+namespace Annium.Blazor.Css;
+
+public abstract class RuleSet
 {
-    public abstract class RuleSet
+    protected RuleSet()
     {
-        protected RuleSet()
-        {
-            Task.Run(() => Internal.StyleSheet.Instance.Render(this));
-        }
+        Task.Run(() => Internal.StyleSheet.Instance.Render(this));
     }
 }

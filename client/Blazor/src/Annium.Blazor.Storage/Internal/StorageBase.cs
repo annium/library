@@ -6,77 +6,76 @@ using Annium.Core.DependencyInjection;
 using Annium.Serialization.Abstractions;
 using Microsoft.JSInterop;
 
-namespace Annium.Blazor.Storage.Internal
+namespace Annium.Blazor.Storage.Internal;
+
+internal class StorageBase : IStorageBase
 {
-    internal class StorageBase : IStorageBase
+    private readonly IJSInProcessRuntime _js;
+    private readonly ISerializer<string> _serializer;
+
+    private readonly string _storage;
+
+    protected StorageBase(
+        IJSRuntime js,
+        IIndex<SerializerKey, ISerializer<string>> serializers,
+        string storage
+    )
     {
-        private readonly IJSInProcessRuntime _js;
-        private readonly ISerializer<string> _serializer;
+        _js = (IJSInProcessRuntime) js;
+        _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
+        _storage = storage;
+    }
 
-        private readonly string _storage;
+    public IReadOnlyCollection<string> GetKeys()
+    {
+        var length = _js.Invoke<int>("eval", $"{_storage}.length");
 
-        protected StorageBase(
-            IJSRuntime js,
-            IIndex<SerializerKey, ISerializer<string>> serializers,
-            string storage
-        )
-        {
-            _js = (IJSInProcessRuntime) js;
-            _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
-            _storage = storage;
-        }
+        if (length == 0)
+            return Array.Empty<string>();
 
-        public IReadOnlyCollection<string> GetKeys()
-        {
-            var length = _js.Invoke<int>("eval", $"{_storage}.length");
+        var keys = Enumerable.Range(0, length)
+            .Select(i => _js.Invoke<string>($"{_storage}.key", i))
+            .ToArray();
 
-            if (length == 0)
-                return Array.Empty<string>();
+        return keys;
+    }
 
-            var keys = Enumerable.Range(0, length)
-                .Select(i => _js.Invoke<string>($"{_storage}.key", i))
-                .ToArray();
+    public bool HasKey(string key)
+    {
+        return _js.Invoke<bool>($"{_storage}.hasOwnProperty", key);
+    }
 
-            return keys;
-        }
+    public T Get<T>(string key)
+    {
+        var raw = _js.Invoke<string>($"{_storage}.getItem", key);
 
-        public bool HasKey(string key)
-        {
-            return _js.Invoke<bool>($"{_storage}.hasOwnProperty", key);
-        }
+        if (string.IsNullOrWhiteSpace(raw))
+            throw new KeyNotFoundException($"Key {key} is not found in {_storage}");
 
-        public T Get<T>(string key)
-        {
-            var raw = _js.Invoke<string>($"{_storage}.getItem", key);
+        var value = _serializer.Deserialize<T>(raw);
 
-            if (string.IsNullOrWhiteSpace(raw))
-                throw new KeyNotFoundException($"Key {key} is not found in {_storage}");
+        return value;
+    }
 
-            var value = _serializer.Deserialize<T>(raw);
+    public bool Set<T>(string key, T value)
+    {
+        var raw = _serializer.Serialize(value);
+        var hasKey = HasKey(key);
+        _js.InvokeVoid($"{_storage}.setItem", key, raw);
 
-            return value;
-        }
+        return !hasKey;
+    }
 
-        public bool Set<T>(string key, T value)
-        {
-            var raw = _serializer.Serialize(value);
-            var hasKey = HasKey(key);
-            _js.InvokeVoid($"{_storage}.setItem", key, raw);
+    public bool Remove(string key)
+    {
+        var hasKey = HasKey(key);
+        _js.InvokeVoid($"{_storage}.removeItem", key);
 
-            return !hasKey;
-        }
+        return hasKey;
+    }
 
-        public bool Remove(string key)
-        {
-            var hasKey = HasKey(key);
-            _js.InvokeVoid($"{_storage}.removeItem", key);
-
-            return hasKey;
-        }
-
-        public void Clear()
-        {
-            _js.InvokeVoid($"{_storage}.clear");
-        }
+    public void Clear()
+    {
+        _js.InvokeVoid($"{_storage}.clear");
     }
 }

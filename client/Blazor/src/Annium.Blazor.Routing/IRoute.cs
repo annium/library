@@ -1,9 +1,8 @@
-namespace Annium.Blazor.Routing
+namespace Annium.Blazor.Routing;
+
+public interface IRoute
 {
-    public interface IRoute
-    {
-        string Link();
-        void Go();
-        bool IsAt(PathMatch match = PathMatch.Exact);
-    }
+    string Link();
+    void Go();
+    bool IsAt(PathMatch match = PathMatch.Exact);
 }

@@ -4,46 +4,46 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Annium.Blazor.Css.Internal
+namespace Annium.Blazor.Css.Internal;
+
+internal class CssRuleInternal : CssTopLevelRule
 {
-    internal class CssRuleInternal : CssTopLevelRule
-    {
-        private readonly string _selector;
-        private readonly IList<CssRuleInternal> _rules = new List<CssRuleInternal>();
-        private readonly IDictionary<string, CssRuleInternal> _media = new Dictionary<string, CssRuleInternal>();
-        private readonly IDictionary<string, string> _properties = new Dictionary<string, string>();
+    private readonly string _selector;
+    private readonly IList<CssRuleInternal> _rules = new List<CssRuleInternal>();
+    private readonly IDictionary<string, CssRuleInternal> _media = new Dictionary<string, CssRuleInternal>();
+    private readonly IDictionary<string, string> _properties = new Dictionary<string, string>();
 
 #if DEBUG
-        private const int INDENT = 2;
-        private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}: {pair.Value};";
+    private const int INDENT = 2;
+    private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}: {pair.Value};";
 
-        private static void WriteCss(string inheritedSelector, CssRuleInternal rule, StringBuilder sb, int indent = 0)
+    private static void WriteCss(string inheritedSelector, CssRuleInternal rule, StringBuilder sb, int indent = 0)
+    {
+        var i1 = new string(' ', indent);
+        var i2 = new string(' ', indent + INDENT);
+
+        // this rule
+        sb.AppendLine($"{i1}{inheritedSelector}{rule._selector} {{");
+        foreach (var property in rule._properties.Select(PropertyToCss))
+            sb.AppendLine($"{i2}{property}");
+        sb.AppendLine($"{i1}}}");
+
+        // inner rules
+        foreach (var innerRule in rule._rules)
         {
-            var i1 = new string(' ', indent);
-            var i2 = new string(' ', indent + INDENT);
-
-            // this rule
-            sb.AppendLine($"{i1}{inheritedSelector}{rule._selector} {{");
-            foreach (var property in rule._properties.Select(PropertyToCss))
-                sb.AppendLine($"{i2}{property}");
-            sb.AppendLine($"{i1}}}");
-
-            // inner rules
-            foreach (var innerRule in rule._rules)
-            {
-                sb.AppendLine();
-                WriteCss($"{inheritedSelector}{rule._selector}", innerRule, sb, indent);
-            }
-
-            // media rules
-            foreach (var (query, mediaRule) in rule._media)
-            {
-                sb.AppendLine();
-                sb.AppendLine($"{i1}{query} {{");
-                WriteCss(inheritedSelector, mediaRule, sb, indent + INDENT);
-                sb.AppendLine($"{i1}}}");
-            }
+            sb.AppendLine();
+            WriteCss($"{inheritedSelector}{rule._selector}", innerRule, sb, indent);
         }
+
+        // media rules
+        foreach (var (query, mediaRule) in rule._media)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"{i1}{query} {{");
+            WriteCss(inheritedSelector, mediaRule, sb, indent + INDENT);
+            sb.AppendLine($"{i1}}}");
+        }
+    }
 #else
         private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}:{pair.Value};";
 
@@ -73,59 +73,58 @@ namespace Annium.Blazor.Css.Internal
         }
 #endif
 
-        public CssRuleInternal(string selector)
-        {
-            Name = selector.Split('#', '.').Last();
-            _selector = selector;
-        }
+    public CssRuleInternal(string selector)
+    {
+        Name = selector.Split('#', '.').Last();
+        _selector = selector;
+    }
 
-        public override CssRule Set(string property, string value)
-        {
-            _properties[property] = value;
+    public override CssRule Set(string property, string value)
+    {
+        _properties[property] = value;
 
-            return this;
-        }
+        return this;
+    }
 
-        public override CssRule And(string selector, Action<CssRule> configure) => AddRule(selector, configure);
+    public override CssRule And(string selector, Action<CssRule> configure) => AddRule(selector, configure);
 
 #if DEBUG
-        public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($" > {selector}", configure);
+    public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($" > {selector}", configure);
 #else
         public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($">{selector}", configure);
 #endif
 
-        public override CssRule Inheritor(string selector, Action<CssRule> configure) => AddRule($" {selector}", configure);
+    public override CssRule Inheritor(string selector, Action<CssRule> configure) => AddRule($" {selector}", configure);
 
-        public override CssTopLevelRule Media(string query, Action<CssRule> configure)
-        {
-            var rule = new CssRuleInternal(_selector);
-            configure(rule);
-            _media[$"@media {query}"] = rule;
+    public override CssTopLevelRule Media(string query, Action<CssRule> configure)
+    {
+        var rule = new CssRuleInternal(_selector);
+        configure(rule);
+        _media[$"@media {query}"] = rule;
 
-            return this;
-        }
-
-        public override string ToString() => _selector;
-
-        public override string ToCss()
-        {
-            var sb = new StringBuilder(GetSizeEstimation());
-
-            WriteCss(string.Empty, this, sb);
-
-            return sb.ToString();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private CssRule AddRule(string selector, Action<CssRule> configure)
-        {
-            var rule = new CssRuleInternal(selector);
-            configure(rule);
-            _rules.Add(rule);
-
-            return this;
-        }
-
-        private int GetSizeEstimation() => _properties.Count * 20 + _rules.Select(x => x.GetSizeEstimation()).Sum();
+        return this;
     }
+
+    public override string ToString() => _selector;
+
+    public override string ToCss()
+    {
+        var sb = new StringBuilder(GetSizeEstimation());
+
+        WriteCss(string.Empty, this, sb);
+
+        return sb.ToString();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private CssRule AddRule(string selector, Action<CssRule> configure)
+    {
+        var rule = new CssRuleInternal(selector);
+        configure(rule);
+        _rules.Add(rule);
+
+        return this;
+    }
+
+    private int GetSizeEstimation() => _properties.Count * 20 + _rules.Select(x => x.GetSizeEstimation()).Sum();
 }

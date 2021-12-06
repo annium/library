@@ -1,7 +1,6 @@
-namespace Annium.Blazor.Routing.Internal
+namespace Annium.Blazor.Routing.Internal;
+
+internal class Constants
 {
-    internal class Constants
-    {
-        public const char SEPARATOR = '/';
-    }
+    public const char SEPARATOR = '/';
 }

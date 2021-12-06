@@ -6,52 +6,51 @@ using Annium.Core.Mapper;
 using Annium.Core.Primitives;
 using Microsoft.Extensions.Primitives;
 
-namespace Annium.Blazor.Routing.Internal.Implementations.Locations
+namespace Annium.Blazor.Routing.Internal.Implementations.Locations;
+
+internal class LocationQuery : ILocationQuery
 {
-    internal class LocationQuery : ILocationQuery
+    public static ILocationQuery Create(
+        IReadOnlyCollection<PropertyInfo> properties,
+        IMapper mapper
+    )
     {
-        public static ILocationQuery Create(
-            IReadOnlyCollection<PropertyInfo> properties,
-            IMapper mapper
-        )
+        return new LocationQuery(properties.ToPropertiesDictionary(), mapper);
+    }
+
+    private readonly IReadOnlyDictionary<string, PropertyInfo> _properties;
+    private readonly IMapper _mapper;
+
+    private LocationQuery(
+        IReadOnlyDictionary<string, PropertyInfo> properties,
+        IMapper mapper
+    )
+    {
+        _properties = properties;
+        _mapper = mapper;
+    }
+
+    public LocationMatch Match(IReadOnlyDictionary<string, StringValues> query)
+    {
+        var routeValues = new Dictionary<string, object>();
+
+        foreach (var (key, raw) in query)
         {
-            return new LocationQuery(properties.ToPropertiesDictionary(), mapper);
-        }
+            if (!_properties.TryGetValue(key, out var property))
+                continue;
 
-        private readonly IReadOnlyDictionary<string, PropertyInfo> _properties;
-        private readonly IMapper _mapper;
-
-        private LocationQuery(
-            IReadOnlyDictionary<string, PropertyInfo> properties,
-            IMapper mapper
-        )
-        {
-            _properties = properties;
-            _mapper = mapper;
-        }
-
-        public LocationMatch Match(IReadOnlyDictionary<string, StringValues> query)
-        {
-            var routeValues = new Dictionary<string, object>();
-
-            foreach (var (key, raw) in query)
+            var type = property.PropertyType;
+            try
             {
-                if (!_properties.TryGetValue(key, out var property))
-                    continue;
-
-                var type = property.PropertyType;
-                try
-                {
-                    var value = type.IsEnumerable() ? _mapper.Map(raw.ToArray(), type) : _mapper.Map(raw.FirstOrDefault()!, type);
-                    routeValues[key] = value;
-                }
-                catch
-                {
-                    // ignored
-                }
+                var value = type.IsEnumerable() ? _mapper.Map(raw.ToArray(), type) : _mapper.Map(raw.FirstOrDefault()!, type);
+                routeValues[key] = value;
             }
-
-            return new LocationMatch(true, routeValues);
+            catch
+            {
+                // ignored
+            }
         }
+
+        return new LocationMatch(true, routeValues);
     }
 }

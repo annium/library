@@ -1,6 +1,5 @@
-namespace Annium.Blazor.Storage
+namespace Annium.Blazor.Storage;
+
+public interface IStore
 {
-    public interface IStore
-    {
-    }
 }

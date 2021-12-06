@@ -1,9 +1,8 @@
 using Annium.Blazor.Routing.Internal.Routes;
 
-namespace Annium.Blazor.Routing.Internal
+namespace Annium.Blazor.Routing.Internal;
+
+internal interface IRouteContainer
 {
-    internal interface IRouteContainer
-    {
-        void Track(IRouteBase route);
-    }
+    void Track(IRouteBase route);
 }

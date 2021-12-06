@@ -3,25 +3,24 @@ using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Blazor.Routing.Internal.Routes;
 using Microsoft.AspNetCore.Components;
 
-namespace Annium.Blazor.Routing.Internal.Implementations.Routes
+namespace Annium.Blazor.Routing.Internal.Implementations.Routes;
+
+internal abstract class RouteBase : IRouteBase
 {
-    internal abstract class RouteBase : IRouteBase
+    public string Template { get; }
+    public Type PageType { get; }
+    protected NavigationManager NavigationManager { get; }
+
+    protected RouteBase(
+        NavigationManager navigationManager,
+        string template,
+        Type pageType
+    )
     {
-        public string Template { get; }
-        public Type PageType { get; }
-        protected NavigationManager NavigationManager { get; }
-
-        protected RouteBase(
-            NavigationManager navigationManager,
-            string template,
-            Type pageType
-        )
-        {
-            NavigationManager = navigationManager;
-            Template = template;
-            PageType = pageType;
-        }
-
-        public abstract LocationMatch Match(RawLocation raw, PathMatch match);
+        NavigationManager = navigationManager;
+        Template = template;
+        PageType = pageType;
     }
+
+    public abstract LocationMatch Match(RawLocation raw, PathMatch match);
 }

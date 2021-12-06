@@ -1,6 +1,5 @@
-namespace Annium.Blazor.Routing.Internal.Implementations.Locations.Segments
+namespace Annium.Blazor.Routing.Internal.Implementations.Locations.Segments;
+
+internal interface ILocationSegment
 {
-    internal interface ILocationSegment
-    {
-    }
 }

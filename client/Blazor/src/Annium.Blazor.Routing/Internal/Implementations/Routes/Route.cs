@@ -6,47 +6,46 @@ using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Core.Mapper;
 using Microsoft.AspNetCore.Components;
 
-namespace Annium.Blazor.Routing.Internal.Implementations.Routes
+namespace Annium.Blazor.Routing.Internal.Implementations.Routes;
+
+internal class Route : RouteBase, IRoute
 {
-    internal class Route : RouteBase, IRoute
+    private readonly ILocationPath _path;
+
+    public Route(
+        NavigationManager navigationManager,
+        string template,
+        Type pageType,
+        IMapper mapper
+    ) : base(navigationManager, template, pageType)
     {
-        private readonly ILocationPath _path;
+        _path = LocationPath.Parse(template, Array.Empty<PropertyInfo>(), mapper).Item1;
+    }
 
-        public Route(
-            NavigationManager navigationManager,
-            string template,
-            Type pageType,
-            IMapper mapper
-        ) : base(navigationManager, template, pageType)
-        {
-            _path = LocationPath.Parse(template, Array.Empty<PropertyInfo>(), mapper).Item1;
-        }
+    public string Link()
+    {
+        var path = _path.Link(new Dictionary<string, object>());
 
-        public string Link()
-        {
-            var path = _path.Link(new Dictionary<string, object>());
+        return path;
+    }
 
-            return path;
-        }
+    public void Go()
+    {
+        var link = Link();
+        NavigationManager.NavigateTo(link);
+    }
 
-        public void Go()
-        {
-            var link = Link();
-            NavigationManager.NavigateTo(link);
-        }
+    public bool IsAt(PathMatch match = PathMatch.Exact)
+    {
+        var raw = RawLocation.Parse(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
 
-        public bool IsAt(PathMatch match = PathMatch.Exact)
-        {
-            var raw = RawLocation.Parse(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
+        return Match(raw, match).IsSuccess;
+    }
 
-            return Match(raw, match).IsSuccess;
-        }
+    public override LocationMatch Match(RawLocation raw, PathMatch match)
+    {
+        var pathMatch = _path.Match(raw.Segments, match);
 
-        public override LocationMatch Match(RawLocation raw, PathMatch match)
-        {
-            var pathMatch = _path.Match(raw.Segments, match);
-
-            return pathMatch;
-        }
+        return pathMatch;
     }
 }
