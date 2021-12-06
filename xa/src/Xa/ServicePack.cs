@@ -8,7 +8,7 @@ namespace Xa
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
             container.AddRuntimeTools(GetType().Assembly, true);
-            container.AddTimeProvider();
+            container.AddTime().WithRealTime().SetDefault();
             container.AddArguments();
             container.AddLogging(route => route.UseConsole());
             container.AddMapper();

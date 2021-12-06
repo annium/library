@@ -3,10 +3,10 @@
         <PackageId>XRest.Plugins.AspNetCore</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
         <Description>XRest middleware for ASP.NET Core</Description>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <OutputType>Library</OutputType>
         <DebugType>portable</DebugType>
-        <LangVersion>9.0</LangVersion>
+        <LangVersion>10.0</LangVersion>
         <WarningsAsErrors>true</WarningsAsErrors>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
@@ -17,6 +17,6 @@
     <ItemGroup>
         <PackageReference Include="Annium.Data.Operations.Serialization.Json" Version="0.1.0" />
         <PackageReference Include="Annium.NodaTime.Serialization.Json" Version="0.1.0" />
-        <PackageReference Include="NSwag.AspNetCore" Version="13.10.4" />
+        <PackageReference Include="NSwag.AspNetCore" Version="13.14.8" />
     </ItemGroup>
 </Project>

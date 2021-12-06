@@ -7,9 +7,9 @@
         <description>Sass compilation tool</description>
     </metadata>
     <files>
-        <file src="build/_._" target="lib/net5.0/" />
-        <file src="build/XSass.targets" target="build/net5.0/XSass.targets" />
+        <file src="build/_._" target="lib/net6.0/" />
+        <file src="build/XSass.targets" target="build/net6.0/XSass.targets" />
         <file src="build/CompileSass.targets" target="tools/" />
-        <file src="$publishdir$\net5.0\**\*" target="tools/net5.0/" />
+        <file src="$publishdir$\net6.0\**\*" target="tools/net6.0/" />
     </files>
 </package>

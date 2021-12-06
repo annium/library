@@ -33,7 +33,7 @@ namespace Backuper.Api
 
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            container.AddTimeProvider();
+            container.AddTime().WithRealTime().SetDefault();
 
             container.Add<StateFactory>().AsSelf().Singleton();
             container.Add<StateManager>().AsSelf().Singleton();

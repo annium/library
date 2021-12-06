@@ -18,7 +18,7 @@ namespace Xmg
 
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            container.AddTimeProvider();
+            container.AddTime().WithRealTime().SetDefault();
             container.AddMapper();
             container.AddArguments();
             container.AddJsonSerializers().SetDefault();

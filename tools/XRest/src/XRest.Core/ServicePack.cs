@@ -9,7 +9,7 @@ namespace XRest.Core
     {
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            container.AddTimeProvider();
+            container.AddTime().WithRealTime().SetDefault();
             container.AddJsonSerializers().SetDefault();
 
             container.Add<ITemplateWriter, TemplateWriter>().Singleton();

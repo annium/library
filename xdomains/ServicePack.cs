@@ -9,7 +9,7 @@ namespace xdomains
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
             container.AddRuntimeTools(GetType().Assembly, false);
-            container.AddTimeProvider();
+            container.AddTime().WithRealTime().SetDefault();
             container.AddMapper();
 
             container.Add<Cache>().AsSelf().Singleton();

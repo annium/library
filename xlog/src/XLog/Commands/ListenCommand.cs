@@ -80,7 +80,7 @@ namespace XLog.Commands
                     pool.Return(buffer);
                 }
 
-                if (client is not null!)
+                if (client is not null)
                 {
                     client.Close();
                     client.Dispose();

@@ -14,7 +14,7 @@ namespace XSass
             container.AddRuntimeTools(GetType().Assembly, false);
             container.AddMapper();
             container.AddConfiguration<Configuration>(x => x.AddYamlFile("xsass.yml", true));
-            container.AddTimeProvider();
+            container.AddTime().WithRealTime().SetDefault();
         }
 
         public override void Register(IServiceContainer container, IServiceProvider provider)

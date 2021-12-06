@@ -3,10 +3,10 @@
         <PackageId>Xmg.Core</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
         <Description>Xmg.Core</Description>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <OutputType>Library</OutputType>
         <DebugType>portable</DebugType>
-        <LangVersion>9.0</LangVersion>
+        <LangVersion>10.0</LangVersion>
         <WarningsAsErrors>true</WarningsAsErrors>
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
@@ -17,6 +17,6 @@
         <PackageReference Include="Annium.Core.Reflection" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Runtime" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Abstractions" Version="0.1.0" />
-        <PackageReference Include="Scriban" Version="3.5.0" />
+        <PackageReference Include="Scriban" Version="5.0.0" />
     </ItemGroup>
 </Project>

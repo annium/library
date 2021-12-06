@@ -49,7 +49,7 @@ namespace XRest.Plugins.AspNetCore
             if (sample.RouteValues.TryGetValue(RouteDynamicKey, out var dynamicKey) && !string.IsNullOrWhiteSpace(dynamicKey))
                 nsParts.Add(dynamicKey.PascalCase());
             var ns = Namespace.New(nsParts);
-            var name = sample.RouteValues[RouteController];
+            var name = sample.RouteValues[RouteController]!;
             var actionModels = actions
                 .SelectMany(BuildActionModel)
                 .ToArray();
