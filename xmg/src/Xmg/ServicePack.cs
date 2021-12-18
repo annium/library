@@ -11,17 +11,18 @@ internal class ServicePack : ServicePackBase
         Add<Migration.ServicePack>();
     }
 
-    public override void Configure(IServiceContainer container)
-    {
-        container.AddRuntimeTools(GetType().Assembly, true);
-    }
-
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
+        container.AddRuntimeTools(GetType().Assembly, true);
         container.AddTime().WithRealTime().SetDefault();
         container.AddMapper();
         container.AddArguments();
         container.AddJsonSerializers().SetDefault();
-        container.AddLogging(route => route.UseConsole());
+        container.AddLogging();
+    }
+
+    public override void Setup(IServiceProvider provider)
+    {
+        provider.UseLogging(route => route.UseConsole());
     }
 }

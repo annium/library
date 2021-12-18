@@ -13,15 +13,16 @@ internal class ServicePack : ServicePackBase
         Add<Sources.ServicePack>();
     }
 
-    public override void Configure(IServiceContainer container)
-    {
-        container.AddRuntimeTools(GetType().Assembly, true);
-    }
-
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
+        container.AddRuntimeTools(GetType().Assembly, true);
         container.AddArguments();
-        container.AddLogging(route => route.UseConsole());
+        container.AddLogging();
         container.AddMapper();
+    }
+
+    public override void Setup(IServiceProvider provider)
+    {
+        provider.UseLogging(route => route.UseConsole());
     }
 }

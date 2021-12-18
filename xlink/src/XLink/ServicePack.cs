@@ -5,11 +5,6 @@ namespace XLink;
 
 internal class ServicePack : ServicePackBase
 {
-    public override void Configure(IServiceContainer container)
-    {
-        // register configurations
-    }
-
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
         // register and setup services

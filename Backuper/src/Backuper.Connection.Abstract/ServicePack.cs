@@ -9,7 +9,12 @@ public class ServicePack : ServicePackBase
     {
         container.Add<ConnectionFactory>().Singleton();
 
-        container.AddLogging(route => route.UseConsole());
+        container.AddLogging();
         container.AddShell();
+    }
+
+    public override void Setup(IServiceProvider provider)
+    {
+        provider.UseLogging(route => route.UseConsole());
     }
 }

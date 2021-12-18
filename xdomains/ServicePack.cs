@@ -20,6 +20,11 @@ internal class ServicePack : ServicePackBase
         container.Add<Settings>().AsSelf().Singleton();
 
         container.AddArguments();
-        container.AddLogging(route => route.UseConsole());
+        container.AddLogging();
+    }
+
+    public override void Setup(IServiceProvider provider)
+    {
+        provider.UseLogging(route => route.UseConsole());
     }
 }

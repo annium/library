@@ -10,7 +10,12 @@ internal class ServicePack : ServicePackBase
         container.AddRuntimeTools(GetType().Assembly, true);
         container.AddTime().WithRealTime().SetDefault();
         container.AddArguments();
-        container.AddLogging(route => route.UseConsole());
+        container.AddLogging();
         container.AddMapper();
+    }
+
+    public override void Setup(IServiceProvider provider)
+    {
+        provider.UseLogging(route => route.UseConsole());
     }
 }

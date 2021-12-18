@@ -9,6 +9,11 @@ public class ServicePack : ServicePackBase
     {
         container.Add<ChannelFactory>().Singleton();
 
-        container.AddLogging(route => route.UseConsole());
+        container.AddLogging();
+    }
+
+    public override void Setup(IServiceProvider provider)
+    {
+        provider.UseLogging(route => route.UseConsole());
     }
 }

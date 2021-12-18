@@ -20,20 +20,15 @@ internal class ServicePack : ServicePackBase
         Add<Storage.ServicePack>();
     }
 
-    public override void Configure(IServiceContainer container)
+    public override void Register(IServiceContainer container, IServiceProvider provider)
     {
         container.AddRuntimeTools(GetType().Assembly, false);
+        container.AddTime().WithRealTime().SetDefault();
+        container.AddConfiguration<Configuration>(x => x.AddYamlFile(Path.Combine("configuration", "config.yml")));
         container
             .AddStorage()
             .AddFileSystemStorage()
             .AddS3Storage();
-
-        container.AddConfiguration<Configuration>(x => x.AddYamlFile(Path.Combine("configuration", "config.yml")));
-    }
-
-    public override void Register(IServiceContainer container, IServiceProvider provider)
-    {
-        container.AddTime().WithRealTime().SetDefault();
 
         container.Add<StateFactory>().AsSelf().Singleton();
         container.Add<StateManager>().AsSelf().Singleton();
@@ -42,11 +37,13 @@ internal class ServicePack : ServicePackBase
 
         container.AddScheduler();
         container.AddMediator();
-        container.AddLogging(route => route.UseConsole());
+        container.AddLogging();
     }
 
     public override void Setup(IServiceProvider provider)
     {
+        provider.UseLogging(route => route.UseConsole());
+
         var stateFactory = provider.GetRequiredService<StateFactory>();
         var stateManager = provider.GetRequiredService<StateManager>();
 

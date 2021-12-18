@@ -11,7 +11,7 @@ internal class ServicePack : ServicePackBase
         container.AddRuntimeTools(GetType().Assembly, true);
         container.AddTime().WithRealTime().SetDefault();
         container.AddArguments();
-        container.AddLogging(route => route.UseConsole());
+        container.AddLogging();
         container.AddMapper();
 
         container.AddAll(GetType().Assembly)
@@ -20,5 +20,10 @@ internal class ServicePack : ServicePackBase
             .AsSelf()
             .AsSelfFactory()
             .Transient();
+    }
+
+    public override void Setup(IServiceProvider provider)
+    {
+        provider.UseLogging(route => route.UseConsole());
     }
 }
