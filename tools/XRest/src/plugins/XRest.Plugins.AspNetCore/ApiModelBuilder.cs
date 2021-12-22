@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -72,11 +73,14 @@ internal class ApiModelBuilder
             .Where(x => x.BindingInfo?.BindingSource?.Id != BindingBody)
             .SelectMany(x =>
             {
+                if (ParseHelper.IsSkippedType(x.ParameterType))
+                    return Array.Empty<ParameterModel>();
+
                 if (routeParameters.Contains(x.Name))
-                    return new[] { new ParameterModel(x.Name!, ParameterLocationEnum.Path, x.ParameterType) };
+                    return new[] { new ParameterModel(x.Name, ParameterLocationEnum.Path, x.ParameterType) };
 
                 if (ParseHelper.IsAllowedQueryType(x.ParameterType))
-                    return new[] { new ParameterModel(x.Name!, ParameterLocationEnum.Query, x.ParameterType) };
+                    return new[] { new ParameterModel(x.Name, ParameterLocationEnum.Query, x.ParameterType) };
 
                 return x.ParameterType
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)

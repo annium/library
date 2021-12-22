@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using NodaTime;
 
@@ -15,6 +16,11 @@ public static class ParseHelper
                type == typeof(DateTimeOffset) ||
                type == typeof(Instant) ||
                type == typeof(Guid);
+    }
+
+    public static bool IsSkippedType(Type type)
+    {
+        return type == typeof(CancellationToken);
     }
 
     /// <summary>

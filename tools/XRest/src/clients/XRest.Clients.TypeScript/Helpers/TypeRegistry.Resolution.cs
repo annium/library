@@ -80,6 +80,10 @@ internal partial class TypeRegistry
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private DefinedTypeView ResolveInternal(Type type)
     {
+        // Task
+        if (type == typeof(Task))
+            return BaseType.Void;
+
         if (TryResolve(type, out var view))
             return view!;
 

@@ -64,6 +64,9 @@ internal class Parser : IParser
             .Where(x => x.GetCustomAttribute<FromBodyAttribute>() is null)
             .SelectMany(x =>
             {
+                if (ParseHelper.IsSkippedType(x.ParameterType))
+                    return Array.Empty<ParameterModel>();
+
                 if (routeParameters.Contains(x.Name))
                     return new[] { new ParameterModel(x.Name!, ParameterLocationEnum.Path, x.ParameterType) };
 
