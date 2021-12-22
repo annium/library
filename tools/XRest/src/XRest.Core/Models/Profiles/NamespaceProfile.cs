@@ -1,7 +1,6 @@
 using Annium.Core.Mapper;
-using XRest.Core.Models;
 
-namespace XRest.Core.Views.Profiles;
+namespace XRest.Core.Models.Profiles;
 
 public class NamespaceProfile : Profile
 {
