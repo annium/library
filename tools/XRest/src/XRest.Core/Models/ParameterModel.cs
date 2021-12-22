@@ -1,4 +1,5 @@
 using System;
+using Annium.Core.Primitives;
 
 namespace XRest.Core.Models;
 
@@ -18,4 +19,6 @@ public class ParameterModel
         Location = location;
         Type = type;
     }
+
+    public override string ToString() => $"[{Location}] {Type.FriendlyName()} {Name}";
 }

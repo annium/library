@@ -30,5 +30,5 @@ public class ActionModel
         Response = response;
     }
 
-    public override string ToString() => $"{Method} {Path}";
+    public override string ToString() => $"{Method} {Path} ({Name})";
 }

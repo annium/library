@@ -9,7 +9,7 @@ public class ServicePack : ServicePackBase
 {
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
-        container.AddHttpRequestFactory();
+        container.AddHttpRequestFactory().SetDefault();
         container.Add<ILoader, Loader>().Singleton();
     }
 }

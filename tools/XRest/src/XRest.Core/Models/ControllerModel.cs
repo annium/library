@@ -18,4 +18,6 @@ public class ControllerModel
         Name = name;
         Actions = actions;
     }
+
+    public override string ToString() => $"{Namespace} > {Name}";
 }
