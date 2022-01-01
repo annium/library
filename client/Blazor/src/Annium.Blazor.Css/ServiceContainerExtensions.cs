@@ -10,7 +10,6 @@ public static class ServiceContainerExtensions
         // register rule sets
         container.AddAll()
             .AssignableTo<RuleSet>()
-            .AsInterfaces()
             .AsSelf()
             .Singleton();
 

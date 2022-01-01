@@ -14,21 +14,12 @@ internal class StyleSheet : IStyleSheet
         var rules = new List<CssRule>();
         var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        var properties = set.GetType().GetProperties(flags)
-            .Where(x => x.CanRead && x.PropertyType.IsAssignableFrom(typeof(CssRule)))
-            .ToArray();
-        foreach (var property in properties)
-            rules.Add(
-                (CssRule) property.GetMethod!.Invoke(set, Array.Empty<object>())! ??
-                throw new InvalidOperationException($"Property {property} contains empty rule")
-            );
-
         var fields = set.GetType().GetFields(flags)
             .Where(x => x.FieldType.IsAssignableFrom(typeof(CssRule)))
             .ToArray();
         foreach (var field in fields)
             rules.Add(
-                (CssRule) field.GetValue(set)! ??
+                (CssRule)field.GetValue(set)! ??
                 throw new InvalidOperationException($"Field {field} contains empty rule")
             );
 
