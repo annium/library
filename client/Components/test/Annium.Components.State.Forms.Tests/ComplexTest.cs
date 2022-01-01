@@ -134,14 +134,14 @@ public class ComplexTest : TestBase
         log.Has(1);
     }
 
-    private Blog Arrange() => new Blog
+    private Blog Arrange() => new()
     {
         Name = "Sample",
         Author = new User { Name = "Max" },
         Messages = new[] { new Message { Text = "one", IsRead = true }, new Message { Text = "two" } },
     };
 
-    private Blog ArrangeOther() => new Blog
+    private Blog ArrangeOther() => new()
     {
         Name = "Demo",
         Author = new User { Name = "Lex" },

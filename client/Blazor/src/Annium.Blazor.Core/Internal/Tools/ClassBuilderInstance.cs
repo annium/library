@@ -8,7 +8,7 @@ namespace Annium.Blazor.Core.Internal.Tools;
 
 internal class ClassBuilderInstance<T> : IClassBuilder<T>
 {
-    private readonly List<Func<T, string?>> _rules = new List<Func<T, string?>>();
+    private readonly List<Func<T, string?>> _rules = new();
 
     internal ClassBuilderInstance()
     {
@@ -70,7 +70,7 @@ internal class ClassBuilderInstance<T> : IClassBuilder<T>
 
 internal class ClassBuilderInstance : IClassBuilder
 {
-    private readonly List<Func<string?>> _rules = new List<Func<string?>>();
+    private readonly List<Func<string?>> _rules = new();
 
     internal ClassBuilderInstance()
     {
@@ -105,6 +105,8 @@ internal class ClassBuilderInstance : IClassBuilder
 
     public IClassBuilder With<TK>(TK key, IDictionary<TK, string?> dictionary) =>
         Rule(() => dictionary.TryGetValue(key, out var value) ? value : string.Empty);
+
+    public override string ToString() => Build();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private IClassBuilder Rule(Func<string?> process)

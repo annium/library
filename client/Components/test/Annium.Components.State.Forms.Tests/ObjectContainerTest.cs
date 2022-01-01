@@ -176,7 +176,7 @@ public class ObjectContainerTest : TestBase
         log.Has(2);
     }
 
-    private User Arrange() => new User
+    private User Arrange() => new()
     {
         Name = "Max",
         Age = 20,
