@@ -23,8 +23,13 @@ internal class Writer : IWriter
         if (!Directory.Exists(output))
             Directory.CreateDirectory(output);
 
-        if (generateTestClient)
+        WriteIfMissing(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
         {
+            Usages = new[] { "Annium.Net.Http" },
+            client.Namespace,
+        });
+
+        if (generateTestClient)
             Write(output, "HttpResponseExtensions", "Templates.HttpResponseTestExtensions", new
             {
                 Usages = new[]
@@ -37,15 +42,7 @@ internal class Writer : IWriter
                 },
                 client.Namespace,
             });
-        }
         else
-        {
-            Write(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
-            {
-                Usages = new[] { "Annium.Net.Http" },
-                client.Namespace,
-            });
-
             Write(output, "HttpResponseExtensions", "Templates.HttpResponseExtensions", new
             {
                 Usages = new[]
@@ -57,7 +54,7 @@ internal class Writer : IWriter
                 },
                 client.Namespace,
             });
-        }
+
 
         Write(output, "ClientBase", "Templates.ClientBase", new
         {
@@ -100,6 +97,14 @@ internal class Writer : IWriter
             Directory.CreateDirectory(output);
 
         Write(output, client.Type, generateTestClient ? "Templates.TestClient" : "Templates.Client", client);
+    }
+
+    private void WriteIfMissing<T>(string output, string fileName, string template, T data)
+        where T : class
+    {
+        var path = Path.Combine(output, $"{fileName}.cs");
+        if (!File.Exists(path))
+            File.WriteAllText(path, _templateWriter.Write(template, data));
     }
 
     private void Write<T>(string output, string fileName, string template, T data)
