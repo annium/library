@@ -14,13 +14,13 @@ internal class CssRuleInternal : CssTopLevelRule
     private readonly IDictionary<string, string> _properties = new Dictionary<string, string>();
 
 #if DEBUG
-    private const int INDENT = 2;
+    private const int Indent = 2;
     private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}: {pair.Value};";
 
     private static void WriteCss(string inheritedSelector, CssRuleInternal rule, StringBuilder sb, int indent = 0)
     {
         var i1 = new string(' ', indent);
-        var i2 = new string(' ', indent + INDENT);
+        var i2 = new string(' ', indent + Indent);
 
         // this rule
         sb.AppendLine($"{i1}{inheritedSelector}{rule._selector} {{");
@@ -40,38 +40,48 @@ internal class CssRuleInternal : CssTopLevelRule
         {
             sb.AppendLine();
             sb.AppendLine($"{i1}{query} {{");
-            WriteCss(inheritedSelector, mediaRule, sb, indent + INDENT);
+            WriteCss(inheritedSelector, mediaRule, sb, indent + Indent);
             sb.AppendLine($"{i1}}}");
         }
     }
 #else
-        private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}:{pair.Value};";
+    private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}:{pair.Value};";
 
-        private static void WriteCss(string inheritedSelector, CssRuleInternal rule, StringBuilder sb)
+    private static void WriteCss(string inheritedSelector, CssRuleInternal rule, StringBuilder sb)
+    {
+        // skip
+        if (rule._properties.Count == 0 && rule._rules.Count == 0 && rule._media.Count == 0)
+            return;
+
+        // this rule
+        sb.Append($"{inheritedSelector}{rule._selector}{{");
+        foreach (var property in rule._properties.Select(PropertyToCss))
+            sb.Append(property);
+        sb.Append("}");
+
+        // inner rules
+        foreach (var innerRule in rule._rules)
+            WriteCss($"{inheritedSelector}{rule._selector}", innerRule, sb);
+
+        // media rules
+        foreach (var (query, mediaRule) in rule._media)
         {
-            // skip
-            if (rule._properties.Count == 0 && rule._rules.Count == 0 && rule._media.Count == 0)
-                return;
-
-            // this rule
-            sb.Append($"{inheritedSelector}{rule._selector}{{");
-            foreach (var property in rule._properties.Select(PropertyToCss))
-                sb.Append(property);
-            sb.Append("}");
-
-            // inner rules
-            foreach (var innerRule in rule._rules)
-                WriteCss($"{inheritedSelector}{rule._selector}", innerRule, sb);
-
-            // media rules
-            foreach (var (query, mediaRule) in rule._media)
-            {
-                sb.AppendLine($"{query} {{");
-                WriteCss(inheritedSelector, mediaRule, sb);
-                sb.AppendLine("}");
-            }
+            sb.AppendLine($"{query} {{");
+            WriteCss(inheritedSelector, mediaRule, sb);
+            sb.AppendLine("}");
         }
+    }
 #endif
+
+    private static void WriteInline(CssRuleInternal rule, StringBuilder sb)
+    {
+        // inner rules and media queries are forbidden
+        if (rule._rules.Count != 0 || rule._media.Count != 0)
+            throw new InvalidOperationException("Inner rules and media queries are not allowed in inline rules");
+
+        foreach (var property in rule._properties.Select(PropertyToCss))
+            sb.Append(property);
+    }
 
     public CssRuleInternal(string selector)
     {
@@ -106,6 +116,15 @@ internal class CssRuleInternal : CssTopLevelRule
     }
 
     public override string ToString() => _selector;
+
+    public override string Inline()
+    {
+        var sb = new StringBuilder(GetSizeEstimation());
+
+        WriteInline(this, sb);
+
+        return sb.ToString();
+    }
 
     public override string ToCss()
     {
