@@ -82,7 +82,6 @@ internal class Parser : IParser
                         p.PropertyType
                     ));
             })
-            .OrderBy(x => x.Name)
             .ToArray();
 
         var bodyType = action.GetParameters()

@@ -91,7 +91,6 @@ internal class ApiModelBuilder
                         p.PropertyType
                     ));
             })
-            .OrderBy(x => x.Name)
             .ToArray();
         var body = action.Parameters.SingleOrDefault(x => x.BindingInfo?.BindingSource?.Id == BindingBody)?.ParameterType;
         var response = action.MethodInfo.ReturnType;
