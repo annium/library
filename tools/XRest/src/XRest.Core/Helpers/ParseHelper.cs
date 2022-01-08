@@ -16,6 +16,7 @@ public static class ParseHelper
                type == typeof(DateTime) ||
                type == typeof(DateTimeOffset) ||
                type == typeof(Instant) ||
+               type == typeof(LocalDateTime) ||
                type == typeof(Guid);
     }
 
