@@ -1,0 +1,15 @@
+﻿@using Annium.Blazor.Charts.Domain
+@using Annium.Blazor.Charts.Domain.Contexts
+@using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts
+
+@namespace Annium.Blazor.Charts.Components
+
+@inject Style _style;
+
+<div @ref="_block" class="@Class">
+    <CascadingValue Value="SideContext" TValue="IManagedVerticalSideContext">
+        <canvas @ref="_canvas" class="@_style.Canvas" width="10" height="10"></canvas>
+        <canvas @ref="_overlay" class="@_style.Canvas" width="10" height="10"></canvas>
+        @ChildContent
+    </CascadingValue>
+</div>

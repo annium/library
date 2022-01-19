@@ -1,0 +1,29 @@
+using System.Collections.Immutable;
+using NodaTime;
+
+namespace Annium.Blazor.Charts.Internal;
+
+internal static class Constants
+{
+    public const int AnimationFrameMs = 16;
+    public const decimal ZoomMultiplier = 0.02m;
+    public static readonly ImmutableArray<int> Zooms = ImmutableArray.Create(1, 2, 4, 8, 16);
+    public static int ZoomMin => Zooms[0];
+    public static int ZoomMax => Zooms[^1];
+    public const int ZoomDefault = 4;
+    public const decimal ScrollMultiplier = 0.5m;
+    public static int GridLine => (int)(GridHalfLine * 2);
+    public const float GridHalfLine = 0.5f;
+    public const string GridStyle = "#eee";
+    public const string AxisLabelFontFamily = "sans-serif";
+    public const int AxisLabelFontSize = 12;
+    public const string AxisLabelStyle = "black";
+    public const string CrosshairLineStyle = "#555";
+    public const string CrosshairLabelBackground = "#333";
+    public const string CrosshairLabelFontFamily = "sans-serif";
+    public const int CrosshairLabelFontSize = 12;
+    public const string CrosshairLabelStyle = "white";
+    public static readonly Duration Minute = Duration.FromMinutes(1);
+    public static string S(Instant t) => t.InZone(TimeZone).LocalDateTime.ToString();
+    private static readonly DateTimeZone TimeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+}

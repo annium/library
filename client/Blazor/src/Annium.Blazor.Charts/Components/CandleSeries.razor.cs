@@ -1,0 +1,195 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Annium.Blazor.Charts.Data;
+using Annium.Blazor.Charts.Domain;
+using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Internal.Extensions;
+using Annium.Core.Primitives;
+using Microsoft.AspNetCore.Components;
+using NodaTime;
+using static Annium.Blazor.Charts.Internal.Constants;
+
+namespace Annium.Blazor.Charts.Components;
+
+public partial class CandleSeries : IAsyncDisposable
+{
+    [Parameter, EditorRequired]
+    public Func<Instant, Instant, Task<IReadOnlyList<ICandle>>> Load { get; set; } = default!;
+
+    [Parameter]
+    public string UpColor { get; set; } = "#51A39A";
+
+    [Parameter]
+    public string DownColor { get; set; } = "#DD5E56";
+
+    [Parameter]
+    public string StaleColor { get; set; } = "#999999";
+
+    [CascadingParameter]
+    public IChartContext ChartContext { get; set; } = default!;
+
+    [CascadingParameter]
+    internal IPaneContext PaneContext { get; set; } = default!;
+
+    [CascadingParameter]
+    internal ISeriesContext SeriesContext { get; set; } = default!;
+
+    [Inject]
+    private ISeriesSource<ICandle> Source { get; set; } = default!;
+
+    private AsyncDisposableBox _disposable = Disposable.AsyncBox();
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        Source.Init(Load);
+        PaneContext.RegisterSource(Source);
+
+        _disposable += Source;
+        _disposable += ChartContext.OnUpdate(Draw);
+    }
+
+    private void Draw()
+    {
+        var (start, end) = ChartContext.Range;
+
+        if (Source.GetData(start, end, out var data))
+            Render(data);
+        else if (!Source.IsLoading)
+            Source.LoadData(start, end, Draw);
+    }
+
+    private void Render(IReadOnlyList<ICandle> items)
+    {
+        if (items.Count == 0)
+            return;
+
+        var (min, max) = GetBounds(items);
+
+        // if range is changed, redraw will be triggered
+        if (PaneContext.AdjustRange(min, max))
+            return;
+
+        var width = GetWidth();
+        var offset = width == 1 ? 0 : ((double)width / 2).FloorInt32();
+        var start = ChartContext.View.Start;
+        var msPerPx = ChartContext.MsPerPx;
+        var rangeUp = PaneContext.View.End;
+        var dpx = PaneContext.DotPerPx;
+        var ctx = SeriesContext.Canvas;
+
+        ctx.Save();
+
+        if (width == 1)
+        {
+            ctx.FillStyle = UpColor;
+            foreach (var item in items.Where(x => x.Open < x.Close))
+            {
+                var high = ((rangeUp - item.High) / dpx).FloorInt32();
+                var low = ((rangeUp - item.Low) / dpx).FloorInt32();
+
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
+
+                ctx.FillRect(x, high, 1, low - high);
+            }
+
+            ctx.FillStyle = DownColor;
+            foreach (var item in items.Where(x => x.Open > x.Close))
+            {
+                var high = ((rangeUp - item.High) / dpx).FloorInt32();
+                var low = ((rangeUp - item.Low) / dpx).FloorInt32();
+
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
+
+                ctx.FillRect(x, high, 1, low - high);
+            }
+
+            ctx.FillStyle = StaleColor;
+            foreach (var item in items.Where(x => x.Open == x.Close))
+            {
+                var high = ((rangeUp - item.High) / dpx).FloorInt32();
+                var low = ((rangeUp - item.Low) / dpx).FloorInt32();
+
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
+
+                ctx.FillRect(x, high, 1, low - high);
+            }
+        }
+        else
+        {
+            ctx.FillStyle = UpColor;
+            foreach (var item in items.Where(x => x.Open < x.Close))
+            {
+                var open = ((rangeUp - item.Open) / dpx).FloorInt32();
+                var high = ((rangeUp - item.High) / dpx).FloorInt32();
+                var low = ((rangeUp - item.Low) / dpx).FloorInt32();
+                var close = ((rangeUp - item.Close) / dpx).FloorInt32();
+
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
+
+                ctx.FillRect(x, high, 1, low - high);
+                ctx.FillRect(x - offset, high, width, open - close);
+            }
+
+            ctx.FillStyle = DownColor;
+            foreach (var item in items.Where(x => x.Open > x.Close))
+            {
+                var open = ((rangeUp - item.Open) / dpx).FloorInt32();
+                var high = ((rangeUp - item.High) / dpx).FloorInt32();
+                var low = ((rangeUp - item.Low) / dpx).FloorInt32();
+                var close = ((rangeUp - item.Close) / dpx).FloorInt32();
+
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
+
+                ctx.FillRect(x, high, 1, low - high);
+                ctx.FillRect(x - offset, open, width, close - open);
+            }
+
+            ctx.FillStyle = StaleColor;
+            foreach (var item in items.Where(x => x.Open == x.Close))
+            {
+                var open = ((rangeUp - item.Open) / dpx).FloorInt32();
+                var high = ((rangeUp - item.High) / dpx).FloorInt32();
+                var low = ((rangeUp - item.Low) / dpx).FloorInt32();
+
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
+
+                ctx.FillRect(x, high, 1, low - high);
+                ctx.FillRect(x - offset, open, width, 1);
+            }
+        }
+
+        ctx.Restore();
+    }
+
+    private (decimal min, decimal max) GetBounds(IReadOnlyList<ICandle> items)
+    {
+        var min = decimal.MaxValue;
+        var max = decimal.MinValue;
+
+        foreach (var item in items)
+        {
+            min = Math.Min(min, item.Low);
+            max = Math.Max(max, item.High);
+        }
+
+        return (min, max);
+    }
+
+    private int GetWidth()
+    {
+        var minuteWidth = Minute.TotalMilliseconds / ChartContext.MsPerPx;
+
+        var width = (minuteWidth / 1.3d).FloorInt32().Above(1);
+
+        return width % 2 == 1 ? width : width - 1;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return _disposable.DisposeAsync();
+    }
+}

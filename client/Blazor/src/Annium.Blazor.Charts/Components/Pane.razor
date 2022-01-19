@@ -1,0 +1,12 @@
+﻿@using Annium.Blazor.Charts.Domain
+@using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts
+
+@namespace Annium.Blazor.Charts.Components
+
+@inject Style _style;
+
+<div class="@Class">
+    <CascadingValue Value="PaneContext" TValue="IManagedPaneContext">
+        @ChildContent
+    </CascadingValue>
+</div>

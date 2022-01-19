@@ -1,0 +1,10 @@
+# build
+/bin/
+/obj/
+
+# packages
+/*.nupkg
+
+# artifacts
+/wwwroot/**/*.js
+/wwwroot/**/*.js.map
