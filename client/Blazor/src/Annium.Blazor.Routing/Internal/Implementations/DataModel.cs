@@ -40,24 +40,24 @@ internal class DataModel : IDataModel
         _properties = properties.ToPropertiesDictionary();
     }
 
-    public IReadOnlyDictionary<string, object> ToParams(object data)
+    public IReadOnlyDictionary<string, object?> ToParams(object data)
     {
         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
         if (data is null)
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
 
         var dataType = data.GetType();
         if (dataType != _type && !data.GetType().IsDerivedFrom(_type))
             throw new ArgumentException($"Data type '{data.GetType().FriendlyName()}' is not derived from '{_type.FriendlyName()}'");
 
-        var values = new Dictionary<string, object>();
+        var values = new Dictionary<string, object?>();
         foreach (var (key, property) in _properties)
-            values[key] = property.GetValue(data)!;
+            values[key] = property.GetValue(data);
 
         return values;
     }
 
-    public T ToData<T>(IReadOnlyDictionary<string, object> parameters)
+    public T ToData<T>(IReadOnlyDictionary<string, object?> parameters)
         where T : new()
     {
         var data = new T();
@@ -73,9 +73,9 @@ internal class DataModel : IDataModel
         return data;
     }
 
-    public IReadOnlyDictionary<string, object> ToParams(UriQuery query)
+    public IReadOnlyDictionary<string, object?> ToParams(UriQuery query)
     {
-        var parameters = new Dictionary<string, object>();
+        var parameters = new Dictionary<string, object?>();
 
         foreach (var (name, value) in query)
         {
@@ -83,13 +83,13 @@ internal class DataModel : IDataModel
                 continue;
 
             var type = property.PropertyType;
-            parameters[name] = _mapper.Map(type.IsEnumerable() ? value.ToArray() : value.FirstOrDefault()!, type);
+            parameters[name] = _mapper.Map(type.IsEnumerable() ? value.ToArray() : value.FirstOrDefault(), type);
         }
 
         return parameters;
     }
 
-    public UriQuery ToQuery(IReadOnlyDictionary<string, object> parameters)
+    public UriQuery ToQuery(IReadOnlyDictionary<string, object?> parameters)
     {
         var query = UriQuery.New();
 

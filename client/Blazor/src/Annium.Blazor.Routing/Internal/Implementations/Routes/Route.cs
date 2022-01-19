@@ -24,7 +24,7 @@ internal class Route : RouteBase, IRoute
 
     public string Link()
     {
-        var path = _path.Link(new Dictionary<string, object>());
+        var path = _path.Link(new Dictionary<string, object?>());
 
         return path;
     }

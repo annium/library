@@ -32,7 +32,7 @@ internal class LocationQuery : ILocationQuery
 
     public LocationMatch Match(IReadOnlyDictionary<string, StringValues> query)
     {
-        var routeValues = new Dictionary<string, object>();
+        var routeValues = new Dictionary<string, object?>();
 
         foreach (var (key, raw) in query)
         {

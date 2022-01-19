@@ -4,6 +4,7 @@ using System.Linq;
 using Annium.Blazor.Routing.Internal.Implementations.Locations;
 using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Core.Mapper;
+using Annium.Core.Primitives.Collections.Generic;
 using Annium.Data.Models.Extensions;
 using Microsoft.AspNetCore.Components;
 
@@ -13,7 +14,7 @@ internal class Route<TData> : RouteBase, IRoute<TData>
     where TData : notnull, new()
 {
     private readonly TData _default = new();
-    private readonly IReadOnlyDictionary<string, object> _defaultParameters;
+    private readonly IReadOnlyDictionary<string, object?> _defaultParameters;
     private readonly IMapper _mapper;
     private readonly ILocationPath _path;
     private readonly ILocationQuery _query;

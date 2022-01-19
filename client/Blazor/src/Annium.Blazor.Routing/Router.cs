@@ -81,7 +81,7 @@ public class Router : IComponent, IHandleAfterRender, IDisposable
         var rawLocation = RawLocation.Parse(NavigationManager.ToBaseRelativePath(_location));
         var locationData = RouteManager.Match(rawLocation, PathMatch.Exact) ?? RouteManager.Match(rawLocation, PathMatch.Start);
 
-        var fragment = locationData is null ? NotFound : Found(new RouteData(locationData.PageType, locationData.RouteValues));
+        var fragment = locationData is null ? NotFound : Found(new RouteData(locationData.PageType, locationData.RouteValues!));
         _renderHandle.Render(fragment);
     }
 }
