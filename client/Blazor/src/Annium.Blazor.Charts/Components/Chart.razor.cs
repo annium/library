@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using Annium.Blazor.Charts.Internal;
-using Annium.Blazor.Charts.Internal.Domain;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
+using Annium.Extensions.Jobs;
 using Annium.NodaTime.Extensions;
 using Microsoft.AspNetCore.Components;
 using NodaTime;
-using NodaTime.TimeZones;
-using Timer = Annium.Extensions.Jobs.Timer;
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
@@ -46,6 +41,11 @@ public partial class Chart : IAsyncDisposable
         _disposable += _container.OnWheel(HandleWheel);
         _disposable += Timer.Start(Draw, AnimationFrameMs, AnimationFrameMs);
         _disposable += _container;
+    }
+
+    protected override void OnParametersSet()
+    {
+        ChartContext.RequestDraw();
     }
 
     private void HandleWheel(bool ctrlKey, decimal deltaX, decimal deltaY)

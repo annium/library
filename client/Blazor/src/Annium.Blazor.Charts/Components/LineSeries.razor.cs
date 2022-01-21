@@ -50,6 +50,11 @@ public partial class LineSeries : IAsyncDisposable
         _disposable += ChartContext.OnUpdate(Draw);
     }
 
+    protected override void OnParametersSet()
+    {
+        ChartContext.RequestDraw();
+    }
+
     private void Draw()
     {
         var (start, end) = ChartContext.Range;
@@ -79,7 +84,7 @@ public partial class LineSeries : IAsyncDisposable
 
         ctx.Save();
 
-        ctx.FillStyle = Color;
+        ctx.StrokeStyle = Color;
         ctx.LineWidth = Width;
         if (Dash is not null)
             ctx.LineDash = Dash;

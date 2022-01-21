@@ -52,6 +52,11 @@ public partial class CandleSeries : IAsyncDisposable
         _disposable += ChartContext.OnUpdate(Draw);
     }
 
+    protected override void OnParametersSet()
+    {
+        ChartContext.RequestDraw();
+    }
+
     private void Draw()
     {
         var (start, end) = ChartContext.Range;

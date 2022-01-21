@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain.Contexts;
-using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Components;
@@ -39,6 +38,11 @@ public partial class Crosshair : IAsyncDisposable
 
         _disposable += ChartContext.Container.OnMouseMove(HandlePointerMove);
         _disposable += ChartContext.Container.OnMouseOut(HandlePointerOut);
+    }
+
+    protected override void OnParametersSet()
+    {
+        ChartContext.RequestDraw();
     }
 
     private void HandlePointerMove(int ex, int ey)

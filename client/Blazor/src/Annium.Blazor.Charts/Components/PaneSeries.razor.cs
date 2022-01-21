@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
-using Annium.Blazor.Charts.Internal;
-using Annium.Blazor.Charts.Internal.Domain;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
-using Annium.Core.Primitives.Collections.Generic;
 using Microsoft.AspNetCore.Components;
 using static Annium.Blazor.Charts.Internal.Constants;
 

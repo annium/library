@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
-using Annium.Blazor.Charts.Internal.Domain;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Core.Tools;
