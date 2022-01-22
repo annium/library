@@ -28,7 +28,7 @@ public partial class Pane
             return;
 
         PaneContext.Init(ChartContext);
-        ChartContext.Register(PaneContext);
+        ChartContext.RegisterPane(PaneContext);
     }
 
     public class Style : RuleSet

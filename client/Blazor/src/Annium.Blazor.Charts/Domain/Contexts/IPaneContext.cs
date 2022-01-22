@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Data;
 using Annium.Data.Models;
@@ -18,7 +19,7 @@ public interface IPaneContext
     ValueRange<decimal> View { get; }
     IReadOnlyDictionary<int, decimal> HorizontalLines { get; }
     bool AdjustRange(decimal min, decimal max);
-    void RegisterSource(ISeriesSource source);
+    Action RegisterSource(ISeriesSource source);
     void SetSeries(ISeriesContext series);
     void SetBottom(IHorizontalSideContext bottom);
     void SetRight(IVerticalSideContext right);

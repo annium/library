@@ -7,14 +7,13 @@ using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Components;
-using NodaTime;
 
 namespace Annium.Blazor.Charts.Components;
 
 public partial class LineSeries : IAsyncDisposable
 {
     [Parameter, EditorRequired]
-    public Func<Instant, Instant, Task<IReadOnlyList<IValue>>> Load { get; set; } = default!;
+    public ISeriesSource<IValue> Source { get; set; } = default!;
 
     [Parameter]
     public string Color { get; set; } = "black";
@@ -34,25 +33,14 @@ public partial class LineSeries : IAsyncDisposable
     [CascadingParameter]
     internal ISeriesContext SeriesContext { get; set; } = default!;
 
-    [Inject]
-    private ISeriesSource<IValue> Source { get; set; } = default!;
-
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 
     protected override void OnAfterRender(bool firstRender)
     {
         if (!firstRender) return;
 
-        Source.Init(Load);
-        PaneContext.RegisterSource(Source);
-
-        _disposable += Source;
+        _disposable += PaneContext.RegisterSource(Source);
         _disposable += ChartContext.OnUpdate(Draw);
-    }
-
-    protected override void OnParametersSet()
-    {
-        ChartContext.RequestDraw();
     }
 
     private void Draw()

@@ -1,0 +1,43 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Annium.Blazor.Charts.Data;
+using Annium.Blazor.Charts.Domain;
+using Annium.Core.Primitives;
+using Annium.Logging.Abstractions;
+using NodaTime;
+
+namespace Annium.Blazor.Charts.Internal.Data;
+
+internal class SeriesSourceFactory : ISeriesSourceFactory
+{
+    private readonly ITimeProvider _timeProvider;
+    private readonly ILoggerFactory _loggerFactory;
+
+    public SeriesSourceFactory(
+        ITimeProvider timeProvider,
+        ILoggerFactory loggerFactory
+    )
+    {
+        _timeProvider = timeProvider;
+        _loggerFactory = loggerFactory;
+    }
+
+    public ISeriesSource<TData> Create<TData>(
+        Func<Instant, Instant, Task<IReadOnlyList<TData>>> load
+    )
+        where TData : ITimeSeries
+    {
+        return new LoadingSeriesSource<TData>(_timeProvider, load, _loggerFactory.GetLogger<LoadingSeriesSource<TData>>());
+    }
+
+    public ISeriesSource<TData> Create<TSource, TData>(
+        ISeriesSource<TSource> source,
+        Func<TSource, TData> getValue
+    )
+        where TSource : ITimeSeries
+        where TData : ITimeSeries
+    {
+        return new DependentSeriesSource<TSource, TData>(source, getValue, _loggerFactory.GetLogger<DependentSeriesSource<TSource, TData>>());
+    }
+}

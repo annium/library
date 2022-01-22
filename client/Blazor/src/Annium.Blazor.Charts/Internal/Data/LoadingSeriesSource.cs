@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain;
 using Annium.Core.Primitives;
+using Annium.Core.Primitives.Collections.Generic;
 using Annium.Data.Models;
 using Annium.Logging.Abstractions;
 using Annium.NodaTime.Extensions;
@@ -14,8 +16,8 @@ using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Internal.Data;
 
-internal class SeriesSource<T> : ISeriesSource<T>, ILogSubject
-    where T : ITimeSeries
+internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeriesSource, ILogSubject
+    where TData : ITimeSeries
 {
     public bool IsLoading => Volatile.Read(ref _isLoading) == 1;
     public ILogger Logger { get; }
@@ -29,20 +31,22 @@ internal class SeriesSource<T> : ISeriesSource<T>, ILogSubject
     private readonly ManagedValueRange<Instant> _emptyRange;
     private readonly ManagedValueRange<Instant> _emptyAfter;
 
-    private readonly List<T> _cache = new();
+    private readonly List<TData> _cache = new();
     private Instant Start => _cache[0].Moment;
     private Instant End => _cache[^1].Moment;
 
-    private Func<Instant, Instant, Task<IReadOnlyList<T>>> _load = default!;
+    private readonly Func<Instant, Instant, Task<IReadOnlyList<TData>>> _load;
     private int _isLoading;
     private int _isDisposed;
 
-    public SeriesSource(
+    public LoadingSeriesSource(
         ITimeProvider timeProvider,
-        ILogger<SeriesSource<T>> logger
+        Func<Instant, Instant, Task<IReadOnlyList<TData>>> load,
+        ILogger<LoadingSeriesSource<TData>> logger
     )
     {
         Logger = logger;
+        _load = load;
         var now = timeProvider.Now.FloorToMinute();
         _emptyBefore = ValueRange.Create(Instant.MinValue, now - Duration.FromDays(10000));
         _emptyRange = ValueRange.Create(now, now);
@@ -50,16 +54,9 @@ internal class SeriesSource<T> : ISeriesSource<T>, ILogSubject
         Bounds = ValueRange.Create(() => _emptyBefore.End, () => _emptyAfter.Start);
     }
 
-    public void Init(
-        Func<Instant, Instant, Task<IReadOnlyList<T>>> load
-    )
+    public bool GetData(Instant start, Instant end, out IReadOnlyList<TData> data)
     {
-        _load = load;
-    }
-
-    public bool GetData(Instant start, Instant end, out IReadOnlyList<T> data)
-    {
-        data = Array.Empty<T>();
+        data = Array.Empty<TData>();
 
         var (min, max) = GetBounds(start, end, BufferZone);
 
@@ -73,7 +70,7 @@ internal class SeriesSource<T> : ISeriesSource<T>, ILogSubject
 
         SyncCache(start, end);
 
-        // this.Log().Trace($"cache after sync: {S(Start)} - {S(Max)}");
+        // this.Log().Trace($"cache after sync: {S(Start)} - {S(Bounds.End)}");
 
         if (min < Start || End < max)
         {
@@ -88,7 +85,7 @@ internal class SeriesSource<T> : ISeriesSource<T>, ILogSubject
         if (from < to)
             data = GetDataFromCache(from, to);
         // else
-        //     this.Log().Trace($"non-overlapping range between: range {S(start)} - {S(end)} and cache {S(Start)} - {S(End)}");
+        // this.Log().Trace($"non-overlapping range between: range {S(start)} - {S(end)} and cache {S(Start)} - {S(End)}");
 
         return true;
     }
@@ -127,7 +124,7 @@ internal class SeriesSource<T> : ISeriesSource<T>, ILogSubject
         return false;
     }
 
-    private IReadOnlyList<T> GetDataFromCache(Instant from, Instant to)
+    private IReadOnlyList<TData> GetDataFromCache(Instant from, Instant to)
     {
         // this.Log().Trace($"get range: {S(from)} - {S(to)}");
 
@@ -183,7 +180,7 @@ internal class SeriesSource<T> : ISeriesSource<T>, ILogSubject
         EndLoad();
     }
 
-    private async Task<IReadOnlyList<T>> LoadInRange(Instant start, Instant end)
+    private async Task<IReadOnlyList<TData>> LoadInRange(Instant start, Instant end)
     {
         // this.Log().Trace($"{S(start)} - {S(end)}");
 
@@ -231,14 +228,14 @@ internal class SeriesSource<T> : ISeriesSource<T>, ILogSubject
         var index = _cache.FindIndex(x => x.Moment == min);
         if (index > 0)
         {
-            // this.Log().Trace($"MM: {S(Min)} - {S(Max)}. Cache: {S(Start)} - {S(End)}. Bounds {S(min)} - {S(max)}. Remove range (0, {index}) from {_cache.Count} items");
+            // this.Log().Trace($"MM: {S(Bounds.Start)} - {S(Bounds.End)}. Cache: {S(Start)} - {S(End)}. Bounds {S(min)} - {S(max)}. Remove range (0, {index}) from {_cache.Count} items");
             _cache.RemoveRange(0, index);
         }
 
         index = _cache.FindLastIndex(x => x.Moment == max);
         if (index > 0 && index < _cache.Count - 1)
         {
-            // this.Log().Trace($"MM: {S(Min)} - {S(Max)}. Cache: {S(Start)} - {S(End)}. Bounds {S(min)} - {S(max)}. Remove range ({index}, {_cache.Count - index}) from {_cache.Count} items");
+            // this.Log().Trace($"MM: {S(Bounds.Start)} - {S(Bounds.End)}. Cache: {S(Start)} - {S(End)}. Bounds {S(min)} - {S(max)}. Remove range ({index}, {_cache.Count - index}) from {_cache.Count} items");
             _cache.RemoveRange(index, _cache.Count - index);
         }
 
@@ -279,7 +276,10 @@ internal class SeriesSource<T> : ISeriesSource<T>, ILogSubject
         if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 1)
             throw new InvalidOperationException($"{GetType().FriendlyName()} is already disposed");
 
-        _load = null!;
         _cache.Clear();
     }
+}
+
+internal interface ILoadingSeriesSource
+{
 }

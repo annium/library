@@ -15,7 +15,7 @@ public static class ServiceContainerExtensions
         container.Add<IManagedSeriesContext, SeriesContext>().Transient();
         container.Add<IManagedHorizontalSideContext, HorizontalSideContext>().Transient();
         container.Add<IManagedVerticalSideContext, VerticalSideContext>().Transient();
-        container.Add(typeof(SeriesSource<>)).As(typeof(ISeriesSource<>)).Transient();
+        container.Add<ISeriesSourceFactory, SeriesSourceFactory>().Transient();
 
         return container;
     }

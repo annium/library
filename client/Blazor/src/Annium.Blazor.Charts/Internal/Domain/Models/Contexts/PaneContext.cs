@@ -71,10 +71,16 @@ internal sealed record PaneContext : IManagedPaneContext
         return true;
     }
 
-    public void RegisterSource(ISeriesSource source)
+    public Action RegisterSource(ISeriesSource source)
     {
         if (!_sources.Add(source))
             throw new InvalidOperationException("Source is already registered");
+
+        return () =>
+        {
+            if (!_sources.Remove(source))
+                throw new InvalidOperationException("Source is not registered");
+        };
     }
 
     public void SetSeries(ISeriesContext series)

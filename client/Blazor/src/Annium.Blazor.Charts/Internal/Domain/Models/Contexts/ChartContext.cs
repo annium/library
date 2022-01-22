@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Interop;
@@ -19,7 +20,7 @@ internal sealed record ChartContext : IManagedChartContext
 
     public event Action Updated = delegate { };
     public Element Container { get; private set; } = default!;
-    public DomRect Rect { get; private set; } = default!;
+    public DomRect Rect { get; private set; }
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
     public int MsPerPx => ((double)NodaConstants.MillisecondsPerMinute / Zoom).FloorInt32();
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
@@ -29,9 +30,10 @@ internal sealed record ChartContext : IManagedChartContext
 
     public int Scroll => _scroll;
     public int Zoom => _zoom;
-    public bool IsLocked => _panes.Any(x => x.IsLocked);
+    public bool IsLocked => _panes.Any(x => x.IsLocked) || _sources.Any(x => x.IsLoading);
 
     private readonly HashSet<IPaneContext> _panes = new();
+    private readonly HashSet<ISeriesSource> _sources = new();
     private readonly ValueRange<Instant> _bounds;
     private readonly ManagedValueRange<Instant> _view = ValueRange.Create(Instant.MinValue, Instant.MinValue);
     private readonly ManagedValueRange<Instant> _range = ValueRange.Create(Instant.MinValue, Instant.MinValue);
@@ -57,10 +59,16 @@ internal sealed record ChartContext : IManagedChartContext
         Rect = container.GetBoundingClientRect();
     }
 
-    public void Register(IPaneContext paneContext)
+    public void RegisterPane(IPaneContext paneContext)
     {
         if (!_panes.Add(paneContext))
-            throw new InvalidOperationException("Series is already registered");
+            throw new InvalidOperationException("Pane is already registered");
+    }
+
+    public void RegisterSource(ISeriesSource source)
+    {
+        if (!_sources.Add(source))
+            throw new InvalidOperationException("Source is already registered");
     }
 
     public bool ChangeZoom(decimal delta)

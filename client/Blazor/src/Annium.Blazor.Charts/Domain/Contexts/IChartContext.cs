@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Interop;
 using Annium.Data.Models;
 using NodaTime;
@@ -17,6 +18,7 @@ public interface IChartContext
     ValueRange<Instant> Range { get; }
     ValueRange<Instant> View { get; }
     IReadOnlyDictionary<int, LocalDateTime> VerticalLines { get; }
-    void Register(IPaneContext paneContext);
+    void RegisterPane(IPaneContext paneContext);
+    void RegisterSource(ISeriesSource source);
     void RequestDraw();
 }
