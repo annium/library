@@ -26,6 +26,7 @@ internal sealed record ChartContext : IManagedChartContext
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
     public ValueRange<Instant> Range => _range;
     public ValueRange<Instant> View => _view;
+    public Instant? LookupMoment { get; private set; }
     public IReadOnlyDictionary<int, LocalDateTime> VerticalLines { get; private set; } = new Dictionary<int, LocalDateTime>();
 
     public int Scroll => _scroll;
@@ -70,6 +71,8 @@ internal sealed record ChartContext : IManagedChartContext
         if (!_sources.Add(source))
             throw new InvalidOperationException("Source is already registered");
     }
+
+    public void SetLookupMoment(Instant? moment) => LookupMoment = moment;
 
     public bool ChangeZoom(decimal delta)
     {
@@ -120,7 +123,7 @@ internal sealed record ChartContext : IManagedChartContext
         _view.SetEnd(end);
 
         var alignment = GetAlignmentDuration(msPerPx);
-        var lines = new Dictionary<int, LocalDateTime>();
+        var verticalLines = new Dictionary<int, LocalDateTime>();
         var lineMoment = start.FloorTo(alignment);
 
         // align floors instant, so pick next period if start is not aligned
@@ -130,11 +133,11 @@ internal sealed record ChartContext : IManagedChartContext
         while (lineMoment <= end)
         {
             var line = ((lineMoment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
-            lines[line] = lineMoment.InZone(TimeZone).LocalDateTime;
+            verticalLines[line] = lineMoment.InZone(TimeZone).LocalDateTime;
             lineMoment += alignment;
         }
 
-        VerticalLines = lines;
+        VerticalLines = verticalLines;
     }
 
     public void SendUpdate() => Updated();

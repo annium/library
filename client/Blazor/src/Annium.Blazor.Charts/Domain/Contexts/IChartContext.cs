@@ -17,8 +17,10 @@ public interface IChartContext
     DateTimeZone TimeZone { get; }
     ValueRange<Instant> Range { get; }
     ValueRange<Instant> View { get; }
+    Instant? LookupMoment { get; }
     IReadOnlyDictionary<int, LocalDateTime> VerticalLines { get; }
     void RegisterPane(IPaneContext paneContext);
     void RegisterSource(ISeriesSource source);
+    void SetLookupMoment(Instant? moment);
     void RequestDraw();
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
+using Annium.NodaTime.Extensions;
 using Microsoft.AspNetCore.Components;
 using NodaTime;
 using static Annium.Blazor.Charts.Internal.Constants;
@@ -66,8 +67,10 @@ public partial class Crosshair : IAsyncDisposable
                 ctx.LineWidth = 1;
                 ctx.LineDash = new[] { 6, 6 };
 
-                var x = ex - ctxX - 0.5f;
-                var y = ey - ctxY - 0.5f;
+                var xMoment = (ChartContext.View.Start + Duration.FromMilliseconds((ex - ctxX) * ChartContext.MsPerPx)).RoundToMinute();
+                ChartContext.SetLookupMoment(xMoment);
+                var x = ((xMoment - ChartContext.View.Start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32() + 0.5f;
+                var y = ey - ctxY + 0.5f;
 
                 ctx.ClearRect(0, 0, ctxWidth, ctxHeight);
 
@@ -153,6 +156,8 @@ public partial class Crosshair : IAsyncDisposable
 
     private void HandlePointerOut(int ex, int ey)
     {
+        ChartContext.SetLookupMoment(null);
+
         foreach (var pane in ChartContext.Panes)
         {
             // clear crosshair at series
