@@ -15,6 +15,9 @@ internal static class Constants
     public static int GridLine => (int)(GridHalfLine * 2);
     public const float GridHalfLine = 0.5f;
     public const string GridStyle = "#eee";
+    public const string SeriesLabelFontFamily = "sans-serif";
+    public const int SeriesLabelFontSize = 12;
+    public const string SeriesLabelStyle = "black";
     public const string AxisLabelFontFamily = "sans-serif";
     public const int AxisLabelFontSize = 12;
     public const string AxisLabelStyle = "black";
