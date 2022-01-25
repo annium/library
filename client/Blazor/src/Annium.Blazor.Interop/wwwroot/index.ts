@@ -15,6 +15,8 @@ interop.canvas = canvas
 interop.element = element
 
 // trackers
+import cbTracker from './trackers/cbTracker.js'
 import objectTracker from './trackers/objectTracker.js'
 
+interop.cbTracker = cbTracker
 interop.objectTracker = objectTracker
