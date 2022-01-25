@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
-using Annium.NodaTime.Extensions;
 using Microsoft.AspNetCore.Components;
 using NodaTime;
 using static Annium.Blazor.Charts.Internal.Constants;
@@ -37,8 +38,7 @@ public partial class Crosshair : IAsyncDisposable
     {
         if (!firstRender) return;
 
-        _disposable += ChartContext.Container.OnMouseMove(HandlePointerMove);
-        _disposable += ChartContext.Container.OnMouseOut(HandlePointerOut);
+        _disposable += ChartContext.OnLookupChanged(HandleLookup);
     }
 
     protected override void OnParametersSet()
@@ -46,8 +46,13 @@ public partial class Crosshair : IAsyncDisposable
         ChartContext.RequestDraw();
     }
 
-    private void HandlePointerMove(int ex, int ey)
+    private void HandleLookup(Instant? m, Point? p)
     {
+        if (m is null || p is null)
+            return;
+
+        var moment = m.Value;
+        var point = p.Value;
         var msPerPx = ChartContext.MsPerPx;
 
         foreach (var pane in ChartContext.Panes)
@@ -56,7 +61,6 @@ public partial class Crosshair : IAsyncDisposable
             {
                 var ctx = pane.Series.Overlay;
                 var rect = pane.Series.Rect;
-                var ctxX = rect.X.FloorInt32();
                 var ctxY = rect.Y.FloorInt32();
                 var ctxWidth = rect.Width.CeilInt32();
                 var ctxHeight = rect.Height.CeilInt32();
@@ -67,10 +71,8 @@ public partial class Crosshair : IAsyncDisposable
                 ctx.LineWidth = 1;
                 ctx.LineDash = new[] { 6, 6 };
 
-                var xMoment = (ChartContext.View.Start + Duration.FromMilliseconds((ex - ctxX) * ChartContext.MsPerPx)).RoundToMinute();
-                ChartContext.SetLookupMoment(xMoment);
-                var x = ((xMoment - ChartContext.View.Start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32() + 0.5f;
-                var y = ey - ctxY + 0.5f;
+                var x = ((moment - ChartContext.View.Start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32() + 0.5f;
+                var y = point.Y - ctxY + 0.5f;
 
                 ctx.ClearRect(0, 0, ctxWidth, ctxHeight);
 
@@ -108,19 +110,19 @@ public partial class Crosshair : IAsyncDisposable
                 ctx.Font = $"{LabelFontSize}px {LabelFontFamily}";
                 ctx.FillStyle = LabelStyle;
 
-                var moment = (ChartContext.Range.Start + Duration.FromMilliseconds((ex - ctxX) * msPerPx)).InZone(ChartContext.TimeZone);
-                var text = moment.ToString("dd.MM.yy HH:mm", null);
+                var dateTime = moment.InZone(ChartContext.TimeZone);
+                var text = dateTime.ToString("dd.MM.yy HH:mm", null);
                 var textSize = ctx.MeasureText(text);
 
                 var backOffset = (textSize / 1.7d).CeilInt32();
                 ctx.FillStyle = LabelBackground;
-                ctx.FillRect(ex - ctxX - backOffset, 0, backOffset * 2, ctxHeight);
+                ctx.FillRect(point.X - ctxX - backOffset, 0, backOffset * 2, ctxHeight);
 
                 var textOffset = (textSize / 2d).CeilInt32();
                 var baseline = (ctxHeight / 2d).FloorInt32();
                 ctx.FillStyle = LabelStyle;
                 ctx.TextBaseline = CanvasTextBaseline.middle;
-                ctx.FillText(text, ex - ctxX - textOffset, baseline);
+                ctx.FillText(text, point.X - ctxX - textOffset, baseline);
 
                 ctx.Restore();
             }
@@ -140,40 +142,18 @@ public partial class Crosshair : IAsyncDisposable
 
                 var backOffset = (LabelFontSize * 0.85d).CeilInt32();
                 ctx.FillStyle = LabelBackground;
-                ctx.FillRect(0, ey - ctxY - backOffset, ctxWidth, backOffset * 2);
+                ctx.FillRect(0, point.Y - ctxY - backOffset, ctxWidth, backOffset * 2);
 
-                var value = pane.View.Start + (ctx.Height - ey + ctxY) * pane.DotPerPx;
+                var value = pane.View.Start + (ctx.Height - point.Y + ctxY) * pane.DotPerPx;
                 var text = value.ToString(CultureInfo.InvariantCulture);
                 ctx.Font = $"{LabelFontSize}px {LabelFontFamily}";
                 ctx.FillStyle = LabelStyle;
                 ctx.TextBaseline = CanvasTextBaseline.middle;
-                ctx.FillText(text, 3, ey - ctxY);
+                ctx.FillText(text, 3, point.Y - ctxY);
 
                 ctx.Restore();
             }
         }
-    }
-
-    private void HandlePointerOut(int ex, int ey)
-    {
-        ChartContext.SetLookupMoment(null);
-
-        foreach (var pane in ChartContext.Panes)
-        {
-            // clear crosshair at series
-            ClearContext(pane.Series.Overlay, pane.Series.Rect);
-
-            // clear bottom label
-            if (pane.Bottom is not null)
-                ClearContext(pane.Bottom.Overlay, pane.Bottom.Rect);
-
-            // clear right label
-            if (pane.Right is not null)
-                ClearContext(pane.Right.Overlay, pane.Right.Rect);
-        }
-
-        static void ClearContext(Canvas ctx, DomRect rect) =>
-            ctx.ClearRect(0, 0, rect.Width.CeilInt32(), rect.Height.CeilInt32());
     }
 
     public ValueTask DisposeAsync()

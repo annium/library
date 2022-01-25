@@ -1,5 +1,7 @@
 using System;
+using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
+using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Extensions;
 
@@ -11,11 +13,11 @@ internal static class ChartContextExtensions
 
         return () => context.Updated -= draw;
     }
-    //
-    // public static Action OnPointerMove(this IChartContext context, Action<int, int> handle)
-    // {
-    //     context.PointerMoved += handle;
-    //
-    //     return () => context.PointerMoved -= handle;
-    // }
+
+    public static Action OnLookupChanged(this IChartContext context, Action<Instant?, Point?> handle)
+    {
+        context.LookupChanged += handle;
+
+        return () => context.LookupChanged -= handle;
+    }
 }

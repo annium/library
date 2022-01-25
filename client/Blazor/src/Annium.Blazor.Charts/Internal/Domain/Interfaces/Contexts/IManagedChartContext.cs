@@ -1,3 +1,4 @@
+using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Interop;
 using NodaTime;
@@ -14,5 +15,7 @@ internal interface IManagedChartContext : IChartContext
     bool ChangeScroll(decimal delta);
     void Adjust(Instant moment);
     void SendUpdate();
+    void SendLookupChanged(Instant? moment, Point? point);
     bool TryDraw();
+    bool TryOverlay(out Point point);
 }

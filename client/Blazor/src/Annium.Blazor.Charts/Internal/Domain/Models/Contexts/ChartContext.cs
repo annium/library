@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Annium.Blazor.Charts.Data;
+using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Interop;
@@ -19,6 +20,7 @@ internal sealed record ChartContext : IManagedChartContext
     private const int DefaultBlockSize = 80;
 
     public event Action Updated = delegate { };
+    public event Action<Instant?, Point?> LookupChanged = delegate { };
     public Element Container { get; private set; } = default!;
     public DomRect Rect { get; private set; }
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
@@ -26,7 +28,6 @@ internal sealed record ChartContext : IManagedChartContext
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
     public ValueRange<Instant> Range => _range;
     public ValueRange<Instant> View => _view;
-    public Instant? LookupMoment { get; private set; }
     public IReadOnlyDictionary<int, LocalDateTime> VerticalLines { get; private set; } = new Dictionary<int, LocalDateTime>();
 
     public int Scroll => _scroll;
@@ -42,7 +43,8 @@ internal sealed record ChartContext : IManagedChartContext
     private int _scroll;
     private int _zoom = ZoomDefault;
     private decimal _rawZoom = ZoomDefault;
-    private int _isDirty = 1;
+    private int _isCanvasDirty = 1;
+    private (Point?, bool) _overlayRequest;
 
     public ChartContext(
         ITimeProvider timeProvider
@@ -71,8 +73,6 @@ internal sealed record ChartContext : IManagedChartContext
         if (!_sources.Add(source))
             throw new InvalidOperationException("Source is already registered");
     }
-
-    public void SetLookupMoment(Instant? moment) => LookupMoment = moment;
 
     public bool ChangeZoom(decimal delta)
     {
@@ -141,9 +141,26 @@ internal sealed record ChartContext : IManagedChartContext
     }
 
     public void SendUpdate() => Updated();
+    public void SendLookupChanged(Instant? moment, Point? point) => LookupChanged(moment, point);
 
-    public bool TryDraw() => Interlocked.CompareExchange(ref _isDirty, 0, 1) == 1;
-    public void RequestDraw() => Volatile.Write(ref _isDirty, 1);
+    public bool TryDraw() => Interlocked.CompareExchange(ref _isCanvasDirty, 0, 1) == 1;
+
+    public bool TryOverlay(out Point point)
+    {
+        var (p, isRequested) = _overlayRequest;
+        _overlayRequest = default;
+        point = p ?? default;
+
+        return isRequested;
+    }
+
+    public void RequestDraw() => Volatile.Write(ref _isCanvasDirty, 1);
+    public void RequestOverlay((int x, int y)? point)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void RequestOverlay(Point? point) => _overlayRequest = (point, true);
 
     private (Instant start, Instant end) GetView()
     {

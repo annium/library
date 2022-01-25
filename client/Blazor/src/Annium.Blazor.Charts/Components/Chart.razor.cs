@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
@@ -39,7 +40,10 @@ public partial class Chart : IAsyncDisposable
         ChartContext.Init(_container);
 
         _disposable += _container.OnWheel(HandleWheel);
+        _disposable += ChartContext.Container.OnMouseMove(HandlePointerMove);
+        _disposable += ChartContext.Container.OnMouseOut(HandlePointerOut);
         _disposable += Timer.Start(Draw, AnimationFrameMs, AnimationFrameMs);
+        _disposable += Timer.Start(Overlay, AnimationFrameMs, AnimationFrameMs);
         _disposable += _container;
     }
 
@@ -61,6 +65,12 @@ public partial class Chart : IAsyncDisposable
             ChartContext.RequestDraw();
     }
 
+    private void HandlePointerMove(int x, int y) =>
+        ChartContext.RequestOverlay(new Point(x, y));
+
+    private void HandlePointerOut(int x, int y) =>
+        ChartContext.RequestOverlay(null);
+
     private void Draw()
     {
         if (!ChartContext.TryDraw())
@@ -68,6 +78,43 @@ public partial class Chart : IAsyncDisposable
 
         ChartContext.Adjust(Moment);
         ChartContext.SendUpdate();
+    }
+
+    private void Overlay()
+    {
+        if (!ChartContext.TryOverlay(out var point))
+            return;
+
+        ClearOverlays();
+
+        if (point == default)
+            ChartContext.SendLookupChanged(null, null);
+        else
+        {
+            var lookupMoment = (ChartContext.View.Start + Duration.FromMilliseconds(point.X * ChartContext.MsPerPx)).RoundToMinute();
+
+            ChartContext.SendLookupChanged(lookupMoment, point);
+        }
+    }
+
+    private void ClearOverlays()
+    {
+        foreach (var pane in ChartContext.Panes)
+        {
+            // clear crosshair at series
+            ClearContext(pane.Series.Overlay, pane.Series.Rect);
+
+            // clear bottom label
+            if (pane.Bottom is not null)
+                ClearContext(pane.Bottom.Overlay, pane.Bottom.Rect);
+
+            // clear right label
+            if (pane.Right is not null)
+                ClearContext(pane.Right.Overlay, pane.Right.Rect);
+        }
+
+        static void ClearContext(Canvas ctx, DomRect rect) =>
+            ctx.ClearRect(0, 0, rect.Width.CeilInt32(), rect.Height.CeilInt32());
     }
 
     public ValueTask DisposeAsync()
