@@ -47,10 +47,10 @@ public partial class LineSeries : IAsyncDisposable
     {
         var (start, end) = ChartContext.Range;
 
-        if (Source.GetData(start, end, out var data))
+        if (Source.GetItems(start, end, out var data))
             Render(data);
         else if (!Source.IsLoading)
-            Source.LoadData(start, end, Draw);
+            Source.LoadItems(start, end, Draw);
     }
 
     private void Render(IReadOnlyList<IValue> items)

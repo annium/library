@@ -30,19 +30,19 @@ internal class DependentSeriesSource<TSource, TData> : ISeriesSource<TData>, IDe
         _getValue = getValue;
     }
 
-    public bool GetData(Instant start, Instant end, out IReadOnlyList<TData> data)
+    public bool GetItems(Instant start, Instant end, out IReadOnlyList<TData> data)
     {
         // this.Log().Trace($"get data in {start} - {end}");
-        var result = _source.GetData(start, end, out var sourceData);
+        var result = _source.GetItems(start, end, out var sourceData);
         data = sourceData.Select(_getValue).ToArray();
 
         return result;
     }
 
-    public void LoadData(Instant start, Instant end, Action onLoaded)
+    public void LoadItems(Instant start, Instant end, Action onLoaded)
     {
         // this.Log().Trace($"get data in {start} - {end}");
-        _source.LoadData(start, end, onLoaded);
+        _source.LoadItems(start, end, onLoaded);
     }
 
     public void Dispose()

@@ -9,8 +9,8 @@ namespace Annium.Blazor.Charts.Data;
 public interface ISeriesSource<T> : ISeriesSource, IDisposable
     where T : ITimeSeries
 {
-    bool GetData(Instant start, Instant end, out IReadOnlyList<T> data);
-    void LoadData(Instant start, Instant end, Action onLoad);
+    bool GetItems(Instant start, Instant end, out IReadOnlyList<T> data);
+    void LoadItems(Instant start, Instant end, Action onLoad);
 }
 
 public interface ISeriesSource

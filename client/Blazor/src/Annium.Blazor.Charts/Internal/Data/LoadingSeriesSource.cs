@@ -54,7 +54,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         Bounds = ValueRange.Create(() => _emptyBefore.End, () => _emptyAfter.Start);
     }
 
-    public bool GetData(Instant start, Instant end, out IReadOnlyList<TData> data)
+    public bool GetItems(Instant start, Instant end, out IReadOnlyList<TData> data)
     {
         data = Array.Empty<TData>();
 
@@ -90,7 +90,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         return true;
     }
 
-    public void LoadData(Instant start, Instant end, Action onLoaded)
+    public void LoadItems(Instant start, Instant end, Action onLoaded)
     {
         LoadData(start, end).ContinueWith(t =>
         {
