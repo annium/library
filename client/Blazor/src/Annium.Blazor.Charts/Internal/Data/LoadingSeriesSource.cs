@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain;
 using Annium.Core.Primitives;
-using Annium.Core.Primitives.Collections.Generic;
 using Annium.Data.Models;
 using Annium.Logging.Abstractions;
 using Annium.NodaTime.Extensions;
@@ -88,6 +86,20 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         // this.Log().Trace($"non-overlapping range between: range {S(start)} - {S(end)} and cache {S(Start)} - {S(End)}");
 
         return true;
+    }
+
+    public TData? GetItem(Instant moment)
+    {
+        if (moment < Start || moment > End)
+            return default;
+
+        var index = moment.Minus(Start).TotalMinutes.FloorInt32();
+        var item = _cache[index];
+
+        if (item.Moment != moment)
+            throw new InvalidOperationException($"Item {item} is doesn't match moment {moment}");
+
+        return item;
     }
 
     public void LoadItems(Instant start, Instant end, Action onLoaded)

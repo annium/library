@@ -39,6 +39,13 @@ internal class DependentSeriesSource<TSource, TData> : ISeriesSource<TData>, IDe
         return result;
     }
 
+    public TData? GetItem(Instant moment)
+    {
+        var item = _source.GetItem(moment);
+
+        return item is null ? default : _getValue(item);
+    }
+
     public void LoadItems(Instant start, Instant end, Action onLoaded)
     {
         // this.Log().Trace($"get data in {start} - {end}");
