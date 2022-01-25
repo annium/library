@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Annium.Components.State.Forms;
 using Microsoft.AspNetCore.Components;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Annium.Blazor.Core.Tools;
 using Annium.Components.State.Forms;
