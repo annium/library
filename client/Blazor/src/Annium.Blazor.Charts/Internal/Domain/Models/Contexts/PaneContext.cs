@@ -61,8 +61,10 @@ internal sealed record PaneContext : IManagedPaneContext
         if (_range.Start <= min && max <= _range.End)
             return false;
 
-        _range.SetStart(min);
-        _range.SetEnd(max);
+        if (_range.Start == 0m || _range.Start > min)
+            _range.SetStart(min);
+        if (_range.End < max)
+            _range.SetEnd(max);
 
         HorizontalLines = GetHorizontalLines();
 

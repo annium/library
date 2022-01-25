@@ -74,16 +74,17 @@ public partial class Label<TData> : IAsyncDisposable
 
     private void HandleLookup(Instant? moment, Point? _)
     {
-        var ctx = SeriesContext.Overlay;
-        var rect = SeriesContext.Rect;
-
-        ctx.ClearRect(0, 0, Width, Height);
         if (moment is null)
             return;
 
         var item = Source.GetItem(moment.Value);
         if (item is null)
             return;
+
+        var ctx = SeriesContext.Overlay;
+        var rect = SeriesContext.Rect;
+
+        ctx.ClearRect(0, 0, Width, Height);
 
         var x = Left ?? rect.Width.FloorInt32() - Right!.Value;
         var y = Top ?? rect.Height.FloorInt32() - Bottom!.Value;
