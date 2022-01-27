@@ -5,7 +5,7 @@
 @inject Style _style;
 
 <div @ref="_container" class="@Class">
-    <CascadingValue Value="ChartContext" TValue="IManagedChartContext">
+    <CascadingValue Value="_chartContext" TValue="IManagedChartContext">
         @ChildContent
     </CascadingValue>
 </div>

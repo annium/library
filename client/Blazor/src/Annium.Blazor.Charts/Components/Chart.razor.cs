@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain;
+using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
@@ -16,6 +17,9 @@ namespace Annium.Blazor.Charts.Components;
 
 public partial class Chart : IAsyncDisposable
 {
+    [Parameter, EditorRequired]
+    public IChartContext ChartContext { get; set; } = default!;
+
     [Parameter]
     public string? CssClass { get; set; }
 
@@ -25,11 +29,9 @@ public partial class Chart : IAsyncDisposable
     [Parameter]
     public RenderFragment ChildContent { get; set; } = default!;
 
-    [Inject]
-    private IManagedChartContext ChartContext { get; set; } = default!;
-
     private string Class => ClassBuilder.With(_style.Container).With(CssClass).Build();
     private Div _container = default!;
+    private IManagedChartContext _chartContext = default!;
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 
     protected override void OnAfterRender(bool firstRender)
@@ -37,11 +39,11 @@ public partial class Chart : IAsyncDisposable
         if (!firstRender)
             return;
 
-        ChartContext.Init(_container);
+        _chartContext.Init(_container);
 
         _disposable += _container.OnWheel(HandleWheel);
-        _disposable += ChartContext.Container.OnMouseMove(HandlePointerMove);
-        _disposable += ChartContext.Container.OnMouseOut(HandlePointerOut);
+        _disposable += _chartContext.Container.OnMouseMove(HandlePointerMove);
+        _disposable += _chartContext.Container.OnMouseOut(HandlePointerOut);
         _disposable += Timer.Start(Draw, AnimationFrameMs, AnimationFrameMs);
         _disposable += Timer.Start(Overlay, AnimationFrameMs, AnimationFrameMs);
         _disposable += _container;
@@ -49,57 +51,58 @@ public partial class Chart : IAsyncDisposable
 
     protected override void OnParametersSet()
     {
-        ChartContext.RequestDraw();
+        _chartContext = (IManagedChartContext)ChartContext;
+        _chartContext.RequestDraw();
     }
 
     private void HandleWheel(bool ctrlKey, decimal deltaX, decimal deltaY)
     {
-        if (ChartContext.IsLocked)
+        if (_chartContext.IsLocked)
             return;
 
         var changed = ctrlKey
-            ? ChartContext.ChangeZoom(deltaY)
-            : ChartContext.ChangeScroll(deltaX);
+            ? _chartContext.ChangeZoom(deltaY)
+            : _chartContext.ChangeScroll(deltaX);
 
         if (changed)
-            ChartContext.RequestDraw();
+            _chartContext.RequestDraw();
     }
 
     private void HandlePointerMove(int x, int y) =>
-        ChartContext.RequestOverlay(new Point(x, y));
+        _chartContext.RequestOverlay(new Point(x, y));
 
     private void HandlePointerOut(int x, int y) =>
-        ChartContext.RequestOverlay(null);
+        _chartContext.RequestOverlay(null);
 
     private void Draw()
     {
-        if (!ChartContext.TryDraw())
+        if (!_chartContext.TryDraw())
             return;
 
-        ChartContext.Adjust(Moment);
-        ChartContext.SendUpdate();
+        _chartContext.Adjust(Moment);
+        _chartContext.SendUpdate();
     }
 
     private void Overlay()
     {
-        if (!ChartContext.TryOverlay(out var point))
+        if (!_chartContext.TryOverlay(out var point))
             return;
 
         ClearOverlays();
 
         if (point == default)
-            ChartContext.SendLookupChanged(null, null);
+            _chartContext.SendLookupChanged(null, null);
         else
         {
-            var lookupMoment = (ChartContext.View.Start + Duration.FromMilliseconds(point.X * ChartContext.MsPerPx)).RoundToMinute();
+            var lookupMoment = (_chartContext.View.Start + Duration.FromMilliseconds(point.X * _chartContext.MsPerPx)).RoundToMinute();
 
-            ChartContext.SendLookupChanged(lookupMoment, point);
+            _chartContext.SendLookupChanged(lookupMoment, point);
         }
     }
 
     private void ClearOverlays()
     {
-        foreach (var pane in ChartContext.Panes)
+        foreach (var pane in _chartContext.Panes)
         {
             // clear crosshair at series
             ClearContext(pane.Series.Overlay, pane.Series.Rect);
