@@ -25,13 +25,12 @@ internal sealed record ChartContext : IManagedChartContext
     public Element Container { get; private set; } = default!;
     public DomRect Rect { get; private set; }
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
-    public int MsPerPx => ((double)NodaConstants.MillisecondsPerMinute / Zoom).FloorInt32();
+    public int MsPerPx { get; private set; }
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
     public ValueRange<Instant> Range => _range;
     public ValueRange<Instant> View => _view;
     public IReadOnlyDictionary<int, LocalDateTime> VerticalLines { get; private set; } = new Dictionary<int, LocalDateTime>();
 
-    public int Scroll => _scroll;
     public int Zoom => _zoom;
     public bool IsLocked => _panes.Any(x => x.IsLocked) || _sources.Any(x => x.IsLoading);
 
@@ -40,8 +39,7 @@ internal sealed record ChartContext : IManagedChartContext
     private readonly ValueRange<Instant> _bounds;
     private readonly ManagedValueRange<Instant> _view = ValueRange.Create(Instant.MinValue, Instant.MinValue);
     private readonly ManagedValueRange<Instant> _range = ValueRange.Create(Instant.MinValue, Instant.MinValue);
-    private int _scroll;
-    private int _zoom = ZoomDefault;
+    private int _zoom;
     private decimal _rawZoom = ZoomDefault;
     private int _isCanvasDirty = 1;
     private (Point?, bool) _overlayRequest;
@@ -55,6 +53,7 @@ internal sealed record ChartContext : IManagedChartContext
             () => _panes.Count > 0 ? _panes.Min(x => x.Bounds.Start) : timeProvider.Now,
             () => _panes.Count > 0 ? _panes.Max(x => x.Bounds.End) : timeProvider.Now
         );
+        SetZoom(ZoomDefault);
     }
 
     public void Init(Element container)
@@ -75,7 +74,7 @@ internal sealed record ChartContext : IManagedChartContext
             throw new InvalidOperationException("Source is already registered");
     }
 
-    public bool ChangeZoom(decimal delta)
+    public bool HandleZoomEvent(decimal delta)
     {
         _rawZoom = (_rawZoom * (1 - delta * ZoomMultiplier)).Within(ZoomMin, ZoomMax);
 
@@ -83,7 +82,7 @@ internal sealed record ChartContext : IManagedChartContext
         if (value == _zoom)
             return false;
 
-        _zoom = value;
+        SetZoom(value);
 
         return true;
     }
@@ -102,11 +101,11 @@ internal sealed record ChartContext : IManagedChartContext
         if (change > 0 && _bounds.End - start <= size / 2)
             return false;
 
-        var scroll = Scroll + change;
-        if (Scroll == scroll)
-            return false;
-
-        _scroll = scroll;
+        var duration = Duration.FromMilliseconds(MsPerPx * Math.Abs(change));
+        if (change > 0)
+            Moment += duration;
+        else
+            Moment -= duration;
 
         return true;
     }
@@ -163,11 +162,15 @@ internal sealed record ChartContext : IManagedChartContext
     {
         var msPerPx = MsPerPx;
         var size = Duration.FromMilliseconds(Rect.Width.FloorInt32() * msPerPx);
-        var offset = Duration.FromMilliseconds(Math.Abs(Scroll) * msPerPx);
-        var end = Scroll > 0 ? Moment + offset : Moment - offset;
-        var start = end - size;
+        var start = Moment - size;
 
-        return (start, end);
+        return (start, Moment);
+    }
+
+    public void SetZoom(int zoom)
+    {
+        _zoom = zoom;
+        MsPerPx = ((double)NodaConstants.MillisecondsPerMinute / zoom).FloorInt32();
     }
 
     private Duration GetAlignmentDuration(long msPerPx)

@@ -13,7 +13,6 @@ public interface IChartContext
     event Action Updated;
     Instant Moment { get; }
     int Zoom { get; }
-    int Scroll { get; }
     bool IsLocked { get; }
     Element Container { get; }
     DomRect Rect { get; }
@@ -25,6 +24,7 @@ public interface IChartContext
     IReadOnlyDictionary<int, LocalDateTime> VerticalLines { get; }
     void Adjust(Instant moment);
     bool ChangeScroll(decimal delta);
+    void SetZoom(int zoom);
     void RegisterPane(IPaneContext paneContext);
     void RegisterSource(ISeriesSource source);
     void RequestDraw();

@@ -8,7 +8,7 @@ namespace Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 internal interface IManagedChartContext : IChartContext
 {
     void Init(Element container);
-    bool ChangeZoom(decimal delta);
+    bool HandleZoomEvent(decimal delta);
     void SendUpdate();
     void SendLookupChanged(Instant? moment, Point? point);
     bool TryDraw();

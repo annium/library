@@ -57,7 +57,7 @@ public partial class Chart : IAsyncDisposable
             return;
 
         var changed = ctrlKey
-            ? _chartContext.ChangeZoom(deltaY)
+            ? _chartContext.HandleZoomEvent(deltaY)
             : _chartContext.ChangeScroll(deltaX);
 
         if (changed)
