@@ -155,10 +155,6 @@ internal sealed record ChartContext : IManagedChartContext
     }
 
     public void RequestDraw() => Volatile.Write(ref _isCanvasDirty, 1);
-    public void RequestOverlay((int x, int y)? point)
-    {
-        throw new NotImplementedException();
-    }
 
     public void RequestOverlay(Point? point) => _overlayRequest = (point, true);
 
@@ -179,6 +175,12 @@ internal sealed record ChartContext : IManagedChartContext
 
         return block switch
         {
+            > 11520 => Duration.FromDays(8),
+            > 5760 => Duration.FromDays(4),
+            > 2880 => Duration.FromDays(2),
+            > 1440 => Duration.FromDays(1),
+            > 720 => Duration.FromHours(12),
+            > 360 => Duration.FromHours(6),
             > 240 => Duration.FromHours(4),
             > 120 => Duration.FromHours(2),
             > 60  => Duration.FromHours(1),
