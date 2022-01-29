@@ -85,7 +85,7 @@ public partial class PaneSeries : IAsyncDisposable
             ctx.ClosePath();
         }
 
-        foreach (var x in ChartContext.VerticalLines.Keys)
+        foreach (var x in ChartContext.GetVerticalLines().Keys)
         {
             ctx.BeginPath();
             ctx.MoveTo(x - 0.5f, 0);

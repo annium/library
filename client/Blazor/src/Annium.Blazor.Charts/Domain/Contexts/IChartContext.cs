@@ -21,7 +21,6 @@ public interface IChartContext
     DateTimeZone TimeZone { get; }
     ValueRange<Instant> Range { get; }
     ValueRange<Instant> View { get; }
-    IReadOnlyDictionary<int, LocalDateTime> VerticalLines { get; }
     void Adjust(Instant moment);
     bool ChangeScroll(decimal delta);
     void SetZoom(int zoom);

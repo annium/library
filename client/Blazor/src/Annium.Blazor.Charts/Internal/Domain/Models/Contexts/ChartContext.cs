@@ -17,8 +17,6 @@ namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
 internal sealed record ChartContext : IManagedChartContext
 {
-    private const int DefaultBlockSize = 80;
-
     public event Action Updated = delegate { };
     public event Action<Instant?, Point?> LookupChanged = delegate { };
     public Instant Moment { get; private set; }
@@ -29,7 +27,6 @@ internal sealed record ChartContext : IManagedChartContext
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
     public ValueRange<Instant> Range => _range;
     public ValueRange<Instant> View => _view;
-    public IReadOnlyDictionary<int, LocalDateTime> VerticalLines { get; private set; } = new Dictionary<int, LocalDateTime>();
 
     public int Zoom => _zoom;
     public bool IsLocked => _panes.Any(x => x.IsLocked) || _sources.Any(x => x.IsLoading);
@@ -113,7 +110,6 @@ internal sealed record ChartContext : IManagedChartContext
     public void Adjust(Instant moment)
     {
         Moment = moment;
-        var msPerPx = MsPerPx;
         var (start, end) = GetView();
 
         // Console.WriteLine($"range: {S(start)} - {S(end)} size: {size} bounds: {S(_bounds.Start)} - {S(_bounds.End)}");
@@ -121,23 +117,6 @@ internal sealed record ChartContext : IManagedChartContext
         _range.SetEnd(end.FloorToMinute());
         _view.SetStart(start);
         _view.SetEnd(end);
-
-        var alignment = GetAlignmentDuration(msPerPx);
-        var verticalLines = new Dictionary<int, LocalDateTime>();
-        var lineMoment = start.FloorTo(alignment);
-
-        // align floors instant, so pick next period if start is not aligned
-        if (lineMoment < start)
-            lineMoment += alignment;
-
-        while (lineMoment <= end)
-        {
-            var line = ((lineMoment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
-            verticalLines[line] = lineMoment.InZone(TimeZone).LocalDateTime;
-            lineMoment += alignment;
-        }
-
-        VerticalLines = verticalLines;
     }
 
     public void SendUpdate() => Updated();
@@ -171,26 +150,5 @@ internal sealed record ChartContext : IManagedChartContext
     {
         _zoom = zoom;
         MsPerPx = ((double)NodaConstants.MillisecondsPerMinute / zoom).FloorInt32();
-    }
-
-    private Duration GetAlignmentDuration(long msPerPx)
-    {
-        var block = (decimal)DefaultBlockSize * msPerPx / NodaConstants.MillisecondsPerMinute;
-
-        return block switch
-        {
-            > 11520 => Duration.FromDays(8),
-            > 5760  => Duration.FromDays(4),
-            > 2880  => Duration.FromDays(2),
-            > 1440  => Duration.FromDays(1),
-            > 720   => Duration.FromHours(12),
-            > 360   => Duration.FromHours(6),
-            > 240   => Duration.FromHours(4),
-            > 120   => Duration.FromHours(2),
-            > 60    => Duration.FromHours(1),
-            > 30    => Duration.FromMinutes(30),
-            > 15    => Duration.FromMinutes(15),
-            _       => Duration.FromMinutes(block > 5 ? 5 : 3)
-        };
     }
 }

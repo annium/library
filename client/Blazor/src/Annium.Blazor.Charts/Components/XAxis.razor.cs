@@ -49,7 +49,7 @@ public partial class XAxis : IAsyncDisposable
         ctx.TextBaseline = CanvasTextBaseline.middle;
 
         var baseline = (SideContext.Rect.Height / 2).FloorInt32();
-        foreach (var (x, m) in Chart.VerticalLines)
+        foreach (var (x, m) in Chart.GetVerticalLines())
         {
             if (m.IsMidnight())
             {
