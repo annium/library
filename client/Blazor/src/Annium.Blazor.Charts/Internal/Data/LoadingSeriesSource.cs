@@ -90,6 +90,9 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
 
     public TData? GetItem(Instant moment)
     {
+        if (_cache.Count == 0)
+            return default;
+
         if (moment < Start || moment > End)
             return default;
 

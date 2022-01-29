@@ -21,6 +21,7 @@ internal sealed record ChartContext : IManagedChartContext
 
     public event Action Updated = delegate { };
     public event Action<Instant?, Point?> LookupChanged = delegate { };
+    public Instant Moment { get; private set; }
     public Element Container { get; private set; } = default!;
     public DomRect Rect { get; private set; }
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
@@ -50,6 +51,7 @@ internal sealed record ChartContext : IManagedChartContext
         ITimeProvider timeProvider
     )
     {
+        Moment = timeProvider.Now;
         _bounds = ValueRange.Create(
             () => _panes.Count > 0 ? _panes.Min(x => x.Bounds.Start) : timeProvider.Now,
             () => _panes.Count > 0 ? _panes.Max(x => x.Bounds.End) : timeProvider.Now
@@ -176,17 +178,17 @@ internal sealed record ChartContext : IManagedChartContext
         return block switch
         {
             > 11520 => Duration.FromDays(8),
-            > 5760 => Duration.FromDays(4),
-            > 2880 => Duration.FromDays(2),
-            > 1440 => Duration.FromDays(1),
-            > 720 => Duration.FromHours(12),
-            > 360 => Duration.FromHours(6),
-            > 240 => Duration.FromHours(4),
-            > 120 => Duration.FromHours(2),
-            > 60  => Duration.FromHours(1),
-            > 30  => Duration.FromMinutes(30),
-            > 15  => Duration.FromMinutes(15),
-            _     => Duration.FromMinutes(block > 5 ? 5 : 3)
+            > 5760  => Duration.FromDays(4),
+            > 2880  => Duration.FromDays(2),
+            > 1440  => Duration.FromDays(1),
+            > 720   => Duration.FromHours(12),
+            > 360   => Duration.FromHours(6),
+            > 240   => Duration.FromHours(4),
+            > 120   => Duration.FromHours(2),
+            > 60    => Duration.FromHours(1),
+            > 30    => Duration.FromMinutes(30),
+            > 15    => Duration.FromMinutes(15),
+            _       => Duration.FromMinutes(block > 5 ? 5 : 3)
         };
     }
 }

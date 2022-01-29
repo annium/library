@@ -11,6 +11,7 @@ public interface IChartContext
 {
     event Action<Instant?, Point?> LookupChanged;
     event Action Updated;
+    Instant Moment { get; }
     int Zoom { get; }
     int Scroll { get; }
     bool IsLocked { get; }

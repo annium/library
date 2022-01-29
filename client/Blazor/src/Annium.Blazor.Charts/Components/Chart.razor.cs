@@ -24,9 +24,6 @@ public partial class Chart : IAsyncDisposable
     public string? CssClass { get; set; }
 
     [Parameter]
-    public Instant Moment { get; set; } = SystemClock.Instance.GetCurrentInstant().FloorToMinute();
-
-    [Parameter]
     public RenderFragment ChildContent { get; set; } = default!;
 
     private string Class => ClassBuilder.With(_style.Container).With(CssClass).Build();
@@ -77,7 +74,7 @@ public partial class Chart : IAsyncDisposable
     {
         if (_chartContext.TryDraw())
         {
-            _chartContext.Adjust(Moment);
+            _chartContext.Adjust(_chartContext.Moment);
             _chartContext.SendUpdate();
         }
 
