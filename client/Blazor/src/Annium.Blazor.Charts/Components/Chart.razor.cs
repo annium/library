@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
@@ -30,6 +31,7 @@ public partial class Chart : IAsyncDisposable
     private string Class => ClassBuilder.With(_style.Container).With(CssClass).Build();
     private Div _container = default!;
     private IManagedChartContext _chartContext = default!;
+    private decimal _rawZoom = ZoomDefault;
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 
     protected override void OnAfterRender(bool firstRender)
@@ -40,8 +42,8 @@ public partial class Chart : IAsyncDisposable
         _chartContext.Init(_container);
 
         _disposable += _container.OnWheel(HandleWheel);
-        _disposable += _chartContext.Container.OnMouseMove(HandlePointerMove);
-        _disposable += _chartContext.Container.OnMouseOut(HandlePointerOut);
+        _disposable += _container.OnMouseMove(HandlePointerMove);
+        _disposable += _container.OnMouseOut(HandlePointerOut);
         _disposable += Timer.Start(CheckState, AnimationFrameMs, AnimationFrameMs);
         _disposable += _container;
     }
@@ -58,8 +60,8 @@ public partial class Chart : IAsyncDisposable
             return;
 
         var changed = ctrlKey
-            ? _chartContext.HandleZoomEvent(deltaY)
-            : _chartContext.ChangeScroll(deltaX);
+            ? HandleZoomDelta(deltaY)
+            : HandleScrollDelta(deltaX);
 
         if (changed)
             _chartContext.RequestDraw();
@@ -74,24 +76,55 @@ public partial class Chart : IAsyncDisposable
     private void CheckState()
     {
         if (_chartContext.TryDraw())
-        {
-            _chartContext.Adjust(_chartContext.Moment);
-            _chartContext.SendUpdate();
-        }
+            _chartContext.Update();
 
         if (_chartContext.TryOverlay(out var point))
         {
             _chartContext.ClearOverlays();
 
             if (point == default)
-                _chartContext.SendLookupChanged(null, null);
+                _chartContext.SetLookup(null, null);
             else
             {
                 var lookupMoment = (_chartContext.View.Start + Duration.FromMilliseconds(point.X * _chartContext.MsPerPx)).RoundToMinute();
 
-                _chartContext.SendLookupChanged(lookupMoment, point);
+                _chartContext.SetLookup(lookupMoment, point);
             }
         }
+    }
+
+    private bool HandleZoomDelta(decimal delta)
+    {
+        _rawZoom = (_rawZoom * (1 - delta * ZoomMultiplier)).Within(ZoomMin, ZoomMax);
+
+        var value = Zooms.OrderBy(x => _rawZoom.DiffFrom(x)).First();
+        if (value == _chartContext.Zoom)
+            return false;
+
+        _chartContext.SetZoom(value);
+
+        return true;
+    }
+
+    private bool HandleScrollDelta(decimal delta)
+    {
+        var change = (delta * ScrollMultiplier).FloorInt32();
+        if (change == 0)
+            return false;
+
+        var (start, end) = _chartContext.View;
+        var size = end - start;
+        if (change < 0 && end - _chartContext.Bounds.Start <= size / 2)
+            return false;
+
+        if (change > 0 && _chartContext.Bounds.End - start <= size / 2)
+            return false;
+
+        var duration = Duration.FromMilliseconds(_chartContext.MsPerPx * Math.Abs(change));
+        var moment = change > 0 ? _chartContext.Moment + duration : _chartContext.Moment - duration;
+        _chartContext.SetMoment(moment);
+
+        return true;
     }
 
     public ValueTask DisposeAsync()

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
@@ -20,24 +19,19 @@ internal sealed record ChartContext : IManagedChartContext
     public event Action Updated = delegate { };
     public event Action<Instant?, Point?> LookupChanged = delegate { };
     public Instant Moment { get; private set; }
-    public Element Container { get; private set; } = default!;
-    public DomRect Rect { get; private set; }
-    public IReadOnlyCollection<IPaneContext> Panes => _panes;
+    public int Zoom { get; private set; }
+    public bool IsLocked => _panes.Any(x => x.IsLocked);
     public int MsPerPx { get; private set; }
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-    public ValueRange<Instant> Range => _range;
+    public ValueRange<Instant> Bounds { get; }
     public ValueRange<Instant> View => _view;
-
-    public int Zoom => _zoom;
-    public bool IsLocked => _panes.Any(x => x.IsLocked) || _sources.Any(x => x.IsLoading);
+    public ValueRange<Instant> Range => _range;
+    public IReadOnlyCollection<IPaneContext> Panes => _panes;
 
     private readonly HashSet<IPaneContext> _panes = new();
-    private readonly HashSet<ISeriesSource> _sources = new();
-    private readonly ValueRange<Instant> _bounds;
     private readonly ManagedValueRange<Instant> _view = ValueRange.Create(Instant.MinValue, Instant.MinValue);
     private readonly ManagedValueRange<Instant> _range = ValueRange.Create(Instant.MinValue, Instant.MinValue);
-    private int _zoom;
-    private decimal _rawZoom = ZoomDefault;
+    private DomRect _rect;
     private int _isCanvasDirty = 1;
     private (Point?, bool) _overlayRequest;
 
@@ -46,7 +40,7 @@ internal sealed record ChartContext : IManagedChartContext
     )
     {
         Moment = timeProvider.Now;
-        _bounds = ValueRange.Create(
+        Bounds = ValueRange.Create(
             () => _panes.Count > 0 ? _panes.Min(x => x.Bounds.Start) : timeProvider.Now,
             () => _panes.Count > 0 ? _panes.Max(x => x.Bounds.End) : timeProvider.Now
         );
@@ -55,8 +49,7 @@ internal sealed record ChartContext : IManagedChartContext
 
     public void Init(Element container)
     {
-        Container = container;
-        Rect = container.GetBoundingClientRect();
+        _rect = container.GetBoundingClientRect();
     }
 
     public void RegisterPane(IPaneContext paneContext)
@@ -65,51 +58,8 @@ internal sealed record ChartContext : IManagedChartContext
             throw new InvalidOperationException("Pane is already registered");
     }
 
-    public void RegisterSource(ISeriesSource source)
+    public void Update()
     {
-        if (!_sources.Add(source))
-            throw new InvalidOperationException("Source is already registered");
-    }
-
-    public bool HandleZoomEvent(decimal delta)
-    {
-        _rawZoom = (_rawZoom * (1 - delta * ZoomMultiplier)).Within(ZoomMin, ZoomMax);
-
-        var value = Zooms.OrderBy(x => _rawZoom.DiffFrom(x)).First();
-        if (value == _zoom)
-            return false;
-
-        SetZoom(value);
-
-        return true;
-    }
-
-    public bool ChangeScroll(decimal delta)
-    {
-        var change = (delta * ScrollMultiplier).FloorInt32();
-        if (change == 0)
-            return false;
-
-        var (start, end) = GetView();
-        var size = end - start;
-        if (change < 0 && end - _bounds.Start <= size / 2)
-            return false;
-
-        if (change > 0 && _bounds.End - start <= size / 2)
-            return false;
-
-        var duration = Duration.FromMilliseconds(MsPerPx * Math.Abs(change));
-        if (change > 0)
-            Moment += duration;
-        else
-            Moment -= duration;
-
-        return true;
-    }
-
-    public void Adjust(Instant moment)
-    {
-        Moment = moment;
         var (start, end) = GetView();
 
         // Console.WriteLine($"range: {S(start)} - {S(end)} size: {size} bounds: {S(_bounds.Start)} - {S(_bounds.End)}");
@@ -117,10 +67,11 @@ internal sealed record ChartContext : IManagedChartContext
         _range.SetEnd(end.FloorToMinute());
         _view.SetStart(start);
         _view.SetEnd(end);
+
+        Updated();
     }
 
-    public void SendUpdate() => Updated();
-    public void SendLookupChanged(Instant? moment, Point? point) => LookupChanged(moment, point);
+    public void SetLookup(Instant? moment, Point? point) => LookupChanged(moment, point);
 
     public bool TryDraw() => Interlocked.CompareExchange(ref _isCanvasDirty, 0, 1) == 1;
 
@@ -139,16 +90,20 @@ internal sealed record ChartContext : IManagedChartContext
 
     private (Instant start, Instant end) GetView()
     {
-        var msPerPx = MsPerPx;
-        var size = Duration.FromMilliseconds(Rect.Width.FloorInt32() * msPerPx);
+        var size = Duration.FromMilliseconds(_rect.Width.FloorInt32() * MsPerPx);
         var start = Moment - size;
 
         return (start, Moment);
     }
 
+    public void SetMoment(Instant moment)
+    {
+        Moment = moment;
+    }
+
     public void SetZoom(int zoom)
     {
-        _zoom = zoom;
+        Zoom = zoom;
         MsPerPx = ((double)NodaConstants.MillisecondsPerMinute / zoom).FloorInt32();
     }
 }

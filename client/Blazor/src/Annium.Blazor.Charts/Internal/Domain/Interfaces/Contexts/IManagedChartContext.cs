@@ -8,9 +8,8 @@ namespace Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 internal interface IManagedChartContext : IChartContext
 {
     void Init(Element container);
-    bool HandleZoomEvent(decimal delta);
-    void SendUpdate();
-    void SendLookupChanged(Instant? moment, Point? point);
+    void Update();
+    void SetLookup(Instant? moment, Point? point);
     bool TryDraw();
     bool TryOverlay(out Point point);
 }
