@@ -12,6 +12,9 @@ public interface IChartContext
     Instant Moment { get; }
     int Zoom { get; }
     IReadOnlyList<int> Zooms { get; }
+    Duration Resolution { get; }
+    int PxPerResolution { get; }
+    IReadOnlyList<Duration> Resolutions { get; }
     bool IsLocked { get; }
     int MsPerPx { get; }
     DateTimeZone TimeZone { get; }
@@ -19,9 +22,10 @@ public interface IChartContext
     ValueRange<Instant> View { get; }
     ValueRange<Instant> Range { get; }
     IReadOnlyCollection<IPaneContext> Panes { get; }
-    void Configure(IReadOnlyList<int> zooms);
+    void Configure(IReadOnlyList<int> zooms, IReadOnlyList<int> resolutions);
     void SetMoment(Instant moment);
     void SetZoom(int zoom);
+    void SetResolution(Duration resolution);
     void RegisterPane(IPaneContext paneContext);
     void RequestDraw();
     void RequestOverlay(Point? point);

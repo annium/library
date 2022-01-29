@@ -31,7 +31,7 @@ internal static class ChartContextExtensions
     {
         var lines = new Dictionary<int, LocalDateTime>();
 
-        var alignment = GetAlignmentDuration(context.MsPerPx);
+        var alignment = context.GetAlignmentDuration();
         var (start, end) = context.View;
 
         var lineMoment = context.View.Start.FloorTo(alignment);
@@ -71,9 +71,9 @@ internal static class ChartContextExtensions
     }
 
 
-    private static Duration GetAlignmentDuration(long msPerPx)
+    private static Duration GetAlignmentDuration(this IChartContext context)
     {
-        var block = (decimal)DefaultBlockSize * msPerPx / NodaConstants.MillisecondsPerMinute;
+        var block = DefaultBlockSize * context.Resolution.TotalMinutes / context.Zoom;
 
         return block switch
         {

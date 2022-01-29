@@ -20,6 +20,9 @@ internal sealed record ChartContext : IManagedChartContext
     public Instant Moment { get; private set; }
     public int Zoom { get; private set; }
     public IReadOnlyList<int> Zooms => _zooms;
+    public Duration Resolution { get; private set; }
+    public int PxPerResolution { get; private set; }
+    public IReadOnlyList<Duration> Resolutions => _resolutions;
     public bool IsLocked => _panes.Any(x => x.IsLocked);
     public int MsPerPx { get; private set; }
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
@@ -29,6 +32,7 @@ internal sealed record ChartContext : IManagedChartContext
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
 
     private List<int> _zooms = new() { 1 };
+    private List<Duration> _resolutions = new() { Duration.FromMinutes(1) };
     private readonly HashSet<IPaneContext> _panes = new();
     private readonly ManagedValueRange<Instant> _view = ValueRange.Create(Instant.MinValue, Instant.MinValue);
     private readonly ManagedValueRange<Instant> _range = ValueRange.Create(Instant.MinValue, Instant.MinValue);
@@ -46,6 +50,7 @@ internal sealed record ChartContext : IManagedChartContext
             () => _panes.Count > 0 ? _panes.Max(x => x.Bounds.End) : timeProvider.Now
         );
         SetZoom(_zooms[0]);
+        SetResolution(_resolutions[0]);
     }
 
     public void Init(Element container)
@@ -53,13 +58,21 @@ internal sealed record ChartContext : IManagedChartContext
         _rect = container.GetBoundingClientRect();
     }
 
-    public void Configure(IReadOnlyList<int> zooms)
+    public void Configure(
+        IReadOnlyList<int> zooms,
+        IReadOnlyList<int> resolutions
+    )
     {
         if (zooms.Count == 0)
             throw new ArgumentException("Zooms list is empty");
 
+        if (resolutions.Count == 0)
+            throw new ArgumentException("Resolutions list is empty");
+
         _zooms = zooms.ToList();
         SetZoom(_zooms[(_zooms.Count / (decimal)2).FloorInt32()]);
+        _resolutions = resolutions.Select(i => Duration.FromMinutes(i)).ToList();
+        SetResolution(_resolutions[0]);
     }
 
     public void RegisterPane(IPaneContext paneContext)
@@ -73,8 +86,8 @@ internal sealed record ChartContext : IManagedChartContext
         var (start, end) = GetView();
 
         // Console.WriteLine($"range: {S(start)} - {S(end)} size: {size} bounds: {S(_bounds.Start)} - {S(_bounds.End)}");
-        _range.SetStart(start.CeilToMinute());
-        _range.SetEnd(end.FloorToMinute());
+        _range.SetStart(start.CeilTo(Resolution));
+        _range.SetEnd(end.FloorTo(Resolution));
         _view.SetStart(start);
         _view.SetEnd(end);
 
@@ -98,6 +111,29 @@ internal sealed record ChartContext : IManagedChartContext
 
     public void RequestOverlay(Point? point) => _overlayRequest = (point, true);
 
+    public void SetMoment(Instant moment)
+    {
+        Moment = moment;
+    }
+
+    public void SetZoom(int zoom)
+    {
+        if (!_zooms.Contains(zoom))
+            throw new ArgumentOutOfRangeException($"Zoom value {zoom} is not valid");
+
+        Zoom = zoom;
+        UpdateUnits();
+    }
+
+    public void SetResolution(Duration resolution)
+    {
+        if (!_resolutions.Contains(resolution))
+            throw new ArgumentOutOfRangeException($"Resolution value {resolution} is not valid");
+
+        Resolution = resolution;
+        UpdateUnits();
+    }
+
     private (Instant start, Instant end) GetView()
     {
         var size = Duration.FromMilliseconds(_rect.Width.FloorInt32() * MsPerPx);
@@ -106,22 +142,9 @@ internal sealed record ChartContext : IManagedChartContext
         return (start, Moment);
     }
 
-    public void SetMoment(Instant moment)
+    private void UpdateUnits()
     {
-        Moment = moment;
-    }
-
-    public void SetZoom(int zoom)
-    {
-        if (_zooms.Count == 0)
-            throw new InvalidOperationException("Chart zooms not configured");
-
-        var min = _zooms[0];
-        var max = _zooms[^1];
-        if (!_zooms.Contains(zoom))
-            throw new ArgumentOutOfRangeException($"Zoom value {zoom} is out of chart zoom range [{min};{max}]");
-
-        Zoom = zoom;
-        MsPerPx = ((double)NodaConstants.MillisecondsPerMinute / zoom).FloorInt32();
+        MsPerPx = (NodaConstants.MillisecondsPerMinute * Resolution.TotalMinutes / Zoom).FloorInt32();
+        PxPerResolution = Zoom;
     }
 }
