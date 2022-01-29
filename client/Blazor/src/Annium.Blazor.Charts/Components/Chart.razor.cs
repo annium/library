@@ -31,7 +31,7 @@ public partial class Chart : IAsyncDisposable
     private string Class => ClassBuilder.With(_style.Container).With(CssClass).Build();
     private Div _container = default!;
     private IManagedChartContext _chartContext = default!;
-    private decimal _rawZoom = ZoomDefault;
+    private decimal _rawZoom;
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 
     protected override void OnAfterRender(bool firstRender)
@@ -52,6 +52,7 @@ public partial class Chart : IAsyncDisposable
     {
         _chartContext = (IManagedChartContext)ChartContext;
         _chartContext.RequestDraw();
+        _rawZoom = _chartContext.Zoom;
     }
 
     private void HandleWheel(bool ctrlKey, decimal deltaX, decimal deltaY)
@@ -95,9 +96,10 @@ public partial class Chart : IAsyncDisposable
 
     private bool HandleZoomDelta(decimal delta)
     {
-        _rawZoom = (_rawZoom * (1 - delta * ZoomMultiplier)).Within(ZoomMin, ZoomMax);
+        var zooms = _chartContext.Zooms;
+        _rawZoom = (_rawZoom * (1 - delta * ZoomMultiplier)).Within(zooms[0], zooms[^1]);
 
-        var value = Zooms.OrderBy(x => _rawZoom.DiffFrom(x)).First();
+        var value = zooms.OrderBy(x => _rawZoom.DiffFrom(x)).First();
         if (value == _chartContext.Zoom)
             return false;
 

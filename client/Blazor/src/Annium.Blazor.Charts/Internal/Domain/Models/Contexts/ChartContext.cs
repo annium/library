@@ -10,7 +10,6 @@ using Annium.Core.Primitives;
 using Annium.Data.Models;
 using Annium.NodaTime.Extensions;
 using NodaTime;
-using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
@@ -20,6 +19,7 @@ internal sealed record ChartContext : IManagedChartContext
     public event Action<Instant?, Point?> LookupChanged = delegate { };
     public Instant Moment { get; private set; }
     public int Zoom { get; private set; }
+    public IReadOnlyList<int> Zooms => _zooms;
     public bool IsLocked => _panes.Any(x => x.IsLocked);
     public int MsPerPx { get; private set; }
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
@@ -28,6 +28,7 @@ internal sealed record ChartContext : IManagedChartContext
     public ValueRange<Instant> Range => _range;
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
 
+    private List<int> _zooms = new() { 1 };
     private readonly HashSet<IPaneContext> _panes = new();
     private readonly ManagedValueRange<Instant> _view = ValueRange.Create(Instant.MinValue, Instant.MinValue);
     private readonly ManagedValueRange<Instant> _range = ValueRange.Create(Instant.MinValue, Instant.MinValue);
@@ -44,12 +45,21 @@ internal sealed record ChartContext : IManagedChartContext
             () => _panes.Count > 0 ? _panes.Min(x => x.Bounds.Start) : timeProvider.Now,
             () => _panes.Count > 0 ? _panes.Max(x => x.Bounds.End) : timeProvider.Now
         );
-        SetZoom(ZoomDefault);
+        SetZoom(_zooms[0]);
     }
 
     public void Init(Element container)
     {
         _rect = container.GetBoundingClientRect();
+    }
+
+    public void Configure(IReadOnlyList<int> zooms)
+    {
+        if (zooms.Count == 0)
+            throw new ArgumentException("Zooms list is empty");
+
+        _zooms = zooms.ToList();
+        SetZoom(_zooms[(_zooms.Count / (decimal)2).FloorInt32()]);
     }
 
     public void RegisterPane(IPaneContext paneContext)
@@ -103,6 +113,14 @@ internal sealed record ChartContext : IManagedChartContext
 
     public void SetZoom(int zoom)
     {
+        if (_zooms.Count == 0)
+            throw new InvalidOperationException("Chart zooms not configured");
+
+        var min = _zooms[0];
+        var max = _zooms[^1];
+        if (!_zooms.Contains(zoom))
+            throw new ArgumentOutOfRangeException($"Zoom value {zoom} is out of chart zoom range [{min};{max}]");
+
         Zoom = zoom;
         MsPerPx = ((double)NodaConstants.MillisecondsPerMinute / zoom).FloorInt32();
     }

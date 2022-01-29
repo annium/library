@@ -11,6 +11,7 @@ public interface IChartContext
     event Action Updated;
     Instant Moment { get; }
     int Zoom { get; }
+    IReadOnlyList<int> Zooms { get; }
     bool IsLocked { get; }
     int MsPerPx { get; }
     DateTimeZone TimeZone { get; }
@@ -18,6 +19,7 @@ public interface IChartContext
     ValueRange<Instant> View { get; }
     ValueRange<Instant> Range { get; }
     IReadOnlyCollection<IPaneContext> Panes { get; }
+    void Configure(IReadOnlyList<int> zooms);
     void SetMoment(Instant moment);
     void SetZoom(int zoom);
     void RegisterPane(IPaneContext paneContext);

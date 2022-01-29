@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal;
@@ -7,10 +6,6 @@ internal static class Constants
 {
     public const int AnimationFrameMs = 16;
     public const decimal ZoomMultiplier = 0.02m;
-    public static readonly ImmutableArray<int> Zooms = ImmutableArray.Create(1, 2, 4, 8, 16);
-    public static int ZoomMin => Zooms[0];
-    public static int ZoomMax => Zooms[^1];
-    public const int ZoomDefault = 4;
     public const decimal ScrollMultiplier = 0.5m;
     public static int GridLine => (int)(GridHalfLine * 2);
     public const float GridHalfLine = 0.5f;
