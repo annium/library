@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
 using Annium.NodaTime.Extensions;
 using NodaTime;
@@ -48,6 +49,27 @@ internal static class ChartContextExtensions
 
         return lines;
     }
+
+    public static void ClearOverlays(this IChartContext context)
+    {
+        foreach (var pane in context.Panes)
+        {
+            // clear crosshair at series
+            ClearContext(pane.Series.Overlay, pane.Series.Rect);
+
+            // clear bottom label
+            if (pane.Bottom is not null)
+                ClearContext(pane.Bottom.Overlay, pane.Bottom.Rect);
+
+            // clear right label
+            if (pane.Right is not null)
+                ClearContext(pane.Right.Overlay, pane.Right.Rect);
+        }
+
+        static void ClearContext(Canvas ctx, DomRect rect) =>
+            ctx.ClearRect(0, 0, rect.Width.CeilInt32(), rect.Height.CeilInt32());
+    }
+
 
     private static Duration GetAlignmentDuration(long msPerPx)
     {

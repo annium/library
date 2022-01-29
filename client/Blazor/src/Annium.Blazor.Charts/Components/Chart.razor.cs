@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
+using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
@@ -80,7 +81,7 @@ public partial class Chart : IAsyncDisposable
 
         if (_chartContext.TryOverlay(out var point))
         {
-            ClearOverlays();
+            _chartContext.ClearOverlays();
 
             if (point == default)
                 _chartContext.SendLookupChanged(null, null);
@@ -91,26 +92,6 @@ public partial class Chart : IAsyncDisposable
                 _chartContext.SendLookupChanged(lookupMoment, point);
             }
         }
-    }
-
-    private void ClearOverlays()
-    {
-        foreach (var pane in _chartContext.Panes)
-        {
-            // clear crosshair at series
-            ClearContext(pane.Series.Overlay, pane.Series.Rect);
-
-            // clear bottom label
-            if (pane.Bottom is not null)
-                ClearContext(pane.Bottom.Overlay, pane.Bottom.Rect);
-
-            // clear right label
-            if (pane.Right is not null)
-                ClearContext(pane.Right.Overlay, pane.Right.Rect);
-        }
-
-        static void ClearContext(Canvas ctx, DomRect rect) =>
-            ctx.ClearRect(0, 0, rect.Width.CeilInt32(), rect.Height.CeilInt32());
     }
 
     public ValueTask DisposeAsync()
