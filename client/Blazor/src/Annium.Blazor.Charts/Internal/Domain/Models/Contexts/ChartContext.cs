@@ -40,7 +40,6 @@ internal sealed record ChartContext : IManagedChartContext
     private readonly ValueRange<Instant> _bounds;
     private readonly ManagedValueRange<Instant> _view = ValueRange.Create(Instant.MinValue, Instant.MinValue);
     private readonly ManagedValueRange<Instant> _range = ValueRange.Create(Instant.MinValue, Instant.MinValue);
-    private Instant _moment;
     private int _scroll;
     private int _zoom = ZoomDefault;
     private decimal _rawZoom = ZoomDefault;
@@ -114,7 +113,7 @@ internal sealed record ChartContext : IManagedChartContext
 
     public void Adjust(Instant moment)
     {
-        _moment = moment;
+        Moment = moment;
         var msPerPx = MsPerPx;
         var (start, end) = GetView();
 
@@ -165,7 +164,7 @@ internal sealed record ChartContext : IManagedChartContext
         var msPerPx = MsPerPx;
         var size = Duration.FromMilliseconds(Rect.Width.FloorInt32() * msPerPx);
         var offset = Duration.FromMilliseconds(Math.Abs(Scroll) * msPerPx);
-        var end = Scroll > 0 ? _moment + offset : _moment - offset;
+        var end = Scroll > 0 ? Moment + offset : Moment - offset;
         var start = end - size;
 
         return (start, end);
