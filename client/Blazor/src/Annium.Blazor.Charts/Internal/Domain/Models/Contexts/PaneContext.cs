@@ -12,22 +12,20 @@ namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
 internal sealed record PaneContext : IManagedPaneContext
 {
-    private const int DefaultBlockSize = 40;
-
     public IReadOnlyCollection<ISeriesSource> Sources => _sources;
     public ISeriesContext Series { get; private set; } = default!;
     public IHorizontalSideContext? Bottom { get; set; }
     public IVerticalSideContext? Right { get; set; }
-    public decimal DotPerPx => (View.End - View.Start) / _height;
+    public int Width { get; private set; }
+    public int Height { get; private set; }
+    public decimal DotPerPx => (View.End - View.Start) / Height;
     public bool IsLocked => _sources.Any(x => x.IsLoading);
     public ValueRange<Instant> Bounds { get; }
     public ValueRange<decimal> Range => _range;
     public ValueRange<decimal> View { get; }
-    public IReadOnlyDictionary<int, decimal> HorizontalLines { get; private set; } = new Dictionary<int, decimal>();
     private readonly HashSet<ISeriesSource> _sources = new();
     private readonly ManagedValueRange<decimal> _range = ValueRange.Create(0m, 0m);
     private IChartContext _chartContext = default!;
-    private int _height;
 
     public PaneContext(
         ITimeProvider timeProvider
@@ -51,7 +49,11 @@ internal sealed record PaneContext : IManagedPaneContext
         _chartContext = chartContext;
     }
 
-    public void SetHeight(int height) => _height = height;
+    public void SetSize(int width,int height)
+    {
+        Width = width;
+        Height = height;
+    }
 
     public bool AdjustRange(decimal min, decimal max)
     {
@@ -65,8 +67,6 @@ internal sealed record PaneContext : IManagedPaneContext
             _range.SetStart(min);
         if (_range.End < max)
             _range.SetEnd(max);
-
-        HorizontalLines = GetHorizontalLines();
 
         _chartContext.RequestDraw();
 
@@ -107,24 +107,5 @@ internal sealed record PaneContext : IManagedPaneContext
             throw new InvalidOperationException("Right is already set");
 
         Right = right;
-    }
-
-    private IReadOnlyDictionary<int, decimal> GetHorizontalLines()
-    {
-        var (min, max) = View;
-        var dpx = DotPerPx;
-        var alignment = (DefaultBlockSize * dpx).ToPretty(0.5m);
-
-        var lines = new Dictionary<int, decimal>();
-        var value = min.CeilTo(alignment);
-
-        while (value <= max)
-        {
-            var line = _height - ((value - min) / dpx).FloorInt32();
-            lines[line] = value;
-            value += alignment;
-        }
-
-        return lines;
     }
 }

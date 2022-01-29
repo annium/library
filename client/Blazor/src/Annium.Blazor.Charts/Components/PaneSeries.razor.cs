@@ -41,9 +41,9 @@ public partial class PaneSeries : IAsyncDisposable
         if (!firstRender) return;
 
         var rect = _block.GetBoundingClientRect();
-        _overlay.Width = _canvas.Width = rect.Width.CeilInt32();
+        var width = _overlay.Width = _canvas.Width = rect.Width.CeilInt32();
         var height = _overlay.Height = _canvas.Height = rect.Height.CeilInt32();
-        PaneContext.SetHeight(height);
+        PaneContext.SetSize(width, height);
         SeriesContext.Init(_canvas, _overlay, rect);
         PaneContext.SetSeries(SeriesContext);
 
@@ -76,7 +76,7 @@ public partial class PaneSeries : IAsyncDisposable
         ctx.Stroke();
         ctx.ClosePath();
 
-        foreach (var y in PaneContext.HorizontalLines.Keys)
+        foreach (var y in PaneContext.GetHorizontalLines().Keys)
         {
             ctx.BeginPath();
             ctx.MoveTo(0, y - 0.5f);

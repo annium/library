@@ -52,7 +52,7 @@ public partial class YAxis : IAsyncDisposable
         ctx.TextBaseline = CanvasTextBaseline.middle;
 
         var x = 3;
-        foreach (var (y, m) in PaneContext.HorizontalLines)
+        foreach (var (y, m) in PaneContext.GetHorizontalLines())
         {
             var text = m.ToString(CultureInfo.InvariantCulture);
 
