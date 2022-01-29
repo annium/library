@@ -44,8 +44,7 @@ public partial class Chart : IAsyncDisposable
         _disposable += _container.OnWheel(HandleWheel);
         _disposable += _chartContext.Container.OnMouseMove(HandlePointerMove);
         _disposable += _chartContext.Container.OnMouseOut(HandlePointerOut);
-        _disposable += Timer.Start(Draw, AnimationFrameMs, AnimationFrameMs);
-        _disposable += Timer.Start(Overlay, AnimationFrameMs, AnimationFrameMs);
+        _disposable += Timer.Start(CheckState, AnimationFrameMs, AnimationFrameMs);
         _disposable += _container;
     }
 
@@ -74,29 +73,26 @@ public partial class Chart : IAsyncDisposable
     private void HandlePointerOut(int x, int y) =>
         _chartContext.RequestOverlay(null);
 
-    private void Draw()
+    private void CheckState()
     {
-        if (!_chartContext.TryDraw())
-            return;
-
-        _chartContext.Adjust(Moment);
-        _chartContext.SendUpdate();
-    }
-
-    private void Overlay()
-    {
-        if (!_chartContext.TryOverlay(out var point))
-            return;
-
-        ClearOverlays();
-
-        if (point == default)
-            _chartContext.SendLookupChanged(null, null);
-        else
+        if (_chartContext.TryDraw())
         {
-            var lookupMoment = (_chartContext.View.Start + Duration.FromMilliseconds(point.X * _chartContext.MsPerPx)).RoundToMinute();
+            _chartContext.Adjust(Moment);
+            _chartContext.SendUpdate();
+        }
 
-            _chartContext.SendLookupChanged(lookupMoment, point);
+        if (_chartContext.TryOverlay(out var point))
+        {
+            ClearOverlays();
+
+            if (point == default)
+                _chartContext.SendLookupChanged(null, null);
+            else
+            {
+                var lookupMoment = (_chartContext.View.Start + Duration.FromMilliseconds(point.X * _chartContext.MsPerPx)).RoundToMinute();
+
+                _chartContext.SendLookupChanged(lookupMoment, point);
+            }
         }
     }
 
