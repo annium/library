@@ -54,6 +54,7 @@ public partial class Crosshair : IAsyncDisposable
         var moment = m.Value;
         var point = p.Value;
         var msPerPx = ChartContext.MsPerPx;
+        var x = ((moment - ChartContext.View.Start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32() + 0.5f;
 
         foreach (var pane in ChartContext.Panes)
         {
@@ -71,7 +72,6 @@ public partial class Crosshair : IAsyncDisposable
                 ctx.LineWidth = 1;
                 ctx.LineDash = new[] { 6, 6 };
 
-                var x = ((moment - ChartContext.View.Start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32() + 0.5f;
                 var y = point.Y - ctxY + 0.5f;
 
                 ctx.ClearRect(0, 0, ctxWidth, ctxHeight);

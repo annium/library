@@ -87,7 +87,7 @@ public partial class Chart : IAsyncDisposable
                 _chartContext.SetLookup(null, null);
             else
             {
-                var lookupMoment = (_chartContext.View.Start + Duration.FromMilliseconds(point.X * _chartContext.MsPerPx))
+                var lookupMoment = (_chartContext.View.Start + point.X * Duration.FromMilliseconds(_chartContext.MsPerPx))
                     .RoundTo(_chartContext.Resolution);
 
                 _chartContext.SetLookup(lookupMoment, point);
