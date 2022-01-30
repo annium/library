@@ -19,7 +19,7 @@ public interface IPaneContext
     ValueRange<Instant> Bounds { get; }
     ValueRange<decimal> Range { get; }
     ValueRange<decimal> View { get; }
-    bool AdjustRange(decimal min, decimal max);
+    bool AdjustRange(ISeriesSource source, decimal min, decimal max);
     Action RegisterSource(ISeriesSource source);
     void SetSeries(ISeriesContext series);
     void SetBottom(IHorizontalSideContext bottom);

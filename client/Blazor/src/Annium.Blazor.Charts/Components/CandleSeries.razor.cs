@@ -62,11 +62,11 @@ public partial class CandleSeries : IAsyncDisposable
         var (min, max) = GetBounds(items);
 
         // if range is changed, redraw will be triggered
-        if (PaneContext.AdjustRange(min, max))
+        if (PaneContext.AdjustRange(Source, min, max))
             return;
 
         var width = GetWidth();
-        var offset = width == 1 ? 0 : ((double)width / 2).RoundInt32();
+        var offset = width == 1 ? 0 : ((double)width / 2).FloorInt32();
         var start = ChartContext.View.Start;
         var msPerPx = ChartContext.MsPerPx;
         var rangeUp = PaneContext.View.End;
@@ -83,7 +83,7 @@ public partial class CandleSeries : IAsyncDisposable
                 var high = ((rangeUp - item.High) / dpx).RoundInt32();
                 var low = ((rangeUp - item.Low) / dpx).RoundInt32();
 
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).RoundInt32();
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
 
                 ctx.FillRect(x, high, 1, low - high);
             }
@@ -94,7 +94,7 @@ public partial class CandleSeries : IAsyncDisposable
                 var high = ((rangeUp - item.High) / dpx).RoundInt32();
                 var low = ((rangeUp - item.Low) / dpx).RoundInt32();
 
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).RoundInt32();
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
 
                 ctx.FillRect(x, high, 1, low - high);
             }
@@ -105,7 +105,7 @@ public partial class CandleSeries : IAsyncDisposable
                 var high = ((rangeUp - item.High) / dpx).RoundInt32();
                 var low = ((rangeUp - item.Low) / dpx).RoundInt32();
 
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).RoundInt32();
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
 
                 ctx.FillRect(x, high, 1, low - high);
             }
@@ -120,7 +120,7 @@ public partial class CandleSeries : IAsyncDisposable
                 var low = ((rangeUp - item.Low) / dpx).RoundInt32();
                 var close = ((rangeUp - item.Close) / dpx).RoundInt32();
 
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).RoundInt32();
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
 
                 ctx.FillRect(x, high, 1, low - high);
                 ctx.FillRect(x - offset, close, width, open - close);
@@ -134,7 +134,7 @@ public partial class CandleSeries : IAsyncDisposable
                 var low = ((rangeUp - item.Low) / dpx).RoundInt32();
                 var close = ((rangeUp - item.Close) / dpx).RoundInt32();
 
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).RoundInt32();
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
 
                 ctx.FillRect(x, high, 1, low - high);
                 ctx.FillRect(x - offset, open, width, close - open);
@@ -147,7 +147,7 @@ public partial class CandleSeries : IAsyncDisposable
                 var high = ((rangeUp - item.High) / dpx).RoundInt32();
                 var low = ((rangeUp - item.Low) / dpx).RoundInt32();
 
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).RoundInt32();
+                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
 
                 ctx.FillRect(x, high, 1, low - high);
                 ctx.FillRect(x - offset, open, width, 1);

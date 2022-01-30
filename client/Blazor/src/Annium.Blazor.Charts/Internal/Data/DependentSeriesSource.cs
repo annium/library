@@ -52,6 +52,8 @@ internal class DependentSeriesSource<TSource, TData> : ISeriesSource<TData>, IDe
         _source.LoadItems(start, end, onLoaded);
     }
 
+    public void Clear() => _source.Clear();
+
     public void Dispose()
     {
     }

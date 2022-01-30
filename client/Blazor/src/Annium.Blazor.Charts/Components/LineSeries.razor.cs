@@ -61,7 +61,7 @@ public partial class LineSeries : IAsyncDisposable
         var (min, max) = GetBounds(items);
 
         // if range is changed, redraw will be triggered
-        if (PaneContext.AdjustRange(min, max))
+        if (PaneContext.AdjustRange(Source, min, max))
             return;
 
         var start = ChartContext.View.Start;

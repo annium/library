@@ -73,6 +73,8 @@ internal sealed record ChartContext : IManagedChartContext
         SetZoom(_zooms[(_zooms.Count / (decimal)2).FloorInt32()]);
         _resolutions = resolutions.Select(i => Duration.FromMinutes(i)).ToList();
         SetResolution(_resolutions[0]);
+
+        RequestDraw();
     }
 
     public void RegisterPane(IPaneContext paneContext)
@@ -85,9 +87,8 @@ internal sealed record ChartContext : IManagedChartContext
     {
         var (start, end) = GetView();
 
-        // Console.WriteLine($"range: {S(start)} - {S(end)} size: {size} bounds: {S(_bounds.Start)} - {S(_bounds.End)}");
-        _range.SetStart(start.CeilTo(Resolution));
-        _range.SetEnd(end.FloorTo(Resolution));
+        _range.SetStart(start.FloorTo(Resolution));
+        _range.SetEnd(end.CeilTo(Resolution));
         _view.SetStart(start);
         _view.SetEnd(end);
 
@@ -123,6 +124,7 @@ internal sealed record ChartContext : IManagedChartContext
 
         Zoom = zoom;
         UpdateUnits();
+        RequestDraw();
     }
 
     public void SetResolution(Duration resolution)
@@ -132,11 +134,14 @@ internal sealed record ChartContext : IManagedChartContext
 
         Resolution = resolution;
         UpdateUnits();
+        foreach (var series in _panes.SelectMany(pane => pane.Sources))
+            series.Clear();
+        RequestDraw();
     }
 
     private (Instant start, Instant end) GetView()
     {
-        var size = Duration.FromMilliseconds(_rect.Width.FloorInt32() * MsPerPx);
+        var size = _rect.Width.FloorInt32() * Duration.FromMilliseconds(MsPerPx);
         var start = Moment - size;
 
         return (start, Moment);

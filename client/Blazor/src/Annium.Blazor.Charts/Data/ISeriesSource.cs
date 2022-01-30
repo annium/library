@@ -18,4 +18,5 @@ public interface ISeriesSource
 {
     bool IsLoading { get; }
     ValueRange<Instant> Bounds { get; }
+    void Clear();
 }

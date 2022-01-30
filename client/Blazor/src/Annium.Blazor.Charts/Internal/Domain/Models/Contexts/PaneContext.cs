@@ -21,10 +21,10 @@ internal sealed record PaneContext : IManagedPaneContext
     public decimal DotPerPx => (View.End - View.Start) / Height;
     public bool IsLocked => _sources.Any(x => x.IsLoading);
     public ValueRange<Instant> Bounds { get; }
-    public ValueRange<decimal> Range => _range;
+    public ValueRange<decimal> Range { get; }
     public ValueRange<decimal> View { get; }
     private readonly HashSet<ISeriesSource> _sources = new();
-    private readonly ManagedValueRange<decimal> _range = ValueRange.Create(0m, 0m);
+    private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private IChartContext _chartContext = default!;
 
     public PaneContext(
@@ -35,10 +35,13 @@ internal sealed record PaneContext : IManagedPaneContext
             () => _sources.Count > 0 ? _sources.Min(x => x.Bounds.Start) : timeProvider.Now,
             () => _sources.Count > 0 ? _sources.Max(x => x.Bounds.End) : timeProvider.Now
         );
-
+        Range = ValueRange.Create(
+            () => _sourceRanges.Count > 0 ? _sourceRanges.Min(x => x.Value.Start) : 0m,
+            () => _sourceRanges.Count > 0 ? _sourceRanges.Max(x => x.Value.End) : 0m
+        );
         View = ValueRange.Create(
-            () => _range.Start - (_range.End - _range.Start) * 0.1m,
-            () => _range.End + (_range.End - _range.Start) * 0.1m
+            () => Range.Start - (Range.End - Range.Start) * 0.1m,
+            () => Range.End + (Range.End - Range.Start) * 0.1m
         );
     }
 
@@ -49,39 +52,40 @@ internal sealed record PaneContext : IManagedPaneContext
         _chartContext = chartContext;
     }
 
-    public void SetSize(int width,int height)
+    public void SetSize(int width, int height)
     {
         Width = width;
         Height = height;
     }
 
-    public bool AdjustRange(decimal min, decimal max)
+    public bool AdjustRange(ISeriesSource source, decimal min, decimal max)
     {
         if (min >= max)
             throw new ArgumentException($"Invalid range: {min} - {max}");
 
-        if (_range.Start <= min && max <= _range.End)
-            return false;
+        var (allMin, allMax) = Range;
+        var sourceRange = _sourceRanges[source];
+        sourceRange.SetStart(min);
+        sourceRange.SetEnd(max);
 
-        if (_range.Start == 0m || _range.Start > min)
-            _range.SetStart(min);
-        if (_range.End < max)
-            _range.SetEnd(max);
+        var changed = Range.Start != allMin || Range.End != allMax;
+        if (changed)
+            _chartContext.RequestDraw();
 
-        _chartContext.RequestDraw();
-
-        return true;
+        return changed;
     }
 
     public Action RegisterSource(ISeriesSource source)
     {
         if (!_sources.Add(source))
             throw new InvalidOperationException("Source is already registered");
+        _sourceRanges[source] = ValueRange.Create(0m, 0m);
 
         return () =>
         {
             if (!_sources.Remove(source))
                 throw new InvalidOperationException("Source is not registered");
+            _sourceRanges.Remove(source);
         };
     }
 

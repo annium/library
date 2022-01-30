@@ -33,6 +33,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
     private Instant Start => _cache[0].Moment;
     private Instant End => _cache[^1].Moment;
 
+    private readonly ITimeProvider _timeProvider;
     private readonly IChartContext _chartContext;
     private readonly Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> _load;
     private int _isLoading;
@@ -46,12 +47,14 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
     )
     {
         Logger = logger;
+        _timeProvider = timeProvider;
         _chartContext = chartContext;
         _load = load;
         var now = timeProvider.Now.FloorToMinute();
-        _emptyBefore = ValueRange.Create(Instant.MinValue, now - Duration.FromDays(10000));
+        _emptyBefore = ValueRange.Create(now, now);
         _emptyRange = ValueRange.Create(now, now);
-        _emptyAfter = ValueRange.Create(now, Instant.MaxValue);
+        _emptyAfter = ValueRange.Create(now, now);
+        InitRanges();
         Bounds = ValueRange.Create(() => _emptyBefore.End, () => _emptyAfter.Start);
     }
 
@@ -121,6 +124,12 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         });
     }
 
+    public void Clear()
+    {
+        _cache.Clear();
+        InitRanges();
+    }
+
     private bool GetDataFromEmptyCache(Instant from, Instant to)
     {
         // empty range is default, no data was attempted to load
@@ -169,6 +178,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
 
         if (_cache.Count == 0)
         {
+            // this.Log().Trace($"empty cache, resolve range from min/max: {S(min)} - {S(max)} and empty range: {S(_emptyRange.Start)} - {S(_emptyRange.End)}");
             var ranges = ValueRange.Create(min, max) - _emptyRange;
             // this.Log().Trace($"empty cache, load in: {ranges.Select(x => $"{S(x.Start)} - {S(x.End)}").Join("; ")}");
             foreach (var range in ranges)
@@ -281,6 +291,17 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         var max = Instant.Min(end + size, Bounds.End);
 
         return (min, max);
+    }
+
+    private void InitRanges()
+    {
+        var now = _timeProvider.Now.FloorToMinute();
+        _emptyBefore.SetStart(Instant.MinValue);
+        _emptyBefore.SetEnd(now - Duration.FromDays(10000));
+        _emptyRange.SetStart(now);
+        _emptyRange.SetEnd(now);
+        _emptyAfter.SetStart(now);
+        _emptyAfter.SetEnd(Instant.MaxValue);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
