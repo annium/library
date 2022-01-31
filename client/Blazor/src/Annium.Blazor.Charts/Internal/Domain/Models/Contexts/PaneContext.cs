@@ -39,10 +39,7 @@ internal sealed record PaneContext : IManagedPaneContext
             () => _sourceRanges.Count > 0 ? _sourceRanges.Min(x => x.Value.Start) : 0m,
             () => _sourceRanges.Count > 0 ? _sourceRanges.Max(x => x.Value.End) : 0m
         );
-        View = ValueRange.Create(
-            () => Range.Start - (Range.End - Range.Start) * 0.1m,
-            () => Range.End + (Range.End - Range.Start) * 0.1m
-        );
+        View = ValueRange.Create(GetViewStart, GetViewEnd);
     }
 
     public void Init(
@@ -60,7 +57,7 @@ internal sealed record PaneContext : IManagedPaneContext
 
     public bool AdjustRange(ISeriesSource source, decimal min, decimal max)
     {
-        if (min >= max)
+        if (min > max)
             throw new ArgumentException($"Invalid range: {min} - {max}");
 
         var (allMin, allMax) = Range;
@@ -112,4 +109,20 @@ internal sealed record PaneContext : IManagedPaneContext
 
         Right = right;
     }
+
+    private decimal GetViewStart()
+    {
+        var size = GetRangeSize();
+
+        return size > 0 ? Range.Start - size * 0.1m : Range.Start * .9m;
+    }
+
+    private decimal GetViewEnd()
+    {
+        var size = GetRangeSize();
+
+        return size > 0 ? Range.End + size * 0.1m : Range.Start * 1.1m;
+    }
+
+    private decimal GetRangeSize() => Math.Abs(Range.End) - Math.Abs(Range.Start);
 }
