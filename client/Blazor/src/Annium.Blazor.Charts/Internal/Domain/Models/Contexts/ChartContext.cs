@@ -26,6 +26,7 @@ internal sealed record ChartContext : IManagedChartContext
     public bool IsLocked => _panes.Any(x => x.IsLocked);
     public int MsPerPx { get; private set; }
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+    public int TimeZoneOffset { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault().GetUtcOffset(NodaConstants.UnixEpoch).ToTimeSpan().TotalMinutes.FloorInt32();
     public ValueRange<Instant> Bounds { get; }
     public ValueRange<Instant> View => _view;
     public ValueRange<Instant> Range => _range;

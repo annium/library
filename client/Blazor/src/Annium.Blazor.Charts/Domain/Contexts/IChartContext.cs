@@ -18,6 +18,7 @@ public interface IChartContext
     bool IsLocked { get; }
     int MsPerPx { get; }
     DateTimeZone TimeZone { get; }
+    int TimeZoneOffset { get; }
     ValueRange<Instant> Bounds { get; }
     ValueRange<Instant> View { get; }
     ValueRange<Instant> Range { get; }

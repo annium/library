@@ -35,6 +35,7 @@ internal static class ChartContextExtensions
         var (start, end) = context.View;
 
         var lineMoment = context.View.Start.FloorTo(alignment);
+        lineMoment -= Duration.FromMinutes(context.TimeZoneOffset);
 
         // align floors instant, so pick next period if start is not aligned
         if (lineMoment < start)
