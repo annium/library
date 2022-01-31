@@ -106,7 +106,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         var item = _cache[index];
 
         if (item.Moment != moment)
-            throw new InvalidOperationException($"Item {item} is doesn't match moment {moment}");
+            throw new InvalidOperationException($"Item {item} doesn't match moment {moment}");
 
         return item;
     }
