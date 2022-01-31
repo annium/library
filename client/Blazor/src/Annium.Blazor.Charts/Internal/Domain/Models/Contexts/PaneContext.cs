@@ -112,17 +112,21 @@ internal sealed record PaneContext : IManagedPaneContext
 
     private decimal GetViewStart()
     {
-        var size = GetRangeSize();
+        var (start, end) = Range;
+        var size = Math.Abs(end) - Math.Abs(start);
+        if (size > 0)
+            return Range.Start - size * 0.1m;
 
-        return size > 0 ? Range.Start - size * 0.1m : Range.Start * .9m;
+        return start == 0 ? 0.9m : start * 0.9m;
     }
 
     private decimal GetViewEnd()
     {
-        var size = GetRangeSize();
+        var (start, end) = Range;
+        var size = Math.Abs(end) - Math.Abs(start);
+        if (size > 0)
+            return Range.End + size * 0.1m;
 
-        return size > 0 ? Range.End + size * 0.1m : Range.Start * 1.1m;
+        return end == 0 ? 1.1m : end * 1.1m;
     }
-
-    private decimal GetRangeSize() => Math.Abs(Range.End) - Math.Abs(Range.Start);
 }
