@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Core.Primitives;
+using Annium.Core.Primitives.Collections.Generic;
 using Annium.Data.Models;
 using Annium.Logging.Abstractions;
 using Annium.NodaTime.Extensions;
@@ -67,18 +69,18 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         var from = Instant.Max(start, min);
         var to = Instant.Min(end, max);
 
-        // this.Log().Trace($"in {S(start)} - {S(end)}, with bounds {S(min)} - {S(max)} -> {S(from)} - {S(to)}");
+        this.Log().Trace($"in {S(start)} - {S(end)}, with bounds {S(min)} - {S(max)} -> {S(from)} - {S(to)}");
 
         if (_cache.Count == 0)
             return GetDataFromEmptyCache(from, to);
 
         SyncCache(start, end);
 
-        // this.Log().Trace($"cache after sync: {S(Start)} - {S(Bounds.End)}");
+        this.Log().Trace($"cache after sync: {S(Start)} - {S(Bounds.End)}");
 
         if (min < Start || End < max)
         {
-            // this.Log().Trace($"not enough buffered data with bounds: {S(min)} - {S(max)}");
+            this.Log().Trace($"not enough buffered data with bounds: {S(min)} - {S(max)}");
 
             return false;
         }
@@ -88,8 +90,8 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
 
         if (from < to)
             data = GetDataFromCache(from, to);
-        // else
-        // this.Log().Trace($"non-overlapping range between: range {S(start)} - {S(end)} and cache {S(Start)} - {S(End)}");
+        else
+            this.Log().Trace($"non-overlapping range between: range {S(start)} - {S(end)} and cache {S(Start)} - {S(End)}");
 
         return true;
     }
@@ -135,25 +137,25 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         // empty range is default, no data was attempted to load
         if (_emptyRange.Start == _emptyRange.End)
         {
-            // this.Log().Trace("init");
+            this.Log().Trace("init");
             return false;
         }
 
         // if range is withing empty range - assume data is present
         if (_emptyRange.Contains(from, RangeBounds.Both) && _emptyRange.Contains(to, RangeBounds.Both))
         {
-            // this.Log().Trace($"in empty range {S(_emptyRange.Start)} - {S(_emptyRange.End)}");
+            this.Log().Trace($"in empty range {S(_emptyRange.Start)} - {S(_emptyRange.End)}");
             return true;
         }
 
-        // this.Log().Trace($"out empty range {S(_emptyRange.Start)} - {S(_emptyRange.End)}");
+        this.Log().Trace($"out empty range {S(_emptyRange.Start)} - {S(_emptyRange.End)}");
 
         return false;
     }
 
     private IReadOnlyList<TData> GetDataFromCache(Instant from, Instant to)
     {
-        // this.Log().Trace($"get range: {S(from)} - {S(to)}");
+        this.Log().Trace($"get range: {S(from)} - {S(to)}");
 
         var startIndex = _cache.FindIndex(x => x.Moment == from);
         if (startIndex < 0)
@@ -162,7 +164,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         for (var i = startIndex + 1; i < _cache.Count; i++)
             if (_cache[i].Moment == to)
             {
-                // this.Log().Trace($"GetRange({startIndex}, {i - startIndex + 1})");
+                this.Log().Trace($"GetRange({startIndex}, {i - startIndex + 1})");
 
                 return _cache.GetRange(startIndex, i - startIndex + 1);
             }
@@ -178,9 +180,9 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
 
         if (_cache.Count == 0)
         {
-            // this.Log().Trace($"empty cache, resolve range from min/max: {S(min)} - {S(max)} and empty range: {S(_emptyRange.Start)} - {S(_emptyRange.End)}");
+            this.Log().Trace($"empty cache, resolve range from min/max: {S(min)} - {S(max)} and empty range: {S(_emptyRange.Start)} - {S(_emptyRange.End)}");
             var ranges = ValueRange.Create(min, max) - _emptyRange;
-            // this.Log().Trace($"empty cache, load in: {ranges.Select(x => $"{S(x.Start)} - {S(x.End)}").Join("; ")}");
+            this.Log().Trace($"empty cache, load in: {ranges.Select(x => $"{S(x.Start)} - {S(x.End)}").Join("; ")}");
             foreach (var range in ranges)
             {
                 if (range.Start == min)
@@ -194,7 +196,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
             var from = Start - _chartContext.Resolution;
             var to = End + _chartContext.Resolution;
 
-            // this.Log().Trace($"filled cache, bounds: {S(min)} - {S(max)}, cache {S(Start)} - {S(End)}");
+            this.Log().Trace($"filled cache, bounds: {S(min)} - {S(max)}, cache {S(Start)} - {S(End)}");
 
             if (min < from)
                 _cache.InsertRange(0, await LoadInRange(min, from));
@@ -210,11 +212,11 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
 
     private async Task<IReadOnlyList<TData>> LoadInRange(Instant start, Instant end)
     {
-        // this.Log().Trace($"{S(start)} - {S(end)}");
+        this.Log().Trace($"{S(start)} - {S(end)}");
 
         var items = await _load(_chartContext.Resolution, start, end);
 
-        // this.Log().Trace(items.Count > 0 ? $"loaded {items.Count} items in {S(items[0].Moment)} - {S(items[^1].Moment)}" : "no items loaded");
+        this.Log().Trace(items.Count > 0 ? $"loaded {items.Count} items in {S(items[0].Moment)} - {S(items[^1].Moment)}" : "no items loaded");
 
         return items;
     }
@@ -225,10 +227,10 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         {
             var emptyStart = Instant.Min(_emptyRange.Start, start);
             var emptyEnd = Instant.Max(_emptyRange.End, end);
-            // if (emptyStart != _emptyRange.Start)
-            //     this.Log().Trace($"empty cache, update emptyRange.Start: {S(_emptyRange.Start)} -> {S(emptyStart)}");
-            // if (emptyEnd != _emptyRange.End)
-            //     this.Log().Trace($"empty cache, update emptyRange.End: {S(_emptyRange.End)} -> {S(emptyEnd)}");
+            if (emptyStart != _emptyRange.Start)
+                this.Log().Trace($"empty cache, update emptyRange.Start: {S(_emptyRange.Start)} -> {S(emptyStart)}");
+            if (emptyEnd != _emptyRange.End)
+                this.Log().Trace($"empty cache, update emptyRange.End: {S(_emptyRange.End)} -> {S(emptyEnd)}");
             _emptyRange.SetStart(emptyStart);
             _emptyRange.SetEnd(emptyEnd);
         }
@@ -236,13 +238,13 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
         {
             if (Start > start)
             {
-                // this.Log().Trace($"filled cache, update emptyBefore.End: {S(_emptyBefore.End)} -> {S(Start)}");
+                this.Log().Trace($"filled cache, update emptyBefore.End: {S(_emptyBefore.End)} -> {S(Start)}");
                 _emptyBefore.SetEnd(Start);
             }
 
             if (End < end)
             {
-                // this.Log().Trace($"filled cache, update emptyAfter.Start: {S(_emptyAfter.Start)} -> {S(End)}");
+                this.Log().Trace($"filled cache, update emptyAfter.Start: {S(_emptyAfter.Start)} -> {S(End)}");
                 _emptyAfter.SetStart(End);
             }
         }
@@ -251,19 +253,19 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeries
     private void SyncCache(Instant start, Instant end)
     {
         var (min, max) = GetBounds(start, end, CacheZone);
-        // this.Log().Trace($"set {S(min)} - {S(max)} for {S(Start)} - {S(End)}");
+        this.Log().Trace($"set {S(min)} - {S(max)} for {S(Start)} - {S(End)}");
 
         var index = _cache.FindIndex(x => x.Moment == min);
         if (index > 0)
         {
-            // this.Log().Trace($"MM: {S(Bounds.Start)} - {S(Bounds.End)}. Cache: {S(Start)} - {S(End)}. Bounds {S(min)} - {S(max)}. Remove range (0, {index}) from {_cache.Count} items");
+            this.Log().Trace($"MM: {S(Bounds.Start)} - {S(Bounds.End)}. Cache: {S(Start)} - {S(End)}. Bounds {S(min)} - {S(max)}. Remove range (0, {index}) from {_cache.Count} items");
             _cache.RemoveRange(0, index);
         }
 
         index = _cache.FindLastIndex(x => x.Moment == max);
         if (index > 0 && index < _cache.Count - 1)
         {
-            // this.Log().Trace($"MM: {S(Bounds.Start)} - {S(Bounds.End)}. Cache: {S(Start)} - {S(End)}. Bounds {S(min)} - {S(max)}. Remove range ({index}, {_cache.Count - index}) from {_cache.Count} items");
+            this.Log().Trace($"MM: {S(Bounds.Start)} - {S(Bounds.End)}. Cache: {S(Start)} - {S(End)}. Bounds {S(min)} - {S(max)}. Remove range ({index}, {_cache.Count - index}) from {_cache.Count} items");
             _cache.RemoveRange(index, _cache.Count - index);
         }
 

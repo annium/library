@@ -7,11 +7,12 @@ using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Core.Primitives;
+using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class CandleSeries : IAsyncDisposable
+public partial class CandleSeries : ILogSubject, IAsyncDisposable
 {
     [Parameter, EditorRequired]
     public ISeriesSource<ICandle> Source { get; set; } = default!;
@@ -33,6 +34,11 @@ public partial class CandleSeries : IAsyncDisposable
 
     [CascadingParameter]
     internal ISeriesContext SeriesContext { get; set; } = default!;
+
+    public ILogger Logger => EntityLogger;
+
+    [Inject]
+    private ILogger<CandleSeries> EntityLogger { get; set; } = default!;
 
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 
@@ -61,6 +67,7 @@ public partial class CandleSeries : IAsyncDisposable
 
         var (min, max) = GetBounds(items);
 
+        this.Log().Trace($"render in {min} - {max}");
         // if range is changed, redraw will be triggered
         if (PaneContext.AdjustRange(Source, min, max))
             return;

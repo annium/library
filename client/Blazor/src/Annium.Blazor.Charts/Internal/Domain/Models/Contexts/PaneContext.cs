@@ -6,11 +6,12 @@ using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
+using Annium.Logging.Abstractions;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
-internal sealed record PaneContext : IManagedPaneContext
+internal sealed record PaneContext : IManagedPaneContext, ILogSubject
 {
     public IReadOnlyCollection<ISeriesSource> Sources => _sources;
     public ISeriesContext Series { get; private set; } = default!;
@@ -23,12 +24,14 @@ internal sealed record PaneContext : IManagedPaneContext
     public ValueRange<Instant> Bounds { get; }
     public ValueRange<decimal> Range { get; }
     public ValueRange<decimal> View { get; }
+    public ILogger Logger { get; }
     private readonly HashSet<ISeriesSource> _sources = new();
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private IChartContext _chartContext = default!;
 
     public PaneContext(
-        ITimeProvider timeProvider
+        ITimeProvider timeProvider,
+        ILogger<PaneContext> logger
     )
     {
         Bounds = ValueRange.Create(
@@ -40,6 +43,7 @@ internal sealed record PaneContext : IManagedPaneContext
             () => _sourceRanges.Count > 0 ? _sourceRanges.Max(x => x.Value.End) : 0m
         );
         View = ValueRange.Create(GetViewStart, GetViewEnd);
+        Logger = logger;
     }
 
     public void Init(
@@ -61,6 +65,7 @@ internal sealed record PaneContext : IManagedPaneContext
             throw new ArgumentException($"Invalid range: {min} - {max}");
 
         var (allMin, allMax) = Range;
+        this.Log().Trace($"adjust range of {source.GetType().FriendlyName()} to {min} - {max}");
         var sourceRange = _sourceRanges[source];
         sourceRange.SetStart(min);
         sourceRange.SetEnd(max);
