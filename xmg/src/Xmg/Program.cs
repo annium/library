@@ -1,22 +1,12 @@
-using System;
-using System.Threading;
 using Annium.Core.Entrypoint;
 using Annium.Extensions.Arguments;
+using Xmg;
+using Group = Xmg.Commands.Group;
 
-namespace Xmg;
+await using var entry = Entrypoint.Default
+    .UseServicePack<ServicePack>()
+    .Setup();
 
-internal static class Program
-{
-    private static void Run(
-        IServiceProvider provider,
-        string[] args,
-        CancellationToken ct
-    )
-    {
-        Commander.Run<Commands.Group>(provider, args, ct);
-    }
+var (provider, ct) = entry;
 
-    internal static int Main(string[] args) => new Entrypoint()
-        .UseServicePack<ServicePack>()
-        .Run(Run, args);
-}
+Commander.Run<Group>(provider, args, ct);

@@ -1,22 +1,9 @@
 using System;
-using System.Threading;
 using Annium.Core.Entrypoint;
+using XCert;
 
-namespace XCert
-{
-    internal static class Program
-    {
-        private static void Run(
-            IServiceProvider provider,
-            string[] args,
-            CancellationToken ct
-        )
-        {
-            Console.WriteLine("When have time, this will be certs updating daemon");
-        }
+await using var entry = Entrypoint.Default
+    .UseServicePack<ServicePack>()
+    .Setup();
 
-        internal static int Main(string[] args) => new Entrypoint()
-            .UseServicePack<ServicePack>()
-            .Run(Run, args);
-    }
-}
+Console.WriteLine("When have time, this will be certs updating daemon");

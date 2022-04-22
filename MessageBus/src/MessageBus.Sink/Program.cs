@@ -1,33 +1,23 @@
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Entrypoint;
 using Annium.Core.Primitives.Threading;
-using Annium.Logging.Abstractions;
 using Annium.Infrastructure.MessageBus.Node;
+using Annium.Logging.Abstractions;
+using MessageBus.Sink;
 
-namespace MessageBus.Sink;
+await using var entry = Entrypoint.Default
+    .UseServicePack<ServicePack>()
+    .Setup();
 
-public class Program
-{
-    private static async Task Run(
-        IServiceProvider provider,
-        CancellationToken ct
-    )
-    {
-        var logSubject = provider.Resolve<ILogSubject<Program>>();
-        var socket = provider.Resolve<IMessageBusSocket>();
+var (provider, ct) = entry;
 
-        var cfg = provider.Resolve<EndpointsConfiguration>();
-        Console.WriteLine($"Start sink with PUB {cfg.PubEndpoint} / SUB {cfg.SubEndpoint}");
+var logSubject = provider.Resolve<ILogSubject<Program>>();
+var socket = provider.Resolve<IMessageBusSocket>();
 
-        socket.Subscribe(x => logSubject.Log().Info(x));
+var cfg = provider.Resolve<EndpointsConfiguration>();
+Console.WriteLine($"Start sink with PUB {cfg.PubEndpoint} / SUB {cfg.SubEndpoint}");
 
-        await ct;
-    }
+socket.Subscribe(x => logSubject.Log().Info(x));
 
-    public static Task<int> Main() => new Entrypoint()
-        .UseServicePack<ServicePack>()
-        .Run(Run);
-}
+await ct;

@@ -1,22 +1,11 @@
-using System;
-using System.Threading;
 using Annium.Core.Entrypoint;
 using Annium.Extensions.Arguments;
+using xdomains;
 
-namespace xdomains;
+await using var entry = Entrypoint.Default
+    .UseServicePack<ServicePack>()
+    .Setup();
 
-public class Program
-{
-    private static void Run(
-        IServiceProvider provider,
-        string[] args,
-        CancellationToken ct
-    )
-    {
-        Commander.Run<Commands.Group>(provider, args, ct);
-    }
+var (provider, ct) = entry;
 
-    public static int Main(string[] args) => new Entrypoint()
-        .UseServicePack<ServicePack>()
-        .Run(Run, args);
-}
+Commander.Run<xdomains.Commands.Group>(provider, args, ct);
