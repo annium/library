@@ -15,6 +15,6 @@
         <ProjectReference Include="../Backuper.Connection.Abstract/Backuper.Connection.Abstract.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Npgsql" Version="6.0.1" />
+        <PackageReference Include="Npgsql" Version="6.0.4" />
     </ItemGroup>
 </Project>
