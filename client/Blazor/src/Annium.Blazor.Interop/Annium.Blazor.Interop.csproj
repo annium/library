@@ -14,8 +14,8 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />
-        <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.5.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.4" />
+        <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.6.4" />
     </ItemGroup>
     <ItemGroup>
         <TypeScriptCompile Include="wwwroot\**\*.ts" />
