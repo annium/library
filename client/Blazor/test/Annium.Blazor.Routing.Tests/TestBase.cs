@@ -14,7 +14,7 @@ public abstract class TestBase
     protected TestBase()
     {
         var container = new ServiceContainer();
-        container.AddRuntimeTools(GetType().Assembly, false);
+        container.AddRuntime(GetType().Assembly);
         container.AddMapper();
         container.AddRouting();
         container.Add<FakeNavigationManager>().AsSelf().As<NavigationManager>().Singleton();

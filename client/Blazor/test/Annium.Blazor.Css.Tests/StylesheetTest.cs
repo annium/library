@@ -12,7 +12,7 @@ public class StylesheetTest
     {
         // arrange
         var sp = new ServiceContainer()
-            .AddRuntimeTools(GetType().Assembly, false)
+            .AddRuntime(GetType().Assembly)
             .AddCss()
             .BuildServiceProvider();
         var styleSheet = sp.Resolve<IStyleSheet>();
