@@ -11,7 +11,7 @@ internal class ServicePack : ServicePackBase
 {
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
-        container.AddRuntimeTools(GetType().Assembly, false);
+        container.AddRuntime(GetType().Assembly);
         container.AddMapper();
         container.AddConfiguration<Configuration>(x => x.AddYamlFile("xsass.yml", true));
         container.AddTime().WithRealTime().SetDefault();

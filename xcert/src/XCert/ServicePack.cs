@@ -7,7 +7,7 @@ namespace XCert
     {
         public override void Register(IServiceContainer container, IServiceProvider provider)
         {
-            container.AddRuntimeTools(GetType().Assembly, true);
+            container.AddRuntime(GetType().Assembly);
             container.AddTime().WithRealTime().SetDefault();
             container.AddLogging();
             container.AddMapper();

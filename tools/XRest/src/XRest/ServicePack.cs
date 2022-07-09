@@ -15,7 +15,7 @@ internal class ServicePack : ServicePackBase
 
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
-        container.AddRuntimeTools(GetType().Assembly, true);
+        container.AddRuntime(GetType().Assembly);
         container.AddArguments();
         container.AddLogging();
         container.AddMapper();

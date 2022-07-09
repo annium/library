@@ -22,7 +22,7 @@ internal class Processor : IProcessor
 
     public ClientContainerView Process(Namespace ns, ApiModel api)
     {
-        var tm = TypeManager.GetInstance(api.Assembly, false);
+        var tm = TypeManager.GetInstance(api.Assembly);
         var candidates = api.Controllers
             .Select(x => ParseController(ns, x, tm))
             .ToArray();

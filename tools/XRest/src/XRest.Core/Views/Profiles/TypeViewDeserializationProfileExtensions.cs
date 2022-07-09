@@ -11,7 +11,7 @@ public static class TypeViewDeserializationProfileExtensions
 {
     public static Profile ConfigureForTypeViewDeserialization(this Profile profile, Assembly assembly)
     {
-        var types = TypeManager.GetInstance(assembly, false).Types;
+        var types = TypeManager.GetInstance(assembly).Types;
 
         profile.Map<TypeView?, Type?>(x => ResolveType(types, x));
 
