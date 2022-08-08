@@ -10,7 +10,12 @@ public class ServicePack : ServicePackBase
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
         container.AddTime().WithRealTime().SetDefault();
-        container.AddJsonSerializers().SetDefault();
+        container.AddJsonSerializers()
+            .Configure(opts =>
+            {
+                opts.UseCamelCaseNamingPolicy();
+            })
+            .SetDefault();
 
         container.Add<ITemplateWriter, TemplateWriter>().Singleton();
 

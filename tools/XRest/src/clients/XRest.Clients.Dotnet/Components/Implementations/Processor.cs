@@ -273,7 +273,7 @@ internal class Processor : IProcessor
             return $"Array.Empty<{type.GetElementType()!.FriendlyName()}>()";
         }
 
-        return $"new {type.FriendlyName()}()";
+        return $"({type.FriendlyName()}) Activator.CreateInstance(typeof({type.FriendlyName()}))!";
     }
 
     private enum ResponseKind

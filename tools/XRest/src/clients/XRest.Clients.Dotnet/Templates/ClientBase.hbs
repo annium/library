@@ -2,15 +2,14 @@
 using {{ ns }};
 {{~ end ~}}
 
-namespace {{ namespace }}
-{
-    public abstract class ClientBase
-    {
-        protected IHttpRequest Request { get; }
+namespace {{ namespace }};
 
-        protected ClientBase(IHttpRequest request)
-        {
-            Request = request;
-        }
+public abstract class ClientBase
+{
+    protected IHttpRequest Request { get; }
+
+    protected ClientBase(IHttpRequest request)
+    {
+        Request = request;
     }
 }

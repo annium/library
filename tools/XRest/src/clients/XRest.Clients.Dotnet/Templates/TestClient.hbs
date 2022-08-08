@@ -2,31 +2,30 @@
 using {{ ns }};
 {{~ end ~}}
 
-namespace {{ namespace }}
-{
-    public class {{ type }} : ClientBase
-    {
-        public {{ type }}(IHttpRequest request) : base(request)
-        {
-        }
-        {{~ for action in actions ~}}
+namespace {{ namespace }};
 
-        public async {{ if action.has_response }}Task<IHttpResponse<{{ action.response }}>>{{ else }}Task<IHttpResponse>{{ end }} {{ action.name }}(
-        {{~ for parameter in action.parameters ~}}
-            {{ parameter.type}} {{ parameter.name }}{{~ if !for.last }},{{~ end }}
-        {{~ end ~}}
-        )
-        {
-            return await Request.Clone()
-                .{{ action.method }}({{~ if action.path_parameters.size > 0 ~}}${{~ end ~}}"{{ action.path }}")
-                {{~ for parameter in action.query_parameters ~}}
-                .Param("{{ parameter.name }}", {{ parameter.name }})
-                {{~ end ~}}
-                {{~ if action.has_body ~}}
-                .JsonContent(body)
-                {{~ end ~}}
-                .{{ if action.has_response }}AsResponseAsync<{{ action.response }}>{{ else }}AsResponseAsync{{ end }}();
-        }
-        {{~ end ~}}
+public class {{ type }} : ClientBase
+{
+    public {{ type }}(IHttpRequest request) : base(request)
+    {
     }
+    {{~ for action in actions ~}}
+
+    public async {{ if action.has_response }}Task<IHttpResponse<{{ action.response }}>>{{ else }}Task<IHttpResponse>{{ end }} {{ action.name }}(
+    {{~ for parameter in action.parameters ~}}
+        {{ parameter.type}} {{ parameter.name }}{{~ if !for.last }},{{~ end }}
+    {{~ end ~}}
+    )
+    {
+        return await Request.Clone()
+            .{{ action.method }}({{~ if action.path_parameters.size > 0 ~}}${{~ end ~}}"{{ action.path }}")
+            {{~ for parameter in action.query_parameters ~}}
+            .Param("{{ parameter.name }}", {{ parameter.name }})
+            {{~ end ~}}
+            {{~ if action.has_body ~}}
+            .JsonContent(body)
+            {{~ end ~}}
+            .{{ if action.has_response }}AsResponseAsync<{{ action.response }}>{{ else }}AsResponseAsync{{ end }}();
+    }
+    {{~ end ~}}
 }
