@@ -1,8 +1,8 @@
-using LDatabase = Annium.linq2db.Extensions.Models.Database;
+using Annium.linq2db.Extensions.Configuration.Metadata;
 
 namespace Xmg.Configuration.linq2db.Components;
 
 internal interface ILoader
 {
-    LDatabase LoadMetadata(string assemblyPath);
+    DatabaseMetadata LoadMetadata(string assemblyPath);
 }

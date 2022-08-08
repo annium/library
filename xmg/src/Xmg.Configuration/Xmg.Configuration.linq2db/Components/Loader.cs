@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using Annium.Core.Runtime.Loader;
-using LDatabase = Annium.linq2db.Extensions.Models.Database;
+using Annium.linq2db.Extensions.Configuration.Metadata;
 
 namespace Xmg.Configuration.linq2db.Components;
 
@@ -16,7 +16,7 @@ internal class Loader : ILoader
         _assemblyLoaderBuilder = assemblyLoaderBuilder;
     }
 
-    public LDatabase LoadMetadata(string assemblyPath)
+    public DatabaseMetadata LoadMetadata(string assemblyPath)
     {
         if (!File.Exists(assemblyPath))
             throw new FileNotFoundException($"Assembly file '{assemblyPath}' missing.");

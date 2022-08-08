@@ -2,22 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Annium.Core.Reflection;
+using Annium.linq2db.Extensions.Configuration.Metadata;
 using LinqToDB.Extensions;
 using LinqToDB.Mapping;
 using Xmg.Core.Models;
-using LDatabase = Annium.linq2db.Extensions.Models.Database;
-using LTable = Annium.linq2db.Extensions.Models.Table;
-using LTableColumn = Annium.linq2db.Extensions.Models.TableColumn;
 using LDataType = LinqToDB.DataType;
 
 namespace Xmg.Configuration.linq2db.Components;
 
 internal class MetadataProcessor : IMetadataProcessor
 {
-    public Database Process(LDatabase database)
+    public Database Process(DatabaseMetadata database)
     {
         var schemas = new Dictionary<string, List<Table>>();
-        foreach (var (schema, table) in database.Tables.Select(x => ProcessTable(database, x)))
+        foreach (var (schema, table) in database.Tables.Values.Select(x => ProcessTable(database, x)))
         {
             if (schemas.TryGetValue(schema, out var tables))
                 tables.Add(table);
@@ -28,16 +26,18 @@ internal class MetadataProcessor : IMetadataProcessor
         return new Database(schemas.Select(x => new Schema(x.Key, x.Value)).ToArray());
     }
 
-    private (string schema, Table table) ProcessTable(LDatabase database, LTable table)
+    private (string schema, Table table) ProcessTable(DatabaseMetadata database, TableMetadata table)
     {
         var columns = table.Columns
+            .Values
             .Select(x => ProcessColumn(table, x)!)
             .Where(x => x != null!)
             .ToArray();
 
-        var primaryKey = ResolvePrimaryKey(table.Schema, table.Name, table.Columns);
+        var primaryKey = ResolvePrimaryKey(table.Schema, table.Name, table.Columns.Values);
 
         var foreignKeys = table.Columns
+            .Values
             .Select(x => ProcessForeignKey(database, table, x)!)
             .Where(x => x != null!)
             .ToArray();
@@ -54,7 +54,7 @@ internal class MetadataProcessor : IMetadataProcessor
         );
     }
 
-    private TableColumn? ProcessColumn(LTable table, LTableColumn column)
+    private TableColumn? ProcessColumn(TableMetadata table, ColumnMetadata column)
     {
         if (column.Association != null)
             return null;
@@ -69,12 +69,12 @@ internal class MetadataProcessor : IMetadataProcessor
         return new TableColumn(
             column.Name,
             valueType,
-            column.Attribute.Length > 0 ? column.Attribute.Length : (int?) null,
+            column.Attribute.Length > 0 ? column.Attribute.Length : null,
             nullable?.CanBeNull ?? false
         );
     }
 
-    private TablePrimaryKeyConstraint? ResolvePrimaryKey(string? schema, string table, IReadOnlyCollection<LTableColumn> columns)
+    private TablePrimaryKeyConstraint? ResolvePrimaryKey(string? schema, string table, IEnumerable<ColumnMetadata> columns)
     {
         var primaryKeyColumns = columns
             .Where(x => x.Attribute.IsColumn && x.PrimaryKey != null)
@@ -85,7 +85,7 @@ internal class MetadataProcessor : IMetadataProcessor
         return primaryKeyColumns.Length > 0 ? new TablePrimaryKeyConstraint(schema, table, primaryKeyColumns) : null;
     }
 
-    private TableForeignKeyConstraint? ProcessForeignKey(LDatabase db, LTable table, LTableColumn column)
+    private TableForeignKeyConstraint? ProcessForeignKey(DatabaseMetadata db, TableMetadata table, ColumnMetadata column)
     {
         if (column.Association is null)
             return null;
@@ -94,17 +94,17 @@ internal class MetadataProcessor : IMetadataProcessor
         if (column.Association.Relationship != Relationship.OneToOne)
             return null;
 
-        var foreignColumn = table.Columns.SingleOrDefault(x => x.Member.Name == column.Association.ThisKey)
+        var foreignColumn = table.Columns.Values.SingleOrDefault(x => x.Member.Name == column.Association.ThisKey)
                             ?? throw new InvalidOperationException(
                                 $"Foreign table '{table}' has no key column '{column.Association.ThisKey}'. Ensure table '{table}' configuration is valid."
                             );
 
         var targetType = column.Member.GetMemberType();
-        var primaryTable = db.Tables.SingleOrDefault(x => x.Type == targetType)
+        var primaryTable = db.Tables.Values.SingleOrDefault(x => x.Type == targetType)
                            ?? throw new InvalidOperationException(
                                $"Foreign table refers to value of type '{targetType}', that was not discovered during discovery process. Ensure type '{targetType}' configuration is declared."
                            );
-        var primaryColumn = primaryTable.Columns.SingleOrDefault(x => x.Member.Name == column.Association.OtherKey)
+        var primaryColumn = primaryTable.Columns.Values.SingleOrDefault(x => x.Member.Name == column.Association.OtherKey)
                             ?? throw new InvalidOperationException(
                                 $"Primary table '{primaryTable}' has no column, mapped to '{table}'.'{foreignColumn.Name}'. Ensure table '{primaryTable}' configuration is valid."
                             );
