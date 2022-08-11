@@ -30,7 +30,7 @@ internal class Writer : IWriter
         });
 
         if (generateTestClient)
-            Write(output, "HttpResponseExtensions", "Templates.HttpResponseTestExtensions", new
+            Write(output, "HttpResponseExtensions", "Templates.HttpResponseExtensions", new
             {
                 Usages = new[]
                 {
@@ -42,19 +42,6 @@ internal class Writer : IWriter
                 },
                 client.Namespace,
             });
-        else
-            Write(output, "HttpResponseExtensions", "Templates.HttpResponseExtensions", new
-            {
-                Usages = new[]
-                {
-                    "System.Collections.Generic",
-                    "System.Linq",
-                    "System.Threading.Tasks",
-                    "Annium.Data.Operations",
-                },
-                client.Namespace,
-            });
-
 
         Write(output, "ClientBase", "Templates.ClientBase", new
         {
