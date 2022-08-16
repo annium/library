@@ -71,17 +71,23 @@ internal sealed record ChartContext : IManagedChartContext
             throw new ArgumentException("Resolutions list is empty");
 
         _zooms = zooms.ToList();
-        SetZoom(_zooms[(_zooms.Count / (decimal)2).FloorInt32()]);
+        SetZoom(_zooms[(_zooms.Count / (decimal) 2).FloorInt32()]);
         _resolutions = resolutions.Select(i => Duration.FromMinutes(i)).ToList();
         SetResolution(_resolutions[0]);
 
         RequestDraw();
     }
 
-    public void RegisterPane(IPaneContext paneContext)
+    public Action RegisterPane(IPaneContext paneContext)
     {
         if (!_panes.Add(paneContext))
             throw new InvalidOperationException("Pane is already registered");
+
+        return () =>
+        {
+            if (!_panes.Remove(paneContext))
+                throw new InvalidOperationException("Pane is not registered");
+        };
     }
 
     public void Update()

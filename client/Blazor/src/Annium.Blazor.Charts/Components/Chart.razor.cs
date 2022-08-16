@@ -100,7 +100,7 @@ public partial class Chart : IAsyncDisposable
         var zooms = _chartContext.Zooms;
         _rawZoom = (_rawZoom * (1 - delta * ZoomMultiplier)).Within(zooms[0], zooms[^1]);
 
-        var value = zooms.OrderBy(x => _rawZoom.DiffFrom(x)).First();
+        var value = zooms.MinBy(x => _rawZoom.DiffFrom(x));
         if (value == _chartContext.Zoom)
             return false;
 

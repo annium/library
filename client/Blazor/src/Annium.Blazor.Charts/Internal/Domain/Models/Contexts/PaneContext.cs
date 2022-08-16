@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
@@ -28,6 +29,7 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject
     private readonly HashSet<ISeriesSource> _sources = new();
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private IChartContext _chartContext = default!;
+    private int _isInitiated;
 
     public PaneContext(
         ITimeProvider timeProvider,
@@ -50,6 +52,9 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject
         IChartContext chartContext
     )
     {
+        if (Interlocked.CompareExchange(ref _isInitiated, 1, 0) != 0)
+            throw new InvalidOperationException($"Can't init {nameof(VerticalSideContext)} more than once");
+
         _chartContext = chartContext;
     }
 
