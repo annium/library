@@ -1,4 +1,5 @@
 // ReSharper disable InconsistentNaming
+
 namespace Annium.Blazor.Interop.Domain;
 
 public enum MouseEventEnum

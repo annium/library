@@ -50,7 +50,7 @@ public partial class Chart : IAsyncDisposable
 
     protected override void OnParametersSet()
     {
-        _chartContext = (IManagedChartContext)ChartContext;
+        _chartContext = (IManagedChartContext) ChartContext;
         _chartContext.RequestDraw();
         _rawZoom = _chartContext.Zoom;
     }

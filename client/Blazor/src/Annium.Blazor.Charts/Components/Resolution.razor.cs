@@ -32,9 +32,9 @@ public partial class Resolution : IAsyncDisposable
 
     private string Humanize(Duration resolution) => resolution.TotalMinutes switch
     {
-        < 60   => $"{resolution.TotalMinutes}m",
+        < 60 => $"{resolution.TotalMinutes}m",
         < 1440 => $"{resolution.TotalHours}h",
-        _      => $"{resolution.TotalDays}d",
+        _ => $"{resolution.TotalDays}d",
     };
 
     public ValueTask DisposeAsync()

@@ -89,7 +89,7 @@ public partial class LineSeries : ILogSubject, IAsyncDisposable
 
         // first point
         {
-            var x = ((items[0].Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
+            var x = ((items[0].Moment - start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32();
             var y = ((rangeUp - items[0].Value) / dpx).FloorInt32();
 
             ctx.MoveTo(x, y);
@@ -98,7 +98,7 @@ public partial class LineSeries : ILogSubject, IAsyncDisposable
         for (var i = 1; i < items.Count; i++)
         {
             var item = items[i];
-            var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal)msPerPx).FloorInt32();
+            var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32();
             var y = ((rangeUp - item.Value) / dpx).FloorInt32();
 
             ctx.LineTo(x, y);

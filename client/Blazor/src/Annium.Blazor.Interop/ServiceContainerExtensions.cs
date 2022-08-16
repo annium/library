@@ -9,8 +9,8 @@ public static class ServiceContainerExtensions
         this IServiceContainer container
     )
     {
-        container.Add(sp => (IJSInProcessRuntime)sp.Resolve<IJSRuntime>()).AsSelf().Singleton();
-        container.Add(sp => (IJSUnmarshalledRuntime)sp.Resolve<IJSRuntime>()).AsSelf().Singleton();
+        container.Add(sp => (IJSInProcessRuntime) sp.Resolve<IJSRuntime>()).AsSelf().Singleton();
+        container.Add(sp => (IJSUnmarshalledRuntime) sp.Resolve<IJSRuntime>()).AsSelf().Singleton();
 
         container.Add<IInteropContext, InteropContextInstance>().Singleton();
         container.OnBuild += InteropContext.Init;

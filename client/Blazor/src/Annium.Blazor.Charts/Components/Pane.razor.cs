@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class Pane: IAsyncDisposable
+public partial class Pane : IAsyncDisposable
 {
     [Parameter]
     public string? CssClass { get; set; }
