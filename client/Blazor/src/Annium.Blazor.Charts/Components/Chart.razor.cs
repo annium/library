@@ -10,6 +10,7 @@ using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
 using Annium.Extensions.Jobs;
+using Annium.Logging.Abstractions;
 using Annium.NodaTime.Extensions;
 using Microsoft.AspNetCore.Components;
 using NodaTime;
@@ -17,7 +18,7 @@ using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class Chart : IAsyncDisposable
+public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
 {
     [Parameter, EditorRequired]
     public IChartContext ChartContext { get; set; } = default!;
@@ -28,7 +29,13 @@ public partial class Chart : IAsyncDisposable
     [Parameter]
     public RenderFragment ChildContent { get; set; } = default!;
 
-    private string Class => ClassBuilder.With(_style.Container).With(CssClass).Build();
+    [Inject]
+    public ILogger<Chart> Logger { get; set; } = default!;
+
+    [Inject]
+    private Style Styles { get; set; } = default!;
+
+    private string Class => ClassBuilder.With(Styles.Container).With(CssClass).Build();
     private Div _container = default!;
     private IManagedChartContext _chartContext = default!;
     private decimal _rawZoom;

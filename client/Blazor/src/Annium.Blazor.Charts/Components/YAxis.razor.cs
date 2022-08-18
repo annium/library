@@ -5,12 +5,13 @@ using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
+using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class YAxis : IAsyncDisposable
+public partial class YAxis : ILogSubject<YAxis>, IAsyncDisposable
 {
     [Parameter]
     public string LabelFontFamily { get; set; } = AxisLabelFontFamily;
@@ -29,6 +30,9 @@ public partial class YAxis : IAsyncDisposable
 
     [CascadingParameter]
     public IVerticalSideContext SideContext { get; set; } = default!;
+
+    [Inject]
+    public ILogger<YAxis> Logger { get; set; } = default!;
 
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 

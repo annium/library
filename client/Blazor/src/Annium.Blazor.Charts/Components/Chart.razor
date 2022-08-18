@@ -2,8 +2,6 @@
 
 @namespace Annium.Blazor.Charts.Components
 
-@inject Style _style;
-
 <div @ref="_container" class="@Class">
     <CascadingValue Value="_chartContext" TValue="IManagedChartContext">
         @ChildContent

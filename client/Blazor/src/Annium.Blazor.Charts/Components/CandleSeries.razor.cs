@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class CandleSeries : ILogSubject, IAsyncDisposable
+public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
 {
     [Parameter, EditorRequired]
     public ISeriesSource<ICandle> Source { get; set; } = default!;
@@ -35,10 +35,8 @@ public partial class CandleSeries : ILogSubject, IAsyncDisposable
     [CascadingParameter]
     internal ISeriesContext SeriesContext { get; set; } = default!;
 
-    public ILogger Logger => EntityLogger;
-
     [Inject]
-    private ILogger<CandleSeries> EntityLogger { get; set; } = default!;
+    public ILogger<CandleSeries> Logger { get; set; } = default!;
 
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 

@@ -9,11 +9,14 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data;
 
-internal class DependentSeriesSource<TSource, TData> : ISeriesSource<TData>, IDependentSeriesSource, ILogSubject
+internal class DependentSeriesSource<TSource, TData> :
+    ISeriesSource<TData>,
+    IDependentSeriesSource,
+    ILogSubject<DependentSeriesSource<TSource, TData>>
     where TSource : ITimeSeries
     where TData : ITimeSeries
 {
-    public ILogger Logger { get; }
+    public ILogger<DependentSeriesSource<TSource, TData>> Logger { get; }
     public bool IsLoading => _source.IsLoading;
     public ValueRange<Instant> Bounds => _source.Bounds;
     private readonly ISeriesSource<TSource> _source;

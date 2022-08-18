@@ -6,13 +6,14 @@ using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
+using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 using NodaTime;
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class Label<TData> : IAsyncDisposable
+public partial class Label<TData> : ILogSubject<Label<TData>>, IAsyncDisposable
     where TData : ITimeSeries
 {
     [Parameter, EditorRequired]
@@ -53,6 +54,9 @@ public partial class Label<TData> : IAsyncDisposable
 
     [CascadingParameter]
     public ISeriesContext SeriesContext { get; set; } = default!;
+
+    [Inject]
+    public ILogger<Label<TData>> Logger { get; set; } = default!;
 
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 

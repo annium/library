@@ -30,7 +30,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     )
         where TData : ITimeSeries
     {
-        return new LoadingSeriesSource<TData>(_timeProvider, chartContext, load, _loggerFactory.GetLogger<LoadingSeriesSource<TData>>());
+        return new LoadingSeriesSource<TData>(_timeProvider, chartContext, load, _loggerFactory.Get<LoadingSeriesSource<TData>>());
     }
 
     public ISeriesSource<TData> Create<TSource, TData>(
@@ -40,6 +40,6 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         where TSource : ITimeSeries
         where TData : ITimeSeries
     {
-        return new DependentSeriesSource<TSource, TData>(source, getValue, _loggerFactory.GetLogger<DependentSeriesSource<TSource, TData>>());
+        return new DependentSeriesSource<TSource, TData>(source, getValue, _loggerFactory.Get<DependentSeriesSource<TSource, TData>>());
     }
 }

@@ -17,11 +17,11 @@ using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Internal.Data;
 
-internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeriesSource, ILogSubject
+internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeriesSource, ILogSubject<LoadingSeriesSource<TData>>
     where TData : ITimeSeries
 {
     public bool IsLoading => Volatile.Read(ref _isLoading) == 1;
-    public ILogger Logger { get; }
+    public ILogger<LoadingSeriesSource<TData>> Logger { get; }
     private const long BufferZone = 1L;
     private const long LoadZone = 3L;
     private const long CacheZone = 8L;

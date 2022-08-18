@@ -6,13 +6,14 @@ using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
+using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 using NodaTime;
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class Crosshair : IAsyncDisposable
+public partial class Crosshair : ILogSubject<Crosshair>, IAsyncDisposable
 {
     [Parameter]
     public string LineStyle { get; set; } = CrosshairLineStyle;
@@ -31,6 +32,9 @@ public partial class Crosshair : IAsyncDisposable
 
     [CascadingParameter]
     public IChartContext ChartContext { get; set; } = default!;
+
+    [Inject]
+    public ILogger<Crosshair> Logger { get; set; } = default!;
 
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 

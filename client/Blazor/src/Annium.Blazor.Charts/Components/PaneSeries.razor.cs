@@ -7,12 +7,13 @@ using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
+using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class PaneSeries : IAsyncDisposable
+public partial class PaneSeries : ILogSubject<PaneSeries>, IAsyncDisposable
 {
     [Parameter]
     public string? CssClass { get; set; }
@@ -25,6 +26,9 @@ public partial class PaneSeries : IAsyncDisposable
 
     [CascadingParameter]
     internal IManagedPaneContext PaneContext { get; set; } = default!;
+
+    [Inject]
+    public ILogger<PaneSeries> Logger { get; set; } = default!;
 
     [Inject]
     private IManagedSeriesContext SeriesContext { get; set; } = default!;

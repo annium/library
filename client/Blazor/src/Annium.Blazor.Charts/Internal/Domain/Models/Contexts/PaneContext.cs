@@ -12,7 +12,7 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
-internal sealed record PaneContext : IManagedPaneContext, ILogSubject
+internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContext>
 {
     public IReadOnlyCollection<ISeriesSource> Sources => _sources;
     public ISeriesContext Series { get; private set; } = default!;
@@ -25,7 +25,7 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject
     public ValueRange<Instant> Bounds { get; }
     public ValueRange<decimal> Range { get; }
     public ValueRange<decimal> View { get; }
-    public ILogger Logger { get; }
+    public ILogger<PaneContext> Logger { get; }
     private readonly HashSet<ISeriesSource> _sources = new();
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private IChartContext _chartContext = default!;
