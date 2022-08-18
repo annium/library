@@ -11,11 +11,11 @@ using Config = Xmg.Configuration.Abstractions.Config;
 
 namespace Xmg.Commands;
 
-internal class GenerateCommand : Command<GenerateCommandConfig>, ILogSubject
+internal class GenerateCommand : Command<GenerateCommandConfig>, ILogSubject<GenerateCommand>
 {
     public override string Id { get; } = "gen";
     public override string Description { get; } = "generate Migration";
-    public ILogger Logger { get; }
+    public ILogger<GenerateCommand> Logger { get; }
     private readonly ITimeProvider _timeProvider;
     private readonly IConfiguratorFactory _configuratorFactory;
     private readonly IMigratorFactory _migratorFactory;

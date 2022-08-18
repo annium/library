@@ -13,7 +13,7 @@ public class ServicePack : ServicePackBase
     {
         Func<Configuration, IChannel> Factory(IServiceProvider sp) => configuration =>
             new ChannelProxy(new Channel(sp.GetRequiredService<IHttpRequestFactory>(), configuration), configuration.Type,
-                sp.GetRequiredService<ILogger<Channel>>());
+                sp.GetRequiredService<ILogger<ChannelProxy>>());
 
         container.Add(Factory).AsSelf().Singleton();
     }

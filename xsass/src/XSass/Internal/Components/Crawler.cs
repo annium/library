@@ -6,9 +6,9 @@ using Annium.Logging.Abstractions;
 
 namespace XSass.Internal.Components;
 
-internal class Crawler : ILogSubject
+internal class Crawler : ILogSubject<Crawler>
 {
-    public ILogger Logger { get; }
+    public ILogger<Crawler> Logger { get; }
     private readonly Configuration _cfg;
     private readonly Compiler _compiler;
 

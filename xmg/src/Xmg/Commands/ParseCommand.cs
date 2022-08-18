@@ -10,11 +10,11 @@ using Xmg.Configuration.Components;
 
 namespace Xmg.Commands;
 
-internal class ParseCommand : Command<ParseCommandConfig>, ILogSubject
+internal class ParseCommand : Command<ParseCommandConfig>, ILogSubject<ParseCommand>
 {
     public override string Id { get; } = "parse";
     public override string Description { get; } = "parse database configuration";
-    public ILogger Logger { get; }
+    public ILogger<ParseCommand> Logger { get; }
     private readonly IConfiguratorFactory _configuratorFactory;
     private readonly ISerializer<string> _serializer;
 

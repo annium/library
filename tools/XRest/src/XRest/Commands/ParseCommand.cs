@@ -14,14 +14,14 @@ using XRest.Sources.Components;
 
 namespace XRest.Commands;
 
-internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ILogSubject
+internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ILogSubject<ParseCommand>
 {
     public override string Id { get; } = "parse";
     public override string Description { get; } = "parse API";
     private readonly ILoader _loader;
     private readonly ISerializer<string> _serializer;
     private readonly IMapper _mapper;
-    public ILogger Logger { get; }
+    public ILogger<ParseCommand> Logger { get; }
 
     public ParseCommand(
         ILoader loader,

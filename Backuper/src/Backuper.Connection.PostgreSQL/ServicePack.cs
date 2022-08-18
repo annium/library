@@ -11,7 +11,7 @@ public class ServicePack : ServicePackBase
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
         Func<Configuration, IConnection> Factory(IServiceProvider sp) => configuration =>
-            new ConnectionProxy(new Connection(configuration, sp.Resolve<IShell>()), configuration.Type, sp.Resolve<ILogger<Connection>>());
+            new ConnectionProxy(new Connection(configuration, sp.Resolve<IShell>()), configuration.Type, sp.Resolve<ILogger<ConnectionProxy>>());
 
         container.Add(Factory).AsSelf().Singleton();
     }

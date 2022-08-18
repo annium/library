@@ -9,34 +9,31 @@ namespace Backuper.Connection.PostgreSQL;
 
 public class Connection : IConnection
 {
-    private readonly Configuration cfg;
-
-    private readonly IShell shell;
+    private readonly Configuration _cfg;
+    private readonly IShell _shell;
 
     public Connection(
         Configuration cfg,
         IShell shell
     )
     {
-        this.cfg = cfg;
-        this.shell = shell;
+        _cfg = cfg;
+        _shell = shell;
     }
 
     public async Task SetupAsync()
     {
-        using(var conn = new NpgsqlConnection(GetConnectionString()))
-        {
-            await conn.OpenAsync();
-        }
+        await using var conn = new NpgsqlConnection(GetConnectionString());
+        await conn.OpenAsync();
     }
 
     public async Task<string> BackupAsync()
     {
         var path = Path.GetTempFileName();
-        var result = await shell
+        var result = await _shell
             .Cmd(
                 "pg_dump -Fc -v",
-                $"--dbname=postgresql://{cfg.User}:{cfg.Pass}@{cfg.Host}:{cfg.Port}/{cfg.Db}",
+                $"--dbname=postgresql://{_cfg.User}:{_cfg.Pass}@{_cfg.Host}:{_cfg.Port}/{_cfg.Db}",
                 $"-f {path}"
             )
             .Pipe(true)
@@ -49,10 +46,10 @@ public class Connection : IConnection
 
     public async Task RestoreAsync(string path)
     {
-        var result = await shell
+        var result = await _shell
             .Cmd(
                 "pg_restore -Fc --clean --if-exists -v",
-                $"--dbname=postgresql://{cfg.User}:{cfg.Pass}@{cfg.Host}:{cfg.Port}/{cfg.Db}",
+                $"--dbname=postgresql://{_cfg.User}:{_cfg.Pass}@{_cfg.Host}:{_cfg.Port}/{_cfg.Db}",
                 path
             )
             .Pipe(true)
@@ -61,14 +58,13 @@ public class Connection : IConnection
             throw new InvalidOperationException("restore failed");
     }
 
-    private string GetConnectionString() => string.Join(';', new string[]
-    {
-        $"Host={cfg.Host}",
-        $"Port={cfg.Port}",
-        $"Database={cfg.Db}",
-        $"Username={cfg.User}",
-        $"Password={cfg.Pass}",
+    private string GetConnectionString() => string.Join(';',
+        $"Host={_cfg.Host}",
+        $"Port={_cfg.Port}",
+        $"Database={_cfg.Db}",
+        $"Username={_cfg.User}",
+        $"Password={_cfg.Pass}",
         "SSL Mode=Prefer",
-        "Trust Server Certificate=true",
-    });
+        "Trust Server Certificate=true"
+    );
 }

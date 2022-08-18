@@ -9,8 +9,10 @@ public class ConnectionProxy : Resource<IConnection>, IConnection
     public ConnectionProxy(
         IConnection entity,
         string type,
-        ILogger logger
-    ) : base(entity, "Connection", type, logger) { }
+        ILogger<ConnectionProxy> logger
+    ) : base(entity, "Connection", type, logger)
+    {
+    }
 
     public Task SetupAsync() => SafeAsync("info", Entity.SetupAsync);
 

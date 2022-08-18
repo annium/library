@@ -4,19 +4,19 @@ using Annium.Logging.Abstractions;
 
 namespace Backuper.Shared;
 
-public class Resource<T> : ILogSubject
+public abstract class Resource<T> : ILogSubject<Resource<T>>
     where T : class
 {
-    public ILogger Logger { get; }
+    public ILogger<Resource<T>> Logger { get; }
     protected T Entity { get; }
     private readonly string _category;
     private readonly string _type;
 
-    public Resource(
+    protected Resource(
         T entity,
         string category,
         string type,
-        ILogger logger
+        ILogger<Resource<T>> logger
     )
     {
         Entity = entity;
@@ -25,7 +25,7 @@ public class Resource<T> : ILogSubject
         Logger = logger;
     }
 
-    public async Task<TResult> SafeAsync<TResult>(string operation, Func<Task<TResult>> handleAsync)
+    protected async Task<TResult> SafeAsync<TResult>(string operation, Func<Task<TResult>> handleAsync)
     {
         try
         {
@@ -42,7 +42,7 @@ public class Resource<T> : ILogSubject
         }
     }
 
-    public async Task SafeAsync(string operation, Func<Task> handleAsync)
+    protected async Task SafeAsync(string operation, Func<Task> handleAsync)
     {
         try
         {

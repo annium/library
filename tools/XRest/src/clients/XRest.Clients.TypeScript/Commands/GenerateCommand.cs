@@ -10,11 +10,11 @@ using XRest.Sources.Components;
 
 namespace XRest.Clients.TypeScript.Commands;
 
-internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILogSubject
+internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILogSubject<GenerateCommand>
 {
     public override string Id { get; } = "gen";
     public override string Description { get; } = "generate client";
-    public ILogger Logger { get; }
+    public ILogger<GenerateCommand> Logger { get; }
     private readonly ILoader _loader;
     private readonly IProcessor _processor;
     private readonly IWriter _writer;

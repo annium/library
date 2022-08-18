@@ -7,9 +7,9 @@ using LibSassHost;
 
 namespace XSass.Internal.Components;
 
-internal class Compiler : ILogSubject
+internal class Compiler : ILogSubject<Compiler>
 {
-    public ILogger Logger { get; }
+    public ILogger<Compiler> Logger { get; }
     private const string CSS = ".css";
     private readonly CompilationOptions _opts;
 

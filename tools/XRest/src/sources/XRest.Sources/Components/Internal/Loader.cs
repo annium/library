@@ -6,9 +6,9 @@ using XRest.Core.Models;
 
 namespace XRest.Sources.Components.Internal;
 
-internal class Loader : ILoader, ILogSubject
+internal class Loader : ILoader, ILogSubject<Loader>
 {
-    public ILogger Logger { get; }
+    public ILogger<Loader> Logger { get; }
     private readonly IServiceProvider _serviceProvider;
 
     public Loader(

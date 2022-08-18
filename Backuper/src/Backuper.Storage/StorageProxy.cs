@@ -11,8 +11,10 @@ public class StorageProxy : Resource<IStorage>, IStorage
     public StorageProxy(
         IStorage entity,
         string type,
-        ILogger logger
-    ) : base(entity, "Storage", type, logger) { }
+        ILogger<StorageProxy> logger
+    ) : base(entity, "Storage", type, logger)
+    {
+    }
 
     public Task SetupAsync() => SafeAsync("setup", Entity.SetupAsync);
 

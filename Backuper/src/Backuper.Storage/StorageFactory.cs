@@ -7,26 +7,26 @@ namespace Backuper.Storage;
 
 public class StorageFactory
 {
-    private readonly IServiceProvider provider;
-    private readonly IStorageFactory storageFactory;
+    private readonly IServiceProvider _sp;
+    private readonly IStorageFactory _storageFactory;
 
     public StorageFactory(
-        IServiceProvider provider,
+        IServiceProvider sp,
         IStorageFactory storageFactory
     )
     {
-        this.provider = provider;
-        this.storageFactory = storageFactory;
+        _sp = sp;
+        _storageFactory = storageFactory;
     }
 
     public IStorage CreateStorage(ConfigurationBase configuration)
     {
-        var storage = storageFactory.CreateStorage(configuration);
+        var storage = _storageFactory.CreateStorage(configuration);
 
         return new StorageProxy(
             storage,
             configuration.Type,
-            (ILogger) provider.GetRequiredService(typeof(ILogger<>).MakeGenericType(storage.GetType()))
+            (ILogger<StorageProxy>) _sp.GetRequiredService(typeof(ILogger<>).MakeGenericType(storage.GetType()))
         );
     }
 }

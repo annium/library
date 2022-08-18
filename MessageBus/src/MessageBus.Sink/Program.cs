@@ -18,6 +18,6 @@ var socket = provider.Resolve<IMessageBusSocket>();
 var cfg = provider.Resolve<EndpointsConfiguration>();
 Console.WriteLine($"Start sink with PUB {cfg.PubEndpoint} / SUB {cfg.SubEndpoint}");
 
-socket.Subscribe(x => logSubject.Log().Info(x));
+socket.Subscribe(Console.WriteLine);
 
 await ct;

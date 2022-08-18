@@ -9,9 +9,9 @@ using Backuper.Notification.Abstract;
 
 namespace Backuper.Api.State;
 
-public class StateManager : ILogSubject
+public class StateManager : ILogSubject<StateManager>
 {
-    public ILogger Logger { get; }
+    public ILogger<StateManager> Logger { get; }
     private readonly IScheduler _scheduler;
     private readonly Namer _namer;
 
