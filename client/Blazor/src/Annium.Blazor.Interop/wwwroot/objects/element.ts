@@ -42,10 +42,10 @@ export default {
         const callback = preventDefault
             ? (e: KeyboardEvent) => {
                 e.preventDefault();
-                ref.invokeMethod(method, type, e.key, e.code, e.metaKey, e.shiftKey, e.altKey)
+                ref.invokeMethod(method, type, e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey)
             }
             : (e: KeyboardEvent) => {
-                ref.invokeMethod(method, type, e.key, e.code, e.metaKey, e.shiftKey, e.altKey)
+                ref.invokeMethod(method, type, e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey)
             }
         getById(id).addEventListener(type, callback)
 

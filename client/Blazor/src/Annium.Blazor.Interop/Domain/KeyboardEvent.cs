@@ -4,6 +4,7 @@ public readonly record struct KeyboardEvent(
     string Key,
     string Code,
     bool MetaKey,
-    bool ShiftKey,
-    bool AltKey
+    bool CtrlKey,
+    bool AltKey,
+    bool ShiftKey
 );

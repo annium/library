@@ -107,13 +107,13 @@ public partial record Element
     }
 
     [JSInvokable($"{nameof(Element)}.{nameof(HandleKeyboardEvent)}")]
-    public void HandleKeyboardEvent(string typeName, string key, string code, bool metaKey, bool shiftKey, bool altKey)
+    public void HandleKeyboardEvent(string typeName, string key, string code, bool metaKey, bool ctrlKey, bool altKey, bool shiftKey)
     {
         var type = typeName.ParseEnum<KeyboardEventEnum>();
         if (!_keyboardEvents.TryGetValue(type, out var e))
             throw new InvalidOperationException($"No {type} event handlers registered");
 
-        e.Handle(new KeyboardEvent(key, code, metaKey, shiftKey, altKey));
+        e.Handle(new KeyboardEvent(key, code, metaKey, ctrlKey, altKey, shiftKey));
     }
 
     [JSInvokable($"{nameof(Element)}.{nameof(HandleWheelEvent)}")]
