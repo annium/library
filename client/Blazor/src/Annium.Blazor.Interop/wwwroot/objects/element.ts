@@ -38,11 +38,15 @@ export default {
     /* events */
 
     // keyboard event
-    onKeyboardEvent: (id: string, type: KeyboardEventName, ref: DotNet.DotNetObject, method: string): number => {
-        const callback = (e: KeyboardEvent) => {
-            e.preventDefault();
-            ref.invokeMethod(method, type, e.key, e.code, e.metaKey, e.shiftKey, e.altKey)
-        }
+    onKeyboardEvent: (id: string, type: KeyboardEventName, ref: DotNet.DotNetObject, method: string, preventDefault: boolean): number => {
+        const callback = preventDefault
+            ? (e: KeyboardEvent) => {
+                e.preventDefault();
+                ref.invokeMethod(method, type, e.key, e.code, e.metaKey, e.shiftKey, e.altKey)
+            }
+            : (e: KeyboardEvent) => {
+                ref.invokeMethod(method, type, e.key, e.code, e.metaKey, e.shiftKey, e.altKey)
+            }
         getById(id).addEventListener(type, callback)
 
         return cbTracker.track(callback)

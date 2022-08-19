@@ -21,8 +21,8 @@ public partial record Element
     public Action OnMouseOver(Action<int, int> handle) => OnMouseEvent(MouseEventEnum.mouseover, handle);
     public Action OnMouseOut(Action<int, int> handle) => OnMouseEvent(MouseEventEnum.mouseout, handle);
     public Action OnMouseMove(Action<int, int> handle) => OnMouseEvent(MouseEventEnum.mousemove, handle);
-    public Action OnKeyDown(Action<KeyboardEvent> handle) => OnKeyboardEvent(KeyboardEventEnum.keydown, handle);
-    public Action OnKeyUp(Action<KeyboardEvent> handle) => OnKeyboardEvent(KeyboardEventEnum.keyup, handle);
+    public Action OnKeyDown(Action<KeyboardEvent> handle, bool preventDefault) => OnKeyboardEvent(KeyboardEventEnum.keydown, handle, preventDefault);
+    public Action OnKeyUp(Action<KeyboardEvent> handle, bool preventDefault) => OnKeyboardEvent(KeyboardEventEnum.keyup, handle, preventDefault);
 
     public Action OnWheel(Action<bool, decimal, decimal> handle)
     {
@@ -66,13 +66,20 @@ public partial record Element
         };
     }
 
-    private Action OnKeyboardEvent(KeyboardEventEnum type, Action<KeyboardEvent> handle)
+    private Action OnKeyboardEvent(KeyboardEventEnum type, Action<KeyboardEvent> handle, bool preventDefault)
     {
         if (!_keyboardEvents.TryGetValue(type, out var e))
             e = _keyboardEvents[type] = new InteropEvent<KeyboardEvent>();
 
         if (!e.HasListeners)
-            e.SetCallbackId(Ctx.Invoke<int>("element.onKeyboardEvent", Id, type.ToString(), _ref, $"{nameof(Element)}.{nameof(HandleKeyboardEvent)}"));
+            e.SetCallbackId(Ctx.Invoke<int>(
+                "element.onKeyboardEvent",
+                Id,
+                type.ToString(),
+                _ref,
+                $"{nameof(Element)}.{nameof(HandleKeyboardEvent)}",
+                preventDefault
+            ));
 
         e.Event += handle;
 
