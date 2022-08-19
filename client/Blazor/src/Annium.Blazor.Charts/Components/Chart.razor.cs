@@ -8,6 +8,7 @@ using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
+using Annium.Blazor.Interop.Domain;
 using Annium.Core.Primitives;
 using Annium.Extensions.Jobs;
 using Annium.Logging.Abstractions;
@@ -62,23 +63,23 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
         _rawZoom = _chartContext.Zoom;
     }
 
-    private void HandleWheel(bool ctrlKey, decimal deltaX, decimal deltaY)
+    private void HandleWheel(WheelEvent e)
     {
         if (_chartContext.IsLocked)
             return;
 
-        var changed = ctrlKey
-            ? HandleZoomDelta(deltaY)
-            : HandleScrollDelta(deltaX);
+        var changed = e.CtrlKey
+            ? HandleZoomDelta(e.DeltaY)
+            : HandleScrollDelta(e.DeltaX);
 
         if (changed)
             _chartContext.RequestDraw();
     }
 
-    private void HandlePointerMove(int x, int y) =>
-        _chartContext.RequestOverlay(new Point(x, y));
+    private void HandlePointerMove(MouseEvent e) =>
+        _chartContext.RequestOverlay(new Point(e.X, e.Y));
 
-    private void HandlePointerOut(int x, int y) =>
+    private void HandlePointerOut(MouseEvent _) =>
         _chartContext.RequestOverlay(null);
 
     private void CheckState()
