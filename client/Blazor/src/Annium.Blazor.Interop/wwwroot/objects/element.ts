@@ -4,6 +4,10 @@ import cbTracker from '../trackers/cbTracker.js'
 import objectTracker from '../trackers/objectTracker.js'
 import js from '../interop/js.js';
 
+type KeyboardEventName =
+    | 'keydown'
+    | 'keyup'
+
 type MouseEventName =
     | 'mousedown'
     | 'mouseenter'
@@ -32,6 +36,20 @@ export default {
     },
 
     /* events */
+
+    // keyboard event
+    onKeyboardEvent: (id: string, type: KeyboardEventName, ref: DotNet.DotNetObject, method: string): number => {
+        const callback = (e: KeyboardEvent) => {
+            e.preventDefault();
+            ref.invokeMethod(method, type, e.key, e.code, e.metaKey, e.shiftKey, e.altKey)
+        }
+        getById(id).addEventListener(type, callback)
+
+        return cbTracker.track(callback)
+    },
+    offKeyboardEvent: (id: string, type: KeyboardEventName, cid: number): void => {
+        getById(id).removeEventListener(type, cbTracker.release(cid))
+    },
 
     // mouse event
     onMouseEvent: (id: string, type: MouseEventName, ref: DotNet.DotNetObject, method: string): number => {

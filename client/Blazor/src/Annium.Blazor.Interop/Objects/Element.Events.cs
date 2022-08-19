@@ -12,6 +12,7 @@ public partial record Element
 {
     private readonly InteropEvent<bool, decimal, decimal> _wheelEvent = new();
     private readonly Dictionary<MouseEventEnum, InteropEvent<int, int>> _mouseEvents = new();
+    private readonly Dictionary<KeyboardEventEnum, InteropEvent<KeyboardEvent>> _keyboardEvents = new();
 
     public Action OnMouseDown(Action<int, int> handle) => OnMouseEvent(MouseEventEnum.mousedown, handle);
     public Action OnMouseUp(Action<int, int> handle) => OnMouseEvent(MouseEventEnum.mouseup, handle);
@@ -20,6 +21,8 @@ public partial record Element
     public Action OnMouseOver(Action<int, int> handle) => OnMouseEvent(MouseEventEnum.mouseover, handle);
     public Action OnMouseOut(Action<int, int> handle) => OnMouseEvent(MouseEventEnum.mouseout, handle);
     public Action OnMouseMove(Action<int, int> handle) => OnMouseEvent(MouseEventEnum.mousemove, handle);
+    public Action OnKeyDown(Action<KeyboardEvent> handle) => OnKeyboardEvent(KeyboardEventEnum.keydown, handle);
+    public Action OnKeyUp(Action<KeyboardEvent> handle) => OnKeyboardEvent(KeyboardEventEnum.keyup, handle);
 
     public Action OnWheel(Action<bool, decimal, decimal> handle)
     {
@@ -63,6 +66,29 @@ public partial record Element
         };
     }
 
+    private Action OnKeyboardEvent(KeyboardEventEnum type, Action<KeyboardEvent> handle)
+    {
+        if (!_keyboardEvents.TryGetValue(type, out var e))
+            e = _keyboardEvents[type] = new InteropEvent<KeyboardEvent>();
+
+        if (!e.HasListeners)
+            e.SetCallbackId(Ctx.Invoke<int>("element.onKeyboardEvent", Id, type.ToString(), _ref, $"{nameof(Element)}.{nameof(HandleKeyboardEvent)}"));
+
+        e.Event += handle;
+
+        return () =>
+        {
+            e.Event -= handle;
+
+            if (e.HasListeners)
+                return;
+
+            _keyboardEvents.Remove(type);
+            Ctx.InvokeVoid("element.offKeyboardEvent", Id, type.ToString(), e.CallbackId);
+            e.ResetCallbackId();
+        };
+    }
+
     [JSInvokable($"{nameof(Element)}.{nameof(HandleMouseEvent)}")]
     public void HandleMouseEvent(string typeName, int x, int y)
     {
@@ -71,6 +97,16 @@ public partial record Element
             throw new InvalidOperationException($"No {type} event handlers registered");
 
         e.Handle(x, y);
+    }
+
+    [JSInvokable($"{nameof(Element)}.{nameof(HandleKeyboardEvent)}")]
+    public void HandleKeyboardEvent(string typeName, char key, char code, bool metaKey, bool shiftKey, bool altKey)
+    {
+        var type = typeName.ParseEnum<KeyboardEventEnum>();
+        if (!_keyboardEvents.TryGetValue(type, out var e))
+            throw new InvalidOperationException($"No {type} event handlers registered");
+
+        e.Handle(new KeyboardEvent(key, code, metaKey, shiftKey, altKey));
     }
 
     [JSInvokable($"{nameof(Element)}.{nameof(HandleWheelEvent)}")]
