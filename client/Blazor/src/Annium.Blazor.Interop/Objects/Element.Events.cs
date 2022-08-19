@@ -8,7 +8,7 @@ using Microsoft.JSInterop;
 
 namespace Annium.Blazor.Interop;
 
-public abstract partial record Element
+public partial record Element
 {
     private readonly InteropEvent<bool, decimal, decimal> _wheelEvent = new();
     private readonly Dictionary<MouseEventEnum, InteropEvent<int, int>> _mouseEvents = new();

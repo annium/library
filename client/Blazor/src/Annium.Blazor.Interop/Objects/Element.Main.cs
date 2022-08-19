@@ -7,7 +7,7 @@ using Microsoft.JSInterop;
 
 namespace Annium.Blazor.Interop;
 
-public abstract partial record Element : IAsyncDisposable
+public partial record Element : IAsyncDisposable
 {
     protected IInteropContext Ctx => InteropContext.Instance;
     protected string Id => _id.Value;
@@ -43,4 +43,6 @@ public abstract partial record Element : IAsyncDisposable
     {
         await _disposable.DisposeAsync();
     }
+
+    public static implicit operator Element(ElementReference reference) => new(reference);
 }
