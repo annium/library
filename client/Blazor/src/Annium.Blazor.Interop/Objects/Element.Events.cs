@@ -100,7 +100,7 @@ public partial record Element
     }
 
     [JSInvokable($"{nameof(Element)}.{nameof(HandleKeyboardEvent)}")]
-    public void HandleKeyboardEvent(string typeName, char key, char code, bool metaKey, bool shiftKey, bool altKey)
+    public void HandleKeyboardEvent(string typeName, string key, string code, bool metaKey, bool shiftKey, bool altKey)
     {
         var type = typeName.ParseEnum<KeyboardEventEnum>();
         if (!_keyboardEvents.TryGetValue(type, out var e))

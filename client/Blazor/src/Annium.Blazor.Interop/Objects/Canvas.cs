@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Interop;
 
-public sealed record Canvas : Element
+public sealed record Canvas : ReferenceElement
 {
     public Canvas(ElementReference reference) : base(reference)
     {
