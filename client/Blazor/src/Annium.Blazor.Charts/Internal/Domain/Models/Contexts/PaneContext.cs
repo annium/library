@@ -139,4 +139,6 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
 
         return end == 0 ? 1.1m : end * 1.1m;
     }
+
+    public override string ToString() => this.GetFullId();
 }

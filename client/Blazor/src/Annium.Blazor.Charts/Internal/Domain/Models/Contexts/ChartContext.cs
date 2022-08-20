@@ -8,13 +8,15 @@ using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
+using Annium.Logging.Abstractions;
 using Annium.NodaTime.Extensions;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
-internal sealed record ChartContext : IManagedChartContext
+internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartContext>
 {
+    public ILogger<ChartContext> Logger { get; }
     public event Action Updated = delegate { };
     public event Action<Instant?, Point?> LookupChanged = delegate { };
     public Instant Moment { get; private set; }
@@ -34,7 +36,7 @@ internal sealed record ChartContext : IManagedChartContext
 
     private List<int> _zooms = new() { 1 };
     private List<Duration> _resolutions = new() { Duration.FromMinutes(1) };
-    private readonly HashSet<IPaneContext> _panes = new();
+    private readonly List<IPaneContext> _panes = new();
     private readonly ManagedValueRange<Instant> _view = ValueRange.Create(Instant.MinValue, Instant.MinValue);
     private readonly ManagedValueRange<Instant> _range = ValueRange.Create(Instant.MinValue, Instant.MinValue);
     private DomRect _rect;
@@ -42,9 +44,11 @@ internal sealed record ChartContext : IManagedChartContext
     private (Point?, bool) _overlayRequest;
 
     public ChartContext(
-        ITimeProvider timeProvider
+        ITimeProvider timeProvider,
+        ILogger<ChartContext> logger
     )
     {
+        Logger = logger;
         Moment = timeProvider.Now;
         Bounds = ValueRange.Create(
             () => _panes.Count > 0 ? _panes.Min(x => x.Bounds.Start) : timeProvider.Now,
@@ -80,13 +84,14 @@ internal sealed record ChartContext : IManagedChartContext
 
     public Action RegisterPane(IPaneContext paneContext)
     {
-        if (!_panes.Add(paneContext))
-            throw new InvalidOperationException("Pane is already registered");
+        if (_panes.Contains(paneContext))
+            throw new InvalidOperationException($"{paneContext} is already registered");
+        _panes.Add(paneContext);
 
         return () =>
         {
             if (!_panes.Remove(paneContext))
-                throw new InvalidOperationException("Pane is not registered");
+                throw new InvalidOperationException($"{paneContext} is not registered");
         };
     }
 
@@ -159,4 +164,6 @@ internal sealed record ChartContext : IManagedChartContext
         MsPerPx = (NodaConstants.MillisecondsPerMinute * Resolution.TotalMinutes / Zoom).FloorInt32();
         PxPerResolution = Zoom;
     }
+
+    public override string ToString() => this.GetFullId();
 }
