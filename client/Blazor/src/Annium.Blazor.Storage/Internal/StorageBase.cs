@@ -45,6 +45,22 @@ internal class StorageBase : IStorageBase
         return _js.Invoke<bool>($"{_storage}.hasOwnProperty", key);
     }
 
+    public bool TryGet<T>(string key, out T? value)
+    {
+        var raw = _js.Invoke<string>($"{_storage}.getItem", key);
+
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            value = default;
+
+            return false;
+        }
+
+        value = _serializer.Deserialize<T>(raw);
+
+        return true;
+    }
+
     public T Get<T>(string key)
     {
         var raw = _js.Invoke<string>($"{_storage}.getItem", key);
