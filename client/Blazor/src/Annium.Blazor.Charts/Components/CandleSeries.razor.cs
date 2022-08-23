@@ -61,15 +61,21 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
     private void Render(IReadOnlyList<ICandle> items)
     {
         if (items.Count == 0)
+        {
+            this.Log().Trace("No candles to render");
             return;
+        }
 
         var (min, max) = GetBounds(items);
 
-        this.Log().Trace($"render in {min} - {max}");
         // if range is changed, redraw will be triggered
         if (PaneContext.AdjustRange(Source, min, max))
+        {
+            this.Log().Trace("adjusted to range {min} - {max}, wait for redraw", min, max);
             return;
+        }
 
+        this.Log().Trace("render {count} in range {min} - {max}", items.Count, min, max);
         var width = GetWidth();
         var offset = width == 1 ? 0 : ((double) width / 2).FloorInt32();
         var start = ChartContext.View.Start;
