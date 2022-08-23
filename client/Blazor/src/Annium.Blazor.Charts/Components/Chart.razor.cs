@@ -42,6 +42,13 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
     private decimal _rawZoom;
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 
+    protected override void OnParametersSet()
+    {
+        _chartContext = (IManagedChartContext) ChartContext;
+        _chartContext.RequestDraw();
+        _rawZoom = _chartContext.Zoom;
+    }
+
     protected override void OnAfterRender(bool firstRender)
     {
         if (!firstRender)
@@ -54,13 +61,6 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
         _disposable += _container.OnMouseOut(HandlePointerOut);
         _disposable += Timer.Start(CheckState, AnimationFrameMs, AnimationFrameMs);
         _disposable += _container;
-    }
-
-    protected override void OnParametersSet()
-    {
-        _chartContext = (IManagedChartContext) ChartContext;
-        _chartContext.RequestDraw();
-        _rawZoom = _chartContext.Zoom;
     }
 
     private void HandleWheel(WheelEvent e)

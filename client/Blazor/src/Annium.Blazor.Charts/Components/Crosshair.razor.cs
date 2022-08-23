@@ -38,16 +38,16 @@ public partial class Crosshair : ILogSubject<Crosshair>, IAsyncDisposable
 
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 
+    protected override void OnParametersSet()
+    {
+        ChartContext.RequestDraw();
+    }
+
     protected override void OnAfterRender(bool firstRender)
     {
         if (!firstRender) return;
 
         _disposable += ChartContext.OnLookupChanged(HandleLookup);
-    }
-
-    protected override void OnParametersSet()
-    {
-        ChartContext.RequestDraw();
     }
 
     private void HandleLookup(Instant? m, Point? p)

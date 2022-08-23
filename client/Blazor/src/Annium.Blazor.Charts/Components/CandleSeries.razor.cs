@@ -38,14 +38,24 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
     [Inject]
     public ILogger<CandleSeries> Logger { get; set; } = default!;
 
-    private AsyncDisposableBox _disposable = Disposable.AsyncBox();
+    private Action _unregisterSource = delegate { };
+    private Action _unregisterDraw = delegate { };
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        await base.SetParametersAsync(parameters);
+        this.Log().Debug("update source registration");
+        _unregisterSource();
+        _unregisterSource = PaneContext.RegisterSource(Source);
+    }
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
-        _disposable += PaneContext.RegisterSource(Source);
-        _disposable += ChartContext.OnUpdate(Draw);
+        this.Log().Debug("register Draw");
+        _unregisterDraw = ChartContext.OnUpdate(Draw);
     }
 
     private void Draw()
@@ -191,6 +201,9 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
 
     public ValueTask DisposeAsync()
     {
-        return _disposable.DisposeAsync();
+        _unregisterSource();
+        _unregisterDraw();
+
+        return ValueTask.CompletedTask;
     }
 }
