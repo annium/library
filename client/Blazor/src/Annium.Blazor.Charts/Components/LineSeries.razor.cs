@@ -48,7 +48,7 @@ public partial class LineSeries : ILogSubject<LineSeries>, IAsyncDisposable
 
         if (Source != source)
         {
-            this.Log().Debug("update source registration");
+            this.Log().Debug("update {oldSource} -> {newSource}", source.GetFullId(), Source.GetFullId());
             _unregisterSource();
             _unregisterSource = PaneContext.RegisterSource(Source);
         }
