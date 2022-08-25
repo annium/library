@@ -43,10 +43,16 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
+        var source = Source;
+
         await base.SetParametersAsync(parameters);
-        this.Log().Debug("update source registration");
-        _unregisterSource();
-        _unregisterSource = PaneContext.RegisterSource(Source);
+
+        if (Source != source)
+        {
+            this.Log().Debug("update source registration");
+            _unregisterSource();
+            _unregisterSource = PaneContext.RegisterSource(Source);
+        }
     }
 
     protected override void OnAfterRender(bool firstRender)
