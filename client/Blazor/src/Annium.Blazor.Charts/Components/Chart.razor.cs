@@ -44,7 +44,7 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
 
     protected override void OnParametersSet()
     {
-        this.Log().Debug("request draw");
+        this.Log().Trace("request draw");
         _chartContext = (IManagedChartContext) ChartContext;
         _chartContext.RequestDraw();
         _rawZoom = _chartContext.Zoom;

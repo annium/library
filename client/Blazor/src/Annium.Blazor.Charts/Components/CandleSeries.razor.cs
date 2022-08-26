@@ -49,7 +49,7 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
 
         if (Source != source)
         {
-            this.Log().Debug("update {oldSource} -> {newSource}", source.GetFullId(), Source.GetFullId());
+            this.Log().Trace("update {oldSource} -> {newSource}", source.GetFullId(), Source.GetFullId());
             _unregisterSource();
             _unregisterSource = PaneContext.RegisterSource(Source);
         }
@@ -60,7 +60,7 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
         if (!firstRender)
             return;
 
-        this.Log().Debug("register Draw");
+        this.Log().Trace("register Draw");
         _unregisterDraw = ChartContext.OnUpdate(Draw);
     }
 
