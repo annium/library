@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
+using Annium.Core.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using NodaTime;
 
@@ -11,13 +13,14 @@ public static class ParseHelper
     public static bool IsAllowedQueryType(Type type)
     {
         return type.IsPrimitive ||
-               type.IsEnum ||
-               type == typeof(string) ||
-               type == typeof(DateTime) ||
-               type == typeof(DateTimeOffset) ||
-               type == typeof(Instant) ||
-               type == typeof(LocalDateTime) ||
-               type == typeof(Guid);
+            type.IsEnum ||
+            type == typeof(string) ||
+            type == typeof(DateTime) ||
+            type == typeof(DateTimeOffset) ||
+            type == typeof(Instant) ||
+            type == typeof(LocalDateTime) ||
+            type == typeof(Guid) ||
+            type.GetTargetImplementation(typeof(IEnumerable<>)) is not null;
     }
 
     public static bool IsSkippedType(Type type)
