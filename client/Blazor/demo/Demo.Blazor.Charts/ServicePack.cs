@@ -1,4 +1,5 @@
 using System;
+using Annium.Blazor.Charts;
 using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,7 +14,7 @@ public class ServicePack : ServicePackBase
         container.AddTime().WithRealTime().SetDefault();
         container.AddLogging();
         container.AddMapper();
-        container.AddHttpRequestFactory();
+        container.AddHttpRequestFactory().SetDefault();
         container.AddJsonSerializers()
             .Configure(opts => opts.ConfigureForOperations().ConfigureForNodaTime())
             .SetDefault();
@@ -25,6 +26,8 @@ public class ServicePack : ServicePackBase
         container.AddStorages();
         container.AddComponentFormStateFactory();
         container.AddCss();
+        container.AddInterop();
+        container.AddCharts();
         container.Collection.AddAntDesign();
     }
 

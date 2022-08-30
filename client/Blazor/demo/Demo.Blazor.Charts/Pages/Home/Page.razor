@@ -1,0 +1,24 @@
+@using Annium.Blazor.Charts.Components
+
+@namespace Demo.Blazor.Charts.Pages.Home
+
+<Chart ChartContext="@ChartContext" CssClass="@Styles.Chart">
+    <Pane CssClass="@Styles.CandlesPane">
+        <PaneSeries>
+        </PaneSeries>
+        <PaneRight CssClass="@Styles.PaneRight">
+            <YAxis />
+        </PaneRight>
+    </Pane>
+    <Pane CssClass="@Styles.LinesPane">
+        <PaneSeries>
+        </PaneSeries>
+        <PaneBottom CssClass="@Styles.PaneBottom">
+            <XAxis />
+        </PaneBottom>
+        <PaneRight CssClass="@Styles.PaneRight">
+            <YAxis />
+        </PaneRight>
+    </Pane>
+    <Crosshair />
+</Chart>
