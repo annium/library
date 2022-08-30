@@ -11,6 +11,11 @@ public class Style : RuleSet
     public readonly CssRule CandlesPane = Rule.Class()
         .HeightPercent(40);
 
+    public readonly CssRule Resolution = Rule.Class()
+        .HeightPx(20)
+        .RightRem(1)
+        .TopRem(1);
+
     public readonly CssRule LinesPane = Rule.Class()
         .HeightPercent(10);
 

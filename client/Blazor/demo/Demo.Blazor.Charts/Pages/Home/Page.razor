@@ -1,10 +1,14 @@
 @using Annium.Blazor.Charts.Components
+@using Annium.Blazor.Charts.Domain
 
 @namespace Demo.Blazor.Charts.Pages.Home
 
 <Chart ChartContext="@ChartContext" CssClass="@Styles.Chart">
     <Pane CssClass="@Styles.CandlesPane">
         <PaneSeries>
+            <CandleSeries Source="_candleSeries" />
+            <Label TData="ICandle" Source="@_candleSeries" GetText="GetLabel" Top="20" Left="20" Width="100" Height="15" />
+            <Resolution CssClass="@Styles.Resolution" />
         </PaneSeries>
         <PaneRight CssClass="@Styles.PaneRight">
             <YAxis />
