@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain;
-using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Core.Primitives;
 using Annium.Core.Primitives.Collections.Generic;
 using Annium.Data.Models;
@@ -20,6 +19,7 @@ namespace Annium.Blazor.Charts.Internal.Data;
 internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<LoadingSeriesSource<TData>>
     where TData : ITimeSeries
 {
+    public Duration Resolution { get; private set; }
     public bool IsLoading => Volatile.Read(ref _isLoading) == 1;
     public ILogger<LoadingSeriesSource<TData>> Logger { get; }
     private const long BufferZone = 1L;
@@ -36,21 +36,20 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
     private Instant End => _cache[^1].Moment;
 
     private readonly ITimeProvider _timeProvider;
-    private readonly IChartContext _chartContext;
     private readonly Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> _load;
     private int _isLoading;
     private int _isDisposed;
 
     public LoadingSeriesSource(
         ITimeProvider timeProvider,
-        IChartContext chartContext,
+        Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> load,
         ILogger<LoadingSeriesSource<TData>> logger
     )
     {
+        Resolution = resolution;
         Logger = logger;
         _timeProvider = timeProvider;
-        _chartContext = chartContext;
         _load = load;
         var now = timeProvider.Now.FloorToMinute();
         _emptyBefore = ValueRange.Create(now, now);
@@ -104,7 +103,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
         if (moment < Start || moment > End)
             return default;
 
-        var index = (moment.Minus(Start) / _chartContext.Resolution).RoundInt32();
+        var index = (moment.Minus(Start) / Resolution).RoundInt32();
         var item = _cache[index];
 
         if (item.Moment != moment)
@@ -116,14 +115,24 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
     public void LoadItems(Instant start, Instant end, Action onLoaded)
     {
         LoadData(start, end).ContinueWith(t =>
-        {
-            if (t.IsCompletedSuccessfully)
-                onLoaded();
-            else if (t.Exception is not null)
-                throw t.Exception;
-            else
-                this.Log().Error($"load done in {t.Status} status");
-        });
+            {
+                if (t.IsCompletedSuccessfully)
+                    onLoaded();
+                else if (t.Exception is not null)
+                    throw t.Exception;
+                else
+                    this.Log().Error($"load done in {t.Status} status");
+            }
+        );
+    }
+
+    public void SetResolution(Duration resolution)
+    {
+        if (resolution == Resolution)
+            return;
+
+        Resolution = resolution;
+        Clear();
     }
 
     public void Clear()
@@ -193,8 +202,8 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
         }
         else
         {
-            var from = Start - _chartContext.Resolution;
-            var to = End + _chartContext.Resolution;
+            var from = Start - Resolution;
+            var to = End + Resolution;
 
             this.Log().Trace($"filled cache, bounds: {S(min)} - {S(max)}, cache {S(Start)} - {S(End)}");
 
@@ -214,7 +223,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
     {
         this.Log().Trace($"{S(start)} - {S(end)}");
 
-        var items = await _load(_chartContext.Resolution, start, end);
+        var items = await _load(Resolution, start, end);
 
         this.Log().Trace(items.Count > 0 ? $"loaded {items.Count} items in {S(items[0].Moment)} - {S(items[^1].Moment)}" : "no items loaded");
 
@@ -280,7 +289,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
         for (var i = 1; i < _cache.Count; i++)
         {
             var diff = _cache[i].Moment - _cache[i - 1].Moment;
-            if (diff != _chartContext.Resolution)
+            if (diff != Resolution)
                 throw new InvalidOperationException($"Cache integrity failure: {_cache[i - 1]}, {_cache[i]}. Diff: {diff}");
         }
     }

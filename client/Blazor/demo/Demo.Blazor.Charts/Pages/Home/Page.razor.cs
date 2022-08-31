@@ -53,7 +53,7 @@ public partial class Page
 
         // ChartContext.SetMoment(SystemClock.Instance.GetCurrentInstant() - Duration.FromDays(1000));
 
-        _candleSeries = SeriesSourceFactory.Create(ChartContext, LoadCandles);
+        _candleSeries = SeriesSourceFactory.Create(ChartContext.Resolution, LoadCandles);
         _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open) as IValue);
     }
 

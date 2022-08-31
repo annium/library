@@ -16,7 +16,9 @@ public interface ISeriesSource<TData> : ISeriesSource, IDisposable
 
 public interface ISeriesSource
 {
-    bool IsLoading { get; }
+    Duration Resolution { get; }
     ValueRange<Instant> Bounds { get; }
+    bool IsLoading { get; }
+    void SetResolution(Duration resolution);
     void Clear();
 }

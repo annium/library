@@ -147,7 +147,7 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
         Resolution = resolution;
         UpdateUnits();
         foreach (var series in _panes.SelectMany(pane => pane.Sources))
-            series.Clear();
+            series.SetResolution(Resolution);
         RequestDraw();
     }
 

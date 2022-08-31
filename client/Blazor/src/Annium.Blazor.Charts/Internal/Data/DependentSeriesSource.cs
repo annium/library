@@ -16,6 +16,7 @@ internal class DependentSeriesSource<TSource, TData> :
     where TData : ITimeSeries
 {
     public ILogger<DependentSeriesSource<TSource, TData>> Logger { get; }
+    public Duration Resolution => _source.Resolution;
     public bool IsLoading => _source.IsLoading;
     public ValueRange<Instant> Bounds => _source.Bounds;
     private readonly ISeriesSource<TSource> _source;
@@ -53,6 +54,8 @@ internal class DependentSeriesSource<TSource, TData> :
         // this.Log().Trace($"get data in {start} - {end}");
         _source.LoadItems(start, end, onLoaded);
     }
+
+    public void SetResolution(Duration resolution) => _source.SetResolution(resolution);
 
     public void Clear() => _source.Clear();
 

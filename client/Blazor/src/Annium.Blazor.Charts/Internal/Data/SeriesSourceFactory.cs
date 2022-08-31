@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain;
-using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
 using NodaTime;
@@ -25,12 +24,12 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     }
 
     public ISeriesSource<TData> Create<TData>(
-        IChartContext chartContext,
+        Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> load
     )
         where TData : ITimeSeries
     {
-        return new LoadingSeriesSource<TData>(_timeProvider, chartContext, load, _loggerFactory.Get<LoadingSeriesSource<TData>>());
+        return new LoadingSeriesSource<TData>(_timeProvider, resolution, load, _loggerFactory.Get<LoadingSeriesSource<TData>>());
     }
 
     public ISeriesSource<TData> Create<TSource, TData>(

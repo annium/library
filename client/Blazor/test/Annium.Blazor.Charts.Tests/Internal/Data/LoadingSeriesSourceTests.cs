@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain;
-using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Testing;
 using Annium.Testing.Lib;
 using NodaTime;
@@ -22,21 +21,18 @@ public class LoadingSeriesSourceTests : TestBase
     public void True_IsTrue()
     {
         // arrange
-        var ctx = Get<IChartContext>();
-        var sourceFactory = Get<ISeriesSourceFactory>();
-        var source = sourceFactory.Create(ctx, LoadItems);
+        var source = CreateSource(Array.Empty<Item>);
 
         // assert
         source.IsNotDefault();
     }
 
-    private Task<IReadOnlyList<Item>> LoadItems(
-        Duration resolution,
-        Instant start,
-        Instant end
-    )
+    private ISeriesSource<Item> CreateSource(Func<IReadOnlyList<Item>> getItems)
     {
-        return Task.FromResult<IReadOnlyList<Item>>(Array.Empty<Item>());
+        var sourceFactory = Get<ISeriesSourceFactory>();
+        var source = sourceFactory.Create(Duration.FromMinutes(1), (_, _, _) => Task.FromResult(getItems()));
+
+        return source;
     }
 
     private sealed record Item(Instant Moment, int Value) : ITimeSeries;
