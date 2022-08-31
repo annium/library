@@ -45,6 +45,8 @@ public partial class Page
 
     private ISeriesSource<ICandle> _candleSeries = default!;
 
+    private ISeriesSource<IValue> _openSeries = default!;
+
     protected override void OnInitialized()
     {
         ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
@@ -52,6 +54,7 @@ public partial class Page
         // ChartContext.SetMoment(SystemClock.Instance.GetCurrentInstant() - Duration.FromDays(1000));
 
         _candleSeries = SeriesSourceFactory.Create(ChartContext, LoadCandles);
+        _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open) as IValue);
     }
 
     private async Task<IReadOnlyList<ICandle>> LoadCandles(
