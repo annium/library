@@ -17,7 +17,7 @@ using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Internal.Data;
 
-internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILoadingSeriesSource, ILogSubject<LoadingSeriesSource<TData>>
+internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<LoadingSeriesSource<TData>>
     where TData : ITimeSeries
 {
     public bool IsLoading => Volatile.Read(ref _isLoading) == 1;

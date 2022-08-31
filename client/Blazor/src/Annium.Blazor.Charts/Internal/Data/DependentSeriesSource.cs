@@ -11,7 +11,6 @@ namespace Annium.Blazor.Charts.Internal.Data;
 
 internal class DependentSeriesSource<TSource, TData> :
     ISeriesSource<TData>,
-    IDependentSeriesSource,
     ILogSubject<DependentSeriesSource<TSource, TData>>
     where TSource : ITimeSeries
     where TData : ITimeSeries
@@ -60,8 +59,4 @@ internal class DependentSeriesSource<TSource, TData> :
     public void Dispose()
     {
     }
-}
-
-internal interface IDependentSeriesSource
-{
 }
