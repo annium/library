@@ -22,9 +22,6 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
     public Duration Resolution { get; private set; }
     public bool IsLoading => Volatile.Read(ref _isLoading) == 1;
     public ILogger<LoadingSeriesSource<TData>> Logger { get; }
-    private const long BufferZone = 1L;
-    private const long LoadZone = 3L;
-    private const long CacheZone = 8L;
 
     public ValueRange<Instant> Bounds { get; }
     private readonly ManagedValueRange<Instant> _emptyBefore;
@@ -37,6 +34,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
 
     private readonly ITimeProvider _timeProvider;
     private readonly Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> _load;
+    private readonly SeriesSourceOptions _options;
     private int _isLoading;
     private int _isDisposed;
 
@@ -44,6 +42,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
         ITimeProvider timeProvider,
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> load,
+        SeriesSourceOptions options,
         ILogger<LoadingSeriesSource<TData>> logger
     )
     {
@@ -51,6 +50,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
         Logger = logger;
         _timeProvider = timeProvider;
         _load = load;
+        _options = options;
         var now = timeProvider.Now.FloorToMinute();
         _emptyBefore = ValueRange.Create(now, now);
         _emptyRange = ValueRange.Create(now, now);
@@ -63,7 +63,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
     {
         data = Array.Empty<TData>();
 
-        var (min, max) = GetBounds(start, end, BufferZone);
+        var (min, max) = GetBounds(start, end, _options.BufferZone);
 
         var from = Instant.Max(start, min);
         var to = Instant.Min(end, max);
@@ -150,7 +150,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
             return false;
         }
 
-        // if range is withing empty range - assume data is present
+        // if range is within empty range - assume data is present
         if (_emptyRange.Contains(from, RangeBounds.Both) && _emptyRange.Contains(to, RangeBounds.Both))
         {
             this.Log().Trace($"in empty range {S(_emptyRange.Start)} - {S(_emptyRange.End)}");
@@ -185,7 +185,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
     {
         BeginLoad();
 
-        var (min, max) = GetBounds(start, end, LoadZone);
+        var (min, max) = GetBounds(start, end, _options.LoadZone);
 
         if (_cache.Count == 0)
         {
@@ -261,7 +261,7 @@ internal class LoadingSeriesSource<TData> : ISeriesSource<TData>, ILogSubject<Lo
 
     private void SyncCache(Instant start, Instant end)
     {
-        var (min, max) = GetBounds(start, end, CacheZone);
+        var (min, max) = GetBounds(start, end, _options.CacheZone);
         this.Log().Trace($"set {S(min)} - {S(max)} for {S(Start)} - {S(End)}");
 
         var index = _cache.FindIndex(x => x.Moment == min);

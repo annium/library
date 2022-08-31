@@ -28,8 +28,16 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> load
     )
         where TData : ITimeSeries
+        => Create(resolution, load, new SeriesSourceOptions(1L, 3L, 8L));
+
+    public ISeriesSource<TData> Create<TData>(
+        Duration resolution,
+        Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> load,
+        SeriesSourceOptions options
+    )
+        where TData : ITimeSeries
     {
-        return new LoadingSeriesSource<TData>(_timeProvider, resolution, load, _loggerFactory.Get<LoadingSeriesSource<TData>>());
+        return new LoadingSeriesSource<TData>(_timeProvider, resolution, load, options, _loggerFactory.Get<LoadingSeriesSource<TData>>());
     }
 
     public ISeriesSource<TData> Create<TSource, TData>(
