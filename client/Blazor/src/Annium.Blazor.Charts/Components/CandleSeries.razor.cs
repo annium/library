@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
@@ -39,7 +40,7 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
     public ILogger<CandleSeries> Logger { get; set; } = default!;
 
     private Action _unregisterSource = delegate { };
-    private Action _unregisterDraw = delegate { };
+    private Action _unregisterRender = delegate { };
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
@@ -61,17 +62,7 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
             return;
 
         this.Log().Trace("register Draw");
-        _unregisterDraw = ChartContext.OnUpdate(Draw);
-    }
-
-    private void Draw()
-    {
-        var (start, end) = ChartContext.Range;
-
-        if (Source.GetItems(start, end, out var data))
-            Render(data);
-        else if (!Source.IsLoading)
-            Source.LoadItems(start, end, Draw);
+        _unregisterRender = Source.RenderTo(ChartContext, Render);
     }
 
     private void Render(IReadOnlyList<ICandle> items)
@@ -208,7 +199,7 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         _unregisterSource();
-        _unregisterDraw();
+        _unregisterRender();
 
         return ValueTask.CompletedTask;
     }
