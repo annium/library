@@ -11,12 +11,16 @@ public static class ServiceContainerExtensions
 {
     public static IServiceContainer AddCharts(this IServiceContainer container)
     {
+        // data
+        container.Add<ISeriesSourceFactory, SeriesSourceFactory>().Transient();
+        container.Add<Boundary>().AsSelf().Transient();
+
+        // contexts
         container.Add<IChartContext, ChartContext>().Transient();
         container.Add<IManagedPaneContext, PaneContext>().Transient();
         container.Add<IManagedSeriesContext, SeriesContext>().Transient();
         container.Add<IManagedHorizontalSideContext, HorizontalSideContext>().Transient();
         container.Add<IManagedVerticalSideContext, VerticalSideContext>().Transient();
-        container.Add<ISeriesSourceFactory, SeriesSourceFactory>().Transient();
 
         return container;
     }
