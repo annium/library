@@ -1,13 +1,13 @@
 @using Annium.Blazor.Charts.Components
-@using Annium.Blazor.Charts.Domain
+@using Demo.Blazor.Charts.Domain
 
 @namespace Demo.Blazor.Charts.Pages.Home
 
 <Chart ChartContext="@ChartContext" CssClass="@Styles.Chart">
     <Pane CssClass="@Styles.CandlesPane">
         <PaneSeries>
-            <CandleSeries Source="_candleSeries" />
-            <Label TData="ICandle" Source="@_candleSeries" GetText="GetLabel" Top="20" Left="20" Width="100" Height="15" />
+            <CandleSeries T="Candle" Source="@_candleSeries" />
+            <Label T="Candle" Source="@_candleSeries" GetText="GetLabel" Top="20" Left="20" Width="100" Height="15" />
             <Resolution CssClass="@Styles.Resolution" />
         </PaneSeries>
         <PaneRight CssClass="@Styles.PaneRight">
@@ -16,7 +16,7 @@
     </Pane>
     <Pane CssClass="@Styles.LinesPane">
         <PaneSeries>
-            <LineSeries Source="_openSeries" />
+            <LineSeries T="LineValue" Source="_openSeries" />
         </PaneSeries>
         <PaneBottom CssClass="@Styles.PaneBottom">
             <XAxis />

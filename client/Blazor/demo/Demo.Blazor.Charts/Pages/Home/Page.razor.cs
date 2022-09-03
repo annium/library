@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data;
-using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Data;
 using Annium.Core.DependencyInjection;
@@ -44,21 +43,20 @@ public partial class Page
     [Inject]
     public ILogger<Page> Logger { get; set; } = default!;
 
-    private ISeriesSource<ICandle> _candleSeries = default!;
-
-    private ISeriesSource<IValue> _openSeries = default!;
+    private ISeriesSource<Candle> _candleSeries = default!;
+    private ISeriesSource<LineValue> _openSeries = default!;
+    private ISeriesSource<LineValue> _horizontalLineSeries = default!;
 
     protected override void OnInitialized()
     {
         ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
 
-        // ChartContext.SetMoment(SystemClock.Instance.GetCurrentInstant() - Duration.FromDays(1000));
-
         _candleSeries = SeriesSourceFactory.Create(ChartContext.Resolution, LoadCandles, new SeriesSourceCacheOptions(true));
-        _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open) as IValue);
+        _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open));
+        _horizontalLineSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open));
     }
 
-    private async Task<IReadOnlyList<ICandle>> LoadCandles(
+    private async Task<IReadOnlyList<Candle>> LoadCandles(
         Duration resolution,
         Instant start,
         Instant end
@@ -78,7 +76,7 @@ public partial class Page
         return candles;
     }
 
-    private string GetLabel(ICandle x)
+    private string GetLabel(Candle x)
     {
         var absChange = Math.Abs(x.Close - x.Open);
         var percentChange = (absChange / x.Open * 100).Round(2);

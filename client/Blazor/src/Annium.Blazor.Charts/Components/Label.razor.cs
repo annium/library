@@ -13,14 +13,14 @@ using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class Label<TData> : ILogSubject<Label<TData>>, IAsyncDisposable
-    where TData : ITimeSeries
+public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
+    where T : ITimeSeries
 {
     [Parameter, EditorRequired]
-    public ISeriesSource<TData> Source { get; set; } = default!;
+    public ISeriesSource<T> Source { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public Func<TData, string> GetText { get; set; } = default!;
+    public Func<T, string> GetText { get; set; } = default!;
 
     [Parameter]
     public int? Left { get; set; }
@@ -56,7 +56,7 @@ public partial class Label<TData> : ILogSubject<Label<TData>>, IAsyncDisposable
     public ISeriesContext SeriesContext { get; set; } = default!;
 
     [Inject]
-    public ILogger<Label<TData>> Logger { get; set; } = default!;
+    public ILogger<Label<T>> Logger { get; set; } = default!;
 
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 

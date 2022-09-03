@@ -6,17 +6,17 @@ using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Extensions;
-using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
+public partial class CandleSeries<T> : ILogSubject<CandleSeries<T>>, IAsyncDisposable
+    where T : ICandle
 {
     [Parameter, EditorRequired]
-    public ISeriesSource<ICandle> Source { get; set; } = default!;
+    public ISeriesSource<T> Source { get; set; } = default!;
 
     [Parameter]
     public string UpColor { get; set; } = "#51A39A";
@@ -37,7 +37,7 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
     internal ISeriesContext SeriesContext { get; set; } = default!;
 
     [Inject]
-    public ILogger<CandleSeries> Logger { get; set; } = default!;
+    public ILogger<CandleSeries<T>> Logger { get; set; } = default!;
 
     private Action _unregisterSource = delegate { };
     private Action _unregisterRender = delegate { };
@@ -65,7 +65,7 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
         _unregisterRender = Source.RenderTo(ChartContext, Render);
     }
 
-    private void Render(IReadOnlyList<ICandle> items)
+    private void Render(IReadOnlyList<T> items)
     {
         if (items.Count == 0)
         {
@@ -175,7 +175,7 @@ public partial class CandleSeries : ILogSubject<CandleSeries>, IAsyncDisposable
         ctx.Restore();
     }
 
-    private (decimal min, decimal max) GetBounds(IReadOnlyList<ICandle> items)
+    private (decimal min, decimal max) GetBounds(IReadOnlyList<T> items)
     {
         var min = decimal.MaxValue;
         var max = decimal.MinValue;
