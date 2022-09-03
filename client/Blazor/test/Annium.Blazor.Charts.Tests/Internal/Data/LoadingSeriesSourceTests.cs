@@ -40,10 +40,12 @@ public class LoadingSeriesSourceTests : TestBase
         Get<ITimeManager>().SetNow(_now);
 
         var sourceFactory = Get<ISeriesSourceFactory>();
-        var source = sourceFactory.Create(Duration.FromMinutes(1), (_, _, _) => Task.FromResult(getItems()), new SeriesSourceOptions(1, 2, 3));
+        var options = new SeriesSourceOptions(1, 2, 3);
+        var cacheOptions = new SeriesSourceCacheOptions(true);
+        var source = sourceFactory.Create(Duration.FromMinutes(1), (_, _, _) => Task.FromResult(getItems()), options, cacheOptions);
 
         return source;
     }
 
-    private sealed record Item(Instant Moment, int Value) : ITimeSeries;
+    private sealed record Item(Instant Moment) : ITimeSeries;
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Internal.Data;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
 using Annium.Core.Primitives;
@@ -53,7 +54,7 @@ public partial class Page
 
         // ChartContext.SetMoment(SystemClock.Instance.GetCurrentInstant() - Duration.FromDays(1000));
 
-        _candleSeries = SeriesSourceFactory.Create(ChartContext.Resolution, LoadCandles);
+        _candleSeries = SeriesSourceFactory.Create(ChartContext.Resolution, LoadCandles, new SeriesSourceCacheOptions(true));
         _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open) as IValue);
     }
 

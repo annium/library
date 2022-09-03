@@ -6,11 +6,11 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Data;
 
-public interface ISeriesSource<TData> : ISeriesSource, IDisposable
-    where TData : ITimeSeries
+public interface ISeriesSource<T> : ISeriesSource, IDisposable
+    where T : ITimeSeries
 {
-    bool GetItems(Instant start, Instant end, out IReadOnlyList<TData> data);
-    TData? GetItem(Instant moment);
+    bool GetItems(Instant start, Instant end, out IReadOnlyList<T> data);
+    T? GetItem(Instant moment);
     void LoadItems(Instant start, Instant end, Action onLoad);
 }
 

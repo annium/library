@@ -9,23 +9,25 @@ namespace Annium.Blazor.Charts.Data;
 
 public interface ISeriesSourceFactory
 {
-    ISeriesSource<TData> Create<TData>(
+    ISeriesSource<T> Create<T>(
         Duration resolution,
-        Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> load
+        Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
+        SeriesSourceCacheOptions cacheOptions
     )
-        where TData : ITimeSeries;
+        where T : ITimeSeries;
 
-    ISeriesSource<TData> Create<TData>(
+    ISeriesSource<T> Create<T>(
         Duration resolution,
-        Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> load,
-        SeriesSourceOptions options
+        Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
+        SeriesSourceOptions options,
+        SeriesSourceCacheOptions cacheOptions
     )
-        where TData : ITimeSeries;
+        where T : ITimeSeries;
 
-    ISeriesSource<TData> Create<TSource, TData>(
-        ISeriesSource<TSource> source,
-        Func<TSource, TData> getValue
+    ISeriesSource<TD> Create<TS, TD>(
+        ISeriesSource<TS> source,
+        Func<TS, TD> getValue
     )
-        where TSource : ITimeSeries
-        where TData : ITimeSeries;
+        where TS : ITimeSeries
+        where TD : ITimeSeries;
 }
