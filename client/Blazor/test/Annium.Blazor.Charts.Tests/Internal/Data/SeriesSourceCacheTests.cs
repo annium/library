@@ -66,14 +66,14 @@ public class SeriesSourceCacheTests : TestBase
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
         cache.AddData(start1, end1, items1);
-        var (start2, end2) = Range(end1 + Duration.FromMinutes(2), 2);
+        var (start2, end2) = Range(end1 + M(2), 2);
         var items2 = Items(start2, 0, 1, 2);
         cache.AddData(start2, end2, items2);
 
         // assert
         cache.HasData(start1, end1).IsTrue();
         cache.HasData(start2, end2).IsTrue();
-        cache.HasData(start1, start1 + Duration.FromMinutes(1)).IsTrue();
+        cache.HasData(start1, start1 + M(1)).IsTrue();
         cache.HasData(start1, start2).IsFalse();
         cache.HasData(start1, end2).IsFalse();
         cache.HasData(end1, start2).IsFalse();
@@ -87,17 +87,60 @@ public class SeriesSourceCacheTests : TestBase
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
         cache.AddData(start1, end1, items1);
-        var (start2, end2) = Range(end1 + Duration.FromMinutes(2), 2);
+        var (start2, end2) = Range(end1 + M(2), 2);
         var items2 = Items(start2, 0, 1, 2);
         cache.AddData(start2, end2, items2);
 
         // assert
         cache.GetData(start1, end1).IsEqual(items1);
         cache.GetData(start2, end2).IsEqual(items2);
-        cache.GetData(start1, start1 + Duration.FromMinutes(1)).IsEqual(items1.Take(2).ToArray());
+        cache.GetData(start1, start1 + M(1)).IsEqual(items1.Take(2).ToArray());
         cache.GetData(start1, start2).IsEmpty();
         cache.GetData(start1, end2).IsEmpty();
         cache.GetData(end1, start2).IsEmpty();
+    }
+
+    [Fact]
+    public void GetItem()
+    {
+        // arrange
+        var cache = CreateCache(false);
+        // range 1
+        var (start1, end1) = Range(_moment, 1);
+        var items1 = Items(start1, 0);
+        cache.AddData(start1, end1, items1);
+        // range 2
+        var (start2, end2) = Range(end1 + M(2), 1);
+        var items2 = Items(start2, 0, 1);
+        cache.AddData(start2, end2, items2);
+        // range 3
+        var (start3, end3) = Range(end2 + M(2), 2);
+        var items3 = Items(start3, 0, 1, 2);
+        cache.AddData(start3, end3, items3);
+        // range 4
+        var (start4, end4) = Range(end3 + M(2), 20);
+        var items4 = Items(start4, 2, 3, 4, 5, 7, 8, 9, 12, 13, 14, 18);
+        cache.AddData(start4, end4, items4);
+
+        // assert
+        // range 1
+        cache.GetItem(start1 - M(1)).IsDefault();
+        cache.GetItem(start1).Is(items1[0]);
+        cache.GetItem(end1).IsDefault();
+        cache.GetItem(end1 + M(1)).IsDefault();
+        // range 2
+        cache.GetItem(start2).Is(items2[0]);
+        cache.GetItem(end2).Is(items2[1]);
+        // range 3
+        cache.GetItem(start3).Is(items3[0]);
+        cache.GetItem(start3 + M(1)).Is(items3[1]);
+        cache.GetItem(end3).Is(items3[2]);
+        // range 4
+        cache.GetItem(start4).IsDefault();
+        cache.GetItem(start4 + M(2)).Is(items4[0]);
+        cache.GetItem(start4 + M(7)).Is(items4[4]);
+        cache.GetItem(start4 + M(10)).IsDefault();
+        cache.GetItem(end4).IsDefault();
     }
 
     [Fact]
@@ -107,25 +150,26 @@ public class SeriesSourceCacheTests : TestBase
         var cache = CreateCache(true);
 
         // assert
-        cache.GetEmptyRanges(_moment - Duration.FromMinutes(2), _moment + Duration.FromMinutes(2)).IsEmpty();
+        cache.GetEmptyRanges(_moment - M(2), _moment + M(2))
+            .IsEqual(new[] { ValueRange.Create(_moment - M(2), _moment + M(2)) });
 
         // arrange
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
         cache.AddData(start1, end1, items1);
-        var (start2, end2) = Range(end1 + Duration.FromMinutes(2), 2);
+        var (start2, end2) = Range(end1 + M(2), 2);
         var items2 = Items(start2, 0, 1, 2);
         cache.AddData(start2, end2, items2);
 
         // assert
         cache.GetEmptyRanges(start1, end1).IsEmpty();
-        cache.GetEmptyRanges(start1 - Duration.FromMinutes(1), end1).IsEqual(new[] { ValueRange.Create(start1 - Duration.FromMinutes(1), start1) });
-        cache.GetEmptyRanges(start1, end1 + Duration.FromMinutes(1)).IsEqual(new[] { ValueRange.Create(end1, end1 + Duration.FromMinutes(1)) });
-        cache.GetEmptyRanges(start1 - Duration.FromMinutes(1), end2 + Duration.FromMinutes(1)).IsEqual(new[]
+        cache.GetEmptyRanges(start1 - M(1), end1).IsEqual(new[] { ValueRange.Create(start1 - M(1), start1) });
+        cache.GetEmptyRanges(start1, end1 + M(1)).IsEqual(new[] { ValueRange.Create(end1, end1 + M(1)) });
+        cache.GetEmptyRanges(start1 - M(1), end2 + M(1)).IsEqual(new[]
             {
-                ValueRange.Create(start1 - Duration.FromMinutes(1), start1),
+                ValueRange.Create(start1 - M(1), start1),
                 ValueRange.Create(end1, start2),
-                ValueRange.Create(end2, end2 + Duration.FromMinutes(1)),
+                ValueRange.Create(end2, end2 + M(1)),
             }
         );
     }
@@ -137,7 +181,7 @@ public class SeriesSourceCacheTests : TestBase
         var cache = CreateCache(true);
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
-        var (start2, end2) = Range(end1 + Duration.FromMinutes(2), 2);
+        var (start2, end2) = Range(end1 + M(2), 2);
         var items2 = Items(start2, 0, 1, 2);
 
         // act
@@ -146,13 +190,13 @@ public class SeriesSourceCacheTests : TestBase
 
         // assert
         cache.GetEmptyRanges(start1, end1).IsEmpty();
-        cache.GetEmptyRanges(start1 - Duration.FromMinutes(1), end1).IsEqual(new[] { ValueRange.Create(start1 - Duration.FromMinutes(1), start1) });
-        cache.GetEmptyRanges(start1, end1 + Duration.FromMinutes(1)).IsEqual(new[] { ValueRange.Create(end1, end1 + Duration.FromMinutes(1)) });
-        cache.GetEmptyRanges(start1 - Duration.FromMinutes(1), end2 + Duration.FromMinutes(1)).IsEqual(new[]
+        cache.GetEmptyRanges(start1 - M(1), end1).IsEqual(new[] { ValueRange.Create(start1 - M(1), start1) });
+        cache.GetEmptyRanges(start1, end1 + M(1)).IsEqual(new[] { ValueRange.Create(end1, end1 + M(1)) });
+        cache.GetEmptyRanges(start1 - M(1), end2 + M(1)).IsEqual(new[]
             {
-                ValueRange.Create(start1 - Duration.FromMinutes(1), start1),
+                ValueRange.Create(start1 - M(1), start1),
                 ValueRange.Create(end1, start2),
-                ValueRange.Create(end2, end2 + Duration.FromMinutes(1)),
+                ValueRange.Create(end2, end2 + M(1)),
             }
         );
     }
@@ -179,7 +223,7 @@ public class SeriesSourceCacheTests : TestBase
         var cache = CreateCache(true);
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
-        var (start2, end2) = Range(end1 + Duration.FromMinutes(1), 2);
+        var (start2, end2) = Range(end1 + M(1), 2);
         var items2 = Items(start2, 0, 1, 2);
 
         // act
@@ -187,10 +231,10 @@ public class SeriesSourceCacheTests : TestBase
         cache.AddData(start1, end1, items1);
 
         // assert
-        cache.GetEmptyRanges(start1 - Duration.FromMinutes(1), end2 + Duration.FromMinutes(1)).IsEqual(new[]
+        cache.GetEmptyRanges(start1 - M(1), end2 + M(1)).IsEqual(new[]
             {
-                ValueRange.Create(start1 - Duration.FromMinutes(1), start1),
-                ValueRange.Create(end2, end2 + Duration.FromMinutes(1)),
+                ValueRange.Create(start1 - M(1), start1),
+                ValueRange.Create(end2, end2 + M(1)),
             }
         );
     }
@@ -202,7 +246,7 @@ public class SeriesSourceCacheTests : TestBase
         var cache = CreateCache(true);
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
-        var (start2, end2) = Range(end1 + Duration.FromMinutes(1), 2);
+        var (start2, end2) = Range(end1 + M(1), 2);
         var items2 = Items(start2, 0, 1, 2);
 
         // act
@@ -210,10 +254,10 @@ public class SeriesSourceCacheTests : TestBase
         cache.AddData(start2, end2, items2);
 
         // assert
-        cache.GetEmptyRanges(start1 - Duration.FromMinutes(1), end2 + Duration.FromMinutes(1)).IsEqual(new[]
+        cache.GetEmptyRanges(start1 - M(1), end2 + M(1)).IsEqual(new[]
             {
-                ValueRange.Create(start1 - Duration.FromMinutes(1), start1),
-                ValueRange.Create(end2, end2 + Duration.FromMinutes(1)),
+                ValueRange.Create(start1 - M(1), start1),
+                ValueRange.Create(end2, end2 + M(1)),
             }
         );
     }
@@ -225,7 +269,7 @@ public class SeriesSourceCacheTests : TestBase
         var cache = CreateCache(true);
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
-        var (start2, end2) = Range(end1 + Duration.FromMinutes(2), 2);
+        var (start2, end2) = Range(end1 + M(2), 2);
         var items2 = Items(start2, 0, 1, 2);
 
         // act
@@ -233,11 +277,11 @@ public class SeriesSourceCacheTests : TestBase
         cache.AddData(start2, end2, items2);
 
         // assert
-        cache.GetEmptyRanges(start1 - Duration.FromMinutes(1), end2 + Duration.FromMinutes(1)).IsEqual(new[]
+        cache.GetEmptyRanges(start1 - M(1), end2 + M(1)).IsEqual(new[]
             {
-                ValueRange.Create(start1 - Duration.FromMinutes(1), start1),
+                ValueRange.Create(start1 - M(1), start1),
                 ValueRange.Create(end1, start2),
-                ValueRange.Create(end2, end2 + Duration.FromMinutes(1)),
+                ValueRange.Create(end2, end2 + M(1)),
             }
         );
     }
@@ -255,7 +299,7 @@ public class SeriesSourceCacheTests : TestBase
         cache.IsEmpty.IsFalse();
 
         // act
-        cache.SetResolution(Duration.FromMinutes(2));
+        cache.SetResolution(M(2));
 
         // assert
         cache.IsEmpty.IsTrue();
@@ -282,20 +326,22 @@ public class SeriesSourceCacheTests : TestBase
 
     private ISeriesSourceCache<Item> CreateCache(bool enableIntegrityCheck)
     {
-        return new SeriesSourceCache<Item>(Duration.FromMinutes(1), new SeriesSourceCacheOptions(enableIntegrityCheck));
+        return new SeriesSourceCache<Item>(M(1), new SeriesSourceCacheOptions(enableIntegrityCheck));
     }
 
-    private (Instant start, Instant end) Range(Instant from, int length) => (from, from + Duration.FromMinutes(length));
+    private (Instant start, Instant end) Range(Instant from, int length) => (from, from + M(length));
 
     private IReadOnlyList<Item> Items(Instant start, params int[] offsets)
     {
         var items = new List<Item>();
 
         foreach (var offset in offsets)
-            items.Add(new(start + Duration.FromMinutes(offset)));
+            items.Add(new(start + M(offset)));
 
         return items;
     }
+
+    private Duration M(int minutes) => Duration.FromMinutes(minutes);
 
     private sealed record Item(Instant Moment) : ITimeSeries;
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Annium.Blazor.Charts.Domain;
+using Annium.Core.Primitives;
 using Annium.Data.Models;
 using NodaTime;
 
@@ -51,12 +52,51 @@ internal class SeriesSourceCache<T> : ISeriesSourceCache<T>
         return Array.Empty<T>();
     }
 
+    public T? GetItem(Instant moment)
+    {
+        foreach (var chunk in _chunks)
+            if (chunk.Range.Contains(moment, RangeBounds.Both))
+                return GetChunkItem(chunk, moment);
+
+        return default;
+
+        static T? GetChunkItem(Chunk chunk, Instant moment)
+        {
+            var items = chunk.Items;
+
+            if (moment < items[0].Moment || moment > items[^1].Moment)
+                return default;
+
+            var l = 0;
+            var r = items.Count - 1;
+
+            while (l <= r)
+            {
+                var i = ((r - l) / 2m).FloorInt32().Within(l, r);
+                var item = items[i];
+
+                if (moment > item.Moment)
+                    l = i + 1;
+                else if (moment < item.Moment)
+                    r = i - 1;
+                else
+                    return item;
+            }
+
+            return default;
+        }
+    }
+
     public IReadOnlyList<ValueRange<Instant>> GetEmptyRanges(Instant start, Instant end)
     {
-        if (_chunks.Count == 0)
-            return Array.Empty<ValueRange<Instant>>();
-
         var ranges = new List<ValueRange<Instant>>();
+
+        if (_chunks.Count == 0)
+        {
+            ranges.Add(ValueRange.Create(start, end));
+            return ranges;
+        }
+
         var from = start;
 
         foreach (var chunk in _chunks)
