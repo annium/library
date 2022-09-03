@@ -43,7 +43,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
 
     public ISeriesSource<TData> Create<TSource, TData>(
         ISeriesSource<TSource> source,
-        Func<TSource, TData> getValue
+        Func<TSource, TData?> getValue
     )
         where TSource : ITimeSeries
         where TData : ITimeSeries

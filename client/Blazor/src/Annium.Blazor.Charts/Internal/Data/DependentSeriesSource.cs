@@ -9,23 +9,23 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data;
 
-internal class DependentSeriesSource<TSource, TData> :
-    ISeriesSource<TData>,
-    ILogSubject<DependentSeriesSource<TSource, TData>>
-    where TSource : ITimeSeries
-    where TData : ITimeSeries
+internal class DependentSeriesSource<TS, TD> :
+    ISeriesSource<TD>,
+    ILogSubject<DependentSeriesSource<TS, TD>>
+    where TS : ITimeSeries
+    where TD : ITimeSeries
 {
-    public ILogger<DependentSeriesSource<TSource, TData>> Logger { get; }
+    public ILogger<DependentSeriesSource<TS, TD>> Logger { get; }
     public Duration Resolution => _source.Resolution;
     public bool IsLoading => _source.IsLoading;
     public ValueRange<Instant> Bounds => _source.Bounds;
-    private readonly ISeriesSource<TSource> _source;
-    private readonly Func<TSource, TData> _getValue;
+    private readonly ISeriesSource<TS> _source;
+    private readonly Func<TS, TD?> _getValue;
 
     public DependentSeriesSource(
-        ISeriesSource<TSource> source,
-        Func<TSource, TData> getValue,
-        ILogger<DependentSeriesSource<TSource, TData>> logger
+        ISeriesSource<TS> source,
+        Func<TS, TD?> getValue,
+        ILogger<DependentSeriesSource<TS, TD>> logger
     )
     {
         Logger = logger;
@@ -33,16 +33,16 @@ internal class DependentSeriesSource<TSource, TData> :
         _getValue = getValue;
     }
 
-    public bool GetItems(Instant start, Instant end, out IReadOnlyList<TData> data)
+    public bool GetItems(Instant start, Instant end, out IReadOnlyList<TD> data)
     {
         // this.Log().Trace($"get data in {start} - {end}");
         var result = _source.GetItems(start, end, out var sourceData);
-        data = sourceData.Select(_getValue).ToArray();
+        data = sourceData.Select(_getValue).OfType<TD>().ToArray();
 
         return result;
     }
 
-    public TData? GetItem(Instant moment)
+    public TD? GetItem(Instant moment)
     {
         var item = _source.GetItem(moment);
 
