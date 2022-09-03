@@ -13,7 +13,6 @@ public static class ServiceContainerExtensions
     {
         // data
         container.Add<ISeriesSourceFactory, SeriesSourceFactory>().Transient();
-        container.Add<Boundary>().AsSelf().Transient();
 
         // contexts
         container.Add<IChartContext, ChartContext>().Transient();
