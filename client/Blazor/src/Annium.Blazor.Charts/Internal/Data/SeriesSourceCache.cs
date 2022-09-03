@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Annium.Blazor.Charts.Domain;
+using Annium.Blazor.Charts.Extensions;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
 using NodaTime;
@@ -24,10 +25,15 @@ internal class SeriesSourceCache<T> : ISeriesSourceCache<T>
     {
         _resolution = resolution;
         _options = options;
-        Bounds = ValueRange.Create(
-            () => _chunks.Count > 0 ? _chunks[0].Range.Start : NodaConstants.UnixEpoch,
-            () => _chunks.Count > 0 ? _chunks[^1].Range.End : NodaConstants.UnixEpoch
-        );
+        Bounds = options.EnableIntegrityCheck
+            ? ValueRange.Create(
+                () => _chunks.Count > 0 ? _chunks[0].Items[0].Moment : NodaConstants.UnixEpoch,
+                () => _chunks.Count > 0 ? _chunks[^1].Items[^1].Moment : NodaConstants.UnixEpoch
+            )
+            : ValueRange.Create(
+                () => _chunks.Count > 0 ? _chunks[0].Range.Start : NodaConstants.UnixEpoch,
+                () => _chunks.Count > 0 ? _chunks[^1].Range.End : NodaConstants.UnixEpoch
+            );
     }
 
     public bool HasData(Instant start, Instant end)
@@ -189,15 +195,42 @@ internal class SeriesSourceCache<T> : ISeriesSourceCache<T>
         if (!_options.EnableIntegrityCheck)
             return;
 
-        foreach (var chunk in _chunks)
+        for (var i = 0; i < _chunks.Count; i++)
         {
+            var chunk = _chunks[i];
             var items = chunk.Items;
-            for (var i = 1; i < items.Count; i++)
-            {
-                var diff = items[i].Moment - items[i - 1].Moment;
-                if (diff != _resolution)
-                    throw new InvalidOperationException($"Cache integrity failure: {items[i - 1]}, {items[i]}. Diff: {diff}");
-            }
+            if (items.Count == 0)
+                throw new InvalidOperationException($"Cache integrity failure: chunk {chunk} is empty");
+
+            ValidateChunkBoundsIntegrity(chunk, i == 0, i == _chunks.Count - 1);
+            ValidateChunkItemsIntegrity(items, _resolution);
+        }
+    }
+
+    private void ValidateChunkBoundsIntegrity(
+        Chunk chunk,
+        bool isFirst,
+        bool isLast
+    )
+    {
+        var items = chunk.Items;
+        if (!isFirst && items[0].Moment != chunk.Range.Start)
+            throw new InvalidOperationException($"Cache integrity failure: chunk {chunk} first item doesn't match range start");
+
+        if (!isLast && items[^1].Moment != chunk.Range.End)
+            throw new InvalidOperationException($"Cache integrity failure: chunk {chunk} last item doesn't match range end");
+    }
+
+    private void ValidateChunkItemsIntegrity(
+        IReadOnlyList<T> items,
+        Duration resolution
+    )
+    {
+        for (var i = 1; i < items.Count; i++)
+        {
+            var diff = items[i].Moment - items[i - 1].Moment;
+            if (diff != resolution)
+                throw new InvalidOperationException($"Cache integrity failure: {items[i - 1]}, {items[i]}. Diff: {diff}");
         }
     }
 
@@ -235,5 +268,7 @@ internal class SeriesSourceCache<T> : ISeriesSourceCache<T>
             if (Items[^1].Moment > Range.End)
                 throw new InvalidOperationException($"Invalid chunk: {Items[^1]} goes after end at {Range.End}");
         }
+
+        public override string ToString() => $"{typeof(T).FriendlyName()}[{Items.Count}] ({Range.Start.S()} - {Range.End.S()})";
     }
 }
