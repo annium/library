@@ -105,9 +105,9 @@ internal class SeriesSourceCache<T> : ISeriesSourceCache<T>
                 break;
 
             if (chunk.Range.Start > from)
-                ranges.Add(ValueRange.Create(from, chunk.Range.Start));
+                ranges.Add(ValueRange.Create(from, chunk.Range.Start - _resolution));
 
-            from = chunk.Range.End;
+            from = chunk.Range.End + _resolution;
         }
 
         if (end > from)

@@ -163,13 +163,13 @@ public class SeriesSourceCacheTests : TestBase
 
         // assert
         cache.GetEmptyRanges(start1, end1).IsEmpty();
-        cache.GetEmptyRanges(start1 - M(1), end1).IsEqual(new[] { ValueRange.Create(start1 - M(1), start1) });
-        cache.GetEmptyRanges(start1, end1 + M(1)).IsEqual(new[] { ValueRange.Create(end1, end1 + M(1)) });
-        cache.GetEmptyRanges(start1 - M(1), end2 + M(1)).IsEqual(new[]
+        cache.GetEmptyRanges(start1 - M(2), end1).IsEqual(new[] { ValueRange.Create(start1 - M(2), start1 - M(1)) });
+        cache.GetEmptyRanges(start1, end1 + M(2)).IsEqual(new[] { ValueRange.Create(end1 + M(1), end1 + M(2)) });
+        cache.GetEmptyRanges(start1 - M(2), end2 + M(2)).IsEqual(new[]
             {
-                ValueRange.Create(start1 - M(1), start1),
-                ValueRange.Create(end1, start2),
-                ValueRange.Create(end2, end2 + M(1)),
+                ValueRange.Create(start1 - M(2), start1 - M(1)),
+                ValueRange.Create(end1 + M(1), start2 - M(1)),
+                ValueRange.Create(end2 + M(1), end2 + M(2)),
             }
         );
     }
@@ -190,13 +190,13 @@ public class SeriesSourceCacheTests : TestBase
 
         // assert
         cache.GetEmptyRanges(start1, end1).IsEmpty();
-        cache.GetEmptyRanges(start1 - M(1), end1).IsEqual(new[] { ValueRange.Create(start1 - M(1), start1) });
-        cache.GetEmptyRanges(start1, end1 + M(1)).IsEqual(new[] { ValueRange.Create(end1, end1 + M(1)) });
-        cache.GetEmptyRanges(start1 - M(1), end2 + M(1)).IsEqual(new[]
+        cache.GetEmptyRanges(start1 - M(2), end1).IsEqual(new[] { ValueRange.Create(start1 - M(2), start1 - M(1)) });
+        cache.GetEmptyRanges(start1, end1 + M(2)).IsEqual(new[] { ValueRange.Create(end1 + M(1), end1 + M(2)) });
+        cache.GetEmptyRanges(start1 - M(2), end2 + M(2)).IsEqual(new[]
             {
-                ValueRange.Create(start1 - M(1), start1),
-                ValueRange.Create(end1, start2),
-                ValueRange.Create(end2, end2 + M(1)),
+                ValueRange.Create(start1 - M(2), start1 - M(1)),
+                ValueRange.Create(end1 + M(1), start2 - M(1)),
+                ValueRange.Create(end2 + M(1), end2 + M(2)),
             }
         );
     }
@@ -231,10 +231,10 @@ public class SeriesSourceCacheTests : TestBase
         cache.AddData(start1, end1, items1);
 
         // assert
-        cache.GetEmptyRanges(start1 - M(1), end2 + M(1)).IsEqual(new[]
+        cache.GetEmptyRanges(start1 - M(2), end2 + M(2)).IsEqual(new[]
             {
-                ValueRange.Create(start1 - M(1), start1),
-                ValueRange.Create(end2, end2 + M(1)),
+                ValueRange.Create(start1 - M(2), start1 - M(1)),
+                ValueRange.Create(end2 + M(1), end2 + M(2)),
             }
         );
     }
@@ -254,10 +254,10 @@ public class SeriesSourceCacheTests : TestBase
         cache.AddData(start2, end2, items2);
 
         // assert
-        cache.GetEmptyRanges(start1 - M(1), end2 + M(1)).IsEqual(new[]
+        cache.GetEmptyRanges(start1 - M(2), end2 + M(2)).IsEqual(new[]
             {
-                ValueRange.Create(start1 - M(1), start1),
-                ValueRange.Create(end2, end2 + M(1)),
+                ValueRange.Create(start1 - M(2), start1 - M(1)),
+                ValueRange.Create(end2 + M(1), end2 + M(2)),
             }
         );
     }
@@ -277,11 +277,11 @@ public class SeriesSourceCacheTests : TestBase
         cache.AddData(start2, end2, items2);
 
         // assert
-        cache.GetEmptyRanges(start1 - M(1), end2 + M(1)).IsEqual(new[]
+        cache.GetEmptyRanges(start1 - M(2), end2 + M(2)).IsEqual(new[]
             {
-                ValueRange.Create(start1 - M(1), start1),
-                ValueRange.Create(end1, start2),
-                ValueRange.Create(end2, end2 + M(1)),
+                ValueRange.Create(start1 - M(2), start1 - M(1)),
+                ValueRange.Create(end1 + M(1), start2 - M(1)),
+                ValueRange.Create(end2 + M(1), end2 + M(2)),
             }
         );
     }
