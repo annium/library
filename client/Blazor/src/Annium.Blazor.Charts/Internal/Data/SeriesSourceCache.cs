@@ -263,12 +263,12 @@ internal class SeriesSourceCache<T> : ISeriesSourceCache<T>
                 return;
 
             if (Items[0].Moment < Range.Start)
-                throw new InvalidOperationException($"Invalid chunk: {Items[0]} goes before start at {Range.Start}");
+                throw new InvalidOperationException($"Invalid chunk: {Items[0]} goes before start at {Range.Start.S()}");
 
             if (Items[^1].Moment > Range.End)
-                throw new InvalidOperationException($"Invalid chunk: {Items[^1]} goes after end at {Range.End}");
+                throw new InvalidOperationException($"Invalid chunk: {Items[^1]} goes after end at {Range.End.S()}");
         }
 
-        public override string ToString() => $"{typeof(T).FriendlyName()}[{Items.Count}] ({Range.Start.S()} - {Range.End.S()})";
+        public override string ToString() => $"{typeof(T).FriendlyName()}[{Items.Count}] ({Range.S()})";
     }
 }

@@ -61,7 +61,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
         if (_cache.HasData(min, max))
         {
             this.Log().Trace($"all data in {min.S()} - {max.S()} is available");
-            data = _cache.GetData(min, max);
+            data = _cache.GetData(start, end);
 
             return true;
         }

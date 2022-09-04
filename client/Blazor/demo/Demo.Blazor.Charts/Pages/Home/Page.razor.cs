@@ -52,8 +52,8 @@ public partial class Page
         ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
 
         _candleSeries = SeriesSourceFactory.Create(ChartContext.Resolution, LoadCandles, new SeriesSourceCacheOptions(true));
-        _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open));
-        _horizontalLineSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open));
+        _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open), new SeriesSourceCacheOptions(true));
+        _horizontalLineSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open), new SeriesSourceCacheOptions(true));
     }
 
     private async Task<IReadOnlyList<Candle>> LoadCandles(

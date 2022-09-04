@@ -42,13 +42,17 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         return new LoadingSeriesSource<T>(cache, resolution, load, options, logger);
     }
 
-    public ISeriesSource<TData> Create<TSource, TData>(
-        ISeriesSource<TSource> source,
-        Func<TSource, TData?> getValue
+    public ISeriesSource<TD> Create<TS, TD>(
+        ISeriesSource<TS> source,
+        Func<TS, TD?> getValue,
+        SeriesSourceCacheOptions cacheOptions
     )
-        where TSource : ITimeSeries
-        where TData : ITimeSeries
+        where TS : ITimeSeries
+        where TD : ITimeSeries
     {
-        return new DependentSeriesSource<TSource, TData>(source, getValue, _loggerFactory.Get<DependentSeriesSource<TSource, TData>>());
+        var cache = new SeriesSourceCache<TD>(source.Resolution, cacheOptions);
+        var logger = _loggerFactory.Get<DependentSeriesSource<TS, TD>>();
+
+        return new DependentSeriesSource<TS, TD>(source, cache, getValue, logger);
     }
 }
