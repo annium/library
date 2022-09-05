@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Annium.Blazor.Charts.Data;
+using Annium.Blazor.Charts.Data.Sources;
 using Annium.Data.Models;
 using NodaTime;
 

@@ -7,7 +7,7 @@ using Annium.Core.Primitives;
 using Annium.Data.Models;
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Internal.Data;
+namespace Annium.Blazor.Charts.Internal.Data.Cache;
 
 internal class SeriesSourceCache<T> : ISeriesSourceCache<T>
     where T : ITimeSeries

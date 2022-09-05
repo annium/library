@@ -3,7 +3,7 @@ using Annium.Blazor.Charts.Domain;
 using Annium.Data.Models;
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Internal.Data;
+namespace Annium.Blazor.Charts.Internal.Data.Cache;
 
 internal interface ISeriesSourceCache<T>
     where T : ITimeSeries

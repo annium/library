@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Annium.Blazor.Charts.Data;
+using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Extensions;
+using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
 using Annium.Logging.Abstractions;
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Internal.Data;
+namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
 internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSeriesSource<T>>
     where T : ITimeSeries

@@ -1,11 +1,10 @@
-using Annium.Blazor.Charts.Data;
+using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
-using Annium.Blazor.Charts.Internal.Data;
+using Annium.Blazor.Charts.Internal.Data.Sources;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
-using Annium.Core.DependencyInjection;
 
-namespace Annium.Blazor.Charts;
+namespace Annium.Core.DependencyInjection;
 
 public static class ServiceContainerExtensions
 {

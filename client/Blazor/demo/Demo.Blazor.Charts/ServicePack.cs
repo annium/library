@@ -1,6 +1,5 @@
 using System;
 using System.Text;
-using Annium.Blazor.Charts;
 using Annium.Core.DependencyInjection;
 using Annium.Logging.Shared;
 using Microsoft.Extensions.DependencyInjection;

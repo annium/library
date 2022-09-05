@@ -1,4 +1,4 @@
-namespace Annium.Blazor.Charts.Internal.Data;
+namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
 public sealed record SeriesSourceOptions(
     long BufferZone,

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Annium.Blazor.Charts.Data;
+using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain;
-using Annium.Blazor.Charts.Internal.Data;
+using Annium.Blazor.Charts.Internal.Data.Cache;
+using Annium.Blazor.Charts.Internal.Data.Sources;
+using Annium.Core.DependencyInjection;
 using Annium.Core.Runtime.Time;
 using Annium.Testing;
 using Annium.Testing.Lib;

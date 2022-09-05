@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Annium.Blazor.Charts.Data;
+using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain;
+using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Logging.Abstractions;
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Internal.Data;
+namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
 internal class SeriesSourceFactory : ISeriesSourceFactory
 {

@@ -4,7 +4,7 @@ using Annium.Blazor.Charts.Domain;
 using Annium.Data.Models;
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Data;
+namespace Annium.Blazor.Charts.Data.Sources;
 
 public interface ISeriesSource<T> : ISeriesSource, IDisposable
     where T : ITimeSeries
