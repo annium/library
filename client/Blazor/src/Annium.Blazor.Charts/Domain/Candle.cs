@@ -1,3 +1,4 @@
+using System;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Domain;
@@ -9,4 +10,8 @@ public record Candle(
     decimal Low,
     decimal Close,
     decimal Volume
-) : TimeSeries<Candle>(Moment);
+) : ITimeSeries, IComparable<Candle>, IComparable<Instant>
+{
+    public int CompareTo(Candle? other) => Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));
+    public int CompareTo(Instant other) => Moment.CompareTo(other);
+}

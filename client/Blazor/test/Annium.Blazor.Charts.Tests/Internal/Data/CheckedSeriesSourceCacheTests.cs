@@ -324,5 +324,8 @@ public class CheckedSeriesSourceCacheTests : TestBase
 
     private Duration M(int minutes) => Duration.FromMinutes(minutes);
 
-    private sealed record Item(Instant Moment) : TimeSeries<Item>(Moment);
+    private sealed record Item(Instant Moment) : ITimeSeries, IComparable<Item>
+    {
+        public int CompareTo(Item? other) => Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));
+    }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain;
-using Annium.Blazor.Charts.Internal.Data.Sources;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Runtime.Time;
 using Annium.Testing;
@@ -47,5 +46,8 @@ public class LoadingSeriesSourceTests : TestBase
         return source;
     }
 
-    private sealed record Item(Instant Moment) : TimeSeries<Item>(Moment);
+    private sealed record Item(Instant Moment) : ITimeSeries, IComparable<Item>
+    {
+        public int CompareTo(Item? other) => Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));
+    }
 }
