@@ -53,7 +53,7 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
     )
     {
         if (Interlocked.CompareExchange(ref _isInitiated, 1, 0) != 0)
-            throw new InvalidOperationException($"Can't init {nameof(VerticalSideContext)} more than once");
+            throw new InvalidOperationException($"Can't init {nameof(PaneContext)} more than once");
 
         _chartContext = chartContext;
     }

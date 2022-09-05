@@ -17,8 +17,8 @@ public interface IPaneContext
     decimal DotPerPx { get; }
     bool IsLocked { get; }
     ValueRange<Instant> Bounds { get; }
-    ValueRange<decimal> Range { get; }
     ValueRange<decimal> View { get; }
+    ValueRange<decimal> Range { get; }
     bool AdjustRange(ISeriesSource source, decimal min, decimal max);
     Action RegisterSource(ISeriesSource source);
     void SetSeries(ISeriesContext series);
