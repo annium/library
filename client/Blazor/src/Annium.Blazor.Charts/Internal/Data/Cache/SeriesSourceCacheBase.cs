@@ -13,11 +13,14 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
     where T : IComparable<T>
 {
     public bool IsEmpty => Chunks.Count == 0;
-    public ValueRange<Instant> Bounds { get; }
+    public ValueRange<Instant> Bounds => _bounds;
     protected Duration Resolution;
     protected IList<TChunk> Chunks { get; } = new List<TChunk>();
+    private readonly ManagedValueRange<Instant> _bounds;
     private readonly Func<Instant, Instant, IReadOnlyCollection<T>, TChunk> _createChunk;
     private readonly Func<T, Instant, int> _compare;
+    private readonly Func<TChunk, Instant> _getStart;
+    private readonly Func<TChunk, Instant> _getEnd;
 
     protected SeriesSourceCacheBase(
         Duration resolution,
@@ -30,10 +33,9 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         Resolution = resolution;
         _createChunk = createChunk;
         _compare = compare;
-        Bounds = ValueRange.Create(
-            () => Chunks.Count > 0 ? getStart(Chunks[0]) : NodaConstants.UnixEpoch,
-            () => Chunks.Count > 0 ? getEnd(Chunks[^1]) : NodaConstants.UnixEpoch
-        );
+        _getStart = getStart;
+        _getEnd = getEnd;
+        _bounds = ValueRange.Create(NodaConstants.UnixEpoch, NodaConstants.UnixEpoch);
     }
 
     public bool HasData(Instant start, Instant end)
@@ -103,6 +105,7 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         if (Chunks.Count == 0)
         {
             Chunks.Add(newChunk);
+            SyncBounds();
             PostProcessDataChange();
 
             return;
@@ -127,6 +130,7 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
             Chunks.Add(newChunk);
 
         Optimize();
+        SyncBounds();
         PostProcessDataChange();
     }
 
@@ -137,14 +141,28 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
 
         Resolution = resolution;
         Chunks.Clear();
+        ResetBounds();
     }
 
     public void Clear()
     {
         Chunks.Clear();
+        ResetBounds();
     }
 
     protected abstract void PostProcessDataChange();
+
+    private void SyncBounds()
+    {
+        _bounds.SetStart(_getStart(Chunks[0]));
+        _bounds.SetEnd(_getEnd(Chunks[^1]));
+    }
+
+    private void ResetBounds()
+    {
+        _bounds.SetStart(NodaConstants.UnixEpoch);
+        _bounds.SetEnd(NodaConstants.UnixEpoch);
+    }
 
     private void Optimize()
     {
