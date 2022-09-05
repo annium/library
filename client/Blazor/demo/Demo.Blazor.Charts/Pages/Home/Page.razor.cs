@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
-using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
 using Annium.Core.Primitives;
@@ -52,8 +51,8 @@ public partial class Page
     {
         ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
 
-        _candleSeries = SeriesSourceFactory.Create(ChartContext.Resolution, LoadCandles, new SeriesSourceCacheOptions(true));
-        _openSeries = SeriesSourceFactory.Create(_candleSeries, (x, _, _) => new PlainValue(x.Moment, x.Open).Yield(), new SeriesSourceCacheOptions(true));
+        _candleSeries = SeriesSourceFactory.CreateChecked(ChartContext.Resolution, LoadCandles);
+        _openSeries = SeriesSourceFactory.CreateChecked(_candleSeries, (x, _, _) => new PlainValue(x.Moment, x.Open).Yield());
     }
 
     private async Task<IReadOnlyList<Candle>> LoadCandles(

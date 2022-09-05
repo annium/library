@@ -12,11 +12,11 @@ using Xunit;
 
 namespace Annium.Blazor.Charts.Tests.Internal.Data;
 
-public class SeriesSourceCacheTests : TestBase
+public class CheckedSeriesSourceCacheTests : TestBase
 {
     private readonly Instant _moment = new LocalDateTime(2020, 1, 15, 14, 20).InUtc().ToInstant();
 
-    public SeriesSourceCacheTests()
+    public CheckedSeriesSourceCacheTests()
     {
         Register(container => container.AddCharts());
     }
@@ -25,7 +25,7 @@ public class SeriesSourceCacheTests : TestBase
     public void IsEmpty()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
 
         // assert
         cache.IsEmpty.IsTrue();
@@ -43,7 +43,7 @@ public class SeriesSourceCacheTests : TestBase
     public void Bounds()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
 
         // assert
         cache.Bounds.Start.Is(NodaConstants.UnixEpoch);
@@ -63,7 +63,7 @@ public class SeriesSourceCacheTests : TestBase
     public void HasData()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
         cache.AddData(start1, end1, items1);
@@ -84,7 +84,7 @@ public class SeriesSourceCacheTests : TestBase
     public void GetData()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
         cache.AddData(start1, end1, items1);
@@ -105,50 +105,30 @@ public class SeriesSourceCacheTests : TestBase
     public void GetItem()
     {
         // arrange
-        var cache = CreateCache(false);
+        var cache = CreateCache();
         // range 1
-        var (start1, end1) = Range(_moment, 1);
-        var items1 = Items(start1, 0);
+        var (start1, end1) = Range(_moment, 20);
+        var items1 = Items(start1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
         cache.AddData(start1, end1, items1);
-        // range 2
-        var (start2, end2) = Range(end1 + M(2), 1);
-        var items2 = Items(start2, 0, 1);
-        cache.AddData(start2, end2, items2);
-        // range 3
-        var (start3, end3) = Range(end2 + M(2), 2);
-        var items3 = Items(start3, 0, 1, 2);
-        cache.AddData(start3, end3, items3);
-        // range 4
-        var (start4, end4) = Range(end3 + M(2), 20);
-        var items4 = Items(start4, 2, 3, 4, 5, 7, 8, 9, 12, 13, 14, 18);
-        cache.AddData(start4, end4, items4);
 
         // assert
         // range 1
         cache.GetItem(start1 - M(1)).IsDefault();
         cache.GetItem(start1).Is(items1[0]);
-        cache.GetItem(end1).IsDefault();
+        cache.GetItem(start1 + M(1)).Is(items1[1]);
+        cache.GetItem(start1 + M(6)).Is(items1[6]);
+        cache.GetItem(start1 + M(10)).Is(items1[10]);
+        cache.GetItem(start1 + M(14)).Is(items1[14]);
+        cache.GetItem(end1 - M(1)).Is(items1[^2]);
+        cache.GetItem(end1).Is(items1[^1]);
         cache.GetItem(end1 + M(1)).IsDefault();
-        // range 2
-        cache.GetItem(start2).Is(items2[0]);
-        cache.GetItem(end2).Is(items2[1]);
-        // range 3
-        cache.GetItem(start3).Is(items3[0]);
-        cache.GetItem(start3 + M(1)).Is(items3[1]);
-        cache.GetItem(end3).Is(items3[2]);
-        // range 4
-        cache.GetItem(start4).IsDefault();
-        cache.GetItem(start4 + M(2)).Is(items4[0]);
-        cache.GetItem(start4 + M(7)).Is(items4[4]);
-        cache.GetItem(start4 + M(10)).IsDefault();
-        cache.GetItem(end4).IsDefault();
     }
 
     [Fact]
     public void GetEmptyRanges()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
 
         // assert
         cache.GetEmptyRanges(_moment - M(2), _moment + M(2))
@@ -179,7 +159,7 @@ public class SeriesSourceCacheTests : TestBase
     public void AddData_Init()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
         var (start2, end2) = Range(end1 + M(2), 2);
@@ -206,7 +186,7 @@ public class SeriesSourceCacheTests : TestBase
     public void AddData_Intersection()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
         var (start2, end2) = Range(end1, 2);
@@ -221,7 +201,7 @@ public class SeriesSourceCacheTests : TestBase
     public void AddData_Before()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
         var (start2, end2) = Range(end1 + M(1), 2);
@@ -244,7 +224,7 @@ public class SeriesSourceCacheTests : TestBase
     public void AddData_After()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
         var (start2, end2) = Range(end1 + M(1), 2);
@@ -267,7 +247,7 @@ public class SeriesSourceCacheTests : TestBase
     public void AddData_EmptyRange()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
         var (start1, end1) = Range(_moment, 2);
         var items1 = Items(start1, 0, 1, 2);
         var (start2, end2) = Range(end1 + M(2), 2);
@@ -291,7 +271,7 @@ public class SeriesSourceCacheTests : TestBase
     public void SetResolution()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
         var (start, end) = Range(_moment, 2);
         var items = Items(start, 0, 1, 2);
         cache.AddData(start, end, items);
@@ -310,7 +290,7 @@ public class SeriesSourceCacheTests : TestBase
     public void Clear()
     {
         // arrange
-        var cache = CreateCache(true);
+        var cache = CreateCache();
         var (start, end) = Range(_moment, 2);
         var items = Items(start, 0, 1, 2);
         cache.AddData(start, end, items);
@@ -325,9 +305,9 @@ public class SeriesSourceCacheTests : TestBase
         cache.IsEmpty.IsTrue();
     }
 
-    private ISeriesSourceCache<Item> CreateCache(bool enableIntegrityCheck)
+    private ISeriesSourceCache<Item> CreateCache()
     {
-        return new SeriesSourceCache<Item>(M(1), new SeriesSourceCacheOptions(enableIntegrityCheck));
+        return new CheckedSeriesSourceCache<Item>(M(1));
     }
 
     private (Instant start, Instant end) Range(Instant from, int length) => (from, from + M(length));
@@ -344,5 +324,5 @@ public class SeriesSourceCacheTests : TestBase
 
     private Duration M(int minutes) => Duration.FromMinutes(minutes);
 
-    private sealed record Item(Instant Moment) : ITimeSeries;
+    private sealed record Item(Instant Moment) : TimeSeries<Item>(Moment);
 }

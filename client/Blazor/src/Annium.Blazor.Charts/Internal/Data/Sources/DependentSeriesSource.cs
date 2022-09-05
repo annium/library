@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Annium.Blazor.Charts.Data.Sources;
-using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Data.Models;
@@ -14,8 +13,7 @@ namespace Annium.Blazor.Charts.Internal.Data.Sources;
 internal class DependentSeriesSource<TS, TD> :
     ISeriesSource<TD>,
     ILogSubject<DependentSeriesSource<TS, TD>>
-    where TS : ITimeSeries
-    where TD : ITimeSeries
+    where TD : IComparable<TD>
 {
     public ILogger<DependentSeriesSource<TS, TD>> Logger { get; }
     public Duration Resolution => _source.Resolution;

@@ -21,37 +21,66 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         _loggerFactory = loggerFactory;
     }
 
-    public ISeriesSource<TData> Create<TData>(
+    public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
-        Func<Duration, Instant, Instant, Task<IReadOnlyList<TData>>> load,
-        SeriesSourceCacheOptions cacheOptions
+        Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load
     )
-        where TData : ITimeSeries
-        => Create(resolution, load, _defaultSeriesSourceOptions, cacheOptions);
+        where T : IComparable<T>, IComparable<Instant>
+        => CreateUnchecked(resolution, load, _defaultSeriesSourceOptions);
 
-    public ISeriesSource<T> Create<T>(
+
+    public ISeriesSource<T> CreateChecked<T>(
+        Duration resolution,
+        Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load
+    )
+        where T : ITimeSeries, IComparable<T>
+        => CreateChecked(resolution, load, _defaultSeriesSourceOptions);
+
+    public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceOptions options,
-        SeriesSourceCacheOptions cacheOptions
+        SeriesSourceOptions options
     )
-        where T : ITimeSeries
+        where T : IComparable<T>, IComparable<Instant>
     {
-        var cache = new SeriesSourceCache<T>(resolution, cacheOptions);
+        var cache = new UncheckedSeriesSourceCache<T>(resolution);
         var logger = _loggerFactory.Get<LoadingSeriesSource<T>>();
 
         return new LoadingSeriesSource<T>(cache, resolution, load, options, logger);
     }
 
-    public ISeriesSource<TD> Create<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<TS, Instant, Instant, IEnumerable<TD>> getValues,
-        SeriesSourceCacheOptions cacheOptions
+    public ISeriesSource<T> CreateChecked<T>(
+        Duration resolution,
+        Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
+        SeriesSourceOptions options
     )
-        where TS : ITimeSeries
-        where TD : ITimeSeries
+        where T : ITimeSeries, IComparable<T>
     {
-        var cache = new SeriesSourceCache<TD>(source.Resolution, cacheOptions);
+        var cache = new CheckedSeriesSourceCache<T>(resolution);
+        var logger = _loggerFactory.Get<LoadingSeriesSource<T>>();
+
+        return new LoadingSeriesSource<T>(cache, resolution, load, options, logger);
+    }
+
+    public ISeriesSource<TD> CreateUnchecked<TS, TD>(
+        ISeriesSource<TS> source,
+        Func<TS, Instant, Instant, IEnumerable<TD>> getValues
+    )
+        where TD : IComparable<TD>, IComparable<Instant>
+    {
+        var cache = new UncheckedSeriesSourceCache<TD>(source.Resolution);
+        var logger = _loggerFactory.Get<DependentSeriesSource<TS, TD>>();
+
+        return new DependentSeriesSource<TS, TD>(source, cache, getValues, logger);
+    }
+
+    public ISeriesSource<TD> CreateChecked<TS, TD>(
+        ISeriesSource<TS> source,
+        Func<TS, Instant, Instant, IEnumerable<TD>> getValues
+    )
+        where TD : ITimeSeries, IComparable<TD>
+    {
+        var cache = new CheckedSeriesSourceCache<TD>(source.Resolution);
         var logger = _loggerFactory.Get<DependentSeriesSource<TS, TD>>();
 
         return new DependentSeriesSource<TS, TD>(source, cache, getValues, logger);

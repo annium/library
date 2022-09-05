@@ -1,12 +1,12 @@
+using System;
 using System.Collections.Generic;
-using Annium.Blazor.Charts.Domain;
 using Annium.Data.Models;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data.Cache;
 
 internal interface ISeriesSourceCache<T>
-    where T : ITimeSeries
+    where T : IComparable<T>
 {
     bool IsEmpty { get; }
     ValueRange<Instant> Bounds { get; }

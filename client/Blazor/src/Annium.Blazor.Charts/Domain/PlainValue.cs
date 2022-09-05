@@ -2,4 +2,4 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Domain;
 
-public record PlainValue(Instant Moment, decimal Value) : ITimeSeries;
+public record PlainValue(Instant Moment, decimal Value) : TimeSeries<PlainValue>(Moment);

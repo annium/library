@@ -9,4 +9,4 @@ public record Candle(
     decimal Low,
     decimal Close,
     decimal Volume
-) : ITimeSeries;
+) : TimeSeries<Candle>(Moment);

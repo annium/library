@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain;
-using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Blazor.Charts.Internal.Data.Sources;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Runtime.Time;
@@ -43,11 +42,10 @@ public class LoadingSeriesSourceTests : TestBase
 
         var sourceFactory = Get<ISeriesSourceFactory>();
         var options = new SeriesSourceOptions(1, 2, 3);
-        var cacheOptions = new SeriesSourceCacheOptions(true);
-        var source = sourceFactory.Create(Duration.FromMinutes(1), (_, _, _) => Task.FromResult(getItems()), options, cacheOptions);
+        var source = sourceFactory.CreateChecked(Duration.FromMinutes(1), (_, _, _) => Task.FromResult(getItems()), options);
 
         return source;
     }
 
-    private sealed record Item(Instant Moment) : ITimeSeries;
+    private sealed record Item(Instant Moment) : TimeSeries<Item>(Moment);
 }

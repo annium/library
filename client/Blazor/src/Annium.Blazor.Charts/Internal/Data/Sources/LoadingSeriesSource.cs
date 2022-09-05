@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
-using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Core.Primitives;
@@ -15,7 +14,7 @@ using NodaTime;
 namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
 internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSeriesSource<T>>
-    where T : ITimeSeries
+    where T : IComparable<T>
 {
     public Duration Resolution { get; private set; }
     public bool IsLoading => Volatile.Read(ref _isLoading) == 1;

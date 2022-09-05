@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain;
-using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Blazor.Charts.Internal.Data.Sources;
 using NodaTime;
 
@@ -10,26 +9,41 @@ namespace Annium.Blazor.Charts.Data.Sources;
 
 public interface ISeriesSourceFactory
 {
-    ISeriesSource<T> Create<T>(
+    ISeriesSource<T> CreateUnchecked<T>(
+        Duration resolution,
+        Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load
+    )
+        where T : IComparable<T>, IComparable<Instant>;
+
+    ISeriesSource<T> CreateChecked<T>(
+        Duration resolution,
+        Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load
+    )
+        where T : ITimeSeries, IComparable<T>;
+
+    ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceCacheOptions cacheOptions
+        SeriesSourceOptions options
     )
-        where T : ITimeSeries;
+        where T : IComparable<T>, IComparable<Instant>;
 
-    ISeriesSource<T> Create<T>(
+    ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceOptions options,
-        SeriesSourceCacheOptions cacheOptions
+        SeriesSourceOptions options
     )
-        where T : ITimeSeries;
+        where T : ITimeSeries, IComparable<T>;
 
-    ISeriesSource<TD> Create<TS, TD>(
+    ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, Instant, Instant, IEnumerable<TD>> getValues,
-        SeriesSourceCacheOptions cacheOptions
+        Func<TS, Instant, Instant, IEnumerable<TD>> getValues
     )
-        where TS : ITimeSeries
-        where TD : ITimeSeries;
+        where TD : IComparable<TD>, IComparable<Instant>;
+
+    ISeriesSource<TD> CreateChecked<TS, TD>(
+        ISeriesSource<TS> source,
+        Func<TS, Instant, Instant, IEnumerable<TD>> getValues
+    )
+        where TD : ITimeSeries, IComparable<TD>;
 }

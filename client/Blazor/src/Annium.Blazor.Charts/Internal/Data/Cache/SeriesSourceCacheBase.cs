@@ -1,0 +1,192 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Annium.Core.Primitives;
+using Annium.Data.Models;
+using NodaTime;
+
+namespace Annium.Blazor.Charts.Internal.Data.Cache;
+
+internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
+    where TChunk : CacheChunkBase<T>
+    where T : IComparable<T>
+{
+    public bool IsEmpty => Chunks.Count == 0;
+    public ValueRange<Instant> Bounds { get; }
+    protected Duration Resolution;
+    protected IList<TChunk> Chunks { get; } = new List<TChunk>();
+    private readonly Func<Instant, Instant, IReadOnlyCollection<T>, TChunk> _createChunk;
+    private readonly Func<T, Instant, int> _compare;
+
+    protected SeriesSourceCacheBase(
+        Duration resolution,
+        Func<Instant, Instant, IReadOnlyCollection<T>, TChunk> createChunk,
+        Func<T, Instant, int> compare,
+        Func<TChunk, Instant> getStart,
+        Func<TChunk, Instant> getEnd
+    )
+    {
+        Resolution = resolution;
+        _createChunk = createChunk;
+        _compare = compare;
+        Bounds = ValueRange.Create(
+            () => Chunks.Count > 0 ? getStart(Chunks[0]) : NodaConstants.UnixEpoch,
+            () => Chunks.Count > 0 ? getEnd(Chunks[^1]) : NodaConstants.UnixEpoch
+        );
+    }
+
+    public bool HasData(Instant start, Instant end)
+    {
+        var range = ValueRange.Create(start, end);
+
+        foreach (var chunk in Chunks)
+            if (chunk.Range.Contains(range, RangeBounds.Both))
+                return true;
+
+        return false;
+    }
+
+    public IReadOnlyList<T> GetData(Instant start, Instant end)
+    {
+        var range = ValueRange.Create(start, end);
+
+        foreach (var chunk in Chunks)
+            if (chunk.Range.Contains(range, RangeBounds.Both))
+                return chunk.Items.Where(x => _compare(x, start) >= 0 && _compare(x, end) <= 0).ToArray();
+
+        return Array.Empty<T>();
+    }
+
+    public T? GetItem(Instant moment)
+    {
+        foreach (var chunk in Chunks)
+            if (chunk.Range.Contains(moment, RangeBounds.Both))
+                return GetChunkItem(chunk, moment);
+
+        return default;
+    }
+
+    public IReadOnlyList<ValueRange<Instant>> GetEmptyRanges(Instant start, Instant end)
+    {
+        var ranges = new List<ValueRange<Instant>>();
+
+        if (Chunks.Count == 0)
+        {
+            ranges.Add(ValueRange.Create(start, end));
+            return ranges;
+        }
+
+        var from = start;
+
+        foreach (var chunk in Chunks)
+        {
+            if (chunk.Range.Start >= end)
+                break;
+
+            if (chunk.Range.Start > from)
+                ranges.Add(ValueRange.Create(from, chunk.Range.Start - Resolution));
+
+            from = chunk.Range.End + Resolution;
+        }
+
+        if (end > from)
+            ranges.Add(ValueRange.Create(from, end));
+
+        return ranges;
+    }
+
+    public void AddData(Instant start, Instant end, IReadOnlyCollection<T> data)
+    {
+        var newChunk = _createChunk(start, end, data);
+
+        if (Chunks.Count == 0)
+        {
+            Chunks.Add(newChunk);
+            PostProcessDataChange();
+
+            return;
+        }
+
+        var isAdded = false;
+        for (var i = 0; i < Chunks.Count; i++)
+        {
+            var chunk = Chunks[i];
+            if (chunk.Range.Contains(newChunk.Range.Start, RangeBounds.Both) || chunk.Range.Contains(newChunk.Range.End, RangeBounds.Both))
+                throw new InvalidOperationException($"New chunk {newChunk.Range} intersects with existing chunk {chunk}");
+
+            if (newChunk.Range.End > chunk.Range.Start)
+                continue;
+
+            Chunks.Insert(i, newChunk);
+            isAdded = true;
+            break;
+        }
+
+        if (!isAdded)
+            Chunks.Add(newChunk);
+
+        Optimize();
+        PostProcessDataChange();
+    }
+
+    public void SetResolution(Duration resolution)
+    {
+        if (resolution == Resolution)
+            return;
+
+        Resolution = resolution;
+        Chunks.Clear();
+    }
+
+    public void Clear()
+    {
+        Chunks.Clear();
+    }
+
+    protected abstract void PostProcessDataChange();
+
+    private void Optimize()
+    {
+        var i = 0;
+
+        while (i < Chunks.Count - 1)
+        {
+            var current = Chunks[i];
+            var next = Chunks[i + 1];
+
+            if (next.Range.Start - current.Range.End == Resolution)
+            {
+                current.Append(next);
+                Chunks.RemoveAt(i + 1);
+            }
+            else
+                i++;
+        }
+    }
+
+    private T? GetChunkItem(TChunk chunk, Instant moment)
+    {
+        var items = chunk.Items;
+
+        if (_compare(items[0], moment) > 0 || _compare(items[^1], moment) < 0)
+            return default;
+
+        var l = 0;
+        var r = items.Count - 1;
+
+        while (l <= r)
+        {
+            var i = ((r - l) / 2m).FloorInt32().Within(l, r);
+            var item = items[i];
+
+            if (_compare(item, moment) < 0)
+                l = i + 1;
+            else if (_compare(item, moment) > 0)
+                r = i - 1;
+            else
+                return item;
+        }
+
+        return default;
+    }
+}
