@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
+using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Core.Primitives;
@@ -72,7 +73,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
         return false;
     }
 
-    public T? GetItem(Instant moment) => _cache.GetItem(moment);
+    public T? GetItem(Instant moment, LookupMatch match = LookupMatch.Exact) => _cache.GetItem(moment, match);
 
     public void LoadItems(Instant start, Instant end, Action onLoaded)
     {

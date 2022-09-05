@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Annium.Blazor.Charts.Domain;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
 using NodaTime;
@@ -57,11 +58,11 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         return Array.Empty<T>();
     }
 
-    public T? GetItem(Instant moment)
+    public T? GetItem(Instant moment, LookupMatch match = LookupMatch.Exact)
     {
         foreach (var chunk in Chunks)
             if (chunk.Range.Contains(moment, RangeBounds.Both))
-                return GetChunkItem(chunk, moment);
+                return GetChunkItem(chunk, moment, match);
 
         return default;
     }
@@ -164,12 +165,23 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         }
     }
 
-    private T? GetChunkItem(TChunk chunk, Instant moment)
+    private T? GetChunkItem(TChunk chunk, Instant moment, LookupMatch match)
     {
         var items = chunk.Items;
 
-        if (_compare(items[0], moment) > 0 || _compare(items[^1], moment) < 0)
-            return default;
+        if (_compare(items[0], moment) > 0)
+            return match switch
+            {
+                LookupMatch.NearestRight => items[0],
+                _ => default,
+            };
+
+        if (_compare(items[^1], moment) < 0)
+            return match switch
+            {
+                LookupMatch.NearestLeft => items[^1],
+                _ => default,
+            };
 
         var l = 0;
         var r = items.Count - 1;
@@ -187,6 +199,11 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
                 return item;
         }
 
-        return default;
+        return match switch
+        {
+            LookupMatch.NearestLeft => r >= 0 ? items[r] : default,
+            LookupMatch.NearestRight => l < items.Count ? items[l] : default,
+            _ => default,
+        };
     }
 }

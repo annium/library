@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Core.DependencyInjection;
 using Annium.Data.Models;
@@ -137,9 +138,17 @@ public class UncheckedSeriesSourceCacheTests : TestBase
         cache.GetItem(end3).Is(items3[2]);
         // range 4
         cache.GetItem(start4).IsDefault();
+        cache.GetItem(start4 + M(1), LookupMatch.NearestLeft).IsDefault();
+        cache.GetItem(start4 + M(1)).IsDefault();
+        cache.GetItem(start4 + M(1), LookupMatch.NearestRight).Is(items4[0]);
         cache.GetItem(start4 + M(2)).Is(items4[0]);
         cache.GetItem(start4 + M(7)).Is(items4[4]);
+        cache.GetItem(start4 + M(10), LookupMatch.NearestLeft).Is(items4[6]);
         cache.GetItem(start4 + M(10)).IsDefault();
+        cache.GetItem(start4 + M(10), LookupMatch.NearestRight).Is(items4[7]);
+        cache.GetItem(start4 + M(19), LookupMatch.NearestLeft).Is(items4[10]);
+        cache.GetItem(start4 + M(19)).IsDefault();
+        cache.GetItem(start4 + M(19), LookupMatch.NearestRight).IsDefault();
         cache.GetItem(end4).IsDefault();
     }
 

@@ -23,6 +23,9 @@ public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
     public Func<T, string> GetText { get; set; } = default!;
 
     [Parameter]
+    public LookupMatch Match { get; set; } = LookupMatch.Exact;
+
+    [Parameter]
     public int? Left { get; set; }
 
     [Parameter]
@@ -81,7 +84,7 @@ public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
         if (moment is null)
             return;
 
-        var item = Source.GetItem(moment.Value);
+        var item = Source.GetItem(moment.Value, Match);
         if (item is null)
             return;
 

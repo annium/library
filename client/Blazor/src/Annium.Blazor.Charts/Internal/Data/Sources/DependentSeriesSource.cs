@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Annium.Blazor.Charts.Data.Sources;
+using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Data.Models;
@@ -73,7 +74,7 @@ internal class DependentSeriesSource<TS, TD> :
         return true;
     }
 
-    public TD? GetItem(Instant moment) => _cache.GetItem(moment);
+    public TD? GetItem(Instant moment, LookupMatch match = LookupMatch.Exact) => _cache.GetItem(moment, match);
 
     public void LoadItems(Instant start, Instant end, Action onLoaded)
     {
