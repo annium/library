@@ -9,6 +9,7 @@ using Annium.Blazor.Charts.Internal.Data;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
 using Annium.Core.Primitives;
+using Annium.Core.Primitives.Collections.Generic;
 using Annium.Logging.Abstractions;
 using Annium.Net.Http;
 using Annium.Serialization.Abstractions;
@@ -52,7 +53,7 @@ public partial class Page
         ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
 
         _candleSeries = SeriesSourceFactory.Create(ChartContext.Resolution, LoadCandles, new SeriesSourceCacheOptions(true));
-        _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new PlainValue(x.Moment, x.Open), new SeriesSourceCacheOptions(true));
+        _openSeries = SeriesSourceFactory.Create(_candleSeries, (x, _, _) => new PlainValue(x.Moment, x.Open).Yield(), new SeriesSourceCacheOptions(true));
     }
 
     private async Task<IReadOnlyList<Candle>> LoadCandles(

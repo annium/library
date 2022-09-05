@@ -26,7 +26,7 @@ public interface ISeriesSourceFactory
 
     ISeriesSource<TD> Create<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, TD?> getValue,
+        Func<TS, Instant, Instant, IEnumerable<TD>> getValues,
         SeriesSourceCacheOptions cacheOptions
     )
         where TS : ITimeSeries

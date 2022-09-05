@@ -10,7 +10,7 @@ namespace Annium.Blazor.Charts.Internal.Data;
 
 internal class SeriesSourceFactory : ISeriesSourceFactory
 {
-    private readonly SeriesSourceOptions _defaultSeriesSourceOptions = new SeriesSourceOptions(1L, 3L, 8L);
+    private readonly SeriesSourceOptions _defaultSeriesSourceOptions = new(1L, 3L, 8L);
     private readonly ILoggerFactory _loggerFactory;
 
     public SeriesSourceFactory(
@@ -44,7 +44,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
 
     public ISeriesSource<TD> Create<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, TD?> getValue,
+        Func<TS, Instant, Instant, IEnumerable<TD>> getValues,
         SeriesSourceCacheOptions cacheOptions
     )
         where TS : ITimeSeries
@@ -53,6 +53,6 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         var cache = new SeriesSourceCache<TD>(source.Resolution, cacheOptions);
         var logger = _loggerFactory.Get<DependentSeriesSource<TS, TD>>();
 
-        return new DependentSeriesSource<TS, TD>(source, cache, getValue, logger);
+        return new DependentSeriesSource<TS, TD>(source, cache, getValues, logger);
     }
 }

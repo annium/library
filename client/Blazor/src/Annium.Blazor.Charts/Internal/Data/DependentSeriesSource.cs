@@ -22,19 +22,19 @@ internal class DependentSeriesSource<TS, TD> :
     public ValueRange<Instant> Bounds => _source.Bounds;
     private readonly ISeriesSource<TS> _source;
     private readonly ISeriesSourceCache<TD> _cache;
-    private readonly Func<TS, TD?> _getValue;
+    private readonly Func<TS, Instant, Instant, IEnumerable<TD>> _getValues;
 
     public DependentSeriesSource(
         ISeriesSource<TS> source,
         ISeriesSourceCache<TD> cache,
-        Func<TS, TD?> getValue,
+        Func<TS, Instant, Instant, IEnumerable<TD>> getValues,
         ILogger<DependentSeriesSource<TS, TD>> logger
     )
     {
         Logger = logger;
         _source = source;
         _cache = cache;
-        _getValue = getValue;
+        _getValues = getValues;
     }
 
     public bool GetItems(Instant start, Instant end, out IReadOnlyList<TD> data)
@@ -47,7 +47,7 @@ internal class DependentSeriesSource<TS, TD> :
             return true;
         }
 
-        if (!_source.GetItems(start, end, out var sourceData))
+        if (!_source.GetItems(start, end, out _))
         {
             this.Log().Trace($"get data in {start.S()} - {end.S()}: missing in source");
             data = Array.Empty<TD>();
@@ -63,7 +63,7 @@ internal class DependentSeriesSource<TS, TD> :
             if (!_source.GetItems(range.Start, range.End, out var rangeSource))
                 throw new InvalidOperationException($"Series source {_source} invalid behavior: expected to get data in range {range.S()}");
 
-            var rangeData = rangeSource.Select(_getValue).OfType<TD>().ToArray();
+            var rangeData = rangeSource.SelectMany(x => _getValues(x, range.Start, range.End)).ToArray();
             this.Log().Trace($"save {rangeData.Length} item(s) ({rangeSource.Count} sourced) in {range.S()} to cache");
             _cache.AddData(range.Start, range.End, rangeData);
         }
