@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Annium.Blazor.Charts.Domain;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
@@ -12,6 +13,7 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
     where TChunk : CacheChunkBase<T>
     where T : IComparable<T>
 {
+    public event Action OnBoundsChange = delegate { };
     public bool IsEmpty => Chunks.Count == 0;
     public ValueRange<Instant> Bounds => _bounds;
     protected Duration Resolution;
@@ -152,16 +154,21 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
 
     protected abstract void PostProcessDataChange();
 
-    private void SyncBounds()
-    {
-        _bounds.SetStart(_getStart(Chunks[0]));
-        _bounds.SetEnd(_getEnd(Chunks[^1]));
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void SyncBounds() => SetBounds(_getStart(Chunks[0]), _getEnd(Chunks[^1]));
 
-    private void ResetBounds()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ResetBounds() => SetBounds(NodaConstants.UnixEpoch, NodaConstants.UnixEpoch);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void SetBounds(Instant start, Instant end)
     {
-        _bounds.SetStart(NodaConstants.UnixEpoch);
-        _bounds.SetEnd(NodaConstants.UnixEpoch);
+        if (start == _bounds.Start && end == _bounds.End)
+            return;
+
+        _bounds.SetStart(start);
+        _bounds.SetEnd(end);
+        OnBoundsChange();
     }
 
     private void Optimize()

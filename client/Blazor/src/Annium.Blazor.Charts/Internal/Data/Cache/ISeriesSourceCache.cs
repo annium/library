@@ -9,6 +9,7 @@ namespace Annium.Blazor.Charts.Internal.Data.Cache;
 internal interface ISeriesSourceCache<T>
     where T : IComparable<T>
 {
+    event Action OnBoundsChange;
     bool IsEmpty { get; }
     ValueRange<Instant> Bounds { get; }
     bool HasData(Instant start, Instant end);

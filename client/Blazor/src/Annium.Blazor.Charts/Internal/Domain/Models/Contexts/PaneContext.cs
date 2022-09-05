@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
@@ -22,24 +23,20 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
     public int Height { get; private set; }
     public decimal DotPerPx => (View.End - View.Start) / Height;
     public bool IsLocked => _sources.Any(x => x.IsLoading);
-    public ValueRange<Instant> Bounds { get; }
+    public ValueRange<Instant> Bounds => _bounds;
     public ValueRange<decimal> Range { get; }
     public ValueRange<decimal> View { get; }
     public ILogger<PaneContext> Logger { get; }
+    private readonly ManagedValueRange<Instant> _bounds = ValueRange.Create(NodaConstants.UnixEpoch, NodaConstants.UnixEpoch);
     private readonly HashSet<ISeriesSource> _sources = new();
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private IChartContext _chartContext = default!;
     private int _isInitiated;
 
     public PaneContext(
-        ITimeProvider timeProvider,
         ILogger<PaneContext> logger
     )
     {
-        Bounds = ValueRange.Create(
-            () => _sources.Count > 0 ? _sources.Min(x => x.Bounds.Start) : timeProvider.Now,
-            () => _sources.Count > 0 ? _sources.Max(x => x.Bounds.End) : timeProvider.Now
-        );
         Range = ValueRange.Create(
             () => _sourceRanges.Count > 0 ? _sourceRanges.Min(x => x.Value.Start) : 0m,
             () => _sourceRanges.Count > 0 ? _sourceRanges.Max(x => x.Value.End) : 0m
@@ -86,13 +83,17 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
     {
         if (!_sources.Add(source))
             throw new InvalidOperationException("Source is already registered");
+
         _sourceRanges[source] = ValueRange.Create(0m, 0m);
+        source.OnBoundsChange += UpdateBounds;
 
         return () =>
         {
             if (!_sources.Remove(source))
                 throw new InvalidOperationException("Source is not registered");
+
             _sourceRanges.Remove(source);
+            source.OnBoundsChange -= UpdateBounds;
         };
     }
 
@@ -118,6 +119,20 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
             throw new InvalidOperationException("Right is already set");
 
         Right = right;
+    }
+
+    private void UpdateBounds()
+    {
+        var (start, end) = _sources.Count == 0
+            ? (NodaConstants.UnixEpoch, NodaConstants.UnixEpoch)
+            : (_sources.Min(x => x.Bounds.Start), _sources.Max(x => x.Bounds.End));
+
+        if (start == _bounds.Start && end == _bounds.End)
+            return;
+
+        _bounds.SetStart(start);
+        _bounds.SetEnd(end);
+        Console.WriteLine($"UPDATED BOUNDS: {_bounds.S()}");
     }
 
     private decimal GetViewStart()
