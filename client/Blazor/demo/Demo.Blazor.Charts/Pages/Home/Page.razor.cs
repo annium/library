@@ -45,7 +45,6 @@ public partial class Page
 
     private ISeriesSource<Candle> _candleSeries = default!;
     private ISeriesSource<LineValue> _openSeries = default!;
-    private ISeriesSource<LineValue> _horizontalLineSeries = default!;
 
     protected override void OnInitialized()
     {
@@ -53,7 +52,6 @@ public partial class Page
 
         _candleSeries = SeriesSourceFactory.Create(ChartContext.Resolution, LoadCandles, new SeriesSourceCacheOptions(true));
         _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open), new SeriesSourceCacheOptions(true));
-        _horizontalLineSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open), new SeriesSourceCacheOptions(true));
     }
 
     private async Task<IReadOnlyList<Candle>> LoadCandles(
