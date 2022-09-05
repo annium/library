@@ -1,5 +1,5 @@
 @using Annium.Blazor.Charts.Components
-@using Demo.Blazor.Charts.Domain
+@using Annium.Blazor.Charts.Domain
 
 @namespace Demo.Blazor.Charts.Pages.Home
 
@@ -16,7 +16,7 @@
     </Pane>
     <Pane CssClass="@Styles.LinesPane">
         <PaneSeries>
-            <LineSeries T="LineValue" Source="_openSeries" />
+            <LineSeries T="PlainValue" Source="_openSeries" />
         </PaneSeries>
         <PaneBottom CssClass="@Styles.PaneBottom">
             <XAxis />

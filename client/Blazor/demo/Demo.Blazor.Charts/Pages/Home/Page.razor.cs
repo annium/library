@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data;
+using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Data;
 using Annium.Core.DependencyInjection;
@@ -44,14 +45,14 @@ public partial class Page
     public ILogger<Page> Logger { get; set; } = default!;
 
     private ISeriesSource<Candle> _candleSeries = default!;
-    private ISeriesSource<LineValue> _openSeries = default!;
+    private ISeriesSource<PlainValue> _openSeries = default!;
 
     protected override void OnInitialized()
     {
         ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
 
         _candleSeries = SeriesSourceFactory.Create(ChartContext.Resolution, LoadCandles, new SeriesSourceCacheOptions(true));
-        _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new LineValue(x.Moment, x.Open), new SeriesSourceCacheOptions(true));
+        _openSeries = SeriesSourceFactory.Create(_candleSeries, x => new PlainValue(x.Moment, x.Open), new SeriesSourceCacheOptions(true));
     }
 
     private async Task<IReadOnlyList<Candle>> LoadCandles(

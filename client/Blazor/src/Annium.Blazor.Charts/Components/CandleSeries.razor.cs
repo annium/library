@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Components;
 namespace Annium.Blazor.Charts.Components;
 
 public partial class CandleSeries<T> : ILogSubject<CandleSeries<T>>, IAsyncDisposable
-    where T : ICandle
+    where T : Candle
 {
     [Parameter, EditorRequired]
     public ISeriesSource<T> Source { get; set; } = default!;

@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Components;
 namespace Annium.Blazor.Charts.Components;
 
 public partial class LineSeries<T> : ILogSubject<LineSeries<T>>, IAsyncDisposable
-    where T : IValue
+    where T : PlainValue
 {
     [Parameter, EditorRequired]
     public ISeriesSource<T> Source { get; set; } = default!;

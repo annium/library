@@ -1,13 +1,12 @@
-using Annium.Blazor.Charts.Domain;
 using NodaTime;
 
-namespace Demo.Blazor.Charts.Domain;
+namespace Annium.Blazor.Charts.Domain;
 
-public sealed record Candle(
+public record Candle(
     Instant Moment,
     decimal Open,
     decimal High,
     decimal Low,
     decimal Close,
     decimal Volume
-) : ICandle;
+) : ITimeSeries;
