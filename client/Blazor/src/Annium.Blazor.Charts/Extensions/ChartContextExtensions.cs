@@ -9,5 +9,5 @@ internal static class ChartContextExtensions
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ToX(this IChartContext ctx, Instant moment) =>
-        ((moment - ctx.View.Start).TotalMilliseconds.FloorInt64() / (decimal) ctx.MsPerPx).FloorInt32();
+        ((moment - ctx.View.Start).TotalMilliseconds.FloorInt64() / (decimal) ctx.MsPerPx).CeilInt32();
 }
