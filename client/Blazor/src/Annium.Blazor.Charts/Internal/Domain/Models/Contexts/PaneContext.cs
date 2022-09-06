@@ -25,10 +25,11 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
     public decimal DotPerPx => (View.End - View.Start) / Height;
     public bool IsLocked => _sources.Any(x => x.IsLoading);
     public ValueRange<Instant> Bounds => _bounds;
-    public ValueRange<decimal> Range { get; }
+    public ValueRange<decimal> Range => _range;
     public ValueRange<decimal> View { get; }
     public ILogger<PaneContext> Logger { get; }
     private readonly ManagedValueRange<Instant> _bounds = ValueRange.Create(FutureBound, PastBound);
+    private readonly ManagedValueRange<decimal> _range = ValueRange.Create(0m, 0m);
     private readonly List<ISeriesSource> _sources = new();
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private IChartContext _chartContext = default!;
@@ -38,10 +39,6 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
         ILogger<PaneContext> logger
     )
     {
-        Range = ValueRange.Create(
-            () => _sourceRanges.Count > 0 ? _sourceRanges.Min(x => x.Value.Start) : 0m,
-            () => _sourceRanges.Count > 0 ? _sourceRanges.Max(x => x.Value.End) : 0m
-        );
         View = ValueRange.Create(GetViewStart, GetViewEnd);
         Logger = logger;
     }
@@ -68,16 +65,19 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
             throw new ArgumentException($"Invalid range: {min} - {max}");
 
         var (allMin, allMax) = Range;
-        this.Log().Trace($"adjust range of {source.GetType().FriendlyName()} to {min} - {max}");
         var sourceRange = _sourceRanges[source];
         sourceRange.SetStart(min);
         sourceRange.SetEnd(max);
+        _range.SetStart(_sourceRanges.Min(x => x.Value.Start));
+        _range.SetEnd(_sourceRanges.Max(x => x.Value.End));
 
-        var changed = Range.Start != allMin || Range.End != allMax;
-        if (changed)
-            _chartContext.RequestDraw();
+        if (Range.Start == allMin && Range.End == allMax)
+            return false;
 
-        return changed;
+        this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {allMin} - {allMax} -> {Range}");
+        _chartContext.RequestDraw();
+
+        return true;
     }
 
     public Action RegisterSource(ISeriesSource source)
@@ -96,6 +96,8 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
 
             _sourceRanges.Remove(source);
             source.OnBoundsChange -= UpdateBounds;
+            if (_sources.Count == 0)
+                ResetRange();
         };
     }
 
@@ -135,6 +137,12 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
         _bounds.SetStart(start);
         _bounds.SetEnd(end);
         OnBoundsChange(_bounds);
+    }
+
+    private void ResetRange()
+    {
+        _range.SetStart(0m);
+        _range.SetEnd(0m);
     }
 
     private decimal GetViewStart()
