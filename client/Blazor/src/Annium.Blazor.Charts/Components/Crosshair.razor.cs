@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
@@ -57,8 +58,7 @@ public partial class Crosshair : ILogSubject<Crosshair>, IAsyncDisposable
 
         var moment = m.Value;
         var point = p.Value;
-        var msPerPx = ChartContext.MsPerPx;
-        var x = ((moment - ChartContext.View.Start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32() + 0.5f;
+        var x = ChartContext.ToX(moment) - 0.5f;
 
         foreach (var pane in ChartContext.Panes)
         {
@@ -67,8 +67,8 @@ public partial class Crosshair : ILogSubject<Crosshair>, IAsyncDisposable
                 var ctx = pane.Series.Overlay;
                 var rect = pane.Series.Rect;
                 var ctxY = rect.Y.FloorInt32();
-                var ctxWidth = rect.Width.CeilInt32();
-                var ctxHeight = rect.Height.CeilInt32();
+                var ctxWidth = rect.Width.FloorInt32();
+                var ctxHeight = rect.Height.FloorInt32();
 
                 ctx.Save();
 
