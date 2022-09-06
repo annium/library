@@ -66,7 +66,7 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
     {
         foreach (var chunk in Chunks)
             if (chunk.Range.Contains(moment, RangeBounds.Both))
-                return GetChunkItem(chunk, moment, match);
+                return chunk.Items.Count > 0 ? GetChunkItem(chunk, moment, match) : default;
 
         return default;
     }
