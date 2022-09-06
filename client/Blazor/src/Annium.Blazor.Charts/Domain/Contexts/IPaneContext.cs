@@ -8,6 +8,7 @@ namespace Annium.Blazor.Charts.Domain.Contexts;
 
 public interface IPaneContext
 {
+    event Action<ValueRange<Instant>> OnBoundsChange;
     IReadOnlyCollection<ISeriesSource> Sources { get; }
     ISeriesContext Series { get; }
     IHorizontalSideContext? Bottom { get; }

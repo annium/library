@@ -15,6 +15,7 @@ namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
 internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContext>
 {
+    public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public IReadOnlyCollection<ISeriesSource> Sources => _sources;
     public ISeriesContext Series { get; private set; } = default!;
     public IHorizontalSideContext? Bottom { get; set; }
@@ -28,7 +29,7 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
     public ValueRange<decimal> View { get; }
     public ILogger<PaneContext> Logger { get; }
     private readonly ManagedValueRange<Instant> _bounds = ValueRange.Create(FutureBound, PastBound);
-    private readonly HashSet<ISeriesSource> _sources = new();
+    private readonly List<ISeriesSource> _sources = new();
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private IChartContext _chartContext = default!;
     private int _isInitiated;
@@ -81,9 +82,10 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
 
     public Action RegisterSource(ISeriesSource source)
     {
-        if (!_sources.Add(source))
+        if (_sources.Contains(source))
             throw new InvalidOperationException("Source is already registered");
 
+        _sources.Add(source);
         _sourceRanges[source] = ValueRange.Create(0m, 0m);
         source.OnBoundsChange += UpdateBounds;
 
@@ -132,6 +134,7 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
 
         _bounds.SetStart(start);
         _bounds.SetEnd(end);
+        OnBoundsChange(_bounds);
     }
 
     private decimal GetViewStart()

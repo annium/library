@@ -10,6 +10,7 @@ using Annium.Core.Primitives;
 using Annium.Data.Models;
 using Annium.Logging.Abstractions;
 using NodaTime;
+using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
@@ -28,14 +29,15 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
     public int MsPerPx { get; private set; }
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
     public int TimeZoneOffset { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault().GetUtcOffset(NodaConstants.UnixEpoch).ToTimeSpan().TotalMinutes.FloorInt32();
-    public ValueRange<Instant> Bounds { get; }
+    public ValueRange<Instant> Bounds => _bounds;
     public ValueRange<Instant> View => _view;
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
 
     private List<int> _zooms = new() { 1 };
     private List<Duration> _resolutions = new() { Duration.FromMinutes(1) };
     private readonly List<IPaneContext> _panes = new();
-    private readonly ManagedValueRange<Instant> _view = ValueRange.Create(Instant.MinValue, Instant.MinValue);
+    private readonly ManagedValueRange<Instant> _bounds = ValueRange.Create(FutureBound, PastBound);
+    private readonly ManagedValueRange<Instant> _view = ValueRange.Create(FutureBound, PastBound);
     private DomRect _rect;
     private int _isCanvasDirty = 1;
     private (Point?, bool) _overlayRequest;
@@ -47,10 +49,6 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
     {
         Logger = logger;
         Moment = timeProvider.Now;
-        Bounds = ValueRange.Create(
-            () => _panes.Count > 0 ? _panes.Min(x => x.Bounds.Start) : timeProvider.Now,
-            () => _panes.Count > 0 ? _panes.Max(x => x.Bounds.End) : timeProvider.Now
-        );
         SetZoom(_zooms[0]);
         SetResolution(_resolutions[0]);
     }
@@ -79,16 +77,20 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
         RequestDraw();
     }
 
-    public Action RegisterPane(IPaneContext paneContext)
+    public Action RegisterPane(IPaneContext pane)
     {
-        if (_panes.Contains(paneContext))
-            throw new InvalidOperationException($"{paneContext} is already registered");
-        _panes.Add(paneContext);
+        if (_panes.Contains(pane))
+            throw new InvalidOperationException($"{pane} is already registered");
+
+        _panes.Add(pane);
+        pane.OnBoundsChange += UpdateBounds;
 
         return () =>
         {
-            if (!_panes.Remove(paneContext))
-                throw new InvalidOperationException($"{paneContext} is not registered");
+            if (!_panes.Remove(pane))
+                throw new InvalidOperationException($"{pane} is not registered");
+
+            pane.OnBoundsChange -= UpdateBounds;
         };
     }
 
@@ -144,6 +146,19 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
         foreach (var series in _panes.SelectMany(pane => pane.Sources))
             series.SetResolution(Resolution);
         RequestDraw();
+    }
+
+    private void UpdateBounds(ValueRange<Instant> bounds)
+    {
+        var (start, end) = _panes.Count == 0
+            ? (FutureBound, PastBound)
+            : (Instant.Min(_bounds.Start, bounds.Start), Instant.Max(_bounds.End, bounds.End));
+
+        if (start == _bounds.Start && end == _bounds.End)
+            return;
+
+        _bounds.SetStart(start);
+        _bounds.SetEnd(end);
     }
 
     private (Instant start, Instant end) GetView()

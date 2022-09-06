@@ -26,7 +26,7 @@ public interface IChartContext
     void SetMoment(Instant moment);
     void SetZoom(int zoom);
     void SetResolution(Duration resolution);
-    Action RegisterPane(IPaneContext paneContext);
+    Action RegisterPane(IPaneContext pane);
     void RequestDraw();
     void RequestOverlay(Point? point);
 }
