@@ -166,8 +166,7 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         if (start == _bounds.Start && end == _bounds.End)
             return;
 
-        _bounds.SetStart(start);
-        _bounds.SetEnd(end);
+        _bounds.Set(start, end);
         OnBoundsChange(_bounds);
     }
 
