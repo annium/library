@@ -84,11 +84,7 @@ public partial class CandleSeries<T> : ILogSubject<CandleSeries<T>>, IAsyncDispo
 
         this.Log().Trace("render {count} in range {min} - {max}", items.Count, min, max);
         var width = GetWidth();
-        var offset = width == 1 ? 0 : ((double) width / 2).FloorInt32();
-        var start = ChartContext.View.Start;
-        var msPerPx = ChartContext.MsPerPx;
-        var rangeUp = PaneContext.View.End;
-        var dpx = PaneContext.DotPerPx;
+        var offset = width == 1 ? 0 : ((double) width / 2).CeilInt32();
         var ctx = SeriesContext.Canvas;
 
         ctx.Save();
@@ -98,10 +94,9 @@ public partial class CandleSeries<T> : ILogSubject<CandleSeries<T>>, IAsyncDispo
             ctx.FillStyle = UpColor;
             foreach (var item in items.Where(x => x.Open < x.Close))
             {
-                var high = ((rangeUp - item.High) / dpx).RoundInt32();
-                var low = ((rangeUp - item.Low) / dpx).RoundInt32();
-
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32();
+                var x = PaneContext.ToX(item.Moment);
+                var high = PaneContext.ToY(item.High);
+                var low = PaneContext.ToY(item.Low);
 
                 ctx.FillRect(x, high, 1, low - high);
             }
@@ -109,10 +104,9 @@ public partial class CandleSeries<T> : ILogSubject<CandleSeries<T>>, IAsyncDispo
             ctx.FillStyle = DownColor;
             foreach (var item in items.Where(x => x.Open > x.Close))
             {
-                var high = ((rangeUp - item.High) / dpx).RoundInt32();
-                var low = ((rangeUp - item.Low) / dpx).RoundInt32();
-
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32();
+                var x = PaneContext.ToX(item.Moment);
+                var high = PaneContext.ToY(item.High);
+                var low = PaneContext.ToY(item.Low);
 
                 ctx.FillRect(x, high, 1, low - high);
             }
@@ -120,10 +114,9 @@ public partial class CandleSeries<T> : ILogSubject<CandleSeries<T>>, IAsyncDispo
             ctx.FillStyle = StaleColor;
             foreach (var item in items.Where(x => x.Open == x.Close))
             {
-                var high = ((rangeUp - item.High) / dpx).RoundInt32();
-                var low = ((rangeUp - item.Low) / dpx).RoundInt32();
-
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32();
+                var x = PaneContext.ToX(item.Moment);
+                var high = PaneContext.ToY(item.High);
+                var low = PaneContext.ToY(item.Low);
 
                 ctx.FillRect(x, high, 1, low - high);
             }
@@ -133,41 +126,38 @@ public partial class CandleSeries<T> : ILogSubject<CandleSeries<T>>, IAsyncDispo
             ctx.FillStyle = UpColor;
             foreach (var item in items.Where(x => x.Open < x.Close))
             {
-                var open = ((rangeUp - item.Open) / dpx).RoundInt32();
-                var high = ((rangeUp - item.High) / dpx).RoundInt32();
-                var low = ((rangeUp - item.Low) / dpx).RoundInt32();
-                var close = ((rangeUp - item.Close) / dpx).RoundInt32();
+                var x = PaneContext.ToX(item.Moment);
+                var open = PaneContext.ToY(item.Open);
+                var high = PaneContext.ToY(item.High);
+                var low = PaneContext.ToY(item.Low);
+                var close = PaneContext.ToY(item.Close);
 
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32();
-
-                ctx.FillRect(x, high, 1, low - high);
+                ctx.FillRect(x - 1, high, 1, low - high);
                 ctx.FillRect(x - offset, close, width, open - close);
             }
 
             ctx.FillStyle = DownColor;
             foreach (var item in items.Where(x => x.Open > x.Close))
             {
-                var open = ((rangeUp - item.Open) / dpx).RoundInt32();
-                var high = ((rangeUp - item.High) / dpx).RoundInt32();
-                var low = ((rangeUp - item.Low) / dpx).RoundInt32();
-                var close = ((rangeUp - item.Close) / dpx).RoundInt32();
+                var x = PaneContext.ToX(item.Moment);
+                var open = PaneContext.ToY(item.Open);
+                var high = PaneContext.ToY(item.High);
+                var low = PaneContext.ToY(item.Low);
+                var close = PaneContext.ToY(item.Close);
 
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32();
-
-                ctx.FillRect(x, high, 1, low - high);
+                ctx.FillRect(x - 1, high, 1, low - high);
                 ctx.FillRect(x - offset, open, width, close - open);
             }
 
             ctx.FillStyle = StaleColor;
             foreach (var item in items.Where(x => x.Open == x.Close))
             {
-                var open = ((rangeUp - item.Open) / dpx).RoundInt32();
-                var high = ((rangeUp - item.High) / dpx).RoundInt32();
-                var low = ((rangeUp - item.Low) / dpx).RoundInt32();
+                var x = PaneContext.ToX(item.Moment);
+                var open = PaneContext.ToY(item.Open);
+                var high = PaneContext.ToY(item.High);
+                var low = PaneContext.ToY(item.Low);
 
-                var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32();
-
-                ctx.FillRect(x, high, 1, low - high);
+                ctx.FillRect(x - 1, high, 1, low - high);
                 ctx.FillRect(x - offset, open, width, 1);
             }
         }
