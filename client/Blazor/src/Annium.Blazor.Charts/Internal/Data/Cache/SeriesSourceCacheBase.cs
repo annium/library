@@ -13,7 +13,7 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
     where TChunk : CacheChunkBase<T>
     where T : IComparable<T>
 {
-    public event Action OnBoundsChange = delegate { };
+    public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public bool IsEmpty => Chunks.Count == 0;
     public ValueRange<Instant> Bounds => _bounds;
     protected Duration Resolution;
@@ -168,7 +168,7 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
 
         _bounds.SetStart(start);
         _bounds.SetEnd(end);
-        OnBoundsChange();
+        OnBoundsChange(_bounds);
     }
 
     private void Optimize()

@@ -10,6 +10,7 @@ using Annium.Core.Primitives;
 using Annium.Data.Models;
 using Annium.Logging.Abstractions;
 using NodaTime;
+using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
@@ -27,7 +28,7 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
     public ValueRange<decimal> Range { get; }
     public ValueRange<decimal> View { get; }
     public ILogger<PaneContext> Logger { get; }
-    private readonly ManagedValueRange<Instant> _bounds = ValueRange.Create(NodaConstants.UnixEpoch, NodaConstants.UnixEpoch);
+    private readonly ManagedValueRange<Instant> _bounds = ValueRange.Create(FutureBound, PastBound);
     private readonly HashSet<ISeriesSource> _sources = new();
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private IChartContext _chartContext = default!;
@@ -121,18 +122,17 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
         Right = right;
     }
 
-    private void UpdateBounds()
+    private void UpdateBounds(ValueRange<Instant> bounds)
     {
         var (start, end) = _sources.Count == 0
-            ? (NodaConstants.UnixEpoch, NodaConstants.UnixEpoch)
-            : (_sources.Min(x => x.Bounds.Start), _sources.Max(x => x.Bounds.End));
+            ? (FutureBound, PastBound)
+            : (Instant.Min(_bounds.Start, bounds.Start), Instant.Max(_bounds.End, bounds.End));
 
         if (start == _bounds.Start && end == _bounds.End)
             return;
 
         _bounds.SetStart(start);
         _bounds.SetEnd(end);
-        Console.WriteLine($"UPDATED BOUNDS: {_bounds.S()}");
     }
 
     private decimal GetViewStart()

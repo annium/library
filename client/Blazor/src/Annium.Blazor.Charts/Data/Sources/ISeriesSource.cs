@@ -15,7 +15,7 @@ public interface ISeriesSource<T> : ISeriesSource, IDisposable
 
 public interface ISeriesSource
 {
-    event Action OnBoundsChange;
+    event Action<ValueRange<Instant>> OnBoundsChange;
     Duration Resolution { get; }
     ValueRange<Instant> Bounds { get; }
     bool IsLoading { get; }

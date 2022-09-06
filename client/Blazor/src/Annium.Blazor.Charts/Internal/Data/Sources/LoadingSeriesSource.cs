@@ -17,7 +17,7 @@ namespace Annium.Blazor.Charts.Internal.Data.Sources;
 internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSeriesSource<T>>
     where T : IComparable<T>
 {
-    public event Action OnBoundsChange = delegate { };
+    public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public ILogger<LoadingSeriesSource<T>> Logger { get; }
     public Duration Resolution { get; private set; }
     public bool IsLoading => Volatile.Read(ref _isLoading) == 1;
@@ -41,7 +41,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
         _cache = cache;
         _load = load;
         _options = options;
-        _cache.OnBoundsChange += () => OnBoundsChange();
+        _cache.OnBoundsChange += bounds => OnBoundsChange(bounds);
     }
 
     public bool GetItems(Instant start, Instant end, out IReadOnlyList<T> data)

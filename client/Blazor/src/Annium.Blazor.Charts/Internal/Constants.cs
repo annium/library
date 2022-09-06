@@ -21,6 +21,6 @@ internal static class Constants
     public const string CrosshairLabelFontFamily = "sans-serif";
     public const int CrosshairLabelFontSize = 12;
     public const string CrosshairLabelStyle = "white";
-    public static string S(Instant t) => t.InZone(TimeZone).LocalDateTime.ToString();
-    private static readonly DateTimeZone TimeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+    public static readonly Instant PastBound = NodaConstants.UnixEpoch - Duration.FromDays(100000);
+    public static readonly Instant FutureBound = NodaConstants.UnixEpoch + Duration.FromDays(100000);
 }

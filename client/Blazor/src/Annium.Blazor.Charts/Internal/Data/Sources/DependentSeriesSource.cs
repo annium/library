@@ -16,7 +16,7 @@ internal class DependentSeriesSource<TS, TD> :
     ILogSubject<DependentSeriesSource<TS, TD>>
     where TD : IComparable<TD>
 {
-    public event Action OnBoundsChange = delegate { };
+    public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public ILogger<DependentSeriesSource<TS, TD>> Logger { get; }
     public Duration Resolution => _source.Resolution;
     public bool IsLoading => _source.IsLoading;
@@ -36,7 +36,7 @@ internal class DependentSeriesSource<TS, TD> :
         _source = source;
         _cache = cache;
         _getValues = getValues;
-        _cache.OnBoundsChange += () => OnBoundsChange();
+        _cache.OnBoundsChange += bounds => OnBoundsChange(bounds);
     }
 
     public bool GetItems(Instant start, Instant end, out IReadOnlyList<TD> data)
