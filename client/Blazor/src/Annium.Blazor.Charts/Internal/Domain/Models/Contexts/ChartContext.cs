@@ -96,10 +96,10 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
 
     public void Update()
     {
-        var (start, end) = GetView();
+        var size = _rect.Width.FloorInt32() * Duration.FromMilliseconds(MsPerPx);
 
-        _view.SetStart(start);
-        _view.SetEnd(end);
+        _view.SetStart(Moment - size);
+        _view.SetEnd(Moment);
 
         Updated();
     }
@@ -159,14 +159,6 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
 
         _bounds.SetStart(start);
         _bounds.SetEnd(end);
-    }
-
-    private (Instant start, Instant end) GetView()
-    {
-        var size = _rect.Width.FloorInt32() * Duration.FromMilliseconds(MsPerPx);
-        var start = Moment - size;
-
-        return (start, Moment);
     }
 
     private void UpdateUnits()
