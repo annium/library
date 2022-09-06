@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Core.Tools;
@@ -95,12 +96,7 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
             if (point == default)
                 _chartContext.SetLookup(null, null);
             else
-            {
-                var lookupMoment = (_chartContext.View.Start + point.X * Duration.FromMilliseconds(_chartContext.MsPerPx))
-                    .RoundTo(_chartContext.Resolution);
-
-                _chartContext.SetLookup(lookupMoment, point);
-            }
+                _chartContext.SetLookup(_chartContext.FromX(point.X), point);
         }
     }
 
@@ -132,8 +128,7 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
         if (change > 0 && _chartContext.Bounds.End - start <= size / 2)
             return false;
 
-        var duration = Duration.FromMilliseconds(_chartContext.MsPerPx * Math.Abs(change));
-        var moment = change > 0 ? _chartContext.Moment + duration : _chartContext.Moment - duration;
+        var moment = _chartContext.FromX(_chartContext.ToX(_chartContext.Moment) + change);
         _chartContext.SetMoment(moment);
 
         return true;

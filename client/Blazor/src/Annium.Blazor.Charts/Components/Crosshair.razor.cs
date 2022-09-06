@@ -148,7 +148,7 @@ public partial class Crosshair : ILogSubject<Crosshair>, IAsyncDisposable
                 ctx.FillStyle = LabelBackground;
                 ctx.FillRect(0, point.Y - ctxY - backOffset, ctxWidth, backOffset * 2);
 
-                var value = pane.View.Start + (ctx.Height - point.Y + ctxY) * pane.DotPerPx;
+                var value = pane.FromY(point.Y - ctxY);
                 var text = value.ToString(CultureInfo.InvariantCulture);
                 ctx.Font = $"{LabelFontSize}px {LabelFontFamily}";
                 ctx.FillStyle = LabelStyle;
