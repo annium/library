@@ -9,7 +9,6 @@ using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
 using Annium.Logging.Abstractions;
-using Annium.NodaTime.Extensions;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
@@ -31,14 +30,12 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
     public int TimeZoneOffset { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault().GetUtcOffset(NodaConstants.UnixEpoch).ToTimeSpan().TotalMinutes.FloorInt32();
     public ValueRange<Instant> Bounds { get; }
     public ValueRange<Instant> View => _view;
-    public ValueRange<Instant> Range => _range;
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
 
     private List<int> _zooms = new() { 1 };
     private List<Duration> _resolutions = new() { Duration.FromMinutes(1) };
     private readonly List<IPaneContext> _panes = new();
     private readonly ManagedValueRange<Instant> _view = ValueRange.Create(Instant.MinValue, Instant.MinValue);
-    private readonly ManagedValueRange<Instant> _range = ValueRange.Create(Instant.MinValue, Instant.MinValue);
     private DomRect _rect;
     private int _isCanvasDirty = 1;
     private (Point?, bool) _overlayRequest;
@@ -99,8 +96,6 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
     {
         var (start, end) = GetView();
 
-        _range.SetStart(start.FloorTo(Resolution));
-        _range.SetEnd(end.CeilTo(Resolution));
         _view.SetStart(start);
         _view.SetEnd(end);
 

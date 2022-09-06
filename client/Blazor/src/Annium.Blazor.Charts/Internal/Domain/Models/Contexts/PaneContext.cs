@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
-using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Core.Primitives;
 using Annium.Data.Models;

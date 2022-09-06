@@ -21,7 +21,6 @@ public interface IChartContext
     int TimeZoneOffset { get; }
     ValueRange<Instant> Bounds { get; }
     ValueRange<Instant> View { get; }
-    ValueRange<Instant> Range { get; }
     IReadOnlyCollection<IPaneContext> Panes { get; }
     void Configure(IReadOnlyList<int> zooms, IReadOnlyList<int> resolutions);
     void SetMoment(Instant moment);

@@ -4,6 +4,7 @@ using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
+using Annium.NodaTime.Extensions;
 
 namespace Annium.Blazor.Charts.Extensions;
 
@@ -18,7 +19,8 @@ public static class SeriesSourceExtensions
     {
         void Draw()
         {
-            var (start, end) = chartContext.Range;
+            var start = chartContext.View.Start.FloorTo(chartContext.Resolution);
+            var end = chartContext.View.End.CeilTo(chartContext.Resolution);
 
             if (source.GetItems(start, end, out var data))
                 render(data);
