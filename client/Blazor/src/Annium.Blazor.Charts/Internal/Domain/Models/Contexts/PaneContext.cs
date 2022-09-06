@@ -13,7 +13,7 @@ using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
-internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContext>
+internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneContext, ILogSubject<PaneContext>
 {
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public IReadOnlyCollection<ISeriesSource> Sources => _sources;
@@ -26,22 +26,14 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
     public bool IsLocked => _sources.Any(x => x.IsLoading);
     public ValueRange<Instant> Bounds => _bounds;
     public ValueRange<decimal> Range => _range;
-    public ValueRange<decimal> View { get; }
-    public ILogger<PaneContext> Logger { get; }
+    public ValueRange<decimal> View => _view;
     private readonly ManagedValueRange<Instant> _bounds = ValueRange.Create(FutureBound, PastBound);
     private readonly ManagedValueRange<decimal> _range = ValueRange.Create(0m, 0m);
+    private readonly ManagedValueRange<decimal> _view = ValueRange.Create(0m, 0m);
     private readonly List<ISeriesSource> _sources = new();
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private IChartContext _chartContext = default!;
     private int _isInitiated;
-
-    public PaneContext(
-        ILogger<PaneContext> logger
-    )
-    {
-        View = ValueRange.Create(GetViewStart, GetViewEnd);
-        Logger = logger;
-    }
 
     public void Init(
         IChartContext chartContext
@@ -64,17 +56,27 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
         if (min > max)
             throw new ArgumentException($"Invalid range: {min} - {max}");
 
-        var (allMin, allMax) = Range;
+        var (start, end) = Range;
         var sourceRange = _sourceRanges[source];
-        sourceRange.SetStart(min);
-        sourceRange.SetEnd(max);
-        _range.SetStart(_sourceRanges.Min(x => x.Value.Start));
-        _range.SetEnd(_sourceRanges.Max(x => x.Value.End));
+        sourceRange.Set(min, max);
+        _range.Set(
+            _sourceRanges.Min(x => x.Value.Start),
+            _sourceRanges.Max(x => x.Value.End)
+        );
 
-        if (Range.Start == allMin && Range.End == allMax)
+        if (Range.Start == start && Range.End == end)
             return false;
 
-        this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {allMin} - {allMax} -> {Range}");
+        (start, end) = Range;
+        var size = Math.Abs(end - start);
+        if (size > 0)
+            _view.Set(start - size * 0.1m, end + size * 0.1m);
+        else if (start == 0)
+            _view.Set(-0.5m, 0.5m);
+        else
+            _view.Set(start * 0.9m, start * 1.1m);
+
+        this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}");
         _chartContext.RequestDraw();
 
         return true;
@@ -97,7 +99,7 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
             _sourceRanges.Remove(source);
             source.OnBoundsChange -= UpdateBounds;
             if (_sources.Count == 0)
-                ResetRange();
+                ResetRangeAndView();
         };
     }
 
@@ -134,35 +136,14 @@ internal sealed record PaneContext : IManagedPaneContext, ILogSubject<PaneContex
         if (start == _bounds.Start && end == _bounds.End)
             return;
 
-        _bounds.SetStart(start);
-        _bounds.SetEnd(end);
+        _bounds.Set(start, end);
         OnBoundsChange(_bounds);
     }
 
-    private void ResetRange()
+    private void ResetRangeAndView()
     {
-        _range.SetStart(0m);
-        _range.SetEnd(0m);
-    }
-
-    private decimal GetViewStart()
-    {
-        var (start, end) = Range;
-        var size = Math.Abs(end) - Math.Abs(start);
-        if (size > 0)
-            return Range.Start - size * 0.1m;
-
-        return start == 0 ? 0.9m : start * 0.9m;
-    }
-
-    private decimal GetViewEnd()
-    {
-        var (start, end) = Range;
-        var size = Math.Abs(end) - Math.Abs(start);
-        if (size > 0)
-            return Range.End + size * 0.1m;
-
-        return end == 0 ? 1.1m : end * 1.1m;
+        _range.Set(0m, 0m);
+        _view.Set(0m, 0m);
     }
 
     public override string ToString() => this.GetFullId();
