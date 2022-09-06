@@ -16,6 +16,7 @@ namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneContext, ILogSubject<PaneContext>
 {
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
+    public IChartContext Chart { get; private set; } = default!;
     public IReadOnlyCollection<ISeriesSource> Sources => _sources;
     public ISeriesContext Series { get; private set; } = default!;
     public IHorizontalSideContext? Bottom { get; set; }
@@ -32,17 +33,16 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
     private readonly ManagedValueRange<decimal> _view = ValueRange.Create(0m, 0m);
     private readonly List<ISeriesSource> _sources = new();
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
-    private IChartContext _chartContext = default!;
     private int _isInitiated;
 
     public void Init(
-        IChartContext chartContext
+        IChartContext chart
     )
     {
         if (Interlocked.CompareExchange(ref _isInitiated, 1, 0) != 0)
             throw new InvalidOperationException($"Can't init {nameof(PaneContext)} more than once");
 
-        _chartContext = chartContext;
+        Chart = chart;
     }
 
     public void SetSize(int width, int height)
@@ -77,7 +77,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
             _view.Set(start * 0.9m, start * 1.1m);
 
         this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}");
-        _chartContext.RequestDraw();
+        Chart.RequestDraw();
 
         return true;
     }
