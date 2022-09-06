@@ -23,7 +23,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
     public IVerticalSideContext? Right { get; set; }
     public int Width { get; private set; }
     public int Height { get; private set; }
-    public decimal DotPerPx => (View.End - View.Start) / Height;
+    public decimal DotPerPx { get; private set; }
     public bool IsLocked => _sources.Any(x => x.IsLoading);
     public ValueRange<Instant> Bounds => _bounds;
     public ValueRange<decimal> Range => _range;
@@ -49,6 +49,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
     {
         Width = width;
         Height = height;
+        UpdateDotPerPx();
     }
 
     public bool AdjustRange(ISeriesSource source, decimal min, decimal max)
@@ -75,6 +76,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
             _view.Set(-0.5m, 0.5m);
         else
             _view.Set(start * 0.9m, start * 1.1m);
+        UpdateDotPerPx();
 
         this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}");
         Chart.RequestDraw();
@@ -127,6 +129,8 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         Right = right;
     }
 
+    private void UpdateDotPerPx() => DotPerPx = Height == 0 ? 0 : (_view.End - _view.Start) / Height;
+
     private void UpdateBounds(ValueRange<Instant> bounds)
     {
         var (start, end) = _sources.Count == 0
@@ -144,6 +148,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
     {
         _range.Set(0m, 0m);
         _view.Set(0m, 0m);
+        UpdateDotPerPx();
     }
 
     public override string ToString() => this.GetFullId();
