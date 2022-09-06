@@ -13,10 +13,10 @@ internal static class PaneContextExtensions
     {
         var lines = new Dictionary<int, decimal>();
 
-        if (context.DotPerPx == 0)
+        var (min, max) = context.View;
+        if (min == max || context.Height == 0)
             return lines;
 
-        var (min, max) = context.View;
         var alignment = (DefaultBlockSize * context.DotPerPx).ToPretty(0.5m);
 
         var value = min.CeilTo(alignment);
