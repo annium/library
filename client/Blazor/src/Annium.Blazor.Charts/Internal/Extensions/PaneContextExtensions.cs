@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Extensions;
 using Annium.Core.Primitives;
 
 namespace Annium.Blazor.Charts.Internal.Extensions;
@@ -12,18 +13,17 @@ internal static class PaneContextExtensions
     {
         var lines = new Dictionary<int, decimal>();
 
-        var dpx = context.DotPerPx;
-        if (dpx == 0)
+        if (context.DotPerPx == 0)
             return lines;
 
         var (min, max) = context.View;
-        var alignment = (DefaultBlockSize * dpx).ToPretty(0.5m);
+        var alignment = (DefaultBlockSize * context.DotPerPx).ToPretty(0.5m);
 
         var value = min.CeilTo(alignment);
 
         while (value <= max)
         {
-            var line = context.Height - ((value - min) / dpx).FloorInt32();
+            var line = context.ToY(value);
             lines[line] = value;
             value += alignment;
         }

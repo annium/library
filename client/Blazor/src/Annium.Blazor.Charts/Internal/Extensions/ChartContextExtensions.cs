@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
 using Annium.NodaTime.Extensions;
@@ -34,7 +35,7 @@ internal static class ChartContextExtensions
         var alignment = context.GetAlignmentDuration();
         var (start, end) = context.View;
 
-        var lineMoment = context.View.Start.FloorTo(alignment);
+        var lineMoment = start.FloorTo(alignment);
         lineMoment -= Duration.FromMinutes(context.TimeZoneOffset);
 
         // align floors instant, so pick next period if start is not aligned
@@ -43,7 +44,7 @@ internal static class ChartContextExtensions
 
         while (lineMoment <= end)
         {
-            var line = ((lineMoment - start).TotalMilliseconds.FloorInt64() / (decimal) context.MsPerPx).FloorInt32();
+            var line = context.ToX(lineMoment);
             lines[line] = lineMoment.InZone(context.TimeZone).LocalDateTime;
             lineMoment += alignment;
         }
