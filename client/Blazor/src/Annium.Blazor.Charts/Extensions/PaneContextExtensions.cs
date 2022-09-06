@@ -12,6 +12,14 @@ public static class PaneContextExtensions
         ctx.Chart.ToX(moment);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Instant FromX(this IPaneContext ctx, int x) =>
+        ctx.Chart.FromX(x);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ToY(this IPaneContext ctx, decimal value) =>
         ((ctx.View.End - value) / ctx.DotPerPx).RoundInt32();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static decimal FromY(this IPaneContext ctx, int y) =>
+        ctx.View.End - y * ctx.DotPerPx;
 }
