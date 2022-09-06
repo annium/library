@@ -77,10 +77,6 @@ public partial class LineSeries<T> : ILogSubject<LineSeries<T>>, IAsyncDisposabl
         if (PaneContext.AdjustRange(Source, min, max))
             return;
 
-        var start = ChartContext.View.Start;
-        var msPerPx = ChartContext.MsPerPx;
-        var rangeUp = PaneContext.View.End;
-        var dpx = PaneContext.DotPerPx;
         var ctx = SeriesContext.Canvas;
 
         ctx.Save();
@@ -94,8 +90,8 @@ public partial class LineSeries<T> : ILogSubject<LineSeries<T>>, IAsyncDisposabl
 
         // first point
         {
-            var x = ((items[0].Moment - start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32();
-            var y = ((rangeUp - items[0].Value) / dpx).FloorInt32();
+            var x = PaneContext.ToX(items[0].Moment);
+            var y = PaneContext.ToY(items[0].Value);
 
             ctx.MoveTo(x, y);
         }
@@ -103,8 +99,8 @@ public partial class LineSeries<T> : ILogSubject<LineSeries<T>>, IAsyncDisposabl
         for (var i = 1; i < items.Count; i++)
         {
             var item = items[i];
-            var x = ((item.Moment - start).TotalMilliseconds.FloorInt64() / (decimal) msPerPx).FloorInt32();
-            var y = ((rangeUp - item.Value) / dpx).FloorInt32();
+            var x = PaneContext.ToX(item.Moment);
+            var y = PaneContext.ToY(item.Value);
 
             ctx.LineTo(x, y);
         }
