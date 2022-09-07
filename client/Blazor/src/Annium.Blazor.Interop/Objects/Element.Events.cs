@@ -10,9 +10,9 @@ namespace Annium.Blazor.Interop;
 
 public partial record Element
 {
-    private readonly InteropEvent<WheelEvent> _wheelEvent = new();
-    private readonly Dictionary<MouseEventEnum, InteropEvent<MouseEvent>> _mouseEvents = new();
-    private readonly Dictionary<KeyboardEventEnum, InteropEvent<KeyboardEvent>> _keyboardEvents = new();
+    private readonly InteropOldEvent<WheelEvent> _wheelOldEvent = new();
+    private readonly Dictionary<MouseEventEnum, InteropOldEvent<MouseEvent>> _mouseEvents = new();
+    private readonly Dictionary<KeyboardEventEnum, InteropOldEvent<KeyboardEvent>> _keyboardEvents = new();
 
     public Action OnMouseDown(Action<MouseEvent> handle) => OnMouseEvent(MouseEventEnum.mousedown, handle);
     public Action OnMouseUp(Action<MouseEvent> handle) => OnMouseEvent(MouseEventEnum.mouseup, handle);
@@ -26,27 +26,27 @@ public partial record Element
 
     public Action OnWheel(Action<WheelEvent> handle)
     {
-        if (!_wheelEvent.HasListeners)
-            _wheelEvent.SetCallbackId(Ctx.Invoke<int>("element.onWheelEvent", Id, _ref, $"{nameof(Element)}.{nameof(HandleWheelEvent)}"));
+        if (!_wheelOldEvent.HasListeners)
+            _wheelOldEvent.SetCallbackId(Ctx.Invoke<int>("element.onWheelEvent", Id, _ref, $"{nameof(Element)}.{nameof(HandleWheelEvent)}"));
 
-        _wheelEvent.Event += handle;
+        _wheelOldEvent.Event += handle;
 
         return () =>
         {
-            _wheelEvent.Event -= handle;
+            _wheelOldEvent.Event -= handle;
 
-            if (_wheelEvent.HasListeners)
+            if (_wheelOldEvent.HasListeners)
                 return;
 
-            Ctx.InvokeVoid("element.offWheelEvent", Id, _wheelEvent.CallbackId);
-            _wheelEvent.ResetCallbackId();
+            Ctx.InvokeVoid("element.offWheelEvent", Id, _wheelOldEvent.CallbackId);
+            _wheelOldEvent.ResetCallbackId();
         };
     }
 
     private Action OnMouseEvent(MouseEventEnum type, Action<MouseEvent> handle)
     {
         if (!_mouseEvents.TryGetValue(type, out var e))
-            e = _mouseEvents[type] = new InteropEvent<MouseEvent>();
+            e = _mouseEvents[type] = new InteropOldEvent<MouseEvent>();
 
         if (!e.HasListeners)
             e.SetCallbackId(Ctx.Invoke<int>("element.onMouseEvent", Id, type.ToString(), _ref, $"{nameof(Element)}.{nameof(HandleMouseEvent)}"));
@@ -69,7 +69,7 @@ public partial record Element
     private Action OnKeyboardEvent(KeyboardEventEnum type, Action<KeyboardEvent> handle, bool preventDefault)
     {
         if (!_keyboardEvents.TryGetValue(type, out var e))
-            e = _keyboardEvents[type] = new InteropEvent<KeyboardEvent>();
+            e = _keyboardEvents[type] = new InteropOldEvent<KeyboardEvent>();
 
         if (!e.HasListeners)
             e.SetCallbackId(Ctx.Invoke<int>(
@@ -119,6 +119,6 @@ public partial record Element
     [JSInvokable($"{nameof(Element)}.{nameof(HandleWheelEvent)}")]
     public void HandleWheelEvent(bool ctrlKey, decimal deltaX, decimal deltaY)
     {
-        _wheelEvent.Handle(new WheelEvent(ctrlKey, deltaX, deltaY));
+        _wheelOldEvent.Handle(new WheelEvent(ctrlKey, deltaX, deltaY));
     }
 }

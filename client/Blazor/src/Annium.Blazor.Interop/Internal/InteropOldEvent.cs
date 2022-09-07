@@ -2,7 +2,7 @@ using System;
 
 namespace Annium.Blazor.Interop.Internal;
 
-internal sealed record InteropEvent<T>
+internal sealed record InteropOldEvent<T>
 {
     public event Action<T> Event = delegate { };
     public bool HasListeners => Event.GetInvocationList().Length > 1;
