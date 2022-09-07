@@ -1,13 +1,6 @@
 namespace Annium.Blazor.Interop;
 
-public record StaticElement : Element
+public record StaticElement(string Id) : Element
 {
-    protected override string Id { get; }
-
-    public StaticElement(
-        string id
-    )
-    {
-        Id = id;
-    }
+    public override string Id { get; } = Id;
 }

@@ -6,10 +6,10 @@ using Microsoft.JSInterop;
 
 namespace Annium.Blazor.Interop;
 
-public abstract partial record Element : IAsyncDisposable
+public abstract partial record Element : IObject, IAsyncDisposable
 {
     protected IInteropContext Ctx => InteropContext.Instance;
-    protected abstract string Id { get; }
+    public abstract string Id { get; }
     private readonly DotNetObjectReference<Element> _ref;
     private readonly AsyncDisposableBox _disposable = Disposable.AsyncBox();
 
