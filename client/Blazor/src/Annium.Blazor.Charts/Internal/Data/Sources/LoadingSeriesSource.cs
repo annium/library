@@ -82,7 +82,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
                 if (t.IsCompletedSuccessfully)
                     onLoaded();
                 else if (t.Exception is not null)
-                    throw t.Exception;
+                    this.Log().Error(t.Exception);
                 else
                     this.Log().Error($"load done in {t.Status} status");
             }
