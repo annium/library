@@ -1,0 +1,13 @@
+@using Annium.Blazor.Css
+@using Annium.Blazor.Routing
+
+<Router>
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" />
+    </Found>
+    <NotFound>
+        <p>Sorry, there's nothing at this address.</p>
+    </NotFound>
+</Router>
+
+<StyleSheet />
