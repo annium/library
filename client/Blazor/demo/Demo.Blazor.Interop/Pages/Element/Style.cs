@@ -7,10 +7,10 @@ public class Style : RuleSet
     public readonly CssRule Container = Rule.Class()
         .WidthPercent(100)
         .HeightPercent(100)
-        .FlexColumn(AlignItems.Center, JustifyContent.Center);
+        .FlexColumn(AlignItems.Center, JustifyContent.SpaceEvenly);
 
     public readonly CssRule Block = Rule.Class()
-        .WidthPercent(50)
-        .HeightPercent(50)
+        .WidthPercent(30)
+        .HeightPercent(30)
         .BackgroundColor("lightblue");
 }

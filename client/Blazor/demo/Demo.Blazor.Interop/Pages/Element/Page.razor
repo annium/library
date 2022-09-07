@@ -5,7 +5,10 @@
 <Navigation />
 
 <div @ref="@_container" class="@Styles.Container">
-    <div @ref="@_div" class="@Styles.Block">
-        Block text
+    <div @ref="@_block" class="@Styles.Block">
+        Input: <input @ref="_input" placeholder="input" />
+    </div>
+    <div @ref="@_eventsBlock" class="@Styles.Block">
+        Events block
     </div>
 </div>
