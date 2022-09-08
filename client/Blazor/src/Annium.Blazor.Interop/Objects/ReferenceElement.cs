@@ -17,7 +17,7 @@ public record ReferenceElement : Element
         _id = new Lazy<string>(() =>
         {
             var id = this.GetFullId();
-            Ctx.InvokeVoid("objectTracker.track", id, reference);
+            Ctx.Call("objectTracker.track", id, reference);
 
             return id;
         });

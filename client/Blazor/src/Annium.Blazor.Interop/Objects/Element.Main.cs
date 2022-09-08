@@ -21,12 +21,12 @@ public abstract partial record Element : IObject, IDisposable
 
     public string Style
     {
-        get => Ctx.UInvoke<string, string>("element.getStyle", Id);
-        set => Ctx.UInvokeVoid("element.setStyle", Id, value);
+        get => Ctx.Invoke<string, string>("element.getStyle", Id);
+        set => Ctx.Invoke("element.setStyle", Id, value);
     }
 
     public DomRect GetBoundingClientRect()
-        => Ctx.Invoke<DomRect>("element.getBoundingClientRect", Id);
+        => Ctx.Call<DomRect>("element.getBoundingClientRect", Id);
 
     public void Dispose()
     {
