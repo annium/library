@@ -39,17 +39,18 @@ export default {
 
     // keyboard event
     onKeyboardEvent: (id: string, type: KeyboardEventName, ref: DotNet.DotNetObject, method: string, preventDefault: boolean): number => {
+        let callbackId: number;
         const callback = preventDefault
             ? (e: KeyboardEvent) => {
                 e.preventDefault();
-                ref.invokeMethod(method, type, e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey)
+                ref.invokeMethod(method, callbackId, e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey)
             }
             : (e: KeyboardEvent) => {
-                ref.invokeMethod(method, type, e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey)
+                ref.invokeMethod(method, callbackId, e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey)
             }
         getById(id).addEventListener(type, callback)
 
-        return cbTracker.track(callback)
+        return callbackId = cbTracker.track(callback)
     },
     offKeyboardEvent: (id: string, type: KeyboardEventName, cid: number): void => {
         getById(id).removeEventListener(type, cbTracker.release(cid))
@@ -81,6 +82,9 @@ export default {
     },
     offWheelEvent: (id: string, cid: number): void => {
         getById(id).removeEventListener('wheel', cbTracker.release(cid))
+    },
+    offEvent: (id: string, type: keyof HTMLElementEventMap, cid: number): void => {
+        getById(id).removeEventListener(type, cbTracker.release(cid))
     },
 }
 

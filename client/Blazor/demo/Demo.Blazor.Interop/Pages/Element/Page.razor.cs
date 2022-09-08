@@ -25,8 +25,9 @@ public partial class Page : ILogSubject<Canvas.Page>, IDisposable
     {
         if (!firstRender) return;
 
-        _disposable += _input.OnKeyDown(Handler<KeyboardEvent>("keydown", "input"), true);
-        _disposable += _input.OnKeyUp(Handler<KeyboardEvent>("keyup", "input"), true);
+        _disposable += _input;
+        _input.OnKeyDown(Handler<KeyboardEvent>("keydown", "input"), true);
+        _input.OnKeyUp(Handler<KeyboardEvent>("keyup", "input"), true);
 
         _disposable += _eventsBlock.OnMouseDown(Handler<MouseEvent>("mousedown", "block"));
         _disposable += _eventsBlock.OnMouseUp(Handler<MouseEvent>("mouseup", "block"));
@@ -39,7 +40,7 @@ public partial class Page : ILogSubject<Canvas.Page>, IDisposable
 
     public void Dispose()
     {
-        Console.WriteLine("Element page disposal");
+        _disposable.Dispose();
     }
 
     private Action<T> Handler<T>(string ev, string code) => e => Console.WriteLine($"{code}.{ev}: {e}");

@@ -1,4 +1,6 @@
 const callbacks = new Map<number, Function>()
+// @ts-ignore
+window['callbacks'] = callbacks;
 let id = 0
 
 export default {
