@@ -3,23 +3,20 @@ using Annium.Blazor.Interop.Domain;
 using Annium.Blazor.Interop.Internal;
 using Annium.Blazor.Interop.Internal.Extensions;
 using Annium.Core.Primitives;
-using Microsoft.JSInterop;
 
 namespace Annium.Blazor.Interop;
 
 public abstract partial record Element : IObject, IDisposable
 {
-    protected IInteropContext Ctx => InteropContext.Instance;
+    protected static IInteropContext Ctx => InteropContext.Instance;
     public abstract string Id { get; }
-    private readonly DotNetObjectReference<Element> _ref;
     private readonly DisposableBox _disposable = Disposable.Box();
 
     protected Element()
     {
-        _disposable += _ref = DotNetObjectReference.Create(this);
-        _disposable += _keyboardEvent = new InteropEvent<KeyboardEvent>(nameof(Element), this, _ref);
-        _disposable += _mouseEvent = new InteropEvent<MouseEvent>(nameof(Element), this, _ref);
-        _disposable += _wheelEvent = new InteropEvent<WheelEvent>(nameof(Element), this, _ref);
+        _disposable += _keyboardEvent = new InteropEvent<Element, KeyboardEvent>(this);
+        _disposable += _mouseEvent = new InteropEvent<Element, MouseEvent>(this);
+        _disposable += _wheelEvent = new InteropEvent<Element, WheelEvent>(this);
     }
 
     public string Style

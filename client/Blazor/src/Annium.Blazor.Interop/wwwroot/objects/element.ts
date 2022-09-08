@@ -42,10 +42,10 @@ export default {
         const callback = preventDefault
             ? (e: KeyboardEvent) => {
                 e.preventDefault();
-                ref.invokeMethod(method, callbackId, e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey)
+                ref.invokeMethod(method, callbackId, [e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey])
             }
             : (e: KeyboardEvent) => {
-                ref.invokeMethod(method, callbackId, e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey)
+                ref.invokeMethod(method, callbackId, [e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey])
             }
         getById(id).addEventListener(type, callback)
 
@@ -55,7 +55,7 @@ export default {
         let callbackId: number;
         const callback = (e: MouseEvent) => {
             e.preventDefault();
-            ref.invokeMethod(method, callbackId, e.clientX, e.clientY)
+            ref.invokeMethod(method, callbackId, [e.clientX, e.clientY])
         }
         getById(id).addEventListener(type, callback)
 
@@ -65,7 +65,7 @@ export default {
         let callbackId: number;
         const callback = (e: WheelEvent) => {
             e.preventDefault();
-            ref.invokeMethod(method, callbackId, e.ctrlKey, e.deltaX, e.deltaY)
+            ref.invokeMethod(method, callbackId, [e.ctrlKey, e.deltaX, e.deltaY])
         }
         getById(id).addEventListener(type, callback)
 
