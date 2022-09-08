@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.JSInterop;
 
@@ -12,6 +13,14 @@ public static class InteropContextExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void InvokeVoid(this IInteropContext ctx, string identifier, params object?[]? args)
+        => ctx.InProcessRuntime.InvokeVoid(Call.Name(identifier), args);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T Apply<T>(this IInteropContext ctx, string identifier, object?[] args)
+        => ctx.InProcessRuntime.Invoke<T>(Call.Name(identifier), args);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Apply(this IInteropContext ctx, string identifier, object?[] args)
         => ctx.InProcessRuntime.InvokeVoid(Call.Name(identifier), args);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

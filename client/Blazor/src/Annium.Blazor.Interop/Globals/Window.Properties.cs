@@ -2,10 +2,8 @@ using Annium.Blazor.Interop.Internal.Extensions;
 
 namespace Annium.Blazor.Interop;
 
-public static class Window
+public static partial class Window
 {
-    private static IInteropContext Ctx => InteropContext.Instance;
-
     public static int GetInnerWidth() =>
         Ctx.Invoke<int>("window.innerWidth");
 

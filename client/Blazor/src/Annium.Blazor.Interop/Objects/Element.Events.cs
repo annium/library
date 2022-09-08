@@ -6,9 +6,9 @@ namespace Annium.Blazor.Interop;
 
 public partial record Element
 {
-    private readonly InteropEvent<Element, KeyboardEvent> _keyboardEvent;
-    private readonly InteropEvent<Element, MouseEvent> _mouseEvent;
-    private readonly InteropEvent<Element, WheelEvent> _wheelEvent;
+    private readonly ElementInteropEvent<KeyboardEvent> _keyboardEvent;
+    private readonly ElementInteropEvent<MouseEvent> _mouseEvent;
+    private readonly ElementInteropEvent<WheelEvent> _wheelEvent;
 
     public Action OnMouseDown(Action<MouseEvent> handle) => _mouseEvent.Register(MouseEventEnum.mousedown, handle);
     public Action OnMouseUp(Action<MouseEvent> handle) => _mouseEvent.Register(MouseEventEnum.mouseup, handle);

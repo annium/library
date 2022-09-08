@@ -8,42 +8,41 @@ using Microsoft.JSInterop;
 
 namespace Annium.Blazor.Interop.Internal;
 
-internal sealed record InteropEvent<TContext, TEvent> : IDisposable
-    where TContext : IObject
-    where TEvent : notnull
+internal abstract record InteropEventBase<T> : IDisposable
+    where T : notnull
 {
-    private const string HandleMethod = $"{nameof(InteropEvent<TContext, TEvent>)}.{nameof(Handle)}";
-    private static readonly string BindContext = typeof(TContext).FriendlyName().CamelCase();
+    private const string HandleMethod = $"{nameof(InteropEventBase<T>)}.{nameof(Handle)}";
     private static IInteropContext Ctx => InteropContext.Instance;
-    private static readonly IReadOnlyList<Type> ConstructorTypes = typeof(TEvent).GetConstructors().Single().GetParameters().Select(x => x.ParameterType).ToArray();
-    private readonly TContext _target;
+    private static readonly IReadOnlyList<Type> ConstructorTypes = typeof(T).GetConstructors().Single().GetParameters().Select(x => x.ParameterType).ToArray();
+    private readonly Lazy<string> _target;
     private readonly object _netRef;
-    private readonly IDictionary<int, Action<TEvent>> _handlers = new Dictionary<int, Action<TEvent>>();
+    private readonly IDictionary<int, Action<T>> _handlers = new Dictionary<int, Action<T>>();
     private readonly IList<Action> _disposers = new List<Action>();
     private readonly string _binderName;
     private readonly string _unbinderName;
 
-    public InteropEvent(
-        TContext target
+    protected InteropEventBase(
+        string context,
+        Lazy<string> target
     )
     {
-        _binderName = $"{BindContext}.on{typeof(TEvent).Name}";
-        _unbinderName = $"{BindContext}.offEvent";
+        _binderName = $"{context}.on{typeof(T).Name}";
+        _unbinderName = $"{context}.offEvent";
         _target = target;
         _netRef = DotNetObjectReference.Create(this);
     }
 
-    public Action Register<TKey>(TKey eventKey, Action<TEvent> handle, params object[] args)
+    public Action Register<TKey>(TKey eventKey, Action<T> handle, params object[] args)
         where TKey : notnull
     {
-        var callbackId = Ctx.Invoke<int>(_binderName, new[] { _target.Id, eventKey.ToString(), _netRef, HandleMethod }.Append(args).ToArray());
+        var callbackId = Ctx.Apply<int>(_binderName, GetSharedBindArgs().Concat(new[] { eventKey.ToString(), _netRef, HandleMethod }).Concat(args).ToArray());
         if (!_handlers.TryAdd(callbackId, handle))
             throw OperationException($"failed to add handler {callbackId}");
 
         void Disposer()
         {
             Trace($"remove {callbackId}");
-            Ctx.InvokeVoid(_unbinderName, _target.Id, eventKey.ToString(), callbackId);
+            Ctx.Apply(_unbinderName, GetSharedBindArgs().Concat(new[] { eventKey.ToString(), callbackId.ToString() }).ToArray());
             if (!_handlers.Remove(callbackId))
                 throw OperationException($"failed to remove handler {callbackId}");
         }
@@ -66,7 +65,7 @@ internal sealed record InteropEvent<TContext, TEvent> : IDisposable
             throw OperationException($"failed to find handler {callbackId}");
 
         var values = args.Select((x, i) => x.Deserialize(ConstructorTypes[i])).ToArray();
-        var data = (TEvent) Activator.CreateInstance(typeof(TEvent), values)!;
+        var data = (T) Activator.CreateInstance(typeof(T), values)!;
         handle(data);
     }
 
@@ -79,6 +78,8 @@ internal sealed record InteropEvent<TContext, TEvent> : IDisposable
         Trace("dispose done");
     }
 
+    protected abstract IEnumerable<object> GetSharedBindArgs();
+
     private void Trace(string message) =>
         Console.WriteLine(Message(message));
 
@@ -86,5 +87,5 @@ internal sealed record InteropEvent<TContext, TEvent> : IDisposable
         new(Message(message));
 
     private string Message(string message) =>
-        $"Interop event for {_target.Id}: {typeof(TEvent).FriendlyName()} {message}";
+        $"Interop event for {_target}: {typeof(T).FriendlyName()} {message}";
 }
