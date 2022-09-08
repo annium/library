@@ -41,18 +41,15 @@ internal abstract record InteropEventBase<T> : IDisposable
 
         void Disposer()
         {
-            Trace($"remove {callbackId}");
             Ctx.Apply(_unbinderName, GetSharedBindArgs().Concat(new[] { eventKey.ToString(), callbackId.ToString() }).ToArray());
             if (!_handlers.Remove(callbackId))
                 throw OperationException($"failed to remove handler {callbackId}");
         }
 
-        Trace($"register {callbackId}");
         _disposers.Add(Disposer);
 
         return () =>
         {
-            Trace($"unregister {callbackId}");
             if (_disposers.Remove(Disposer))
                 Disposer();
         };
@@ -71,17 +68,12 @@ internal abstract record InteropEventBase<T> : IDisposable
 
     public void Dispose()
     {
-        Trace("dispose start");
         foreach (var dispose in _disposers)
             dispose();
         _disposers.Clear();
-        Trace("dispose done");
     }
 
     protected abstract IEnumerable<object> GetSharedBindArgs();
-
-    private void Trace(string message) =>
-        Console.WriteLine(Message(message));
 
     private InvalidOperationException OperationException(string message) =>
         new(Message(message));
