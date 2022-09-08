@@ -1,14 +1,17 @@
 const callbacks = new Map<number, Function>()
-// @ts-ignore
-window['callbacks'] = callbacks;
+
 let id = 0
 
+export type Callback<T> = T & { id: number }
+
 export default {
-    track: (cb: Function): number => {
+    track: <T extends Function>(cb: T): Callback<T> => {
         const cid = id++
         callbacks.set(cid, cb)
+        const callback = cb as Callback<T>
+        callback.id = cid
 
-        return cid
+        return callback
     },
     release: <T extends Function>(id: number): T => {
         const cb = callbacks.get(id)
