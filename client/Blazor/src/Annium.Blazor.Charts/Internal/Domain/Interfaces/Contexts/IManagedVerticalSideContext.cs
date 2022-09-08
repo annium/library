@@ -5,5 +5,6 @@ namespace Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 
 internal interface IManagedVerticalSideContext : IVerticalSideContext
 {
-    void Init(Canvas canvas, Canvas overlay, DomRect rect);
+    void Init(Canvas canvas, Canvas overlay);
+    void SetRect(DomRect rect);
 }

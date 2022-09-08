@@ -7,7 +7,8 @@ namespace Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 
 internal interface IManagedChartContext : IChartContext
 {
-    void Init(Element container);
+    DomRect Rect { get; }
+    void SetRect(DomRect rect);
     void Update();
     void SetLookup(Instant? moment, Point? point);
     bool TryDraw();

@@ -32,13 +32,13 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
     public ValueRange<Instant> Bounds => _bounds;
     public ValueRange<Instant> View => _view;
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
+    public DomRect Rect { get; private set; }
 
     private List<int> _zooms = new() { 1 };
     private List<Duration> _resolutions = new() { Duration.FromMinutes(1) };
     private readonly List<IPaneContext> _panes = new();
     private readonly ManagedValueRange<Instant> _bounds = ValueRange.Create(FutureBound, PastBound);
     private readonly ManagedValueRange<Instant> _view = ValueRange.Create(FutureBound, PastBound);
-    private DomRect _rect;
     private int _isCanvasDirty = 1;
     private (Point?, bool) _overlayRequest;
 
@@ -53,9 +53,10 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
         SetResolution(_resolutions[0]);
     }
 
-    public void Init(Element container)
+    public void SetRect(DomRect rect)
     {
-        _rect = container.GetBoundingClientRect();
+        Rect = rect;
+        RequestDraw();
     }
 
     public void Configure(
@@ -96,7 +97,7 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
 
     public void Update()
     {
-        var size = _rect.Width.FloorInt32() * Duration.FromMilliseconds(MsPerPx);
+        var size = Rect.Width.FloorInt32() * Duration.FromMilliseconds(MsPerPx);
         _view.Set(Moment - size, Moment);
         Updated();
     }

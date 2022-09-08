@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Data.Sources;
+using Annium.Blazor.Interop;
 using Annium.Data.Models;
 using NodaTime;
 
@@ -14,8 +15,7 @@ public interface IPaneContext
     ISeriesContext Series { get; }
     IHorizontalSideContext? Bottom { get; }
     IVerticalSideContext? Right { get; }
-    int Width { get; }
-    int Height { get; }
+    DomRect Rect { get; }
     decimal DotPerPx { get; }
     bool IsLocked { get; }
     ValueRange<Instant> Bounds { get; }

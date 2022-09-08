@@ -12,17 +12,17 @@ internal sealed record HorizontalSideContext : IManagedHorizontalSideContext
     public DomRect Rect { get; private set; }
     private int _isInitiated;
 
-    public void Init(
-        Canvas canvas,
-        Canvas overlay,
-        DomRect rect
-    )
+    public void Init(Canvas canvas, Canvas overlay)
     {
         if (Interlocked.CompareExchange(ref _isInitiated, 1, 0) != 0)
             throw new InvalidOperationException($"Can't init {nameof(VerticalSideContext)} more than once");
 
         Canvas = canvas;
         Overlay = overlay;
+    }
+
+    public void SetRect(DomRect rect)
+    {
         Rect = rect;
     }
 }

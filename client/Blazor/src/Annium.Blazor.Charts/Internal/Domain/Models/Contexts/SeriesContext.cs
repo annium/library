@@ -14,8 +14,7 @@ internal sealed record SeriesContext : IManagedSeriesContext
 
     public void Init(
         Canvas canvas,
-        Canvas overlay,
-        DomRect rect
+        Canvas overlay
     )
     {
         if (Interlocked.CompareExchange(ref _isInitiated, 1, 0) != 0)
@@ -23,6 +22,10 @@ internal sealed record SeriesContext : IManagedSeriesContext
 
         Canvas = canvas;
         Overlay = overlay;
+    }
+
+    public void SetRect(DomRect rect)
+    {
         Rect = rect;
     }
 }

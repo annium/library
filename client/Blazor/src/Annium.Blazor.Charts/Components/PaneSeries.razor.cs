@@ -44,17 +44,24 @@ public partial class PaneSeries : ILogSubject<PaneSeries>, IAsyncDisposable
     {
         if (!firstRender) return;
 
-        var rect = _block.GetBoundingClientRect();
-        var width = _overlay.Width = _canvas.Width = rect.Width.CeilInt32();
-        var height = _overlay.Height = _canvas.Height = rect.Height.CeilInt32();
-        PaneContext.SetSize(width, height);
-        SeriesContext.Init(_canvas, _overlay, rect);
+        SetSize();
+        SeriesContext.Init(_canvas, _overlay);
         PaneContext.SetSeries(SeriesContext);
 
         _disposable += ChartContext.OnUpdate(Draw);
         _disposable += _block;
         _disposable += _canvas;
         _disposable += _overlay;
+        _disposable += Window.OnResize(_ => SetSize());
+    }
+
+    private void SetSize()
+    {
+        var rect = _block.GetBoundingClientRect();
+        _overlay.Width = _canvas.Width = rect.Width.CeilInt32();
+        _overlay.Height = _canvas.Height = rect.Height.CeilInt32();
+        PaneContext.SetRect(rect);
+        SeriesContext.SetRect(rect);
     }
 
     private void Draw()

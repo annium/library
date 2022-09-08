@@ -5,6 +5,7 @@ using System.Threading;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
+using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
 using Annium.Logging.Abstractions;
@@ -21,8 +22,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
     public ISeriesContext Series { get; private set; } = default!;
     public IHorizontalSideContext? Bottom { get; set; }
     public IVerticalSideContext? Right { get; set; }
-    public int Width { get; private set; }
-    public int Height { get; private set; }
+    public DomRect Rect { get; private set; }
     public decimal DotPerPx { get; private set; }
     public bool IsLocked => _sources.Any(x => x.IsLoading);
     public ValueRange<Instant> Bounds => _bounds;
@@ -45,10 +45,10 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         Chart = chart;
     }
 
-    public void SetSize(int width, int height)
+    public void SetRect(DomRect rect)
     {
-        Width = width;
-        Height = height;
+        Rect = rect;
+        Chart.RequestDraw();
         UpdateDotPerPx();
     }
 
@@ -129,7 +129,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         Right = right;
     }
 
-    private void UpdateDotPerPx() => DotPerPx = Height == 0 ? 0 : (_view.End - _view.Start) / Height;
+    private void UpdateDotPerPx() => DotPerPx = Rect.Height == 0 ? 0 : (_view.End - _view.Start) / Rect.Height;
 
     private void UpdateBounds(ValueRange<Instant> bounds)
     {

@@ -44,16 +44,23 @@ public partial class PaneRight : ILogSubject<PaneRight>, IAsyncDisposable
     {
         if (!firstRender) return;
 
-        var rect = _block.GetBoundingClientRect();
-        _overlay.Width = _canvas.Width = rect.Width.CeilInt32();
-        _overlay.Height = _canvas.Height = rect.Height.CeilInt32();
-        SideContext.Init(_canvas, _overlay, rect);
+        SetSize();
+        SideContext.Init(_canvas, _overlay);
         PaneContext.SetRight(SideContext);
 
         _disposable += ChartContext.OnUpdate(Draw);
         _disposable += _block;
         _disposable += _canvas;
         _disposable += _overlay;
+        _disposable += Window.OnResize(_ => SetSize());
+    }
+
+    private void SetSize()
+    {
+        var rect = _block.GetBoundingClientRect();
+        _overlay.Width = _canvas.Width = rect.Width.CeilInt32();
+        _overlay.Height = _canvas.Height = rect.Height.CeilInt32();
+        SideContext.SetRect(rect);
     }
 
     private void Draw()

@@ -30,7 +30,7 @@ internal abstract record CacheChunkBase<T>
 
     private void Validate()
     {
-        if (Range.Start >= Range.End)
+        if (Range.Start > Range.End)
             throw new InvalidOperationException($"Invalid chunk: {Range} is invalid");
     }
 
