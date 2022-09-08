@@ -37,7 +37,6 @@ export default {
 
     /* events */
 
-    // keyboard event
     onKeyboardEvent: (id: string, type: KeyboardEventName, ref: DotNet.DotNetObject, method: string, preventDefault: boolean): number => {
         let callbackId: number;
         const callback = preventDefault
@@ -52,36 +51,25 @@ export default {
 
         return callbackId = cbTracker.track(callback)
     },
-    offKeyboardEvent: (id: string, type: KeyboardEventName, cid: number): void => {
-        getById(id).removeEventListener(type, cbTracker.release(cid))
-    },
-
-    // mouse event
     onMouseEvent: (id: string, type: MouseEventName, ref: DotNet.DotNetObject, method: string): number => {
+        let callbackId: number;
         const callback = (e: MouseEvent) => {
             e.preventDefault();
-            ref.invokeMethod(method, type, e.clientX, e.clientY)
+            ref.invokeMethod(method, callbackId, e.clientX, e.clientY)
         }
         getById(id).addEventListener(type, callback)
 
-        return cbTracker.track(callback)
+        return callbackId = cbTracker.track(callback)
     },
-    offMouseEvent: (id: string, type: MouseEventName, cid: number): void => {
-        getById(id).removeEventListener(type, cbTracker.release(cid))
-    },
-
-    // wheel event
-    onWheelEvent: (id: string, ref: DotNet.DotNetObject, method: string): number => {
+    onWheelEvent: (id: string, type: 'wheel', ref: DotNet.DotNetObject, method: string): number => {
+        let callbackId: number;
         const callback = (e: WheelEvent) => {
             e.preventDefault();
-            ref.invokeMethod(method, e.ctrlKey, e.deltaX, e.deltaY)
+            ref.invokeMethod(method, callbackId, e.ctrlKey, e.deltaX, e.deltaY)
         }
-        getById(id).addEventListener('wheel', callback)
+        getById(id).addEventListener(type, callback)
 
-        return cbTracker.track(callback)
-    },
-    offWheelEvent: (id: string, cid: number): void => {
-        getById(id).removeEventListener('wheel', cbTracker.release(cid))
+        return callbackId = cbTracker.track(callback)
     },
     offEvent: (id: string, type: keyof HTMLElementEventMap, cid: number): void => {
         getById(id).removeEventListener(type, cbTracker.release(cid))

@@ -36,6 +36,7 @@ public partial class Page : ILogSubject<Canvas.Page>, IDisposable
         _disposable += _eventsBlock.OnMouseOver(Handler<MouseEvent>("mouseover", "block"));
         _disposable += _eventsBlock.OnMouseOut(Handler<MouseEvent>("mouseout", "block"));
         _disposable += _eventsBlock.OnMouseMove(Handler<MouseEvent>("mousemove", "block"));
+        _disposable += _eventsBlock.OnWheel(Handler<WheelEvent>("wheel", "block"));
     }
 
     public void Dispose()
