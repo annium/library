@@ -12,7 +12,6 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../Annium.Blazor.Css/Annium.Blazor.Css.csproj" />
         <ProjectReference Include="../../../shared/src/Annium.Components.State.Forms/Annium.Components.State.Forms.csproj" />
     </ItemGroup>
     <ItemGroup>
