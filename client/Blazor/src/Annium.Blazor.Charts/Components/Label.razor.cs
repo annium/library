@@ -38,13 +38,13 @@ public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
     public int? Bottom { get; set; }
 
     [Parameter]
-    public string LabelFontFamily { get; set; } = SeriesLabelFontFamily;
+    public string FontFamily { get; set; } = SeriesLabelFontFamily;
 
     [Parameter]
-    public int LabelFontSize { get; set; } = SeriesLabelFontSize;
+    public int FontSize { get; set; } = SeriesLabelFontSize;
 
     [Parameter]
-    public string LabelStyle { get; set; } = SeriesLabelStyle;
+    public string Style { get; set; } = SeriesLabelStyle;
 
     [CascadingParameter]
     public IChartContext ChartContext { get; set; } = default!;
@@ -91,8 +91,8 @@ public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
         ctx.Save();
 
         var text = GetText(item);
-        ctx.Font = $"{LabelFontSize}px {LabelFontFamily}";
-        ctx.FillStyle = LabelStyle;
+        ctx.Font = $"{FontSize}px {FontFamily}";
+        ctx.FillStyle = Style;
         ctx.TextBaseline = CanvasTextBaseline.middle;
         ctx.FillText(text, x, y);
 
