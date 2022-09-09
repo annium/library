@@ -116,7 +116,7 @@ public partial class Crosshair : ILogSubject<Crosshair>, IAsyncDisposable
 
                 var dateTime = moment.InZone(ChartContext.TimeZone);
                 var text = dateTime.ToString("dd.MM.yy HH:mm", null);
-                var textSize = ctx.MeasureText(text);
+                var textSize = ctx.MeasureTextWidth(text);
 
                 var backOffset = (textSize / 1.7d).CeilInt32();
                 ctx.FillStyle = LabelBackground;

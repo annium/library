@@ -154,8 +154,12 @@ export default {
         else
             ctx.strokeText(js.readString(data, 4), js.readInt(data, 8), js.readInt(data, 12))
     },
-    measureText: function (data: number): number {
+    measureTextWidth: function (data: number): number {
         return Math.ceil(getContext(data).measureText(js.readString(data, 4)).width)
+    },
+    measureTextHeight: function (data: number): number {
+        const metrics = getContext(data).measureText(js.readString(data, 4));
+        return Math.ceil(metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent);
     },
 
     // state

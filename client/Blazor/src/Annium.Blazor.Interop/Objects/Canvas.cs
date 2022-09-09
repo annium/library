@@ -118,8 +118,11 @@ public sealed record Canvas : ReferenceElement
     public void StrokeText(string text, int x, int y, int maxWidth = 0) =>
         Ctx.Invoke("canvas.strokeText", Id, text, x, y, maxWidth);
 
-    public int MeasureText(string text) =>
-        Ctx.Invoke<string, string, int>("canvas.measureText", Id, text);
+    public int MeasureTextWidth(string text) =>
+        Ctx.Invoke<string, string, int>("canvas.measureTextWidth", Id, text);
+
+    public int MeasureTextHeight(string text) =>
+        Ctx.Invoke<string, string, int>("canvas.measureTextHeight", Id, text);
 
     public void Save() =>
         Ctx.Invoke("canvas.save", Id);

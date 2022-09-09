@@ -58,7 +58,7 @@ public partial class XAxis : ILogSubject<XAxis>, IAsyncDisposable
             if (m.IsMidnight())
             {
                 var text = m.ToString("dd.MM", null);
-                var offset = ((double) ctx.MeasureText(text) / 2).CeilInt32();
+                var offset = ((double) ctx.MeasureTextWidth(text) / 2).CeilInt32();
 
                 ctx.Font = $"bold {LabelFontSize}px {LabelFontFamily}";
                 ctx.FillText(text, x - offset, baseline);
@@ -67,7 +67,7 @@ public partial class XAxis : ILogSubject<XAxis>, IAsyncDisposable
             else
             {
                 var text = m.ToString("HH:mm", null);
-                var offset = ((double) ctx.MeasureText(text) / 2).CeilInt32();
+                var offset = ((double) ctx.MeasureTextWidth(text) / 2).CeilInt32();
 
                 ctx.FillText(text, x - offset, baseline);
             }
