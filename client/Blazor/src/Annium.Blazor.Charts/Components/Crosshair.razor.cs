@@ -78,8 +78,6 @@ public partial class Crosshair : ILogSubject<Crosshair>, IAsyncDisposable
 
                 var y = point.Y - ctxY + 0.5f;
 
-                ctx.ClearRect(0, 0, ctxWidth, ctxHeight);
-
                 // crosshair
                 ctx.BeginPath();
 
@@ -104,12 +102,9 @@ public partial class Crosshair : ILogSubject<Crosshair>, IAsyncDisposable
                 var ctx = pane.Bottom.Overlay;
                 var rect = pane.Bottom.Rect;
                 var ctxX = rect.X.FloorInt32();
-                var ctxWidth = rect.Width.CeilInt32();
                 var ctxHeight = rect.Height.CeilInt32();
 
                 ctx.Save();
-
-                ctx.ClearRect(0, 0, ctxWidth, ctxHeight);
 
                 ctx.Font = $"{LabelFontSize}px {LabelFontFamily}";
                 ctx.FillStyle = LabelStyle;
@@ -138,11 +133,8 @@ public partial class Crosshair : ILogSubject<Crosshair>, IAsyncDisposable
                 var rect = pane.Right.Rect;
                 var ctxY = rect.Y.FloorInt32();
                 var ctxWidth = rect.Width.CeilInt32();
-                var ctxHeight = rect.Height.CeilInt32();
 
                 ctx.Save();
-
-                ctx.ClearRect(0, 0, ctxWidth, ctxHeight);
 
                 var backOffset = (LabelFontSize * 0.85d).CeilInt32();
                 ctx.FillStyle = LabelBackground;

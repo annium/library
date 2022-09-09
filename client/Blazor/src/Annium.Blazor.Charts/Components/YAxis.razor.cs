@@ -49,8 +49,6 @@ public partial class YAxis : ILogSubject<YAxis>, IAsyncDisposable
 
         ctx.Save();
 
-        ctx.ClearRect(0, 0, SideContext.Rect.Width.CeilInt32(), SideContext.Rect.Height.CeilInt32());
-
         ctx.Font = $"{LabelFontSize}px {LabelFontFamily}";
         ctx.FillStyle = LabelStyle;
         ctx.TextBaseline = CanvasTextBaseline.middle;

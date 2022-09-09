@@ -37,12 +37,6 @@ public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
     [Parameter]
     public int? Bottom { get; set; }
 
-    [Parameter, EditorRequired]
-    public int Width { get; set; }
-
-    [Parameter, EditorRequired]
-    public int Height { get; set; }
-
     [Parameter]
     public string LabelFontFamily { get; set; } = SeriesLabelFontFamily;
 
@@ -90,8 +84,6 @@ public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
 
         var ctx = SeriesContext.Overlay;
         var rect = SeriesContext.Rect;
-
-        ctx.ClearRect(0, 0, Width, Height);
 
         var x = Left ?? rect.Width.FloorInt32() - Right!.Value;
         var y = Top ?? rect.Height.FloorInt32() - Bottom!.Value;
