@@ -26,16 +26,16 @@ public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
     public LookupMatch Match { get; set; } = LookupMatch.Exact;
 
     [Parameter]
-    public int? Left { get; set; }
+    public Func<T, int>? GetLeft { get; set; }
 
     [Parameter]
-    public int? Right { get; set; }
+    public Func<T, int>? GetRight { get; set; }
 
     [Parameter]
-    public int? Top { get; set; }
+    public Func<T, int>? GetTop { get; set; }
 
     [Parameter]
-    public int? Bottom { get; set; }
+    public Func<T, int>? GetBottom { get; set; }
 
     [Parameter]
     public string FontFamily { get; set; } = SeriesLabelFontFamily;
@@ -44,7 +44,7 @@ public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
     public int FontSize { get; set; } = SeriesLabelFontSize;
 
     [Parameter]
-    public string Style { get; set; } = SeriesLabelStyle;
+    public Func<T, string> GetColor { get; set; } = _ => SeriesLabelStyle;
 
     [CascadingParameter]
     public IChartContext ChartContext { get; set; } = default!;
@@ -59,11 +59,11 @@ public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
 
     protected override void OnParametersSet()
     {
-        if (!Left.HasValue && !Right.HasValue)
-            throw new ArgumentException($"Either {nameof(Left)} or {nameof(Right)} must be specified");
+        if (GetLeft is null && GetRight is null)
+            throw new ArgumentException($"Either {nameof(GetLeft)} or {nameof(GetRight)} must be specified");
 
-        if (!Top.HasValue && !Bottom.HasValue)
-            throw new ArgumentException($"Either {nameof(Top)} or {nameof(Bottom)} must be specified");
+        if (GetTop is null && GetBottom is null)
+            throw new ArgumentException($"Either {nameof(GetTop)} or {nameof(GetBottom)} must be specified");
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -85,14 +85,14 @@ public partial class Label<T> : ILogSubject<Label<T>>, IAsyncDisposable
         var ctx = SeriesContext.Overlay;
         var rect = SeriesContext.Rect;
 
-        var x = Left ?? rect.Width.FloorInt32() - Right!.Value;
-        var y = Top ?? rect.Height.FloorInt32() - Bottom!.Value;
+        var x = GetLeft?.Invoke(item) ?? rect.Width.FloorInt32() - GetRight!(item);
+        var y = GetTop?.Invoke(item) ?? rect.Width.FloorInt32() - GetBottom!(item);
 
         ctx.Save();
 
         var text = GetText(item);
         ctx.Font = $"{FontSize}px {FontFamily}";
-        ctx.FillStyle = Style;
+        ctx.FillStyle = GetColor(item);
         ctx.TextBaseline = CanvasTextBaseline.middle;
         ctx.FillText(text, x, y);
 
