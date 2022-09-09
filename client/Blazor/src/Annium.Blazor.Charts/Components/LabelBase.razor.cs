@@ -16,22 +16,22 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
     // where T : ITimeSeries
 {
     [Parameter, EditorRequired]
-    public OneOf<string, Func<T, string>, Func<Instant, T, string>> GetText { get; set; }
+    public OneOf<string, Func<T, string>, Func<Instant, T, string>> Text { get; set; }
 
     [Parameter]
     public LookupMatch Match { get; set; } = LookupMatch.Exact;
 
     [Parameter]
-    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, T, int>>? GetLeft { get; set; }
+    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, T, int>>? Left { get; set; }
 
     [Parameter]
-    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, T, int>>? GetRight { get; set; }
+    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, T, int>>? Right { get; set; }
 
     [Parameter]
-    public OneOf<int, Func<T, int>, Func<IPaneContext, T, int>>? GetTop { get; set; }
+    public OneOf<int, Func<T, int>, Func<IPaneContext, T, int>>? Top { get; set; }
 
     [Parameter]
-    public OneOf<int, Func<T, int>, Func<IPaneContext, T, int>>? GetBottom { get; set; }
+    public OneOf<int, Func<T, int>, Func<IPaneContext, T, int>>? Bottom { get; set; }
 
     [Parameter]
     public string FontFamily { get; set; } = SeriesLabelFontFamily;
@@ -55,11 +55,11 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
 
     protected override void OnParametersSet()
     {
-        if (GetLeft is null && GetRight is null)
-            throw new ArgumentException($"Either {nameof(GetLeft)} or {nameof(GetRight)} must be specified");
+        if (Left is null && Right is null)
+            throw new ArgumentException($"Either {nameof(Left)} or {nameof(Right)} must be specified");
 
-        if (GetTop is null && GetBottom is null)
-            throw new ArgumentException($"Either {nameof(GetTop)} or {nameof(GetBottom)} must be specified");
+        if (Top is null && Bottom is null)
+            throw new ArgumentException($"Either {nameof(Top)} or {nameof(Bottom)} must be specified");
     }
 
     protected void RenderItems(Instant moment, IReadOnlyCollection<T> items)
@@ -74,10 +74,10 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
 
         foreach (var item in items)
         {
-            var x = GetX(GetLeft, moment, item) ?? rect.Width.FloorInt32() - GetX(GetRight, moment, item)!.Value;
-            var y = GetY(GetTop, item) ?? rect.Height.FloorInt32() - GetY(GetBottom, item)!.Value;
+            var x = GetX(Left, moment, item) ?? rect.Width.FloorInt32() - GetX(Right, moment, item)!.Value;
+            var y = GetY(Top, item) ?? rect.Height.FloorInt32() - GetY(Bottom, item)!.Value;
 
-            var text = GetText.Match(
+            var text = Text.Match(
                 value => value,
                 get => get(item),
                 get => get(moment, item)
