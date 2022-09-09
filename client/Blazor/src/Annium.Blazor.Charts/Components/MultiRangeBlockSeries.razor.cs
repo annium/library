@@ -12,6 +12,7 @@ using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 using NodaTime;
+using OneOf;
 
 namespace Annium.Blazor.Charts.Components;
 
@@ -23,7 +24,10 @@ public partial class MultiRangeBlockSeries<TM, TI> : ILogSubject<MultiRangeBlock
     public ISeriesSource<TM> Source { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public Func<TI, string> GetItemColor { get; set; } = delegate { return string.Empty; };
+    public OneOf<string, Func<TI, string>> ItemColor { get; set; }
+
+    [Parameter]
+    public bool Centered { get; set; }
 
     [CascadingParameter]
     public IChartContext ChartContext { get; set; } = default!;
@@ -81,13 +85,15 @@ public partial class MultiRangeBlockSeries<TM, TI> : ILogSubject<MultiRangeBlock
         }
 
         this.Log().Trace("render {count} in range {min} - {max}", items.Count, min, max);
+        var width = GetWidth();
+        var offset = Centered ? width == 1 ? 0 : ((double) width / 2).CeilInt32() : 0;
         var ctx = SeriesContext.Canvas;
 
         ctx.Save();
 
         for (var i = 0; i < items.Count - 1; i++)
-            RenderItem(ctx, items[i], items[i + 1].Moment);
-        RenderItem(ctx, items[^1], ChartContext.View.End);
+            RenderItem(ctx, items[i], items[i + 1].Moment, offset);
+        RenderItem(ctx, items[^1], ChartContext.View.End, offset);
 
         ctx.Restore();
     }
@@ -96,21 +102,21 @@ public partial class MultiRangeBlockSeries<TM, TI> : ILogSubject<MultiRangeBlock
     private void RenderItem(
         Canvas ctx,
         TM item,
-        Instant to
+        Instant to,
+        int offset
     )
     {
         var left = PaneContext.ToX(item.Moment);
         var right = PaneContext.ToX(to);
         var width = right - left;
 
-
         foreach (var range in item.Values)
         {
-            ctx.FillStyle = GetItemColor(range);
+            ctx.FillStyle = ItemColor.Match(value => value, get => get(range));
             var low = PaneContext.ToY(range.Low);
             var high = PaneContext.ToY(range.High);
 
-            ctx.FillRect(left, high, width, low - high);
+            ctx.FillRect(left - offset, high, width, low - high);
         }
     }
 
@@ -126,6 +132,13 @@ public partial class MultiRangeBlockSeries<TM, TI> : ILogSubject<MultiRangeBlock
         }
 
         return (min, max);
+    }
+
+    private int GetWidth()
+    {
+        var width = ChartContext.PxPerResolution.Above(1);
+
+        return width % 2 == 1 ? width : width - 1;
     }
 
     public ValueTask DisposeAsync()
