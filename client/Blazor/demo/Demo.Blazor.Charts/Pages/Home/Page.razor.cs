@@ -5,13 +5,10 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
-using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
 using Annium.Core.Primitives;
 using Annium.Core.Primitives.Collections.Generic;
-using Annium.Logging.Abstractions;
 using Annium.Net.Http;
-using Annium.Serialization.Abstractions;
 using Demo.Blazor.Charts.Domain;
 using Microsoft.AspNetCore.Components;
 using NodaTime;
@@ -21,16 +18,10 @@ namespace Demo.Blazor.Charts.Pages.Home;
 public partial class Page
 {
     [Inject]
-    private ITimeProvider TimeProvider { get; set; } = default!;
-
-    [Inject]
     private IChartContext ChartContext { get; set; } = default!;
 
     [Inject]
     private IHttpRequestFactory Api { get; set; } = default!;
-
-    [Inject]
-    private IIndex<SerializerKey, ISerializer<string>> Serializers { get; set; } = default!;
 
     [Inject]
     private ISeriesSourceFactory SeriesSourceFactory { get; set; } = default!;
@@ -41,11 +32,9 @@ public partial class Page
     [Inject]
     private Style Styles { get; set; } = default!;
 
-    [Inject]
-    public ILogger<Page> Logger { get; set; } = default!;
-
     private ISeriesSource<Candle> _candleSeries = default!;
     private ISeriesSource<PlainValue> _openSeries = default!;
+    private ISeriesSource<MultiRangeValue<RangeItem>> _rangeSeries = default!;
 
     protected override void OnInitialized()
     {
@@ -53,6 +42,15 @@ public partial class Page
 
         _candleSeries = SeriesSourceFactory.CreateChecked(ChartContext.Resolution, LoadCandles);
         _openSeries = SeriesSourceFactory.CreateChecked(_candleSeries, (x, _, _) => new PlainValue(x.Moment, x.Open).Yield());
+        _rangeSeries = SeriesSourceFactory.CreateChecked(
+            _candleSeries,
+            (x, _, _) => new MultiRangeValue<RangeItem>(x.Moment, new[]
+                {
+                    new RangeItem(2 * x.Low - x.High, x.Low),
+                    new RangeItem(x.High, 2 * x.High - x.Low)
+                }
+            ).Yield()
+        );
     }
 
     private async Task<IReadOnlyList<Candle>> LoadCandles(

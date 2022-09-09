@@ -8,6 +8,7 @@
         <PaneSeries>
             <CandleSeries T="Candle" Source="@_candleSeries" />
             <Label T="Candle" Source="@_candleSeries" Text="@((Func<Candle, string>) GetLabel)" Top="20" Left="20" />
+            <MultiRangeBlockSeries TM="MultiRangeValue<RangeItem>" TI="RangeItem" Source="_rangeSeries" ItemColor="@("rgba(50, 0, 150, 0.5)")" />
             <Resolution CssClass="@Styles.Resolution" />
         </PaneSeries>
         <PaneRight CssClass="@Styles.PaneRight">
