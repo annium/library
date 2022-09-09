@@ -6,11 +6,11 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class Label<T> : LabelBase<T>
-    where T : ITimeSeries
+public partial class MultiLabel<TValue, TItem> : LabelBase<TItem>
+    where TValue : IMultiValue<TItem>
 {
     [Parameter, EditorRequired]
-    public ISeriesSource<T> Source { get; set; } = default!;
+    public ISeriesSource<TValue> Source { get; set; } = default!;
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -28,6 +28,6 @@ public partial class Label<T> : LabelBase<T>
 
         var item = Source.GetItem(moment.Value, Match);
         if (item is not null)
-            RenderItems(moment.Value, new[] { item });
+            RenderItems(moment.Value, item.Values);
     }
 }

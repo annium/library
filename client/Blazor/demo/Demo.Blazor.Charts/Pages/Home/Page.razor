@@ -7,7 +7,7 @@
     <Pane CssClass="@Styles.CandlesPane">
         <PaneSeries>
             <CandleSeries T="Candle" Source="@_candleSeries" />
-            <Label T="Candle" Source="@_candleSeries" GetText="GetLabel" GetTop="_ => 20" GetLeft="_ => 20" />
+            <Label T="Candle" Source="@_candleSeries" GetText="@((Func<Candle, string>) GetLabel)" GetTop="20" GetLeft="20" />
             <Resolution CssClass="@Styles.Resolution" />
         </PaneSeries>
         <PaneRight CssClass="@Styles.PaneRight">

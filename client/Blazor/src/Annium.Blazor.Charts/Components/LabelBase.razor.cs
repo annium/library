@@ -3,34 +3,35 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
-using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Components;
+using NodaTime;
+using OneOf;
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
 public abstract partial class LabelBase<T> : IAsyncDisposable
-    where T : ITimeSeries
+    // where T : ITimeSeries
 {
     [Parameter, EditorRequired]
-    public Func<T, string> GetText { get; set; } = default!;
+    public OneOf<string, Func<T, string>, Func<Instant, T, string>> GetText { get; set; }
 
     [Parameter]
     public LookupMatch Match { get; set; } = LookupMatch.Exact;
 
     [Parameter]
-    public Func<T, int>? GetLeft { get; set; }
+    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, T, int>>? GetLeft { get; set; }
 
     [Parameter]
-    public Func<T, int>? GetRight { get; set; }
+    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, T, int>>? GetRight { get; set; }
 
     [Parameter]
-    public Func<T, int>? GetTop { get; set; }
+    public OneOf<int, Func<T, int>, Func<IPaneContext, T, int>>? GetTop { get; set; }
 
     [Parameter]
-    public Func<T, int>? GetBottom { get; set; }
+    public OneOf<int, Func<T, int>, Func<IPaneContext, T, int>>? GetBottom { get; set; }
 
     [Parameter]
     public string FontFamily { get; set; } = SeriesLabelFontFamily;
@@ -39,10 +40,13 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
     public int FontSize { get; set; } = SeriesLabelFontSize;
 
     [Parameter]
-    public Func<T, string> GetColor { get; set; } = _ => SeriesLabelStyle;
+    public OneOf<string, Func<T, string>> GetColor { get; set; } = SeriesLabelStyle;
 
     [CascadingParameter]
     public IChartContext ChartContext { get; set; } = default!;
+
+    [CascadingParameter]
+    internal IPaneContext PaneContext { get; set; } = default!;
 
     [CascadingParameter]
     public ISeriesContext SeriesContext { get; set; } = default!;
@@ -58,7 +62,7 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
             throw new ArgumentException($"Either {nameof(GetTop)} or {nameof(GetBottom)} must be specified");
     }
 
-    protected void RenderItems(IReadOnlyCollection<T> items)
+    protected void RenderItems(Instant moment, IReadOnlyCollection<T> items)
     {
         if (items.Count == 0)
             return;
@@ -70,18 +74,45 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
 
         foreach (var item in items)
         {
-            var x = GetLeft?.Invoke(item) ?? rect.Width.FloorInt32() - GetRight!(item);
-            var y = GetTop?.Invoke(item) ?? rect.Width.FloorInt32() - GetBottom!(item);
+            var x = GetX(GetLeft, moment, item) ?? rect.Width.FloorInt32() - GetX(GetRight, moment, item)!.Value;
+            var y = GetY(GetTop, item) ?? rect.Height.FloorInt32() - GetY(GetBottom, item)!.Value;
 
-
-            var text = GetText(item);
+            var text = GetText.Match(
+                value => value,
+                get => get(item),
+                get => get(moment, item)
+            );
             ctx.Font = $"{FontSize}px {FontFamily}";
-            ctx.FillStyle = GetColor(item);
+            ctx.FillStyle = GetColor.Match(value => value, get => get(item));
             ctx.TextBaseline = CanvasTextBaseline.middle;
             ctx.FillText(text, x, y);
         }
 
         ctx.Restore();
+    }
+
+    private int? GetX(OneOf<int, Func<T, int>, Func<IPaneContext, Instant, T, int>>? getter, Instant moment, T item)
+    {
+        if (!getter.HasValue)
+            return null;
+
+        return getter.Value.Match(
+            value => value,
+            get => get(item),
+            get => get(PaneContext, moment, item)
+        );
+    }
+
+    private int? GetY(OneOf<int, Func<T, int>, Func<IPaneContext, T, int>>? getter, T item)
+    {
+        if (!getter.HasValue)
+            return null;
+
+        return getter.Value.Match(
+            value => value,
+            get => get(item),
+            get => get(PaneContext, item)
+        );
     }
 
     public ValueTask DisposeAsync()

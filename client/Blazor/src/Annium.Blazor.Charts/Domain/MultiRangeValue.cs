@@ -4,7 +4,7 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Domain;
 
-public record MultiRangeValue<T>(Instant Moment, IReadOnlyCollection<T> Ranges) : ITimeSeries, IComparable<MultiRangeValue<T>>, IComparable<Instant>
+public record MultiRangeValue<T>(Instant Moment, IReadOnlyCollection<T> Values) : IMultiValue<T>, IComparable<MultiRangeValue<T>>, IComparable<Instant>
     where T : RangeItem
 {
     public int CompareTo(MultiRangeValue<T>? other) => Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));

@@ -104,7 +104,7 @@ public partial class MultiRangeBlockSeries<TM, TI> : ILogSubject<MultiRangeBlock
         var width = right - left;
 
 
-        foreach (var range in item.Ranges)
+        foreach (var range in item.Values)
         {
             ctx.FillStyle = GetItemColor(range);
             var low = PaneContext.ToY(range.Low);
@@ -121,8 +121,8 @@ public partial class MultiRangeBlockSeries<TM, TI> : ILogSubject<MultiRangeBlock
 
         foreach (var item in items)
         {
-            min = Math.Min(min, item.Ranges.Min(x => x.Low));
-            max = Math.Max(max, item.Ranges.Max(x => x.High));
+            min = Math.Min(min, item.Values.Min(x => x.Low));
+            max = Math.Max(max, item.Values.Max(x => x.High));
         }
 
         return (min, max);
