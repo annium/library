@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Extensions;
 using Annium.Core.Mapper;
 using Annium.Core.Primitives;
 using Annium.Core.Primitives.Collections.Generic;
@@ -35,6 +36,10 @@ public partial class Page
     private ISeriesSource<Candle> _candleSeries = default!;
     private ISeriesSource<PlainValue> _openSeries = default!;
     private ISeriesSource<MultiRangeValue<RangeItem>> _rangeSeries = default!;
+    private Func<Candle, string> _getCandleLabel = delegate { return string.Empty; };
+    private Func<RangeItem, string> _getRangeText = delegate { return string.Empty; };
+    private Func<IPaneContext, Instant, int> _getRangeLeft = delegate { return 0; };
+    private Func<IPaneContext, RangeItem, int> _getRangeTop = delegate { return 0; };
 
     protected override void OnInitialized()
     {
@@ -51,6 +56,18 @@ public partial class Page
                 }
             ).Yield()
         );
+
+        _getCandleLabel = x =>
+        {
+            var absChange = Math.Abs(x.Close - x.Open);
+            var percentChange = (absChange / x.Open * 100).Round(2);
+            var changeSign = x.Close > x.Open ? "+" : "-";
+
+            return $"O: {x.Open} H: {x.High} L: {x.Low} C: {x.Close}  [ {changeSign}{absChange} ({changeSign}{percentChange:F2}) ]";
+        };
+        _getRangeText = range => $"{range.Low:F2} - {range.High:F2}";
+        _getRangeLeft = (ctx, moment) => ctx.ToX(moment) + 5;
+        _getRangeTop = (ctx, range) => ctx.ToY((range.Low + range.High) / 2);
     }
 
     private async Task<IReadOnlyList<Candle>> LoadCandles(
@@ -71,14 +88,5 @@ public partial class Page
         var candles = Mapper.Map<IReadOnlyList<Candle>>(response);
 
         return candles;
-    }
-
-    private string GetLabel(Candle x)
-    {
-        var absChange = Math.Abs(x.Close - x.Open);
-        var percentChange = (absChange / x.Open * 100).Round(2);
-        var changeSign = x.Close > x.Open ? "+" : "-";
-
-        return $"O: {x.Open} H: {x.High} L: {x.Low} C: {x.Close}  [ {changeSign}{absChange} ({changeSign}{percentChange:F2}) ]";
     }
 }
