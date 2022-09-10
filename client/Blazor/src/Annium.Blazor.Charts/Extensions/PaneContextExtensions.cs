@@ -17,7 +17,7 @@ public static class PaneContextExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ToY(this IPaneContext ctx, decimal value) =>
-        ((ctx.View.End - value) / ctx.DotPerPx).RoundInt32();
+        ctx.DotPerPx == 0 ? 0 : ((ctx.View.End - value) / ctx.DotPerPx).RoundInt32();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static decimal FromY(this IPaneContext ctx, int y) =>
