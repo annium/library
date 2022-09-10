@@ -82,31 +82,13 @@ public interface ISeriesSourceFactory
 
     ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, Instant, Instant, TD> getValues
+        Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
         where TD : IComparable<TD>, IComparable<Instant>;
 
     ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : IComparable<TD>, IComparable<Instant>;
-
-    ISeriesSource<TD> CreateUnchecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<TS, Instant, Instant, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : IComparable<TD>, IComparable<Instant>;
-
-    ISeriesSource<TD> CreateUnchecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<IReadOnlyList<TS>, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : IComparable<TD>, IComparable<Instant>;
-
-    ISeriesSource<TD> CreateUnchecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<IReadOnlyList<TS>, Instant, Instant, IReadOnlyCollection<TD>> getValues
+        Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
         where TD : IComparable<TD>, IComparable<Instant>;
 
@@ -122,31 +104,13 @@ public interface ISeriesSourceFactory
 
     ISeriesSource<TD> CreateChecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, Instant, Instant, TD> getValues
+        Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
         where TD : ITimeSeries, IComparable<TD>;
 
     ISeriesSource<TD> CreateChecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : ITimeSeries, IComparable<TD>;
-
-    ISeriesSource<TD> CreateChecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<TS, Instant, Instant, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : ITimeSeries, IComparable<TD>;
-
-    ISeriesSource<TD> CreateChecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<IReadOnlyList<TS>, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : ITimeSeries, IComparable<TD>;
-
-    ISeriesSource<TD> CreateChecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<IReadOnlyList<TS>, Instant, Instant, IReadOnlyCollection<TD>> getValues
+        Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
         where TD : ITimeSeries, IComparable<TD>;
 

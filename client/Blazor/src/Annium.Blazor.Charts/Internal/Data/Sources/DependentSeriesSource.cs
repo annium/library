@@ -22,12 +22,12 @@ internal class DependentSeriesSource<TS, TD> :
     public ValueRange<Instant> Bounds => _source.Bounds;
     private readonly ISeriesSource<TS> _source;
     private readonly ISeriesSourceCache<TD> _cache;
-    private readonly Func<IReadOnlyList<TS>, Instant, Instant, IReadOnlyCollection<TD>> _getValues;
+    private readonly Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> _getValues;
 
     public DependentSeriesSource(
         ISeriesSource<TS> source,
         ISeriesSourceCache<TD> cache,
-        Func<IReadOnlyList<TS>, Instant, Instant, IReadOnlyCollection<TD>> getValues,
+        Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues,
         ILogger<DependentSeriesSource<TS, TD>> logger
     )
     {
@@ -64,7 +64,7 @@ internal class DependentSeriesSource<TS, TD> :
             if (!_source.GetItems(range.Start, range.End, out var rangeSource))
                 throw new InvalidOperationException($"Series source {_source} invalid behavior: expected to get data in range {range.S()}");
 
-            var rangeData = _getValues(rangeSource, range.Start, range.End);
+            var rangeData = _getValues(rangeSource, _source.Resolution, range.Start, range.End);
             this.Log().Trace($"save {rangeData.Count} item(s) ({rangeSource.Count} sourced) in {range.S()} to cache");
             _cache.AddData(range.Start, range.End, rangeData);
         }

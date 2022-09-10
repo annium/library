@@ -102,39 +102,18 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<TS, TD> getValues
     )
         where TD : IComparable<TD>, IComparable<Instant>
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _) => chunk.Select(getValues).ToArray());
+        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _, _) => chunk.Select(getValues).ToArray());
 
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, Instant, Instant, TD> getValues
+        Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
         where TD : IComparable<TD>, IComparable<Instant>
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), (chunk, start, end) => chunk.Select(x => getValues(x, start, end)).ToArray());
+        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray());
 
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : IComparable<TD>, IComparable<Instant>
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _) => chunk.SelectMany(getValues).ToArray());
-
-    public ISeriesSource<TD> CreateUnchecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<TS, Instant, Instant, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : IComparable<TD>, IComparable<Instant>
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), (chunk, start, end) => chunk.SelectMany(x => getValues(x, start, end)).ToArray());
-
-    public ISeriesSource<TD> CreateUnchecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<IReadOnlyList<TS>, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : IComparable<TD>, IComparable<Instant>
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _) => getValues(chunk));
-
-    public ISeriesSource<TD> CreateUnchecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<IReadOnlyList<TS>, Instant, Instant, IReadOnlyCollection<TD>> getValues
+        Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
         where TD : IComparable<TD>, IComparable<Instant>
         => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), getValues);
@@ -148,39 +127,18 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<TS, TD> getValues
     )
         where TD : ITimeSeries, IComparable<TD>
-        => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _) => chunk.Select(getValues).ToArray());
+        => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _, _) => chunk.Select(getValues).ToArray());
 
     public ISeriesSource<TD> CreateChecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, Instant, Instant, TD> getValues
+        Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
         where TD : ITimeSeries, IComparable<TD>
-        => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, start, end) => chunk.Select(x => getValues(x, start, end)).ToArray());
+        => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray());
 
     public ISeriesSource<TD> CreateChecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : ITimeSeries, IComparable<TD>
-        => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _) => chunk.SelectMany(getValues).ToArray());
-
-    public ISeriesSource<TD> CreateChecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<TS, Instant, Instant, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : ITimeSeries, IComparable<TD>
-        => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, start, end) => chunk.SelectMany(x => getValues(x, start, end)).ToArray());
-
-    public ISeriesSource<TD> CreateChecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<IReadOnlyList<TS>, IReadOnlyCollection<TD>> getValues
-    )
-        where TD : ITimeSeries, IComparable<TD>
-        => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _) => getValues(chunk));
-
-    public ISeriesSource<TD> CreateChecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<IReadOnlyList<TS>, Instant, Instant, IReadOnlyCollection<TD>> getValues
+        Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
         where TD : ITimeSeries, IComparable<TD>
         => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), getValues);
@@ -190,7 +148,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     #region base
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ISeriesSource<T> Create<T>(
+    private ISeriesSource<T> Create<T>(
         Duration resolution,
         ISeriesSourceCache<T> cache,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
@@ -207,7 +165,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     private ISeriesSource<TD> Create<TS, TD>(
         ISeriesSource<TS> source,
         ISeriesSourceCache<TD> cache,
-        Func<IReadOnlyList<TS>, Instant, Instant, IReadOnlyCollection<TD>> getValues
+        Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
         where TD : IComparable<TD>
     {
