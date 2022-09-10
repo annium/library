@@ -39,7 +39,7 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
     public int FontSize { get; set; } = SeriesLabelFontSize;
 
     [Parameter]
-    public OneOf<string, Func<T, string>> GetColor { get; set; } = SeriesLabelStyle;
+    public OneOf<string, Func<T, string>> Color { get; set; } = SeriesLabelStyle;
 
     [CascadingParameter]
     public IChartContext ChartContext { get; set; } = default!;
@@ -82,7 +82,7 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
                 get => get(moment, item)
             );
             ctx.Font = $"{FontSize}px {FontFamily}";
-            ctx.FillStyle = GetColor.Match(value => value, get => get(item));
+            ctx.FillStyle = Color.Match(value => value, get => get(item));
             ctx.TextBaseline = CanvasTextBaseline.middle;
             ctx.FillText(text, x, y);
         }
