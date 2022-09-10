@@ -13,7 +13,6 @@ using static Annium.Blazor.Charts.Internal.Constants;
 namespace Annium.Blazor.Charts.Components;
 
 public abstract partial class LabelBase<T> : IAsyncDisposable
-    // where T : ITimeSeries
 {
     [Parameter, EditorRequired]
     public OneOf<string, Func<T, string>, Func<Instant, T, string>> Text { get; set; }
@@ -22,10 +21,10 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
     public LookupMatch Match { get; set; } = LookupMatch.Exact;
 
     [Parameter]
-    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, T, int>>? Left { get; set; }
+    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, int>, Func<IPaneContext, Instant, T, int>>? Left { get; set; }
 
     [Parameter]
-    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, T, int>>? Right { get; set; }
+    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, int>, Func<IPaneContext, Instant, T, int>>? Right { get; set; }
 
     [Parameter]
     public OneOf<int, Func<T, int>, Func<IPaneContext, T, int>>? Top { get; set; }
@@ -91,7 +90,7 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
         ctx.Restore();
     }
 
-    private int? GetX(OneOf<int, Func<T, int>, Func<IPaneContext, Instant, T, int>>? getter, Instant moment, T item)
+    private int? GetX(OneOf<int, Func<T, int>, Func<IPaneContext, Instant, int>, Func<IPaneContext, Instant, T, int>>? getter, Instant moment, T item)
     {
         if (!getter.HasValue)
             return null;
@@ -99,6 +98,7 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
         return getter.Value.Match(
             value => value,
             get => get(item),
+            get => get(PaneContext, moment),
             get => get(PaneContext, moment, item)
         );
     }
