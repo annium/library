@@ -29,6 +29,9 @@ public partial class MultiRangeBlockSeries<TM, TI> : ILogSubject<MultiRangeBlock
     [Parameter]
     public bool Centered { get; set; }
 
+    [Parameter]
+    public bool ContinueLast { get; set; }
+
     [CascadingParameter]
     public IChartContext ChartContext { get; set; } = default!;
 
@@ -87,13 +90,14 @@ public partial class MultiRangeBlockSeries<TM, TI> : ILogSubject<MultiRangeBlock
         this.Log().Trace("render {count} in range {min} - {max}", items.Count, min, max);
         var width = GetWidth();
         var offset = Centered ? width == 1 ? 0 : ((double) width / 2).CeilInt32() : 0;
+        var lastMoment = ContinueLast ? ChartContext.View.End : ChartContext.FromX(ChartContext.ToX(items[^1].Moment) + width);
         var ctx = SeriesContext.Canvas;
 
         ctx.Save();
 
         for (var i = 0; i < items.Count - 1; i++)
             RenderItem(ctx, items[i], items[i + 1].Moment, offset);
-        RenderItem(ctx, items[^1], ChartContext.View.End, offset);
+        RenderItem(ctx, items[^1], lastMoment, offset);
 
         ctx.Restore();
     }
