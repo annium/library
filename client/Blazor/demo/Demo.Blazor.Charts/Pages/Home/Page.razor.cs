@@ -8,7 +8,6 @@ using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Core.Mapper;
 using Annium.Core.Primitives;
-using Annium.Core.Primitives.Collections.Generic;
 using Annium.Net.Http;
 using Demo.Blazor.Charts.Domain;
 using Microsoft.AspNetCore.Components;
@@ -46,15 +45,15 @@ public partial class Page
         ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
 
         _candleSeries = SeriesSourceFactory.CreateChecked(ChartContext.Resolution, LoadCandles);
-        _openSeries = SeriesSourceFactory.CreateChecked(_candleSeries, (x, _, _) => new PlainValue(x.Moment, x.Open).Yield());
+        _openSeries = SeriesSourceFactory.CreateChecked(_candleSeries, x => new PlainValue(x.Moment, x.Open));
         _rangeSeries = SeriesSourceFactory.CreateChecked(
             _candleSeries,
-            (x, _, _) => new MultiRangeValue<RangeItem>(x.Moment, new[]
+            x => new MultiRangeValue<RangeItem>(x.Moment, new[]
                 {
                     new RangeItem(2 * x.Low - x.High, x.Low),
                     new RangeItem(x.High, 2 * x.High - x.Low)
                 }
-            ).Yield()
+            )
         );
 
         _getCandleLabel = x =>

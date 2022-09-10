@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Extensions;
@@ -23,12 +22,12 @@ internal class DependentSeriesSource<TS, TD> :
     public ValueRange<Instant> Bounds => _source.Bounds;
     private readonly ISeriesSource<TS> _source;
     private readonly ISeriesSourceCache<TD> _cache;
-    private readonly Func<TS, Instant, Instant, IEnumerable<TD>> _getValues;
+    private readonly Func<IReadOnlyList<TS>, Instant, Instant, IReadOnlyCollection<TD>> _getValues;
 
     public DependentSeriesSource(
         ISeriesSource<TS> source,
         ISeriesSourceCache<TD> cache,
-        Func<TS, Instant, Instant, IEnumerable<TD>> getValues,
+        Func<IReadOnlyList<TS>, Instant, Instant, IReadOnlyCollection<TD>> getValues,
         ILogger<DependentSeriesSource<TS, TD>> logger
     )
     {
@@ -65,8 +64,8 @@ internal class DependentSeriesSource<TS, TD> :
             if (!_source.GetItems(range.Start, range.End, out var rangeSource))
                 throw new InvalidOperationException($"Series source {_source} invalid behavior: expected to get data in range {range.S()}");
 
-            var rangeData = rangeSource.SelectMany(x => _getValues(x, range.Start, range.End)).ToArray();
-            this.Log().Trace($"save {rangeData.Length} item(s) ({rangeSource.Count} sourced) in {range.S()} to cache");
+            var rangeData = _getValues(rangeSource, range.Start, range.End);
+            this.Log().Trace($"save {rangeData.Count} item(s) ({rangeSource.Count} sourced) in {range.S()} to cache");
             _cache.AddData(range.Start, range.End, rangeData);
         }
 
