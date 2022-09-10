@@ -16,7 +16,7 @@ using OneOf;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class MultiRangeBlockSeries<TM, TI> : ILogSubject<MultiRangeBlockSeries<TM, TI>>, IAsyncDisposable
+public partial class MultiRangeSeries<TM, TI> : ILogSubject<MultiRangeSeries<TM, TI>>, IAsyncDisposable
     where TM : MultiRangeValue<TI>
     where TI : RangeItem
 {
@@ -42,7 +42,7 @@ public partial class MultiRangeBlockSeries<TM, TI> : ILogSubject<MultiRangeBlock
     internal ISeriesContext SeriesContext { get; set; } = default!;
 
     [Inject]
-    public ILogger<MultiRangeBlockSeries<TM, TI>> Logger { get; set; } = default!;
+    public ILogger<MultiRangeSeries<TM, TI>> Logger { get; set; } = default!;
 
     private Action _unregisterSource = delegate { };
     private Action _unregisterRender = delegate { };
