@@ -28,34 +28,38 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
         Func<Instant, Instant, IReadOnlyList<T>> load,
+        Func<T, T, int> compare,
+        Func<T, Instant, int> compareToMoment,
         SeriesSourceOptions? options = null
     )
-        where T : IComparable<T>, IComparable<Instant>
-        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution), (_, start, end) => Task.FromResult(load(start, end)), options);
+        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), (_, start, end) => Task.FromResult(load(start, end)), options);
 
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, IReadOnlyList<T>> load,
+        Func<T, T, int> compare,
+        Func<T, Instant, int> compareToMoment,
         SeriesSourceOptions? options = null
     )
-        where T : IComparable<T>, IComparable<Instant>
-        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution), (duration, start, end) => Task.FromResult(load(duration, start, end)), options);
+        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), (duration, start, end) => Task.FromResult(load(duration, start, end)), options);
 
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
         Func<Instant, Instant, Task<IReadOnlyList<T>>> load,
+        Func<T, T, int> compare,
+        Func<T, Instant, int> compareToMoment,
         SeriesSourceOptions? options = null
     )
-        where T : IComparable<T>, IComparable<Instant>
-        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution), (_, start, end) => load(start, end), options);
+        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), (_, start, end) => load(start, end), options);
 
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
+        Func<T, T, int> compare,
+        Func<T, Instant, int> compareToMoment,
         SeriesSourceOptions? options = null
     )
-        where T : IComparable<T>, IComparable<Instant>
-        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution), load, options);
+        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), load, options);
 
     #endregion
 
@@ -66,7 +70,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Instant, Instant, IReadOnlyList<T>> load,
         SeriesSourceOptions? options = null
     )
-        where T : ITimeSeries, IComparable<T>
+        where T : ITimeSeries
         => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (_, start, end) => Task.FromResult(load(start, end)), options);
 
     public ISeriesSource<T> CreateChecked<T>(
@@ -74,7 +78,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Duration, Instant, Instant, IReadOnlyList<T>> load,
         SeriesSourceOptions? options = null
     )
-        where T : ITimeSeries, IComparable<T>
+        where T : ITimeSeries
         => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (duration, start, end) => Task.FromResult(load(duration, start, end)), options);
 
     public ISeriesSource<T> CreateChecked<T>(
@@ -82,7 +86,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Instant, Instant, Task<IReadOnlyList<T>>> load,
         SeriesSourceOptions? options = null
     )
-        where T : ITimeSeries, IComparable<T>
+        where T : ITimeSeries
         => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (_, start, end) => load(start, end), options);
 
     public ISeriesSource<T> CreateChecked<T>(
@@ -90,7 +94,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
         SeriesSourceOptions? options = null
     )
-        where T : ITimeSeries, IComparable<T>
+        where T : ITimeSeries
         => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), load, options);
 
     #endregion
@@ -99,24 +103,27 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
 
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, TD> getValues
+        Func<TS, TD> getValues,
+        Func<TD, TD, int> compare,
+        Func<TD, Instant, int> compareToMoment
     )
-        where TD : IComparable<TD>, IComparable<Instant>
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _, _) => chunk.Select(getValues).ToArray());
+        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment), (chunk, _, _, _) => chunk.Select(getValues).ToArray());
 
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
+        Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues,
+        Func<TD, TD, int> compare,
+        Func<TD, Instant, int> compareToMoment
     )
-        where TD : IComparable<TD>, IComparable<Instant>
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray());
+        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment), (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray());
 
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
+        Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues,
+        Func<TD, TD, int> compare,
+        Func<TD, Instant, int> compareToMoment
     )
-        where TD : IComparable<TD>, IComparable<Instant>
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution), getValues);
+        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment), getValues);
 
     #endregion
 
@@ -126,21 +133,21 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         ISeriesSource<TS> source,
         Func<TS, TD> getValues
     )
-        where TD : ITimeSeries, IComparable<TD>
+        where TD : ITimeSeries
         => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _, _) => chunk.Select(getValues).ToArray());
 
     public ISeriesSource<TD> CreateChecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
-        where TD : ITimeSeries, IComparable<TD>
+        where TD : ITimeSeries
         => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray());
 
     public ISeriesSource<TD> CreateChecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
-        where TD : ITimeSeries, IComparable<TD>
+        where TD : ITimeSeries
         => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), getValues);
 
     #endregion
@@ -154,7 +161,6 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
         SeriesSourceOptions? options
     )
-        where T : IComparable<T>
     {
         var logger = _loggerFactory.Get<LoadingSeriesSource<T>>();
 
@@ -167,7 +173,6 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         ISeriesSourceCache<TD> cache,
         Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
-        where TD : IComparable<TD>
     {
         var logger = _loggerFactory.Get<DependentSeriesSource<TS, TD>>();
 

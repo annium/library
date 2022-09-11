@@ -13,7 +13,6 @@ namespace Annium.Blazor.Charts.Internal.Data.Sources;
 internal class DependentSeriesSource<TS, TD> :
     ISeriesSource<TD>,
     ILogSubject<DependentSeriesSource<TS, TD>>
-    where TD : IComparable<TD>
 {
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public ILogger<DependentSeriesSource<TS, TD>> Logger { get; }

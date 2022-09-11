@@ -7,7 +7,6 @@ using NodaTime;
 namespace Annium.Blazor.Charts.Internal.Data.Cache;
 
 internal interface ISeriesSourceCache<T>
-    where T : IComparable<T>
 {
     event Action<ValueRange<Instant>> OnBoundsChange;
     bool IsEmpty { get; }

@@ -2,14 +2,19 @@ using System;
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
+using Annium.Blazor.Charts.Internal.Data.Comparers;
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Internal.Data.Cache;
+namespace Annium.Blazor.Charts.Internal.Data.Cache.Chunks;
 
 internal sealed record CheckedCacheChunk<T> : CacheChunkBase<T>
-    where T : ITimeSeries, IComparable<T>
+    where T : ITimeSeries
 {
-    public CheckedCacheChunk(Instant start, Instant end, IReadOnlyCollection<T> items) : base(start, end, items)
+    public CheckedCacheChunk(
+        Instant start,
+        Instant end,
+        IReadOnlyCollection<T> items
+    ) : base(start, end, items, TimeSeriesComparer<T>.Default)
     {
         Validate();
     }

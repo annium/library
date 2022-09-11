@@ -15,7 +15,6 @@ using NodaTime;
 namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
 internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSeriesSource<T>>
-    where T : IComparable<T>
 {
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public ILogger<LoadingSeriesSource<T>> Logger { get; }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Annium.Blazor.Charts.Domain.Lookup;
+using Annium.Blazor.Charts.Internal.Data.Cache.Chunks;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
 using NodaTime;
@@ -11,7 +12,6 @@ namespace Annium.Blazor.Charts.Internal.Data.Cache;
 
 internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
     where TChunk : CacheChunkBase<T>
-    where T : IComparable<T>
 {
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public bool IsEmpty => Chunks.Count == 0;

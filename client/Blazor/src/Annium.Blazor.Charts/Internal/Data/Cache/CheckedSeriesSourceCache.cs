@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Domain.Interfaces;
+using Annium.Blazor.Charts.Internal.Data.Cache.Chunks;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data.Cache;
 
 internal sealed class CheckedSeriesSourceCache<T> : SeriesSourceCacheBase<CheckedCacheChunk<T>, T>
-    where T : ITimeSeries, IComparable<T>
+    where T : ITimeSeries
 {
     public CheckedSeriesSourceCache(
         Duration resolution

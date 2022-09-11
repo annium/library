@@ -6,19 +6,23 @@ using Annium.Core.Primitives;
 using Annium.Data.Models;
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Internal.Data.Cache;
+namespace Annium.Blazor.Charts.Internal.Data.Cache.Chunks;
 
 internal abstract record CacheChunkBase<T>
-    where T : IComparable<T>
 {
     public ValueRange<Instant> Range => _range;
     public List<T> Items { get; }
     private readonly ManagedValueRange<Instant> _range;
 
-    protected CacheChunkBase(Instant start, Instant end, IReadOnlyCollection<T> items)
+    protected CacheChunkBase(
+        Instant start,
+        Instant end,
+        IReadOnlyCollection<T> items,
+        IComparer<T> comparer
+    )
     {
         _range = ValueRange.Create(start, end);
-        Items = items.OrderBy(x => x).ToList();
+        Items = items.OrderBy(x => x,comparer).ToList();
         Validate();
     }
 
