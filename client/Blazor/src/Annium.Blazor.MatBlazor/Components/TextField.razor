@@ -1,9 +1,8 @@
-﻿@using MatBlazor;
-@namespace Annium.Blazor.MatBlazor.Components
+﻿@namespace Annium.Blazor.MatBlazor.Components
 
 @typeparam TValue
 
-<MatTextField
+<MatBlazor.MatTextField
     Value="@State.Value"
     OnInput="@(e => State.Set((TValue) e.Value!))"
     Class="@ClassName"
@@ -11,4 +10,4 @@
     HelperText="@State.Message"
     OnFocusOut="@(_ => StateHasChanged())"
     @attributes="Attributes">
-</MatTextField>
+</MatBlazor.MatTextField>

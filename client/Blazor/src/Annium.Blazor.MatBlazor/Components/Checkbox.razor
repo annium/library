@@ -1,10 +1,9 @@
-﻿@using MatBlazor;
-@namespace Annium.Blazor.MatBlazor.Components
+﻿@namespace Annium.Blazor.MatBlazor.Components
 
-<MatCheckbox
+<MatBlazor.MatCheckbox
     Value="@State.Value"
     ValueChanged="@((bool e) => { State.Set(e); return Task.CompletedTask; })"
     Class="@Class"
     Disabled="@Disabled">
     @ChildContent
-</MatCheckbox>
+</MatBlazor.MatCheckbox>
