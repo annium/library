@@ -87,7 +87,7 @@ internal class LocationPath : ILocationPath
         return new LocationMatch(true, routeValues);
     }
 
-    public string Link(IReadOnlyDictionary<string, object?> parameters) => string.Join(Constants.SEPARATOR, _segments.Select(x =>
+    public string Link(IReadOnlyDictionary<string, object?> parameters) => string.Join(Constants.Separator, _segments.Select(x =>
     {
         if (x is FixedLocationSegment fs)
             return fs.Part;

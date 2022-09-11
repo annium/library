@@ -4,13 +4,13 @@ using Annium.Core.Primitives;
 
 namespace Annium.Blazor.Routing.Internal.Implementations.Locations.Segments;
 
-internal sealed record ParamLocationSegment(string Name, Type type) : ILocationSegment
+internal sealed record ParamLocationSegment(string Name, Type Type) : ILocationSegment
 {
     public object? Match(string segment, IMapper mapper)
     {
         try
         {
-            return mapper.Map(segment, type);
+            return mapper.Map(segment, Type);
         }
         catch (MappingException)
         {
@@ -22,5 +22,5 @@ internal sealed record ParamLocationSegment(string Name, Type type) : ILocationS
         }
     }
 
-    public override string ToString() => $"{Name}:{type.FriendlyName()}";
+    public override string ToString() => $"{Name}:{Type.FriendlyName()}";
 }
