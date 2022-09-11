@@ -20,9 +20,12 @@ public partial class Resolution : ILogSubject<Resolution>, IAsyncDisposable
     public IChartContext ChartContext { get; set; } = default!;
 
     [Inject]
+    private Style Styles { get; set; } = default!;
+
+    [Inject]
     public ILogger<Resolution> Logger { get; set; } = default!;
 
-    private string Class => ClassBuilder.With(_style.Container).With(CssClass).Build();
+    private string Class => ClassBuilder.With(Styles.Container).With(CssClass).Build();
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 
     protected override void OnAfterRender(bool firstRender)

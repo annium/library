@@ -1,14 +1,12 @@
 @using Annium.Blazor.Core.Tools
 @namespace Annium.Blazor.Charts.Components
 
-@inject Style _style;
-
 <div class="@Class">
     @foreach (var value in ChartContext.Resolutions)
     {
         var cls = value == ChartContext.Resolution
-            ? ClassBuilder.With(_style.Resolution).With(_style.ActiveResolution).Build()
-            : _style.Resolution;
+            ? ClassBuilder.With(Styles.Resolution).With(Styles.ActiveResolution).Build()
+            : Styles.Resolution;
         <div onclick="@HandleResolutionSelect(value)" class="@cls">@Humanize(value)</div>
     }
 </div>

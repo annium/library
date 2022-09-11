@@ -28,12 +28,15 @@ public partial class PaneBottom : ILogSubject<PaneBottom>, IAsyncDisposable
     internal IPaneContext PaneContext { get; set; } = default!;
 
     [Inject]
-    public ILogger<PaneBottom> Logger { get; set; } = default!;
-
-    [Inject]
     private IManagedHorizontalSideContext SideContext { get; set; } = default!;
 
-    private string Class => ClassBuilder.With(_style.Block).With(CssClass).Build();
+    [Inject]
+    private Style Styles { get; set; } = default!;
+
+    [Inject]
+    public ILogger<PaneBottom> Logger { get; set; } = default!;
+
+    private string Class => ClassBuilder.With(Styles.Block).With(CssClass).Build();
 
     private Div _block = default!;
     private Canvas _canvas = default!;

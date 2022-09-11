@@ -22,12 +22,15 @@ public partial class Pane : ILogSubject<Pane>, IAsyncDisposable
     internal IChartContext ChartContext { get; set; } = default!;
 
     [Inject]
-    public ILogger<Pane> Logger { get; set; } = default!;
-
-    [Inject]
     private IManagedPaneContext PaneContext { get; set; } = default!;
 
-    private string Class => ClassBuilder.With(_style.Block).With(CssClass).Build();
+    [Inject]
+    private Style Styles { get; set; } = default!;
+
+    [Inject]
+    public ILogger<Pane> Logger { get; set; } = default!;
+
+    private string Class => ClassBuilder.With(Styles.Block).With(CssClass).Build();
     private AsyncDisposableBox _disposable = Disposable.AsyncBox();
 
     protected override void OnAfterRender(bool firstRender)
