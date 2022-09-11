@@ -1,12 +1,13 @@
 @using Annium.Blazor.Charts.Components
+@using Annium.Blazor.Charts.Domain.Interfaces
 @using Annium.Blazor.Charts.Domain.Models
 @namespace Demo.Blazor.Charts.Pages.Home
 
 <Chart ChartContext="@ChartContext" CssClass="@Styles.Chart">
     <Pane CssClass="@Styles.CandlesPane">
         <PaneSeries>
-            <CandleSeries T="Candle" Source="@_candleSeries" />
-            <Label T="Candle" Source="@_candleSeries" Text="@_getCandleLabel" Top="20" Left="20" />
+            <CandleSeries T="ICandle" Source="@_candleSeries" />
+            <Label T="ICandle" Source="@_candleSeries" Text="@_getCandleLabel" Top="20" Left="20" />
             <MultiRangeSeries
                 TM="MultiRangeValue<RangeItem>"
                 TI="RangeItem"

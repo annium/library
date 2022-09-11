@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Domain.Models;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Core.Mapper;
@@ -32,10 +33,10 @@ public partial class Page
     [Inject]
     private Style Styles { get; set; } = default!;
 
-    private ISeriesSource<Candle> _candleSeries = default!;
+    private ISeriesSource<ICandle> _candleSeries = default!;
     private ISeriesSource<PointValue> _openSeries = default!;
     private ISeriesSource<MultiRangeValue<RangeItem>> _rangeSeries = default!;
-    private Func<Candle, string> _getCandleLabel = delegate { return string.Empty; };
+    private Func<ICandle, string> _getCandleLabel = delegate { return string.Empty; };
     private Func<RangeItem, string> _getRangeText = delegate { return string.Empty; };
     private Func<IPaneContext, Instant, int> _getRangeLeft = delegate { return 0; };
     private Func<IPaneContext, RangeItem, int> _getRangeTop = delegate { return 0; };
@@ -69,7 +70,7 @@ public partial class Page
         _getRangeTop = (ctx, range) => ctx.ToY((range.Low + range.High) / 2);
     }
 
-    private async Task<IReadOnlyList<Candle>> LoadCandles(
+    private async Task<IReadOnlyList<ICandle>> LoadCandles(
         Duration resolution,
         Instant start,
         Instant end
