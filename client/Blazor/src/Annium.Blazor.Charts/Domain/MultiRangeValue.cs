@@ -10,5 +10,3 @@ public record MultiRangeValue<T>(Instant Moment, IReadOnlyCollection<T> Values) 
     public int CompareTo(MultiRangeValue<T>? other) => Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));
     public int CompareTo(Instant other) => Moment.CompareTo(other);
 }
-
-public record RangeItem(decimal Low, decimal High);
