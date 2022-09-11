@@ -1,4 +1,5 @@
 using Annium.Blazor.Routing;
+using Demo.Blazor.Interop.Pages.Canvas;
 
 namespace Demo.Blazor.Interop.Pages;
 
@@ -11,7 +12,7 @@ public class Routing : IRouting
         IRouteFactory routeFactory
     )
     {
-        Canvas = routeFactory.Create<Canvas.Page>("/canvas");
+        Canvas = routeFactory.Create<Page>("/canvas");
         Element = routeFactory.Create<Element.Page>("/element");
     }
 }

@@ -1,6 +1,6 @@
 using Annium.Blazor.Core.Extensions;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Demo.Blazor.Charts;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.StartAt<App>();

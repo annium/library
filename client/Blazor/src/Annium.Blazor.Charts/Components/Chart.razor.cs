@@ -13,9 +13,7 @@ using Annium.Blazor.Interop.Domain;
 using Annium.Core.Primitives;
 using Annium.Extensions.Jobs;
 using Annium.Logging.Abstractions;
-using Annium.NodaTime.Extensions;
 using Microsoft.AspNetCore.Components;
-using NodaTime;
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;

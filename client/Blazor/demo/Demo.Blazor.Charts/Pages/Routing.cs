@@ -1,4 +1,5 @@
 using Annium.Blazor.Routing;
+using Demo.Blazor.Charts.Pages.Home;
 
 namespace Demo.Blazor.Charts.Pages;
 
@@ -10,6 +11,6 @@ public class Routing : IRouting
         IRouteFactory routeFactory
     )
     {
-        Home = routeFactory.Create<Home.Page>("/");
+        Home = routeFactory.Create<Page>("/");
     }
 }
