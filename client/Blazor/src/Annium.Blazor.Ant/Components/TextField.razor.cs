@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Annium.Components.State.Forms;
+using Annium.Core.Mapper;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
@@ -23,16 +24,20 @@ public partial class TextField<TValue> where TValue : IEquatable<TValue>
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object> Attributes { get; set; } = default!;
 
+    [Inject]
+    private IMapper Mapper { get; set; } = default!;
+
     private TValue Value => InternalState.Value;
 
     private void SetValue(ChangeEventArgs args)
     {
         try
         {
-            InternalState.Set(mapper.Map<TValue>(args.Value!));
+            InternalState.Set(Mapper.Map<TValue>(args.Value!));
         }
         catch
         {
+            // ignored
         }
     }
 

@@ -1,14 +1,11 @@
 ﻿@namespace Annium.Blazor.Ant.Components
-@using Annium.Core.Mapper
 @typeparam TValue
 
-@inject IMapper mapper
-
-<Input
+<AntDesign.Input
     TValue="TValue"
     Value="@Value"
     OnInput="@SetValue"
     OnPressEnter="@OnPressEnter"
     @attributes="Attributes">
     @ChildContent
-</Input>
+</AntDesign.Input>

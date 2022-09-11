@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Annium.Components.State.Forms;
+using Annium.Core.Mapper;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
@@ -22,16 +23,20 @@ public partial class PasswordField
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object> Attributes { get; set; } = default!;
 
+    [Inject]
+    private IMapper Mapper { get; set; } = default!;
+
     private string Value => InternalState.Value;
 
     private void SetValue(ChangeEventArgs args)
     {
         try
         {
-            InternalState.Set(mapper.Map<string>(args.Value!));
+            InternalState.Set(Mapper.Map<string>(args.Value!));
         }
         catch
         {
+            // ignored
         }
     }
 
