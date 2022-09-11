@@ -51,7 +51,7 @@ public static class InteropContextExtensions
         => ctx.UnmarshalledRuntime.InvokeUnmarshalled<ValueTuple<T1, T2, T3>, T>(Helper.Call(identifier), ValueTuple.Create(x1, x2, x3));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void UInvokeVoid<T1, T2, T3>(this IInteropContext ctx, string identifier, T1 x1, T2 x2, T3 x3)
+    public static void Invoke<T1, T2, T3>(this IInteropContext ctx, string identifier, T1 x1, T2 x2, T3 x3)
         => ctx.UnmarshalledRuntime.InvokeUnmarshalled<ValueTuple<T1, T2, T3>, object>(Helper.Call(identifier), ValueTuple.Create(x1, x2, x3));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

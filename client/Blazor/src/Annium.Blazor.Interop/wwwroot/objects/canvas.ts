@@ -133,8 +133,16 @@ export default {
     lineTo: function (data: number): void {
         getContext(data).lineTo(js.readFloat(data, 4), js.readFloat(data, 8))
     },
+    arc: function (data: number): void {
+        getContext(data).arc(js.readFloat(data, 4), js.readFloat(data, 8), js.readFloat(data, 12), js.readFloat(data, 16), js.readFloat(data, 20), !!js.readShort(data, 24))
+    },
     stroke: function (data: number): void {
         getContext(data).stroke()
+    },
+    
+    // areas
+    fill: function (data: number): void {
+        getContext(data).fill()
     },
 
     // text
@@ -183,7 +191,7 @@ function getContext(data: number): CanvasRenderingContext2D {
     if (!newCtx)
         throw new Error('failed to create 2d context')
 
-    newCtx.imageSmoothingEnabled = false;
+    newCtx.imageSmoothingEnabled = true;
     contexts.set(el, newCtx)
 
     return newCtx

@@ -104,13 +104,28 @@ public sealed record Canvas : ReferenceElement
         Ctx.Invoke("canvas.closePath", Id);
 
     public void MoveTo(float x, float y) =>
-        Ctx.UInvokeVoid("canvas.moveTo", Id, x, y);
+        Ctx.Invoke("canvas.moveTo", Id, x, y);
 
     public void LineTo(float x, float y) =>
-        Ctx.UInvokeVoid("canvas.lineTo", Id, x, y);
+        Ctx.Invoke("canvas.lineTo", Id, x, y);
+
+    public void Arc(
+        float x,
+        float y,
+        float radius,
+        float startAngle,
+        float endAngle,
+        bool antiClockwise
+    )
+    {
+        Ctx.Invoke("canvas.arc", Id, x, y, radius, startAngle, endAngle, antiClockwise ? 1 : 0);
+    }
 
     public void Stroke() =>
         Ctx.Invoke("canvas.stroke", Id);
+
+    public void Fill() =>
+        Ctx.Invoke("canvas.fill", Id);
 
     public void FillText(string text, int x, int y, int maxWidth = 0) =>
         Ctx.Invoke("canvas.fillText", Id, text, x, y, maxWidth);
