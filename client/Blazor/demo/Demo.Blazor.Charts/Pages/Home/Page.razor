@@ -9,14 +9,14 @@
             <CandleSeries T="ICandle" Source="@_candleSeries" />
             <Label T="ICandle" Source="@_candleSeries" Text="@_getCandleLabel" Top="20" Left="20" />
             <MultiRangeSeries
-                TM="MultiRangeValue<RangeItem>"
+                TM="MultiValue<RangeItem>"
                 TI="RangeItem"
                 Source="_rangeSeries"
                 Centered="true"
                 ContinueLast="false"
                 ItemColor="@("rgba(50, 0, 150, 0.5)")" />
             <MultiLabel
-                TValue="MultiRangeValue<RangeItem>"
+                TValue="MultiValue<RangeItem>"
                 TItem="RangeItem"
                 Source="_rangeSeries"
                 Text="@_getRangeText"

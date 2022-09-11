@@ -35,7 +35,7 @@ public partial class Page
 
     private ISeriesSource<ICandle> _candleSeries = default!;
     private ISeriesSource<PointValue> _openSeries = default!;
-    private ISeriesSource<MultiRangeValue<RangeItem>> _rangeSeries = default!;
+    private ISeriesSource<MultiValue<RangeItem>> _rangeSeries = default!;
     private Func<ICandle, string> _getCandleLabel = delegate { return string.Empty; };
     private Func<RangeItem, string> _getRangeText = delegate { return string.Empty; };
     private Func<IPaneContext, Instant, int> _getRangeLeft = delegate { return 0; };
@@ -49,7 +49,7 @@ public partial class Page
         _openSeries = SeriesSourceFactory.CreateChecked(_candleSeries, x => new PointValue(x.Moment, x.Open));
         _rangeSeries = SeriesSourceFactory.CreateChecked(
             _candleSeries,
-            x => new MultiRangeValue<RangeItem>(x.Moment, new[]
+            x => new MultiValue<RangeItem>(x.Moment, new[]
                 {
                     new RangeItem(2 * x.Low - x.High, x.Low),
                     new RangeItem(x.High, 2 * x.High - x.Low)

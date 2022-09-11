@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Domain.Models;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
@@ -17,8 +18,8 @@ using OneOf;
 namespace Annium.Blazor.Charts.Components;
 
 public partial class MultiRangeSeries<TM, TI> : ILogSubject<MultiRangeSeries<TM, TI>>, IAsyncDisposable
-    where TM : MultiRangeValue<TI>
-    where TI : RangeItem
+    where TM : IMultiValue<TI>
+    where TI : IRangeItem
 {
     [Parameter, EditorRequired]
     public ISeriesSource<TM> Source { get; set; } = default!;
