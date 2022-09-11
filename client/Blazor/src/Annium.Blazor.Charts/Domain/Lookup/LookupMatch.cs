@@ -1,4 +1,4 @@
-namespace Annium.Blazor.Charts.Domain;
+namespace Annium.Blazor.Charts.Domain.Lookup;
 
 public enum LookupMatch
 {

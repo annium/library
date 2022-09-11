@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Data.Sources;
-using Annium.Blazor.Charts.Domain;
+using Annium.Blazor.Charts.Domain.Lookup;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Data.Models;

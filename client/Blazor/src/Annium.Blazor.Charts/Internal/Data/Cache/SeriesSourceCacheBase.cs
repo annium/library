@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Annium.Blazor.Charts.Domain;
+using Annium.Blazor.Charts.Domain.Lookup;
 using Annium.Core.Primitives;
 using Annium.Data.Models;
 using NodaTime;
