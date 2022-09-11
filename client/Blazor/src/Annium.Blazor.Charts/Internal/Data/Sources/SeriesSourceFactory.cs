@@ -175,29 +175,4 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     }
 
     #endregion
-
-    // public ISeriesSource<T> CreateChecked<T>(
-    //     Duration resolution,
-    //     Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
-    //     SeriesSourceOptions options
-    // )
-    //     where T : ITimeSeries, IComparable<T>
-    // {
-    //     var cache = new CheckedSeriesSourceCache<T>(resolution);
-    //     var logger = _loggerFactory.Get<LoadingSeriesSource<T>>();
-    //
-    //     return new LoadingSeriesSource<T>(cache, resolution, load, options, logger);
-    // }
-    //
-    // private ISeriesSource<TD> CreateUnchecked<TS, TD>(
-    //     ISeriesSource<TS> source,
-    //     Func<IReadOnlyList<TS>, Instant, Instant, IReadOnlyCollection<TD>> getValues
-    // )
-    //     where TD : IComparable<TD>, IComparable<Instant>
-    // {
-    //     var cache = new UncheckedSeriesSourceCache<TD>(source.Resolution);
-    //     var logger = _loggerFactory.Get<DependentSeriesSource<TS, TD>>();
-    //
-    //     return new DependentSeriesSource<TS, TD>(source, cache, getValues, logger);
-    // }
 }
