@@ -9,9 +9,8 @@ public record Candle(
     decimal Open,
     decimal High,
     decimal Low,
-    decimal Close,
-    decimal Volume
-) : ITimeSeries, IComparable<Candle>, IComparable<Instant>
+    decimal Close
+) : ICandle, IComparable<Candle>, IComparable<Instant>
 {
     public int CompareTo(Candle? other) => Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));
     public int CompareTo(Instant other) => Moment.CompareTo(other);

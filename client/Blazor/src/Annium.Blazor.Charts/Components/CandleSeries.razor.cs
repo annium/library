@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
+using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Domain.Models;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Core.Primitives;
@@ -13,7 +14,7 @@ using Microsoft.AspNetCore.Components;
 namespace Annium.Blazor.Charts.Components;
 
 public partial class CandleSeries<T> : ILogSubject<CandleSeries<T>>, IAsyncDisposable
-    where T : Candle
+    where T : ICandle
 {
     [Parameter, EditorRequired]
     public ISeriesSource<T> Source { get; set; } = default!;

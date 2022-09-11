@@ -23,8 +23,7 @@ public class CandleResponseProfile : Profile
                     x.Opens[i],
                     x.Highs[i],
                     x.Lows[i],
-                    x.Closes[i],
-                    x.Volumes[i]
+                    x.Closes[i]
                 )
             );
 
