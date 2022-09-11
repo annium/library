@@ -10,12 +10,12 @@ namespace Annium.Blazor.Charts.Extensions;
 
 public static class SeriesSourceExtensions
 {
-    public static Action RenderTo<TData>(
-        this ISeriesSource<TData> source,
+    public static Action RenderTo<T>(
+        this ISeriesSource<T> source,
         IChartContext chartContext,
-        Action<IReadOnlyList<TData>> render
+        Action<IReadOnlyList<T>> render
     )
-        where TData : ITimeSeries
+        where T : ITimeSeries
     {
         void Draw()
         {
