@@ -1,3 +1,5 @@
+using Annium.Blazor.Charts.Domain.Interfaces;
+
 namespace Annium.Blazor.Charts.Domain.Models;
 
-public record RangeItem(decimal Low, decimal High);
+public record RangeItem(decimal Low, decimal High) : IRangeItem;
