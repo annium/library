@@ -33,7 +33,7 @@ public partial class Page
     private Style Styles { get; set; } = default!;
 
     private ISeriesSource<Candle> _candleSeries = default!;
-    private ISeriesSource<PlainValue> _openSeries = default!;
+    private ISeriesSource<PointValue> _openSeries = default!;
     private ISeriesSource<MultiRangeValue<RangeItem>> _rangeSeries = default!;
     private Func<Candle, string> _getCandleLabel = delegate { return string.Empty; };
     private Func<RangeItem, string> _getRangeText = delegate { return string.Empty; };
@@ -45,7 +45,7 @@ public partial class Page
         ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
 
         _candleSeries = SeriesSourceFactory.CreateChecked(ChartContext.Resolution, LoadCandles);
-        _openSeries = SeriesSourceFactory.CreateChecked(_candleSeries, x => new PlainValue(x.Moment, x.Open));
+        _openSeries = SeriesSourceFactory.CreateChecked(_candleSeries, x => new PointValue(x.Moment, x.Open));
         _rangeSeries = SeriesSourceFactory.CreateChecked(
             _candleSeries,
             x => new MultiRangeValue<RangeItem>(x.Moment, new[]

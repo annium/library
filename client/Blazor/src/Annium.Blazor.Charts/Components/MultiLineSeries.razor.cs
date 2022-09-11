@@ -14,8 +14,8 @@ using OneOf;
 namespace Annium.Blazor.Charts.Components;
 
 public partial class MultiLineSeries<TM, TI> : ILogSubject<MultiLineSeries<TM, TI>>, IAsyncDisposable
-    where TM : MultiPlainValue<TI>
-    where TI : PlainItem
+    where TM : MultiPointValue<TI>
+    where TI : PointItem
 {
     [Parameter, EditorRequired]
     public ISeriesSource<TM> Source { get; set; } = default!;
