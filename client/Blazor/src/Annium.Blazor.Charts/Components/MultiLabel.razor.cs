@@ -1,5 +1,4 @@
 using Annium.Blazor.Charts.Data.Sources;
-using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Domain.Lookup;
 using Annium.Blazor.Charts.Internal.Extensions;

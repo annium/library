@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
-using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Runtime.Time;

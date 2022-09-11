@@ -2,7 +2,7 @@ using System;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Domain;
+namespace Annium.Blazor.Charts.Domain.Models;
 
 public record Candle(
     Instant Moment,

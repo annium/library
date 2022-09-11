@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
-using Annium.Blazor.Charts.Domain;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Logging.Abstractions;

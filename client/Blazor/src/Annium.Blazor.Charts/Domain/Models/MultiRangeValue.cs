@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Domain;
+namespace Annium.Blazor.Charts.Domain.Models;
 
 public record MultiRangeValue<T>(Instant Moment, IReadOnlyCollection<T> Values) : IMultiValue<T>, IComparable<MultiRangeValue<T>>, IComparable<Instant>
     where T : RangeItem

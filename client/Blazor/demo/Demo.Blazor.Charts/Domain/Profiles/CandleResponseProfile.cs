@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Annium.Blazor.Charts.Domain;
+using Annium.Blazor.Charts.Domain.Models;
 using Annium.Core.Mapper;
 using NodaTime;
 
