@@ -1,6 +1,6 @@
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Domain;
+namespace Annium.Blazor.Charts.Domain.Interfaces;
 
 public interface ITimeSeries
 {

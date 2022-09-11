@@ -1,4 +1,5 @@
 using System;
+using Annium.Blazor.Charts.Domain.Interfaces;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Domain;

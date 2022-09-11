@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain;
+using Annium.Blazor.Charts.Domain.Interfaces;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Data.Sources;

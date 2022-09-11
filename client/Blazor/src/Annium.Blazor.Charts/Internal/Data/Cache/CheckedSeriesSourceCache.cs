@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Domain;
+using Annium.Blazor.Charts.Domain.Interfaces;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data.Cache;
