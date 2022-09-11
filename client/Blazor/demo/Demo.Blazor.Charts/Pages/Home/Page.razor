@@ -11,17 +11,30 @@
             <MultiRangeSeries
                 TM="MultiValue<RangeItem>"
                 TI="RangeItem"
-                Source="_rangeSeries"
+                Source="_multiRangeSeries"
                 Centered="true"
                 ContinueLast="false"
                 ItemColor="@("rgba(50, 0, 150, 0.5)")" />
             <MultiLabel
                 TValue="MultiValue<RangeItem>"
                 TItem="RangeItem"
-                Source="_rangeSeries"
-                Text="@_getRangeText"
-                Left="@_getRangeLeft"
-                Top="@_getRangeTop" />
+                Source="_multiRangeSeries"
+                Text="@_getRangeLabelText"
+                Left="@_getRangeLabelLeft"
+                Top="@_getRangeLabelTop" />
+            <MultiLineSeries
+                TM="MultiValue<LinePointItem>"
+                TI="LinePointItem"
+                Source="_multiLineSeries"
+                IsRelated="@((a, b) => a.IsUpper == b.IsUpper)"
+                ItemColor="@("rgba(50, 0, 150, 0.5)")" />
+            <MultiLabel
+                TValue="MultiValue<LinePointItem>"
+                TItem="LinePointItem"
+                Source="_multiLineSeries"
+                Text="@_getLineLabelText"
+                Left="@_getLineLabelLeft"
+                Top="@_getLineLabelTop" />
             <Resolution CssClass="@Styles.Resolution" />
         </PaneSeries>
         <PaneRight CssClass="@Styles.PaneRight">

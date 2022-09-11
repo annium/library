@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
+using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
@@ -21,13 +23,16 @@ public partial class MultiLineSeries<TM, TI> : ILogSubject<MultiLineSeries<TM, T
     public ISeriesSource<TM> Source { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public OneOf<string, Func<TI, string>> ItemColor { get; set; }
+    public Func<TI, TI, bool> IsRelated { get; set; } = delegate { return false; };
 
     [Parameter]
-    public bool Centered { get; set; }
+    public OneOf<string, Func<TI, string>> ItemColor { get; set; } = "black";
 
     [Parameter]
-    public bool ContinueLast { get; set; }
+    public OneOf<int, Func<TI, int>> Width { get; set; } = 1;
+
+    [Parameter]
+    public OneOf<int, Func<TI, int>> Radius { get; set; } = 2;
 
     [CascadingParameter]
     public IChartContext ChartContext { get; set; } = default!;
@@ -85,41 +90,52 @@ public partial class MultiLineSeries<TM, TI> : ILogSubject<MultiLineSeries<TM, T
         }
 
         this.Log().Trace("render {count} in range {min} - {max}", items.Count, min, max);
-        var width = GetWidth();
-        var offset = Centered ? width == 1 ? 0 : ((double) width / 2).CeilInt32() : 0;
-        var lastMoment = ContinueLast ? ChartContext.View.End : ChartContext.FromX(ChartContext.ToX(items[^1].Moment) + width);
         var ctx = SeriesContext.Canvas;
 
         ctx.Save();
 
-        // for (var i = 0; i < items.Count - 1; i++)
-        //     RenderItem(ctx, items[i], items[i + 1].Moment, offset);
-        // RenderItem(ctx, items[^1], lastMoment, offset);
+        for (var i = 0; i < items.Count - 1; i++)
+            RenderItem(ctx, items[i], items[i + 1]);
 
         ctx.Restore();
     }
 
-    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    // private void RenderItem(
-    //     Canvas ctx,
-    //     TM item,
-    //     Instant to,
-    //     int offset
-    // )
-    // {
-    //     var left = PaneContext.ToX(item.Moment);
-    //     var right = PaneContext.ToX(to);
-    //     var width = right - left;
-    //
-    //     foreach (var range in item.Values)
-    //     {
-    //         ctx.FillStyle = ItemColor.Match(value => value, get => get(range));
-    //         var low = PaneContext.ToY(range.Low);
-    //         var high = PaneContext.ToY(range.High);
-    //
-    //         ctx.FillRect(left - offset, high, width, low - high);
-    //     }
-    // }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void RenderItem(Canvas ctx, TM a, TM b)
+    {
+        var left = PaneContext.ToX(a.Moment);
+        var right = PaneContext.ToX(b.Moment);
+
+        foreach (var av in a.Values)
+        {
+            var width = Width.Match(x => x, x => x(av));
+            var radius = Radius.Match(x => x, x => x(av));
+            var color = ItemColor.Match(x => x, x => x(av));
+            var y = PaneContext.ToY(av.Value);
+
+            ctx.StrokeStyle = color;
+            ctx.LineWidth = width;
+
+            ctx.BeginPath();
+            ctx.MoveTo(left, y);
+            ctx.Arc(left, y, radius, 0, (float) (2 * Math.PI), false);
+            ctx.FillStyle = color;
+            ctx.Fill();
+            ctx.ClosePath();
+
+            foreach (var bv in b.Values)
+            {
+                if (!IsRelated(bv, av))
+                    continue;
+
+                ctx.BeginPath();
+                ctx.MoveTo(left, y);
+                ctx.LineTo(right, PaneContext.ToY(bv.Value));
+                ctx.Stroke();
+                ctx.ClosePath();
+            }
+        }
+    }
 
     private (decimal min, decimal max) GetBounds(IReadOnlyList<TM> items)
     {
@@ -133,13 +149,6 @@ public partial class MultiLineSeries<TM, TI> : ILogSubject<MultiLineSeries<TM, T
         }
 
         return (min, max);
-    }
-
-    private int GetWidth()
-    {
-        var width = ChartContext.PxPerResolution.Above(1);
-
-        return width % 2 == 1 ? width : width - 1;
     }
 
     public ValueTask DisposeAsync()

@@ -35,11 +35,15 @@ public partial class Page
 
     private ISeriesSource<ICandle> _candleSeries = default!;
     private ISeriesSource<PointValue> _openSeries = default!;
-    private ISeriesSource<MultiValue<RangeItem>> _rangeSeries = default!;
+    private ISeriesSource<MultiValue<RangeItem>> _multiRangeSeries = default!;
+    private ISeriesSource<MultiValue<LinePointItem>> _multiLineSeries = default!;
     private Func<ICandle, string> _getCandleLabel = delegate { return string.Empty; };
-    private Func<RangeItem, string> _getRangeText = delegate { return string.Empty; };
-    private Func<IPaneContext, Instant, int> _getRangeLeft = delegate { return 0; };
-    private Func<IPaneContext, RangeItem, int> _getRangeTop = delegate { return 0; };
+    private Func<RangeItem, string> _getRangeLabelText = delegate { return string.Empty; };
+    private Func<IPaneContext, Instant, int> _getRangeLabelLeft = delegate { return 0; };
+    private Func<IPaneContext, RangeItem, int> _getRangeLabelTop = delegate { return 0; };
+    private Func<LinePointItem, string> _getLineLabelText = delegate { return string.Empty; };
+    private Func<IPaneContext, Instant, int> _getLineLabelLeft = delegate { return 0; };
+    private Func<IPaneContext, LinePointItem, int> _getLineLabelTop = delegate { return 0; };
 
     protected override void OnInitialized()
     {
@@ -47,12 +51,21 @@ public partial class Page
 
         _candleSeries = SeriesSourceFactory.CreateChecked(ChartContext.Resolution, LoadCandles);
         _openSeries = SeriesSourceFactory.CreateChecked(_candleSeries, x => new PointValue(x.Moment, x.Open));
-        _rangeSeries = SeriesSourceFactory.CreateChecked(
+        _multiRangeSeries = SeriesSourceFactory.CreateChecked(
             _candleSeries,
             x => new MultiValue<RangeItem>(x.Moment, new[]
                 {
                     new RangeItem(2 * x.Low - x.High, x.Low),
                     new RangeItem(x.High, 2 * x.High - x.Low)
+                }
+            )
+        );
+        _multiLineSeries = SeriesSourceFactory.CreateChecked(
+            _candleSeries,
+            x => new MultiValue<LinePointItem>(x.Moment, new[]
+                {
+                    new LinePointItem(false, x.Low * .98m),
+                    new LinePointItem(true, x.High * 1.02m)
                 }
             )
         );
@@ -65,9 +78,14 @@ public partial class Page
 
             return $"O: {x.Open} H: {x.High} L: {x.Low} C: {x.Close}  [ {changeSign}{absChange} ({changeSign}{percentChange:F2}) ]";
         };
-        _getRangeText = range => $"{range.Low:F2} - {range.High:F2}";
-        _getRangeLeft = (ctx, moment) => ctx.ToX(moment) + 5;
-        _getRangeTop = (ctx, range) => ctx.ToY((range.Low + range.High) / 2);
+
+        _getRangeLabelText = range => $"{range.Low:F2} - {range.High:F2}";
+        _getRangeLabelLeft = (ctx, moment) => ctx.ToX(moment) + 5;
+        _getRangeLabelTop = (ctx, range) => ctx.ToY((range.Low + range.High) / 2);
+
+        _getLineLabelText = point => $"{point.Value:F2}";
+        _getLineLabelLeft = (ctx, moment) => ctx.ToX(moment) + 5;
+        _getLineLabelTop = (ctx, point) => ctx.ToY(point.Value);
     }
 
     private async Task<IReadOnlyList<ICandle>> LoadCandles(
@@ -89,4 +107,6 @@ public partial class Page
 
         return candles;
     }
+
+    private sealed record LinePointItem(bool IsUpper, decimal Value) : IPointItem;
 }
