@@ -47,33 +47,45 @@ internal class StorageBase : IStorageBase
 
     public bool TryGet<T>(string key, out T? value)
     {
-        var raw = _js.Invoke<string>($"{_storage}.getItem", key);
-
-        if (string.IsNullOrWhiteSpace(raw))
+        if (TryGetString(key, out var raw))
         {
-            value = default;
-
-            return false;
+            value = _serializer.Deserialize<T>(raw!);
+            return true;
         }
 
-        value = _serializer.Deserialize<T>(raw);
+        value = default;
 
-        return true;
+        return false;
+    }
+
+    public bool TryGetString(string key, out string? value)
+    {
+        value = _js.Invoke<string>($"{_storage}.getItem", key);
+
+        return !string.IsNullOrWhiteSpace(value);
     }
 
     public T Get<T>(string key)
+    {
+        return _serializer.Deserialize<T>(GetString(key));
+    }
+
+    public string GetString(string key)
     {
         var raw = _js.Invoke<string>($"{_storage}.getItem", key);
 
         if (string.IsNullOrWhiteSpace(raw))
             throw new KeyNotFoundException($"Key {key} is not found in {_storage}");
 
-        var value = _serializer.Deserialize<T>(raw);
-
-        return value;
+        return raw;
     }
 
     public bool Set<T>(string key, T value)
+    {
+        return SetString(key, _serializer.Serialize(value));
+    }
+
+    public bool SetString(string key, string value)
     {
         var raw = _serializer.Serialize(value);
         var hasKey = HasKey(key);
