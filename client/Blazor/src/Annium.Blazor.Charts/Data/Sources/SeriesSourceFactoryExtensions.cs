@@ -54,7 +54,7 @@ public static class SeriesSourceFactoryExtensions
     public static ISeriesSource<TD> CreateUnchecked<TS, TD>(
         this ISeriesSourceFactory factory,
         ISeriesSource<TS> source,
-        Func<TS, TD> getValues
+        Func<TS, TD?> getValues
     )
         where TD : ITimeSeries
         => factory.CreateUnchecked(source, getValues, Compare, Compare);

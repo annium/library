@@ -103,11 +103,22 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
 
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, TD> getValues,
+        Func<TS, TD?> getValues,
         Func<TD, TD, int> compare,
         Func<TD, Instant, int> compareToMoment
     )
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment), (chunk, _, _, _) => chunk.Select(getValues).ToArray());
+        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment), (chunk, _, _, _) =>
+        {
+            var result = new List<TD>(chunk.Count);
+            foreach (var sourceItem in chunk)
+            {
+                var resultItem = getValues(sourceItem);
+                if (resultItem is not null)
+                    result.Add(resultItem);
+            }
+
+            return result;
+        });
 
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,

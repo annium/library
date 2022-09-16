@@ -80,7 +80,7 @@ public interface ISeriesSourceFactory
 
     ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
-        Func<TS, TD> getValues,
+        Func<TS, TD?> getValues,
         Func<TD, TD, int> compare,
         Func<TD, Instant, int> compareToMoment
     );
