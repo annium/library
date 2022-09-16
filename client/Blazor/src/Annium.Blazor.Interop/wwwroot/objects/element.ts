@@ -3,6 +3,7 @@
 import cbTracker from '../trackers/cbTracker.js'
 import objectTracker from '../trackers/objectTracker.js'
 import js from '../interop/js.js';
+import { getLog } from '../log.js';
 
 type KeyboardEventName =
     | 'keydown'
@@ -16,6 +17,8 @@ type MouseEventName =
     | 'mouseout'
     | 'mouseover'
     | 'mouseup'
+
+const log = getLog('element')
 
 export default {
     /* properties */
@@ -46,6 +49,7 @@ export default {
             : (e: KeyboardEvent) => {
                 ref.invokeMethod(method, callback.id, [e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey])
             })
+        log.debug('onKeyboardEvent - add callback', callback.id)
         getById(id).addEventListener(type, callback)
 
         return callback.id
@@ -55,6 +59,7 @@ export default {
             e.preventDefault();
             ref.invokeMethod(method, callback.id, [e.clientX, e.clientY])
         })
+        log.debug('onMouseEvent - add callback', callback.id)
         getById(id).addEventListener(type, callback)
 
         return callback.id
@@ -64,11 +69,13 @@ export default {
             e.preventDefault();
             ref.invokeMethod(method, callback.id, [e.ctrlKey, e.deltaX, e.deltaY])
         })
+        log.debug('onWheelEvent - add callback', callback.id)
         getById(id).addEventListener(type, callback)
 
         return callback.id
     },
     offEvent: (id: string, type: keyof HTMLElementEventMap, cid: number): void => {
+        log.debug('offEvent - remove', type, 'callback', id)
         getById(id).removeEventListener(type, cbTracker.release(cid))
     },
 }
