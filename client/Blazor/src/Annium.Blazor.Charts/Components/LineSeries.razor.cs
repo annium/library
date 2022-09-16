@@ -88,22 +88,17 @@ public partial class LineSeries<T> : ILogSubject<LineSeries<T>>, IAsyncDisposabl
 
         ctx.BeginPath();
 
-        // first point
-        {
-            var x = PaneContext.ToX(items[0].Moment);
-            var y = PaneContext.ToY(items[0].Value);
+        ctx.MoveTo(0, PaneContext.ToY(items[0].Value));
 
-            ctx.MoveTo(x, y);
-        }
-
-        for (var i = 1; i < items.Count; i++)
+        foreach (var item in items)
         {
-            var item = items[i];
             var x = PaneContext.ToX(item.Moment);
             var y = PaneContext.ToY(item.Value);
 
             ctx.LineTo(x, y);
         }
+
+        ctx.LineTo((float) PaneContext.Rect.Width, PaneContext.ToY(items[^1].Value));
 
         ctx.Stroke();
         ctx.ClosePath();
