@@ -40,8 +40,7 @@ public class LoadingSeriesSourceTests : TestBase
         Get<ITimeManager>().SetNow(_now);
 
         var sourceFactory = Get<ISeriesSourceFactory>();
-        var options = new SeriesSourceOptions(1, 2, 3);
-        var source = sourceFactory.CreateChecked(Duration.FromMinutes(1), (_, _, _) => Task.FromResult(getItems()), options);
+        var source = sourceFactory.CreateChecked(Duration.FromMinutes(1), (_, _, _) => Task.FromResult(getItems()));
 
         return source;
     }

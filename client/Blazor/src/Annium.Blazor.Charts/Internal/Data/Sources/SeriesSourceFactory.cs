@@ -13,7 +13,6 @@ namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
 internal class SeriesSourceFactory : ISeriesSourceFactory
 {
-    private readonly SeriesSourceOptions _defaultSeriesSourceOptions = new(1L, 3L, 8L);
     private readonly ILoggerFactory _loggerFactory;
 
     public SeriesSourceFactory(
@@ -175,7 +174,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     {
         var logger = _loggerFactory.Get<LoadingSeriesSource<T>>();
 
-        return new LoadingSeriesSource<T>(cache, resolution, load, options ?? _defaultSeriesSourceOptions, logger);
+        return new LoadingSeriesSource<T>(cache, resolution, load, options ?? SeriesSourceOptions.Default, logger);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
