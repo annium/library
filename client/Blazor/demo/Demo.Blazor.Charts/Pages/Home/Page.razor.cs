@@ -50,7 +50,7 @@ public partial class Page
         ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
 
         _candleSeries = SeriesSourceFactory.CreateChecked(ChartContext.Resolution, LoadCandles);
-        _openSeries = SeriesSourceFactory.CreateChecked(_candleSeries, x => new PointValue(x.Moment, x.Open));
+        _openSeries = SeriesSourceFactory.CreateUnchecked(_candleSeries, x => x.Close > x.Open * 1.001m ? new PointValue(x.Moment, x.Open) : null);
         _multiRangeSeries = SeriesSourceFactory.CreateChecked(
             _candleSeries,
             x => new MultiValue<RangeItem>(x.Moment, new[]
