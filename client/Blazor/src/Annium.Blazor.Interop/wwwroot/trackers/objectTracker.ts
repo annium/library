@@ -28,10 +28,13 @@ const release = (id: string): void => {
     throw new Error(`Object ${id} is not tracked`)
 }
 
+const dump = () => new Map(objects)
+
 export default {
   track,
   get,
-  release
+  release,
+  dump,
 }
 
 /* globals */
