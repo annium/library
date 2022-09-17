@@ -15,7 +15,7 @@ const track = (id: string, el: HTMLElement): void => {
 
 const get = <T extends HTMLElement>(id: string): T => {
   const object = objects.get(id)
-  log.trace('get', id, 'is', object)
+  log.trace('get', id, 'resolved', object)
   if (!object)
     throw new Error(`Object ${id} is not tracked`)
 

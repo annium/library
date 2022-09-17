@@ -25,7 +25,7 @@ public partial class Page : ILogSubject<Canvas.Page>, IDisposable
     {
         if (!firstRender) return;
 
-        Window.OnResize(Handler<ResizeEvent>("resize", "window"));
+        _disposable += Window.OnResize(Handler<ResizeEvent>("resize", "window"));
         _disposable += _input;
         _input.OnKeyDown(Handler<KeyboardEvent>("keydown", "input"), false);
         _input.OnKeyUp(Handler<KeyboardEvent>("keyup", "input"), false);

@@ -41,7 +41,7 @@ internal abstract record InteropEventBase<T> : IDisposable
 
         void Disposer()
         {
-            Ctx.Apply(_unbinderName, GetSharedBindArgs().Concat(new[] { eventKey.ToString(), callbackId.ToString() }).ToArray());
+            Ctx.Apply(_unbinderName, GetSharedBindArgs().Concat(new object[] { eventKey.ToString()!, callbackId }).ToArray());
             if (!_handlers.Remove(callbackId))
                 throw OperationException($"failed to remove handler {callbackId}");
         }
