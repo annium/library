@@ -81,9 +81,16 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
                 get => get(item),
                 get => get(moment, item)
             );
+
             ctx.Font = $"{FontSize}px {FontFamily}";
-            ctx.FillStyle = Color.Match(value => value, get => get(item));
             ctx.TextBaseline = CanvasTextBaseline.middle;
+
+            var width = ctx.MeasureTextWidth(text);
+            var height = ctx.MeasureTextHeight(text);
+            ctx.FillStyle = "white";
+            ctx.FillRect(x, y - (height / 2f).RoundInt32(), width, height);
+
+            ctx.FillStyle = Color.Match(value => value, get => get(item));
             ctx.FillText(text, x, y);
         }
 
