@@ -53,7 +53,10 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
     private void Render(IReadOnlyList<T> values)
     {
         if (values.Count < MinValuesToRender)
+        {
+            PaneContext.AdjustRange(Source, 0, 0);
             return;
+        }
 
         var (min, max) = GetBounds(values);
 

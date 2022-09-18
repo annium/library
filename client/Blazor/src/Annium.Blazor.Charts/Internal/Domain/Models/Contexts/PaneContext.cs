@@ -60,14 +60,29 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         var (start, end) = Range;
         var sourceRange = _sourceRanges[source];
         sourceRange.Set(min, max);
-        _range.Set(
-            _sourceRanges.Min(x => x.Value.Start),
-            _sourceRanges.Max(x => x.Value.End)
-        );
+
+        var renderingRanges = _sourceRanges.Values.Where(x => x.Start != 0 && x.End != 0).ToArray();
+        if (renderingRanges.Length > 0)
+        {
+            this.Log().Trace($"update Pane range from {renderingRanges.Length} rendering source(s)");
+            _range.Set(
+                renderingRanges.Min(x => x.Start),
+                renderingRanges.Max(x => x.End)
+            );
+        }
+        else
+        {
+            this.Log().Trace($"reset Pane range due to lack of rendering source(s)");
+            _range.Set(0, 0);
+        }
 
         if (Range.Start == start && Range.End == end)
+        {
+            this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, not changed Pane range: {Range}");
             return false;
+        }
 
+        this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}");
         (start, end) = Range;
         var size = Math.Abs(end - start);
         if (size > 0)
@@ -78,7 +93,6 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
             _view.Set(start * 0.9m, start * 1.1m);
         UpdateDotPerPx();
 
-        this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}");
         Chart.RequestDraw();
 
         return true;
