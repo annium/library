@@ -7,6 +7,7 @@ using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
+using NodaTime;
 using OneOf;
 
 namespace Annium.Blazor.Charts.Components;
@@ -34,44 +35,67 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
 
     protected override void RenderValues(IReadOnlyList<TM> items)
     {
-        for (var i = 0; i < items.Count - 1; i++)
-            RenderItem(SeriesContext.Canvas, items[i], items[i + 1]);
+        var ctx = SeriesContext.Canvas;
+        var first = items[0];
+        RenderValueItemPoints(ctx, first);
+        if (items.Count == 1)
+            return;
+
+        var lastItems = first.Items.Select(x => new LastItem(first.Moment, x)).ToList();
+
+        for (var i = 1; i < items.Count; i++)
+            RenderValue(SeriesContext.Canvas, items[i], lastItems);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void RenderItem(Canvas ctx, TM a, TM b)
+    private void RenderValue(Canvas ctx, TM value, List<LastItem> lastItems)
     {
-        var left = PaneContext.ToX(a.Moment);
-        var right = PaneContext.ToX(b.Moment);
+        RenderValueItemPoints(ctx, value);
 
-        foreach (var av in a.Values)
+        var right = PaneContext.ToX(value.Moment);
+
+        foreach (var item in value.Items)
         {
-            var width = Width.Match(x => x, x => x(av));
-            var radius = Radius.Match(x => x, x => x(av));
-            var color = ItemColor.Match(x => x, x => x(av));
-            var y = PaneContext.ToY(av.Value);
+            var index = lastItems.FindIndex(x => IsRelated(item, x.Item));
+            var lastItem = new LastItem(value.Moment, item);
+            if (index < 0)
+            {
+                lastItems.Add(lastItem);
+                continue;
+            }
+
+            var prev = lastItems[index];
+            lastItems[index] = lastItem;
+
+            ctx.BeginPath();
+            ctx.MoveTo(PaneContext.ToX(prev.Moment), PaneContext.ToY(prev.Item.Value));
+            ctx.LineTo(right, PaneContext.ToY(item.Value));
+            ctx.Stroke();
+            ctx.ClosePath();
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void RenderValueItemPoints(Canvas ctx, TM value)
+    {
+        var x = PaneContext.ToX(value.Moment);
+
+        foreach (var item in value.Items)
+        {
+            var width = Width.Match(x => x, x => x(item));
+            var radius = Radius.Match(x => x, x => x(item));
+            var color = ItemColor.Match(x => x, x => x(item));
+            var y = PaneContext.ToY(item.Value);
 
             ctx.StrokeStyle = color;
             ctx.LineWidth = width;
 
             ctx.BeginPath();
-            ctx.MoveTo(left, y);
-            ctx.Arc(left, y, radius, 0, (float) (2 * Math.PI), false);
+            ctx.MoveTo(x, y);
+            ctx.Arc(x, y, radius, 0, (float) (2 * Math.PI), false);
             ctx.FillStyle = color;
             ctx.Fill();
             ctx.ClosePath();
-
-            foreach (var bv in b.Values)
-            {
-                if (!IsRelated(bv, av))
-                    continue;
-
-                ctx.BeginPath();
-                ctx.MoveTo(left, y);
-                ctx.LineTo(right, PaneContext.ToY(bv.Value));
-                ctx.Stroke();
-                ctx.ClosePath();
-            }
         }
     }
 
@@ -82,10 +106,22 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
 
         foreach (var item in items)
         {
-            min = Math.Min(min, item.Values.Min(x => x.Value));
-            max = Math.Max(max, item.Values.Max(x => x.Value));
+            min = Math.Min(min, item.Items.Min(x => x.Value));
+            max = Math.Max(max, item.Items.Max(x => x.Value));
         }
 
         return (min, max);
+    }
+
+    private sealed record LastItem(Instant Moment, TI Item)
+    {
+        public Instant Moment { get; private set; } = Moment;
+        public TI Item { get; private set; } = Item;
+
+        public void Update(Instant moment, TI item)
+        {
+            Moment = moment;
+            Item = item;
+        }
     }
 }

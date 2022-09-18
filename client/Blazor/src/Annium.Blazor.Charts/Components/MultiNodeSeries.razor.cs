@@ -26,7 +26,7 @@ public partial class MultiNodeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
     protected override void RenderValues(IReadOnlyList<TM> values)
     {
         foreach (var value in values)
-        foreach (var item in value.Values)
+        foreach (var item in value.Items)
             RenderItem(item, SeriesContext.Canvas, PaneContext.ToX(value.Moment), PaneContext.ToY(item.Value));
     }
 
@@ -37,8 +37,8 @@ public partial class MultiNodeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
 
         foreach (var value in values)
         {
-            min = Math.Min(min, value.Values.Min(x => x.Value));
-            max = Math.Max(max, value.Values.Max(x => x.Value));
+            min = Math.Min(min, value.Items.Min(x => x.Value));
+            max = Math.Max(max, value.Items.Max(x => x.Value));
         }
 
         return (min, max);

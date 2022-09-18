@@ -4,4 +4,4 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Domain.Models;
 
-public record MultiValue<T>(Instant Moment, IReadOnlyCollection<T> Values) : IMultiValue<T>;
+public record MultiValue<T>(Instant Moment, IReadOnlyCollection<T> Items) : IMultiValue<T>;

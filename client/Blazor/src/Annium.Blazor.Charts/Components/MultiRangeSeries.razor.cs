@@ -55,7 +55,7 @@ public partial class MultiRangeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Mult
         var right = PaneContext.ToX(to);
         var width = right - left;
 
-        foreach (var range in item.Values)
+        foreach (var range in item.Items)
         {
             ctx.FillStyle = ItemColor.Match(value => value, get => get(range));
             var low = PaneContext.ToY(range.Low);
@@ -72,8 +72,8 @@ public partial class MultiRangeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Mult
 
         foreach (var item in items)
         {
-            min = Math.Min(min, item.Values.Min(x => x.Low));
-            max = Math.Max(max, item.Values.Max(x => x.High));
+            min = Math.Min(min, item.Items.Min(x => x.Low));
+            max = Math.Max(max, item.Items.Max(x => x.High));
         }
 
         return (min, max);

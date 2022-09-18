@@ -29,6 +29,6 @@ public partial class MultiLabel<TValue, TItem> : LabelBase<TItem>
 
         var item = Source.GetItem(moment.Value, Match);
         if (item is not null)
-            RenderItems(moment.Value, item.Values);
+            RenderItems(moment.Value, item.Items);
     }
 }
