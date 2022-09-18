@@ -29,36 +29,18 @@ public partial class MultiRangeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Mult
     [Inject]
     public ILogger<MultiRangeSeries<TM, TI>> Logger { get; set; } = default!;
 
-    protected override void Render(IReadOnlyList<TM> items)
+    protected override int MinValuesToRender => 1;
+
+    protected override void RenderValues(IReadOnlyList<TM> items)
     {
-        if (items.Count == 0)
-        {
-            this.Log().Trace("No items to render");
-            return;
-        }
-
-        var (min, max) = GetBounds(items);
-
-        // if range is changed, redraw will be triggered
-        if (PaneContext.AdjustRange(Source, min, max))
-        {
-            this.Log().Trace("adjusted to range {min} - {max}, wait for redraw", min, max);
-            return;
-        }
-
-        this.Log().Trace("render {count} in range {min} - {max}", items.Count, min, max);
         var width = GetWidth();
         var offset = Centered ? width == 1 ? 0 : ((double) width / 2).CeilInt32() : 0;
         var lastMoment = ContinueLast ? ChartContext.View.End : ChartContext.FromX(ChartContext.ToX(items[^1].Moment) + width);
         var ctx = SeriesContext.Canvas;
 
-        ctx.Save();
-
         for (var i = 0; i < items.Count - 1; i++)
             RenderItem(ctx, items[i], items[i + 1].Moment, offset);
         RenderItem(ctx, items[^1], lastMoment, offset);
-
-        ctx.Restore();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,7 +65,7 @@ public partial class MultiRangeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Mult
         }
     }
 
-    private (decimal min, decimal max) GetBounds(IReadOnlyList<TM> items)
+    protected override (decimal min, decimal max) GetBounds(IReadOnlyList<TM> items)
     {
         var min = decimal.MaxValue;
         var max = decimal.MinValue;

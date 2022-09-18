@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Annium.Blazor.Charts.Domain.Models;
+using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 namespace Annium.Blazor.Charts.Components;
 
 public partial class LineSeries<T> : SeriesBase<T>, ILogSubject<LineSeries<T>>
-    where T : PointValue
+    where T : IPointValue
 {
     [Parameter]
     public string Color { get; set; } = "black";
@@ -22,22 +22,11 @@ public partial class LineSeries<T> : SeriesBase<T>, ILogSubject<LineSeries<T>>
     [Inject]
     public ILogger<LineSeries<T>> Logger { get; set; } = default!;
 
-    protected override void Render(IReadOnlyList<T> items)
+    protected override int MinValuesToRender => 1;
+
+    protected override void RenderValues(IReadOnlyList<T> items)
     {
-        this.Log().Trace($"render {items.Count} points");
-        if (items.Count <= 1)
-            return;
-
-        var (min, max) = GetBounds(items);
-
-        this.Log().Trace($"render in {min} - {max}");
-        // if range is changed, redraw will be triggered
-        if (PaneContext.AdjustRange(Source, min, max))
-            return;
-
         var ctx = SeriesContext.Canvas;
-
-        ctx.Save();
 
         ctx.StrokeStyle = Color;
         ctx.LineWidth = Width;
@@ -60,11 +49,9 @@ public partial class LineSeries<T> : SeriesBase<T>, ILogSubject<LineSeries<T>>
 
         ctx.Stroke();
         ctx.ClosePath();
-
-        ctx.Restore();
     }
 
-    private (decimal min, decimal max) GetBounds(IReadOnlyList<T> items)
+    protected override (decimal min, decimal max) GetBounds(IReadOnlyList<T> items)
     {
         var min = decimal.MaxValue;
         var max = decimal.MinValue;

@@ -24,6 +24,8 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
     [CascadingParameter]
     public ISeriesContext SeriesContext { get; set; } = default!;
 
+    protected abstract int MinValuesToRender { get; }
+
     private Action _unregisterSource = delegate { };
     private Action _unregisterRender = delegate { };
 
@@ -48,7 +50,29 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
         _unregisterRender = Source.RenderTo(ChartContext, Render);
     }
 
-    protected abstract void Render(IReadOnlyList<T> items);
+    private void Render(IReadOnlyList<T> values)
+    {
+        if (values.Count < MinValuesToRender)
+            return;
+
+        var (min, max) = GetBounds(values);
+
+        // if range is changed, redraw will be triggered
+        if (PaneContext.AdjustRange(Source, min, max))
+            return;
+
+        var ctx = SeriesContext.Canvas;
+
+        ctx.Save();
+
+        RenderValues(values);
+
+        ctx.Restore();
+    }
+
+    protected abstract void RenderValues(IReadOnlyList<T> values);
+
+    protected abstract (decimal min, decimal max) GetBounds(IReadOnlyList<T> items);
 
     public ValueTask DisposeAsync()
     {

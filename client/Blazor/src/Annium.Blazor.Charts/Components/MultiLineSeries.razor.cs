@@ -30,32 +30,12 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
     [Inject]
     public ILogger<MultiLineSeries<TM, TI>> Logger { get; set; } = default!;
 
-    protected override void Render(IReadOnlyList<TM> items)
+    protected override int MinValuesToRender => 1;
+
+    protected override void RenderValues(IReadOnlyList<TM> items)
     {
-        if (items.Count == 0)
-        {
-            this.Log().Trace("No items to render");
-            return;
-        }
-
-        var (min, max) = GetBounds(items);
-
-        // if range is changed, redraw will be triggered
-        if (PaneContext.AdjustRange(Source, min, max))
-        {
-            this.Log().Trace("adjusted to range {min} - {max}, wait for redraw", min, max);
-            return;
-        }
-
-        this.Log().Trace("render {count} in range {min} - {max}", items.Count, min, max);
-        var ctx = SeriesContext.Canvas;
-
-        ctx.Save();
-
         for (var i = 0; i < items.Count - 1; i++)
-            RenderItem(ctx, items[i], items[i + 1]);
-
-        ctx.Restore();
+            RenderItem(SeriesContext.Canvas, items[i], items[i + 1]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,7 +75,7 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
         }
     }
 
-    private (decimal min, decimal max) GetBounds(IReadOnlyList<TM> items)
+    protected override (decimal min, decimal max) GetBounds(IReadOnlyList<TM> items)
     {
         var min = decimal.MaxValue;
         var max = decimal.MinValue;

@@ -25,44 +25,24 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject<CandleSeries<T
     [Inject]
     public ILogger<CandleSeries<T>> Logger { get; set; } = default!;
 
-    protected override void Render(IReadOnlyList<T> items)
+    protected override int MinValuesToRender => 1;
+
+    protected override void RenderValues(IReadOnlyList<T> values)
     {
-        if (items.Count == 0)
-        {
-            this.Log().Trace("No candles to render");
-            return;
-        }
-
-        var (min, max) = GetBounds(items);
-
-        // if range is changed, redraw will be triggered
-        if (PaneContext.AdjustRange(Source, min, max))
-        {
-            this.Log().Trace("adjusted to range {min} - {max}, wait for redraw", min, max);
-            return;
-        }
-
-        this.Log().Trace("render {count} in range {min} - {max}", items.Count, min, max);
         var width = GetWidth();
-        var ctx = SeriesContext.Canvas;
-
-        ctx.Save();
-
         if (width == 1)
-            RenderLineCandles(ctx, items);
+            RenderLineCandles(SeriesContext.Canvas, values);
         else
-            RenderNormalCandles(ctx, items, ((double) width / 2).CeilInt32(), width);
-
-        ctx.Restore();
+            RenderNormalCandles(SeriesContext.Canvas, values, ((double) width / 2).CeilInt32(), width);
     }
 
     private void RenderLineCandles(
         Canvas ctx,
-        IReadOnlyList<T> items
+        IReadOnlyList<T> values
     )
     {
         ctx.FillStyle = UpColor;
-        foreach (var item in items.Where(x => x.Open < x.Close))
+        foreach (var item in values.Where(x => x.Open < x.Close))
         {
             var x = PaneContext.ToX(item.Moment);
             var high = PaneContext.ToY(item.High);
@@ -72,7 +52,7 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject<CandleSeries<T
         }
 
         ctx.FillStyle = DownColor;
-        foreach (var item in items.Where(x => x.Open > x.Close))
+        foreach (var item in values.Where(x => x.Open > x.Close))
         {
             var x = PaneContext.ToX(item.Moment);
             var high = PaneContext.ToY(item.High);
@@ -82,7 +62,7 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject<CandleSeries<T
         }
 
         ctx.FillStyle = StaleColor;
-        foreach (var item in items.Where(x => x.Open == x.Close))
+        foreach (var item in values.Where(x => x.Open == x.Close))
         {
             var x = PaneContext.ToX(item.Moment);
             var high = PaneContext.ToY(item.High);
@@ -94,13 +74,13 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject<CandleSeries<T
 
     private void RenderNormalCandles(
         Canvas ctx,
-        IReadOnlyList<T> items,
+        IReadOnlyList<T> values,
         int offset,
         int width
     )
     {
         ctx.FillStyle = UpColor;
-        foreach (var item in items.Where(x => x.Open < x.Close))
+        foreach (var item in values.Where(x => x.Open < x.Close))
         {
             var x = PaneContext.ToX(item.Moment);
             var open = PaneContext.ToY(item.Open);
@@ -113,7 +93,7 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject<CandleSeries<T
         }
 
         ctx.FillStyle = DownColor;
-        foreach (var item in items.Where(x => x.Open > x.Close))
+        foreach (var item in values.Where(x => x.Open > x.Close))
         {
             var x = PaneContext.ToX(item.Moment);
             var open = PaneContext.ToY(item.Open);
@@ -126,7 +106,7 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject<CandleSeries<T
         }
 
         ctx.FillStyle = StaleColor;
-        foreach (var item in items.Where(x => x.Open == x.Close))
+        foreach (var item in values.Where(x => x.Open == x.Close))
         {
             var x = PaneContext.ToX(item.Moment);
             var open = PaneContext.ToY(item.Open);
@@ -138,7 +118,7 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject<CandleSeries<T
         }
     }
 
-    private (decimal min, decimal max) GetBounds(IReadOnlyList<T> items)
+    protected override (decimal min, decimal max) GetBounds(IReadOnlyList<T> items)
     {
         var min = decimal.MaxValue;
         var max = decimal.MinValue;
