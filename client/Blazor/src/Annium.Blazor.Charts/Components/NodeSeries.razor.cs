@@ -11,8 +11,10 @@ namespace Annium.Blazor.Charts.Components;
 public partial class NodeSeries<T> : SeriesBase<T>, ILogSubject<NodeSeries<T>>
     where T : IPointValue
 {
+    public delegate void Renderer(T item, Canvas ctx, int x, int y);
+
     [Parameter, EditorRequired]
-    public Action<Canvas, int, int> RenderItem { get; set; } = delegate { };
+    public Renderer RenderItem { get; set; } = delegate { };
 
     [Inject]
     public ILogger<NodeSeries<T>> Logger { get; set; } = default!;
@@ -22,7 +24,7 @@ public partial class NodeSeries<T> : SeriesBase<T>, ILogSubject<NodeSeries<T>>
     protected override void RenderValues(IReadOnlyList<T> items)
     {
         foreach (var item in items)
-            RenderItem(SeriesContext.Canvas, PaneContext.ToX(item.Moment), PaneContext.ToY(item.Value));
+            RenderItem(item, SeriesContext.Canvas, PaneContext.ToX(item.Moment), PaneContext.ToY(item.Value));
     }
 
     protected override (decimal min, decimal max) GetBounds(IReadOnlyList<T> items)

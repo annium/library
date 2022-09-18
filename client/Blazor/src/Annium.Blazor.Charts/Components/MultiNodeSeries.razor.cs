@@ -13,8 +13,10 @@ public partial class MultiNodeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
     where TM : IMultiValue<TI>
     where TI : IPointItem
 {
+    public delegate void Renderer(TI item, Canvas ctx, int x, int y);
+
     [Parameter, EditorRequired]
-    public Action<Canvas, int, int> RenderItem { get; set; } = delegate { };
+    public Renderer RenderItem { get; set; } = delegate { };
 
     [Inject]
     public ILogger<MultiNodeSeries<TM, TI>> Logger { get; set; } = default!;
@@ -25,7 +27,7 @@ public partial class MultiNodeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
     {
         foreach (var value in values)
         foreach (var item in value.Values)
-            RenderItem(SeriesContext.Canvas, PaneContext.ToX(value.Moment), PaneContext.ToY(item.Value));
+            RenderItem(item, SeriesContext.Canvas, PaneContext.ToX(value.Moment), PaneContext.ToY(item.Value));
     }
 
     protected override (decimal min, decimal max) GetBounds(IReadOnlyList<TM> values)
