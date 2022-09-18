@@ -87,7 +87,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
     public Action RegisterSource(ISeriesSource source)
     {
         if (_sources.Contains(source))
-            throw new InvalidOperationException("Source is already registered");
+            return delegate { };
 
         _sources.Add(source);
         _sourceRanges[source] = ValueRange.Create(0m, 0m);
