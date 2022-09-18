@@ -2,11 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using Annium.Blazor.Charts.Data.Sources;
-using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Domain.Interfaces;
-using Annium.Blazor.Charts.Domain.Models;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Core.Primitives;
@@ -17,13 +13,10 @@ using OneOf;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class MultiRangeSeries<TM, TI> : ILogSubject<MultiRangeSeries<TM, TI>>, IAsyncDisposable
+public partial class MultiRangeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<MultiRangeSeries<TM, TI>>
     where TM : IMultiValue<TI>
     where TI : IRangeItem
 {
-    [Parameter, EditorRequired]
-    public ISeriesSource<TM> Source { get; set; } = default!;
-
     [Parameter, EditorRequired]
     public OneOf<string, Func<TI, string>> ItemColor { get; set; }
 
@@ -33,45 +26,10 @@ public partial class MultiRangeSeries<TM, TI> : ILogSubject<MultiRangeSeries<TM,
     [Parameter]
     public bool ContinueLast { get; set; }
 
-    [CascadingParameter]
-    public IChartContext ChartContext { get; set; } = default!;
-
-    [CascadingParameter]
-    internal IPaneContext PaneContext { get; set; } = default!;
-
-    [CascadingParameter]
-    internal ISeriesContext SeriesContext { get; set; } = default!;
-
     [Inject]
     public ILogger<MultiRangeSeries<TM, TI>> Logger { get; set; } = default!;
 
-    private Action _unregisterSource = delegate { };
-    private Action _unregisterRender = delegate { };
-
-    public override async Task SetParametersAsync(ParameterView parameters)
-    {
-        var source = Source;
-
-        await base.SetParametersAsync(parameters);
-
-        if (Source != source)
-        {
-            this.Log().Trace("update {oldSource} -> {newSource}", source.GetFullId(), Source.GetFullId());
-            _unregisterSource();
-            _unregisterSource = PaneContext.RegisterSource(Source);
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (!firstRender)
-            return;
-
-        this.Log().Trace("register Draw");
-        _unregisterRender = Source.RenderTo(ChartContext, Render);
-    }
-
-    private void Render(IReadOnlyList<TM> items)
+    protected override void Render(IReadOnlyList<TM> items)
     {
         if (items.Count == 0)
         {
@@ -144,13 +102,5 @@ public partial class MultiRangeSeries<TM, TI> : ILogSubject<MultiRangeSeries<TM,
         var width = ChartContext.PxPerResolution.Above(1);
 
         return width % 2 == 1 ? width : width - 1;
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        _unregisterSource();
-        _unregisterRender();
-
-        return ValueTask.CompletedTask;
     }
 }

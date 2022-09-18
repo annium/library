@@ -1,22 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Annium.Blazor.Charts.Data.Sources;
-using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Domain.Models;
 using Annium.Blazor.Charts.Extensions;
-using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class LineSeries<T> : ILogSubject<LineSeries<T>>, IAsyncDisposable
+public partial class LineSeries<T> : SeriesBase<T>, ILogSubject<LineSeries<T>>
     where T : PointValue
 {
-    [Parameter, EditorRequired]
-    public ISeriesSource<T> Source { get; set; } = default!;
-
     [Parameter]
     public string Color { get; set; } = "black";
 
@@ -26,45 +19,10 @@ public partial class LineSeries<T> : ILogSubject<LineSeries<T>>, IAsyncDisposabl
     [Parameter]
     public int[]? Dash { get; set; }
 
-    [CascadingParameter]
-    public IChartContext ChartContext { get; set; } = default!;
-
-    [CascadingParameter]
-    internal IPaneContext PaneContext { get; set; } = default!;
-
-    [CascadingParameter]
-    internal ISeriesContext SeriesContext { get; set; } = default!;
-
     [Inject]
     public ILogger<LineSeries<T>> Logger { get; set; } = default!;
 
-    private Action _unregisterSource = delegate { };
-    private Action _unregisterRender = delegate { };
-
-    public override async Task SetParametersAsync(ParameterView parameters)
-    {
-        var source = Source;
-
-        await base.SetParametersAsync(parameters);
-
-        if (Source != source)
-        {
-            this.Log().Trace("update {oldSource} -> {newSource}", source.GetFullId(), Source.GetFullId());
-            _unregisterSource();
-            _unregisterSource = PaneContext.RegisterSource(Source);
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (!firstRender)
-            return;
-
-        this.Log().Trace("register Draw");
-        _unregisterRender = Source.RenderTo(ChartContext, Render);
-    }
-
-    private void Render(IReadOnlyList<T> items)
+    protected override void Render(IReadOnlyList<T> items)
     {
         this.Log().Trace($"render {items.Count} points");
         if (items.Count <= 1)
@@ -118,13 +76,5 @@ public partial class LineSeries<T> : ILogSubject<LineSeries<T>>, IAsyncDisposabl
         }
 
         return (min, max);
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        _unregisterSource();
-        _unregisterRender();
-
-        return ValueTask.CompletedTask;
     }
 }

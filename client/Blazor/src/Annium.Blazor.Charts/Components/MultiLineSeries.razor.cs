@@ -2,26 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using Annium.Blazor.Charts.Data.Sources;
-using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
-using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 using OneOf;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class MultiLineSeries<TM, TI> : ILogSubject<MultiLineSeries<TM, TI>>, IAsyncDisposable
+public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject<MultiLineSeries<TM, TI>>
     where TM : IMultiValue<TI>
     where TI : IPointItem
 {
-    [Parameter, EditorRequired]
-    public ISeriesSource<TM> Source { get; set; } = default!;
-
     [Parameter, EditorRequired]
     public Func<TI, TI, bool> IsRelated { get; set; } = delegate { return false; };
 
@@ -34,45 +27,10 @@ public partial class MultiLineSeries<TM, TI> : ILogSubject<MultiLineSeries<TM, T
     [Parameter]
     public OneOf<int, Func<TI, int>> Radius { get; set; } = 2;
 
-    [CascadingParameter]
-    public IChartContext ChartContext { get; set; } = default!;
-
-    [CascadingParameter]
-    internal IPaneContext PaneContext { get; set; } = default!;
-
-    [CascadingParameter]
-    internal ISeriesContext SeriesContext { get; set; } = default!;
-
     [Inject]
     public ILogger<MultiLineSeries<TM, TI>> Logger { get; set; } = default!;
 
-    private Action _unregisterSource = delegate { };
-    private Action _unregisterRender = delegate { };
-
-    public override async Task SetParametersAsync(ParameterView parameters)
-    {
-        var source = Source;
-
-        await base.SetParametersAsync(parameters);
-
-        if (Source != source)
-        {
-            this.Log().Trace("update {oldSource} -> {newSource}", source.GetFullId(), Source.GetFullId());
-            _unregisterSource();
-            _unregisterSource = PaneContext.RegisterSource(Source);
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (!firstRender)
-            return;
-
-        this.Log().Trace("register Draw");
-        _unregisterRender = Source.RenderTo(ChartContext, Render);
-    }
-
-    private void Render(IReadOnlyList<TM> items)
+    protected override void Render(IReadOnlyList<TM> items)
     {
         if (items.Count == 0)
         {
@@ -149,13 +107,5 @@ public partial class MultiLineSeries<TM, TI> : ILogSubject<MultiLineSeries<TM, T
         }
 
         return (min, max);
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        _unregisterSource();
-        _unregisterRender();
-
-        return ValueTask.CompletedTask;
     }
 }
