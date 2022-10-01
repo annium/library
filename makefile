@@ -1,6 +1,9 @@
 TFM := net6.0
 BIN_DEBUG := bin/Debug/$(TFM)
 
+demo-blazor-ant:
+	cd web/demo/Demo.Blazor.Ant && ../../tools/run_blazor.sh
+
 demo-blazor-interop:
 	cd web/demo/Demo.Blazor.Interop && ../../tools/run_blazor.sh
 

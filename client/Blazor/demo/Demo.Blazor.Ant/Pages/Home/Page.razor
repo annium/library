@@ -1,0 +1,9 @@
+@using Annium.Blazor.Ant.Components
+@namespace Demo.Blazor.Ant.Pages.Home
+
+<div>
+    <FormField TValue="bool" State="_state.At(x => x.IsChecked)">
+        <CheckboxField>checkbox</CheckboxField>
+    </FormField>
+    <div>@(System.Text.Json.JsonSerializer.Serialize(_state.Value))</div>
+</div>
