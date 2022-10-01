@@ -14,17 +14,13 @@
     <ItemGroup>
         <ProjectReference Include="../../src/Annium.Blazor.Ant/Annium.Blazor.Ant.csproj" />
         <ProjectReference Include="../../src/Annium.Blazor.Charts/Annium.Blazor.Charts.csproj" />
-        <ProjectReference Include="../../src/Annium.Blazor.Css/Annium.Blazor.Css.csproj" />
-        <ProjectReference Include="../../src/Annium.Blazor.Interop/Annium.Blazor.Interop.csproj" />
         <ProjectReference Include="../../src/Annium.Blazor.Net/Annium.Blazor.Net.csproj" />
         <ProjectReference Include="../../src/Annium.Blazor.Routing/Annium.Blazor.Routing.csproj" />
         <ProjectReference Include="../../src/Annium.Blazor.Storage/Annium.Blazor.Storage.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Microsoft" Version="0.1.0" />
-        <PackageReference Include="Annium.Net.Http" Version="0.1.0" />
         <PackageReference Include="Annium.Serialization.Json" Version="0.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.8" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.8" />

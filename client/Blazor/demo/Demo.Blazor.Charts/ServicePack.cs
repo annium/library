@@ -2,7 +2,6 @@ using System;
 using System.Text;
 using Annium.Core.DependencyInjection;
 using Annium.Logging.Shared;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Demo.Blazor.Charts;
 
@@ -29,7 +28,7 @@ public class ServicePack : ServicePackBase
         container.AddCss();
         container.AddInterop();
         container.AddCharts();
-        container.Collection.AddAntDesign();
+        container.AddAntDesign();
     }
 
     public override void Setup(IServiceProvider provider)
