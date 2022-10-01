@@ -101,19 +101,27 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
     public Action RegisterSource(ISeriesSource source)
     {
         if (_sources.Contains(source))
+        {
+            this.Log().Trace($"source {source.GetFullId()} is already tracked");
             return delegate { };
+        }
 
+        this.Log().Trace($"track source {source.GetFullId()}");
         _sources.Add(source);
         _sourceRanges[source] = ValueRange.Create(0m, 0m);
         source.OnBoundsChange += UpdateBounds;
+        Chart?.RequestDraw();
 
         return () =>
         {
             if (!_sources.Remove(source))
                 throw new InvalidOperationException("Source is not registered");
 
+            this.Log().Trace($"untrack source {source.GetFullId()}");
             _sourceRanges.Remove(source);
             source.OnBoundsChange -= UpdateBounds;
+            Chart?.RequestDraw();
+
             if (_sources.Count == 0)
                 ResetRangeAndView();
         };
@@ -160,6 +168,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
 
     private void ResetRangeAndView()
     {
+        this.Log().Trace(string.Empty);
         _range.Set(0m, 0m);
         _view.Set(0m, 0m);
         UpdateDotPerPx();
