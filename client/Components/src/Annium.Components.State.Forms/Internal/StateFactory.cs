@@ -61,6 +61,9 @@ internal class StateFactory : IStateFactory
     public IAtomicContainer<DateTimeOffset> Create(DateTimeOffset initialValue) => CreateAtomic(initialValue);
     public IAtomicContainer<Instant> Create(Instant initialValue) => CreateAtomic(initialValue);
 
+    public IMapContainer<TKey, TValue> Create<TKey, TValue>(Dictionary<TKey, TValue> initialValue) where TKey : notnull where TValue : notnull, new() =>
+        new MapContainer<TKey, TValue>(this, initialValue.ToDictionary(x => x.Key, x => x.Value), _mapper);
+
     public IMapContainer<TKey, TValue> Create<TKey, TValue>(IDictionary<TKey, TValue> initialValue) where TKey : notnull where TValue : notnull, new() =>
         new MapContainer<TKey, TValue>(this, initialValue.ToDictionary(x => x.Key, x => x.Value), _mapper);
 

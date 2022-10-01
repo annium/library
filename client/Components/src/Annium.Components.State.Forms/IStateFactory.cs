@@ -23,6 +23,7 @@ public interface IStateFactory
     IAtomicContainer<DateTime> Create(DateTime initialValue);
     IAtomicContainer<DateTimeOffset> Create(DateTimeOffset initialValue);
     IAtomicContainer<Instant> Create(Instant initialValue);
+    IMapContainer<TKey, TValue> Create<TKey, TValue>(Dictionary<TKey, TValue> initialValue) where TKey : notnull where TValue : notnull, new();
     IMapContainer<TKey, TValue> Create<TKey, TValue>(IDictionary<TKey, TValue> initialValue) where TKey : notnull where TValue : notnull, new();
     IMapContainer<TKey, TValue> Create<TKey, TValue>(IReadOnlyDictionary<TKey, TValue> initialValue) where TKey : notnull where TValue : notnull, new();
     IMapContainer<TKey, TValue> Create<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> initialValue) where TKey : notnull where TValue : notnull, new();
