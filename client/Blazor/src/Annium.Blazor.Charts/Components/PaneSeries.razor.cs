@@ -119,6 +119,8 @@ public partial class PaneSeries : ILogSubject<PaneSeries>, IAsyncDisposable
     public class Style : RuleSet
     {
         public readonly CssRule Block = Rule.Class()
+            .DisplayFlex()
+            .FlexColumn(AlignItems.Start, JustifyContent.Start)
             .PositionRelative()
             .Set("grid-area", "1 / 1 / 2 / 2")
             .Set("line-height", "0");
