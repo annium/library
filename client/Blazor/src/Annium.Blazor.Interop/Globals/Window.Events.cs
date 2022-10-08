@@ -6,7 +6,7 @@ namespace Annium.Blazor.Interop;
 
 public static partial class Window
 {
-    private static readonly WindowInteropEvent<ResizeEvent> ResizeEvent = new();
+    private static readonly IInteropEvent<ResizeEvent> ResizeEvent = InteropEvent<ResizeEvent>.Static("window", "window");
 
     public static Action OnResize(Action<ResizeEvent> handle) => ResizeEvent.Register("resize", handle);
 }
