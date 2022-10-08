@@ -59,6 +59,7 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
         _disposable += Timer.Start(CheckState, AnimationFrameMs, AnimationFrameMs);
         _disposable += _container;
         _disposable += Window.OnResize(_ => _chartContext.SetRect(_container.GetBoundingClientRect()));
+        _disposable += _container.OnResize(_ => _chartContext.SetRect(_container.GetBoundingClientRect()));
         _container.OnWheel(HandleWheel);
         _container.OnMouseMove(HandlePointerMove);
         _container.OnMouseOut(HandlePointerOut);

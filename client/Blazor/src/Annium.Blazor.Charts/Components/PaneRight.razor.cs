@@ -56,6 +56,7 @@ public partial class PaneRight : ILogSubject<PaneRight>, IAsyncDisposable
         _disposable += _canvas;
         _disposable += _overlay;
         _disposable += Window.OnResize(_ => SetSize());
+        _disposable += _block.OnResize(_ => SetSize());
     }
 
     private void SetSize()
