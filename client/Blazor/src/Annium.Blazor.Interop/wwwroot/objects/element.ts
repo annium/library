@@ -54,6 +54,10 @@ export default {
 
     return callback.id
   },
+  offKeyboardEvent: (id: string, type: KeyboardEventName, cid: number): void => {
+    log.debug(id, 'offKeyboardEvent', type, 'release callback', cid)
+    getById(id).removeEventListener(type, cbTracker.release(cid))
+  },
   onMouseEvent: (id: string, type: MouseEventName, ref: DotNet.DotNetObject, method: string): number => {
     const callback = cbTracker.track((e: MouseEvent) => {
       e.preventDefault();
@@ -63,6 +67,10 @@ export default {
     getById(id).addEventListener(type, callback)
 
     return callback.id
+  },
+  offMouseEvent: (id: string, type: MouseEventName, cid: number): void => {
+    log.debug(id, 'offMouseEvent', type, 'release callback', cid)
+    getById(id).removeEventListener(type, cbTracker.release(cid))
   },
   onWheelEvent: (id: string, type: 'wheel', ref: DotNet.DotNetObject, method: string): number => {
     const callback = cbTracker.track((e: WheelEvent) => {
@@ -74,8 +82,8 @@ export default {
 
     return callback.id
   },
-  offEvent: (id: string, type: keyof HTMLElementEventMap, cid: number): void => {
-    log.debug(id, 'offEvent', type, 'release callback', cid)
+  offWheelEvent: (id: string, type: 'wheel', cid: number): void => {
+    log.debug(id, 'offWheelEvent', type, 'release callback', cid)
     getById(id).removeEventListener(type, cbTracker.release(cid))
   },
 }

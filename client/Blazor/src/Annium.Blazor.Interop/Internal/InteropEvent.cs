@@ -43,7 +43,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
     )
     {
         _binderName = $"{context}.on{typeof(T).Name}";
-        _unbinderName = $"{context}.offEvent";
+        _unbinderName = $"{context}.off{typeof(T).Name}";
         _target = target;
         _sharedBindArgs = sharedBindArgs;
         _netRef = DotNetObjectReference.Create(this);

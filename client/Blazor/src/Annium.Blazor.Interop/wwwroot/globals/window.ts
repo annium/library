@@ -15,7 +15,7 @@ export default {
 
     return callback.id
   },
-  offEvent: (type: keyof WindowEventMap, cid: number): void => {
+  offResizeEvent: (type: 'resize', cid: number): void => {
     log.debug('offEvent', type, 'release callback', cid)
     window.removeEventListener(type, cbTracker.release(cid))
   },
