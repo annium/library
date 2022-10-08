@@ -1,3 +1,4 @@
+@using Annium.Blazor.Core.Tools
 @using Demo.Blazor.Interop.Components.Navigation
 @namespace Demo.Blazor.Interop.Pages.Element
 
@@ -9,5 +10,8 @@
     </div>
     <div @ref="@_eventsBlock" class="@Styles.Block">
         Events block
+    </div>
+    <div @ref="@_resizedBlock" class="@ClassBuilder.With(() => !IsResized, Styles.Block).With(() => IsResized, Styles.ResizedBlock).Build()">
+        <button onclick="@ToggleResizedBlockSize">resize</button>
     </div>
 </div>

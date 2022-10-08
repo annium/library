@@ -17,6 +17,7 @@ public abstract partial record Element : IObject, IDisposable
         _disposable += _keyboardEvent = InteropEvent<KeyboardEvent>.Element(this);
         _disposable += _mouseEvent = InteropEvent<MouseEvent>.Element(this);
         _disposable += _wheelEvent = InteropEvent<WheelEvent>.Element(this);
+        _disposable += _resizeEvent = InteropEvent<ResizeEvent>.Element(this);
     }
 
     public string Style

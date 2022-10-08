@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
-import cbTracker from '../trackers/cbTracker.js'
+import cbTracker, { Callback } from '../trackers/cbTracker.js'
 import objectTracker from '../trackers/objectTracker.js'
 import js from '../interop/js.js';
 import { getLog } from '../log.js';
@@ -86,6 +86,54 @@ export const onWheelEvent = (id: string, type: 'wheel', ref: DotNet.DotNetObject
 export const offWheelEvent = (id: string, type: 'wheel', cid: number): void => {
   log.debug(id, 'offWheelEvent', type, 'release callback', cid)
   getById(id).removeEventListener(type, cbTracker.release(cid))
+}
+
+interface ResizeHandler {
+  observer: ResizeObserver;
+  callbacks: Set<Callback<(width: number, height: number) => void>>;
+}
+
+const resizeHandlers = new Map<string, ResizeHandler>()
+
+export const onResizeEvent = (id: string, _type: 'resize', ref: DotNet.DotNetObject, method: string): number => {
+  const callback = cbTracker.track((width: number, height: number) => {
+    ref.invokeMethod(method, callback.id, [width, height])
+  })
+  log.debug(id, 'onResizeEvent', 'add callback', callback.id)
+  const handler = resizeHandlers.get(id);
+  if (handler) {
+    handler.callbacks.add(callback)
+  } else {
+    const callbacks = new Set<Callback<(width: number, height: number) => void>>();
+    callbacks.add(callback)
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.contentBoxSize) continue
+        // Firefox implements `contentBoxSize` as a single content rect, rather than an array
+        const contentBoxSize = Array.isArray(entry.contentBoxSize) ? entry.contentBoxSize[0] : entry.contentBoxSize;
+        for (const callback of callbacks)
+          callback(Math.round(contentBoxSize.inlineSize), Math.round(contentBoxSize.blockSize))
+      }
+    });
+    observer.observe(getById(id))
+    resizeHandlers.set(id, { observer, callbacks })
+  }
+
+  return callback.id
+}
+export const offResizeEvent = (id: string, _type: 'resize', cid: number): void => {
+  log.debug(id, 'offResizeEvent', 'release callback', cid)
+  const callback = cbTracker.release<(width: number, height: number) => void>(cid)
+  const handler = resizeHandlers.get(id);
+  if (!handler)
+    return
+
+  handler.callbacks.delete(callback)
+  if (handler.callbacks.size)
+    return;
+
+  handler.observer.disconnect()
+  resizeHandlers.delete(id)
 }
 
 function getEl(data: number): HTMLElement {

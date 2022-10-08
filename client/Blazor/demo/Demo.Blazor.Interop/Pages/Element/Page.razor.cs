@@ -18,7 +18,9 @@ public partial class Page : ILogSubject<Canvas.Page>, IDisposable
     private Div _container = default!;
     private Div _block = default!;
     private Div _eventsBlock = default!;
+    private Div _resizedBlock = default!;
     private Input _input = default!;
+    private bool IsResized;
     private DisposableBox _disposable = Disposable.Box();
 
     protected override void OnAfterRender(bool firstRender)
@@ -38,6 +40,8 @@ public partial class Page : ILogSubject<Canvas.Page>, IDisposable
         _disposable += _eventsBlock.OnMouseOut(Handler<MouseEvent>("mouseout", "block"));
         _disposable += _eventsBlock.OnMouseMove(Handler<MouseEvent>("mousemove", "block"));
         _disposable += _eventsBlock.OnWheel(Handler<WheelEvent>("wheel", "block"));
+
+        _disposable += _resizedBlock.OnResize(Handler<ResizeEvent>("resize", "block"));
     }
 
     public void Dispose()
@@ -46,4 +50,6 @@ public partial class Page : ILogSubject<Canvas.Page>, IDisposable
     }
 
     private Action<T> Handler<T>(string ev, string code) => e => Console.WriteLine($"{code}.{ev}: {e}");
+
+    private void ToggleResizedBlockSize() => IsResized = !IsResized;
 }

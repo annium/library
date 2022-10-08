@@ -18,14 +18,14 @@ const track = <T extends Function>(cb: T): Callback<T> => {
   return callback
 }
 
-const release = <T extends Function>(cid: number): T => {
+const release = <T extends Function>(cid: number): Callback<T> => {
   log.trace('release', cid)
   const cb = callbacks.get(cid)
   if (!cb)
     throw new Error(`Callback ${cid} is not tracked`)
   callbacks.delete(cid)
 
-  return cb as T
+  return cb as Callback<T>
 }
 
 const dump = () => new Map(callbacks)
