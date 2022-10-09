@@ -87,9 +87,8 @@ internal class StorageBase : IStorageBase
 
     public bool SetString(string key, string value)
     {
-        var raw = _serializer.Serialize(value);
         var hasKey = HasKey(key);
-        _js.InvokeVoid($"{_storage}.setItem", key, raw);
+        _js.InvokeVoid($"{_storage}.setItem", key, value);
 
         return !hasKey;
     }
