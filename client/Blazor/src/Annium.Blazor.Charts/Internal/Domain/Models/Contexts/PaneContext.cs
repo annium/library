@@ -29,8 +29,8 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
     public ValueRange<decimal> Range => _range;
     public ValueRange<decimal> View => _view;
     private readonly ManagedValueRange<Instant> _bounds = ValueRange.Create(FutureBound, PastBound);
-    private readonly ManagedValueRange<decimal> _range = ValueRange.Create(0m, 0m);
-    private readonly ManagedValueRange<decimal> _view = ValueRange.Create(0m, 0m);
+    private readonly ManagedValueRange<decimal> _range = ValueRange.Create(decimal.MinValue, decimal.MaxValue);
+    private readonly ManagedValueRange<decimal> _view = ValueRange.Create(decimal.MinValue, decimal.MaxValue);
     private readonly List<ISeriesSource> _sources = new();
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private int _isInitiated;
@@ -61,7 +61,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         var sourceRange = _sourceRanges[source];
         sourceRange.Set(min, max);
 
-        var renderingRanges = _sourceRanges.Values.Where(x => x.Start != 0 && x.End != 0).ToArray();
+        var renderingRanges = _sourceRanges.Values.Where(x => x.Start != decimal.MinValue || x.End != decimal.MaxValue).ToArray();
         if (renderingRanges.Length > 0)
         {
             this.Log().Trace($"update Pane range from {renderingRanges.Length} rendering source(s)");
@@ -72,8 +72,8 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         }
         else
         {
-            this.Log().Trace($"reset Pane range due to lack of rendering source(s)");
-            _range.Set(0, 0);
+            this.Log().Trace("reset Pane range due to lack of rendering source(s)");
+            _range.Set(decimal.MinValue, decimal.MaxValue);
         }
 
         if (Range.Start == start && Range.End == end)
@@ -108,7 +108,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
 
         this.Log().Trace($"track source {source.GetFullId()}");
         _sources.Add(source);
-        _sourceRanges[source] = ValueRange.Create(0m, 0m);
+        _sourceRanges[source] = ValueRange.Create(decimal.MinValue, decimal.MaxValue);
         source.OnBoundsChange += UpdateBounds;
         Chart?.RequestDraw();
 
@@ -151,7 +151,13 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         Right = right;
     }
 
-    private void UpdateDotPerPx() => DotPerPx = Rect.Height == 0 ? 0 : (_view.End - _view.Start) / Rect.Height;
+    private void UpdateDotPerPx()
+    {
+        if (Rect.Height == 0 || (_view.Start == decimal.MinValue && _view.End == decimal.MaxValue))
+            DotPerPx = 0;
+        else
+            DotPerPx = (_view.End - _view.Start) / Rect.Height;
+    }
 
     private void UpdateBounds(ValueRange<Instant> bounds)
     {

@@ -54,7 +54,7 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
     {
         if (values.Count < MinValuesToRender)
         {
-            PaneContext.AdjustRange(Source, 0, 0);
+            PaneContext.AdjustRange(Source, decimal.MinValue, decimal.MaxValue);
             return;
         }
 
