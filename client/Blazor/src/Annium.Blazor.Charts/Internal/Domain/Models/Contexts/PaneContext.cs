@@ -84,13 +84,21 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
 
         this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}");
         (start, end) = Range;
-        var size = Math.Abs(end - start);
-        if (size > 0)
-            _view.Set(start - size * 0.1m, end + size * 0.1m);
-        else if (start == 0)
-            _view.Set(-0.5m, 0.5m);
+
+        // no rendering ranges
+        if (start == decimal.MinValue && end == decimal.MaxValue)
+            _view.Set(decimal.MinValue, decimal.MaxValue);
         else
-            _view.Set(start * 0.9m, start * 1.1m);
+        {
+            var size = Math.Abs(end - start);
+            if (size > 0)
+                _view.Set(start - size * 0.1m, end + size * 0.1m);
+            else if (start == 0)
+                _view.Set(-0.5m, 0.5m);
+            else
+                _view.Set(start * 0.9m, start * 1.1m);
+        }
+
         UpdateDotPerPx();
 
         Chart.RequestDraw();
