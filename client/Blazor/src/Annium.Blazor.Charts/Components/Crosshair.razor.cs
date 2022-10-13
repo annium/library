@@ -63,6 +63,7 @@ public partial class Crosshair : ILogSubject<Crosshair>, IAsyncDisposable
         foreach (var pane in ChartContext.Panes)
         {
             // render crosshair at series
+            if (pane.Series is not null)
             {
                 var ctx = pane.Series.Overlay;
                 var rect = pane.Series.Rect;

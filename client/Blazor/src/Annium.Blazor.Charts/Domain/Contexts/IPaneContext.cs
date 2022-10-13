@@ -12,7 +12,7 @@ public interface IPaneContext
     event Action<ValueRange<Instant>> OnBoundsChange;
     IChartContext Chart { get; }
     IReadOnlyCollection<ISeriesSource> Sources { get; }
-    ISeriesContext Series { get; }
+    ISeriesContext? Series { get; }
     IHorizontalSideContext? Bottom { get; }
     IVerticalSideContext? Right { get; }
     DomRect Rect { get; }
@@ -23,7 +23,7 @@ public interface IPaneContext
     ValueRange<decimal> Range { get; }
     bool AdjustRange(ISeriesSource source, decimal min, decimal max);
     Action RegisterSource(ISeriesSource source);
-    void SetSeries(ISeriesContext series);
-    void SetBottom(IHorizontalSideContext bottom);
-    void SetRight(IVerticalSideContext right);
+    void SetSeries(ISeriesContext? series);
+    void SetBottom(IHorizontalSideContext? bottom);
+    void SetRight(IVerticalSideContext? right);
 }

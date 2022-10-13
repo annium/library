@@ -19,7 +19,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public IChartContext Chart { get; private set; } = default!;
     public IReadOnlyCollection<ISeriesSource> Sources => _sources;
-    public ISeriesContext Series { get; private set; } = default!;
+    public ISeriesContext? Series { get; private set; }
     public IHorizontalSideContext? Bottom { get; set; }
     public IVerticalSideContext? Right { get; set; }
     public DomRect Rect { get; private set; }
@@ -135,28 +135,22 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         };
     }
 
-    public void SetSeries(ISeriesContext series)
+    public void SetSeries(ISeriesContext? series)
     {
-        if (Series is not null)
-            throw new InvalidOperationException("Series is already set");
-
         Series = series;
+        Chart.RequestDraw();
     }
 
-    public void SetBottom(IHorizontalSideContext bottom)
+    public void SetBottom(IHorizontalSideContext? bottom)
     {
-        if (Bottom is not null)
-            throw new InvalidOperationException("Bottom is already set");
-
         Bottom = bottom;
+        Chart.RequestDraw();
     }
 
-    public void SetRight(IVerticalSideContext right)
+    public void SetRight(IVerticalSideContext? right)
     {
-        if (Right is not null)
-            throw new InvalidOperationException("Right is already set");
-
         Right = right;
+        Chart.RequestDraw();
     }
 
     private void UpdateDotPerPx()

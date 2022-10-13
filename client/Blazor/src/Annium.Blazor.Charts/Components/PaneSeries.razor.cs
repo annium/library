@@ -50,6 +50,7 @@ public partial class PaneSeries : ILogSubject<PaneSeries>, IAsyncDisposable
         SetSize();
         SeriesContext.Init(_canvas, _overlay);
         PaneContext.SetSeries(SeriesContext);
+        _disposable += () => PaneContext.SetSeries(null);
 
         _disposable += ChartContext.OnUpdate(Draw);
         _disposable += _block;

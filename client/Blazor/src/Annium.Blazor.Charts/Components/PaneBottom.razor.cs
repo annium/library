@@ -50,6 +50,7 @@ public partial class PaneBottom : ILogSubject<PaneBottom>, IAsyncDisposable
         SetSize();
         SideContext.Init(_canvas, _overlay);
         PaneContext.SetBottom(SideContext);
+        _disposable += () => PaneContext.SetBottom(null);
 
         _disposable += ChartContext.OnUpdate(Draw);
         _disposable += _block;

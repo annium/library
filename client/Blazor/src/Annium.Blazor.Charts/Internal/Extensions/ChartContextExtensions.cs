@@ -57,7 +57,8 @@ internal static class ChartContextExtensions
         foreach (var pane in context.Panes)
         {
             // clear crosshair at series
-            ClearContext(pane.Series.Overlay, pane.Series.Rect);
+            if (pane.Series is not null)
+                ClearContext(pane.Series.Overlay, pane.Series.Rect);
 
             // clear bottom label
             if (pane.Bottom is not null)

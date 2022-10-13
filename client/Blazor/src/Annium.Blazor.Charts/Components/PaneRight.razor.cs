@@ -50,6 +50,7 @@ public partial class PaneRight : ILogSubject<PaneRight>, IAsyncDisposable
         SetSize();
         SideContext.Init(_canvas, _overlay);
         PaneContext.SetRight(SideContext);
+        _disposable += () => PaneContext.SetRight(null);
 
         _disposable += ChartContext.OnUpdate(Draw);
         _disposable += _block;
