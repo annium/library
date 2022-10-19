@@ -67,6 +67,7 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
             var prev = lastItems[index];
             lastItems[index] = lastItem;
 
+            ctx.StrokeStyle = ItemColor.Match(x => x, x => x(item));
             ctx.BeginPath();
             ctx.MoveTo(PaneContext.ToX(prev.Moment), PaneContext.ToY(prev.Item.Value));
             ctx.LineTo(right, PaneContext.ToY(item.Value));
