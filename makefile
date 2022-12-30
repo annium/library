@@ -11,14 +11,22 @@ uninstall-xa uninstall-xc uninstall-xdomains uninstall-xlink uninstall-xmg unins
 	./$(subst uninstall-,,$@)/scripts/nix_uninstall.sh
 
 
-publish:
-	$(call publish,MessageBus/src/MessageBus.Proxy,mbus.proxy)
-	$(call publish,MessageBus/src/MessageBus.Sink,mbus.sink)
+publish: publish-backuper publish-mbus-proxy publish-mbus-sink
+
+publish-backuper:
+	$(call publish,Backuper/src,Backuper.Api/app.dockerfile,backuper)
+
+publish-mbus-proxy:
+	$(call publish,MessageBus/src/MessageBus.Proxy,app.dockerfile,mbus.proxy)
+
+publish-mbus-sink:
+	$(call publish,MessageBus/src/MessageBus.Sink,app.dockerfile,mbus.sink)
 
 define publish
 	@$(eval context := $(1))
-	@$(eval tag := $(2))
-	@docker build -t $(REGISTRY)/tools/$(tag) -f $(context)/app.dockerfile $(context)
+	@$(eval dockerfile := $(2))
+	@$(eval tag := $(3))
+	@docker build -t $(REGISTRY)/tools/$(tag) -f $(context)/$(dockerfile) $(context)
 	@docker push $(REGISTRY)/tools/$(tag)
 endef
 
