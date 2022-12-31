@@ -23,10 +23,6 @@ public static class InteropContextExtensions
         => ctx.InProcessRuntime.InvokeVoid(Helper.Call(identifier), args);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T Invoke<T>(this IInteropContext ctx, string identifier)
-        => ctx.UnmarshalledRuntime.InvokeUnmarshalled<T>(Helper.Call(identifier));
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T Invoke<T1, T>(this IInteropContext ctx, string identifier, T1 x1)
         => ctx.UnmarshalledRuntime.InvokeUnmarshalled<T1, T>(Helper.Call(identifier), x1);
 
