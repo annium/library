@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Interop;
 
-public record ReferenceElement : Element
+public partial record ReferenceElement : Element
 {
     public override string Id => _id.Value;
     private readonly Lazy<string> _id;

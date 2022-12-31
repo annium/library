@@ -1,8 +1,10 @@
 using System;
+using System.Runtime.InteropServices.JavaScript;
 using Annium.Blazor.Interop.Domain;
 using Annium.Blazor.Interop.Internal;
 using Annium.Blazor.Interop.Internal.Extensions;
 using Annium.Core.Primitives;
+using static Annium.Blazor.Interop.Internal.Constants;
 
 namespace Annium.Blazor.Interop;
 
@@ -22,9 +24,15 @@ public abstract partial record Element : IObject, IDisposable
 
     public string Style
     {
-        get => Ctx.Invoke<string, string>("element.getStyle", Id);
-        set => Ctx.Invoke("element.setStyle", Id, value);
+        get => GetStyle(Id);
+        set => SetStyle(Id, value);
     }
+
+    [JSImport($"{JsPath}element.getStyle")]
+    private static partial string GetStyle(string id);
+
+    [JSImport($"{JsPath}element.setStyle")]
+    private static partial void SetStyle(string id, string style);
 
     public DomRect GetBoundingClientRect()
         => Ctx.Call<DomRect>("element.getBoundingClientRect", Id);

@@ -2,7 +2,6 @@
 
 import cbTracker, { Callback } from '../trackers/cbTracker.js'
 import objectTracker from '../trackers/objectTracker.js'
-import js from '../interop/js.js';
 import { getLog } from '../log.js';
 
 type KeyboardEventName =
@@ -23,11 +22,11 @@ const log = getLog('element')
 /* properties */
 
 // style
-export const getStyle = (data: number): number => {
-  return js.writeString(getEl(data).style.cssText)
+export const getStyle = (id: string): string => {
+  return getById(id).style.cssText
 }
-export const setStyle = (data: number): void => {
-  getEl(data).style.cssText = js.readString(data, 4)
+export const setStyle = (id: string, style: string): void => {
+  getById(id).style.cssText = style
 }
 
 /* methods */
@@ -134,10 +133,6 @@ export const offResizeEvent = (id: string, _type: 'resize', cid: number): void =
 
   handler.observer.disconnect()
   resizeHandlers.delete(id)
-}
-
-function getEl(data: number): HTMLElement {
-  return objectTracker.get<HTMLElement>(js.readString(data, 0))
 }
 
 function getById(id: string): HTMLElement {

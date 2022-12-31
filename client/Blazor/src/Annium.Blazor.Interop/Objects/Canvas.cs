@@ -1,13 +1,15 @@
 using System.Linq;
+using System.Runtime.InteropServices.JavaScript;
 using Annium.Blazor.Interop.Internal.Extensions;
 using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Components;
+using static Annium.Blazor.Interop.Internal.Constants;
 
 // ReSharper disable InconsistentNaming
 
 namespace Annium.Blazor.Interop;
 
-public sealed record Canvas : ReferenceElement
+public sealed partial record Canvas : ReferenceElement
 {
     public Canvas(ElementReference reference) : base(reference)
     {
@@ -139,8 +141,10 @@ public sealed record Canvas : ReferenceElement
     public int MeasureTextHeight(string text) =>
         Ctx.Invoke<string, string, int>("canvas.measureTextHeight", Id, text);
 
-    public void Save() =>
-        Ctx.Invoke("canvas.save", Id);
+    public void Save() => Save(Id);
+
+    [JSImport($"{JsPath}canvas.save")]
+    private static partial void Save(string id);
 
     public void Restore() =>
         Ctx.Invoke("canvas.restore", Id);

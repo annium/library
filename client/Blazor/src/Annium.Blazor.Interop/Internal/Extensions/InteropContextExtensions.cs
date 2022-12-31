@@ -32,11 +32,11 @@ public static class InteropContextExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T Invoke<T1, T>(this IInteropContext ctx, string identifier, T1 x1)
-        => ctx.UnmarshalledRuntime.InvokeUnmarshalled<ValueTuple<T1>, T>(Helper.Call(identifier), ValueTuple.Create(x1));
+        => ctx.UnmarshalledRuntime.InvokeUnmarshalled<T1, T>(Helper.Call(identifier), x1);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Invoke<T1>(this IInteropContext ctx, string identifier, T1 x1)
-        => ctx.UnmarshalledRuntime.InvokeUnmarshalled<ValueTuple<T1>, object>(Helper.Call(identifier), ValueTuple.Create(x1));
+        => ctx.UnmarshalledRuntime.InvokeUnmarshalled<T1, object>(Helper.Call(identifier), x1);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T Invoke<T1, T2, T>(this IInteropContext ctx, string identifier, T1 x1, T2 x2)
