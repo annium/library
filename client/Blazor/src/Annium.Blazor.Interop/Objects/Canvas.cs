@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
-using Annium.Blazor.Interop.Internal.Extensions;
 using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Components;
 using static Annium.Blazor.Interop.Internal.Constants;
@@ -15,139 +14,349 @@ public sealed partial record Canvas : ReferenceElement
     {
     }
 
+    #region Width
+
     public int Width
     {
-        get => Ctx.Invoke<string, int>("canvas.getWidth", Id);
-        set => Ctx.Invoke("canvas.setWidth", Id, value);
+        get => GetWidth(Id);
+        set => SetWidth(Id, value);
     }
+
+    [JSImport($"{JsPath}canvas.getWidth")]
+    private static partial int GetWidth(string id);
+
+    [JSImport($"{JsPath}canvas.setWidth")]
+    private static partial void SetWidth(string id, int width);
+
+    #endregion
+
+    #region Height
 
     public int Height
     {
-        get => Ctx.Invoke<string, int>("canvas.getHeight", Id);
-        set => Ctx.Invoke("canvas.setHeight", Id, value);
+        get => GetHeight(Id);
+        set => SetHeight(Id, value);
     }
+
+    [JSImport($"{JsPath}canvas.getHeight")]
+    private static partial int GetHeight(string id);
+
+    [JSImport($"{JsPath}canvas.setHeight")]
+    private static partial void SetHeight(string id, int height);
+
+    #endregion
+
+    #region FillStyle
 
     public string FillStyle
     {
-        get => Ctx.Invoke<string, string>("canvas.getFillStyle", Id);
-        set => Ctx.Invoke("canvas.setFillStyle", Id, value);
+        get => GetFillStyle(Id);
+        set => SetFillStyle(Id, value);
     }
+
+    [JSImport($"{JsPath}canvas.getFillStyle")]
+    private static partial string GetFillStyle(string id);
+
+    [JSImport($"{JsPath}canvas.setFillStyle")]
+    private static partial void SetFillStyle(string id, string style);
+
+    #endregion
+
+    #region StrokeStyle
 
     public string StrokeStyle
     {
-        get => Ctx.Invoke<string, string>("canvas.getStrokeStyle", Id);
-        set => Ctx.Invoke("canvas.setStrokeStyle", Id, value);
+        get => GetStrokeStyle(Id);
+        set => SetStrokeStyle(Id, value);
     }
+
+    [JSImport($"{JsPath}canvas.getStrokeStyle")]
+    private static partial string GetStrokeStyle(string id);
+
+    [JSImport($"{JsPath}canvas.setStrokeStyle")]
+    private static partial void SetStrokeStyle(string id, string style);
+
+    #endregion
+
+    #region LineCap
 
     public CanvasLineCap LineCap
     {
-        get => Ctx.Invoke<string, string>("canvas.getLineCap", Id).ParseEnum<CanvasLineCap>();
-        set => Ctx.Invoke("canvas.setLineCap", Id, value.ToString());
+        get => GetLineCap(Id).ParseEnum<CanvasLineCap>();
+        set => SetLineCap(Id, value.ToString());
     }
+
+    [JSImport($"{JsPath}canvas.getLineCap")]
+    private static partial string GetLineCap(string id);
+
+    [JSImport($"{JsPath}canvas.setLineCap")]
+    private static partial void SetLineCap(string id, string style);
+
+    #endregion
+
+    #region LineJoin
 
     public CanvasLineJoin LineJoin
     {
-        get => Ctx.Invoke<string, string>("canvas.getLineJoin", Id).ParseEnum<CanvasLineJoin>();
-        set => Ctx.Invoke("canvas.setLineJoin", Id, value.ToString());
+        get => GetLineJoin(Id).ParseEnum<CanvasLineJoin>();
+        set => SetLineJoin(Id, value.ToString());
     }
+
+    [JSImport($"{JsPath}canvas.getLineJoin")]
+    private static partial string GetLineJoin(string id);
+
+    [JSImport($"{JsPath}canvas.setLineJoin")]
+    private static partial void SetLineJoin(string id, string style);
+
+    #endregion
+
+    #region LineWidth
 
     public int LineWidth
     {
-        get => Ctx.Invoke<string, int>("canvas.getLineWidth", Id);
-        set => Ctx.Invoke("canvas.setLineWidth", Id, value);
+        get => GetLineWidth(Id);
+        set => SetLineWidth(Id, value);
     }
+
+    [JSImport($"{JsPath}canvas.getLineWidth")]
+    private static partial int GetLineWidth(string id);
+
+    [JSImport($"{JsPath}canvas.setLineWidth")]
+    private static partial void SetLineWidth(string id, int width);
+
+    #endregion
+
+    #region LineDashOffset
 
     public int LineDashOffset
     {
-        get => Ctx.Invoke<string, int>("canvas.getLineDashOffset", Id);
-        set => Ctx.Invoke("canvas.setLineDashOffset", Id, value);
+        get => GetLineDashOffset(Id);
+        set => SetLineDashOffset(Id, value);
     }
+
+    [JSImport($"{JsPath}canvas.getLineDashOffset")]
+    private static partial int GetLineDashOffset(string id);
+
+    [JSImport($"{JsPath}canvas.setLineDashOffset")]
+    private static partial void SetLineDashOffset(string id, int offset);
+
+    #endregion
+
+    #region MiterLimit
 
     public int MiterLimit
     {
-        get => Ctx.Invoke<string, int>("canvas.getMiterLimit", Id);
-        set => Ctx.Invoke("canvas.setMiterLimit", Id, value);
+        get => GetMiterLimit(Id);
+        set => SetMiterLimit(Id, value);
     }
+
+    [JSImport($"{JsPath}canvas.getMiterLimit")]
+    private static partial int GetMiterLimit(string id);
+
+    [JSImport($"{JsPath}canvas.setMiterLimit")]
+    private static partial void SetMiterLimit(string id, int limit);
+
+    #endregion
+
+    #region LineDash
 
     public int[] LineDash
     {
-        get => Ctx.Invoke<string, string>("canvas.getLineDash", Id).Split(',').Select(int.Parse).ToArray();
-        set => Ctx.Invoke("canvas.setLineDash", Id, string.Join(',', value));
+        get => GetLineDash(Id).Split(',').Select(int.Parse).ToArray();
+        set => SetLineDash(Id, string.Join(',', value));
     }
+
+    [JSImport($"{JsPath}canvas.getLineDash")]
+    private static partial string GetLineDash(string id);
+
+    [JSImport($"{JsPath}canvas.setLineDash")]
+    private static partial void SetLineDash(string id, string dash);
+
+    #endregion
+
+    #region Font
 
     public string Font
     {
-        get => Ctx.Invoke<string, string>("canvas.getFont", Id);
-        set => Ctx.Invoke("canvas.setFont", Id, value);
+        get => GetFont(Id);
+        set => SetFont(Id, value);
     }
+
+    [JSImport($"{JsPath}canvas.getFont")]
+    private static partial string GetFont(string id);
+
+    [JSImport($"{JsPath}canvas.setFont")]
+    private static partial void SetFont(string id, string font);
+
+    #endregion
+
+    #region TextAlign
 
     public CanvasTextAlign TextAlign
     {
-        get => Ctx.Invoke<string, string>("canvas.getTextAlign", Id).ParseEnum<CanvasTextAlign>();
-        set => Ctx.Invoke("canvas.setTextAlign", Id, value.ToString());
+        get => GetTextAlign(Id).ParseEnum<CanvasTextAlign>();
+        set => SetTextAlign(Id, value.ToString());
     }
+
+    [JSImport($"{JsPath}canvas.getTextAlign")]
+    private static partial string GetTextAlign(string id);
+
+    [JSImport($"{JsPath}canvas.setTextAlign")]
+    private static partial void SetTextAlign(string id, string align);
+
+    #endregion
+
+    #region TextAlign
 
     public CanvasTextBaseline TextBaseline
     {
-        get => Ctx.Invoke<string, string>("canvas.getTextBaseline", Id).ParseEnum<CanvasTextBaseline>();
-        set => Ctx.Invoke("canvas.setTextBaseline", Id, value.ToString());
+        get => GetTextBaseline(Id).ParseEnum<CanvasTextBaseline>();
+        set => SetTextBaseline(Id, value.ToString());
     }
 
-    public void ClearRect(int x, int y, int width, int height) =>
-        Ctx.Invoke("canvas.clearRect", Id, x, y, width, height);
+    [JSImport($"{JsPath}canvas.getTextBaseline")]
+    private static partial string GetTextBaseline(string id);
 
-    public void FillRect(int x, int y, int width, int height) =>
-        Ctx.Invoke("canvas.fillRect", Id, x, y, width, height);
+    [JSImport($"{JsPath}canvas.setTextBaseline")]
+    private static partial void SetTextBaseline(string id, string baseline);
 
-    public void BeginPath() =>
-        Ctx.Invoke("canvas.beginPath", Id);
+    #endregion
 
-    public void ClosePath() =>
-        Ctx.Invoke("canvas.closePath", Id);
+    #region ClearRect
 
-    public void MoveTo(float x, float y) =>
-        Ctx.Invoke("canvas.moveTo", Id, x, y);
+    public void ClearRect(int x, int y, int width, int height) => ClearRect(Id, x, y, width, height);
 
-    public void LineTo(float x, float y) =>
-        Ctx.Invoke("canvas.lineTo", Id, x, y);
+    [JSImport($"{JsPath}canvas.clearRect")]
+    private static partial void ClearRect(string id, int x, int y, int width, int height);
 
-    public void Arc(
-        float x,
-        float y,
-        float radius,
-        float startAngle,
-        float endAngle,
-        bool antiClockwise
-    )
-    {
-        Ctx.Invoke("canvas.arc", Id, x, y, radius, startAngle, endAngle, antiClockwise ? 1 : 0);
-    }
+    #endregion
 
-    public void Stroke() =>
-        Ctx.Invoke("canvas.stroke", Id);
+    #region FillRect
 
-    public void Fill() =>
-        Ctx.Invoke("canvas.fill", Id);
+    public void FillRect(int x, int y, int width, int height) => FillRect(Id, x, y, width, height);
 
-    public void FillText(string text, int x, int y, int maxWidth = 0) =>
-        Ctx.Invoke("canvas.fillText", Id, text, x, y, maxWidth);
+    [JSImport($"{JsPath}canvas.fillRect")]
+    private static partial void FillRect(string id, int x, int y, int width, int height);
 
-    public void StrokeText(string text, int x, int y, int maxWidth = 0) =>
-        Ctx.Invoke("canvas.strokeText", Id, text, x, y, maxWidth);
+    #endregion
 
-    public int MeasureTextWidth(string text) =>
-        Ctx.Invoke<string, string, int>("canvas.measureTextWidth", Id, text);
+    #region BeginPath
 
-    public int MeasureTextHeight(string text) =>
-        Ctx.Invoke<string, string, int>("canvas.measureTextHeight", Id, text);
+    public void BeginPath() => BeginPath(Id);
+
+    [JSImport($"{JsPath}canvas.beginPath")]
+    private static partial void BeginPath(string id);
+
+    #endregion
+
+    #region ClosePath
+
+    public void ClosePath() => ClosePath(Id);
+
+    [JSImport($"{JsPath}canvas.closePath")]
+    private static partial void ClosePath(string id);
+
+    #endregion
+
+    #region MoveTo
+
+    public void MoveTo(float x, float y) => MoveTo(Id, x, y);
+
+    [JSImport($"{JsPath}canvas.moveTo")]
+    private static partial void MoveTo(string id, float x, float y);
+
+    #endregion
+
+    #region LineTo
+
+    public void LineTo(float x, float y) => LineTo(Id, x, y);
+
+    [JSImport($"{JsPath}canvas.lineTo")]
+    private static partial void LineTo(string id, float x, float y);
+
+    #endregion
+
+    #region Arc
+
+    public void Arc(float x, float y, float radius, float startAngle, float endAngle, bool antiClockwise) =>
+        Arc(Id, x, y, radius, startAngle, endAngle, antiClockwise);
+
+    [JSImport($"{JsPath}canvas.arc")]
+    private static partial void Arc(string id, float x, float y, float radius, float startAngle, float endAngle, bool antiClockwise);
+
+    #endregion
+
+    #region Stroke
+
+    public void Stroke() => Stroke(Id);
+
+    [JSImport($"{JsPath}canvas.stroke")]
+    private static partial void Stroke(string id);
+
+    #endregion
+
+    #region Fill
+
+    public void Fill() => Fill(Id);
+
+    [JSImport($"{JsPath}canvas.fill")]
+    private static partial void Fill(string id);
+
+    #endregion
+
+    #region FillText
+
+    public void FillText(string text, int x, int y, int maxWidth = 0) => FillText(Id, text, x, y, maxWidth);
+
+    [JSImport($"{JsPath}canvas.fillText")]
+    private static partial void FillText(string id, string text, int x, int y, int maxWidth);
+
+    #endregion
+
+    #region StrokeText
+
+    public void StrokeText(string text, int x, int y, int maxWidth = 0) => StrokeText(Id, text, x, y, maxWidth);
+
+    [JSImport($"{JsPath}canvas.strokeText")]
+    private static partial void StrokeText(string id, string text, int x, int y, int maxWidth);
+
+    #endregion
+
+    #region MeasureTextWidth
+
+    public int MeasureTextWidth(string text) => MeasureTextWidth(Id, text);
+
+    [JSImport($"{JsPath}canvas.measureTextWidth")]
+    private static partial int MeasureTextWidth(string id, string text);
+
+    #endregion
+
+    #region MeasureTextHeight
+
+    public int MeasureTextHeight(string text) => MeasureTextHeight(Id, text);
+
+    [JSImport($"{JsPath}canvas.measureTextHeight")]
+    private static partial int MeasureTextHeight(string id, string text);
+
+    #endregion
+
+    #region Save
 
     public void Save() => Save(Id);
 
     [JSImport($"{JsPath}canvas.save")]
     private static partial void Save(string id);
 
-    public void Restore() =>
-        Ctx.Invoke("canvas.restore", Id);
+    #endregion
+
+    #region Restore
+
+    public void Restore() => Restore(Id);
+
+    [JSImport($"{JsPath}canvas.restore")]
+    private static partial void Restore(string id);
+
+    #endregion
 
     public static implicit operator Canvas(ElementReference reference) => new(reference);
 }

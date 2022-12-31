@@ -1,171 +1,168 @@
 // noinspection JSUnusedGlobalSymbols
 
-import js from '../interop/js.js'
 import objectTracker from '../trackers/objectTracker.js'
 
 /* properties */
 
 // width
-export const getWidth = (data: number): number => {
-  return getElObsolete(data).width
+export const getWidth = (id: string): number => {
+  return getById(id).width
 }
-export const setWidth = (data: number): void => {
-  getElObsolete(data).width = js.readInt(data, 4)
+export const setWidth = (id: string, width: number): void => {
+  getById(id).width = width
 }
 
 // height
-export const getHeight = (data: number): number => {
-  return getElObsolete(data).height
+export const getHeight = (id: string): number => {
+  return getById(id).height
 }
-export const setHeight = (data: number): void => {
-  getElObsolete(data).height = js.readInt(data, 4)
+export const setHeight = (id: string, height: number): void => {
+  getById(id).height = height
 }
 
 // fillStyle
-export const getFillStyle = (data: number): number => {
-  return js.writeString(getContextObsolete(data).fillStyle.toString())
+export const getFillStyle = (id: string): string => {
+  return getContext(id).fillStyle.toString()
 }
-export const setFillStyle = (data: number): void => {
-  getContextObsolete(data).fillStyle = js.readString(data, 4)
+export const setFillStyle = (id: string, style: string): void => {
+  getContext(id).fillStyle = style
 }
 
 // strokeStyle
-export const getStrokeStyle = (data: number): number => {
-  return js.writeString(getContextObsolete(data).strokeStyle.toString())
+export const getStrokeStyle = (id: string): string => {
+  return getContext(id).strokeStyle.toString()
 }
-export const setStrokeStyle = (data: number): void => {
-  getContextObsolete(data).strokeStyle = js.readString(data, 4)
+export const setStrokeStyle = (id: string, style: string): void => {
+  getContext(id).strokeStyle = style
 }
 
 // lineCap
-export const getLineCap = (data: number): number => {
-  return js.writeString(getContextObsolete(data).lineCap)
+export const getLineCap = (id: string): CanvasLineCap => {
+  return getContext(id).lineCap
 }
-export const setLineCap = (data: number): void => {
-  getContextObsolete(data).lineCap = js.readString(data, 4) as CanvasLineCap
+export const setLineCap = (id: string, lineCap: CanvasLineCap): void => {
+  getContext(id).lineCap = lineCap
 }
 
 // lineJoin
-export const getLineJoin = (data: number): number => {
-  return js.writeString(getContextObsolete(data).lineJoin)
+export const getLineJoin = (id: string): CanvasLineJoin => {
+  return getContext(id).lineJoin
 }
-export const setLineJoin = (data: number): void => {
-  getContextObsolete(data).lineJoin = js.readString(data, 4) as CanvasLineJoin
+export const setLineJoin = (id: string, lineJoin: CanvasLineJoin): void => {
+  getContext(id).lineJoin = lineJoin
 }
 
 // lineWidth
-export const getLineWidth = (data: number): number => {
-  return getContextObsolete(data).lineWidth
+export const getLineWidth = (id: string): number => {
+  return getContext(id).lineWidth
 }
-export const setLineWidth = (data: number): void => {
-  getContextObsolete(data).lineWidth = js.readInt(data, 4)
+export const setLineWidth = (id: string, width: number): void => {
+  getContext(id).lineWidth = width
 }
 
 // lineDashOffset
-export const getLineDashOffset = (data: number): number => {
-  return getContextObsolete(data).lineDashOffset
+export const getLineDashOffset = (id: string): number => {
+  return getContext(id).lineDashOffset
 }
-export const setLineDashOffset = (data: number): void => {
-  getContextObsolete(data).lineDashOffset = js.readInt(data, 4)
+export const setLineDashOffset = (id: string, offset: number): void => {
+  getContext(id).lineDashOffset = offset
 }
 
 // miterLimit
-export const getMiterLimit = (data: number): number => {
-  return getContextObsolete(data).miterLimit
+export const getMiterLimit = (id: string): number => {
+  return getContext(id).miterLimit
 }
-export const setMiterLimit = (data: number): void => {
-  getContextObsolete(data).miterLimit = js.readInt(data, 4)
+export const setMiterLimit = (id: string, limit: number): void => {
+  getContext(id).miterLimit = limit
 }
 
 // lineDash
-export const getLineDash = (data: number): number => {
-  return js.writeString(getContextObsolete(data).getLineDash().map(Math.round).join(','))
+export const getLineDash = (id: string): string => {
+  return getContext(id).getLineDash().map(Math.round).join(',')
 }
-export const setLineDash = (data: number): void => {
-  getContextObsolete(data).setLineDash(js.readString(data, 4).split(',').map(Number))
+export const setLineDash = (id: string, dash: string): void => {
+  getContext(id).setLineDash(dash.split(',').map(Number))
 }
 
 // font
-export const getFont = (data: number): number => {
-  return js.writeString(getContextObsolete(data).font.toString())
+export const getFont = (id: string): string => {
+  return getContext(id).font
 }
-export const setFont = (data: number): void => {
-  getContextObsolete(data).font = js.readString(data, 4)
+export const setFont = (id: string, font: string): void => {
+  getContext(id).font = font
 }
 
 // textAlign
-export const getTextAlign = (data: number): number => {
-  return js.writeString(getContextObsolete(data).textAlign)
+export const getTextAlign = (id: string): CanvasTextAlign => {
+  return getContext(id).textAlign
 }
-export const setTextAlign = (data: number): void => {
-  getContextObsolete(data).textAlign = js.readString(data, 4) as CanvasTextAlign
+export const setTextAlign = (id: string, align: CanvasTextAlign): void => {
+  getContext(id).textAlign = align
 }
 
 // textBaseline
-export const getTextBaseline = (data: number): number => {
-  return js.writeString(getContextObsolete(data).textBaseline)
+export const getTextBaseline = (id: string): CanvasTextBaseline => {
+  return getContext(id).textBaseline
 }
-export const setTextBaseline = (data: number): void => {
-  getContextObsolete(data).textBaseline = js.readString(data, 4) as CanvasTextBaseline
+export const setTextBaseline = (id: string, baseline: CanvasTextBaseline): void => {
+  getContext(id).textBaseline = baseline
 }
 
 /* methods */
 
 // rects
-export const clearRect = (data: number): void => {
-  getContextObsolete(data).clearRect(js.readInt(data, 4), js.readInt(data, 8), js.readInt(data, 12), js.readInt(data, 16))
+export const clearRect = (id: string, x: number, y: number, width: number, height: number): void => {
+  getContext(id).clearRect(x, y, width, height)
 }
-export const fillRect = (data: number): void => {
-  getContextObsolete(data).fillRect(js.readInt(data, 4), js.readInt(data, 8), js.readInt(data, 12), js.readInt(data, 16))
+export const fillRect = (id: string, x: number, y: number, width: number, height: number): void => {
+  getContext(id).fillRect(x, y, width, height)
 }
 
 // paths
-export const beginPath = (data: number): void => {
-  getContextObsolete(data).beginPath()
+export const beginPath = (id: string): void => {
+  getContext(id).beginPath()
 }
-export const closePath = (data: number): void => {
-  getContextObsolete(data).closePath()
+export const closePath = (id: string): void => {
+  getContext(id).closePath()
 }
-export const moveTo = (data: number): void => {
-  getContextObsolete(data).moveTo(js.readFloat(data, 4), js.readFloat(data, 8))
+export const moveTo = (id: string, x: number, y: number): void => {
+  getContext(id).moveTo(x, y)
 }
-export const lineTo = (data: number): void => {
-  getContextObsolete(data).lineTo(js.readFloat(data, 4), js.readFloat(data, 8))
+export const lineTo = (id: string, x: number, y: number): void => {
+  getContext(id).lineTo(x, y)
 }
-export const arc = (data: number): void => {
-  getContextObsolete(data).arc(js.readFloat(data, 4), js.readFloat(data, 8), js.readFloat(data, 12), js.readFloat(data, 16), js.readFloat(data, 20), !!js.readShort(data, 24))
+export const arc = (id: string, x: number, y: number, radius: number, startAngle: number, endAngle: number, antiClockwise: boolean): void => {
+  getContext(id).arc(x, y, radius, startAngle, endAngle, antiClockwise)
 }
-export const stroke = (data: number): void => {
-  getContextObsolete(data).stroke()
+export const stroke = (id: string): void => {
+  getContext(id).stroke()
 }
 
 // areas
-export const fill = (data: number): void => {
-  getContextObsolete(data).fill()
+export const fill = (id: string): void => {
+  getContext(id).fill()
 }
 
 // text
-export const fillText = (data: number): void => {
-  const ctx = getContextObsolete(data);
-  const maxWidth = js.readInt(data, 16)
+export const fillText = (id: string, text: string, x: number, y: number, maxWidth: number): void => {
+  const ctx = getContext(id);
   if (maxWidth)
-    ctx.fillText(js.readString(data, 4), js.readInt(data, 8), js.readInt(data, 12), maxWidth)
+    ctx.fillText(text, x, y, maxWidth)
   else
-    ctx.fillText(js.readString(data, 4), js.readInt(data, 8), js.readInt(data, 12))
+    ctx.fillText(text, x, y)
 }
-export const strokeText = (data: number): void => {
-  const ctx = getContextObsolete(data);
-  const maxWidth = js.readInt(data, 16)
+export const strokeText = (id: string, text: string, x: number, y: number, maxWidth: number): void => {
+  const ctx = getContext(id);
   if (maxWidth)
-    ctx.strokeText(js.readString(data, 4), js.readInt(data, 8), js.readInt(data, 12), maxWidth)
+    ctx.strokeText(text, x, y, maxWidth)
   else
-    ctx.strokeText(js.readString(data, 4), js.readInt(data, 8), js.readInt(data, 12))
+    ctx.strokeText(text, x, y)
 }
-export const measureTextWidth = (data: number): number => {
-  return Math.ceil(getContextObsolete(data).measureText(js.readString(data, 4)).width)
+export const measureTextWidth = (id: string, text: string): number => {
+  return Math.ceil(getContext(id).measureText(text).width)
 }
-export const measureTextHeight = (data: number): number => {
-  const metrics = getContextObsolete(data).measureText(js.readString(data, 4));
+export const measureTextHeight = (id: string, text: string): number => {
+  const metrics = getContext(id).measureText(text);
   return Math.ceil(metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent);
 }
 
@@ -173,15 +170,15 @@ export const measureTextHeight = (data: number): number => {
 export const save = (id: string): void => {
   getContext(id).save();
 }
-export const restore = (data: number): void => {
-  getContextObsolete(data).restore();
+export const restore = (id: string): void => {
+  getContext(id).restore();
 }
 
 
 const contexts = new WeakMap<HTMLCanvasElement, CanvasRenderingContext2D>()
 
 function getContext(id: string): CanvasRenderingContext2D {
-  const el = objectTracker.get<HTMLCanvasElement>(id)
+  const el = getById(id)
   const ctx = contexts.get(el);
   if (ctx)
     return ctx
@@ -196,28 +193,6 @@ function getContext(id: string): CanvasRenderingContext2D {
   return newCtx
 }
 
-function getContextObsolete(data: number): CanvasRenderingContext2D {
-  const el = getElObsolete(data)
-  console.log('el:', el)
-  const ctx = contexts.get(el);
-  console.log('existing ctx:', ctx)
-  if (ctx)
-    return ctx
-
-  const newCtx = el.getContext('2d')
-  if (!newCtx)
-    throw new Error('failed to create 2d context')
-
-  newCtx.imageSmoothingEnabled = true;
-  contexts.set(el, newCtx)
-
-  console.log('new ctx:', newCtx)
-  return newCtx
-}
-
-function getElObsolete(data: number): HTMLCanvasElement {
-  console.log('get el id from ', data)
-  const id = js.readString(data, 0)
-  console.log('get object with id:', id)
+function getById(id: string): HTMLCanvasElement {
   return objectTracker.get<HTMLCanvasElement>(id)
 }

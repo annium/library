@@ -19,21 +19,17 @@ public static class InteropContext
 
 internal sealed class InteropContextInstance : IInteropContext
 {
-    public IJSUnmarshalledRuntime UnmarshalledRuntime { get; }
     public IJSInProcessRuntime InProcessRuntime { get; }
 
     public InteropContextInstance(
-        IJSUnmarshalledRuntime unmarshalledRuntime,
         IJSInProcessRuntime inProcessRuntime
     )
     {
-        UnmarshalledRuntime = unmarshalledRuntime;
         InProcessRuntime = inProcessRuntime;
     }
 }
 
 public interface IInteropContext
 {
-    IJSUnmarshalledRuntime UnmarshalledRuntime { get; }
     IJSInProcessRuntime InProcessRuntime { get; }
 }
