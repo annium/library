@@ -13,7 +13,9 @@ internal class ServicePack : ServicePackBase
         container.AddRuntime(GetType().Assembly);
         container.AddTime().WithRealTime().SetDefault();
         container.AddLogging();
-        container.AddJsonSerializers().SetDefault();
+        container.AddSerializers()
+            .WithJson(isDefault: true);
+
         container.AddMapper();
         container.AddConfiguration<EndpointsConfiguration>(x => x
             .AddYamlFile("configuration.yml")
