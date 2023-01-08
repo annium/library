@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <SassExe>dotnet "$(MSBuildThisFileDirectory)/net6.0/XSass.dll"</SassExe>
+        <SassExe>dotnet "$(MSBuildThisFileDirectory)/net7.0/XSass.dll"</SassExe>
     </PropertyGroup>
     <Target Name="CompileSass" AfterTargets="BeforeBuild">
         <Exec Command="$(SassExe) $(TargetPathWithTargetPlatformMoniker)" />
