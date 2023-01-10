@@ -23,6 +23,7 @@ publish-mbus-sink:
 	$(call publish,MessageBus/src/MessageBus.Sink,app.dockerfile,mbus.sink)
 
 publish-tools:
+	xs publish xdb.core 0.1.0
 	xs publish xrest.core 0.1.0
 	xs publish xrest.plugins 0.1.0
 
