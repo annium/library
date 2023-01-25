@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Annium.Core.Primitives.Collections.Generic;
 using DbUp.Builder;
 
 namespace Xdb.Core.Migrations;
@@ -18,9 +20,11 @@ public abstract class MigrationEngineBase<T>
     {
         InitBuilder = initBuilder
             .WithTransactionPerScript()
+            .WithVariablesEnabled()
             .LogToConsole();
         MigrationsBuilder = migrationsBuilder
             .WithTransactionPerScript()
+            .WithVariablesEnabled()
             .LogToConsole();
     }
 
@@ -36,6 +40,23 @@ public abstract class MigrationEngineBase<T>
     {
         InitBuilder.WithScriptsEmbeddedInAssembly(assembly, x => x.Contains(".Scripts.Init."));
         MigrationsBuilder.WithScriptsEmbeddedInAssembly(assembly, x => x.Contains(".Scripts.Migrations."));
+
+        return (T) this;
+    }
+
+    public T WithVariable(string name, string value)
+    {
+        InitBuilder.WithVariable(name, value);
+        MigrationsBuilder.WithVariable(name, value);
+
+        return (T) this;
+    }
+
+    public T WithVariables(IReadOnlyDictionary<string,string> variables)
+    {
+        var vars = variables.ToDictionary();
+        InitBuilder.WithVariables(vars);
+        MigrationsBuilder.WithVariables(vars);
 
         return (T) this;
     }
