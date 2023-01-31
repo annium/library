@@ -20,6 +20,6 @@
         <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Abstractions" Version="0.1.0" />
         <PackageReference Include="Annium.Serialization.Json" Version="0.1.0" />
-        <PackageReference Include="Scriban" Version="5.5.1" />
+        <PackageReference Include="Scriban" Version="5.5.2" />
     </ItemGroup>
 </Project>
