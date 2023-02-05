@@ -1,3 +1,6 @@
+using System;
+using System.Threading.Tasks;
+using Annium.Configuration.Abstractions;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Components;
@@ -21,5 +24,12 @@ public static class WebAssemblyHostBuilderExtensions
         builder.ConfigureContainer(new ServiceProviderFactory(b => b.UseServicePack<T>()));
 
         return builder;
+    }
+
+    public static async Task AddConfiguration<T>(this WebAssemblyHostBuilder builder, Func<IConfigurationContainer, Task> configure)
+        where T : class, new()
+    {
+        var container = new ServiceContainer(builder.Services);
+        await container.AddConfiguration<T>(configure);
     }
 }
