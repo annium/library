@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+    <PropertyGroup>
+        <PackageId>XRest.Demo.Server</PackageId>
+        <PackageVersion>0.1.0</PackageVersion>
+        <Description>XRest.Demo</Description>
+        <TargetFramework>net7.0</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <DebugType>portable</DebugType>
+        <LangVersion>11.0</LangVersion>
+        <WarningsAsErrors>true</WarningsAsErrors>
+        <IsPackable>false</IsPackable>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Annium.AspNetCore.Extensions" Version="0.1.0" />
+        <PackageReference Include="Annium.Configuration.Abstractions" Version="0.1.0" />
+        <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
+        <PackageReference Include="Annium.Infrastructure.Hosting" Version="0.1.0" />
+        <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
+        <PackageReference Include="Annium.Logging.Microsoft" Version="0.1.0" />
+        <PackageReference Include="Annium.NodaTime.Serialization.Json" Version="0.1.0" />
+    </ItemGroup>
+</Project>
