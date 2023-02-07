@@ -18,6 +18,7 @@ internal class ServicePack : ServicePackBase
         container.AddSerializers()
             .WithJson(opts => opts.ConfigureForOperations().ConfigureForNodaTime(), isDefault: true);
         container.AddLogging();
+        container.AddXRest();
 
         // server
         container.Collection.AddCors();

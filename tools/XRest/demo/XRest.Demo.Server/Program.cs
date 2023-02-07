@@ -11,6 +11,7 @@ var app = builder.Build();
 
 app.UseExceptionMiddleware();
 app.UseRouting();
+app.UseXRest();
 app.UseCorsDefaults();
 app.UseRequestLocalization("en", "ru");
 app.MapControllers();

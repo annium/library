@@ -12,6 +12,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
+        <ProjectReference Include="../../src/plugins/XRest.Plugins.AspNetCore/XRest.Plugins.AspNetCore.csproj" />
+    </ItemGroup>
+    <ItemGroup>
         <PackageReference Include="Annium.AspNetCore.Extensions" Version="0.1.0" />
         <PackageReference Include="Annium.Configuration.Abstractions" Version="0.1.0" />
         <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
