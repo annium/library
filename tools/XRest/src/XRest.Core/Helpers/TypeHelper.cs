@@ -24,12 +24,19 @@ public static partial class TypeHelper
 
     private static ITypeModel ResolveTypeModel(Type type)
     {
+        Console.WriteLine($"Resolve model for {type}");
         var baseType = BaseType.GetFor(type);
         if (baseType is not null)
+        {
+            Console.WriteLine($"Resolved base type model for {type}");
             return baseType;
+        }
 
         if (type.IsGenericParameter)
+        {
+            Console.WriteLine($"Resolved generic parameter model for {type}");
             return new GenericParameterModel(type.Name);
+        }
 
         if (type.IsEnum)
         {
@@ -41,8 +48,13 @@ public static partial class TypeHelper
             foreach (var value in rawValues)
                 values[names[i++]] = Convert.ToInt64(value);
 
+            Console.WriteLine($"Resolved enum model for {type}");
             return new EnumModel(type.GetNamespace(), type.FriendlyName(), values);
         }
+
+        var specialType = ResolveSpecialTypeModel(type);
+        if (specialType is not null)
+            return specialType;
 
         // struct
 

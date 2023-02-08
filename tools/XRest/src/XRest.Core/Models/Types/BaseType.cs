@@ -20,6 +20,8 @@ public static class BaseType
         Register<uint>("uint");
         Register<long>("long");
         Register<ulong>("ulong");
+        Register<decimal>("decimal");
+        Register<Guid>("guid");
         Register<DateTime>("datetime");
         Register<DateOnly>("date");
         Register<TimeOnly>("time");

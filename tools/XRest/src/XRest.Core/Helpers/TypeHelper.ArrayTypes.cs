@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Annium.Core.Primitives;
 using Annium.Core.Reflection;
+using XRest.Core.Models.Types;
 
 namespace XRest.Core.Helpers;
 
@@ -13,8 +14,14 @@ public static partial class TypeHelper
     private static void RegisterBasicArrayTypes()
     {
         RegisterArrayType(typeof(IEnumerable<>));
-        RegisterArrayType(typeof(ICollection<>));
         RegisterArrayType(typeof(IReadOnlyCollection<>));
+        RegisterArrayType(typeof(ICollection<>));
+        RegisterArrayType(typeof(IReadOnlyList<>));
+        RegisterArrayType(typeof(IList<>));
+        RegisterArrayType(typeof(IReadOnlySet<>));
+        RegisterArrayType(typeof(ISet<>));
+        RegisterArrayType(typeof(List<>));
+        RegisterArrayType(typeof(HashSet<>));
     }
 
     public static void RegisterArrayType(Type type)
@@ -34,15 +41,16 @@ public static partial class TypeHelper
 
     private static bool IsArrayType(Type type) => type.IsArray || ArrayTypes.Contains(type.IsGenericType ? type.GetGenericTypeDefinition() : type);
 
-    private static Type GetArrayTypeElement(Type type)
+    private static ITypeModel ResolveArrayTypeModel(Type type)
     {
         if (!IsArrayType(type))
             throw new ArgumentException($"Can't get non array type {type.FriendlyName()} element type");
 
-        if (type.IsArray)
-            return type.GetElementType()
-                ?? throw new InvalidOperationException($"Failed to resolve element type of {type.FriendlyName()}");
+        var elementType = type.IsArray
+            ? type.GetElementType() ?? throw new InvalidOperationException($"Failed to resolve element type of {type.FriendlyName()}")
+            : type.GetTargetImplementation(BaseArrayType)!.GetGenericArguments()[0];
+        var elementTypeModel = GetTypeModel(elementType);
 
-        return type.GetTargetImplementation(BaseArrayType)!.GetGenericArguments()[0];
+        return new ArrayModel(elementTypeModel);
     }
 }

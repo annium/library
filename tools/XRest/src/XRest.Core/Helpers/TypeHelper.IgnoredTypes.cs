@@ -23,6 +23,9 @@ public static partial class TypeHelper
         // base type interfaces
         RegisterIgnoredType(typeof(IComparable<>));
         RegisterIgnoredType(typeof(IEquatable<>));
+        // low-level interfaces
+        RegisterIgnoredType(typeof(ISpanParsable<>));
+        RegisterIgnoredType(typeof(IParsable<>));
     }
 
     public static void RegisterIgnoredType(Type type)

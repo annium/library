@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Annium.Core.Primitives;
 using Annium.Core.Reflection;
+using XRest.Core.Models.Types;
 
 namespace XRest.Core.Helpers;
 
@@ -14,6 +15,7 @@ public static partial class TypeHelper
     {
         RegisterRecordType(typeof(IDictionary<,>));
         RegisterRecordType(typeof(IReadOnlyDictionary<,>));
+        RegisterRecordType(typeof(Dictionary<,>));
     }
 
     private static void RegisterRecordType(Type type)
@@ -33,13 +35,15 @@ public static partial class TypeHelper
 
     private static bool IsRecordType(Type type) => RecordTypes.Contains(type.IsGenericType ? type.GetGenericTypeDefinition() : type);
 
-    private static (Type Key, Type Value) GetRecordTypeElement(Type type)
+    private static ITypeModel ResolveRecordTypeModel(Type type)
     {
         if (!IsRecordType(type))
             throw new ArgumentException($"Can't get non Record type {type.FriendlyName()} element type");
 
         var args = type.GetTargetImplementation(BaseArrayType)?.GetGenericArguments()[0].GetGenericArguments()!;
+        var keyTypeModel = GetTypeModel(args[0]);
+        var valueTypeModel = GetTypeModel(args[1]);
 
-        return (args[0], args[1]);
+        return new RecordModel(keyTypeModel, valueTypeModel);
     }
 }
