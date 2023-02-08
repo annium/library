@@ -11,7 +11,7 @@ public class ServicePack : ServicePackBase
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
         // components
-        container.Add<IProcessor, Processor>().Singleton();
+        // container.Add<IProcessor, Processor>().Singleton();
         container.Add<IWriter, Writer>().Singleton();
 
         RegisterCommands(container);
