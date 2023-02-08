@@ -7,7 +7,8 @@ using Annium.Core.Mapper;
 using Annium.Serialization.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using XRest.Core.Views;
+using XRest.Plugins.AspNetCore.Internal.Components;
+using Constants = XRest.Core.Constants;
 
 namespace XRest.Plugins.AspNetCore;
 
@@ -16,7 +17,6 @@ internal class XRestMiddleware
     private readonly RequestDelegate _next;
     private readonly IMapper _mapper;
     private readonly IApiDescriptionGroupCollectionProvider _descriptionProvider;
-    private readonly ApiModelBuilder _modelBuilder;
     private readonly ISerializer<string> _serializer;
     private readonly Lazy<string> _description;
 
@@ -24,21 +24,19 @@ internal class XRestMiddleware
         RequestDelegate next,
         IMapper mapper,
         IApiDescriptionGroupCollectionProvider descriptionProvider,
-        ApiModelBuilder modelBuilder,
         IIndex<SerializerKey, ISerializer<string>> serializers
     )
     {
         _next = next;
         _mapper = mapper;
         _descriptionProvider = descriptionProvider;
-        _modelBuilder = modelBuilder;
-        _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
+        _serializer = serializers[SerializerKey.Create(Constants.ApiSourceEndpoint, MediaTypeNames.Application.Json)];
         _description = new Lazy<string>(BuildApiDescription, isThreadSafe: true);
     }
 
     public async Task Invoke(HttpContext context)
     {
-        if (!context.Request.Path.Equals("/.xrest"))
+        if (!context.Request.Path.Equals($"/{Constants.ApiSourceEndpoint}"))
         {
             await _next(context);
             return;
@@ -52,9 +50,9 @@ internal class XRestMiddleware
     private string BuildApiDescription()
     {
         var apiDescriptions = _descriptionProvider.ApiDescriptionGroups.Items.SelectMany(x => x.Items).ToArray();
-        var model = _modelBuilder.Build(apiDescriptions);
-        var view = _mapper.Map<ApiView>(model);
-        var raw = _serializer.Serialize(view);
+        var model = ApiModelBuilder.Build(apiDescriptions);
+        // var view = _mapper.Map<ApiView>(model);
+        var raw = _serializer.Serialize(model);
 
         return raw;
     }

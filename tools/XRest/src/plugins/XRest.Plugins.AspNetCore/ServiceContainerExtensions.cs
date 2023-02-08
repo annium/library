@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using XRest.Plugins.AspNetCore;
+using XRest.Core;
 
 // ReSharper disable once CheckNamespace
 
@@ -10,7 +10,7 @@ public static class ServiceContainerExtensions
     public static IServiceContainer AddXRest(this IServiceContainer container)
     {
         container.Collection.AddOpenApiDocument();
-        container.Add<ApiModelBuilder>().AsSelf().Singleton();
+        container.AddXRestSerializer();
 
         return container;
     }
