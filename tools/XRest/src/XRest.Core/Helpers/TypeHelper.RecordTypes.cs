@@ -38,7 +38,7 @@ public static partial class TypeHelper
         if (!IsRecordType(type))
             throw new ArgumentException($"Can't get non Record type {type.FriendlyName()} element type");
 
-        var args = type.GetTargetImplementation(BaseArrayType)?.GetGenericArguments()[0].GetGenericArguments();
+        var args = type.GetTargetImplementation(BaseArrayType)?.GetGenericArguments()[0].GetGenericArguments()!;
 
         return (args[0], args[1]);
     }

@@ -7,7 +7,7 @@ using Scriban;
 using Scriban.Parsing;
 using Scriban.Runtime;
 
-namespace XRest.Core.Helpers;
+namespace XRest.Core.Internal.Helpers;
 
 internal class TemplateLoader : ITemplateLoader
 {

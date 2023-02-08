@@ -1,34 +1,26 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using Annium.Core.Primitives.Collections.Generic;
+using XRest.Core.Models.Types;
 
 namespace XRest.Core.Models;
 
-public class ActionModel
+public sealed record ActionModel(
+    HttpMethod Method,
+    string Path,
+    string Name,
+    IReadOnlyCollection<ParameterModel> Parameters,
+    ITypeModel? Body,
+    ITypeModel Response
+)
 {
-    public string Name { get; }
-    public HttpMethod Method { get; }
-    public string Path { get; }
-    public IReadOnlyCollection<ParameterModel> Parameters { get; }
-    public Type? Body { get; }
-    public Type? Response { get; }
-
-    public ActionModel(
-        string name,
-        HttpMethod method,
-        string path,
-        IReadOnlyCollection<ParameterModel> parameters,
-        Type? body,
-        Type? response
-    )
+    public override string ToString()
     {
-        Name = name;
-        Method = method;
-        Path = path;
-        Parameters = parameters;
-        Body = body;
-        Response = response;
-    }
+        var parameters = Parameters.Select(x => x.ToString()).ToList();
+        if (Body is not null)
+            parameters.Add($"body: {Body}");
 
-    public override string ToString() => $"{Method} {Path} ({Name})";
+        return $"{Method} {Path} {Name}({parameters.Join(", ")}): {Response}";
+    }
 }

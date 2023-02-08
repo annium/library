@@ -1,14 +1,15 @@
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Annium.Core.Runtime.Resources;
 using Annium.Core.Primitives;
+using Annium.Core.Runtime.Resources;
 using Scriban;
 using Scriban.Parsing;
 using Scriban.Runtime;
-using XRest.Core.Helpers;
+using XRest.Core.Components;
+using XRest.Core.Internal.Helpers;
 
-namespace XRest.Core.Components.Implementations;
+namespace XRest.Core.Internal.Components;
 
 internal class TemplateWriter : ITemplateWriter
 {
