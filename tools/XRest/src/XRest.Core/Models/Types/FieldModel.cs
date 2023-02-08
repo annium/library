@@ -5,4 +5,5 @@ public sealed record FieldModel(
     string Name
 )
 {
+    public override string ToString() => $"{Type} {Name}";
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Annium.Core.Primitives;
 using NodaTime;
 using XRest.Core.Extensions;
 
@@ -7,12 +8,11 @@ namespace XRest.Core.Models.Types;
 
 public static class BaseType
 {
-    private static readonly IReadOnlyDictionary<Type, StructModel> BaseTypes;
+    private static readonly Dictionary<Type, StructModel> BaseTypes = new();
 
     static BaseType()
     {
-        var baseTypes = new Dictionary<Type, StructModel>();
-        Register<bool>("boolean");
+        Register<bool>("bool");
         Register<string>("string");
         Register<byte>("byte");
         Register<sbyte>("sbyte");
@@ -25,11 +25,25 @@ public static class BaseType
         Register<TimeOnly>("time");
         Register<Instant>("instant");
         Register<Duration>("duration");
-        baseTypes[typeof(void)] = new StructModel(typeof(void).GetNamespace(), "void");
-        BaseTypes = baseTypes;
-
-        void Register<T>(string name) => baseTypes[typeof(T)] = new StructModel(typeof(T).GetNamespace(), name);
+        Register(typeof(void), "void");
     }
 
     public static StructModel? GetFor(Type type) => BaseTypes.GetValueOrDefault(type);
+
+    public static void Register<T>(string name) => Register(typeof(T), name);
+
+    public static void Register(Type type, string name)
+    {
+        if (type is { IsClass: false, IsValueType: false })
+            throw new ArgumentException($"Type {type.FriendlyName()} is neither class nor struct");
+
+        if (type.IsGenericType || type.IsGenericTypeDefinition)
+            throw new ArgumentException($"Type {type.FriendlyName()} is generic type");
+
+        if (type.IsGenericTypeParameter)
+            throw new ArgumentException($"Type {type.FriendlyName()} is generic type parameter");
+
+        if (!BaseTypes.TryAdd(type, StructModelBuilder.Init(type.GetNamespace(), name).Build()))
+            throw new ArgumentException($"Type {type.FriendlyName()} is already registered");
+    }
 }
