@@ -1,7 +1,7 @@
 using System;
 using XRest.Core.Models;
 
-namespace XRest.Clients.Dotnet.Helpers;
+namespace XRest.Clients.Csharp.Helpers;
 
 internal static class WriterHelper
 {

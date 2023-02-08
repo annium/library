@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Annium.Core.Primitives;
 using Annium.Core.Reflection;
 using Annium.Core.Runtime.Types;
 using Annium.Data.Operations;
-using Annium.Core.Primitives;
-using XRest.Clients.Dotnet.Extensions;
-using XRest.Clients.Dotnet.Views;
+using XRest.Clients.Csharp.Extensions;
+using XRest.Clients.Csharp.Views;
 using XRest.Core.Extensions;
 using XRest.Core.Models;
-using static XRest.Clients.Dotnet.Helpers.ProcessorHelper;
+using static XRest.Clients.Csharp.Helpers.ProcessorHelper;
 
-namespace XRest.Clients.Dotnet.Components.Implementations;
+namespace XRest.Clients.Csharp.Components.Implementations;
 
 internal class Processor : IProcessor
 {

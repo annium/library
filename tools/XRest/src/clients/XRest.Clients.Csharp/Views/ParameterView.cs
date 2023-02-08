@@ -1,4 +1,4 @@
-namespace XRest.Clients.Dotnet.Views;
+namespace XRest.Clients.Csharp.Views;
 
 internal class ParameterView
 {

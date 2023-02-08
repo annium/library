@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using XRest.Clients.TypeScript.Components;
-using XRest.Sources;
-using XRest.Sources.Components;
+using XRest.Source;
+using XRest.Source.Components;
 
 namespace XRest.Clients.TypeScript.Commands;
 

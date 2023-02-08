@@ -1,10 +1,10 @@
 using System;
 using Annium.Core.DependencyInjection;
-using XRest.Clients.Dotnet.Commands;
-using XRest.Clients.Dotnet.Components;
-using XRest.Clients.Dotnet.Components.Implementations;
+using XRest.Clients.Csharp.Commands;
+using XRest.Clients.Csharp.Components;
+using XRest.Clients.Csharp.Components.Implementations;
 
-namespace XRest.Clients.Dotnet;
+namespace XRest.Clients.Csharp;
 
 public class ServicePack : ServicePackBase
 {

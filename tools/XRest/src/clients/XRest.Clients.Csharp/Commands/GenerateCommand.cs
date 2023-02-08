@@ -4,12 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
-using XRest.Clients.Dotnet.Components;
+using XRest.Clients.Csharp.Components;
 using XRest.Core.Extensions;
-using XRest.Sources;
-using XRest.Sources.Components;
+using XRest.Source;
+using XRest.Source.Components;
 
-namespace XRest.Clients.Dotnet.Commands;
+namespace XRest.Clients.Csharp.Commands;
 
 internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILogSubject<GenerateCommand>
 {

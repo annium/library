@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using XRest.Core.Models;
 
-namespace XRest.Clients.Dotnet.Views;
+namespace XRest.Clients.Csharp.Views;
 
 internal class ClientCandidate
 {

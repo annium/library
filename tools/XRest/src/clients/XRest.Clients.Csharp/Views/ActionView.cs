@@ -3,7 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using Annium.Core.Primitives;
 
-namespace XRest.Clients.Dotnet.Views;
+namespace XRest.Clients.Csharp.Views;
 
 internal class ActionView
 {

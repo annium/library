@@ -8,9 +8,9 @@ using Annium.Core.Mapper;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using Annium.Serialization.Abstractions;
-using XRest.Core.Views;
-using XRest.Sources;
-using XRest.Sources.Components;
+using XRest.Core.Models;
+using XRest.Source;
+using XRest.Source.Components;
 
 namespace XRest.Commands;
 
@@ -41,17 +41,16 @@ internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ILogSubje
         this.Log().Info($"Load '{cfg.ProjectName}' model");
         var model = await _loader.Load(cfg);
 
-        this.Log().Debug($"Save '{cfg.ProjectName}' model view to '{cfg.Output}'");
-        var view = _mapper.Map<ApiView>(model);
-        SaveView(cfg.Output, view);
+        this.Log().Debug($"Save '{cfg.ProjectName}' model to '{cfg.Output}'");
+        SaveView(cfg.Output, model);
     }
 
-    private void SaveView(string output, ApiView view)
+    private void SaveView(string output, ApiModel model)
     {
         if (!Directory.Exists(Path.GetDirectoryName(output)))
             Directory.CreateDirectory(Path.GetDirectoryName(output)!);
 
-        File.WriteAllText(output, _serializer.Serialize(view));
+        File.WriteAllText(output, _serializer.Serialize(model));
     }
 }
 

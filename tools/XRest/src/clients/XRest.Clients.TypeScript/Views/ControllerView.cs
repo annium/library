@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using Annium.Core.Primitives.Collections.Generic;
 using XRest.Clients.TypeScript.Views.Types;
+using XRest.Core.Extensions;
 
 namespace XRest.Clients.TypeScript.Views;
 
@@ -23,7 +25,7 @@ internal class ControllerView
     {
         ImportSource = ns == string.Empty
             ? "./shared"
-            : $"{string.Join('/', Core.Models.Namespace.New(ns).Select(_ => ".."))}/shared";
+            : $"{ns.ToNamespace().Select(_ => "..").Join("/")}/shared";
         Namespace = ns;
         Name = name;
         Imports = imports;

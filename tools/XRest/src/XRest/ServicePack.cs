@@ -8,14 +8,15 @@ internal class ServicePack : ServicePackBase
     public ServicePack()
     {
         Add<Core.ServicePack>();
-        Add<Clients.Dotnet.ServicePack>();
+        Add<Clients.Csharp.ServicePack>();
         Add<Clients.TypeScript.ServicePack>();
-        Add<Sources.ServicePack>();
+        Add<Source.ServicePack>();
     }
 
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
         container.AddRuntime(GetType().Assembly);
+        container.AddTime().WithRealTime().SetDefault();
         container.AddArguments();
         container.AddLogging();
         container.AddMapper();

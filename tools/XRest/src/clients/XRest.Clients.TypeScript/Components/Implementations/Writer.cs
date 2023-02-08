@@ -3,7 +3,7 @@ using System.Linq;
 using Annium.Core.Primitives;
 using XRest.Clients.TypeScript.Views;
 using XRest.Core.Components;
-using XRest.Core.Models;
+using XRest.Core.Extensions;
 
 namespace XRest.Clients.TypeScript.Components.Implementations;
 
@@ -29,7 +29,7 @@ internal class Writer : IWriter
 
         foreach (var controllerView in api.Controllers.Where(x => x.Actions.Count > 0))
         {
-            var directory = Namespace.New(controllerView.Namespace).ToPath(output);
+            var directory = controllerView.Namespace.ToNamespace().ToPath(output);
             Directory.CreateDirectory(directory);
 
             Write(directory, $"{controllerView.Name.CamelCase()}Api.ts", "Templates.Api", controllerView);

@@ -1,7 +1,7 @@
-using XRest.Clients.Dotnet.Views;
+using XRest.Clients.Csharp.Views;
 using XRest.Core.Models;
 
-namespace XRest.Clients.Dotnet.Components;
+namespace XRest.Clients.Csharp.Components;
 
 internal interface IProcessor
 {

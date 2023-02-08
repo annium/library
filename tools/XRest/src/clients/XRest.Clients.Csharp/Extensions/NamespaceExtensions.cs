@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using XRest.Core.Models;
 
-namespace XRest.Clients.Dotnet.Extensions;
+namespace XRest.Clients.Csharp.Extensions;
 
 public static class NamespaceExtensions
 {

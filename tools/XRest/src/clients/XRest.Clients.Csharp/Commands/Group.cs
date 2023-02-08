@@ -1,4 +1,4 @@
-namespace XRest.Clients.Dotnet.Commands;
+namespace XRest.Clients.Csharp.Commands;
 
 public class Group : Annium.Extensions.Arguments.Group
 {

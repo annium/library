@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace XRest.Clients.Dotnet.Views;
+namespace XRest.Clients.Csharp.Views;
 
 internal interface IClientView
 {

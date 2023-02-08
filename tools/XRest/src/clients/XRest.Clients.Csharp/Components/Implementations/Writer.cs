@@ -1,11 +1,11 @@
 using System.IO;
-using XRest.Clients.Dotnet.Views;
+using XRest.Clients.Csharp.Views;
 using XRest.Core.Components;
 using XRest.Core.Extensions;
 using XRest.Core.Models;
-using static XRest.Clients.Dotnet.Helpers.WriterHelper;
+using static XRest.Clients.Csharp.Helpers.WriterHelper;
 
-namespace XRest.Clients.Dotnet.Components.Implementations;
+namespace XRest.Clients.Csharp.Components.Implementations;
 
 internal class Writer : IWriter
 {

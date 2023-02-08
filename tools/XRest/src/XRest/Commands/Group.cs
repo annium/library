@@ -8,7 +8,7 @@ internal class Group : Annium.Extensions.Arguments.Group
 
     public Group()
     {
-        Add<Clients.Dotnet.Commands.Group>();
+        Add<Clients.Csharp.Commands.Group>();
         Add<Clients.TypeScript.Commands.Group>();
         Add<ParseCommand>();
     }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace XRest.Clients.Dotnet.Helpers;
+namespace XRest.Clients.Csharp.Helpers;
 
 internal static class ProcessorHelper
 {

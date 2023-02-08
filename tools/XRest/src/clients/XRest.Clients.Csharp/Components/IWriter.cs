@@ -1,6 +1,6 @@
-using XRest.Clients.Dotnet.Views;
+using XRest.Clients.Csharp.Views;
 
-namespace XRest.Clients.Dotnet.Components;
+namespace XRest.Clients.Csharp.Components;
 
 internal interface IWriter
 {
