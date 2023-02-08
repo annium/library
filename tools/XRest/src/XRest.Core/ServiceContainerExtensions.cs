@@ -11,6 +11,7 @@ public static class ServiceContainerExtensions
             .WithJson(opts =>
             {
                 opts.Converters.Add(new HttpMethodJsonConverter());
+                opts.Converters.Add(new NamespaceJsonConverter());
                 opts.UseCamelCaseNamingPolicy();
             });
 
