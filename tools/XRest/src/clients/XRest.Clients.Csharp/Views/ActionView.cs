@@ -40,10 +40,10 @@ internal class ActionView
         HasResponse = !string.IsNullOrWhiteSpace(response);
         Response = response;
         ResponseDefault = responseDefault;
+        var parameters = pathParameters.Concat(queryParameters).ToList();
         if (HasBody)
-            Parameters = pathParameters.Concat(queryParameters).Append(new ParameterView("body", Body!)).ToArray();
-        else
-            Parameters = pathParameters.Concat(queryParameters).ToArray();
+            parameters.Add(new ParameterView("body", Body));
+        Parameters = parameters;
     }
 
     public override string ToString() => $"{Method} {Path}";
