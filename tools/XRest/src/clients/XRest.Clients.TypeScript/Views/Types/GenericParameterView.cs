@@ -2,7 +2,7 @@ namespace XRest.Clients.TypeScript.Views.Types;
 
 internal class GenericParameterView : TypeView
 {
-    public override TypeViewEnum Type { get; } = TypeViewEnum.GenericParameter;
+    public override TypeViewEnum Type => TypeViewEnum.GenericParameter;
 
     public GenericParameterView(
         string name

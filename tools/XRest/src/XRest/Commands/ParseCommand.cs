@@ -12,10 +12,10 @@ using Constants = XRest.Core.Constants;
 
 namespace XRest.Commands;
 
-internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ILogSubject<ParseCommand>
+internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>
 {
-    public override string Id { get; } = "parse";
-    public override string Description { get; } = "parse API";
+    public override string Id => "parse";
+    public override string Description => "parse API";
     private readonly ILoader _loader;
     private readonly ISerializer<string> _serializer;
     public ILogger<ParseCommand> Logger { get; }
@@ -33,10 +33,7 @@ internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ILogSubje
 
     public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken ct)
     {
-        this.Log().Info($"Load '{cfg.Server}' model");
         var model = await _loader.Load(cfg);
-
-        this.Log().Debug($"Serialize '{cfg.Server}' model and write to stdout");
         Console.WriteLine(_serializer.Serialize(model));
     }
 }

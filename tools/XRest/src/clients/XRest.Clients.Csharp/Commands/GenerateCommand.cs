@@ -13,8 +13,8 @@ namespace XRest.Clients.Csharp.Commands;
 
 internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILogSubject<GenerateCommand>
 {
-    public override string Id { get; } = "gen";
-    public override string Description { get; } = "generate client";
+    public override string Id => "gen";
+    public override string Description => "generate client";
     public ILogger<GenerateCommand> Logger { get; }
     private readonly ILoader _loader;
     private readonly IProcessor _processor;

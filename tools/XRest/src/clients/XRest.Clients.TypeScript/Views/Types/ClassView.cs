@@ -6,7 +6,7 @@ namespace XRest.Clients.TypeScript.Views.Types;
 
 internal class ClassView : DefinedTypeView
 {
-    public override TypeViewEnum Type { get; } = TypeViewEnum.Class;
+    public override TypeViewEnum Type => TypeViewEnum.Class;
     public bool IsGenericType { get; }
     public bool IsGenericTypeDefinition { get; private set; }
     public IReadOnlyCollection<DefinedTypeView> GenericArguments { get; } = Array.Empty<DefinedTypeView>();

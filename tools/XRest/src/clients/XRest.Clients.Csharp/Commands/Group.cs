@@ -2,9 +2,9 @@ namespace XRest.Clients.Csharp.Commands;
 
 public class Group : Annium.Extensions.Arguments.Group
 {
-    public override string Id { get; } = "dotnet";
+    public override string Id => "dotnet";
 
-    public override string Description { get; } = ".NET commands";
+    public override string Description => ".NET commands";
 
     public Group()
     {
