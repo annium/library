@@ -12,10 +12,8 @@ public sealed record Namespace : IEnumerable<string>
 {
     #region static
 
-    public static Namespace Of(Type type) => New(type.Namespace!.ToNamespaceArray());
-    public static Namespace New(string ns) => New(ns.ToNamespaceArray());
-
     public static Namespace New(IEnumerable<string> ns) => new(ns.ToArray().EnsureValidNamespace());
+    public static Namespace New(IReadOnlyList<string> ns) => new(ns.EnsureValidNamespace());
 
     #endregion
 
@@ -51,9 +49,7 @@ public sealed record Namespace : IEnumerable<string>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     public IEnumerator<string> GetEnumerator() => _parts.GetEnumerator();
 
-    public string ToPath(string? basePath = default) => basePath is null
-        ? Path.Combine(_parts.ToArray())
-        : Path.Combine(basePath, Path.Combine(_parts.ToArray()));
+    public string ToPath(string basePath) => Path.Combine(basePath, Path.Combine(_parts.ToArray()));
 
     public override string ToString() => _parts.ToNamespaceString();
 
