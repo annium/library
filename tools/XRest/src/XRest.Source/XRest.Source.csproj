@@ -11,4 +11,10 @@
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
     </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="../XRest.Core/XRest.Core.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Annium.Net.Http" Version="0.1.0" />
+    </ItemGroup>
 </Project>

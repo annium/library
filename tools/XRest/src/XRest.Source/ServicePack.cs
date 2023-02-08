@@ -1,20 +1,15 @@
 using System;
 using Annium.Core.DependencyInjection;
-using XRest.Sources.Components;
-using XRest.Sources.Components.Internal;
+using XRest.Source.Components;
+using XRest.Source.Internal.Components;
 
-namespace XRest.Sources;
+namespace XRest.Source;
 
 public class ServicePack : ServicePackBase
 {
-    public ServicePack()
-    {
-        Add<Api.ServicePack>();
-        Add<Assembly.ServicePack>();
-    }
-
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
+        container.AddHttpRequestFactory().SetDefault();
         container.Add<ILoader, Loader>().Singleton();
     }
 }
