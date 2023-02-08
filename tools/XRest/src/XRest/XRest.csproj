@@ -14,7 +14,7 @@
         <ToolCommandName>xrest</ToolCommandName>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../clients/XRest.Clients.Dotnet/XRest.Clients.Dotnet.csproj" />
+        <ProjectReference Include="../clients/XRest.Clients.Csharp/XRest.Clients.Csharp.csproj" />
         <ProjectReference Include="../clients/XRest.Clients.TypeScript/XRest.Clients.TypeScript.csproj" />
     </ItemGroup>
     <ItemGroup>

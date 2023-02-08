@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using XRest.Clients.Dotnet.Components;
-using XRest.Core.Models;
+using XRest.Core.Extensions;
 using XRest.Sources;
 using XRest.Sources.Components;
 
@@ -41,7 +41,7 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILo
         var model = await _loader.Load(cfg);
 
         this.Log().Info("Process api model to api view");
-        var ns = Namespace.New(string.IsNullOrWhiteSpace(cfg.Namespace) ? Path.GetFileName(cfg.Output) : cfg.Namespace);
+        var ns = string.IsNullOrWhiteSpace(cfg.Namespace) ? Path.GetFileName(cfg.Output).ToNamespace() : cfg.Namespace.ToNamespace();
         var view = _processor.Process(ns, model);
 
         this.Log().Info($"Write api view to {cfg.Output}");

@@ -16,7 +16,7 @@ namespace XRest.Clients.Dotnet.Components.Implementations;
 
 internal class Processor : IProcessor
 {
-    private static readonly Namespace AnniumNetHttp = Namespace.New("Annium.Net.Http");
+    private static readonly Namespace AnniumNetHttp = "Annium.Net.Http".ToNamespace();
     private const string Client = "Client";
     private const string Root = "Root";
 
@@ -176,7 +176,7 @@ internal class Processor : IProcessor
 
         if (type.FullName == typeof(IResult).FullName)
         {
-            addUsage(Namespace.Of(typeof(IResult)));
+            addUsage(typeof(IResult).GetNamespace());
 
             return (ResponseKind.Result, null);
         }
@@ -184,7 +184,7 @@ internal class Processor : IProcessor
         var isGenericResult = type.IsGenericType && type.GetGenericTypeDefinition().FullName == typeof(IResult<>).FullName;
         if (isGenericResult)
         {
-            addUsage(Namespace.Of(typeof(IResult<>)));
+            addUsage(typeof(IResult<>).GetNamespace());
 
             return (ResponseKind.DataResult, type.GetGenericArguments()[0]);
         }
@@ -226,12 +226,12 @@ internal class Processor : IProcessor
 
             if (keyValueImplementation is null)
             {
-                addUsage(Namespace.Of(typeof(Array)));
+                addUsage(typeof(Array).GetNamespace());
 
                 return elementType.MakeArrayType();
             }
 
-            addUsage(Namespace.Of(typeof(Dictionary<,>)));
+            addUsage(typeof(Dictionary<,>).GetNamespace());
 
             return typeof(Dictionary<,>).MakeGenericType(keyValueImplementation.GetGenericArguments());
         }
@@ -261,14 +261,14 @@ internal class Processor : IProcessor
         if (type is null)
             return string.Empty;
 
-        addUsage(Namespace.Of(type));
+        addUsage(type.GetNamespace());
 
         if (type.IsValueType)
             return $"default({type.FriendlyName()})";
 
         if (type.IsArray)
         {
-            addUsage(Namespace.Of(typeof(Array)));
+            addUsage(typeof(Array).GetNamespace());
 
             return $"Array.Empty<{type.GetElementType()!.FriendlyName()}>()";
         }

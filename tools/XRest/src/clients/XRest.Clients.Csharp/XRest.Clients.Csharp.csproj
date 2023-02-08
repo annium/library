@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <PackageId>XRest.Clients.Dotnet</PackageId>
+        <PackageId>XRest.Clients.Csharp</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
         <Description>XRest client for .NET Core</Description>
         <TargetFramework>net7.0</TargetFramework>
