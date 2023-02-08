@@ -7,20 +7,29 @@ namespace XRest.Core.Models.Types;
 
 public static class BaseType
 {
-    public static StructModel Boolean { get; } = new StructModel(typeof(bool).GetNamespace(), "boolean", System.Array.Empty<StructModel>());
-    public static StructModel String { get; } = new StructModel(typeof(string).GetNamespace(), "string");
-    public static StructModel Byte { get; } = new StructModel(typeof(byte).GetNamespace(), "byte");
-    public static StructModel SByte { get; } = new StructModel(typeof(sbyte).GetNamespace(), "sbyte");
-    public static StructModel Int { get; } = new StructModel(typeof(int).GetNamespace(), "int");
-    public static StructModel UInt { get; } = new StructModel(typeof(uint).GetNamespace(), "uint");
-    public static StructModel Long { get; } = new StructModel(typeof(long).GetNamespace(), "long");
-    public static StructModel ULong { get; } = new StructModel(typeof(ulong).GetNamespace(), "ulong");
-    public static StructModel DateTime { get; } = new StructModel(typeof(DateTime).GetNamespace(), "DateTime");
-    public static StructModel Date { get; } = new StructModel(typeof(DateOnly).GetNamespace(), "Date");
-    public static StructModel Time { get; } = new StructModel(typeof(TimeOnly).GetNamespace(), "Time");
-    public static StructModel Instant { get; } = new StructModel(typeof(Instant).GetNamespace(), "Instant");
-    public static StructModel Duration { get; } = new StructModel(typeof(Duration).GetNamespace(), "Duration");
-    public static StructModel Void { get; } = new StructModel(typeof(bool).GetNamespace(), "void");
-    public static StructModel Array { get; } = new StructModel(typeof(Array).GetNamespace(), "Array", new ITypeModel[] { new GenericParameterModel("T") });
-    public static StructModel Record { get; } = new StructModel(typeof(Dictionary<,>).GetNamespace(), "Record", new ITypeModel[] { new GenericParameterModel("TKey"), new GenericParameterModel("TValue") });
+    private static readonly IReadOnlyDictionary<Type, StructModel> BaseTypes;
+
+    static BaseType()
+    {
+        var baseTypes = new Dictionary<Type, StructModel>();
+        Register<bool>("boolean");
+        Register<string>("string");
+        Register<byte>("byte");
+        Register<sbyte>("sbyte");
+        Register<int>("int");
+        Register<uint>("uint");
+        Register<long>("long");
+        Register<ulong>("ulong");
+        Register<DateTime>("datetime");
+        Register<DateOnly>("date");
+        Register<TimeOnly>("time");
+        Register<Instant>("instant");
+        Register<Duration>("duration");
+        baseTypes[typeof(void)] = new StructModel(typeof(void).GetNamespace(), "void");
+        BaseTypes = baseTypes;
+
+        void Register<T>(string name) => baseTypes[typeof(T)] = new StructModel(typeof(T).GetNamespace(), name);
+    }
+
+    public static StructModel? GetFor(Type type) => BaseTypes.GetValueOrDefault(type);
 }
