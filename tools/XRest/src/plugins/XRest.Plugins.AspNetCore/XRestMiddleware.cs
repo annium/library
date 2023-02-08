@@ -30,7 +30,7 @@ internal class XRestMiddleware
         _next = next;
         _mapper = mapper;
         _descriptionProvider = descriptionProvider;
-        _serializer = serializers[SerializerKey.Create(Constants.ApiSourceEndpoint, MediaTypeNames.Application.Json)];
+        _serializer = serializers[SerializerKey.Create(Constants.IndexKey, MediaTypeNames.Application.Json)];
         _description = new Lazy<string>(BuildApiDescription, isThreadSafe: true);
     }
 

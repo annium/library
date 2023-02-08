@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Annium.Core.DependencyInjection;
 using Annium.Net.Http;
 using XRest.Core;
 using XRest.Core.Models;
@@ -11,10 +12,10 @@ internal class Loader : ILoader
     private readonly IHttpRequestFactory _httpRequestFactory;
 
     public Loader(
-        IHttpRequestFactory httpRequestFactory
+        IIndex<string, IHttpRequestFactory> httpRequestFactories
     )
     {
-        _httpRequestFactory = httpRequestFactory;
+        _httpRequestFactory = httpRequestFactories[Constants.IndexKey];
     }
 
     public async Task<ApiModel> Load(ISourceLoaderConfiguration cfg)

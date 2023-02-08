@@ -1,5 +1,6 @@
 using System;
 using Annium.Core.DependencyInjection;
+using XRest.Core;
 
 namespace XRest;
 
@@ -20,6 +21,8 @@ internal class ServicePack : ServicePackBase
         container.AddArguments();
         container.AddLogging();
         container.AddMapper();
+        container.AddHttpRequestFactory(Constants.IndexKey);
+        container.AddXRestSerializer();
     }
 
     public override void Setup(IServiceProvider provider)

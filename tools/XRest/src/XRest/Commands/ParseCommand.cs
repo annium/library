@@ -33,7 +33,7 @@ internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ILogSubje
         _loader = loader;
         _mapper = mapper;
         Logger = logger;
-        _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
+        _serializer = serializers[SerializerKey.Create(Core.Constants.IndexKey, MediaTypeNames.Application.Json)];
     }
 
     public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken ct)
@@ -56,18 +56,6 @@ internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ILogSubje
 
 internal class ParseCommandConfiguration : ISourceLoaderConfiguration
 {
-    [Option("a", true)]
-    [Help("Path to API assembly.")]
-    public string Assembly
-    {
-        get => _assembly;
-        set
-        {
-            _assembly = Path.GetFullPath(value);
-            ProjectName = Path.GetFileNameWithoutExtension(value);
-        }
-    }
-
     [Option("s")]
     [Help("Server to load model from.")]
     public Uri Server { get; set; } = default!;
@@ -82,6 +70,5 @@ internal class ParseCommandConfiguration : ISourceLoaderConfiguration
         set => _output = Path.GetFullPath(value);
     }
 
-    private string _assembly = string.Empty;
     private string _output = string.Empty;
 }

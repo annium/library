@@ -7,7 +7,7 @@ public static class ServiceContainerExtensions
 {
     public static IServiceContainer AddXRestSerializer(this IServiceContainer container)
     {
-        container.AddSerializers(Constants.ApiSourceEndpoint)
+        container.AddSerializers(Constants.IndexKey)
             .WithJson(opts =>
             {
                 opts.Converters.Add(new HttpMethodJsonConverter());
