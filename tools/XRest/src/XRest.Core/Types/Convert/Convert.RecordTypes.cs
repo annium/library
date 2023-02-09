@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Annium.Core.Primitives;
 using Annium.Core.Reflection;
-using XRest.Core.Models.Types;
+using XRest.Core.Types.Models;
 
 namespace XRest.Core.Helpers;
 

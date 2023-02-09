@@ -1,4 +1,4 @@
-namespace XRest.Core.Models.Types;
+namespace XRest.Core.Types.Models;
 
 public record RecordModel(ITypeModel Key, ITypeModel Value) : ITypeModel
 {

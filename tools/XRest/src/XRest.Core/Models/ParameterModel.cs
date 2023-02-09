@@ -1,4 +1,4 @@
-using XRest.Core.Models.Types;
+using XRest.Core.Types.Models;
 
 namespace XRest.Core.Models;
 

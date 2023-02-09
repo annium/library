@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Annium.Core.Primitives.Collections.Generic;
+using XRest.Core.Models;
 
-namespace XRest.Core.Models.Types;
+namespace XRest.Core.Types.Models;
 
 public sealed record StructModel(
     Namespace Namespace,

@@ -1,4 +1,4 @@
-namespace XRest.Core.Models.Types;
+namespace XRest.Core.Types.Models;
 
 public sealed record FieldModel(
     ITypeModel Type,

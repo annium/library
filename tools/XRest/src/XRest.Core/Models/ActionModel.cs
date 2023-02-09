@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using Annium.Core.Primitives.Collections.Generic;
-using XRest.Core.Models.Types;
+using XRest.Core.Types.Models;
 
 namespace XRest.Core.Models;
 

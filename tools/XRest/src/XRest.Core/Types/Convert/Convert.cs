@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Annium.Core.Primitives;
 using XRest.Core.Extensions;
-using XRest.Core.Models.Types;
+using XRest.Core.Types.Models;
 
 namespace XRest.Core.Helpers;
 
@@ -38,19 +38,15 @@ public static partial class TypeHelper
             return new GenericParameterModel(type.Name);
         }
 
-        if (type.IsEnum)
+        var nullableBase=
+        if (Nullable.GetUnderlyingType())
         {
-            var names = Enum.GetNames(type);
-            var rawValues = Enum.GetValuesAsUnderlyingType(type);
-
-            var values = new Dictionary<string, long>();
-            var i = 0;
-            foreach (var value in rawValues)
-                values[names[i++]] = Convert.ToInt64(value);
-
-            Console.WriteLine($"Resolved enum model for {type}");
-            return new EnumModel(type.GetNamespace(), type.FriendlyName(), values);
+            Console.WriteLine($"Resolved generic parameter model for {type}");
+            return new GenericParameterModel(type.Name);
         }
+
+        if (type.IsEnum)
+            return ResolveEnumTypeModel(type);
 
         var specialType = ResolveSpecialTypeModel(type);
         if (specialType is not null)

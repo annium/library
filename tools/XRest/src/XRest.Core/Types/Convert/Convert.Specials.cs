@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using XRest.Core.Models.Types;
+using XRest.Core.Types.Models;
 
 namespace XRest.Core.Helpers;
 

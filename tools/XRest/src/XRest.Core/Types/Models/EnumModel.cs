@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using XRest.Core.Models;
 
-namespace XRest.Core.Models.Types;
+namespace XRest.Core.Types.Models;
 
 public sealed record EnumModel(
     Namespace Namespace,

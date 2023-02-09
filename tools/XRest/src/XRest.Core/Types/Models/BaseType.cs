@@ -4,7 +4,7 @@ using Annium.Core.Primitives;
 using NodaTime;
 using XRest.Core.Extensions;
 
-namespace XRest.Core.Models.Types;
+namespace XRest.Core.Types.Models;
 
 public static class BaseType
 {
