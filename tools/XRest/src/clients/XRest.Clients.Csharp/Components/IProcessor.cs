@@ -1,3 +1,4 @@
+using Annium.Net.Types.Models;
 using XRest.Clients.Csharp.Views;
 using XRest.Core.Models;
 

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using Annium.Core.Primitives.Collections.Generic;
-using XRest.Core.Types.Models;
+using Annium.Net.Types.Refs;
 
 namespace XRest.Core.Models;
 
@@ -11,8 +11,8 @@ public sealed record ActionModel(
     string Path,
     string Name,
     IReadOnlyCollection<ParameterModel> Parameters,
-    ITypeModel? Body,
-    ITypeModel Response
+    IRef? Body,
+    IRef Response
 )
 {
     public override string ToString()

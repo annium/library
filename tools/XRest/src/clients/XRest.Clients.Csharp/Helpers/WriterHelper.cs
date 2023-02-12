@@ -1,5 +1,5 @@
 using System;
-using XRest.Core.Models;
+using Annium.Net.Types.Models;
 
 namespace XRest.Clients.Csharp.Helpers;
 

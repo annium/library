@@ -11,6 +11,7 @@ public static class ServiceContainerExtensions
     {
         container.Collection.AddOpenApiDocument();
         container.AddXRestSerializer();
+        container.AddModelMapper();
 
         return container;
     }

@@ -1,10 +1,10 @@
-using XRest.Core.Types.Models;
+using Annium.Net.Types.Refs;
 
 namespace XRest.Core.Models;
 
 public sealed record ParameterModel(
     ParameterLocationEnum Location,
-    ITypeModel Type,
+    IRef Type,
     string Name
 )
 {

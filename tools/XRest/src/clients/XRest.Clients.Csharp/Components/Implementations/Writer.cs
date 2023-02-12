@@ -1,8 +1,8 @@
 using System.IO;
+using Annium.Net.Types.Models;
 using XRest.Clients.Csharp.Views;
 using XRest.Core.Components;
 using XRest.Core.Extensions;
-using XRest.Core.Models;
 using static XRest.Clients.Csharp.Helpers.WriterHelper;
 
 namespace XRest.Clients.Csharp.Components.Implementations;

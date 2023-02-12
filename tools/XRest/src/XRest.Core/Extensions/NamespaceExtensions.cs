@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using XRest.Core.Models;
+using Annium.Net.Types.Models;
 
 namespace XRest.Core.Extensions;
 
 public static class NamespaceExtensions
 {
-    public static Namespace GetNamespace(this Type type) => type.Namespace!.ToNamespace();
     public static Namespace ToNamespace(this string ns) => Namespace.New(ns.ToNamespaceArray());
-    public static Namespace ToNamespace(this IEnumerable<string> ns) => Namespace.New(ns);
 
     public static string[] ToNamespaceArray(this string ns) => ns switch
     {
@@ -17,9 +15,9 @@ public static class NamespaceExtensions
         _  => ns.Split('.').ToArray().EnsureValidNamespace()
     };
 
-    public static string ToNamespaceString(this IEnumerable<string> ns) => string.Join('.', ns);
+    private static string ToNamespaceString(this IEnumerable<string> ns) => string.Join('.', ns);
 
-    internal static T EnsureValidNamespace<T>(this T ns)
+    private static T EnsureValidNamespace<T>(this T ns)
         where T : IEnumerable<string>
     {
         if (ns.Any(string.IsNullOrWhiteSpace))
