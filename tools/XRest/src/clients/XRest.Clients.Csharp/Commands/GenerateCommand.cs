@@ -35,13 +35,13 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILo
 
     public override async Task HandleAsync(GenerateCommandConfiguration cfg, CancellationToken ct)
     {
-        this.Log().Info($"Generate '{cfg.ProjectName}' client");
+        this.Log().Info($"Generate client for {cfg.Server}");
 
-        this.Log().Info($"Load '{cfg.ProjectName}' model");
+        this.Log().Info($"Load model from {cfg.Server}");
         var model = await _loader.Load(cfg);
 
         this.Log().Info("Process api model to api view");
-        var ns = string.IsNullOrWhiteSpace(cfg.Namespace) ? Path.GetFileName(cfg.Output).ToNamespace() : cfg.Namespace.ToNamespace();
+        var ns = cfg.Namespace.ToNamespace();
         var view = _processor.Process(ns, model);
 
         this.Log().Info($"Write api view to {cfg.Output}");
@@ -52,25 +52,11 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILo
 
 internal class GenerateCommandConfiguration : ISourceLoaderConfiguration
 {
-    [Option("a", true)]
-    [Help("Path to API assembly.")]
-    public string Assembly
-    {
-        get => _assembly;
-        set
-        {
-            _assembly = Path.GetFullPath(value);
-            ProjectName = Path.GetFileNameWithoutExtension(value);
-        }
-    }
-
-    [Option("s")]
+    [Option("s", isRequired: true)]
     [Help("Server to load model from.")]
     public Uri Server { get; set; } = default!;
 
-    public string ProjectName { get; private set; } = string.Empty;
-
-    [Option("o", true)]
+    [Option("o", isRequired: true)]
     [Help("Output directory. Will be removed if exists.")]
     public string Output
     {
@@ -78,7 +64,7 @@ internal class GenerateCommandConfiguration : ISourceLoaderConfiguration
         set => _output = Path.GetFullPath(value);
     }
 
-    [Option("ns")]
+    [Option("ns", isRequired: true)]
     [Help("Root namespace for created classes.")]
     public string Namespace { get; set; } = string.Empty;
 
@@ -86,6 +72,5 @@ internal class GenerateCommandConfiguration : ISourceLoaderConfiguration
     [Help("Generate test client. Is not ensuring success code and returns data wrapped in responses.")]
     public bool TestClient { get; set; } = false;
 
-    private string _assembly = string.Empty;
     private string _output = string.Empty;
 }
