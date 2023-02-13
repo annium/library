@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Annium.Net.Types.Models;
 
-namespace XRest.Clients.Csharp.Views;
+namespace XRest.Clients.Csharp.ViewsSave;
 
 internal class ClientCandidate
 {

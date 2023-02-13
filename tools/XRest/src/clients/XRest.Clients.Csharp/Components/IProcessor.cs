@@ -1,5 +1,5 @@
 using Annium.Net.Types.Models;
-using XRest.Clients.Csharp.Views;
+using XRest.Clients.Csharp.ViewsSave;
 using XRest.Core.Models;
 
 namespace XRest.Clients.Csharp.Components;

@@ -1,6 +1,6 @@
 using System.IO;
 using Annium.Net.Types.Models;
-using XRest.Clients.Csharp.Views;
+using XRest.Clients.Csharp.ViewsSave;
 using XRest.Core.Components;
 using XRest.Core.Extensions;
 using static XRest.Clients.Csharp.Helpers.WriterHelper;
