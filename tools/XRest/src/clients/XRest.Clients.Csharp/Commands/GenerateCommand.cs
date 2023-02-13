@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using XRest.Clients.Csharp.Components;
+using XRest.Clients.Csharp.Components.Processors;
 using XRest.Core.Extensions;
 using XRest.Source;
 using XRest.Source.Components;
@@ -17,18 +18,15 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILo
     public override string Description => "generate client";
     public ILogger<GenerateCommand> Logger { get; }
     private readonly ILoader _loader;
-    private readonly IProcessor _processor;
     private readonly IWriter _writer;
 
     public GenerateCommand(
         ILoader loader,
-        IProcessor processor,
         IWriter writer,
         ILogger<GenerateCommand> logger
     )
     {
         _loader = loader;
-        _processor = processor;
         _writer = writer;
         Logger = logger;
     }
@@ -42,7 +40,7 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILo
 
         this.Log().Info("Process api model to api view");
         var ns = cfg.Namespace.ToNamespace();
-        var view = _processor.Process(ns, model);
+        var view = Processor.Process(ns, model);
 
         this.Log().Info($"Write api view to {cfg.Output}");
         _writer.Write(cfg.Output, view, cfg.TestClient);

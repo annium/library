@@ -1,4 +1,4 @@
-using XRest.Clients.Csharp.ViewsSave;
+using XRest.Clients.Csharp.Views;
 
 namespace XRest.Clients.Csharp.Components;
 

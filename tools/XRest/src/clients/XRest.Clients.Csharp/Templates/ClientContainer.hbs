@@ -1,0 +1,21 @@
+{{~ if usages.size > 0 ~}}
+{{~ for ns in usages ~}}
+using {{ ns }};
+{{~ end ~}}
+
+{{~ end ~}}
+namespace {{ namespace }};
+
+public class {{ type }}
+{
+    {{~ for client in clients ~}}
+    public {{ client.type }} {{ client.name }} { get; }
+    {{~ end ~}}
+
+    public {{ type }}(IHttpRequest request)
+    {
+        {{~ for client in clients ~}}
+        {{ client.name }} = new {{ client.type }}(request);
+        {{~ end ~}}
+    }
+}
