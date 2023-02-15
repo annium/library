@@ -11,7 +11,7 @@ namespace XRest.Clients.Csharp.Components.Processors;
 
 internal static class RefProcessor
 {
-    public static string Process(IRef @ref, ProcessingContext ctx) => @ref switch
+    public static string Process(IRef @ref, ClientContext ctx) => @ref switch
     {
         BaseTypeRef x         => Process(x, ctx),
         NullableRef x         => Process(x, ctx),
@@ -25,7 +25,7 @@ internal static class RefProcessor
         _                     => throw new ArgumentOutOfRangeException(nameof(@ref), @ref, $"Unsupported ref {@ref}")
     };
 
-    private static string Process(BaseTypeRef @ref, ProcessingContext ctx)
+    private static string Process(BaseTypeRef @ref, ClientContext ctx)
     {
         switch (@ref.Name)
         {
@@ -62,12 +62,12 @@ internal static class RefProcessor
 
         string Type<T>()
         {
-            ctx.TrackNamespace(typeof(T));
-            return nameof(T);
+            ctx.UseNamespace(typeof(T));
+            return typeof(T).Name;
         }
     }
 
-    private static string Process(NullableRef @ref, ProcessingContext ctx)
+    private static string Process(NullableRef @ref, ClientContext ctx)
     {
         return $"{Process(@ref.Value, ctx)}?";
     }
@@ -77,36 +77,36 @@ internal static class RefProcessor
         return @ref.Name;
     }
 
-    private static string Process(EnumRef @ref, ProcessingContext ctx)
+    private static string Process(EnumRef @ref, ClientContext ctx)
     {
-        ctx.TrackNamespace(@ref.Namespace.ToNamespace().From(ctx.ModelsNamespace));
+        ctx.UseNamespace(@ref.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace));
         return @ref.Name;
     }
 
-    private static string Process(ArrayRef @ref, ProcessingContext ctx)
+    private static string Process(ArrayRef @ref, ClientContext ctx)
     {
         return $"{Process(@ref.Value, ctx)}[]";
     }
 
-    private static string Process(RecordRef @ref, ProcessingContext ctx)
+    private static string Process(RecordRef @ref, ClientContext ctx)
     {
-        ctx.TrackNamespace(typeof(Dictionary<,>));
+        ctx.UseNamespace(typeof(Dictionary<,>));
         return $"Dictionary<{Process(@ref.Key, ctx)}, {Process(@ref.Value, ctx)}>";
     }
 
-    private static string Process(StructRef @ref, ProcessingContext ctx)
+    private static string Process(StructRef @ref, ClientContext ctx)
     {
         return Process(@ref, @ref.Args, ctx);
     }
 
-    private static string Process(InterfaceRef @ref, ProcessingContext ctx)
+    private static string Process(InterfaceRef @ref, ClientContext ctx)
     {
         return Process(@ref, @ref.Args, ctx);
     }
 
-    private static string Process(IModelRef @ref, IRef[] refArgs, ProcessingContext ctx)
+    private static string Process(IModelRef @ref, IRef[] refArgs, ClientContext ctx)
     {
-        ctx.TrackNamespace(@ref.Namespace.ToNamespace().From(ctx.ModelsNamespace));
+        ctx.UseNamespace(@ref.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace));
         if (refArgs.Length == 0)
             return @ref.Name;
 
@@ -119,15 +119,15 @@ internal static class RefProcessor
         return sb.ToString();
     }
 
-    private static string Process(PromiseRef @ref, ProcessingContext ctx)
+    private static string Process(PromiseRef @ref, ClientContext ctx)
     {
         if (@ref.Value is null)
         {
-            ctx.TrackNamespace(typeof(Task));
+            ctx.UseNamespace(typeof(Task));
             return "Task";
         }
 
-        ctx.TrackNamespace(typeof(Task<>));
+        ctx.UseNamespace(typeof(Task<>));
         return $"Task<{Process(@ref.Value, ctx)}>";
     }
 }

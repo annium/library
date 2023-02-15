@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using Annium.Net.Types.Extensions;
-using Annium.Net.Types.Models;
 using XRest.Clients.Csharp.Views;
 using XRest.Core.Models;
 
@@ -10,15 +7,18 @@ namespace XRest.Clients.Csharp.Components.Processors;
 
 internal static class ControllerProcessor
 {
-    public static ControllerView Process(ControllerModel controller, IReadOnlyCollection<ModelBase> models)
+    public static ControllerView Process(ControllerModel controller, ApiContext apiCtx)
     {
+        var clientNamespace = apiCtx.RootNamespace
+            .Append(Constants.ClientsNamespace.ToNamespace())
+            .Append(controller.Namespace.ToNamespace());
+        var ctx = new ClientContext(clientNamespace, apiCtx.ModelsNamespace);
         var actions = controller.Actions
-            .Select(x => ActionProcessor.Process(x, models))
+            .Select(x => ActionProcessor.Process(x, ctx))
             .ToArray();
 
-        var namespaces = Array.Empty<Namespace>();
-        var @namespace = controller.Namespace.ToNamespace();
+        var usages = ctx.Usages;
 
-        return new ControllerView(namespaces, @namespace, string.Empty, string.Empty, actions);
+        return new ControllerView(usages, clientNamespace, controller.Name, actions);
     }
 }
