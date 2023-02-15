@@ -22,8 +22,7 @@ internal static class ActionProcessor
             .ToArray();
 
         var body = action.Body is not null ? RefProcessor.Process(action.Body, ctx) : string.Empty;
-        var response = string.Empty;
-        var responseDefault = string.Empty;
+        var (response, responseDefault) = ResponseProcessor.Resolve(action.Response, ctx);
 
         return new ActionView(name, action.Method, path, pathParameters, queryParameters, body, response, responseDefault);
     }
