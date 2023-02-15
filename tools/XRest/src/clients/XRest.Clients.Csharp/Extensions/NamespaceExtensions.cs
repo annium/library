@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
 
 namespace XRest.Clients.Csharp.Extensions;

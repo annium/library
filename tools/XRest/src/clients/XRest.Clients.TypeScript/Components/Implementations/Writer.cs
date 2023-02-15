@@ -1,9 +1,9 @@
 using System.IO;
 using System.Linq;
 using Annium.Core.Primitives;
+using Annium.Net.Types.Extensions;
 using XRest.Clients.TypeScript.Views;
 using XRest.Core.Components;
-using XRest.Core.Extensions;
 
 namespace XRest.Clients.TypeScript.Components.Implementations;
 

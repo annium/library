@@ -1,8 +1,8 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
-using XRest.Core.Extensions;
 
 namespace XRest.Core.Internal.Converters;
 

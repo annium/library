@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Annium.Core.Primitives;
 using Annium.Net.Types;
+using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using XRest.Core.Extensions;
 using XRest.Core.Models;
 
 namespace XRest.Plugins.AspNetCore.Internal.Components;
@@ -15,7 +15,7 @@ internal static class ControllerModelBuilder
     {
         var sample = actions.First();
         var nsParts = (sample.ControllerTypeInfo.Namespace ?? string.Empty)
-            .ToNamespaceArray()
+            .ToNamespace()
             .SkipWhile(x => x != Constants.Controllers)
             .Skip(1)
             .ToList();
