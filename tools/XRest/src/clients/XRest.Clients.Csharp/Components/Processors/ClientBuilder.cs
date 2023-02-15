@@ -10,6 +10,7 @@ namespace XRest.Clients.Csharp.Components.Processors;
 
 internal static class ClientBuilder
 {
+    private static readonly Namespace TplNamespace = Constants.TplNamespace.ToNamespace();
     private static readonly Namespace HttpNamespace = Constants.NetHttpNamespace.ToNamespace();
 
     public static IClientView BuildClient(
@@ -65,7 +66,7 @@ internal static class ClientBuilder
     private static IClientView BuildClientNode(ControllerView controller)
     {
         var usages = controller.Usages
-            .Append(HttpNamespace)
+            .Concat(new[] { TplNamespace, HttpNamespace })
             .ToUsagesFrom(controller.Namespace)
             .ToUsageStrings();
         var @namespace = controller.Namespace.ToString();

@@ -42,7 +42,7 @@ internal sealed record ActionView
         ResponseDefault = responseDefault;
         var parameters = pathParameters.Concat(queryParameters).ToList();
         if (HasBody)
-            parameters.Add(new ParameterView("body", Body));
+            parameters.Add(new ParameterView(Body, "body"));
         Parameters = parameters;
     }
 
