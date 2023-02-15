@@ -64,8 +64,11 @@ internal static class ClientBuilder
 
     private static IClientView BuildClientNode(ControllerView controller)
     {
-        var usages = controller.Usages.Select(x => x.ToString()).ToArray();
-        var @namespace = controller.Namespace;
+        var usages = controller.Usages
+            .Append(HttpNamespace)
+            .ToUsagesFrom(controller.Namespace)
+            .ToUsageStrings();
+        var @namespace = controller.Namespace.ToString();
         var name = controller.Name;
         var type = $"{controller.Name}Client";
         var actions = controller.Actions;
