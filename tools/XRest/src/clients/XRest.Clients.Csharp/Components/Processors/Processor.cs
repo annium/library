@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
@@ -9,19 +8,21 @@ namespace XRest.Clients.Csharp.Components.Processors;
 
 internal static class Processor
 {
-    public static ClientContainerView Process(Namespace rootNamespace, ApiModel api)
+    private static readonly Namespace HttpNamespace = Constants.NetHttpNamespace.ToNamespace();
+
+    public static ApiView Process(Namespace rootNamespace, ApiModel api)
     {
-        var apiCtx = new ApiContext(rootNamespace, rootNamespace.Append(Constants.ModelsNamespace.ToNamespace()), api.Models);
+        var apiCtx = new ApiContext(
+            rootNamespace.Append(Constants.ClientsNamespace.ToNamespace()),
+            rootNamespace.Append(Constants.ModelsNamespace.ToNamespace()),
+            api.Models
+        );
         var controllers = api.Controllers
             .Select(x => ControllerProcessor.Process(x, apiCtx))
             .ToArray();
 
-        var usages = Array.Empty<string>();
-        var @namespace = string.Empty;
-        var name = "X";
-        var type = "X";
-        var clients = Array.Empty<IClientView>();
+        var client = ClientBuilder.BuildClient(apiCtx.ClientsNamespace, "Root", "Root", controllers);
 
-        return new ClientContainerView(usages, @namespace, name, type, clients);
+        return new ApiView(client);
     }
 }

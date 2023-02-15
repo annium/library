@@ -7,6 +7,7 @@ using Annium.Logging.Abstractions;
 using Annium.Net.Types.Extensions;
 using XRest.Clients.Csharp.Components;
 using XRest.Clients.Csharp.Components.Processors;
+using XRest.Clients.Csharp.Components.Writers;
 using XRest.Source;
 using XRest.Source.Components;
 
@@ -18,11 +19,11 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILo
     public override string Description => "generate client";
     public ILogger<GenerateCommand> Logger { get; }
     private readonly ILoader _loader;
-    private readonly IWriter _writer;
+    private readonly Writer _writer;
 
     public GenerateCommand(
         ILoader loader,
-        IWriter writer,
+        Writer writer,
         ILogger<GenerateCommand> logger
     )
     {

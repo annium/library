@@ -9,8 +9,7 @@ internal static class ControllerProcessor
 {
     public static ControllerView Process(ControllerModel controller, ApiContext apiCtx)
     {
-        var clientNamespace = apiCtx.RootNamespace
-            .Append(Constants.ClientsNamespace.ToNamespace())
+        var clientNamespace = apiCtx.ClientsNamespace
             .Append(controller.Namespace.ToNamespace());
         var ctx = new ClientContext(clientNamespace, apiCtx.ModelsNamespace);
         var actions = controller.Actions

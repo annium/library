@@ -1,8 +1,7 @@
 using System;
 using Annium.Core.DependencyInjection;
 using XRest.Clients.Csharp.Commands;
-using XRest.Clients.Csharp.Components;
-using XRest.Clients.Csharp.Components.Implementations;
+using XRest.Clients.Csharp.Components.Writers;
 
 namespace XRest.Clients.Csharp;
 
@@ -11,7 +10,10 @@ public class ServicePack : ServicePackBase
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
         // components
-        container.Add<IWriter, Writer>().Singleton();
+        container.Add<Writer>().AsSelf().Singleton();
+        container.Add<ClientWriter>().AsSelf().Singleton();
+        container.Add<ModelWriter>().AsSelf().Singleton();
+        container.Add<FileWriter>().AsSelf().Singleton();
 
         RegisterCommands(container);
     }

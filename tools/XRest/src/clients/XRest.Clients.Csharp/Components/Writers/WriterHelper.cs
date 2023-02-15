@@ -2,7 +2,7 @@ using System;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
 
-namespace XRest.Clients.Csharp.Helpers;
+namespace XRest.Clients.Csharp.Components.Writers;
 
 internal static class WriterHelper
 {
@@ -11,9 +11,6 @@ internal static class WriterHelper
         if (!ns.StartsWith(rootNs))
             throw new InvalidOperationException($"Can't resolve relative path when namespace '{ns}' is not containing root namespace '{rootNs}'");
 
-        if (ns == rootNs)
-            return rootDir;
-
-        return ns.From(rootNs).ToPath(rootDir);
+        return ns == rootNs ? rootDir : ns.From(rootNs).ToPath(rootDir);
     }
 }

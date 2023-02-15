@@ -2,54 +2,53 @@ using System.IO;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
 using XRest.Clients.Csharp.Views;
-using XRest.Core.Components;
-using static XRest.Clients.Csharp.Helpers.WriterHelper;
+using static XRest.Clients.Csharp.Components.Writers.WriterHelper;
 
-namespace XRest.Clients.Csharp.Components.Implementations;
+namespace XRest.Clients.Csharp.Components.Writers;
 
-internal class Writer : IWriter
+internal class ClientWriter
 {
-    private readonly ITemplateWriter _templateWriter;
+    private readonly FileWriter _writer;
 
-    public Writer(
-        ITemplateWriter templateWriter
+    public ClientWriter(
+        FileWriter writer
     )
     {
-        _templateWriter = templateWriter;
+        _writer = writer;
     }
 
-    public void Write(string output, ClientContainerView client, bool generateTestClient)
+    public void Write(string output, IClientView client, bool generateTestClient)
     {
         if (!Directory.Exists(output))
             Directory.CreateDirectory(output);
 
-        WriteIfMissing(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
+        _writer.WriteIfMissing(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
         {
-            Usages = new[] { "Annium.Net.Http" },
+            Usages = new[] { Constants.NetHttpNamespace },
             client.Namespace,
         });
 
         if (generateTestClient)
-            Write(output, "HttpResponseExtensions", "Templates.HttpResponseExtensions", new
+            _writer.Write(output, "HttpResponseExtensions", "Templates.HttpResponseExtensions", new
             {
                 Usages = new[]
                 {
                     "System.Collections.Generic",
                     "System.Linq",
                     "System.Threading.Tasks",
-                    "Annium.Data.Operations",
-                    "Annium.Net.Http",
+                    Constants.DataOperationsNamespace,
+                    Constants.NetHttpNamespace,
                 },
                 client.Namespace,
             });
 
-        Write(output, "ClientBase", "Templates.ClientBase", new
+        _writer.Write(output, "ClientBase", "Templates.ClientBase", new
         {
-            Usages = new[] { "Annium.Net.Http" },
+            Usages = new[] { Constants.NetHttpNamespace },
             client.Namespace,
         });
 
-        WriteClientContainer(output, client.Namespace.ToNamespace(), client, generateTestClient);
+        WriteAbstractClient(output, client.Namespace.ToNamespace(), client, generateTestClient);
     }
 
     private void WriteAbstractClient(string rootDir, Namespace rootNs, IClientView abstraction, bool generateTestClient)
@@ -71,7 +70,7 @@ internal class Writer : IWriter
         if (!Directory.Exists(output))
             Directory.CreateDirectory(output);
 
-        Write(output, container.Type, "Templates.ClientContainer", container);
+        _writer.Write(output, container.Type, "Templates.ClientContainer", container);
 
         foreach (var client in container.Clients)
             WriteAbstractClient(rootDir, rootNs, client, generateTestClient);
@@ -83,20 +82,6 @@ internal class Writer : IWriter
         if (!Directory.Exists(output))
             Directory.CreateDirectory(output);
 
-        Write(output, client.Type, generateTestClient ? "Templates.TestClient" : "Templates.Client", client);
-    }
-
-    private void WriteIfMissing<T>(string output, string fileName, string template, T data)
-        where T : class
-    {
-        var path = Path.Combine(output, $"{fileName}.cs");
-        if (!File.Exists(path))
-            File.WriteAllText(path, _templateWriter.Write(template, data));
-    }
-
-    private void Write<T>(string output, string fileName, string template, T data)
-        where T : class
-    {
-        File.WriteAllText(Path.Combine(output, $"{fileName}.cs"), _templateWriter.Write(template, data));
+        _writer.Write(output, client.Type, generateTestClient ? "Templates.TestClient" : "Templates.Client", client);
     }
 }
