@@ -35,7 +35,7 @@ internal class TemplateWriter : ITemplateWriter
         var templateAssembly = Assembly.GetCallingAssembly();
         ctx.TemplateLoader = new TemplateLoader(templateAssembly, _resourceLoader);
 
-        var resource = _resourceLoader.Load(template, templateAssembly).Single();
+        var resource = _resourceLoader.Load($"{template}.", templateAssembly).Single();
         var raw = Encoding.UTF8.GetString(resource.Content.Span);
         var tpl = Template.Parse(raw, lexerOptions: new LexerOptions());
 
