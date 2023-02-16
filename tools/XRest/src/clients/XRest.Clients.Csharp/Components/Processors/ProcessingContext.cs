@@ -5,8 +5,7 @@ using Annium.Net.Types.Models;
 
 namespace XRest.Clients.Csharp.Components.Processors;
 
-internal sealed record ClientContext(
-    Namespace ClientNamespace,
+internal sealed record ProcessingContext(
     Namespace ModelsNamespace
 )
 {

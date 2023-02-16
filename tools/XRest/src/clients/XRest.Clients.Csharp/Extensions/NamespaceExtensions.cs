@@ -7,7 +7,7 @@ namespace XRest.Clients.Csharp.Extensions;
 
 public static class NamespaceExtensions
 {
-    public static IReadOnlyCollection<Namespace> ToUsagesFrom(
+    public static IReadOnlyList<Namespace> ToUsagesFrom(
         this IEnumerable<Namespace> references,
         Namespace target
     ) => references
@@ -16,7 +16,7 @@ public static class NamespaceExtensions
         .OrderBy(x => x.FirstOrDefault() != "System").ThenBy(x => x.ToString())
         .ToArray();
 
-    public static IReadOnlyCollection<string> ToUsageStrings(
+    public static IReadOnlyList<string> ToUsageStrings(
         this IEnumerable<Namespace> references
     ) => references
         .Select(x => x.ToString())
