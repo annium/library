@@ -38,6 +38,8 @@ internal static class RefProcessor
             case BaseType.UInt:
             case BaseType.Long:
             case BaseType.ULong:
+            case BaseType.Float:
+            case BaseType.Double:
             case BaseType.Decimal:
                 return reference.Name;
             case BaseType.Guid:
