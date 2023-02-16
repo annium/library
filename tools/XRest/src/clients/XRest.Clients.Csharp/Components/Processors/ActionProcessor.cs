@@ -6,7 +6,7 @@ namespace XRest.Clients.Csharp.Components.Processors;
 
 internal static class ActionProcessor
 {
-    public static ActionView Process(ActionModel action, ClientContext ctx)
+    public static ActionView Process(ActionModel action, ProcessingContext ctx)
     {
         var name = action.Name;
         var path = action.Path;

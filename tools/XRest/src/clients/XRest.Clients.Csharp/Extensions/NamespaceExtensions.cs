@@ -12,9 +12,14 @@ public static class NamespaceExtensions
         Namespace target
     ) => references
         .Where(x => !target.StartsWith(x))
-        .Distinct()
-        .OrderBy(x => x.FirstOrDefault() != "System").ThenBy(x => x.ToString())
+        .CleanUsages()
         .ToArray();
+
+    public static IEnumerable<Namespace> CleanUsages(
+        this IEnumerable<Namespace> references
+    ) => references
+        .Distinct()
+        .OrderBy(x => x.FirstOrDefault() != "System").ThenBy(x => x.ToString());
 
     public static IReadOnlyList<string> ToUsageStrings(
         this IEnumerable<Namespace> references

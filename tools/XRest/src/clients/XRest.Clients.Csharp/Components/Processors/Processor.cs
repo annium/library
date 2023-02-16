@@ -8,8 +8,6 @@ namespace XRest.Clients.Csharp.Components.Processors;
 
 internal static class Processor
 {
-    private static readonly Namespace HttpNamespace = Constants.NetHttpNamespace.ToNamespace();
-
     public static ApiView Process(Namespace rootNamespace, ApiModel api)
     {
         var apiCtx = new ApiContext(
@@ -23,6 +21,10 @@ internal static class Processor
 
         var client = ClientBuilder.BuildClient(apiCtx.ClientsNamespace, "Root", "Root", controllers);
 
-        return new ApiView(client);
+        var models = api.Models
+            .Select(x => ModelProcessor.Process(x, new ProcessingContext(apiCtx.ModelsNamespace)))
+            .ToArray();
+
+        return new ApiView(rootNamespace, client, models);
     }
 }

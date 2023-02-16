@@ -9,7 +9,7 @@ internal static class ResponseSpecialProcessor
     private const string KindResult = "result";
     private const string KindDataResult = "data-result";
 
-    public static (string, IRef?)? ResolveResponseKindAndInnerType(IRef response, ClientContext ctx)
+    public static (string, IRef?)? ResolveResponseKindAndInnerType(IRef response, ProcessingContext ctx)
     {
         if (response is not IGenericModelRef modelRef)
             return null;

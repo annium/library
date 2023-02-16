@@ -1,0 +1,6 @@
+public enum {{ name }}
+{
+    {{~ for entry in values ~}}
+    {{ entry.key}} = {{ entry.value }},
+    {{~ end ~}}
+}

@@ -14,17 +14,27 @@ internal class FileWriter
         _templateWriter = templateWriter;
     }
 
-    public void WriteIfMissing<T>(string output, string fileName, string template, T data)
-        where T : class
-    {
-        var path = Path.Combine(output, $"{fileName}.cs");
-        if (!File.Exists(path))
-            Write(output, fileName, template, data);
-    }
-
     public void Write<T>(string output, string fileName, string template, T data)
         where T : class
     {
-        File.WriteAllText(Path.Combine(output, $"{fileName}.cs"), _templateWriter.Write(template, data));
+        var contents = _templateWriter.Write(template, data);
+        Write(output, fileName, contents);
+    }
+
+    public void Append<T>(string output, string fileName, string template, T data)
+        where T : class
+    {
+        var contents = _templateWriter.Write(template, data);
+        Append(output, fileName, contents);
+    }
+
+    public void Write(string output, string fileName, string contents)
+    {
+        File.WriteAllText(Path.Combine(output, $"{fileName}.cs"), contents);
+    }
+
+    public void Append(string output, string fileName, string contents)
+    {
+        File.AppendAllText(Path.Combine(output, $"{fileName}.cs"), contents);
     }
 }

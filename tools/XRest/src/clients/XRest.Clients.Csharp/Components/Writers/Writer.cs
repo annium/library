@@ -1,4 +1,5 @@
 using System.IO;
+using Annium.Net.Types.Extensions;
 using XRest.Clients.Csharp.Views;
 
 namespace XRest.Clients.Csharp.Components.Writers;
@@ -20,5 +21,6 @@ internal class Writer
     public void Write(string output, ApiView api, bool generateTestClient)
     {
         _clientWriter.Write(Path.Combine(output, Constants.ClientsNamespace), api.Client, generateTestClient);
+        _modelWriter.Write(Path.Combine(output, Constants.ModelsNamespace), api.Namespace.Append(Constants.ModelsNamespace), api.Models);
     }
 }

@@ -17,7 +17,7 @@ internal static class ResponseProcessor
     private const string KindNone = "none";
     private const string KindPlain = "plain";
 
-    public static (string responseType, string responseDefault) Resolve(IRef response, ClientContext ctx)
+    public static (string responseType, string responseDefault) Resolve(IRef response, ProcessingContext ctx)
     {
         var responseRef = response is PromiseRef { Value: { } } promiseResponse ? promiseResponse.Value : null;
 
@@ -28,7 +28,7 @@ internal static class ResponseProcessor
         return (type, string.Empty);
     }
 
-    private static (string, IRef?) ResolveResponseKindAndInnerType(IRef? response, ClientContext ctx)
+    private static (string, IRef?) ResolveResponseKindAndInnerType(IRef? response, ProcessingContext ctx)
     {
         if (response is null)
             return (KindNone, null);
