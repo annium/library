@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Annium.Core.Primitives;
-using Annium.Net.Types;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -11,7 +10,7 @@ namespace XRest.Plugins.AspNetCore.Internal.Components;
 
 internal static class ControllerModelBuilder
 {
-    public static ControllerModel Build(IReadOnlyCollection<ControllerActionDescriptor> actions, IModelMapper modelMapper)
+    public static ControllerModel Build(IReadOnlyCollection<ControllerActionDescriptor> actions, MappingContext ctx)
     {
         var sample = actions.First();
         var nsParts = (sample.ControllerTypeInfo.Namespace ?? string.Empty)
@@ -26,7 +25,7 @@ internal static class ControllerModelBuilder
         var ns = Namespace.New(nsParts);
         var name = sample.RouteValues[Constants.RouteController]!;
         var actionModels = actions
-            .SelectMany(x => ActionModelBuilder.Build(x, modelMapper))
+            .SelectMany(x => ActionModelBuilder.Build(x, ctx))
             .ToArray();
 
         return new ControllerModel(ns, name, actionModels);

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Annium.Net.Types;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using XRest.Core.Models;
@@ -9,7 +8,7 @@ namespace XRest.Plugins.AspNetCore.Internal.Components;
 
 internal static class ApiModelBuilder
 {
-    public static ApiModel Build(IReadOnlyCollection<ApiDescription> apiDescriptions, IModelMapper modelMapper)
+    public static ApiModel Build(IReadOnlyCollection<ApiDescription> apiDescriptions, MappingContext ctx)
     {
         var controllerActions = apiDescriptions
             .Select(x => x.ActionDescriptor)
@@ -18,9 +17,9 @@ internal static class ApiModelBuilder
             .ToArray();
 
         var controllers = controllerActions
-            .Select(item => ControllerModelBuilder.Build(item.ToArray(), modelMapper))
+            .Select(item => ControllerModelBuilder.Build(item.ToArray(), ctx))
             .ToArray();
 
-        return new ApiModel(controllers, modelMapper.GetModels());
+        return new ApiModel(controllers, ctx.Mapper.GetModels());
     }
 }

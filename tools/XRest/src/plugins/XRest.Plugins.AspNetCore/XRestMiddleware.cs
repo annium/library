@@ -50,8 +50,8 @@ internal class XRestMiddleware
     private string BuildApiDescription()
     {
         var apiDescriptions = _descriptionProvider.ApiDescriptionGroups.Items.SelectMany(x => x.Items).ToArray();
-        var model = ApiModelBuilder.Build(apiDescriptions, _modelMapper);
-        // var view = _mapper.Map<ApiView>(model);
+        var mappingContext = new MappingContext(_modelMapper);
+        var model = ApiModelBuilder.Build(apiDescriptions, mappingContext);
         var raw = _serializer.Serialize(model);
 
         return raw;

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using Annium.Core.Primitives;
-using Annium.Net.Types;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -16,7 +15,7 @@ namespace XRest.Plugins.AspNetCore.Internal.Components;
 
 internal static class ActionModelBuilder
 {
-    public static IEnumerable<ActionModel> Build(ControllerActionDescriptor action, IModelMapper modelMapper)
+    public static IEnumerable<ActionModel> Build(ControllerActionDescriptor action, MappingContext ctx)
     {
         var methods = action.ActionConstraints!
             .OfType<HttpMethodActionConstraint>()
@@ -29,7 +28,7 @@ internal static class ActionModelBuilder
 
         var parameters = action.Parameters
             .Where(x => x.BindingInfo?.BindingSource?.Id != Constants.BindingBody)
-            .SelectMany(x => BuildParameterModels(x, routeParameters, modelMapper))
+            .SelectMany(x => BuildParameterModels(x, routeParameters, ctx))
             .ToArray();
         var body = action.Parameters.SingleOrDefault(x => x.BindingInfo?.BindingSource?.Id == Constants.BindingBody)?.ParameterType;
         var response = action.MethodInfo.ReturnType;
@@ -40,28 +39,28 @@ internal static class ActionModelBuilder
                 route,
                 action.ActionName,
                 parameters,
-                body is not null ? modelMapper.Map(body.ToContextualType()) : null,
-                modelMapper.Map(response.ToContextualType())
+                body is not null ? ctx.Map(body.ToContextualType()) : null,
+                ctx.Map(response.ToContextualType())
             );
     }
 
-    private static IEnumerable<ParameterModel> BuildParameterModels(ParameterDescriptor param, IReadOnlyCollection<string> routeParameters, IModelMapper modelMapper)
+    private static IEnumerable<ParameterModel> BuildParameterModels(ParameterDescriptor param, IReadOnlyCollection<string> routeParameters, MappingContext ctx)
     {
         if (ParseHelper.IsSkippedType(param.ParameterType))
             return Array.Empty<ParameterModel>();
 
         if (routeParameters.Contains(param.Name))
-            return new[] { new ParameterModel(ParameterLocationEnum.Path, modelMapper.Map(param.ParameterType.ToContextualType()), param.Name) };
+            return new[] { new ParameterModel(ParameterLocationEnum.Path, ctx.Map(param.ParameterType.ToContextualType()), param.Name) };
 
         if (ParseHelper.IsAllowedQueryType(param.ParameterType))
-            return new[] { new ParameterModel(ParameterLocationEnum.Query, modelMapper.Map(param.ParameterType.ToContextualType()), param.Name) };
+            return new[] { new ParameterModel(ParameterLocationEnum.Query, ctx.Map(param.ParameterType.ToContextualType()), param.Name) };
 
         return param.ParameterType
             .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
             .Where(p => p.CanRead)
             .Select(p => new ParameterModel(
                 ParameterLocationEnum.Query,
-                modelMapper.Map(p.ToContextualProperty().PropertyType),
+                ctx.Map(p.ToContextualProperty().PropertyType),
                 p.Name.CamelCase()
             ));
     }
