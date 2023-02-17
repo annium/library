@@ -11,5 +11,5 @@ internal sealed record StructView(
     string Args,
     bool HasExtends,
     string Extends,
-    IReadOnlyList<FieldView> Fields
+    IReadOnlyList<StructFieldView> Fields
 ) : ITypeModelView;

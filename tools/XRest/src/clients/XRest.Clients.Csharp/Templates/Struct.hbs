@@ -1,6 +1,6 @@
 public {{ if is_abstract }}abstract {{ end }}record {{ if args_count > 0 }}{{ name }}<{{ args }}>{{ else }}{{ name }}{{ end }}{{ if has_extends }} : {{ extends }}{{ end }}
 {
     {{~ for field in fields ~}}
-    public {{ field.type }} {{ field.name }} { get; set; }
+    public {{ field.type }} {{ field.name }} { get; set; }{{ if field.has_default }} = {{ field.default }};{{ end }}
     {{~ end ~}}
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Annium.Core.Primitives;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Refs;
 using NodaTime;
@@ -65,7 +66,7 @@ internal static class RefProcessor
         string Type<T>()
         {
             ctx.UseNamespace(typeof(T));
-            return typeof(T).Name;
+            return typeof(T).PureName();
         }
     }
 

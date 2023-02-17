@@ -10,5 +10,5 @@ internal sealed record InterfaceView(
     string Args,
     bool HasExtends,
     string Extends,
-    IReadOnlyList<FieldView> Fields
+    IReadOnlyList<InterfaceFieldView> Fields
 ) : ITypeModelView;

@@ -34,7 +34,13 @@ internal static class ModelProcessor
             .Concat(model.Interfaces)
             .Select(x => RefProcessor.Process(x, ctx))
             .Join(", ");
-        var fields = model.Fields.Select(x => new FieldView(RefProcessor.Process(x.Type, ctx), x.Name)).ToArray();
+        var fields = model.Fields.Select(x =>
+        {
+            var type = RefProcessor.Process(x.Type, ctx);
+            var defaultValue = DefaultValueProcessor.Resolve(x.Type, ctx);
+
+            return new StructFieldView(type, x.Name, !string.IsNullOrWhiteSpace(defaultValue), defaultValue);
+        }).ToArray();
         var usages = ctx.Usages.ToUsagesFrom(@namespace).ToUsageStrings();
 
         return new StructView(usages, @namespace.ToString(), isAbstract, name, argsCount, args, !string.IsNullOrWhiteSpace(extends), extends, fields);
@@ -51,7 +57,12 @@ internal static class ModelProcessor
         var extends = model.Interfaces
             .Select(x => RefProcessor.Process(x, ctx))
             .Join(", ");
-        var fields = model.Fields.Select(x => new FieldView(RefProcessor.Process(x.Type, ctx), x.Name)).ToArray();
+        var fields = model.Fields.Select(x =>
+        {
+            var type = RefProcessor.Process(x.Type, ctx);
+
+            return new InterfaceFieldView(type, x.Name);
+        }).ToArray();
         var usages = ctx.Usages.ToUsagesFrom(@namespace).ToUsageStrings();
 
         return new InterfaceView(usages, @namespace.ToString(), name, argsCount, args, !string.IsNullOrWhiteSpace(extends), extends, fields);
