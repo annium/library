@@ -4,7 +4,7 @@ using System.Linq;
 using Annium.Blazor.Routing.Internal.Implementations.Locations;
 using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Core.Mapper;
-using Annium.Core.Primitives.Collections.Generic;
+using Annium.Core.Primitives.Linq;
 using Annium.Data.Models.Extensions;
 using Microsoft.AspNetCore.Components;
 
