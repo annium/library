@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
-using Annium.Core.Reflection;
+using Annium.Net.Types;
 using Microsoft.AspNetCore.Mvc;
-using NodaTime;
 
 namespace XRest.Core.Helpers;
 
@@ -12,15 +10,18 @@ public static class ParseHelper
 {
     public static bool IsAllowedQueryType(Type type)
     {
-        return type.IsPrimitive ||
-            type.IsEnum ||
-            type == typeof(string) ||
-            type == typeof(DateTime) ||
-            type == typeof(DateTimeOffset) ||
-            type == typeof(Instant) ||
-            type == typeof(LocalDateTime) ||
-            type == typeof(Guid) ||
-            type.GetTargetImplementation(typeof(IEnumerable<>)) is not null;
+        if (IsAllowed(type))
+            return true;
+
+        if (type.IsArray)
+            return IsAllowed(type.GetElementType()!);
+
+        return false;
+
+        static bool IsAllowed(Type type)
+        {
+            return MapperConfig.IsBaseType(type) || type.IsEnum;
+        }
     }
 
     public static bool IsSkippedType(Type type)
