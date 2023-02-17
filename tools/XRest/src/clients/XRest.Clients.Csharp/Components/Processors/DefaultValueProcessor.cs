@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Annium.Net.Types.Refs;
 
 namespace XRest.Clients.Csharp.Components.Processors;
@@ -16,7 +15,7 @@ internal static class DefaultValueProcessor
         GenericParameterRef => Default,
         EnumRef             => string.Empty,
         ArrayRef x          => Resolve(x, ctx),
-        RecordRef x         => Resolve(x, ctx),
+        RecordRef x         => New,
         StructRef           => Default,
         InterfaceRef        => Default,
         _                   => throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported ref {reference}")
@@ -57,11 +56,5 @@ internal static class DefaultValueProcessor
     {
         ctx.UseNamespace(typeof(Array));
         return $"Array.Empty<{RefProcessor.Process(reference.Value, ctx)}>()";
-    }
-
-    private static string Resolve(RecordRef reference, ProcessingContext ctx)
-    {
-        ctx.UseNamespace(typeof(Dictionary<,>));
-        return $"new Dictionary<{RefProcessor.Process(reference.Key, ctx)}, {RefProcessor.Process(reference.Value, ctx)}>()";
     }
 }
