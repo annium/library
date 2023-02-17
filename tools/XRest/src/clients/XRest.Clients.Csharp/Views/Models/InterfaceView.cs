@@ -1,15 +1,15 @@
 using System.Collections.Generic;
+using XRest.Clients.Csharp.Views.Models.Fields;
 
-namespace XRest.Clients.Csharp.Views;
+namespace XRest.Clients.Csharp.Views.Models;
 
-internal sealed record StructView(
+internal sealed record InterfaceView(
     IReadOnlyList<string> Usages,
     string Namespace,
-    bool IsAbstract,
     string Name,
     int ArgsCount,
     string Args,
     bool HasExtends,
     string Extends,
-    IReadOnlyList<StructFieldView> Fields
+    IReadOnlyList<InterfaceFieldView> Fields
 ) : ITypeModelView;

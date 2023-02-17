@@ -6,6 +6,8 @@ using Annium.Net.Types.Models;
 using Annium.Net.Types.Refs;
 using XRest.Clients.Csharp.Extensions;
 using XRest.Clients.Csharp.Views;
+using XRest.Clients.Csharp.Views.Models;
+using XRest.Clients.Csharp.Views.Models.Fields;
 
 namespace XRest.Clients.Csharp.Components.Processors;
 

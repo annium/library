@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace XRest.Clients.Csharp.Views;
+namespace XRest.Clients.Csharp.Views.Models;
 
 internal sealed record EnumView(
     IReadOnlyList<string> Usages,

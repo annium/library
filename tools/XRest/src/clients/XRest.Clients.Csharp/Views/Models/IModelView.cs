@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace XRest.Clients.Csharp.Views;
+namespace XRest.Clients.Csharp.Views.Models;
 
 internal interface IModelView
 {

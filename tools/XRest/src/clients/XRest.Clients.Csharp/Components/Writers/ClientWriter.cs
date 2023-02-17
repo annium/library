@@ -2,6 +2,7 @@ using System.IO;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
 using XRest.Clients.Csharp.Views;
+using XRest.Clients.Csharp.Views.Client;
 using static XRest.Clients.Csharp.Components.Writers.WriterHelper;
 
 namespace XRest.Clients.Csharp.Components.Writers;

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace XRest.Clients.Csharp.Views;
+namespace XRest.Clients.Csharp.Views.Client;
 
 internal sealed record ClientContainerView(
     IReadOnlyCollection<string> Usages,

@@ -1,4 +1,4 @@
-namespace XRest.Clients.Csharp.Views;
+namespace XRest.Clients.Csharp.Views.Models;
 
 internal interface ITypeModelView : IModelView
 {

@@ -2,6 +2,7 @@ using System.Linq;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
 using XRest.Clients.Csharp.Views;
+using XRest.Clients.Csharp.Views.Api;
 using XRest.Core.Models;
 
 namespace XRest.Clients.Csharp.Components.Processors;

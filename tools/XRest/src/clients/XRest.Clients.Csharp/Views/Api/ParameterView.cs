@@ -1,4 +1,4 @@
-namespace XRest.Clients.Csharp.Views;
+namespace XRest.Clients.Csharp.Views.Api;
 
 internal sealed record ParameterView(
     string Type,
