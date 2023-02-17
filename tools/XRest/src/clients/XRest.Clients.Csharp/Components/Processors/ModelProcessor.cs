@@ -22,6 +22,7 @@ internal static class ModelProcessor
     private static StructView Process(StructModel model, ProcessingContext ctx)
     {
         var @namespace = model.Namespace.Prepend(ctx.ModelsNamespace);
+        var isAbstract = model.IsAbstract;
         var name = model.Name;
         var argsCount = model.Args.Count;
         var args = model.Args
@@ -36,7 +37,7 @@ internal static class ModelProcessor
         var fields = model.Fields.Select(x => new FieldView(RefProcessor.Process(x.Type, ctx), x.Name)).ToArray();
         var usages = ctx.Usages.ToUsagesFrom(@namespace).ToUsageStrings();
 
-        return new StructView(usages, @namespace.ToString(), name, argsCount, args, !string.IsNullOrWhiteSpace(extends), extends, fields);
+        return new StructView(usages, @namespace.ToString(), isAbstract, name, argsCount, args, !string.IsNullOrWhiteSpace(extends), extends, fields);
     }
 
     private static InterfaceView Process(InterfaceModel model, ProcessingContext ctx)
