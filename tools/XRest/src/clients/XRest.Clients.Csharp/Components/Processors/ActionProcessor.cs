@@ -1,4 +1,5 @@
 using System.Linq;
+using Annium.Net.Types.Refs;
 using XRest.Clients.Csharp.Views;
 using XRest.Core.Models;
 
@@ -22,8 +23,15 @@ internal static class ActionProcessor
             .ToArray();
 
         var body = action.Body is not null ? RefProcessor.Process(action.Body, ctx) : string.Empty;
-        var (response, responseDefault) = ResponseProcessor.Resolve(action.Response, ctx);
+        var response = ResolveResponseType(action.Response, ctx);
 
-        return new ActionView(name, action.Method, path, pathParameters, queryParameters, body, response, responseDefault);
+        return new ActionView(name, action.Method, path, pathParameters, queryParameters, body, response);
+    }
+
+    private static string ResolveResponseType(IRef? response, ProcessingContext ctx)
+    {
+        response = response is PromiseRef { Value: { } } promiseResponse ? promiseResponse.Value : null;
+
+        return response is null ? string.Empty : RefProcessor.Process(response, ctx);
     }
 }

@@ -17,7 +17,6 @@ internal sealed record ActionView
     public string Body { get; }
     public bool HasResponse { get; }
     public string Response { get; }
-    public string ResponseDefault { get; }
 
     public ActionView(
         string name,
@@ -26,8 +25,7 @@ internal sealed record ActionView
         IReadOnlyCollection<ParameterView> pathParameters,
         IReadOnlyCollection<ParameterView> queryParameters,
         string body,
-        string response,
-        string responseDefault
+        string response
     )
     {
         Name = name;
@@ -39,7 +37,6 @@ internal sealed record ActionView
         Body = body;
         HasResponse = !string.IsNullOrWhiteSpace(response);
         Response = response;
-        ResponseDefault = responseDefault;
         var parameters = pathParameters.Concat(queryParameters).ToList();
         if (HasBody)
             parameters.Add(new ParameterView(Body, "body"));

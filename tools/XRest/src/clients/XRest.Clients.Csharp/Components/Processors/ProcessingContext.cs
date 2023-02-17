@@ -6,13 +6,15 @@ using Annium.Net.Types.Models;
 namespace XRest.Clients.Csharp.Components.Processors;
 
 internal sealed record ProcessingContext(
-    Namespace ModelsNamespace,
-    IReadOnlyCollection<IModel> Models
+    Namespace ModelsNamespace
 )
 {
     public IReadOnlyCollection<Namespace> Usages => _usages;
     private readonly HashSet<Namespace> _usages = new();
 
-    public void UseNamespace(Namespace @namespace) => _usages.Add(@namespace);
-    public void UseNamespace(Type type) => _usages.Add(type.Namespace!.ToNamespace());
+    public void UseNamespace(Namespace @namespace) =>
+        _usages.Add(@namespace);
+
+    public void UseNamespace(Type type) =>
+        _usages.Add(type.Namespace!.ToNamespace());
 }

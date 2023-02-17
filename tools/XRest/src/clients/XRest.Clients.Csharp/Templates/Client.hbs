@@ -25,7 +25,7 @@ public class {{ type }} : ClientBase
             {{~ if action.has_body ~}}
             .JsonContent(body)
             {{~ end ~}}
-            .{{ if action.has_response }}AsAsync{{ else }}AsAsync{{ end }}({{ action.response_default }});
+            .{{ if action.has_response }}AsAsync<{{ action.response }}>{{ else }}AsAsync{{ end }}();
     }
     {{~ end ~}}
 }
