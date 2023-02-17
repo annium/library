@@ -25,48 +25,60 @@ internal static class ModelProcessor
         var @namespace = model.Namespace.Prepend(ctx.ModelsNamespace);
         var isAbstract = model.IsAbstract;
         var name = model.Name;
+
         var argsCount = model.Args.Count;
         var args = model.Args
             .Select(x => RefProcessor.Process(x, ctx))
             .Join(", ");
-        var extends = model
+
+        var extendsList = model
             .Base.Yield()
-            .OfType<IRef>()
+            .OfType<IGenericModelRef>()
             .Concat(model.Interfaces)
             .Select(x => RefProcessor.Process(x, ctx))
             .Join(", ");
-        var fields = model.Fields.Select(x =>
-        {
-            var type = RefProcessor.Process(x.Type, ctx);
-            var defaultValue = DefaultValueProcessor.Resolve(x.Type, ctx);
 
-            return new StructFieldView(type, x.Name, !string.IsNullOrWhiteSpace(defaultValue), defaultValue);
-        }).ToArray();
+        var fields = model.Fields
+            .Select(x =>
+            {
+                var type = RefProcessor.Process(x.Type, ctx);
+                var defaultValue = DefaultValueProcessor.Resolve(x.Type, ctx);
+
+                return new StructFieldView(type, x.Name, !string.IsNullOrWhiteSpace(defaultValue), defaultValue);
+            })
+            .ToArray();
+
         var usages = ctx.Usages.ToUsagesFrom(@namespace).ToUsageStrings();
 
-        return new StructView(usages, @namespace.ToString(), isAbstract, name, argsCount, args, !string.IsNullOrWhiteSpace(extends), extends, fields);
+        return new StructView(usages, @namespace.ToString(), isAbstract, name, argsCount, args, !string.IsNullOrWhiteSpace(extendsList), extendsList, fields);
     }
 
     private static InterfaceView Process(InterfaceModel model, ProcessingContext ctx)
     {
         var @namespace = model.Namespace.Prepend(ctx.ModelsNamespace);
         var name = model.Name;
+
         var argsCount = model.Args.Count;
         var args = model.Args
             .Select(x => RefProcessor.Process(x, ctx))
             .Join(", ");
-        var extends = model.Interfaces
+
+        var extendList = model.Interfaces
             .Select(x => RefProcessor.Process(x, ctx))
             .Join(", ");
-        var fields = model.Fields.Select(x =>
-        {
-            var type = RefProcessor.Process(x.Type, ctx);
 
-            return new InterfaceFieldView(type, x.Name);
-        }).ToArray();
+        var fields = model.Fields
+            .Select(x =>
+            {
+                var type = RefProcessor.Process(x.Type, ctx);
+
+                return new InterfaceFieldView(type, x.Name);
+            })
+            .ToArray();
+
         var usages = ctx.Usages.ToUsagesFrom(@namespace).ToUsageStrings();
 
-        return new InterfaceView(usages, @namespace.ToString(), name, argsCount, args, !string.IsNullOrWhiteSpace(extends), extends, fields);
+        return new InterfaceView(usages, @namespace.ToString(), name, argsCount, args, !string.IsNullOrWhiteSpace(extendList), extendList, fields);
     }
 
     private static EnumView Process(EnumModel model, ProcessingContext ctx)
