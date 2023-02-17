@@ -25,7 +25,7 @@ internal static class ResponseSpecialProcessor
         {
             ctx.UseNamespace(typeof(IResult<>));
 
-            return (KindResult, modelRef.Args[0]);
+            return (KindDataResult, modelRef.Args[0]);
         }
 
         return null;

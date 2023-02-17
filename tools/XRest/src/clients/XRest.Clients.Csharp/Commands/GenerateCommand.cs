@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using Annium.Net.Types.Extensions;
-using XRest.Clients.Csharp.Components;
 using XRest.Clients.Csharp.Components.Processors;
 using XRest.Clients.Csharp.Components.Writers;
 using XRest.Source;
