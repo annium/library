@@ -6,7 +6,8 @@ using Annium.Net.Types.Models;
 namespace XRest.Clients.Csharp.Components.Processors;
 
 internal sealed record ProcessingContext(
-    Namespace ModelsNamespace
+    Namespace ModelsNamespace,
+    IReadOnlyCollection<IModel> Models
 )
 {
     public IReadOnlyCollection<Namespace> Usages => _usages;
