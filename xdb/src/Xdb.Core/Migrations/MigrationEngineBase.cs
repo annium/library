@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Annium.Core.Primitives.Collections.Generic;
+using Annium.Core.Primitives.Linq;
 using DbUp.Builder;
 
 namespace Xdb.Core.Migrations;

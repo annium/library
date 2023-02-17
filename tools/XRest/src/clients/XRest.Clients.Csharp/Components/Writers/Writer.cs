@@ -1,6 +1,5 @@
 using System.IO;
 using Annium.Net.Types.Extensions;
-using XRest.Clients.Csharp.Views;
 using XRest.Clients.Csharp.Views.Api;
 
 namespace XRest.Clients.Csharp.Components.Writers;

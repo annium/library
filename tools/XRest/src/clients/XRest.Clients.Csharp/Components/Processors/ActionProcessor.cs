@@ -1,6 +1,5 @@
 using System.Linq;
 using Annium.Net.Types.Refs;
-using XRest.Clients.Csharp.Views;
 using XRest.Clients.Csharp.Views.Api;
 using XRest.Core.Models;
 
