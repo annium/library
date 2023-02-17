@@ -6,5 +6,5 @@ namespace XRest.Clients.Csharp.Components.Processors;
 internal sealed record ApiContext(
     Namespace ClientsNamespace,
     Namespace ModelsNamespace,
-    IReadOnlyCollection<ModelBase> Models
+    IReadOnlyCollection<IModel> Models
 );

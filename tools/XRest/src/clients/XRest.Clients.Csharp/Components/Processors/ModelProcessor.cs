@@ -11,7 +11,7 @@ namespace XRest.Clients.Csharp.Components.Processors;
 
 internal static class ModelProcessor
 {
-    public static IModelView Process(ModelBase model, ProcessingContext ctx) => model switch
+    public static IModelView Process(IModel model, ProcessingContext ctx) => model switch
     {
         StructModel x    => Process(x, ctx),
         InterfaceModel x => Process(x, ctx),
