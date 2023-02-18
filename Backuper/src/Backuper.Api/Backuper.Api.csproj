@@ -23,7 +23,6 @@
         <PackageReference Include="Annium.Core.Mediator" Version="0.1.0" />
         <PackageReference Include="Annium.Diagnostics.Debug" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Jobs" Version="0.1.0" />
-        <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Microsoft" Version="0.1.0" />
         <PackageReference Include="Annium.NodaTime.Serialization.Json" Version="0.1.0" />
         <PackageReference Include="NodaTime" Version="3.1.6" />
