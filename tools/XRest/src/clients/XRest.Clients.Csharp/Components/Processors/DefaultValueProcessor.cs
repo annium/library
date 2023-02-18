@@ -15,7 +15,7 @@ internal static class DefaultValueProcessor
         GenericParameterRef => Default,
         EnumRef             => string.Empty,
         ArrayRef x          => Resolve(x, ctx),
-        RecordRef x         => New,
+        RecordRef           => New,
         StructRef           => Default,
         InterfaceRef        => Default,
         _                   => throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported ref {reference}")
