@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Threading;
+using Annium.Core.Primitives;
 using Annium.Net.Types;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,8 +14,8 @@ public static class ParseHelper
         if (IsAllowed(type))
             return true;
 
-        if (type.IsArray)
-            return IsAllowed(type.GetElementType()!);
+        if (type.TryGetArrayElementType(out var elementType))
+            return IsAllowed(elementType);
 
         return false;
 
