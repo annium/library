@@ -1,4 +1,4 @@
-namespace XRest.Plugins.AspNetCore.Internal;
+namespace XRest.Sources.AspNetCore.Internal;
 
 internal class Constants
 {

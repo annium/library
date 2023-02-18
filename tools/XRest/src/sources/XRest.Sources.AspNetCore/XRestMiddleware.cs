@@ -7,10 +7,10 @@ using Annium.Net.Types;
 using Annium.Serialization.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using XRest.Plugins.AspNetCore.Internal.Components;
+using XRest.Sources.AspNetCore.Internal.Components;
 using Constants = XRest.Core.Constants;
 
-namespace XRest.Plugins.AspNetCore;
+namespace XRest.Sources.AspNetCore;
 
 internal class XRestMiddleware
 {

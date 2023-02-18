@@ -11,7 +11,7 @@ using Namotion.Reflection;
 using XRest.Core.Helpers;
 using XRest.Core.Models;
 
-namespace XRest.Plugins.AspNetCore.Internal.Components;
+namespace XRest.Sources.AspNetCore.Internal.Components;
 
 internal static class ActionModelBuilder
 {

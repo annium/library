@@ -6,7 +6,7 @@ using Annium.Net.Types.Models;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using XRest.Core.Models;
 
-namespace XRest.Plugins.AspNetCore.Internal.Components;
+namespace XRest.Sources.AspNetCore.Internal.Components;
 
 internal static class ControllerModelBuilder
 {

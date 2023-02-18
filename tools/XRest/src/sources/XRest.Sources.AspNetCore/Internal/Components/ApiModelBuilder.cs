@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using XRest.Core.Models;
 
-namespace XRest.Plugins.AspNetCore.Internal.Components;
+namespace XRest.Sources.AspNetCore.Internal.Components;
 
 internal static class ApiModelBuilder
 {

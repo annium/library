@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Builder;
-using XRest.Plugins.AspNetCore;
+using XRest.Sources.AspNetCore;
 
 // ReSharper disable once CheckNamespace
 

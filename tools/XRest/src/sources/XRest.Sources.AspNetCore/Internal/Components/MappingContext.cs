@@ -2,7 +2,7 @@ using Annium.Net.Types;
 using Annium.Net.Types.Refs;
 using Namotion.Reflection;
 
-namespace XRest.Plugins.AspNetCore.Internal.Components;
+namespace XRest.Sources.AspNetCore.Internal.Components;
 
 internal sealed record MappingContext(
     IModelMapper Mapper
