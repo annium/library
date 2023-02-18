@@ -7,8 +7,8 @@ using Annium.Logging.Abstractions;
 using Annium.Net.Types.Extensions;
 using XRest.Clients.Csharp.Components.Processors;
 using XRest.Clients.Csharp.Components.Writers;
-using XRest.Source;
-using XRest.Source.Components;
+using XRest.Clients.Shared;
+using XRest.Clients.Shared.Components;
 
 namespace XRest.Clients.Csharp.Commands;
 

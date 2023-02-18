@@ -1,6 +1,6 @@
 using System;
 
-namespace XRest.Source;
+namespace XRest.Clients.Shared;
 
 public interface ISourceLoaderConfiguration
 {

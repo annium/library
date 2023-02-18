@@ -11,7 +11,7 @@ internal class ServicePack : ServicePackBase
         Add<Core.ServicePack>();
         Add<Clients.Csharp.ServicePack>();
         Add<Clients.TypeScript.ServicePack>();
-        Add<Source.ServicePack>();
+        Add<Clients.Shared.ServicePack>();
     }
 
     public override void Register(IServiceContainer container, IServiceProvider provider)

@@ -12,7 +12,7 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../../XRest.Source/XRest.Source.csproj" />
+        <ProjectReference Include="../XRest.Clients.Shared/XRest.Clients.Shared.csproj" />
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Templates/**" />

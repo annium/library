@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Net.Http;
+using XRest.Clients.Shared.Components;
 using XRest.Core;
 using XRest.Core.Models;
-using XRest.Source.Components;
 
-namespace XRest.Source.Internal.Components;
+namespace XRest.Clients.Shared.Internal.Components;
 
 internal class Loader : ILoader
 {

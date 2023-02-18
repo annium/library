@@ -1,9 +1,9 @@
 using System;
 using Annium.Core.DependencyInjection;
-using XRest.Source.Components;
-using XRest.Source.Internal.Components;
+using XRest.Clients.Shared.Components;
+using XRest.Clients.Shared.Internal.Components;
 
-namespace XRest.Source;
+namespace XRest.Clients.Shared;
 
 public class ServicePack : ServicePackBase
 {

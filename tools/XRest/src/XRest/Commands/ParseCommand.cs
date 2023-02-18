@@ -6,8 +6,8 @@ using Annium.Core.DependencyInjection;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using Annium.Serialization.Abstractions;
-using XRest.Source;
-using XRest.Source.Components;
+using XRest.Clients.Shared;
+using XRest.Clients.Shared.Components;
 using Constants = XRest.Core.Constants;
 
 namespace XRest.Commands;

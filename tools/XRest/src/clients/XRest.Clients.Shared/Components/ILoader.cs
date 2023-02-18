@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using XRest.Core.Models;
 
-namespace XRest.Source.Components;
+namespace XRest.Clients.Shared.Components;
 
 public interface ILoader
 {
