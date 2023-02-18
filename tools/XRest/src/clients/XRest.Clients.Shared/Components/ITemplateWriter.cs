@@ -1,4 +1,4 @@
-namespace XRest.Core.Components;
+namespace XRest.Clients.Shared.Components;
 
 public interface ITemplateWriter
 {

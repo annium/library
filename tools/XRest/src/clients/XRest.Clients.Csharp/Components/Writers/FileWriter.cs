@@ -1,5 +1,5 @@
 using System.IO;
-using XRest.Core.Components;
+using XRest.Clients.Shared.Components;
 
 namespace XRest.Clients.Csharp.Components.Writers;
 

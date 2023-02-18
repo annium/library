@@ -16,24 +16,24 @@ internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>
 {
     public override string Id => "parse";
     public override string Description => "parse API";
-    private readonly ILoader _loader;
+    private readonly IApiModelLoader _apiModelLoader;
     private readonly ISerializer<string> _serializer;
     public ILogger<ParseCommand> Logger { get; }
 
     public ParseCommand(
-        ILoader loader,
+        IApiModelLoader apiModelLoader,
         ILogger<ParseCommand> logger,
         IIndex<SerializerKey, ISerializer<string>> serializers
     )
     {
-        _loader = loader;
+        _apiModelLoader = apiModelLoader;
         Logger = logger;
         _serializer = serializers[SerializerKey.Create(Constants.IndexKey, MediaTypeNames.Application.Json)];
     }
 
     public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken ct)
     {
-        var model = await _loader.Load(cfg);
+        var model = await _apiModelLoader.Load(cfg);
         Console.WriteLine(_serializer.Serialize(model));
     }
 }

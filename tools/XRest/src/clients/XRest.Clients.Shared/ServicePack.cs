@@ -9,6 +9,8 @@ public class ServicePack : ServicePackBase
 {
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
-        container.Add<ILoader, Loader>().Singleton();
+        container.Add<IApiModelLoader, ApiModelLoader>().Singleton();
+        container.Add<ITemplateWriter, TemplateWriter>().Singleton();
+        container.AddResourceLoader();
     }
 }

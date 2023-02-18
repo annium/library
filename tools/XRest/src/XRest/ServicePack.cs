@@ -8,7 +8,6 @@ internal class ServicePack : ServicePackBase
 {
     public ServicePack()
     {
-        Add<Core.ServicePack>();
         Add<Clients.Csharp.ServicePack>();
         Add<Clients.TypeScript.ServicePack>();
         Add<Clients.Shared.ServicePack>();

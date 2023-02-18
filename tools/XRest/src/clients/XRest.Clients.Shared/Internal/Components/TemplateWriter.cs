@@ -6,10 +6,9 @@ using Annium.Core.Runtime.Resources;
 using Scriban;
 using Scriban.Parsing;
 using Scriban.Runtime;
-using XRest.Core.Components;
-using XRest.Core.Internal.Helpers;
+using XRest.Clients.Shared.Components;
 
-namespace XRest.Core.Internal.Components;
+namespace XRest.Clients.Shared.Internal.Components;
 
 internal class TemplateWriter : ITemplateWriter
 {

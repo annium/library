@@ -17,16 +17,16 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILo
     public override string Id => "gen";
     public override string Description => "generate client";
     public ILogger<GenerateCommand> Logger { get; }
-    private readonly ILoader _loader;
+    private readonly IApiModelLoader _apiModelLoader;
     private readonly Writer _writer;
 
     public GenerateCommand(
-        ILoader loader,
+        IApiModelLoader apiModelLoader,
         Writer writer,
         ILogger<GenerateCommand> logger
     )
     {
-        _loader = loader;
+        _apiModelLoader = apiModelLoader;
         _writer = writer;
         Logger = logger;
     }
@@ -36,7 +36,7 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILo
         this.Log().Info($"Generate client for {cfg.Server}");
 
         this.Log().Info($"Load model from {cfg.Server}");
-        var model = await _loader.Load(cfg);
+        var model = await _apiModelLoader.Load(cfg);
 
         this.Log().Info("Process api model to api view");
         var ns = cfg.Namespace.ToNamespace();

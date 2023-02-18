@@ -7,11 +7,11 @@ using XRest.Core.Models;
 
 namespace XRest.Clients.Shared.Internal.Components;
 
-internal class Loader : ILoader
+internal class ApiModelLoader : IApiModelLoader
 {
     private readonly IHttpRequestFactory _httpRequestFactory;
 
-    public Loader(
+    public ApiModelLoader(
         IIndex<string, IHttpRequestFactory> httpRequestFactories
     )
     {
