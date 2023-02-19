@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Annium.Core.Primitives;
 
 namespace Annium.Blazor.Charts.Internal.Data.Comparers;
 

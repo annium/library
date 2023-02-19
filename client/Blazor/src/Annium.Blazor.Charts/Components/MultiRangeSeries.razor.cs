@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
-using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 using NodaTime;

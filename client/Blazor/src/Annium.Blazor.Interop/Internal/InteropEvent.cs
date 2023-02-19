@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using Annium.Blazor.Interop.Internal.Extensions;
-using Annium.Core.Primitives;
-using Annium.Core.Primitives.Linq;
+using Annium.Linq;
 using Microsoft.JSInterop;
 
 namespace Annium.Blazor.Interop.Internal;

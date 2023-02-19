@@ -6,7 +6,6 @@ using Annium.Blazor.Charts.Domain.Lookup;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
-using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 using NodaTime;

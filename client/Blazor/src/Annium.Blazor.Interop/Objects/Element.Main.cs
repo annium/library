@@ -3,7 +3,6 @@ using System.Runtime.InteropServices.JavaScript;
 using Annium.Blazor.Interop.Domain;
 using Annium.Blazor.Interop.Internal;
 using Annium.Blazor.Interop.Internal.Extensions;
-using Annium.Core.Primitives;
 using static Annium.Blazor.Interop.Internal.Constants;
 
 namespace Annium.Blazor.Interop;

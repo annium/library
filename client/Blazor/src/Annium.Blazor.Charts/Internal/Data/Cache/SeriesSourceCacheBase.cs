@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Annium.Blazor.Charts.Domain.Lookup;
 using Annium.Blazor.Charts.Internal.Data.Cache.Chunks;
-using Annium.Core.Primitives;
 using Annium.Data.Models;
 using NodaTime;
 

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Extensions;
-using Annium.Core.Primitives;
 
 namespace Annium.Blazor.Charts.Internal.Extensions;
 

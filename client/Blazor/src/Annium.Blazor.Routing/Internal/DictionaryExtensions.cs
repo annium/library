@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Annium.Core.Primitives;
 
 namespace Annium.Blazor.Routing.Internal;
 

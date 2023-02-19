@@ -6,7 +6,6 @@ using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Interop;
-using Annium.Core.Primitives;
 using Annium.Data.Models;
 using Annium.Logging.Abstractions;
 using NodaTime;

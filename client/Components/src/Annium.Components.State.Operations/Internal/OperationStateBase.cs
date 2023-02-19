@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Annium.Components.State.Core;
-using Annium.Core.Primitives.Linq;
 using Annium.Data.Operations;
+using Annium.Linq;
 
 namespace Annium.Components.State.Operations.Internal;
 

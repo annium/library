@@ -12,7 +12,7 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Annium.Core.Primitives" Version="0.1.0" />
+        <PackageReference Include="Annium" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Reflection" Version="0.1.0" />
         <PackageReference Include="System.Reactive" Version="5.0.0" />
     </ItemGroup>

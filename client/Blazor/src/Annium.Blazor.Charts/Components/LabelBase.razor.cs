@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Domain.Lookup;
 using Annium.Blazor.Interop;
-using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Components;
 using NodaTime;
 using OneOf;
@@ -50,7 +49,7 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
     [CascadingParameter]
     public ISeriesContext SeriesContext { get; set; } = default!;
 
-    protected AsyncDisposableBox Disposable = Annium.Core.Primitives.Disposable.AsyncBox();
+    protected AsyncDisposableBox Disposable = Annium.Disposable.AsyncBox();
 
     protected override void OnParametersSet()
     {

@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Annium.Configuration.Abstractions;
 using Annium.Core.DependencyInjection;
-using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 

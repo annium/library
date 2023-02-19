@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
-using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Components;
 using static Annium.Blazor.Interop.Internal.Constants;
 

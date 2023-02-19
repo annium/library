@@ -10,7 +10,6 @@ using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
 using Annium.Blazor.Interop.Domain;
-using Annium.Core.Primitives;
 using Annium.Extensions.Jobs;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;

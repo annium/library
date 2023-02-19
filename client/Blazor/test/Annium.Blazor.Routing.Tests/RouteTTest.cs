@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.Mapper.Attributes;
-using Annium.Core.Primitives;
 using Annium.Testing;
 using Xunit;
 

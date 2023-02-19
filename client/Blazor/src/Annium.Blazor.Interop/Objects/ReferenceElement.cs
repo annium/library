@@ -1,6 +1,5 @@
 using System;
 using Annium.Blazor.Interop.Internal.Extensions;
-using Annium.Core.Primitives;
 using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Interop;

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
-using Annium.Core.Primitives;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;
 using static Annium.Blazor.Charts.Internal.Constants;

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Core.Mapper;
-using Annium.Core.Primitives;
 using Microsoft.Extensions.Primitives;
 
 namespace Annium.Blazor.Routing.Internal.Implementations.Locations;

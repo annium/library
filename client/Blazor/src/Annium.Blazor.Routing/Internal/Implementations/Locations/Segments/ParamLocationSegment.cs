@@ -1,6 +1,5 @@
 using System;
 using Annium.Core.Mapper;
-using Annium.Core.Primitives;
 
 namespace Annium.Blazor.Routing.Internal.Implementations.Locations.Segments;
 

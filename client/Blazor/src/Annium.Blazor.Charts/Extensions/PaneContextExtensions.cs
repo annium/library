@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using Annium.Blazor.Charts.Domain.Contexts;
-using Annium.Core.Primitives;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Extensions;
