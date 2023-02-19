@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Annium.Core.Primitives;
+using Annium;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
 using XRest.Clients.Csharp.Extensions;

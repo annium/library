@@ -17,6 +17,7 @@ internal class XRestMiddleware
     private readonly RequestDelegate _next;
     private readonly IApiDescriptionGroupCollectionProvider _descriptionProvider;
     private readonly IModelMapper _modelMapper;
+    private readonly IMapperConfig _mapperConfig;
     private readonly ISerializer<string> _serializer;
     private readonly Lazy<string> _description;
 
@@ -24,12 +25,14 @@ internal class XRestMiddleware
         RequestDelegate next,
         IApiDescriptionGroupCollectionProvider descriptionProvider,
         IModelMapper modelMapper,
+        IMapperConfig mapperConfig,
         IIndex<SerializerKey, ISerializer<string>> serializers
     )
     {
         _next = next;
         _descriptionProvider = descriptionProvider;
         _modelMapper = modelMapper;
+        _mapperConfig = mapperConfig;
         _serializer = serializers[SerializerKey.Create(Constants.IndexKey, MediaTypeNames.Application.Json)];
         _description = new Lazy<string>(BuildApiDescription, isThreadSafe: true);
     }
@@ -50,7 +53,7 @@ internal class XRestMiddleware
     private string BuildApiDescription()
     {
         var apiDescriptions = _descriptionProvider.ApiDescriptionGroups.Items.SelectMany(x => x.Items).ToArray();
-        var mappingContext = new MappingContext(_modelMapper);
+        var mappingContext = new MappingContext(_modelMapper, _mapperConfig);
         var model = ApiModelBuilder.Build(apiDescriptions, mappingContext);
         var raw = _serializer.Serialize(model);
 

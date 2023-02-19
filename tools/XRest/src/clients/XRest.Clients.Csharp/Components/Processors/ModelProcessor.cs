@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Annium.Core.Primitives.Linq;
+using Annium.Linq;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
 using Annium.Net.Types.Refs;

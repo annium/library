@@ -1,6 +1,6 @@
 using System.IO;
 using System.Threading;
-using Annium.Core.Primitives;
+using Annium;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
 using Xmg.Configuration.Abstractions;

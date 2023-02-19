@@ -1,14 +1,14 @@
 using System;
 using System.Reflection;
 using System.Threading;
-using Annium.Core.Primitives;
+using Annium;
 using Annium.Net.Types;
 
 namespace XRest.Sources.Shared.Helpers;
 
 public static class ParseHelper
 {
-    public static bool IsAllowedQueryType(Type type)
+    public static bool IsAllowedQueryType(Type type, IMapperConfig config)
     {
         if (IsAllowed(type))
             return true;
@@ -18,9 +18,9 @@ public static class ParseHelper
 
         return false;
 
-        static bool IsAllowed(Type type)
+        bool IsAllowed(Type x)
         {
-            return MapperConfig.IsBaseType(type) || type.IsEnum;
+            return config.IsBaseType(x) || x.IsEnum;
         }
     }
 

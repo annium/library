@@ -5,7 +5,8 @@ using Namotion.Reflection;
 namespace XRest.Sources.AspNetCore.Internal.Components;
 
 internal sealed record MappingContext(
-    IModelMapper Mapper
+    IModelMapper Mapper,
+    IMapperConfig Config
 )
 {
     public IRef Map(ContextualType type)

@@ -1,9 +1,9 @@
 using System;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Entrypoint;
-using Annium.Core.Primitives.Threading;
 using Annium.Infrastructure.MessageBus.Node;
 using Annium.Logging.Abstractions;
+using Annium.Threading;
 using MessageBus.Sink;
 
 await using var entry = Entrypoint.Default

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using Annium.Core.Primitives;
+using Annium;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -52,7 +52,7 @@ internal static class ActionModelBuilder
         if (routeParameters.Contains(param.Name))
             return new[] { new ParameterModel(ParameterLocationEnum.Path, ctx.Map(param.ParameterType.ToContextualType()), param.Name) };
 
-        if (Shared.Helpers.ParseHelper.IsAllowedQueryType(param.ParameterType))
+        if (Shared.Helpers.ParseHelper.IsAllowedQueryType(param.ParameterType, ctx.Config))
             return new[] { new ParameterModel(ParameterLocationEnum.Query, ctx.Map(param.ParameterType.ToContextualType()), param.Name) };
 
         return param.ParameterType

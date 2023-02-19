@@ -15,8 +15,8 @@
         <ProjectReference Include="../../XRest.Core/XRest.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Annium.Net.Http" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
+        <PackageReference Include="Annium.Net.Http" Version="0.1.0" />
         <PackageReference Include="Scriban" Version="5.5.2" />
     </ItemGroup>
 </Project>

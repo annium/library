@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Annium.Core.Primitives;
+using Annium;
 
 namespace XRest.Clients.Csharp.Views.Api;
 

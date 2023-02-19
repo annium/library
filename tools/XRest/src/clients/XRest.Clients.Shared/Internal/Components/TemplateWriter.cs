@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Annium.Core.Primitives;
+using Annium;
 using Annium.Core.Runtime.Resources;
 using Scriban;
 using Scriban.Parsing;

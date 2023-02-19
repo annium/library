@@ -1,4 +1,4 @@
-using Annium.Core.Primitives;
+using Annium;
 
 namespace XRest.Clients.TypeScript.Views.Types;
 

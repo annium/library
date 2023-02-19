@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Annium.Core.Primitives;
+using Annium;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
 using Microsoft.AspNetCore.Mvc.Controllers;

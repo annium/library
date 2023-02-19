@@ -5,9 +5,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Annium.Core.Primitives.Net;
 using Annium.Extensions.Arguments;
 using Annium.Logging.Abstractions;
+using Annium.Net;
 
 namespace XLog.Commands;
 

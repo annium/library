@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Annium.Core.Primitives.Linq;
+using Annium.Linq;
 using Annium.Net.Types.Extensions;
 using XRest.Clients.TypeScript.Views.Types;
 

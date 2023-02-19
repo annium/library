@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Annium.Core.Primitives;
+using Annium;
 using XRest.Clients.TypeScript.Views.Types;
 using XRest.Core.Models;
 

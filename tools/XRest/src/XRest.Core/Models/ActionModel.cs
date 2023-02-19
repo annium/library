@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Annium.Core.Primitives.Linq;
+using Annium.Linq;
 using Annium.Net.Types.Refs;
 
 namespace XRest.Core.Models;
