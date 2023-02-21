@@ -82,7 +82,11 @@ internal static class RefProcessor
 
     private static string Process(EnumRef reference, ProcessingContext ctx)
     {
-        ctx.UseNamespace(reference.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace));
+        if (ctx.HasModelFor(reference))
+            ctx.UseNamespace(reference.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace));
+        else
+            ctx.UseNamespace(reference.Namespace);
+
         return reference.Name;
     }
 
@@ -109,7 +113,11 @@ internal static class RefProcessor
 
     private static string Process(IModelRef reference, IRef[] refArgs, ProcessingContext ctx)
     {
-        ctx.UseNamespace(reference.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace));
+        if (ctx.HasModelFor(reference))
+            ctx.UseNamespace(reference.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace));
+        else
+            ctx.UseNamespace(reference.Namespace);
+
         if (refArgs.Length == 0)
             return reference.Name;
 

@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Annium.Net.Types.Extensions;
 using Annium.Net.Types.Models;
+using Annium.Net.Types.Refs;
 
 namespace XRest.Clients.Csharp.Components.Processors;
 
 internal sealed record ProcessingContext(
-    Namespace ModelsNamespace
+    Namespace ModelsNamespace,
+    IReadOnlyCollection<IModel> Models
 )
 {
     public IReadOnlyCollection<Namespace> Usages => _usages;
@@ -17,4 +20,7 @@ internal sealed record ProcessingContext(
 
     public void UseNamespace(Type type) =>
         _usages.Add(type.Namespace!.ToNamespace());
+
+    public bool HasModelFor(IModelRef reference) =>
+        Models.Any(reference.IsFor);
 }
