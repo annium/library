@@ -22,7 +22,7 @@ internal class ClientWriter
         if (!Directory.Exists(output))
             Directory.CreateDirectory(output);
 
-        _writer.Write(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
+        _writer.TryWrite(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
         {
             Usages = new[] { Constants.NetHttpNamespace },
             client.Namespace,
