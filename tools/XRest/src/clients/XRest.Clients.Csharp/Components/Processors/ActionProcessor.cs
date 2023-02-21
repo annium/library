@@ -30,7 +30,7 @@ internal static class ActionProcessor
 
     private static string ResolveResponseType(IRef? response, ProcessingContext ctx)
     {
-        response = response is PromiseRef { Value: { } } promiseResponse ? promiseResponse.Value : null;
+        response = response is PromiseRef { Value: { } } promiseResponse ? promiseResponse.Value : response;
 
         return response is null ? string.Empty : RefProcessor.Process(response, ctx);
     }
