@@ -121,9 +121,12 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
 
         var (start, end) = _chartContext.View;
         var size = end - start;
+
+        // block scrolling to left of chart bounds
         if (change < 0 && end - _chartContext.Bounds.Start <= size / 2)
             return false;
 
+        // block scrolling to right of chart bounds
         if (change > 0 && _chartContext.Bounds.End - start <= size / 2)
             return false;
 
