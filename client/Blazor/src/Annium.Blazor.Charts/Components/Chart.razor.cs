@@ -101,14 +101,14 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
 
     private bool HandleZoomDelta(decimal delta)
     {
-        var zooms = _chartContext.Zooms;
-        _rawZoom = (_rawZoom * (1 - delta * ZoomMultiplier)).Within(zooms[0], zooms[^1]);
+        var zooms = _chartContext.Zooms.ToList();
+        var zoomIndex = zooms.IndexOf(_chartContext.Zoom);
 
-        var value = zooms.MinBy(x => _rawZoom.DiffFrom(x));
-        if (value == _chartContext.Zoom)
+        var newZoomIndex = (delta < 0 ? zoomIndex + 1 : zoomIndex - 1).Within(0, zooms.Count - 1);
+        if (newZoomIndex == zoomIndex)
             return false;
 
-        _chartContext.SetZoom(value);
+        _chartContext.SetZoom(zooms[newZoomIndex]);
 
         return true;
     }
