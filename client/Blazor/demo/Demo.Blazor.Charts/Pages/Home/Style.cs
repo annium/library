@@ -9,7 +9,7 @@ public class Style : RuleSet
         .HeightPercent(100);
 
     public readonly CssRule CandlesPane = Rule.Class()
-        .HeightPercent(40);
+        .HeightPercent(90);
 
     public readonly CssRule Resolution = Rule.Class()
         .HeightPx(20)
