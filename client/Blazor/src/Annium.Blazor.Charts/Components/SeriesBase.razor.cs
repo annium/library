@@ -35,10 +35,12 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
 
         await base.SetParametersAsync(parameters);
 
-        if (Source != source)
+        if (Source != source && source != default!)
         {
             _unregisterSource();
+            _unregisterRender();
             _unregisterSource = PaneContext.RegisterSource(Source);
+            _unregisterRender = Source.RenderTo(ChartContext, Render);
         }
     }
 
@@ -47,6 +49,7 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
         if (!firstRender)
             return;
 
+        _unregisterSource = PaneContext.RegisterSource(Source);
         _unregisterRender = Source.RenderTo(ChartContext, Render);
     }
 
