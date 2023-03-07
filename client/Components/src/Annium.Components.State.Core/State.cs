@@ -13,7 +13,7 @@ public static class State
 
     private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IObservableState>>> Observables = new();
 
-    public static IDisposable Observe<T>(T target, Action handleChange)
+    public static IDisposable ObserveObject<T>(T target, Action handleChange)
         where T : notnull
     {
         var observables = Observables.GetOrAdd(target.GetType(), DiscoverObservables);

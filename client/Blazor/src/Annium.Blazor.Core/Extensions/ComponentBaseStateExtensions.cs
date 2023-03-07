@@ -12,10 +12,10 @@ public static class ComponentBaseStateExtensions
 
     private static readonly object[] EmptyArgs = Array.Empty<object>();
 
-    public static IDisposable ObserveState(this ComponentBase component) =>
-        State.Observe(component, () => StateHasChanged.Invoke(component, EmptyArgs));
+    public static IDisposable ObserveStates(this ComponentBase component) =>
+        State.ObserveObject(component, () => StateHasChanged.Invoke(component, EmptyArgs));
 
     public static IDisposable ObserveState<T>(this ComponentBase component, T target)
-        where T : notnull =>
-        State.Observe(target, () => StateHasChanged.Invoke(component, EmptyArgs));
+        where T : IObservableState =>
+        target.Changed.Subscribe(_ => StateHasChanged.Invoke(component, EmptyArgs));
 }

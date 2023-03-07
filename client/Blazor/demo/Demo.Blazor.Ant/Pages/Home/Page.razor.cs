@@ -22,7 +22,7 @@ public partial class Page : ILogSubject<Page>, IAsyncDisposable
     protected override void OnInitialized()
     {
         _state = StateFactory.Create(new Data());
-        _disposable += this.ObserveState(this);
+        _disposable += this.ObserveStates();
     }
 
     public ValueTask DisposeAsync()
