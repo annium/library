@@ -9,7 +9,7 @@ public interface IMapContainer<TKey, TValue> : IState<IReadOnlyDictionary<TKey, 
     where TKey : notnull
     where TValue : notnull, new()
 {
-    IReadOnlyDictionary<TKey, IState> Children { get; }
+    IReadOnlyCollection<TKey> Keys { get; }
     IArrayContainer<TI> At<TI>(Expression<Func<IReadOnlyDictionary<TKey, TValue>, IEnumerable<TI>>> ex) where TI : notnull, new();
     IMapContainer<TK, TV> At<TK, TV>(Expression<Func<IReadOnlyDictionary<TKey, TValue>, IEnumerable<KeyValuePair<TK, TV>>>> ex) where TK : notnull where TV : notnull, new();
     IAtomicContainer<sbyte> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, sbyte>> ex);

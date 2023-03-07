@@ -23,9 +23,9 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        var children = state.Children;
+        var value = state.Value;
         foreach (var itemKey in initialValue.Keys)
-            children.At(itemKey).IsEqual(state.At(x => x[itemKey]));
+            value.At(itemKey).IsEqual(state.At(x => x[itemKey]));
         var key = initialValue.Keys.First();
         state.At(x => x[key]).Value.IsEqual(initialValue.At(key));
         state.HasChanged.IsFalse();
