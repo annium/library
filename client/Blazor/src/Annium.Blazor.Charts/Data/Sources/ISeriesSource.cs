@@ -10,11 +10,12 @@ public interface ISeriesSource<T> : ISeriesSource, IDisposable
 {
     bool GetItems(Instant start, Instant end, out IReadOnlyList<T> data);
     T? GetItem(Instant moment, LookupMatch match = LookupMatch.Exact);
-    void LoadItems(Instant start, Instant end, Action onLoad);
+    void LoadItems(Instant start, Instant end);
 }
 
 public interface ISeriesSource
 {
+    event Action Loaded;
     event Action<ValueRange<Instant>> OnBoundsChange;
     Duration Resolution { get; }
     ValueRange<Instant> Bounds { get; }

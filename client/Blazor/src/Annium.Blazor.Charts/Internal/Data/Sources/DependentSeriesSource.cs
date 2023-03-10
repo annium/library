@@ -14,6 +14,7 @@ internal class DependentSeriesSource<TS, TD> :
     ISeriesSource<TD>,
     ILogSubject<DependentSeriesSource<TS, TD>>
 {
+    public event Action Loaded = delegate { };
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public ILogger<DependentSeriesSource<TS, TD>> Logger { get; }
     public Duration Resolution => _source.Resolution;
@@ -34,7 +35,8 @@ internal class DependentSeriesSource<TS, TD> :
         _source = source;
         _cache = cache;
         _getValues = getValues;
-        _cache.OnBoundsChange += bounds => OnBoundsChange(bounds);
+        _source.Loaded += TriggerLoaded;
+        _cache.OnBoundsChange += TriggerBoundsChanged;
     }
 
     public bool GetItems(Instant start, Instant end, out IReadOnlyList<TD> data)
@@ -76,10 +78,10 @@ internal class DependentSeriesSource<TS, TD> :
 
     public TD? GetItem(Instant moment, LookupMatch match = LookupMatch.Exact) => _cache.GetItem(moment, match);
 
-    public void LoadItems(Instant start, Instant end, Action onLoaded)
+    public void LoadItems(Instant start, Instant end)
     {
         // this.Log().Trace($"get data in {start} - {end}");
-        _source.LoadItems(start, end, onLoaded);
+        _source.LoadItems(start, end);
     }
 
     public void SetResolution(Duration resolution)
@@ -94,9 +96,14 @@ internal class DependentSeriesSource<TS, TD> :
         _cache.Clear();
     }
 
+    private void TriggerLoaded() => Loaded();
+    private void TriggerBoundsChanged(ValueRange<Instant> bounds) => OnBoundsChange(bounds);
+
     public void Dispose()
     {
         _source.Clear();
         _cache.Clear();
+        _source.Loaded -= TriggerLoaded;
+        _cache.OnBoundsChange -= TriggerBoundsChanged;
     }
 }

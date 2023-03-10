@@ -15,6 +15,7 @@ namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
 internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSeriesSource<T>>
 {
+    public event Action Loaded = delegate { };
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public ILogger<LoadingSeriesSource<T>> Logger { get; }
     public Duration Resolution { get; private set; }
@@ -73,12 +74,12 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
 
     public T? GetItem(Instant moment, LookupMatch match = LookupMatch.Exact) => _cache.GetItem(moment, match);
 
-    public void LoadItems(Instant start, Instant end, Action onLoaded)
+    public void LoadItems(Instant start, Instant end)
     {
         LoadData(start, end).ContinueWith(t =>
             {
                 if (t.IsCompletedSuccessfully)
-                    onLoaded();
+                    Loaded();
                 else if (t.Exception is not null)
                     this.Log().Error(t.Exception);
                 else
