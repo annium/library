@@ -10,7 +10,7 @@ namespace Annium.Blazor.Charts.Extensions;
 
 public static class SeriesSourceExtensions
 {
-    public static Action RenderTo<T>(
+    public static IDisposable RenderTo<T>(
         this ISeriesSource<T> source,
         IChartContext chartContext,
         Action<IReadOnlyList<T>> render
@@ -23,11 +23,20 @@ public static class SeriesSourceExtensions
             var end = chartContext.View.End.CeilTo(chartContext.Resolution);
 
             if (source.GetItems(start, end, out var data))
+            {
                 render(data);
+            }
             else if (!source.IsLoading)
-                source.LoadItems(start, end, Draw);
+            {
+                source.LoadItems(start, end);
+            }
         }
 
-        return chartContext.OnUpdate(Draw);
+        var disposable = Disposable.Box();
+        disposable += chartContext.OnUpdate(Draw);
+        source.Loaded += Draw;
+        disposable += () => source.Loaded -= Draw;
+
+        return disposable;
     }
 }
