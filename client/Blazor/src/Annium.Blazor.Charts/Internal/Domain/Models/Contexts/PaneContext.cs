@@ -105,12 +105,12 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         return true;
     }
 
-    public Action RegisterSource(ISeriesSource source)
+    public IDisposable RegisterSource(ISeriesSource source)
     {
         if (_sources.Contains(source))
         {
             this.Log().Trace($"source {source.GetFullId()} is already tracked");
-            return delegate { };
+            return Disposable.Empty;
         }
 
         this.Log().Trace($"track source {source.GetFullId()}");
@@ -119,7 +119,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         source.OnBoundsChange += UpdateBounds;
         Chart?.RequestDraw();
 
-        return () =>
+        return Disposable.Create(() =>
         {
             if (!_sources.Remove(source))
                 throw new InvalidOperationException("Source is not registered");
@@ -131,7 +131,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
 
             if (_sources.Count == 0)
                 ResetRangeAndView();
-        };
+        });
     }
 
     public void SetSeries(ISeriesContext? series)

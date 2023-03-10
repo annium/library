@@ -22,7 +22,7 @@ public interface IPaneContext
     ValueRange<decimal> View { get; }
     ValueRange<decimal> Range { get; }
     bool AdjustRange(ISeriesSource source, decimal min, decimal max);
-    Action RegisterSource(ISeriesSource source);
+    IDisposable RegisterSource(ISeriesSource source);
     void SetSeries(ISeriesContext? series);
     void SetBottom(IHorizontalSideContext? bottom);
     void SetRight(IVerticalSideContext? right);
