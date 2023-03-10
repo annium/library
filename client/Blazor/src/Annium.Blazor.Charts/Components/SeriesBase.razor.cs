@@ -26,8 +26,7 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
 
     protected abstract int MinValuesToRender { get; }
 
-    private Action _unregisterSource = delegate { };
-    private Action _unregisterRender = delegate { };
+    private DisposableBox _disposable = Disposable.Box();
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
@@ -37,10 +36,9 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
 
         if (Source != source && source != default!)
         {
-            _unregisterSource();
-            _unregisterRender();
-            _unregisterSource = PaneContext.RegisterSource(Source);
-            _unregisterRender = Source.RenderTo(ChartContext, Render);
+            _disposable.DisposeAndReset();
+            _disposable += PaneContext.RegisterSource(Source);
+            _disposable += Source.RenderTo(ChartContext, Render);
         }
     }
 
@@ -49,8 +47,8 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
         if (!firstRender)
             return;
 
-        _unregisterSource = PaneContext.RegisterSource(Source);
-        _unregisterRender = Source.RenderTo(ChartContext, Render);
+        _disposable += PaneContext.RegisterSource(Source);
+        _disposable += Source.RenderTo(ChartContext, Render);
     }
 
     private void Render(IReadOnlyList<T> values)
@@ -82,8 +80,7 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
 
     public ValueTask DisposeAsync()
     {
-        _unregisterSource();
-        _unregisterRender();
+        _disposable.Dispose();
 
         return ValueTask.CompletedTask;
     }
