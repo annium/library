@@ -13,7 +13,8 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="../Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
-        <ProjectReference Include="../../../shared/src/Annium.Components.State/Annium.Components.State.csproj" />
+        <ProjectReference Include="../../../shared/src/Annium.Components.State.Forms/Annium.Components.State.Forms.csproj" />
+        <ProjectReference Include="../../../shared/src/Annium.Components.State.Operations/Annium.Components.State.Operations.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="MatBlazor" Version="2.8.0" />

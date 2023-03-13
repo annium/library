@@ -3,10 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Annium.Components.State.Core;
 using Annium.Core.Reflection;
 
-namespace Annium.Components.State;
+namespace Annium.Components.State.Core;
 
 public static class StateObserver
 {

@@ -5,7 +5,7 @@ using Annium.Core.DependencyInjection;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
-namespace Annium.Blazor.Core.Extensions;
+namespace Annium.Blazor.Core;
 
 public static class WebAssemblyHostBuilderExtensions
 {

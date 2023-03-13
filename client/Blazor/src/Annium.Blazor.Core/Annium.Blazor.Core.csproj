@@ -12,6 +12,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
+        <ProjectReference Include="../../../shared/src/Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
+    </ItemGroup>
+    <ItemGroup>
         <PackageReference Include="Annium.Configuration.Abstractions" Version="0.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.3" />
     </ItemGroup>

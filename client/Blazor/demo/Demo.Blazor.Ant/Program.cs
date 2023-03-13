@@ -1,4 +1,4 @@
-using Annium.Blazor.Core.Extensions;
+using Annium.Blazor.Core;
 using Demo.Blazor.Ant;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
