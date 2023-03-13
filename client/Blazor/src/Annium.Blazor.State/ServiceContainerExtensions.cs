@@ -12,7 +12,7 @@ public static class ServiceContainerExtensions
         container.Add<ISessionStorage, SessionStorage>().Singleton();
 
         container.AddAll()
-            .AssignableTo<ObservableState>()
+            .AssignableTo<StateBase>()
             .Where(x => x.IsClass)
             .AsSelf()
             .AsInterfaces()
