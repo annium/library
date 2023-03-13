@@ -6,7 +6,7 @@ namespace Annium.Blazor.State;
 
 public static class ServiceContainerExtensions
 {
-    public static IServiceContainer AddStorages(this IServiceContainer container)
+    public static IServiceContainer AddStates(this IServiceContainer container)
     {
         container.Add<ILocalStorage, LocalStorage>().Singleton();
         container.Add<ISessionStorage, SessionStorage>().Singleton();

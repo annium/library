@@ -23,7 +23,7 @@ public class ServicePack : ServicePackBase
         container.AddRouting();
         container.AddHostHttpRequestFactory();
         container.AddApiServices();
-        container.AddStorages();
+        container.AddStates();
         container.AddStateFactory();
         container.AddCss();
         container.AddInterop();
