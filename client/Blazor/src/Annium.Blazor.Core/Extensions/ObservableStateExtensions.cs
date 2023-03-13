@@ -36,4 +36,7 @@ public static class ObservableStateExtensions
 
     public static IDisposable ObserveStates(this ComponentBase component) =>
         State.ObserveObject(component, () => StateHasChanged.Invoke(component, EmptyArgs));
+
+    public static IDisposable ObserveStates(this ComponentBase component, object target) =>
+        State.ObserveObject(target, () => StateHasChanged.Invoke(component, EmptyArgs));
 }
