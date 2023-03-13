@@ -17,7 +17,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
     public T[] Value => CreateValue();
     public bool HasChanged => !Value.IsShallowEqual(_initialValue, _mapper);
     public bool HasBeenTouched => _hasBeenTouched || _states.Any(x => x.Ref.HasBeenTouched);
-    public IReadOnlyList<IState> Children => _states.Select(x => x.Ref).ToArray();
+    public IReadOnlyList<ITrackedState> Children => _states.Select(x => x.Ref).ToArray();
     private readonly IStateFactory _stateFactory;
     private readonly IEnumerable<T> _initialValue;
     private readonly IMapper _mapper;
@@ -77,7 +77,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
             _states.Clear();
             foreach (var item in _initialValue)
             {
-                var state = (IState<T>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
+                var state = (IValueTrackedState<T>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
                 _states.Add(new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
             }
         }
@@ -148,7 +148,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
         NotifyChanged();
     }
 
-    private TX At<TX>(LambdaExpression ex) where TX : IState
+    private TX At<TX>(LambdaExpression ex) where TX : ITrackedState
     {
         var index = ResolveIndex(ex);
         if (index < 0 || index >= _states.Count)
@@ -187,7 +187,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
 
     private void AddInternal(int index, T item)
     {
-        var state = (IState<T>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
+        var state = (IValueTrackedState<T>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
         _states.Insert(index, new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
     }
 
@@ -199,11 +199,11 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
 
     private class StateReference
     {
-        public IState<T> Ref { get; }
+        public IValueTrackedState<T> Ref { get; }
         public IDisposable Subscription { get; }
 
         public StateReference(
-            IState<T> @ref,
+            IValueTrackedState<T> @ref,
             IDisposable subscription
         )
         {

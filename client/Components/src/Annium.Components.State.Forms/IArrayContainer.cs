@@ -5,10 +5,10 @@ using NodaTime;
 
 namespace Annium.Components.State.Forms;
 
-public interface IArrayContainer<T> : IState<T[]>
+public interface IArrayContainer<T> : IValueTrackedState<T[]>
     where T : notnull, new()
 {
-    IReadOnlyList<IState> Children { get; }
+    IReadOnlyList<ITrackedState> Children { get; }
     IArrayContainer<TI> At<TI>(Expression<Func<T[], IEnumerable<TI>>> ex) where TI : notnull, new();
     IMapContainer<TK, TV> At<TK, TV>(Expression<Func<T[], IEnumerable<KeyValuePair<TK, TV>>>> ex) where TK : notnull where TV : notnull, new();
     IAtomicContainer<sbyte> At(Expression<Func<T[], sbyte>> ex);

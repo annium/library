@@ -2,7 +2,7 @@ using System;
 
 namespace Annium.Components.State.Forms;
 
-public interface IAtomicContainer<T> : IState<T>, IStatusContainer
+public interface IAtomicContainer<T> : IValueTrackedState<T>, IStatusContainer
     where T : IEquatable<T>
 {
 }

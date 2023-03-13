@@ -134,7 +134,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         NotifyChanged();
     }
 
-    private TX At<TX>(LambdaExpression ex) where TX : IState
+    private TX At<TX>(LambdaExpression ex) where TX : ITrackedState
     {
         var key = ResolveKey(ex);
         if (!_states.ContainsKey(key))
@@ -171,7 +171,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
 
     private void AddInternal(TKey key, TValue item)
     {
-        var state = (IState<TValue>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
+        var state = (IValueTrackedState<TValue>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
         _states[key] = new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged()));
     }
 
@@ -183,11 +183,11 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
 
     private class StateReference
     {
-        public IState<TValue> Ref { get; }
+        public IValueTrackedState<TValue> Ref { get; }
         public IDisposable Subscription { get; }
 
         public StateReference(
-            IState<TValue> @ref,
+            IValueTrackedState<TValue> @ref,
             IDisposable subscription
         )
         {

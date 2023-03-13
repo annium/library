@@ -26,7 +26,7 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
     public T Value => CreateValue();
     public bool HasChanged => _states.Values.Any(x => x.Ref.HasChanged);
     public bool HasBeenTouched => _states.Values.Any(x => x.Ref.HasBeenTouched);
-    public IReadOnlyDictionary<string, IState> Children => _states.ToDictionary(x => x.Key.Name, x => x.Value.Ref);
+    public IReadOnlyDictionary<string, ITrackedState> Children => _states.ToDictionary(x => x.Key.Name, x => x.Value.Ref);
     private readonly IReadOnlyDictionary<PropertyInfo, StateReference> _states;
 
     public ObjectContainer(
@@ -38,10 +38,10 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
         foreach (var property in Properties)
         {
             var create = Factories[property];
-            var @ref = (IState) create.Invoke(stateFactory, new[] { property.GetMethod!.Invoke(initialValue, Array.Empty<object>())! })!;
+            var @ref = (ITrackedState) create.Invoke(stateFactory, new[] { property.GetMethod!.Invoke(initialValue, Array.Empty<object>())! })!;
             @ref.Changed.Subscribe(_ => NotifyChanged());
-            var get = @ref.GetType().GetProperty(nameof(IState<object>.Value))!.GetMethod!;
-            var set = @ref.GetType().GetMethod(nameof(IState<object>.Set))!;
+            var get = @ref.GetType().GetProperty(nameof(IValueTrackedState<object>.Value))!.GetMethod!;
+            var set = @ref.GetType().GetMethod(nameof(IValueTrackedState<object>.Set))!;
             states[property] = new StateReference(@ref, get, set);
         }
 
@@ -128,7 +128,7 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
         return value;
     }
 
-    private TX At<TX>(LambdaExpression ex) where TX : IState => (TX) _states[ResolveProperty(ex)].Ref;
+    private TX At<TX>(LambdaExpression ex) where TX : ITrackedState => (TX) _states[ResolveProperty(ex)].Ref;
 
     private PropertyInfo ResolveProperty(LambdaExpression ex)
     {
@@ -139,12 +139,12 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
 
     private class StateReference
     {
-        public IState Ref { get; }
+        public ITrackedState Ref { get; }
         public MethodInfo Get { get; }
         public MethodInfo Set { get; }
 
         public StateReference(
-            IState @ref,
+            ITrackedState @ref,
             MethodInfo get,
             MethodInfo set
         )

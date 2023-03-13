@@ -5,7 +5,7 @@ using NodaTime;
 
 namespace Annium.Components.State.Forms;
 
-public interface IMapContainer<TKey, TValue> : IState<IReadOnlyDictionary<TKey, TValue>>
+public interface IMapContainer<TKey, TValue> : IValueTrackedState<IReadOnlyDictionary<TKey, TValue>>
     where TKey : notnull
     where TValue : notnull, new()
 {

@@ -4,10 +4,10 @@ using System.Reactive.Linq;
 
 namespace Annium.Components.State.Core;
 
-public class ObservableState : IObservableState
+public abstract class ObservableState : IObservableState
 {
     public IObservable<Unit> Changed { get; }
-    private event Action StateChanged = () => { };
+    private event Action StateChanged = delegate { };
     private bool _isMuted;
 
     protected ObservableState()

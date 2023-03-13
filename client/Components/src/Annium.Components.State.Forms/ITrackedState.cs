@@ -2,13 +2,7 @@ using Annium.Components.State.Core;
 
 namespace Annium.Components.State.Forms;
 
-public interface IState<T> : IState
-{
-    T Value { get; }
-    bool Set(T value);
-}
-
-public interface IState : IObservableState
+public interface ITrackedState : IObservableState
 {
     bool HasChanged { get; }
     bool HasBeenTouched { get; }
