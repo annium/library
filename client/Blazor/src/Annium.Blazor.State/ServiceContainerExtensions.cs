@@ -1,4 +1,5 @@
 using Annium.Blazor.State.Internal;
+using Annium.Components.State.Core;
 using Annium.Core.DependencyInjection;
 
 namespace Annium.Blazor.State;
@@ -11,8 +12,9 @@ public static class ServiceContainerExtensions
         container.Add<ISessionStorage, SessionStorage>().Singleton();
 
         container.AddAll()
-            .AssignableTo<IStore>()
+            .AssignableTo<ObservableState>()
             .Where(x => x.IsClass)
+            .AsSelf()
             .AsInterfaces()
             .Scoped();
 
