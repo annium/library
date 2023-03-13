@@ -11,20 +11,21 @@ public static class State
 {
     private static readonly object[] EmptyArgs = Array.Empty<object>();
 
-    private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IObservableState>>> Observables = new();
+    private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IObservableState>>> ObservableAccessors = new();
 
     public static IDisposable ObserveObject<T>(T target, Action handleChange)
-        where T : notnull
+        where T : class
     {
-        var observables = Observables.GetOrAdd(target.GetType(), DiscoverObservables);
+        var accessors = ObservableAccessors.GetOrAdd(target.GetType(), DiscoverObservableAccessors);
 
         var disposable = Disposable.Box();
-        disposable += observables.Select(x => x(target).Changed.Subscribe(_ => handleChange()));
+        foreach (var get in accessors)
+            disposable += get(target).Changed.Subscribe(_ => handleChange());
 
         return disposable;
     }
 
-    private static IReadOnlyCollection<Func<object, IObservableState>> DiscoverObservables(Type type)
+    private static IReadOnlyCollection<Func<object, IObservableState>> DiscoverObservableAccessors(Type type)
     {
         var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         var accessors = new List<Func<object, IObservableState>>();
