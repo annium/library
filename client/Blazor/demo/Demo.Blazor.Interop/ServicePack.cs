@@ -17,7 +17,6 @@ public class ServicePack : ServicePackBase
 
         // web
         container.AddRouting();
-        container.AddComponentFormStateFactory();
         container.AddCss();
         container.AddInterop();
     }

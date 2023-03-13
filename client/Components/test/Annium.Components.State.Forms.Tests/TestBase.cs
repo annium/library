@@ -8,7 +8,7 @@ public abstract class TestBase
     protected IStateFactory GetFactory() => new ServiceContainer()
         .AddRuntime(GetType().Assembly)
         .AddMapper()
-        .AddComponentFormStateFactory()
+        .AddStateFactory()
         .BuildServiceProvider()
         .Resolve<IStateFactory>();
 

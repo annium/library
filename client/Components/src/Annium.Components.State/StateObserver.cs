@@ -3,11 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Annium.Components.State.Core;
 using Annium.Core.Reflection;
 
-namespace Annium.Components.State.Core;
+namespace Annium.Components.State;
 
-public static class State
+public static class StateObserver
 {
     private static readonly object[] EmptyArgs = Array.Empty<object>();
 

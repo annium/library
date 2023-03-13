@@ -5,7 +5,7 @@ namespace Annium.Core.DependencyInjection;
 
 public static class ServiceContainerExtensions
 {
-    public static IServiceContainer AddComponentFormStateFactory(
+    public static IServiceContainer AddStateFactory(
         this IServiceContainer container
     )
     {

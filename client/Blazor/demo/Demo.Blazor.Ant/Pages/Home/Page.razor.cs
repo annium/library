@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Annium;
-using Annium.Blazor.Core.Extensions;
+using Annium.Blazor.State;
 using Annium.Components.State.Forms;
 using Annium.Logging.Abstractions;
 using Microsoft.AspNetCore.Components;

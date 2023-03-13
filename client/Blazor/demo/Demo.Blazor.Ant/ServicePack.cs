@@ -24,10 +24,10 @@ public class ServicePack : ServicePackBase
         container.AddHostHttpRequestFactory();
         container.AddApiServices();
         container.AddStorages();
-        container.AddComponentFormStateFactory();
+        container.AddStateFactory();
         container.AddCss();
         container.AddInterop();
-        container.AddComponentFormStateFactory();
+        container.AddStateFactory();
         container.AddAntDesign();
     }
 

@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Annium.Components.State;
 using Annium.Components.State.Core;
 using Microsoft.AspNetCore.Components;
 
-namespace Annium.Blazor.Core.Extensions;
+namespace Annium.Blazor.State;
 
 public static class ObservableStateExtensions
 {
@@ -35,8 +36,8 @@ public static class ObservableStateExtensions
     }
 
     public static IDisposable ObserveStates(this ComponentBase component) =>
-        State.ObserveObject(component, () => StateHasChanged.Invoke(component, EmptyArgs));
+        StateObserver.ObserveObject(component, () => StateHasChanged.Invoke(component, EmptyArgs));
 
     public static IDisposable ObserveStates(this ComponentBase component, object target) =>
-        State.ObserveObject(target, () => StateHasChanged.Invoke(component, EmptyArgs));
+        StateObserver.ObserveObject(target, () => StateHasChanged.Invoke(component, EmptyArgs));
 }

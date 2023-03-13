@@ -13,6 +13,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="../Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
+        <ProjectReference Include="../../../shared/src/Annium.Components.State/Annium.Components.State.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="AntDesign" Version="0.14.3" />
