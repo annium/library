@@ -12,7 +12,7 @@ public class RouteTest : TestBase
         var route = GetRouting<Routing>().About;
 
         // assert
-        route.Link().IsEqual("statics/about");
+        route.Link().Is("statics/about");
     }
 
     [Fact]
@@ -25,7 +25,7 @@ public class RouteTest : TestBase
         route.Go();
 
         // assert
-        NavigationManager.Locations.At(0).IsEqual("statics/about");
+        NavigationManager.Locations.At(0).Is("statics/about");
     }
 
     [Fact]

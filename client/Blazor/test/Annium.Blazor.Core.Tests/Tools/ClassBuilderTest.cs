@@ -29,8 +29,8 @@ public class ClassBuilderTest
         var named = cb.Build(new User { Gender = Gender.Female, Name = "x" });
 
         // assert
-        unnamed.IsEqual("plain plain-if get get-if _val _val-if male");
-        named.IsEqual("plain plain-if plain-if-value get get-if get-if-value x_val x_val-if x_val-if-value female");
+        unnamed.Is("plain plain-if get get-if _val _val-if male");
+        named.Is("plain plain-if plain-if-value get get-if get-if-value x_val x_val-if x_val-if-value female");
     }
 
     [Fact]
@@ -44,8 +44,8 @@ public class ClassBuilderTest
         var two = cb.Clone().With("two").Build(new User());
 
         // assert
-        one.IsEqual("plain one");
-        two.IsEqual("plain two");
+        one.Is("plain one");
+        two.Is("plain two");
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class ClassBuilderTest
         var className = cb.Build();
 
         // assert
-        className.IsEqual("plain plain-if get male");
+        className.Is("plain plain-if get male");
     }
 
     [Fact]
@@ -78,8 +78,8 @@ public class ClassBuilderTest
         var two = cb.Clone().With("two").Build();
 
         // assert
-        one.IsEqual("plain one");
-        two.IsEqual("plain two");
+        one.Is("plain one");
+        two.Is("plain two");
     }
 
     private class User

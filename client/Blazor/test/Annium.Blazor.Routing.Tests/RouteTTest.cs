@@ -14,7 +14,7 @@ public class RouteTTest : TestBase
         var route = GetRouting<Routing>().Search;
 
         // assert
-        route.Link(new SearchData { Sex = Sex.Male, Name = new[] { "alex", "anna" }, Age = 30 }).IsEqual("pages/search/Male?name=alex&name=anna&age=30");
+        route.Link(new SearchData { Sex = Sex.Male, Name = new[] { "alex", "anna" }, Age = 30 }).Is("pages/search/Male?name=alex&name=anna&age=30");
     }
 
     [Fact]
@@ -27,7 +27,7 @@ public class RouteTTest : TestBase
         route.Go(new SearchData { Sex = Sex.Male, Name = new[] { "alex", "anna" }, Age = 30 });
 
         // assert
-        NavigationManager.Locations.At(0).IsEqual("pages/search/Male?name=alex&name=anna&age=30");
+        NavigationManager.Locations.At(0).Is("pages/search/Male?name=alex&name=anna&age=30");
     }
 
     [Fact]

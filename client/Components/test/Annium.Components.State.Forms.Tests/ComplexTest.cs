@@ -22,7 +22,7 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Author).At(x => x.Name).Value.IsEqual(initialValue.Author.Name);
+        state.At(x => x.Author).At(x => x.Name).Value.Is(initialValue.Author.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -46,7 +46,7 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.IsEqual(initialValue.Name);
+        state.At(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -56,7 +56,7 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x.Name).Value.IsEqual(otherValue.Name);
+        state.At(x => x.Name).Value.Is(otherValue.Name);
         state.At(x => x.Author).Value.IsEqual(otherValue.Author);
         state.At(x => x.Messages).Value.IsEqual(otherValue.Messages);
         state.HasChanged.IsTrue();
@@ -68,7 +68,7 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.IsEqual(initialValue.Name);
+        state.At(x => x.Name).Value.Is(initialValue.Name);
         state.At(x => x.Author).Value.IsEqual(initialValue.Author);
         state.At(x => x.Messages).Value.IsEqual(initialValue.Messages);
         state.HasChanged.IsFalse();
@@ -104,7 +104,7 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Messages).At(x => x[0]).At(x => x.Text).Value.IsEqual(initialValue.Messages.At(0).Text);
+        state.At(x => x.Messages).At(x => x[0]).At(x => x.Text).Value.Is(initialValue.Messages.At(0).Text);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();

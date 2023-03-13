@@ -25,9 +25,9 @@ public class MapContainerTest : TestBase
         state.Value.IsEqual(initialValue);
         var value = state.Value;
         foreach (var itemKey in initialValue.Keys)
-            value.At(itemKey).IsEqual(state.At(x => x[itemKey]));
+            value.At(itemKey).Is(state.At(x => x[itemKey]).Value);
         var key = initialValue.Keys.First();
-        state.At(x => x[key]).Value.IsEqual(initialValue.At(key));
+        state.At(x => x[key]).Value.Is(initialValue.At(key));
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -51,7 +51,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
+        state.At(x => x["a"]).Value.Is(initialValue.At("a"));
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -61,7 +61,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x["c"]).Value.IsEqual(otherValue.At("c"));
+        state.At(x => x["c"]).Value.Is(otherValue.At("c"));
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -71,7 +71,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x["a"]).Value.IsEqual(initialValue.At("a"));
+        state.At(x => x["a"]).Value.Is(initialValue.At("a"));
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
         log.Has(2);
@@ -105,7 +105,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x["c"]).Value.IsEqual(initialValue.At("c"));
+        state.At(x => x["c"]).Value.Is(initialValue.At("c"));
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();

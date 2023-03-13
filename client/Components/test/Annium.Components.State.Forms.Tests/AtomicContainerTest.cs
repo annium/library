@@ -20,7 +20,7 @@ public class AtomicContainerTest : TestBase
         state.Changed.Subscribe(log.Add);
 
         // assert
-        state.Value.IsEqual(5);
+        state.Value.Is(5);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -41,7 +41,7 @@ public class AtomicContainerTest : TestBase
         state.Set(other).IsTrue();
 
         // assert
-        state.Value.IsEqual(other);
+        state.Value.Is(other);
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -50,7 +50,7 @@ public class AtomicContainerTest : TestBase
         state.Set(initial).IsTrue();
 
         // assert
-        state.Value.IsEqual(initial);
+        state.Value.Is(initial);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
         log.Has(2);
@@ -72,7 +72,7 @@ public class AtomicContainerTest : TestBase
         state.Reset();
 
         // assert
-        state.Value.IsEqual(initial);
+        state.Value.Is(initial);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.Has(2);

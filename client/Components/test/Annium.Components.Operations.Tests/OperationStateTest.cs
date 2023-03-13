@@ -22,7 +22,7 @@ public class OperationStateTest : TestBase
         op.IsLoaded.IsFalse();
         op.HasSucceed.IsFalse();
         op.HasFailed.IsFalse();
-        getChanges().IsEqual(1);
+        getChanges().Is(1);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class OperationStateTest : TestBase
         op.IsLoaded.IsTrue();
         op.HasSucceed.IsTrue();
         op.HasFailed.IsFalse();
-        getChanges().IsEqual(2);
+        getChanges().Is(2);
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class OperationStateTest : TestBase
         op.IsLoaded.IsTrue();
         op.HasSucceed.IsFalse();
         op.HasFailed.IsTrue();
-        getChanges().IsEqual(2);
+        getChanges().Is(2);
     }
 
     [Fact]
@@ -83,6 +83,6 @@ public class OperationStateTest : TestBase
         op.IsLoaded.IsFalse();
         op.HasSucceed.IsFalse();
         op.HasFailed.IsFalse();
-        getChanges().IsEqual(3);
+        getChanges().Is(3);
     }
 }

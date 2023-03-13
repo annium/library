@@ -17,13 +17,13 @@ public class OperationStateTTest : TestBase
         op.Start();
 
         // assert
-        op.Data.IsEqual(default(int));
+        op.Data.Is(default(int));
         op.HasErrors.IsFalse();
         op.IsLoading.IsTrue();
         op.IsLoaded.IsFalse();
         op.HasSucceed.IsFalse();
         op.HasFailed.IsFalse();
-        getChanges().IsEqual(1);
+        getChanges().Is(1);
     }
 
     [Fact]
@@ -37,13 +37,13 @@ public class OperationStateTTest : TestBase
         op.Succeed(5);
 
         // assert
-        op.Data.IsEqual(5);
+        op.Data.Is(5);
         op.HasErrors.IsFalse();
         op.IsLoading.IsFalse();
         op.IsLoaded.IsTrue();
         op.HasSucceed.IsTrue();
         op.HasFailed.IsFalse();
-        getChanges().IsEqual(2);
+        getChanges().Is(2);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class OperationStateTTest : TestBase
         op.Fail(failure);
 
         // assert
-        op.Data.IsEqual(failure.Data);
+        op.Data.Is(failure.Data);
         op.HasErrors.IsTrue();
         op.PlainErrors.IsEqual(failure.PlainErrors);
         op.LabeledErrors.IsEqual(failure.LabeledErrors);
@@ -66,7 +66,7 @@ public class OperationStateTTest : TestBase
         op.IsLoaded.IsTrue();
         op.HasSucceed.IsFalse();
         op.HasFailed.IsTrue();
-        getChanges().IsEqual(2);
+        getChanges().Is(2);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class OperationStateTTest : TestBase
         op.Fail(failure);
 
         // assert
-        op.Data.IsEqual(default(int));
+        op.Data.Is(default(int));
         op.HasErrors.IsTrue();
         op.PlainErrors.IsEqual(failure.PlainErrors);
         op.LabeledErrors.IsEqual(failure.LabeledErrors);
@@ -89,7 +89,7 @@ public class OperationStateTTest : TestBase
         op.IsLoaded.IsTrue();
         op.HasSucceed.IsFalse();
         op.HasFailed.IsTrue();
-        getChanges().IsEqual(2);
+        getChanges().Is(2);
     }
 
     [Fact]
@@ -104,12 +104,12 @@ public class OperationStateTTest : TestBase
         op.Reset();
 
         // assert
-        op.Data.IsEqual(default(int));
+        op.Data.Is(default(int));
         op.HasErrors.IsFalse();
         op.IsLoading.IsFalse();
         op.IsLoaded.IsFalse();
         op.HasSucceed.IsFalse();
         op.HasFailed.IsFalse();
-        getChanges().IsEqual(3);
+        getChanges().Is(3);
     }
 }

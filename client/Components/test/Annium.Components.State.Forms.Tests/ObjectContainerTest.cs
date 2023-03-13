@@ -24,9 +24,9 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.Children.At(nameof(User.Age)).IsEqual(state.At(x => x.Age));
-        state.Children.At(nameof(User.Name)).IsEqual(state.At(x => x.Name));
-        state.At(x => x.Name).Value.IsEqual(initialValue.Name);
+        state.Children.At(nameof(User.Age)).Is(state.At(x => x.Age));
+        state.Children.At(nameof(User.Name)).Is(state.At(x => x.Name));
+        state.At(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -53,7 +53,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.IsEqual(initialValue.Name);
+        state.At(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -63,7 +63,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x.Name).Value.IsEqual(otherValue.Name);
+        state.At(x => x.Name).Value.Is(otherValue.Name);
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -73,7 +73,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.IsEqual(initialValue.Name);
+        state.At(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
         log.Has(2);
@@ -110,7 +110,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.IsEqual(initialValue.Name);
+        state.At(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
