@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Annium.Blazor.Storage;
+namespace Annium.Blazor.State;
 
 public interface IStorageBase
 {

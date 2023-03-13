@@ -1,7 +1,7 @@
-using Annium.Blazor.Storage;
-using Annium.Blazor.Storage.Internal;
+using Annium.Blazor.State.Internal;
+using Annium.Core.DependencyInjection;
 
-namespace Annium.Core.DependencyInjection;
+namespace Annium.Blazor.State;
 
 public static class ServiceContainerExtensions
 {

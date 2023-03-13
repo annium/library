@@ -6,7 +6,7 @@ using Annium.Core.DependencyInjection;
 using Annium.Serialization.Abstractions;
 using Microsoft.JSInterop;
 
-namespace Annium.Blazor.Storage.Internal;
+namespace Annium.Blazor.State.Internal;
 
 internal class StorageBase : IStorageBase
 {

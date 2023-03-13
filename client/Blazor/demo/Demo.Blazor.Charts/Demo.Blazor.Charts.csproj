@@ -16,7 +16,7 @@
         <ProjectReference Include="../../src/Annium.Blazor.Charts/Annium.Blazor.Charts.csproj" />
         <ProjectReference Include="../../src/Annium.Blazor.Net/Annium.Blazor.Net.csproj" />
         <ProjectReference Include="../../src/Annium.Blazor.Routing/Annium.Blazor.Routing.csproj" />
-        <ProjectReference Include="../../src/Annium.Blazor.Storage/Annium.Blazor.Storage.csproj" />
+        <ProjectReference Include="../../src/Annium.Blazor.State/Annium.Blazor.State.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
