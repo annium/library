@@ -22,7 +22,7 @@ public class ObservableState : IObservableState
     {
         _isMuted = true;
 
-        return new MuteScope(this);
+        return new MuteScope(Unmute);
     }
 
     protected void NotifyChanged()
@@ -32,21 +32,16 @@ public class ObservableState : IObservableState
     }
 
     private void Unmute() => _isMuted = false;
+}
 
-    private class MuteScope : IDisposable
+file struct MuteScope : IDisposable
+{
+    private readonly Action _unmute;
+
+    public MuteScope(Action unmute)
     {
-        private readonly ObservableState _state;
-
-        public MuteScope(
-            ObservableState state
-        )
-        {
-            _state = state;
-        }
-
-        public void Dispose()
-        {
-            _state.Unmute();
-        }
+        _unmute = unmute;
     }
+
+    public void Dispose() => _unmute();
 }
