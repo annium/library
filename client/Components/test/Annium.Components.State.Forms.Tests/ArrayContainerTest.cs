@@ -18,7 +18,7 @@ public class ArrayContainerTest : TestBase
         var initialValue = Arrange();
 
         // act
-        var state = factory.Create(initialValue);
+        var state = factory.CreateArray(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // assert
@@ -42,12 +42,12 @@ public class ArrayContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var otherValue = new[] { 4, 2 };
-        var state = factory.Create(initialValue);
+        var otherValue = new List<int> { 4, 2 };
+        var state = factory.CreateArray(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
-        state.Set(initialValue.ToArray()).IsFalse();
+        state.Set(initialValue).IsFalse();
 
         // assert
         state.Value.IsEqual(initialValue);
@@ -67,7 +67,7 @@ public class ArrayContainerTest : TestBase
         log.Has(1);
 
         // act
-        state.Set(initialValue.ToArray()).IsTrue();
+        state.Set(initialValue).IsTrue();
 
         // assert
         state.Value.IsEqual(initialValue);
@@ -84,8 +84,8 @@ public class ArrayContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var otherValue = new[] { 4, 2 };
-        var state = factory.Create(initialValue);
+        var otherValue = new List<int> { 4, 2 };
+        var state = factory.CreateArray(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -120,7 +120,7 @@ public class ArrayContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateArray(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -142,7 +142,7 @@ public class ArrayContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateArray(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -162,7 +162,7 @@ public class ArrayContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateArray(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -182,7 +182,7 @@ public class ArrayContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateArray(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -202,13 +202,13 @@ public class ArrayContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateArray(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
         state.RemoveAt(0);
         state.Add(1);
-        state.Set(initialValue.ToArray()).IsTrue();
+        state.Set(initialValue).IsTrue();
 
         // assert
         state.HasChanged.IsFalse();
@@ -216,5 +216,5 @@ public class ArrayContainerTest : TestBase
         log.Has(3);
     }
 
-    private IReadOnlyCollection<int> Arrange() => new[] { 2, 8 };
+    private List<int> Arrange() => new() { 2, 8 };
 }

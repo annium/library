@@ -20,7 +20,7 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
     static ObjectContainer()
     {
         Properties = typeof(T).GetProperties().Where(x => x.CanRead && x.CanWrite).ToArray();
-        Factories = Properties.ToDictionary(x => x, x => StateFactory.ResolveFactory(x.PropertyType));
+        Factories = Properties.ToDictionary(x => x, x => StateFactoryResolver.ResolveFactory(x.PropertyType));
     }
 
     public T Value => CreateValue();
@@ -96,8 +96,8 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
         return false;
     }
 
-    public IArrayContainer<TI> At<TI>(Expression<Func<T, IEnumerable<TI>>> ex) where TI : notnull, new() => At<IArrayContainer<TI>>(ex);
-    public IMapContainer<TK, TV> At<TK, TV>(Expression<Func<T, IEnumerable<KeyValuePair<TK, TV>>>> ex) where TK : notnull where TV : notnull, new() => At<IMapContainer<TK, TV>>(ex);
+    public IArrayContainer<TI> At<TI>(Expression<Func<T, List<TI>>> ex) where TI : notnull, new() => At<IArrayContainer<TI>>(ex);
+    public IMapContainer<TK, TV> At<TK, TV>(Expression<Func<T, Dictionary<TK, TV>>> ex) where TK : notnull where TV : notnull, new() => At<IMapContainer<TK, TV>>(ex);
     public IAtomicContainer<sbyte> At(Expression<Func<T, sbyte>> ex) => At<IAtomicContainer<sbyte>>(ex);
     public IAtomicContainer<short> At(Expression<Func<T, short>> ex) => At<IAtomicContainer<short>>(ex);
     public IAtomicContainer<int> At(Expression<Func<T, int>> ex) => At<IAtomicContainer<int>>(ex);

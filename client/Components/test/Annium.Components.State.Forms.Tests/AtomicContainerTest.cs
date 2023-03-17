@@ -16,7 +16,7 @@ public class AtomicContainerTest : TestBase
         var factory = GetFactory();
 
         // act
-        var state = factory.Create(5);
+        var state = factory.CreateAtomic(5);
         state.Changed.Subscribe(log.Add);
 
         // assert
@@ -34,7 +34,7 @@ public class AtomicContainerTest : TestBase
         var factory = GetFactory();
         var initial = 5;
         var other = 10;
-        var state = factory.Create(initial);
+        var state = factory.CreateAtomic(initial);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -64,7 +64,7 @@ public class AtomicContainerTest : TestBase
         var factory = GetFactory();
         var initial = 5;
         var other = 10;
-        var state = factory.Create(initial);
+        var state = factory.CreateAtomic(initial);
         state.Changed.Subscribe(log.Add);
         state.Set(other).IsTrue();
 

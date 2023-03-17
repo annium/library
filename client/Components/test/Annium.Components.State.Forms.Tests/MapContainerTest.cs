@@ -18,16 +18,16 @@ public class MapContainerTest : TestBase
         var initialValue = Arrange();
 
         // act
-        var state = factory.Create(initialValue);
+        var state = factory.CreateMap(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // assert
         state.Value.IsEqual(initialValue);
         var value = state.Value;
         foreach (var itemKey in initialValue.Keys)
-            value.At(itemKey).Is(state.At(x => x[itemKey]).Value);
+            value[itemKey].Is(state.At(x => x[itemKey]).Value);
         var key = initialValue.Keys.First();
-        state.At(x => x[key]).Value.Is(initialValue.At(key));
+        state.At(x => x[key]).Value.Is(initialValue[key]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -43,7 +43,7 @@ public class MapContainerTest : TestBase
         var factory = GetFactory();
         var initialValue = Arrange();
         var otherValue = ArrangeOther();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateMap(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -51,7 +51,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x["a"]).Value.Is(initialValue.At("a"));
+        state.At(x => x["a"]).Value.Is(initialValue["a"]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -61,7 +61,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x["c"]).Value.Is(otherValue.At("c"));
+        state.At(x => x["c"]).Value.Is(otherValue["c"]);
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -71,7 +71,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x["a"]).Value.Is(initialValue.At("a"));
+        state.At(x => x["a"]).Value.Is(initialValue["a"]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
         log.Has(2);
@@ -85,7 +85,7 @@ public class MapContainerTest : TestBase
         var factory = GetFactory();
         var initialValue = Arrange();
         var otherValue = ArrangeOther();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateMap(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -105,7 +105,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x["c"]).Value.Is(initialValue.At("c"));
+        state.At(x => x["c"]).Value.Is(initialValue["c"]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -120,7 +120,7 @@ public class MapContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateMap(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -142,7 +142,7 @@ public class MapContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateMap(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -168,7 +168,7 @@ public class MapContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateMap(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -192,7 +192,7 @@ public class MapContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateMap(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -206,14 +206,14 @@ public class MapContainerTest : TestBase
         log.Has(3);
     }
 
-    private IReadOnlyDictionary<string, int> Arrange() => new Dictionary<string, int>
+    private Dictionary<string, int> Arrange() => new()
     {
         { "a", 2 },
         { "b", 4 },
         { "c", 8 },
     };
 
-    private IReadOnlyDictionary<string, int> ArrangeOther() => new Dictionary<string, int>
+    private Dictionary<string, int> ArrangeOther() => new()
     {
         { "a", 2 },
         { "c", 4 }

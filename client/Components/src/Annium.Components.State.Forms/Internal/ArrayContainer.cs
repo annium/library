@@ -13,8 +13,8 @@ namespace Annium.Components.State.Forms.Internal;
 internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
     where T : notnull, new()
 {
-    private static MethodInfo Factory { get; } = StateFactory.ResolveFactory(typeof(T));
-    public T[] Value => CreateValue();
+    private static MethodInfo Factory { get; } = StateFactoryResolver.ResolveFactory(typeof(T));
+    public List<T> Value => CreateValue();
     public bool HasChanged => !Value.IsShallowEqual(_initialValue, _mapper);
     public bool HasBeenTouched => _hasBeenTouched || _states.Any(x => x.Ref.HasBeenTouched);
     public IReadOnlyList<ITrackedState> Children => _states.Select(x => x.Ref).ToArray();
@@ -36,24 +36,24 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
         Reset();
     }
 
-    public bool Set(T[] value)
+    public bool Set(List<T> value)
     {
         var changed = false;
 
         using (Mute())
         {
-            var updated = Math.Min(_states.Count, value.Length);
+            var updated = Math.Min(_states.Count, value.Count);
             for (int i = 0; i < updated; i++)
                 changed = _states[i].Ref.Set(value[i]) || changed;
 
-            var added = Math.Max(value.Length - _states.Count, 0) + updated;
+            var added = Math.Max(value.Count - _states.Count, 0) + updated;
             for (int i = updated; i < added; i++)
             {
                 AddInternal(_states.Count, value[i]);
                 changed = true;
             }
 
-            var removed = Math.Max(_states.Count - value.Length, 0) + updated;
+            var removed = Math.Max(_states.Count - value.Count, 0) + updated;
             for (int i = updated; i < removed; i++)
             {
                 RemoveInternal(i);
@@ -104,25 +104,25 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
         return false;
     }
 
-    public IArrayContainer<TI> At<TI>(Expression<Func<T[], IEnumerable<TI>>> ex) where TI : notnull, new() => At<IArrayContainer<TI>>(ex);
-    public IMapContainer<TK, TV> At<TK, TV>(Expression<Func<T[], IEnumerable<KeyValuePair<TK, TV>>>> ex) where TK : notnull where TV : notnull, new() => At<IMapContainer<TK, TV>>(ex);
-    public IAtomicContainer<sbyte> At(Expression<Func<T[], sbyte>> ex) => At<IAtomicContainer<sbyte>>(ex);
-    public IAtomicContainer<short> At(Expression<Func<T[], short>> ex) => At<IAtomicContainer<short>>(ex);
-    public IAtomicContainer<int> At(Expression<Func<T[], int>> ex) => At<IAtomicContainer<int>>(ex);
-    public IAtomicContainer<long> At(Expression<Func<T[], long>> ex) => At<IAtomicContainer<long>>(ex);
-    public IAtomicContainer<byte> At(Expression<Func<T[], byte>> ex) => At<IAtomicContainer<byte>>(ex);
-    public IAtomicContainer<ushort> At(Expression<Func<T[], ushort>> ex) => At<IAtomicContainer<ushort>>(ex);
-    public IAtomicContainer<uint> At(Expression<Func<T[], uint>> ex) => At<IAtomicContainer<uint>>(ex);
-    public IAtomicContainer<ulong> At(Expression<Func<T[], ulong>> ex) => At<IAtomicContainer<ulong>>(ex);
-    public IAtomicContainer<decimal> At(Expression<Func<T[], decimal>> ex) => At<IAtomicContainer<decimal>>(ex);
-    public IAtomicContainer<float> At(Expression<Func<T[], float>> ex) => At<IAtomicContainer<float>>(ex);
-    public IAtomicContainer<double> At(Expression<Func<T[], double>> ex) => At<IAtomicContainer<double>>(ex);
-    public IAtomicContainer<string> At(Expression<Func<T[], string>> ex) => At<IAtomicContainer<string>>(ex);
-    public IAtomicContainer<bool> At(Expression<Func<T[], bool>> ex) => At<IAtomicContainer<bool>>(ex);
-    public IAtomicContainer<DateTime> At(Expression<Func<T[], DateTime>> ex) => At<IAtomicContainer<DateTime>>(ex);
-    public IAtomicContainer<DateTimeOffset> At(Expression<Func<T[], DateTimeOffset>> ex) => At<IAtomicContainer<DateTimeOffset>>(ex);
-    public IAtomicContainer<Instant> At(Expression<Func<T[], Instant>> ex) => At<IAtomicContainer<Instant>>(ex);
-    public IObjectContainer<TI> At<TI>(Expression<Func<T[], TI>> ex) where TI : notnull, new() => At<IObjectContainer<TI>>(ex);
+    public IArrayContainer<TI> At<TI>(Expression<Func<List<T>, List<TI>>> ex) where TI : notnull, new() => At<IArrayContainer<TI>>(ex);
+    public IMapContainer<TK, TV> At<TK, TV>(Expression<Func<List<T>, Dictionary<TK, TV>>> ex) where TK : notnull where TV : notnull, new() => At<IMapContainer<TK, TV>>(ex);
+    public IAtomicContainer<sbyte> At(Expression<Func<List<T>, sbyte>> ex) => At<IAtomicContainer<sbyte>>(ex);
+    public IAtomicContainer<short> At(Expression<Func<List<T>, short>> ex) => At<IAtomicContainer<short>>(ex);
+    public IAtomicContainer<int> At(Expression<Func<List<T>, int>> ex) => At<IAtomicContainer<int>>(ex);
+    public IAtomicContainer<long> At(Expression<Func<List<T>, long>> ex) => At<IAtomicContainer<long>>(ex);
+    public IAtomicContainer<byte> At(Expression<Func<List<T>, byte>> ex) => At<IAtomicContainer<byte>>(ex);
+    public IAtomicContainer<ushort> At(Expression<Func<List<T>, ushort>> ex) => At<IAtomicContainer<ushort>>(ex);
+    public IAtomicContainer<uint> At(Expression<Func<List<T>, uint>> ex) => At<IAtomicContainer<uint>>(ex);
+    public IAtomicContainer<ulong> At(Expression<Func<List<T>, ulong>> ex) => At<IAtomicContainer<ulong>>(ex);
+    public IAtomicContainer<decimal> At(Expression<Func<List<T>, decimal>> ex) => At<IAtomicContainer<decimal>>(ex);
+    public IAtomicContainer<float> At(Expression<Func<List<T>, float>> ex) => At<IAtomicContainer<float>>(ex);
+    public IAtomicContainer<double> At(Expression<Func<List<T>, double>> ex) => At<IAtomicContainer<double>>(ex);
+    public IAtomicContainer<string> At(Expression<Func<List<T>, string>> ex) => At<IAtomicContainer<string>>(ex);
+    public IAtomicContainer<bool> At(Expression<Func<List<T>, bool>> ex) => At<IAtomicContainer<bool>>(ex);
+    public IAtomicContainer<DateTime> At(Expression<Func<List<T>, DateTime>> ex) => At<IAtomicContainer<DateTime>>(ex);
+    public IAtomicContainer<DateTimeOffset> At(Expression<Func<List<T>, DateTimeOffset>> ex) => At<IAtomicContainer<DateTimeOffset>>(ex);
+    public IAtomicContainer<Instant> At(Expression<Func<List<T>, Instant>> ex) => At<IAtomicContainer<Instant>>(ex);
+    public IObjectContainer<TI> At<TI>(Expression<Func<List<T>, TI>> ex) where TI : notnull, new() => At<IObjectContainer<TI>>(ex);
 
     public void Add(T item)
     {
@@ -157,26 +157,27 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
         return (TX) _states[index].Ref;
     }
 
-    private T[] CreateValue()
+    private List<T> CreateValue()
     {
-        var value = new List<T>();
+        var value = new List<T>(_states.Count);
 
         foreach (var state in _states)
             value.Add(state.Ref.Value);
 
-        return value.ToArray();
+        return value;
     }
 
     private int ResolveIndex(LambdaExpression ex)
     {
-        if (ex.Body is BinaryExpression body && body.NodeType == ExpressionType.ArrayIndex)
+        if (ex.Body is MethodCallExpression { NodeType: ExpressionType.Call } body && body.Method.IsSpecialName && body.Arguments.Count == 1)
         {
-            if (body.Right is ConstantExpression constant && constant.Value?.GetType() == typeof(int))
+            var arg = body.Arguments.ElementAt(0);
+            if (arg is ConstantExpression constant && constant.Value?.GetType() == typeof(int))
                 return (int) constant.Value;
 
-            if (body.Right is MemberExpression member && member.Expression is ConstantExpression)
+            if (arg is MemberExpression { Expression: ConstantExpression })
             {
-                var value = Expression.Lambda(body.Right).Compile().DynamicInvoke();
+                var value = Expression.Lambda(arg).Compile().DynamicInvoke();
                 if (value is int index)
                     return index;
             }

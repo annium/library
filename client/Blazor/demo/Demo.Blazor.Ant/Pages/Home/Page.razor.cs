@@ -16,7 +16,7 @@ public partial class Page : ILogSubject<Page>
 
     protected override void OnInitialized()
     {
-        _state = StateFactory.Create(new Data());
+        _state = StateFactory.CreateObject(new Data());
         ObserveStates();
     }
 }

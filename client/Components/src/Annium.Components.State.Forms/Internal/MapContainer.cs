@@ -14,8 +14,8 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     where TKey : notnull
     where TValue : notnull, new()
 {
-    private static MethodInfo Factory { get; } = StateFactory.ResolveFactory(typeof(TValue));
-    public IReadOnlyDictionary<TKey, TValue> Value => CreateValue();
+    private static MethodInfo Factory { get; } = StateFactoryResolver.ResolveFactory(typeof(TValue));
+    public Dictionary<TKey, TValue> Value => CreateValue();
     public bool HasChanged => !Value.IsShallowEqual(_initialValue, _mapper);
     public bool HasBeenTouched => _hasBeenTouched || _states.Values.Any(x => x.Ref.HasBeenTouched);
     public IReadOnlyCollection<TKey> Keys => _states.Keys.ToArray();
@@ -27,7 +27,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
 
     public MapContainer(
         IStateFactory stateFactory,
-        IReadOnlyDictionary<TKey, TValue> initialValue,
+        Dictionary<TKey, TValue> initialValue,
         IMapper mapper
     )
     {
@@ -38,7 +38,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         Reset();
     }
 
-    public bool Set(IReadOnlyDictionary<TKey, TValue> value)
+    public bool Set(Dictionary<TKey, TValue> value)
     {
         var changed = false;
         using (Mute())
@@ -98,25 +98,25 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         return false;
     }
 
-    public IArrayContainer<TI> At<TI>(Expression<Func<IReadOnlyDictionary<TKey, TValue>, IEnumerable<TI>>> ex) where TI : notnull, new() => At<IArrayContainer<TI>>(ex);
-    public IMapContainer<TK, TV> At<TK, TV>(Expression<Func<IReadOnlyDictionary<TKey, TValue>, IEnumerable<KeyValuePair<TK, TV>>>> ex) where TK : notnull where TV : notnull, new() => At<IMapContainer<TK, TV>>(ex);
-    public IAtomicContainer<sbyte> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, sbyte>> ex) => At<IAtomicContainer<sbyte>>(ex);
-    public IAtomicContainer<short> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, short>> ex) => At<IAtomicContainer<short>>(ex);
-    public IAtomicContainer<int> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, int>> ex) => At<IAtomicContainer<int>>(ex);
-    public IAtomicContainer<long> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, long>> ex) => At<IAtomicContainer<long>>(ex);
-    public IAtomicContainer<byte> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, byte>> ex) => At<IAtomicContainer<byte>>(ex);
-    public IAtomicContainer<ushort> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, ushort>> ex) => At<IAtomicContainer<ushort>>(ex);
-    public IAtomicContainer<uint> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, uint>> ex) => At<IAtomicContainer<uint>>(ex);
-    public IAtomicContainer<ulong> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, ulong>> ex) => At<IAtomicContainer<ulong>>(ex);
-    public IAtomicContainer<decimal> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, decimal>> ex) => At<IAtomicContainer<decimal>>(ex);
-    public IAtomicContainer<float> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, float>> ex) => At<IAtomicContainer<float>>(ex);
-    public IAtomicContainer<double> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, double>> ex) => At<IAtomicContainer<double>>(ex);
-    public IAtomicContainer<string> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, string>> ex) => At<IAtomicContainer<string>>(ex);
-    public IAtomicContainer<bool> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, bool>> ex) => At<IAtomicContainer<bool>>(ex);
-    public IAtomicContainer<DateTime> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, DateTime>> ex) => At<IAtomicContainer<DateTime>>(ex);
-    public IAtomicContainer<DateTimeOffset> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, DateTimeOffset>> ex) => At<IAtomicContainer<DateTimeOffset>>(ex);
-    public IAtomicContainer<Instant> At(Expression<Func<IReadOnlyDictionary<TKey, TValue>, Instant>> ex) => At<IAtomicContainer<Instant>>(ex);
-    public IObjectContainer<TI> At<TI>(Expression<Func<IReadOnlyDictionary<TKey, TValue>, TI>> ex) where TI : notnull, new() => At<IObjectContainer<TI>>(ex);
+    public IArrayContainer<TI> At<TI>(Expression<Func<Dictionary<TKey, TValue>, List<TI>>> ex) where TI : notnull, new() => At<IArrayContainer<TI>>(ex);
+    public IMapContainer<TK, TV> At<TK, TV>(Expression<Func<Dictionary<TKey, TValue>, Dictionary<TK, TV>>> ex) where TK : notnull where TV : notnull, new() => At<IMapContainer<TK, TV>>(ex);
+    public IAtomicContainer<sbyte> At(Expression<Func<Dictionary<TKey, TValue>, sbyte>> ex) => At<IAtomicContainer<sbyte>>(ex);
+    public IAtomicContainer<short> At(Expression<Func<Dictionary<TKey, TValue>, short>> ex) => At<IAtomicContainer<short>>(ex);
+    public IAtomicContainer<int> At(Expression<Func<Dictionary<TKey, TValue>, int>> ex) => At<IAtomicContainer<int>>(ex);
+    public IAtomicContainer<long> At(Expression<Func<Dictionary<TKey, TValue>, long>> ex) => At<IAtomicContainer<long>>(ex);
+    public IAtomicContainer<byte> At(Expression<Func<Dictionary<TKey, TValue>, byte>> ex) => At<IAtomicContainer<byte>>(ex);
+    public IAtomicContainer<ushort> At(Expression<Func<Dictionary<TKey, TValue>, ushort>> ex) => At<IAtomicContainer<ushort>>(ex);
+    public IAtomicContainer<uint> At(Expression<Func<Dictionary<TKey, TValue>, uint>> ex) => At<IAtomicContainer<uint>>(ex);
+    public IAtomicContainer<ulong> At(Expression<Func<Dictionary<TKey, TValue>, ulong>> ex) => At<IAtomicContainer<ulong>>(ex);
+    public IAtomicContainer<decimal> At(Expression<Func<Dictionary<TKey, TValue>, decimal>> ex) => At<IAtomicContainer<decimal>>(ex);
+    public IAtomicContainer<float> At(Expression<Func<Dictionary<TKey, TValue>, float>> ex) => At<IAtomicContainer<float>>(ex);
+    public IAtomicContainer<double> At(Expression<Func<Dictionary<TKey, TValue>, double>> ex) => At<IAtomicContainer<double>>(ex);
+    public IAtomicContainer<string> At(Expression<Func<Dictionary<TKey, TValue>, string>> ex) => At<IAtomicContainer<string>>(ex);
+    public IAtomicContainer<bool> At(Expression<Func<Dictionary<TKey, TValue>, bool>> ex) => At<IAtomicContainer<bool>>(ex);
+    public IAtomicContainer<DateTime> At(Expression<Func<Dictionary<TKey, TValue>, DateTime>> ex) => At<IAtomicContainer<DateTime>>(ex);
+    public IAtomicContainer<DateTimeOffset> At(Expression<Func<Dictionary<TKey, TValue>, DateTimeOffset>> ex) => At<IAtomicContainer<DateTimeOffset>>(ex);
+    public IAtomicContainer<Instant> At(Expression<Func<Dictionary<TKey, TValue>, Instant>> ex) => At<IAtomicContainer<Instant>>(ex);
+    public IObjectContainer<TI> At<TI>(Expression<Func<Dictionary<TKey, TValue>, TI>> ex) where TI : notnull, new() => At<IObjectContainer<TI>>(ex);
 
     public void Add(TKey key, TValue item)
     {
@@ -143,7 +143,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         return (TX) _states[key].Ref;
     }
 
-    private IReadOnlyDictionary<TKey, TValue> CreateValue()
+    private Dictionary<TKey, TValue> CreateValue()
     {
         var value = new Dictionary<TKey, TValue>();
 
@@ -155,7 +155,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
 
     private TKey ResolveKey(LambdaExpression ex)
     {
-        if (ex.Body is MethodCallExpression body && body.Method.IsSpecialName && body.Method.ReturnType == typeof(TValue))
+        if (ex.Body is MethodCallExpression { Method.IsSpecialName: true } body && body.Method.ReturnType == typeof(TValue))
         {
             var parameters = body.Method.GetParameters();
             if (parameters.Length == 1 && parameters[0].ParameterType == typeof(TKey))

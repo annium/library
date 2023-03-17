@@ -17,7 +17,7 @@ public class ComplexTest : TestBase
         var initialValue = Arrange();
 
         // act
-        var state = factory.Create(initialValue);
+        var state = factory.CreateObject(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // assert
@@ -38,7 +38,7 @@ public class ComplexTest : TestBase
         var factory = GetFactory();
         var initialValue = Arrange();
         var otherValue = ArrangeOther();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateObject(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -84,7 +84,7 @@ public class ComplexTest : TestBase
         var factory = GetFactory();
         var initialValue = Arrange();
         var otherValue = ArrangeOther();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateObject(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -119,7 +119,7 @@ public class ComplexTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var state = factory.Create(initialValue);
+        var state = factory.CreateObject(initialValue);
         state.Changed.Subscribe(log.Add);
 
         // act
@@ -138,21 +138,31 @@ public class ComplexTest : TestBase
     {
         Name = "Sample",
         Author = new User { Name = "Max" },
-        Messages = new[] { new Message { Text = "one", IsRead = true }, new Message { Text = "two" } },
+        Messages = new() { new Message { Text = "one", IsRead = true }, new Message { Text = "two" } },
+        EmbeddedDictionary = new Dictionary<string, Dictionary<int, Message>>
+        {
+            {
+                "a", new Dictionary<int, Message>
+                {
+                    { 1, new Message { Text = "hey", IsRead = true } }
+                }
+            }
+        }
     };
 
     private Blog ArrangeOther() => new()
     {
         Name = "Demo",
         Author = new User { Name = "Lex" },
-        Messages = new[] { new Message { Text = "three", IsRead = true }, new Message { Text = "four" }, new Message { Text = "five", IsRead = true } },
+        Messages = new() { new Message { Text = "three", IsRead = true }, new Message { Text = "four" }, new Message { Text = "five", IsRead = true } },
     };
 
     private class Blog
     {
         public string Name { get; set; } = string.Empty;
         public User Author { get; set; } = default!;
-        public IEnumerable<Message> Messages { get; set; } = Array.Empty<Message>();
+        public List<Message> Messages { get; set; } = new();
+        public Dictionary<string, Dictionary<int, Message>> EmbeddedDictionary { get; set; } = new();
     }
 
     private class User

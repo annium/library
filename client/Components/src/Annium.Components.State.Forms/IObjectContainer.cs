@@ -9,8 +9,8 @@ public interface IObjectContainer<T> : IValueTrackedState<T>
     where T : notnull, new()
 {
     IReadOnlyDictionary<string, ITrackedState> Children { get; }
-    IArrayContainer<TI> At<TI>(Expression<Func<T, IEnumerable<TI>>> ex) where TI : notnull, new();
-    IMapContainer<TK, TV> At<TK, TV>(Expression<Func<T, IEnumerable<KeyValuePair<TK, TV>>>> ex) where TK : notnull where TV : notnull, new();
+    IArrayContainer<TI> At<TI>(Expression<Func<T, List<TI>>> ex) where TI : notnull, new();
+    IMapContainer<TK, TV> At<TK, TV>(Expression<Func<T, Dictionary<TK, TV>>> ex) where TK : notnull where TV : notnull, new();
     IAtomicContainer<sbyte> At(Expression<Func<T, sbyte>> ex);
     IAtomicContainer<short> At(Expression<Func<T, short>> ex);
     IAtomicContainer<int> At(Expression<Func<T, int>> ex);
