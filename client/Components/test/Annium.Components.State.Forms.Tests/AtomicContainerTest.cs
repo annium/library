@@ -9,7 +9,7 @@ namespace Annium.Components.State.Forms.Tests;
 public class AtomicContainerTest : TestBase
 {
     [Fact]
-    public void Init_Ok()
+    public void Create_Ok()
     {
         // arrange
         var log = new List<Unit>();
@@ -27,7 +27,7 @@ public class AtomicContainerTest : TestBase
     }
 
     [Fact]
-    public void Change_Ok()
+    public void Set_Ok()
     {
         // arrange
         var log = new List<Unit>();
@@ -53,6 +53,36 @@ public class AtomicContainerTest : TestBase
         state.Value.Is(initial);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
+        log.Has(2);
+    }
+
+    [Fact]
+    public void Init_Ok()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initial = 5;
+        var other = 10;
+        var state = factory.CreateAtomic(initial);
+        state.Changed.Subscribe(log.Add);
+
+        // act
+        state.Set(other).IsTrue();
+
+        // assert
+        state.Value.Is(other);
+        state.HasChanged.IsTrue();
+        state.HasBeenTouched.IsTrue();
+        log.Has(1);
+
+        // act
+        state.Init(other);
+
+        // assert
+        state.Value.Is(other);
+        state.HasChanged.IsFalse();
+        state.HasBeenTouched.IsFalse();
         log.Has(2);
     }
 

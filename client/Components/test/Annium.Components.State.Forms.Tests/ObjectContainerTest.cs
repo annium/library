@@ -11,7 +11,7 @@ namespace Annium.Components.State.Forms.Tests;
 public class ObjectContainerTest : TestBase
 {
     [Fact]
-    public void Init_Ok()
+    public void Create_Ok()
     {
         // arrange
         var log = new List<Unit>();
@@ -76,6 +76,51 @@ public class ObjectContainerTest : TestBase
         state.At(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
+        log.Has(2);
+    }
+
+    [Fact]
+    public void Init_Ok()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initialValue = Arrange();
+        var otherValue = new User
+        {
+            Name = "Lex",
+        };
+        var state = factory.CreateObject(initialValue);
+        state.Changed.Subscribe(log.Add);
+
+        // act
+        state.Set(initialValue).IsFalse();
+
+        // assert
+        state.Value.IsEqual(initialValue);
+        state.At(x => x.Name).Value.Is(initialValue.Name);
+        state.HasChanged.IsFalse();
+        state.HasBeenTouched.IsFalse();
+        log.IsEmpty();
+
+        // act
+        state.Set(otherValue).IsTrue();
+
+        // assert
+        state.Value.IsEqual(otherValue);
+        state.At(x => x.Name).Value.Is(otherValue.Name);
+        state.HasChanged.IsTrue();
+        state.HasBeenTouched.IsTrue();
+        log.Has(1);
+
+        // act
+        state.Init(otherValue);
+
+        // assert
+        state.Value.IsEqual(otherValue);
+        state.At(x => x.Name).Value.Is(otherValue.Name);
+        state.HasChanged.IsFalse();
+        state.HasBeenTouched.IsFalse();
         log.Has(2);
     }
 

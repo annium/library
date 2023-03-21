@@ -19,21 +19,44 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
     public bool HasBeenTouched => _hasBeenTouched || _states.Any(x => x.Ref.HasBeenTouched);
     public IReadOnlyList<ITrackedState> Children => _states.Select(x => x.Ref).ToArray();
     private readonly IStateFactory _stateFactory;
-    private readonly IEnumerable<T> _initialValue;
     private readonly IMapper _mapper;
     private readonly IList<StateReference> _states = new List<StateReference>();
+    private List<T> _initialValue;
     private bool _hasBeenTouched;
 
     public ArrayContainer(
+        List<T> initialValue,
         IStateFactory stateFactory,
-        IEnumerable<T> initialValue,
         IMapper mapper
     )
     {
-        _stateFactory = stateFactory;
         _initialValue = initialValue;
+        _stateFactory = stateFactory;
         _mapper = mapper;
-        Reset();
+        Init(_initialValue);
+    }
+
+    public void Init(List<T> value)
+    {
+        _initialValue = value;
+        using (Mute())
+        {
+            var updated = Math.Min(_states.Count, value.Count);
+            for (int i = 0; i < updated; i++)
+                _states[i].Ref.Init(value[i]);
+
+            var added = Math.Max(value.Count - _states.Count, 0) + updated;
+            for (int i = updated; i < added; i++)
+                AddInternal(_states.Count, value[i]);
+
+            var removed = Math.Max(_states.Count - value.Count, 0) + updated;
+            for (int i = updated; i < removed; i++)
+                RemoveInternal(i);
+        }
+
+        _hasBeenTouched = false;
+
+        NotifyChanged();
     }
 
     public bool Set(List<T> value)
@@ -70,21 +93,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
         return changed;
     }
 
-    public void Reset()
-    {
-        using (Mute())
-        {
-            _states.Clear();
-            foreach (var item in _initialValue)
-            {
-                var state = (IValueTrackedState<T>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
-                _states.Add(new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
-            }
-        }
-
-        _hasBeenTouched = false;
-        NotifyChanged();
-    }
+    public void Reset() => Init(_initialValue);
 
     public bool IsStatus(params Status[] statuses)
     {
@@ -154,7 +163,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
         if (index < 0 || index >= _states.Count)
             throw new IndexOutOfRangeException($"There's no item in container with index {index}");
 
-        return (TX) _states[index].Ref;
+        return (TX)_states[index].Ref;
     }
 
     private List<T> CreateValue()
@@ -169,11 +178,11 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
 
     private int ResolveIndex(LambdaExpression ex)
     {
-        if (ex.Body is MethodCallExpression { NodeType: ExpressionType.Call } body && body.Method.IsSpecialName && body.Arguments.Count == 1)
+        if (ex.Body is MethodCallExpression { NodeType: ExpressionType.Call, Method.IsSpecialName: true, Arguments.Count: 1 } body)
         {
             var arg = body.Arguments.ElementAt(0);
             if (arg is ConstantExpression constant && constant.Value?.GetType() == typeof(int))
-                return (int) constant.Value;
+                return (int)constant.Value;
 
             if (arg is MemberExpression { Expression: ConstantExpression })
             {
@@ -188,7 +197,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
 
     private void AddInternal(int index, T item)
     {
-        var state = (IValueTrackedState<T>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
+        var state = (IValueTrackedState<T>)Factory.Invoke(_stateFactory, new[] { (object)item })!;
         _states.Insert(index, new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
     }
 

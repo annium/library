@@ -11,11 +11,19 @@ internal class AtomicContainer<T> : ObservableState, IAtomicContainer<T>
     public bool HasBeenTouched { get; private set; }
     public Status Status { get; private set; }
     public string Message { get; private set; } = string.Empty;
-    private readonly T _initialValue;
+    private T _initialValue;
 
     public AtomicContainer(T initialValue)
     {
         Value = _initialValue = initialValue;
+    }
+
+    public void Init(T value)
+    {
+        Value = _initialValue = value;
+        HasBeenTouched = false;
+        Status = Status.None;
+        NotifyChanged();
     }
 
     public bool Set(T value)
@@ -30,13 +38,7 @@ internal class AtomicContainer<T> : ObservableState, IAtomicContainer<T>
         return true;
     }
 
-    public void Reset()
-    {
-        Value = _initialValue;
-        HasBeenTouched = false;
-        Status = Status.None;
-        NotifyChanged();
-    }
+    public void Reset() => Init(_initialValue);
 
     public void SetStatus(Status status) => SetStatus(status, string.Empty);
 

@@ -19,7 +19,7 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
 
     static ObjectContainer()
     {
-        Properties = typeof(T).GetProperties().Where(x => x.CanRead && x.CanWrite).ToArray();
+        Properties = typeof(T).GetProperties().Where(x => x is { CanRead: true, CanWrite: true }).ToArray();
         Factories = Properties.ToDictionary(x => x, x => StateFactoryResolver.ResolveFactory(x.PropertyType));
     }
 
@@ -27,25 +27,47 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
     public bool HasChanged => _states.Values.Any(x => x.Ref.HasChanged);
     public bool HasBeenTouched => _states.Values.Any(x => x.Ref.HasBeenTouched);
     public IReadOnlyDictionary<string, ITrackedState> Children => _states.ToDictionary(x => x.Key.Name, x => x.Value.Ref);
+    private T _initialValue;
     private readonly IReadOnlyDictionary<PropertyInfo, StateReference> _states;
 
     public ObjectContainer(
-        IStateFactory stateFactory,
-        T initialValue
+        T initialValue,
+        IStateFactory stateFactory
     )
     {
+        _initialValue = initialValue;
+
         var states = new Dictionary<PropertyInfo, StateReference>();
+        _states = states;
+
         foreach (var property in Properties)
         {
             var create = Factories[property];
-            var @ref = (ITrackedState) create.Invoke(stateFactory, new[] { property.GetMethod!.Invoke(initialValue, Array.Empty<object>())! })!;
+            var @ref = (ITrackedState)create.Invoke(stateFactory, new[] { property.GetMethod!.Invoke(initialValue, Array.Empty<object>())! })!;
             @ref.Changed.Subscribe(_ => NotifyChanged());
-            var get = @ref.GetType().GetProperty(nameof(IValueTrackedState<object>.Value))!.GetMethod!;
-            var set = @ref.GetType().GetMethod(nameof(IValueTrackedState<object>.Set))!;
-            states[property] = new StateReference(@ref, get, set);
+            var type = @ref.GetType();
+            var get = type.GetProperty(nameof(IValueTrackedState<object>.Value))!.GetMethod!;
+            var set = type.GetMethod(nameof(IValueTrackedState<object>.Set))!;
+            var init = type.GetMethod(nameof(IValueTrackedState<object>.Init))!;
+            states[property] = new StateReference(@ref, get, set, init);
+        }
+    }
+
+    public void Init(T value)
+    {
+        _initialValue = value;
+
+        using (Mute())
+        {
+            foreach (var property in Properties)
+            {
+                var state = _states[property];
+                var propertyValue = property.GetMethod!.Invoke(value, Array.Empty<object>())!;
+                state.Init.Invoke(state.Ref, new[] { propertyValue });
+            }
         }
 
-        _states = states;
+        NotifyChanged();
     }
 
     public bool Set(T value)
@@ -57,7 +79,7 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
             {
                 var state = _states[property];
                 var propertyValue = property.GetMethod!.Invoke(value, Array.Empty<object>())!;
-                changed = (bool) state.Set.Invoke(state.Ref, new[] { propertyValue })! || changed;
+                changed = (bool)state.Set.Invoke(state.Ref, new[] { propertyValue })! || changed;
             }
         }
 
@@ -128,12 +150,13 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
         return value;
     }
 
-    private TX At<TX>(LambdaExpression ex) where TX : ITrackedState => (TX) _states[ResolveProperty(ex)].Ref;
+    private TX At<TX>(LambdaExpression ex) where TX : ITrackedState => (TX)_states[ResolveProperty(ex)].Ref;
 
     private PropertyInfo ResolveProperty(LambdaExpression ex)
     {
-        if (ex.Body is MemberExpression body && body.Member is PropertyInfo property)
+        if (ex.Body is MemberExpression { Member: PropertyInfo property })
             return property;
+
         throw new ArgumentException($"{ex} is not a direct property access expression");
     }
 
@@ -142,16 +165,19 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
         public ITrackedState Ref { get; }
         public MethodInfo Get { get; }
         public MethodInfo Set { get; }
+        public MethodInfo Init { get; }
 
         public StateReference(
             ITrackedState @ref,
             MethodInfo get,
-            MethodInfo set
+            MethodInfo set,
+            MethodInfo init
         )
         {
             Ref = @ref;
             Get = get;
             Set = set;
+            Init = init;
         }
 
         public override string ToString() => Ref.GetType().FriendlyName();

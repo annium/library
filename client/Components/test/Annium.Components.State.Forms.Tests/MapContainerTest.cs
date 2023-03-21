@@ -10,7 +10,7 @@ namespace Annium.Components.State.Forms.Tests;
 public class MapContainerTest : TestBase
 {
     [Fact]
-    public void Init_Ok()
+    public void Create_Ok()
     {
         // arrange
         var log = new List<Unit>();
@@ -74,6 +74,48 @@ public class MapContainerTest : TestBase
         state.At(x => x["a"]).Value.Is(initialValue["a"]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
+        log.Has(2);
+    }
+
+    [Fact]
+    public void Init_Ok()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initialValue = Arrange();
+        var otherValue = ArrangeOther();
+        var state = factory.CreateMap(initialValue);
+        state.Changed.Subscribe(log.Add);
+
+        // act
+        state.Set(initialValue).IsFalse();
+
+        // assert
+        state.Value.IsEqual(initialValue);
+        state.At(x => x["a"]).Value.Is(initialValue["a"]);
+        state.HasChanged.IsFalse();
+        state.HasBeenTouched.IsFalse();
+        log.IsEmpty();
+
+        // act
+        state.Set(otherValue).IsTrue();
+
+        // assert
+        state.Value.IsEqual(otherValue);
+        state.At(x => x["c"]).Value.Is(otherValue["c"]);
+        state.HasChanged.IsTrue();
+        state.HasBeenTouched.IsTrue();
+        log.Has(1);
+
+        // act
+        state.Init(otherValue);
+
+        // assert
+        state.Value.IsEqual(otherValue);
+        state.At(x => x["a"]).Value.Is(otherValue["a"]);
+        state.HasChanged.IsFalse();
+        state.HasBeenTouched.IsFalse();
         log.Has(2);
     }
 

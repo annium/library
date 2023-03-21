@@ -154,7 +154,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
 
     private void UpdateDotPerPx()
     {
-        if (Rect.Height == 0 || (_view.Start == decimal.MinValue && _view.End == decimal.MaxValue))
+        if (Rect.Height == 0 || _view is { Start: decimal.MinValue, End: decimal.MaxValue })
             DotPerPx = 0;
         else
             DotPerPx = (_view.End - _view.Start) / Rect.Height;

@@ -20,22 +20,44 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     public bool HasBeenTouched => _hasBeenTouched || _states.Values.Any(x => x.Ref.HasBeenTouched);
     public IReadOnlyCollection<TKey> Keys => _states.Keys.ToArray();
     private readonly IStateFactory _stateFactory;
-    private readonly IReadOnlyDictionary<TKey, TValue> _initialValue;
     private readonly IMapper _mapper;
     private readonly IDictionary<TKey, StateReference> _states;
+    private Dictionary<TKey, TValue> _initialValue;
     private bool _hasBeenTouched;
 
     public MapContainer(
-        IStateFactory stateFactory,
         Dictionary<TKey, TValue> initialValue,
+        IStateFactory stateFactory,
         IMapper mapper
     )
     {
-        _stateFactory = stateFactory;
         _initialValue = initialValue;
+        _stateFactory = stateFactory;
         _mapper = mapper;
         _states = new Dictionary<TKey, StateReference>();
-        Reset();
+        Init(_initialValue);
+    }
+
+    public void Init(Dictionary<TKey, TValue> value)
+    {
+        _initialValue = value;
+        using (Mute())
+        {
+            foreach (var key in _states.Keys.ToArray())
+                if (!value.ContainsKey(key))
+                    _states.Remove(key);
+            foreach (var (key, item) in value)
+            {
+                if (_states.TryGetValue(key, out var state))
+                    state.Ref.Init(item);
+                else
+                    AddInternal(key, item);
+            }
+        }
+
+        _hasBeenTouched = false;
+
+        NotifyChanged();
     }
 
     public bool Set(Dictionary<TKey, TValue> value)
@@ -67,18 +89,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         return changed;
     }
 
-    public void Reset()
-    {
-        using (Mute())
-        {
-            _states.Clear();
-            foreach (var (key, item) in _initialValue)
-                AddInternal(key, item);
-        }
-
-        _hasBeenTouched = false;
-        NotifyChanged();
-    }
+    public void Reset() => Init(_initialValue);
 
     public bool IsStatus(params Status[] statuses)
     {
@@ -99,7 +110,10 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     }
 
     public IArrayContainer<TI> At<TI>(Expression<Func<Dictionary<TKey, TValue>, List<TI>>> ex) where TI : notnull, new() => At<IArrayContainer<TI>>(ex);
-    public IMapContainer<TK, TV> At<TK, TV>(Expression<Func<Dictionary<TKey, TValue>, Dictionary<TK, TV>>> ex) where TK : notnull where TV : notnull, new() => At<IMapContainer<TK, TV>>(ex);
+
+    public IMapContainer<TK, TV> At<TK, TV>(Expression<Func<Dictionary<TKey, TValue>, Dictionary<TK, TV>>> ex) where TK : notnull where TV : notnull, new() =>
+        At<IMapContainer<TK, TV>>(ex);
+
     public IAtomicContainer<sbyte> At(Expression<Func<Dictionary<TKey, TValue>, sbyte>> ex) => At<IAtomicContainer<sbyte>>(ex);
     public IAtomicContainer<short> At(Expression<Func<Dictionary<TKey, TValue>, short>> ex) => At<IAtomicContainer<short>>(ex);
     public IAtomicContainer<int> At(Expression<Func<Dictionary<TKey, TValue>, int>> ex) => At<IAtomicContainer<int>>(ex);
@@ -140,7 +154,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         if (!_states.ContainsKey(key))
             throw new IndexOutOfRangeException($"There's no item in container with key {key}");
 
-        return (TX) _states[key].Ref;
+        return (TX)_states[key].Ref;
     }
 
     private Dictionary<TKey, TValue> CreateValue()
@@ -171,7 +185,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
 
     private void AddInternal(TKey key, TValue item)
     {
-        var state = (IValueTrackedState<TValue>) Factory.Invoke(_stateFactory, new[] { (object) item })!;
+        var state = (IValueTrackedState<TValue>)Factory.Invoke(_stateFactory, new[] { (object)item })!;
         _states[key] = new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged()));
     }
 
