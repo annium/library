@@ -31,4 +31,14 @@ public static class ObservableStateExtensions
     {
         return states.Select(x => x.Changed.Subscribe(_ => handle(x)));
     }
+
+    public static IDisposable Notify<T>(this T state, Action handle)
+        where T : IObservableState =>
+        state.Changed.Subscribe(_ => handle());
+
+    public static IEnumerable<IDisposable> Notify<T>(this IEnumerable<T> states, Action handle)
+        where T : IObservableState
+    {
+        return states.Select(x => x.Changed.Subscribe(_ => handle()));
+    }
 }
