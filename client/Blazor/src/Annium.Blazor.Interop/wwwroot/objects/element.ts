@@ -60,7 +60,7 @@ export const offKeyboardEvent = (id: string, type: KeyboardEventName, cid: numbe
 export const onMouseEvent = (id: string, type: MouseEventName, ref: DotNet.DotNetObject, method: string): number => {
   const callback = cbTracker.track((e: MouseEvent) => {
     e.preventDefault();
-    ref.invokeMethod(method, callback.id, [e.clientX, e.clientY])
+    ref.invokeMethod(method, callback.id, [e.clientX, e.clientY, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey])
   })
   log.debug(id, 'onMouseEvent', type, 'add callback', callback.id)
   getById(id).addEventListener(type, callback)
@@ -75,7 +75,8 @@ export const offMouseEvent = (id: string, type: MouseEventName, cid: number): vo
 export const onWheelEvent = (id: string, type: 'wheel', ref: DotNet.DotNetObject, method: string): number => {
   const callback = cbTracker.track((e: WheelEvent) => {
     e.preventDefault();
-    ref.invokeMethod(method, callback.id, [e.ctrlKey, e.deltaX, e.deltaY])
+    const deltaX = e.shiftKey ? (e.deltaX || e.deltaY) : e.deltaX;
+    ref.invokeMethod(method, callback.id, [deltaX, e.deltaY, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey])
   })
   log.debug(id, 'onWheelEvent', 'add callback', callback.id)
   getById(id).addEventListener(type, callback)
