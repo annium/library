@@ -19,6 +19,11 @@ public partial class Page : ILogSubject<Page>
         _state = StateFactory.CreateObject(new Data());
         ObserveStates();
     }
+
+    private void Toggle()
+    {
+        _state.At(x => x.IsChecked).Set(!_state.At(x => x.IsChecked).Value);
+    }
 }
 
 public class Data
