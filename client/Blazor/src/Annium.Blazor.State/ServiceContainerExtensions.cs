@@ -12,7 +12,7 @@ public static class ServiceContainerExtensions
 
         container.AddAll()
             .AssignableTo<StateBase>()
-            .Where(x => x.IsClass)
+            .Where(x => x is { IsClass: true, IsAbstract: false })
             .AsSelf()
             .AsInterfaces()
             .Scoped();
