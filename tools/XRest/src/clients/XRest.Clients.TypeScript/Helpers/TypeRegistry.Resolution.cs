@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Annium.Core.Reflection;
+using Annium.Reflection;
 using XRest.Clients.TypeScript.Views.Types;
 
 namespace XRest.Clients.TypeScript.Helpers;

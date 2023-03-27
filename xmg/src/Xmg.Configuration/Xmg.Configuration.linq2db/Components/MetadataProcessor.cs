@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Annium.Core.Reflection;
 using Annium.linq2db.Extensions.Configuration.Metadata;
+using Annium.Reflection;
 using LinqToDB.Extensions;
 using LinqToDB.Mapping;
 using Xmg.Core.Models;

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Namotion.Reflection;
 using XRest.Core.Models;
 using XRest.Sources.AspNetCore.Internal.Helpers;
+using ParseHelper = XRest.Sources.Shared.Helpers.ParseHelper;
 
 namespace XRest.Sources.AspNetCore.Internal.Components;
 
@@ -46,13 +47,13 @@ internal static class ActionModelBuilder
 
     private static IEnumerable<ParameterModel> BuildParameterModels(ParameterDescriptor param, IReadOnlyCollection<string> routeParameters, MappingContext ctx)
     {
-        if (Shared.Helpers.ParseHelper.IsSkippedType(param.ParameterType))
+        if (ParseHelper.IsSkippedType(param.ParameterType))
             return Array.Empty<ParameterModel>();
 
         if (routeParameters.Contains(param.Name))
             return new[] { new ParameterModel(ParameterLocationEnum.Path, ctx.Map(param.ParameterType.ToContextualType()), param.Name) };
 
-        if (Shared.Helpers.ParseHelper.IsAllowedQueryType(param.ParameterType, ctx.Config))
+        if (ParseHelper.IsAllowedQueryType(param.ParameterType, ctx.Config))
             return new[] { new ParameterModel(ParameterLocationEnum.Query, ctx.Map(param.ParameterType.ToContextualType()), param.Name) };
 
         return param.ParameterType

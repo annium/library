@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using Annium.Extensions.Arguments;
 
@@ -10,6 +11,6 @@ internal class ConfigureCommand : Command<RootCommandConfiguration>
 
     public override void Handle(RootCommandConfiguration cfg, CancellationToken ct)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }

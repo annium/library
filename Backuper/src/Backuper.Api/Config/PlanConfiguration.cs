@@ -1,15 +1,15 @@
 using System.Collections.Generic;
-using Backuper.Notification.Abstract;
+using Annium.Storage.Abstractions;
 
 namespace Backuper.Api.Config;
 
 public class PlanConfiguration
 {
-    public Annium.Storage.Abstractions.ConfigurationBase Storage { get; set; } = default!;
+    public ConfigurationBase Storage { get; set; } = default!;
 
     public string Interval { get; set; } = string.Empty;
 
     public int Capacity { get; set; }
 
-    public Dictionary<string, ConfigurationBase> Notifications { get; set; } = new Dictionary<string, ConfigurationBase>();
+    public Dictionary<string, Notification.Abstract.ConfigurationBase> Notifications { get; set; } = new Dictionary<string, Notification.Abstract.ConfigurationBase>();
 }

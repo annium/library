@@ -1,6 +1,7 @@
 using Annium.Core.Entrypoint;
 using Annium.Extensions.Arguments;
 using XRest;
+using Group = XRest.Commands.Group;
 
 await using var entry = Entrypoint.Default
     .UseServicePack<ServicePack>()
@@ -8,4 +9,4 @@ await using var entry = Entrypoint.Default
 
 var (provider, ct) = entry;
 
-Commander.Run<XRest.Commands.Group>(provider, args, ct);
+Commander.Run<Group>(provider, args, ct);

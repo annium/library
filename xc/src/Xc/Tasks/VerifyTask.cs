@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Xc.Setup;
 
@@ -7,6 +8,6 @@ internal class VerifyTask : IFuncTask<IReadOnlyCollection<string>, RootSetup, st
 {
     public IReadOnlyCollection<string> Execute(RootSetup cfg, string root)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }
