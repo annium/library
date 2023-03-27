@@ -1,12 +1,14 @@
-@using AntDesign
-@using Annium.Blazor.Ant.Components
 @namespace Demo.Blazor.Ant.Pages.Home
-@inherits Annium.Blazor.Core.BaseComponent
+@using System.Text.Json
+@using Annium.Blazor.Ant.Components
+@using Annium.Blazor.Core
+@using AntDesign
+@inherits BaseComponent
 
 <div>
     <FormField TValue="bool" State="_state.At(x => x.IsChecked)">
         <CheckboxField>checkbox</CheckboxField>
     </FormField>
     <Button OnClick="@Toggle">toggle</Button>
-    <div>@(System.Text.Json.JsonSerializer.Serialize(_state.Value))</div>
+    <div>@(JsonSerializer.Serialize(_state.Value))</div>
 </div>

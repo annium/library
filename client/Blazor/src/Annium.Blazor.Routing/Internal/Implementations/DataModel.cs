@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Annium.Core.Mapper;
-using Annium.Core.Reflection;
 using Annium.Net.Base;
+using Annium.Reflection;
 
 namespace Annium.Blazor.Routing.Internal.Implementations;
 
