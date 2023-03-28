@@ -15,7 +15,7 @@ public interface ISeriesSourceFactory
         Func<Instant, Instant, IReadOnlyList<T>> load,
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     );
 
     ISeriesSource<T> CreateUnchecked<T>(
@@ -23,7 +23,7 @@ public interface ISeriesSourceFactory
         Func<Duration, Instant, Instant, IReadOnlyList<T>> load,
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     );
 
     ISeriesSource<T> CreateUnchecked<T>(
@@ -31,7 +31,7 @@ public interface ISeriesSourceFactory
         Func<Instant, Instant, Task<IReadOnlyList<T>>> load,
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     );
 
     ISeriesSource<T> CreateUnchecked<T>(
@@ -39,7 +39,7 @@ public interface ISeriesSourceFactory
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     );
 
     #endregion
@@ -49,28 +49,28 @@ public interface ISeriesSourceFactory
     ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Instant, Instant, IReadOnlyList<T>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries;
 
     ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, IReadOnlyList<T>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries;
 
     ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries;
 
     ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries;
 

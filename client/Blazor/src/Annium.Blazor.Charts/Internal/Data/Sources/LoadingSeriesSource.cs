@@ -23,7 +23,8 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
     public ValueRange<Instant> Bounds => _cache.Bounds;
     private readonly ISeriesSourceCache<T> _cache;
     private readonly Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> _load;
-    private readonly SeriesSourceOptions _options;
+    private readonly ISeriesSourceOptions _options;
+    private SeriesSourceResolutionOptions _resolutionOptions;
     private int _isLoading;
     private int _isDisposed;
 
@@ -31,7 +32,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
         ISeriesSourceCache<T> cache,
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceOptions options,
+        ISeriesSourceOptions options,
         ILogger<LoadingSeriesSource<T>> logger
     )
     {
@@ -40,12 +41,13 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
         _cache = cache;
         _load = load;
         _options = options;
+        _resolutionOptions = options.GetForResolution(resolution);
         _cache.OnBoundsChange += bounds => OnBoundsChange(bounds);
     }
 
     public bool GetItems(Instant start, Instant end, out IReadOnlyList<T> data)
     {
-        var (min, max) = GetBounds(start, end, _options.BufferZone);
+        var (min, max) = GetBounds(start, end, _resolutionOptions.BufferZone);
 
         this.Log().Trace($"get in {start.S()} - {end.S()} (as {min.S()} - {max.S()})");
 
@@ -94,6 +96,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
             return;
 
         Resolution = resolution;
+        _resolutionOptions = _options.GetForResolution(resolution);
         _cache.SetResolution(resolution);
     }
 
@@ -106,7 +109,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
     {
         Volatile.Write(ref _isLoading, 1);
 
-        var (min, max) = GetBounds(start, end, _options.LoadZone);
+        var (min, max) = GetBounds(start, end, _resolutionOptions.LoadZone);
 
         this.Log().Trace($"start in {start.S()} - {end.S()} (as {min.S()} - {max.S()})");
 

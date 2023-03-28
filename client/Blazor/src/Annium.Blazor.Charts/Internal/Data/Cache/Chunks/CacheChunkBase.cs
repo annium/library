@@ -9,6 +9,7 @@ namespace Annium.Blazor.Charts.Internal.Data.Cache.Chunks;
 
 internal abstract record CacheChunkBase<T>
 {
+    private readonly IComparer<T> _comparer;
     public ValueRange<Instant> Range => _range;
     public List<T> Items { get; }
     private readonly ManagedValueRange<Instant> _range;
@@ -20,8 +21,9 @@ internal abstract record CacheChunkBase<T>
         IComparer<T> comparer
     )
     {
+        _comparer = comparer;
         _range = ValueRange.Create(start, end);
-        Items = items.OrderBy(x => x,comparer).ToList();
+        Items = items.OrderBy(x => x, comparer).ToList();
         Validate();
     }
 
@@ -29,6 +31,7 @@ internal abstract record CacheChunkBase<T>
     {
         _range.SetEnd(chunk.Range.End);
         Items.AddRange(chunk.Items);
+        Items.Sort(_comparer);
     }
 
     private void Validate()

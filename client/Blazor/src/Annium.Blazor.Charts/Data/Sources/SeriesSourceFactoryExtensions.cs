@@ -15,7 +15,7 @@ public static class SeriesSourceFactoryExtensions
         this ISeriesSourceFactory factory,
         Duration resolution,
         Func<Instant, Instant, IReadOnlyList<T>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries
         => factory.CreateUnchecked(resolution, load, Compare, Compare, options);
@@ -24,7 +24,7 @@ public static class SeriesSourceFactoryExtensions
         this ISeriesSourceFactory factory,
         Duration resolution,
         Func<Duration, Instant, Instant, IReadOnlyList<T>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries
         => factory.CreateUnchecked(resolution, load, Compare, Compare, options);
@@ -33,7 +33,7 @@ public static class SeriesSourceFactoryExtensions
         this ISeriesSourceFactory factory,
         Duration resolution,
         Func<Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries
         => factory.CreateUnchecked(resolution, load, Compare, Compare, options);
@@ -42,7 +42,7 @@ public static class SeriesSourceFactoryExtensions
         this ISeriesSourceFactory factory,
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries
         => factory.CreateUnchecked(resolution, load, Compare, Compare, options);

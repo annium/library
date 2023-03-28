@@ -29,7 +29,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Instant, Instant, IReadOnlyList<T>> load,
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), (_, start, end) => Task.FromResult(load(start, end)), options);
 
@@ -38,7 +38,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Duration, Instant, Instant, IReadOnlyList<T>> load,
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), (duration, start, end) => Task.FromResult(load(duration, start, end)), options);
 
@@ -47,7 +47,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Instant, Instant, Task<IReadOnlyList<T>>> load,
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), (_, start, end) => load(start, end), options);
 
@@ -56,7 +56,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), load, options);
 
@@ -67,7 +67,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Instant, Instant, IReadOnlyList<T>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries
         => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (_, start, end) => Task.FromResult(load(start, end)), options);
@@ -75,7 +75,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, IReadOnlyList<T>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries
         => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (duration, start, end) => Task.FromResult(load(duration, start, end)), options);
@@ -83,7 +83,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries
         => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (_, start, end) => load(start, end), options);
@@ -91,7 +91,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceOptions? options = null
+        ISeriesSourceOptions? options = null
     )
         where T : ITimeSeries
         => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), load, options);
@@ -169,12 +169,12 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Duration resolution,
         ISeriesSourceCache<T> cache,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
-        SeriesSourceOptions? options
+        ISeriesSourceOptions? options
     )
     {
         var logger = _loggerFactory.Get<LoadingSeriesSource<T>>();
 
-        return new LoadingSeriesSource<T>(cache, resolution, load, options ?? SeriesSourceOptions.Default, logger);
+        return new LoadingSeriesSource<T>(cache, resolution, load, options ?? SeriesSourceOptionsBuilder.Default, logger);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
