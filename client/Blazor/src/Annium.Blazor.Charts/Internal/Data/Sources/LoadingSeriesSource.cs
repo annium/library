@@ -137,8 +137,8 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
 
     private (Instant, Instant) GetBounds(Instant start, Instant end, decimal zone)
     {
-        var sizeTicks = ((end - start).TotalTicks.FloorInt64() * zone).FloorInt64();
-        var size = Duration.FromTicks(sizeTicks);
+        var range = (end - start).TotalMinutes.CeilInt64();
+        var size = Duration.FromMinutes((range * zone).CeilInt64());
 
         return (start - size, end + size);
     }
