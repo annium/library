@@ -4,10 +4,10 @@ public sealed record SeriesSourceOptions
 {
     public static SeriesSourceOptions Default { get; } = new()
     {
-        BufferZone = 1L,
-        LoadZone = 3L,
+        BufferZone = 0.25m,
+        LoadZone = 0.4m,
     };
 
-    public long BufferZone { get; init; }
-    public long LoadZone { get; init; }
+    public decimal BufferZone { get; init; }
+    public decimal LoadZone { get; init; }
 }
