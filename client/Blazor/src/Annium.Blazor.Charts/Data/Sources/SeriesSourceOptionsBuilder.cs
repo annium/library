@@ -8,17 +8,17 @@ public class SeriesSourceOptionsBuilder
 {
     private readonly Dictionary<Duration, SeriesSourceResolutionOptions> _options;
 
-    public static readonly ISeriesSourceOptions Default = Init(Duration.FromMinutes(1), 9.6m, 12.8m)
-        .Set(Duration.FromMinutes(15), 4.8m, 6.4m)
-        .Set(Duration.FromMinutes(30), 2.4m, 3.2m)
-        .Set(Duration.FromMinutes(60), 1.2m, 1.6m)
-        .Set(Duration.FromMinutes(120), 0.6m, 0.8m)
-        .Set(Duration.FromMinutes(240), 0.3m, 0.4m)
+    public static readonly ISeriesSourceOptions Default = Init(Duration.FromMinutes(1), 1.3m, 1.5m)
+        .Set(Duration.FromMinutes(15), 1.1m, 1.3m)
+        .Set(Duration.FromMinutes(30), 0.9m, 1.1m)
+        .Set(Duration.FromMinutes(60), 0.7m, 0.9m)
+        .Set(Duration.FromMinutes(120), 0.5m, 0.7m)
+        .Set(Duration.FromMinutes(240), 0.3m, 0.5m)
         .Build();
 
     public static SeriesSourceOptionsBuilder Init(Duration resolution, decimal bufferZone, decimal loadZone)
     {
-        var options = new Dictionary<Duration, SeriesSourceResolutionOptions>() { { resolution, new SeriesSourceResolutionOptions(bufferZone, loadZone) } };
+        var options = new Dictionary<Duration, SeriesSourceResolutionOptions> { { resolution, new SeriesSourceResolutionOptions(bufferZone, loadZone) } };
 
         return new SeriesSourceOptionsBuilder(options);
     }
