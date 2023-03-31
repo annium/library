@@ -48,13 +48,14 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
     public bool GetItems(Instant start, Instant end, out IReadOnlyList<T> data)
     {
         var (min, max) = GetBounds(start, end, _resolutionOptions.BufferZone);
+        var info = $"{start.S()} - {end.S()} (as {min.S()} - {max.S()})";
 
-        this.Log().Trace($"get in {start.S()} - {end.S()} (as {min.S()} - {max.S()})");
+        this.Log().Trace($"start for {info}");
 
         // no data was attempted to load
         if (_cache.IsEmpty)
         {
-            this.Log().Trace("cache is empty");
+            this.Log().Trace($"cache is empty for {info}");
             data = Array.Empty<T>();
 
             return false;
@@ -62,13 +63,13 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
 
         if (_cache.HasData(min, max))
         {
-            this.Log().Trace($"all data in {min.S()} - {max.S()} is available");
+            this.Log().Trace($"all data is available for {info}");
             data = _cache.GetData(start, end);
 
             return true;
         }
 
-        this.Log().Trace($"some data in {min.S()} - {max.S()} is missing");
+        this.Log().Trace($"some data is missing for {info}");
         data = Array.Empty<T>();
 
         return false;
@@ -82,10 +83,12 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
             {
                 if (t.IsCompletedSuccessfully)
                     Loaded();
-                else if (t.Exception is not null)
-                    this.Log().Error(t.Exception);
                 else
-                    this.Log().Error($"load done in {t.Status} status");
+                {
+                    this.Log().Error($"load in {start.S()} - {end.S()} failed in {t.Status} status");
+                    if (t.Exception is not null)
+                        this.Log().Error(t.Exception);
+                }
             }
         );
     }
@@ -110,30 +113,32 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
         Volatile.Write(ref _isLoading, 1);
 
         var (min, max) = GetBounds(start, end, _resolutionOptions.LoadZone);
+        var info = $"{start.S()} - {end.S()} (as {min.S()} - {max.S()})";
 
-        this.Log().Trace($"start in {start.S()} - {end.S()} (as {min.S()} - {max.S()})");
+        this.Log().Trace($"start for {info}");
 
         var emptyRanges = _cache.GetEmptyRanges(min, max);
         var dataset = await Task.WhenAll(emptyRanges.Select(async range => (range, await LoadInRange(range.Start, range.End))));
 
         foreach (var (range, data) in dataset)
         {
-            this.Log().Trace($"save {data.Count} item(s) in {range.Start.S()} - {range.End.S()} to cache");
+            this.Log().Trace($"save {data.Count} item(s) to cache for {range.Start.S()} - {range.End.S()}");
             _cache.AddData(range.Start, range.End, data);
         }
 
-        this.Log().Trace($"done in {start.S()} - {end.S()} (as {min.S()} - {max.S()})");
+        this.Log().Trace($"done for {info}");
 
         Volatile.Write(ref _isLoading, 0);
     }
 
     private async Task<IReadOnlyList<T>> LoadInRange(Instant start, Instant end)
     {
-        this.Log().Trace($"{start.S()} - {end.S()}");
+        var info = $"{start.S()} - {end.S()}";
+        this.Log().Trace($"start for {info}");
 
         var items = await _load(Resolution, start, end);
 
-        this.Log().Trace(items.Count > 0 ? $"loaded {items.Count} items in {start.S()} - {end.S()}" : "no items loaded");
+        this.Log().Trace(items.Count > 0 ? $"loaded {items.Count} item(s) for {info}" : $"no items loaded for {info}");
 
         return items;
     }
@@ -149,7 +154,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
     public void Dispose()
     {
         if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 1)
-            throw new InvalidOperationException($"{GetType().FriendlyName()} is already disposed");
+            throw new InvalidOperationException($"{this.GetFullId()} is already disposed");
 
         _cache.Clear();
     }
