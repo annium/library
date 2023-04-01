@@ -24,10 +24,12 @@ internal sealed record CheckedCacheChunk<T> : CacheChunkBase<T>
         if (Items.Count == 0)
             return;
 
-        if (Items[0].Moment < Range.Start)
-            throw new InvalidOperationException($"Invalid chunk: {Items[0]} goes before start at {Range.Start.S()}");
+        var first = Items[0];
+        if (first.Moment < Range.Start)
+            throw new InvalidOperationException($"Invalid chunk: {first} at {first.Moment.S()} goes before start at {Range.Start.S()}");
 
-        if (Items[^1].Moment > Range.End)
-            throw new InvalidOperationException($"Invalid chunk: {Items[^1]} goes after end at {Range.End.S()}");
+        var last = Items[^1];
+        if (last.Moment > Range.End)
+            throw new InvalidOperationException($"Invalid chunk: {last} at {last.Moment.S()} goes after end at {Range.End.S()}");
     }
 }

@@ -9,6 +9,7 @@ using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Data.Models;
 using Annium.Logging.Abstractions;
+using Annium.NodaTime.Extensions;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data.Sources;
@@ -146,7 +147,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
     private (Instant, Instant) GetBounds(Instant start, Instant end, decimal zone)
     {
         var range = (end - start).TotalMinutes.CeilInt64();
-        var size = Duration.FromMinutes((range * zone).CeilInt64());
+        var size = Duration.FromMinutes((range * zone).CeilInt64()).CeilTo(Resolution);
 
         return (start - size, end + size);
     }
