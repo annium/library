@@ -45,12 +45,14 @@
         <PaneSeries>
             <LineSeries T="PointValue" Source="_openSeries" />
         </PaneSeries>
-        <PaneBottom CssClass="@Styles.PaneBottom">
-            <XAxis />
-        </PaneBottom>
         <PaneRight CssClass="@Styles.PaneRight">
             <YAxis />
         </PaneRight>
+    </Pane>
+    <Pane CssClass="@Styles.BottomPane">
+        <PaneBottom CssClass="@Styles.PaneBottom">
+            <XAxis />
+        </PaneBottom>
     </Pane>
     <Crosshair />
 </Chart>

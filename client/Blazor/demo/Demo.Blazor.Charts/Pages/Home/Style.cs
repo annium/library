@@ -5,11 +5,12 @@ namespace Demo.Blazor.Charts.Pages.Home;
 public class Style : RuleSet
 {
     public readonly CssRule Chart = Rule.Class()
+        .FlexColumn(AlignItems.FlexStart, JustifyContent.Stretch)
         .WidthPercent(100)
         .HeightPercent(100);
 
     public readonly CssRule CandlesPane = Rule.Class()
-        .HeightPercent(90);
+        .FlexGrow(1);
 
     public readonly CssRule Resolution = Rule.Class()
         .HeightPx(20)
@@ -17,7 +18,10 @@ public class Style : RuleSet
         .TopRem(1);
 
     public readonly CssRule LinesPane = Rule.Class()
-        .HeightPercent(10);
+        .HeightPercent(8);
+
+    public readonly CssRule BottomPane = Rule.Class()
+        .HeightRem(2);
 
     public readonly CssRule PaneRight = Rule.Class()
         .WidthRem(4);
