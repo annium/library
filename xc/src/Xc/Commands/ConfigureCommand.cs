@@ -4,10 +4,10 @@ using Annium.Extensions.Arguments;
 
 namespace Xc.Commands;
 
-internal class ConfigureCommand : Command<RootCommandConfiguration>
+internal class ConfigureCommand : Command<RootCommandConfiguration>, ICommandDescriptor
 {
-    public override string Id { get; } = "configure";
-    public override string Description { get; } = "configure solution";
+    public static string Id => "configure";
+    public static string Description => "configure solution";
 
     public override void Handle(RootCommandConfiguration cfg, CancellationToken ct)
     {

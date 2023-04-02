@@ -1,10 +1,12 @@
+using Annium.Extensions.Arguments;
+
 namespace Xmg.Commands;
 
-internal class Group : Annium.Extensions.Arguments.Group
+internal class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {
-    public override string Id { get; } = "xmg";
+    public static string Id => "xmg";
 
-    public override string Description { get; } = "Db migration tool";
+    public static string Description => "Db migration tool";
 
     public Group()
     {

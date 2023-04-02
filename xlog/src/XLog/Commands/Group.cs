@@ -1,9 +1,11 @@
+using Annium.Extensions.Arguments;
+
 namespace XLog.Commands;
 
-public class Group : Annium.Extensions.Arguments.Group
+public class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {
-    public override string Id { get; } = string.Empty;
-    public override string Description { get; } = "commands";
+    public static string Id => string.Empty;
+    public static string Description => "commands";
 
     public Group()
     {

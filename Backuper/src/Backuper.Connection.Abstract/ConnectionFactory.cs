@@ -6,20 +6,20 @@ namespace Backuper.Connection.Abstract;
 
 public class ConnectionFactory
 {
-    private readonly IServiceProvider provider;
+    private readonly IServiceProvider _provider;
 
     public ConnectionFactory(
         IServiceProvider provider
     )
     {
-        this.provider = provider;
+        _provider = provider;
     }
 
     public IConnection CreateConnection(ConfigurationBase configuration)
     {
         var factoryType = typeof(Func<,>).MakeGenericType(configuration.GetType(), typeof(IConnection));
 
-        var factory = (Delegate) provider.GetRequiredService(factoryType);
+        var factory = (Delegate) _provider.GetRequiredService(factoryType);
 
         try
         {

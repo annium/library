@@ -1,10 +1,12 @@
+using Annium.Extensions.Arguments;
+
 namespace Xc.Commands;
 
-internal class Group : Annium.Extensions.Arguments.Group
+internal class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {
-    public override string Id { get; } = "xc";
+    public static string Id => "xc";
 
-    public override string Description { get; } = "Configuration manager";
+    public static string Description => "Configuration manager";
 
     public Group()
     {

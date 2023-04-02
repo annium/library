@@ -7,6 +7,7 @@ using Xmg.Migration.Abstractions;
 using Xmg.Migration.Abstractions.Components;
 using Xmg.Migration.Abstractions.Views;
 using Xmg.Migration.FluentMigrator.Views;
+using DeleteTableOperation = Xmg.Migration.FluentMigrator.Views.DeleteTableOperation;
 
 namespace Xmg.Migration.FluentMigrator.Components;
 

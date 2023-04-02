@@ -11,10 +11,10 @@ using Annium.Net;
 
 namespace XLog.Commands;
 
-internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, ILogSubject<ListenCommand>
+internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, ICommandDescriptor, ILogSubject<ListenCommand>
 {
-    public override string Id => string.Empty;
-    public override string Description => "listen";
+    public static string Id => string.Empty;
+    public static string Description => "listen";
     public ILogger<ListenCommand> Logger { get; }
 
     public ListenCommand(

@@ -4,24 +4,24 @@ using xdomains.Tools;
 
 namespace xdomains.Commands;
 
-internal class CleanupCommand : Command<CleanupCommandConfiguration>
+internal class CleanupCommand : Command<CleanupCommandConfiguration>, ICommandDescriptor
 {
-    public override string Id { get; } = "cleanup";
+    public static string Id => "cleanup";
 
-    public override string Description { get; } = "cleanup whois cache";
+    public static string Description => "cleanup whois cache";
 
-    private readonly Cache cache;
+    private readonly Cache _cache;
 
     public CleanupCommand(
         Cache cache
     )
     {
-        this.cache = cache;
+        _cache = cache;
     }
 
     public override void Handle(CleanupCommandConfiguration cfg, CancellationToken ct)
     {
-        cache.Cleanup();
+        _cache.Cleanup();
     }
 }
 

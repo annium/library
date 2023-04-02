@@ -8,19 +8,19 @@ using xdomains.Tools;
 
 namespace xdomains.Commands;
 
-internal class QueryCommand : AsyncCommand<QueryCommandConfiguration>
+internal class QueryCommand : AsyncCommand<QueryCommandConfiguration>, ICommandDescriptor
 {
-    public override string Id { get; } = "query";
+    public static string Id => "query";
 
-    public override string Description { get; } = "query domains";
+    public static string Description => "query domains";
 
-    private readonly Worker worker;
+    private readonly Worker _worker;
 
     public QueryCommand(
         Worker worker
     )
     {
-        this.worker = worker;
+        _worker = worker;
     }
 
     public override Task HandleAsync(QueryCommandConfiguration cfg, CancellationToken ct)
@@ -28,7 +28,7 @@ internal class QueryCommand : AsyncCommand<QueryCommandConfiguration>
         var query = File.ReadAllLines("query.txt").OfType<string>().ToArray();
         var filter = cfg.Filter ? File.ReadAllLines("filter.txt").OfType<string>().ToArray() : Array.Empty<string>();
 
-        return worker.RunAsync(query, filter, cfg.DegreeOfParallelism, ct);
+        return _worker.RunAsync(query, filter, cfg.DegreeOfParallelism, ct);
     }
 }
 

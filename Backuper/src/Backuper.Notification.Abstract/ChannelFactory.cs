@@ -6,20 +6,20 @@ namespace Backuper.Notification.Abstract;
 
 public class ChannelFactory
 {
-    private readonly IServiceProvider provider;
+    private readonly IServiceProvider _provider;
 
     public ChannelFactory(
         IServiceProvider provider
     )
     {
-        this.provider = provider;
+        _provider = provider;
     }
 
     public IChannel CreateChannel(ConfigurationBase configuration)
     {
         var factoryType = typeof(Func<,>).MakeGenericType(configuration.GetType(), typeof(IChannel));
 
-        var factory = (Delegate) provider.GetRequiredService(factoryType);
+        var factory = (Delegate) _provider.GetRequiredService(factoryType);
 
         try
         {

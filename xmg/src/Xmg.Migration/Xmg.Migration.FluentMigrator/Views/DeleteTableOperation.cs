@@ -3,7 +3,7 @@ using Xmg.Migration.Abstractions.Views;
 
 namespace Xmg.Migration.FluentMigrator.Views;
 
-internal class DeleteTableOperation : IDeleteTableOperation
+internal class DeleteTableOperation : Abstractions.Views.DeleteTableOperation
 {
     private readonly string? _schema;
     private readonly string _table;

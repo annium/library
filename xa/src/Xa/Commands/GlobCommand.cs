@@ -6,10 +6,10 @@ using GlobExpressions;
 
 namespace Xa.Commands;
 
-internal class GlobCommand : AsyncCommand<GlobCommandConfiguration>
+internal class GlobCommand : AsyncCommand<GlobCommandConfiguration>, ICommandDescriptor
 {
-    public override string Id => "glob";
-    public override string Description => "glob file";
+    public static string Id => "glob";
+    public static string Description => "glob file";
 
     public override async Task HandleAsync(GlobCommandConfiguration cfg, CancellationToken ct)
     {

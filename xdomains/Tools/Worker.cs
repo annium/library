@@ -9,11 +9,11 @@ namespace xdomains.Tools;
 
 internal class Worker
 {
-    private readonly Resolver resolver;
+    private readonly Resolver _resolver;
 
-    private readonly Parser parser;
+    private readonly Parser _parser;
 
-    private readonly Settings settings;
+    private readonly Settings _settings;
 
     public Worker(
         Resolver resolver,
@@ -21,9 +21,9 @@ internal class Worker
         Settings settings
     )
     {
-        this.resolver = resolver;
-        this.parser = parser;
-        this.settings = settings;
+        _resolver = resolver;
+        _parser = parser;
+        _settings = settings;
     }
 
     public async Task RunAsync(
@@ -43,11 +43,11 @@ internal class Worker
         var i = -1;
         Trace();
 
-        await CheckDomains(domains, handleResolved, degreeOfParallelism, ct);
+        await CheckDomains(domains, HandleResolved, degreeOfParallelism, ct);
 
-        void handleResolved(string domain, string result)
+        void HandleResolved(string domain, string result)
         {
-            var isFree = parser.IsFree(result);
+            var isFree = _parser.IsFree(result);
 
             lock(locker)
             {
@@ -67,7 +67,7 @@ internal class Worker
     private IEnumerable<string> GetDomains(string[] query, string[] zones)
     {
         if (zones.Length == 0)
-            zones = File.ReadAllLines(settings.RootedPath("zones.txt"));
+            zones = File.ReadAllLines(_settings.RootedPath("zones.txt"));
 
         foreach (var name in query)
         foreach (var zone in zones)
@@ -84,7 +84,7 @@ internal class Worker
                 return string.Empty;
 
             semaphore.WaitOne();
-            var result = await resolver.ResolveAsync(domain);
+            var result = await _resolver.ResolveAsync(domain);
             semaphore.Release();
             done(domain, result);
 

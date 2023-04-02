@@ -1,10 +1,12 @@
+using Annium.Extensions.Arguments;
+
 namespace Xdb.Commands.Migrate;
 
-internal class Group : Annium.Extensions.Arguments.Group
+internal class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {
-    public override string Id { get; } = "migrate";
+    public static string Id => "migrate";
 
-    public override string Description { get; } = "Migration commands";
+    public static string Description => "Migration commands";
 
     public Group()
     {

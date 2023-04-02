@@ -12,10 +12,10 @@ using XRest.Clients.Shared.Components;
 
 namespace XRest.Clients.Csharp.Commands;
 
-internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ILogSubject<GenerateCommand>
+internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ICommandDescriptor, ILogSubject<GenerateCommand>
 {
-    public override string Id => "gen";
-    public override string Description => "generate client";
+    public static string Id => "gen";
+    public static string Description => "generate client";
     public ILogger<GenerateCommand> Logger { get; }
     private readonly IApiModelLoader _apiModelLoader;
     private readonly Writer _writer;

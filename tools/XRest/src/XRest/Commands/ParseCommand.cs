@@ -12,10 +12,10 @@ using Constants = XRest.Core.Constants;
 
 namespace XRest.Commands;
 
-internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>
+internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ICommandDescriptor
 {
-    public override string Id => "parse";
-    public override string Description => "parse API";
+    public static string Id => "parse";
+    public static string Description => "parse API";
     private readonly IApiModelLoader _apiModelLoader;
     private readonly ISerializer<string> _serializer;
     public ILogger<ParseCommand> Logger { get; }

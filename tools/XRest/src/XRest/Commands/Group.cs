@@ -1,10 +1,12 @@
+using Annium.Extensions.Arguments;
+
 namespace XRest.Commands;
 
-internal class Group : Annium.Extensions.Arguments.Group
+internal class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {
-    public override string Id => "xrest";
+    public static string Id => "xrest";
 
-    public override string Description => "REST client generator";
+    public static string Description => "REST client generator";
 
     public Group()
     {

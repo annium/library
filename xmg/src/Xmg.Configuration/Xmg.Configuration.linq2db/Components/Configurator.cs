@@ -8,7 +8,7 @@ internal class Configurator : IConfigurator
 {
     private readonly ILoader _loader;
     private readonly IMetadataProcessor _metadataProcessor;
-    public ConfigurationProvider Provider => ConfigurationProvider.linq2db;
+    public ConfigurationProvider Provider => ConfigurationProvider.Linq2db;
 
     public Configurator(
         ILoader loader,

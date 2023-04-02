@@ -1,10 +1,12 @@
+using Annium.Extensions.Arguments;
+
 namespace Xa.Commands;
 
-internal class Group : Annium.Extensions.Arguments.Group
+internal class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {
-    public override string Id { get; } = "xa";
+    public static string Id => "xa";
 
-    public override string Description { get; } = "analytics";
+    public static string Description => "analytics";
 
     public Group()
     {

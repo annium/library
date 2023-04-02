@@ -1,10 +1,12 @@
+using Annium.Extensions.Arguments;
+
 namespace XRest.Clients.Csharp.Commands;
 
-public class Group : Annium.Extensions.Arguments.Group
+public class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {
-    public override string Id => "cs";
+    public static string Id => "cs";
 
-    public override string Description => "C# commands";
+    public static string Description => "C# commands";
 
     public Group()
     {

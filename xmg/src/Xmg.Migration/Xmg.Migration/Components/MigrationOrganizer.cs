@@ -21,7 +21,7 @@ internal class MigrationOrganizer : IMigrationOrganizer
         result.AddRange(list.PullOfType<IDeleteTableUniqueConstraintOperation>());
 
         // delete indexes
-        result.AddRange(list.PullOfType<IDeleteTableIndexOperation>());
+        result.AddRange(list.PullOfType<DeleteTableIndexOperation>());
 
         // delete primary keys
         result.AddRange(list.PullOfType<IDeleteTablePrimaryKeyOperation>());
@@ -30,7 +30,7 @@ internal class MigrationOrganizer : IMigrationOrganizer
         result.AddRange(list.PullOfType<IDeleteTableColumnOperation>());
 
         // delete tables
-        result.AddRange(list.PullOfType<IDeleteTableOperation>());
+        result.AddRange(list.PullOfType<DeleteTableOperation>());
 
         // delete schemas
         result.AddRange(list.PullOfType<IDeleteSchemaOperation>());

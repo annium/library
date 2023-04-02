@@ -1,10 +1,12 @@
+using Annium.Extensions.Arguments;
+
 namespace XRest.Clients.TypeScript.Commands;
 
-public class Group : Annium.Extensions.Arguments.Group
+public class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {
-    public override string Id => "ts";
+    public static string Id => "ts";
 
-    public override string Description => "TypeScript commands";
+    public static string Description => "TypeScript commands";
 
     public Group()
     {

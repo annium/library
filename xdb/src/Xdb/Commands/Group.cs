@@ -1,10 +1,12 @@
+using Annium.Extensions.Arguments;
+
 namespace Xdb.Commands;
 
-internal class Group : Annium.Extensions.Arguments.Group
+internal class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {
-    public override string Id { get; } = "xdb";
+    public static string Id => "xdb";
 
-    public override string Description { get; } = "Db manager";
+    public static string Description => "Db manager";
 
     public Group()
     {

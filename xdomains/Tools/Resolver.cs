@@ -5,18 +5,18 @@ namespace xdomains.Tools;
 
 internal class Resolver
 {
-    private readonly Cache cache;
+    private readonly Cache _cache;
 
     public Resolver(
         Cache cache
     )
     {
-        this.cache = cache;
+        _cache = cache;
     }
 
     public Task<string> ResolveAsync(string domain)
     {
-        var cached = cache.Get(domain);
+        var cached = _cache.Get(domain);
         if (!string.IsNullOrWhiteSpace(cached))
             return Task.FromResult(cached);
 
@@ -32,16 +32,16 @@ internal class Resolver
 
         var tcs = new TaskCompletionSource<string>();
 
-        process.Exited += (sender, e) => handleExit();
+        process.Exited += (sender, e) => HandleExit();
 
         process.Start();
 
         return tcs.Task;
 
-        void handleExit()
+        void HandleExit()
         {
             var result = process.StandardOutput.ReadToEnd();
-            cache.Set(domain, result);
+            _cache.Set(domain, result);
             tcs.SetResult(result);
             process.Dispose();
         }

@@ -82,14 +82,14 @@ public class StateManager : ILogSubject<StateManager>
             if (File.Exists(path))
                 File.Delete(path);
 
-            await notifyAll(ch => ch.InfoAsync($"{server} {plan}: scheduled backup {backupId} procedure succeed"));
+            await NotifyAll(ch => ch.InfoAsync($"{server} {plan}: scheduled backup {backupId} procedure succeed"));
         }
         catch (Exception e)
         {
-            await notifyAll(ch => ch.ErrorAsync($"{server} {plan}: scheduled backup {backupId} procedure failed: {e}"));
+            await NotifyAll(ch => ch.ErrorAsync($"{server} {plan}: scheduled backup {backupId} procedure failed: {e}"));
         }
 
-        Task notifyAll(Func<IChannel, Task> notifyChannel) =>
+        Task NotifyAll(Func<IChannel, Task> notifyChannel) =>
             Task.WhenAll(plan.Notifications.Values.Select(notifyChannel));
     }
 }

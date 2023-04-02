@@ -1,10 +1,12 @@
+using Annium.Extensions.Arguments;
+
 namespace xdomains.Commands;
 
-internal class Group : Annium.Extensions.Arguments.Group
+internal class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {
-    public override string Id { get; } = "xdomains";
+    public static string Id => "xdomains";
 
-    public override string Description { get; } = "domains toolkit";
+    public static string Description => "domains toolkit";
 
     public Group()
     {

@@ -10,7 +10,7 @@ namespace XSass.Internal.Components;
 internal class Compiler : ILogSubject<Compiler>
 {
     public ILogger<Compiler> Logger { get; }
-    private const string CSS = ".css";
+    private const string Css = ".css";
     private readonly CompilationOptions _opts;
 
     public Compiler(
@@ -44,7 +44,7 @@ internal class Compiler : ILogSubject<Compiler>
 
         this.Log().Debug($"Compile: process {file}");
         var result = SassCompiler.CompileFile(file, options: _opts);
-        var newFile = fileInfo.FullName.Replace(fileInfo.Extension, CSS);
+        var newFile = fileInfo.FullName.Replace(fileInfo.Extension, Css);
 
         if (File.Exists(newFile) && result.CompiledContent == await File.ReadAllTextAsync(newFile))
         {

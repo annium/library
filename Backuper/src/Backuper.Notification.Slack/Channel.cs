@@ -8,7 +8,7 @@ namespace Backuper.Notification.Slack;
 public class Channel : IChannel
 {
     private readonly IHttpRequestFactory _httpRequestFactory;
-    private readonly Configuration cfg;
+    private readonly Configuration _cfg;
 
     public Channel(
         IHttpRequestFactory httpRequestFactory,
@@ -16,7 +16,7 @@ public class Channel : IChannel
     )
     {
         _httpRequestFactory = httpRequestFactory;
-        this.cfg = cfg;
+        _cfg = cfg;
     }
 
     public Task InfoAsync(string message) => SendMessageAsync(LogLevel.Info, message);
@@ -27,7 +27,7 @@ public class Channel : IChannel
 
     private Task SendMessageAsync(LogLevel level, string message)
     {
-        var url = $"https://hooks.slack.com/services/{cfg.Team}/{cfg.Channel}/{cfg.Token}";
+        var url = $"https://hooks.slack.com/services/{_cfg.Team}/{_cfg.Channel}/{_cfg.Token}";
         var text = $"{level} {message}";
 
         return _httpRequestFactory.New().Post(url).JsonContent(new { text }).RunAsync();
