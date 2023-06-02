@@ -19,20 +19,15 @@ namespace Annium.Blazor.Charts.Components;
 
 public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
 {
-    [Parameter, EditorRequired]
-    public IChartContext ChartContext { get; set; } = default!;
+    [Parameter, EditorRequired] public IChartContext ChartContext { get; set; } = default!;
 
-    [Parameter]
-    public string? CssClass { get; set; }
+    [Parameter] public string? CssClass { get; set; }
 
-    [Parameter]
-    public RenderFragment ChildContent { get; set; } = default!;
+    [Parameter] public RenderFragment ChildContent { get; set; } = default!;
 
-    [Inject]
-    public ILogger<Chart> Logger { get; set; } = default!;
+    [Inject] public ILogger<Chart> Logger { get; set; } = default!;
 
-    [Inject]
-    private Style Styles { get; set; } = default!;
+    [Inject] private Style Styles { get; set; } = default!;
 
     private string Class => ClassBuilder.With(Styles.Container).With(CssClass).Build();
     private Div _container = default!;
@@ -43,7 +38,7 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
     protected override void OnParametersSet()
     {
         this.Log().Trace("request draw");
-        _chartContext = (IManagedChartContext) ChartContext;
+        _chartContext = (IManagedChartContext)ChartContext;
         _chartContext.RequestDraw();
         _rawZoom = _chartContext.Zoom;
     }
@@ -59,9 +54,19 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
         _disposable += _container;
         _disposable += Window.OnResize(_ => _chartContext.SetRect(_container.GetBoundingClientRect()));
         _disposable += _container.OnResize(_ => _chartContext.SetRect(_container.GetBoundingClientRect()));
+        _disposable += Window.OnKeyDown(HandleKeyboard, false);
         _container.OnWheel(HandleWheel);
         _container.OnMouseMove(HandlePointerMove);
         _container.OnMouseOut(HandlePointerOut);
+    }
+
+    private void HandleKeyboard(KeyboardEvent e)
+    {
+        if (e is { AltKey: true } && (e.Key == "-" || e.Code == "Minus"))
+            ChangeZoom(-1);
+
+        if (e is { AltKey: true } && (e.Key == "=" || e.Code == "Equal"))
+            ChangeZoom(1);
     }
 
     private void HandleWheel(WheelEvent e)
@@ -101,16 +106,33 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
 
     private bool HandleZoomDelta(decimal delta)
     {
-        var zooms = _chartContext.Zooms.ToList();
-        var zoomIndex = zooms.IndexOf(_chartContext.Zoom);
+        return ChangeZoom(delta < 0 ? 1 : -1);
+    }
 
-        var newZoomIndex = (delta < 0 ? zoomIndex + 1 : zoomIndex - 1).Within(0, zooms.Count - 1);
+    private bool ChangeZoom(int delta)
+    {
+        var zoomIndex = ResolveZoomIndex();
+
+        var newZoomIndex = (zoomIndex + delta).Within(0, _chartContext.Zooms.Count - 1);
         if (newZoomIndex == zoomIndex)
             return false;
 
-        _chartContext.SetZoom(zooms[newZoomIndex]);
+        _chartContext.SetZoom(_chartContext.Zooms[newZoomIndex]);
 
         return true;
+    }
+
+    private int ResolveZoomIndex()
+    {
+        var index = 0;
+        foreach (var zoom in _chartContext.Zooms)
+        {
+            if (zoom == _chartContext.Zoom)
+                return index;
+            index++;
+        }
+
+        throw new InvalidOperationException("Failed to resolve zoom index");
     }
 
     private bool HandleScrollDelta(decimal delta)
