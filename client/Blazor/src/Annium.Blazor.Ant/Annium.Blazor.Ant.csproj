@@ -17,6 +17,6 @@
         <ProjectReference Include="../../../shared/src/Annium.Components.State.Operations/Annium.Components.State.Operations.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="AntDesign" Version="0.14.3" />
+        <PackageReference Include="AntDesign" Version="0.15.0" />
     </ItemGroup>
 </Project>

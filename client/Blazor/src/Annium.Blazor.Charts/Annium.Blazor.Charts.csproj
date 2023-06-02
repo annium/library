@@ -20,6 +20,6 @@
         <PackageReference Include="Annium.Data.Models" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Jobs" Version="0.1.0" />
         <PackageReference Include="Annium.NodaTime.Extensions" Version="0.1.0" />
-        <PackageReference Include="OneOf" Version="3.0.223" />
+        <PackageReference Include="OneOf" Version="3.0.243" />
     </ItemGroup>
 </Project>
