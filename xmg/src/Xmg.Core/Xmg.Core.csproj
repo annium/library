@@ -16,6 +16,6 @@
         <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Runtime" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Abstractions" Version="0.1.0" />
-        <PackageReference Include="Scriban" Version="5.6.0" />
+        <PackageReference Include="Scriban" Version="5.7.0" />
     </ItemGroup>
 </Project>
