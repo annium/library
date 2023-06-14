@@ -4,7 +4,6 @@ using System.Linq;
 using Annium.linq2db.Extensions.Configuration.Metadata;
 using Annium.Reflection;
 using LinqToDB.Extensions;
-using LinqToDB.Mapping;
 using Xmg.Core.Models;
 using LDataType = LinqToDB.DataType;
 
@@ -91,8 +90,8 @@ internal class MetadataProcessor : IMetadataProcessor
             return null;
 
         // foreign key will be created only if there's Relationship.OneToOne (thus, ThisKey, OtherKey will be defined)
-        if (column.Association.Relationship != Relationship.OneToOne)
-            return null;
+        // if (column.Association.Relationship != Relationship.OneToOne)
+        //     return null;
 
         var foreignColumn = table.Columns.Values.SingleOrDefault(x => x.Member.Name == column.Association.ThisKey)
                             ?? throw new InvalidOperationException(
