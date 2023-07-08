@@ -12,9 +12,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="../Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
         <ProjectReference Include="../../../shared/src/Annium.Components.State.Forms/Annium.Components.State.Forms.csproj" />
         <ProjectReference Include="../../../shared/src/Annium.Components.State.Operations/Annium.Components.State.Operations.csproj" />
+        <ProjectReference Include="../Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="AntDesign" Version="0.15.0" />
