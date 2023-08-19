@@ -26,22 +26,17 @@ public class CustomLoadContext : AssemblyLoadContext
         Default.Resolving += OnDefaultAssemblyLoadContextResolving;
     }
 
-    private Assembly OnDefaultAssemblyLoadContextResolving(AssemblyLoadContext context, AssemblyName assemblyName)
+    private Assembly? OnDefaultAssemblyLoadContextResolving(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        string assemblyPath = _customDefaultContextResolver.ResolveAssemblyToPath(assemblyName);
+        var assemblyPath = _customDefaultContextResolver.ResolveAssemblyToPath(assemblyName);
 
-        if (assemblyPath != null!)
-        {
-            return LoadFromAssemblyPath(assemblyPath);
-        }
-
-        return default!;
+        return assemblyPath is not null ? LoadFromAssemblyPath(assemblyPath) : default;
     }
 
-    protected override Assembly Load(AssemblyName assemblyName)
+    protected override Assembly? Load(AssemblyName assemblyName)
     {
         if (assemblyName.Name!.StartsWith("Amazon.Lambda.Core"))
-            return default!;
+            return default;
 
         var assemblyPath = _builtInResolver.ResolveAssemblyToPath(assemblyName);
         if (assemblyPath == null || !File.Exists(assemblyPath))
@@ -49,12 +44,7 @@ public class CustomLoadContext : AssemblyLoadContext
             assemblyPath = _customResolver.ResolveAssemblyToPath(assemblyName);
         }
 
-        if (assemblyPath != null!)
-        {
-            return LoadFromAssemblyPath(assemblyPath);
-        }
-
-        return default!;
+        return assemblyPath != null! ? LoadFromAssemblyPath(assemblyPath) : default;
     }
 
     protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
@@ -72,7 +62,7 @@ public class CustomLoadContext : AssemblyLoadContext
     private class CustomAssemblyResolver
     {
         private readonly ICompilationAssemblyResolver _assemblyResolver;
-        private readonly DependencyContext _dependencyContext;
+        private readonly DependencyContext? _dependencyContext;
 
         public CustomAssemblyResolver(
             AssemblyLoadContext assemblyLoadContext,
@@ -85,18 +75,35 @@ public class CustomLoadContext : AssemblyLoadContext
             _assemblyResolver = new CompositeCompilationAssemblyResolver
             (new ICompilationAssemblyResolver[]
             {
-                new AppBaseCompilationAssemblyResolver(Path.GetDirectoryName(rootAssemblyPath)),
+                new AppBaseCompilationAssemblyResolver(Path.GetDirectoryName(rootAssemblyPath)!),
                 new ReferenceAssemblyPathResolver(),
                 new PackageCompilationAssemblyResolver()
             });
         }
 
-        public string ResolveAssemblyToPath(AssemblyName name)
+        public string? ResolveAssemblyToPath(AssemblyName name)
         {
-            bool NamesMatch(RuntimeLibrary runtime)
+            var library = _dependencyContext?.RuntimeLibraries.FirstOrDefault(NamesMatch) ?? _dependencyContext?.RuntimeLibraries.FirstOrDefault(ResourceAssetPathMatch);
+
+            if (library is null) return default;
+
+            var wrapper = new CompilationLibrary(
+                library.Type,
+                library.Name,
+                library.Version,
+                library.Hash,
+                library.RuntimeAssemblyGroups.SelectMany(g => g.AssetPaths),
+                library.Dependencies,
+                library.Serviceable);
+
+            var assemblies = new List<string>();
+            _assemblyResolver.TryResolveAssemblyPaths(wrapper, assemblies);
+            if (assemblies.Count > 0)
             {
-                return string.Equals(runtime.Name, name.Name, StringComparison.OrdinalIgnoreCase);
+                return assemblies[0];
             }
+
+            return default!;
 
             bool ResourceAssetPathMatch(RuntimeLibrary runtime)
             {
@@ -114,31 +121,10 @@ public class CustomLoadContext : AssemblyLoadContext
                 return false;
             }
 
-            RuntimeLibrary library = _dependencyContext.RuntimeLibraries.FirstOrDefault(NamesMatch)!;
-
-            if (library == null!)
-                library = _dependencyContext.RuntimeLibraries.FirstOrDefault(ResourceAssetPathMatch)!;
-
-            if (library != null!)
+            bool NamesMatch(RuntimeLibrary runtime)
             {
-                var wrapper = new CompilationLibrary(
-                    library.Type,
-                    library.Name,
-                    library.Version,
-                    library.Hash,
-                    library.RuntimeAssemblyGroups.SelectMany(g => g.AssetPaths),
-                    library.Dependencies,
-                    library.Serviceable);
-
-                var assemblies = new List<string>();
-                _assemblyResolver.TryResolveAssemblyPaths(wrapper, assemblies);
-                if (assemblies.Count > 0)
-                {
-                    return assemblies[0];
-                }
+                return string.Equals(runtime.Name, name.Name, StringComparison.OrdinalIgnoreCase);
             }
-
-            return default!;
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace XRest.Clients.TypeScript.Views.Types;
 
-internal class EnumView : DefinedTypeView
+internal record EnumView : DefinedTypeView
 {
     public override TypeViewEnum Type => TypeViewEnum.Enum;
 

@@ -1,18 +1,8 @@
-using Annium.Data.Models;
-
 namespace XRest.Clients.TypeScript.Views.Types;
 
-internal abstract class TypeView : Equatable<TypeView>
+internal abstract record TypeView(string Name)
 {
-    public string Name { get; }
     public abstract TypeViewEnum Type { get; }
-
-    protected TypeView(
-        string name
-    )
-    {
-        Name = name;
-    }
 
     public override int GetHashCode() => ToString()!.GetHashCode();
 }

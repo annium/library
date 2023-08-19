@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace XRest.Clients.TypeScript.Views.Types;
 
-internal class ClassView : DefinedTypeView
+internal record ClassView : DefinedTypeView
 {
     public override TypeViewEnum Type => TypeViewEnum.Class;
     public bool IsGenericType { get; }
@@ -120,7 +120,7 @@ internal class ClassView : DefinedTypeView
         if (!IsGenericType)
             return Name;
 
-        var arguments = IsGenericTypeDefinition ? (IReadOnlyCollection<TypeView>) GenericParameters : GenericArguments;
+        var arguments = IsGenericTypeDefinition ? (IReadOnlyCollection<TypeView>)GenericParameters : GenericArguments;
 
         // special handling for nullable
         if (Name == BaseType.Nullable.Name)
