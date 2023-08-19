@@ -13,7 +13,7 @@ internal sealed record RawLocation
             return new RawLocation(Helper.ParseTemplateParts(uri), new Dictionary<string, StringValues>());
 
         var (path, rawQuery, _) = uri.Split('?');
-        var query = QueryHelpers.ParseQuery(rawQuery);
+        var query = UriQuery.Parse(rawQuery);
 
         return new RawLocation(Helper.ParseTemplateParts(path), query);
     }
