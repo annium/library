@@ -7,15 +7,15 @@ using Annium.Blazor.Charts.Domain.Lookup;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Interop;
 using Annium.Data.Models;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using NodaTime;
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
-internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartContext>
+internal sealed record ChartContext : IManagedChartContext, ILogSubject
 {
-    public ILogger<ChartContext> Logger { get; }
+    public ILogger Logger { get; }
     public event Action Updated = delegate { };
     public event Action<Instant?, Point?> LookupChanged = delegate { };
     public Instant Moment { get; private set; }
@@ -43,7 +43,7 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject<ChartCon
 
     public ChartContext(
         ITimeProvider timeProvider,
-        ILogger<ChartContext> logger
+        ILogger logger
     )
     {
         Logger = logger;

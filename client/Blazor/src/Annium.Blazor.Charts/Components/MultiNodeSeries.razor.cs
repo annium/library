@@ -4,12 +4,13 @@ using System.Linq;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class MultiNodeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<MultiNodeSeries<TM, TI>>
+public partial class MultiNodeSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     where TM : IMultiValue<TI>
     where TI : IPointItem
 {
@@ -19,7 +20,7 @@ public partial class MultiNodeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
     public Renderer RenderItem { get; set; } = delegate { };
 
     [Inject]
-    public ILogger<MultiNodeSeries<TM, TI>> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     protected override int MinValuesToRender => 1;
 

@@ -9,6 +9,7 @@ using Annium.Testing;
 using Annium.Testing.Lib;
 using NodaTime;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Annium.Blazor.Charts.Tests.Internal.Data;
 
@@ -16,7 +17,8 @@ public class LoadingSeriesSourceTests : TestBase
 {
     private readonly Instant _now = new LocalDateTime(2020, 1, 15, 14, 20).InUtc().ToInstant();
 
-    public LoadingSeriesSourceTests()
+    public LoadingSeriesSourceTests(ITestOutputHelper outputHelper)
+        : base(outputHelper)
     {
         Register(container => container.AddCharts());
     }

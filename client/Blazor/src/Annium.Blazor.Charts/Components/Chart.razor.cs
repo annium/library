@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Domain.Lookup;
@@ -11,13 +10,14 @@ using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
 using Annium.Blazor.Interop.Domain;
 using Annium.Extensions.Jobs;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
+public partial class Chart : ILogSubject, IAsyncDisposable
 {
     [Parameter, EditorRequired] public IChartContext ChartContext { get; set; } = default!;
 
@@ -25,7 +25,7 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
 
     [Parameter] public RenderFragment ChildContent { get; set; } = default!;
 
-    [Inject] public ILogger<Chart> Logger { get; set; } = default!;
+    [Inject] public ILogger Logger { get; set; } = default!;
 
     [Inject] private Style Styles { get; set; } = default!;
 
@@ -33,11 +33,11 @@ public partial class Chart : ILogSubject<Chart>, IAsyncDisposable
     private Div _container = default!;
     private IManagedChartContext _chartContext = default!;
     private decimal _rawZoom;
-    private AsyncDisposableBox _disposable = Disposable.AsyncBox();
+    private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);
 
     protected override void OnParametersSet()
     {
-        this.Log().Trace("request draw");
+        this.Trace("request draw");
         _chartContext = (IManagedChartContext)ChartContext;
         _chartContext.RequestDraw();
         _rawZoom = _chartContext.Zoom;

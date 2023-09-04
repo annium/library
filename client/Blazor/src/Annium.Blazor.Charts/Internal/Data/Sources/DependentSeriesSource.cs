@@ -5,18 +5,18 @@ using Annium.Blazor.Charts.Domain.Lookup;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Data.Models;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
 internal class DependentSeriesSource<TS, TD> :
     ISeriesSource<TD>,
-    ILogSubject<DependentSeriesSource<TS, TD>>
+    ILogSubject
 {
     public event Action Loaded = delegate { };
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
-    public ILogger<DependentSeriesSource<TS, TD>> Logger { get; }
+    public ILogger Logger { get; }
     public Duration Resolution => _source.Resolution;
     public bool IsLoading => _source.IsLoading;
     public ValueRange<Instant> Bounds => _source.Bounds;
@@ -28,7 +28,7 @@ internal class DependentSeriesSource<TS, TD> :
         ISeriesSource<TS> source,
         ISeriesSourceCache<TD> cache,
         Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues,
-        ILogger<DependentSeriesSource<TS, TD>> logger
+        ILogger logger
     )
     {
         Logger = logger;
@@ -43,7 +43,7 @@ internal class DependentSeriesSource<TS, TD> :
     {
         if (_cache.HasData(start, end))
         {
-            this.Log().Trace($"get data in {start.S()} - {end.S()}: found in cache");
+            this.Trace($"get data in {start.S()} - {end.S()}: found in cache");
             data = _cache.GetData(start, end);
 
             return true;
@@ -51,13 +51,13 @@ internal class DependentSeriesSource<TS, TD> :
 
         if (!_source.GetItems(start, end, out _))
         {
-            this.Log().Trace($"get data in {start.S()} - {end.S()}: missing in source");
+            this.Trace($"get data in {start.S()} - {end.S()}: missing in source");
             data = Array.Empty<TD>();
 
             return false;
         }
 
-        this.Log().Trace($"get data in {start.S()} - {end.S()}: found in source, fill cache");
+        this.Trace($"get data in {start.S()} - {end.S()}: found in source, fill cache");
 
         var emptyRanges = _cache.GetEmptyRanges(start, end);
         foreach (var range in emptyRanges)
@@ -66,12 +66,12 @@ internal class DependentSeriesSource<TS, TD> :
                 throw new InvalidOperationException($"Series source {_source} invalid behavior: expected to get data in range {range.S()}");
 
             var rangeData = _getValues(rangeSource, _source.Resolution, range.Start, range.End);
-            this.Log().Trace($"save {rangeData.Count} item(s) ({rangeSource.Count} sourced) in {range.S()} to cache");
+            this.Trace($"save {rangeData.Count} item(s) ({rangeSource.Count} sourced) in {range.S()} to cache");
             _cache.AddData(range.Start, range.End, rangeData);
         }
 
         data = _cache.GetData(start, end);
-        this.Log().Trace($"get data in {start} - {end}: served from cache");
+        this.Trace($"get data in {start} - {end}: served from cache");
 
         return true;
     }
@@ -80,7 +80,7 @@ internal class DependentSeriesSource<TS, TD> :
 
     public void LoadItems(Instant start, Instant end)
     {
-        // this.Log().Trace($"get data in {start} - {end}");
+        // this.Trace($"get data in {start} - {end}");
         _source.LoadItems(start, end);
     }
 

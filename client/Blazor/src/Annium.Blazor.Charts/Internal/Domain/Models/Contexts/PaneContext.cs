@@ -7,13 +7,13 @@ using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Interop;
 using Annium.Data.Models;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using NodaTime;
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
-internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneContext, ILogSubject<PaneContext>
+internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSubject
 {
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
     public IChartContext Chart { get; private set; } = default!;
@@ -63,7 +63,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         var renderingRanges = _sourceRanges.Values.Where(x => x.Start != decimal.MinValue || x.End != decimal.MaxValue).ToArray();
         if (renderingRanges.Length > 0)
         {
-            this.Log().Trace($"update Pane range from {renderingRanges.Length} rendering source(s)");
+            this.Trace($"update Pane range from {renderingRanges.Length} rendering source(s)");
             _range.Set(
                 renderingRanges.Min(x => x.Start),
                 renderingRanges.Max(x => x.End)
@@ -71,17 +71,17 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
         }
         else
         {
-            this.Log().Trace("reset Pane range due to lack of rendering source(s)");
+            this.Trace("reset Pane range due to lack of rendering source(s)");
             _range.Set(decimal.MinValue, decimal.MaxValue);
         }
 
         if (Range.Start == start && Range.End == end)
         {
-            this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, not changed Pane range: {Range}");
+            this.Trace($"range of {source.GetFullId()} updated to {min} - {max}, not changed Pane range: {Range}");
             return false;
         }
 
-        this.Log().Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}");
+        this.Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}");
         (start, end) = Range;
 
         // no rendering ranges
@@ -109,11 +109,11 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
     {
         if (_sources.Contains(source))
         {
-            this.Log().Trace($"source {source.GetFullId()} is already tracked");
+            this.Trace($"source {source.GetFullId()} is already tracked");
             return Disposable.Empty;
         }
 
-        this.Log().Trace($"track source {source.GetFullId()}");
+        this.Trace($"track source {source.GetFullId()}");
         _sources.Add(source);
         _sourceRanges[source] = ValueRange.Create(decimal.MinValue, decimal.MaxValue);
         source.OnBoundsChange += UpdateBounds;
@@ -124,7 +124,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
             if (!_sources.Remove(source))
                 throw new InvalidOperationException("Source is not registered");
 
-            this.Log().Trace($"untrack source {source.GetFullId()}");
+            this.Trace($"untrack source {source.GetFullId()}");
             _sourceRanges.Remove(source);
             source.OnBoundsChange -= UpdateBounds;
             Chart?.RequestDraw();
@@ -175,7 +175,7 @@ internal sealed record PaneContext(ILogger<PaneContext> Logger) : IManagedPaneCo
 
     private void ResetRangeAndView()
     {
-        this.Log().Trace(string.Empty);
+        this.Trace(string.Empty);
         _range.Set(0m, 0m);
         _view.Set(0m, 0m);
         UpdateDotPerPx();

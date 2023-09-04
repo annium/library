@@ -8,17 +8,17 @@ using Annium.Blazor.Charts.Domain.Lookup;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Charts.Internal.Data.Cache;
 using Annium.Data.Models;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Annium.NodaTime.Extensions;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
-internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSeriesSource<T>>
+internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
 {
     public event Action Loaded = delegate { };
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
-    public ILogger<LoadingSeriesSource<T>> Logger { get; }
+    public ILogger Logger { get; }
     public Duration Resolution { get; private set; }
     public bool IsLoading => Volatile.Read(ref _isLoading) == 1;
     public ValueRange<Instant> Bounds => _cache.Bounds;
@@ -34,7 +34,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
         ISeriesSourceOptions options,
-        ILogger<LoadingSeriesSource<T>> logger
+        ILogger logger
     )
     {
         Resolution = resolution;
@@ -51,12 +51,12 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
         var (min, max) = GetBounds(start, end, _resolutionOptions.BufferZone);
         var info = $"{start.S()} - {end.S()} (as {min.S()} - {max.S()})";
 
-        this.Log().Trace($"start for {info}");
+        this.Trace($"start for {info}");
 
         // no data was attempted to load
         if (_cache.IsEmpty)
         {
-            this.Log().Trace($"cache is empty for {info}");
+            this.Trace($"cache is empty for {info}");
             data = Array.Empty<T>();
 
             return false;
@@ -64,13 +64,13 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
 
         if (_cache.HasData(min, max))
         {
-            this.Log().Trace($"all data is available for {info}");
+            this.Trace($"all data is available for {info}");
             data = _cache.GetData(start, end);
 
             return true;
         }
 
-        this.Log().Trace($"some data is missing for {info}");
+        this.Trace($"some data is missing for {info}");
         data = Array.Empty<T>();
 
         return false;
@@ -86,9 +86,9 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
                     Loaded();
                 else
                 {
-                    this.Log().Error($"load in {start.S()} - {end.S()} failed in {t.Status} status");
+                    this.Error($"load in {start.S()} - {end.S()} failed in {t.Status} status");
                     if (t.Exception is not null)
-                        this.Log().Error(t.Exception);
+                        this.Error(t.Exception);
                 }
             }
         );
@@ -116,18 +116,18 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
         var (min, max) = GetBounds(start, end, _resolutionOptions.LoadZone);
         var info = $"{start.S()} - {end.S()} (as {min.S()} - {max.S()})";
 
-        this.Log().Trace($"start for {info}");
+        this.Trace($"start for {info}");
 
         var emptyRanges = _cache.GetEmptyRanges(min, max);
         var dataset = await Task.WhenAll(emptyRanges.Select(async range => (range, await LoadInRange(range.Start, range.End))));
 
         foreach (var (range, data) in dataset)
         {
-            this.Log().Trace($"save {data.Count} item(s) to cache for {range.Start.S()} - {range.End.S()}");
+            this.Trace($"save {data.Count} item(s) to cache for {range.Start.S()} - {range.End.S()}");
             _cache.AddData(range.Start, range.End, data);
         }
 
-        this.Log().Trace($"done for {info}");
+        this.Trace($"done for {info}");
 
         Volatile.Write(ref _isLoading, 0);
     }
@@ -135,11 +135,11 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject<LoadingSer
     private async Task<IReadOnlyList<T>> LoadInRange(Instant start, Instant end)
     {
         var info = $"{start.S()} - {end.S()}";
-        this.Log().Trace($"start for {info}");
+        this.Trace($"start for {info}");
 
         var items = await _load(Resolution, start, end);
 
-        this.Log().Trace(items.Count > 0 ? $"loaded {items.Count} item(s) for {info}" : $"no items loaded for {info}");
+        this.Trace(items.Count > 0 ? $"loaded {items.Count} item(s) for {info}" : $"no items loaded for {info}");
 
         return items;
     }

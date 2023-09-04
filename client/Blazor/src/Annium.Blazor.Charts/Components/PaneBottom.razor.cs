@@ -6,13 +6,14 @@ using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class PaneBottom : ILogSubject<PaneBottom>, IAsyncDisposable
+public partial class PaneBottom : ILogSubject, IAsyncDisposable
 {
     [Parameter]
     public string? CssClass { get; set; }
@@ -33,14 +34,14 @@ public partial class PaneBottom : ILogSubject<PaneBottom>, IAsyncDisposable
     private Style Styles { get; set; } = default!;
 
     [Inject]
-    public ILogger<PaneBottom> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     private string Class => ClassBuilder.With(Styles.Block).With(CssClass).Build();
 
     private Div _block = default!;
     private Canvas _canvas = default!;
     private Canvas _overlay = default!;
-    private AsyncDisposableBox _disposable = Disposable.AsyncBox();
+    private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);
 
     protected override void OnAfterRender(bool firstRender)
     {

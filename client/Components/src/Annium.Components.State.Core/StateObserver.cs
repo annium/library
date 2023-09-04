@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Annium.Logging;
 using Annium.Reflection;
 
 namespace Annium.Components.State.Core;
@@ -18,7 +19,7 @@ public static class StateObserver
     {
         var accessors = ObservableAccessors.GetOrAdd(target.GetType(), DiscoverObservableAccessors);
 
-        var disposable = Disposable.Box();
+        var disposable = Disposable.Box(VoidLogger.Instance);
         foreach (var get in accessors)
             disposable += get(target).Changed.Subscribe(_ => handleChange());
 

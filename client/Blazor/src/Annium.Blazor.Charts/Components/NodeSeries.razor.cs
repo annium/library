@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class NodeSeries<T> : SeriesBase<T>, ILogSubject<NodeSeries<T>>
+public partial class NodeSeries<T> : SeriesBase<T>, ILogSubject
     where T : IPointValue
 {
     public delegate void Renderer(T item, Canvas ctx, int x, int y);
@@ -17,7 +18,7 @@ public partial class NodeSeries<T> : SeriesBase<T>, ILogSubject<NodeSeries<T>>
     public Renderer RenderItem { get; set; } = delegate { };
 
     [Inject]
-    public ILogger<NodeSeries<T>> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     protected override int MinValuesToRender => 1;
 

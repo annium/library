@@ -5,14 +5,15 @@ using System.Runtime.CompilerServices;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+
 using NodaTime;
 using OneOf;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class MultiRangeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<MultiRangeSeries<TM, TI>>
+public partial class MultiRangeSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     where TM : IMultiValue<TI>
     where TI : IRangeItem
 {
@@ -26,7 +27,7 @@ public partial class MultiRangeSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Mult
     public bool ContinueLast { get; set; }
 
     [Inject]
-    public ILogger<MultiRangeSeries<TM, TI>> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     protected override int MinValuesToRender => 1;
 

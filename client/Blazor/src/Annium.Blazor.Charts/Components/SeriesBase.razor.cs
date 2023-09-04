@@ -5,6 +5,7 @@ using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.Charts.Components;
@@ -26,7 +27,7 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
 
     protected abstract int MinValuesToRender { get; }
 
-    private DisposableBox _disposable = Disposable.Box();
+    private DisposableBox _disposable = Disposable.Box(VoidLogger.Instance);
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {

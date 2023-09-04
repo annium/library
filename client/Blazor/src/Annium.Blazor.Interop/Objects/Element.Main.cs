@@ -3,6 +3,7 @@ using System.Runtime.InteropServices.JavaScript;
 using Annium.Blazor.Interop.Domain;
 using Annium.Blazor.Interop.Internal;
 using Annium.Blazor.Interop.Internal.Extensions;
+using Annium.Logging;
 using static Annium.Blazor.Interop.Internal.Constants;
 
 namespace Annium.Blazor.Interop;
@@ -11,7 +12,7 @@ public abstract partial record Element : IObject, IDisposable
 {
     protected static IInteropContext Ctx => InteropContext.Instance;
     public abstract string Id { get; }
-    private readonly DisposableBox _disposable = Disposable.Box();
+    private readonly DisposableBox _disposable = Disposable.Box(VoidLogger.Instance);
 
     protected Element()
     {

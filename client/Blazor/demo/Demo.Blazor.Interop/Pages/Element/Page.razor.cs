@@ -2,26 +2,27 @@ using System;
 using Annium;
 using Annium.Blazor.Interop;
 using Annium.Blazor.Interop.Domain;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+
 
 namespace Demo.Blazor.Interop.Pages.Element;
 
-public partial class Page : ILogSubject<Canvas.Page>, IDisposable
+public partial class Page : ILogSubject, IDisposable
 {
     [Inject]
     private Style Styles { get; set; } = default!;
 
     [Inject]
-    public ILogger<Canvas.Page> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     private Div _container = default!;
     private Div _block = default!;
     private Div _eventsBlock = default!;
     private Div _resizedBlock = default!;
     private Input _input = default!;
-    private bool IsResized;
-    private DisposableBox _disposable = Disposable.Box();
+    private bool _isResized;
+    private DisposableBox _disposable = Disposable.Box(VoidLogger.Instance);
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -51,5 +52,5 @@ public partial class Page : ILogSubject<Canvas.Page>, IDisposable
 
     private Action<T> Handler<T>(string ev, string code) => e => Console.WriteLine($"{code}.{ev}: {e}");
 
-    private void ToggleResizedBlockSize() => IsResized = !IsResized;
+    private void ToggleResizedBlockSize() => _isResized = !_isResized;
 }

@@ -3,14 +3,15 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Annium.NodaTime.Extensions;
 using Microsoft.AspNetCore.Components;
+
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class XAxis : ILogSubject<XAxis>, IAsyncDisposable
+public partial class XAxis : ILogSubject, IAsyncDisposable
 {
     [Parameter]
     public string LabelFontFamily { get; set; } = AxisLabelFontFamily;
@@ -28,9 +29,9 @@ public partial class XAxis : ILogSubject<XAxis>, IAsyncDisposable
     public IHorizontalSideContext SideContext { get; set; } = default!;
 
     [Inject]
-    public ILogger<XAxis> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
-    private AsyncDisposableBox _disposable = Disposable.AsyncBox();
+    private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);
 
     protected override void OnAfterRender(bool firstRender)
     {

@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class LineSeries<T> : SeriesBase<T>, ILogSubject<LineSeries<T>>
+public partial class LineSeries<T> : SeriesBase<T>, ILogSubject
     where T : IPointValue
 {
     [Parameter]
@@ -20,7 +21,7 @@ public partial class LineSeries<T> : SeriesBase<T>, ILogSubject<LineSeries<T>>
     public int[]? Dash { get; set; }
 
     [Inject]
-    public ILogger<LineSeries<T>> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     protected override int MinValuesToRender => 1;
 

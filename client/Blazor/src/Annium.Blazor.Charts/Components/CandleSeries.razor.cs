@@ -4,12 +4,13 @@ using System.Linq;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject<CandleSeries<T>>
+public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject
     where T : ICandle
 {
     [Parameter]
@@ -22,7 +23,7 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject<CandleSeries<T
     public string StaleColor { get; set; } = "#999999";
 
     [Inject]
-    public ILogger<CandleSeries<T>> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     protected override int MinValuesToRender => 1;
 

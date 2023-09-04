@@ -4,13 +4,14 @@ using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class Resolution : ILogSubject<Resolution>, IAsyncDisposable
+public partial class Resolution : ILogSubject, IAsyncDisposable
 {
     [Parameter]
     public string? CssClass { get; set; }
@@ -22,10 +23,10 @@ public partial class Resolution : ILogSubject<Resolution>, IAsyncDisposable
     private Style Styles { get; set; } = default!;
 
     [Inject]
-    public ILogger<Resolution> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     private string Class => ClassBuilder.With(Styles.Container).With(CssClass).Build();
-    private AsyncDisposableBox _disposable = Disposable.AsyncBox();
+    private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);
 
     protected override void OnAfterRender(bool firstRender)
     {

@@ -1,16 +1,16 @@
 using System;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
 
 namespace Demo.Blazor.Interop.Pages.Canvas;
 
-public partial class Page : ILogSubject<Page>, IDisposable
+public partial class Page : ILogSubject, IDisposable
 {
     [Inject]
     private Style Styles { get; set; } = default!;
 
     [Inject]
-    public ILogger<Page> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     private Annium.Blazor.Interop.Canvas _canvas = default!;
 

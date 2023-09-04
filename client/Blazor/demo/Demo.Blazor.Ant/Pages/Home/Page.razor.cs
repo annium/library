@@ -1,16 +1,16 @@
 using Annium.Components.State.Forms;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
 
 namespace Demo.Blazor.Ant.Pages.Home;
 
-public partial class Page : ILogSubject<Page>
+public partial class Page : ILogSubject
 {
     [Inject]
     public IStateFactory StateFactory { get; set; } = default!;
 
     [Inject]
-    public ILogger<Page> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     private IObjectContainer<Data> _state = default!;
 

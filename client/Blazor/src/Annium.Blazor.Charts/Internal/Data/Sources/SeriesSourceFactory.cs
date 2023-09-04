@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Internal.Data.Cache;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
 internal class SeriesSourceFactory : ISeriesSourceFactory
 {
-    private readonly ILoggerFactory _loggerFactory;
+    private readonly ILogger _logger;
 
     public SeriesSourceFactory(
-        ILoggerFactory loggerFactory
+        ILogger logger
     )
     {
-        _loggerFactory = loggerFactory;
+        _logger = logger;
     }
 
     #region unchecked loading
@@ -172,9 +172,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         ISeriesSourceOptions? options
     )
     {
-        var logger = _loggerFactory.Get<LoadingSeriesSource<T>>();
-
-        return new LoadingSeriesSource<T>(cache, resolution, load, options ?? SeriesSourceOptionsBuilder.Default, logger);
+        return new LoadingSeriesSource<T>(cache, resolution, load, options ?? SeriesSourceOptionsBuilder.Default, _logger);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -184,9 +182,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
     {
-        var logger = _loggerFactory.Get<DependentSeriesSource<TS, TD>>();
-
-        return new DependentSeriesSource<TS, TD>(source, cache, getValues, logger);
+        return new DependentSeriesSource<TS, TD>(source, cache, getValues, _logger);
     }
 
     #endregion

@@ -5,14 +5,15 @@ using System.Runtime.CompilerServices;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+
 using NodaTime;
 using OneOf;
 
 namespace Annium.Blazor.Charts.Components;
 
-public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject<MultiLineSeries<TM, TI>>
+public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     where TM : IMultiValue<TI>
     where TI : IPointItem
 {
@@ -29,7 +30,7 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject<Multi
     public OneOf<int, Func<TI, int>> Radius { get; set; } = 2;
 
     [Inject]
-    public ILogger<MultiLineSeries<TM, TI>> Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = default!;
 
     protected override int MinValuesToRender => 1;
 

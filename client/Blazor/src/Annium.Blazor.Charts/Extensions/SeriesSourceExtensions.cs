@@ -4,6 +4,7 @@ using Annium.Blazor.Charts.Data.Sources;
 using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Internal.Extensions;
+using Annium.Logging;
 using Annium.NodaTime.Extensions;
 
 namespace Annium.Blazor.Charts.Extensions;
@@ -32,7 +33,7 @@ public static class SeriesSourceExtensions
             }
         }
 
-        var disposable = Disposable.Box();
+        var disposable = Disposable.Box(VoidLogger.Instance);
         disposable += chartContext.OnUpdate(Draw);
         source.Loaded += Draw;
         disposable += () => source.Loaded -= Draw;
