@@ -35,13 +35,13 @@ public static class StateObserver
             .Where(x => x.PropertyType.IsDerivedFrom(typeof(IObservableState)))
             .ToArray();
         foreach (var property in properties)
-            accessors.Add(instance => (IObservableState) property.GetMethod!.Invoke(instance, EmptyArgs)!);
+            accessors.Add(instance => (IObservableState)property.GetMethod!.Invoke(instance, EmptyArgs)!);
 
         var fields = type.GetFields(flags)
             .Where(x => x.FieldType.IsDerivedFrom(typeof(IObservableState)))
             .ToArray();
         foreach (var field in fields)
-            accessors.Add(instance => (IObservableState) field.GetValue(instance)!);
+            accessors.Add(instance => (IObservableState)field.GetValue(instance)!);
 
         return accessors;
     }

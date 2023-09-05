@@ -83,7 +83,7 @@ public class RouteTTest : TestBase
 
         public bool Equals(SearchData? other) => other is not null && GetHashCode() == other.GetHashCode();
 
-        public override int GetHashCode() => HashCode.Combine((int) Sex, HashCodeSeq.Combine(Name), Age);
+        public override int GetHashCode() => HashCode.Combine((int)Sex, HashCodeSeq.Combine(Name), Age);
     }
 
     [AutoMapped]

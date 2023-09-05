@@ -5,7 +5,6 @@ using Annium.Blazor.Charts.Extensions;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
 
-
 namespace Annium.Blazor.Charts.Components;
 
 public partial class LineSeries<T> : SeriesBase<T>, ILogSubject
@@ -46,7 +45,7 @@ public partial class LineSeries<T> : SeriesBase<T>, ILogSubject
             ctx.LineTo(x, y);
         }
 
-        ctx.LineTo((float) PaneContext.Rect.Width, PaneContext.ToY(items[^1].Value));
+        ctx.LineTo((float)PaneContext.Rect.Width, PaneContext.ToY(items[^1].Value));
 
         ctx.Stroke();
         ctx.ClosePath();

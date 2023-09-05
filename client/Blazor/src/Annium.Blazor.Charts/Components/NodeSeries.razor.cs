@@ -6,7 +6,6 @@ using Annium.Blazor.Interop;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
 
-
 namespace Annium.Blazor.Charts.Components;
 
 public partial class NodeSeries<T> : SeriesBase<T>, ILogSubject

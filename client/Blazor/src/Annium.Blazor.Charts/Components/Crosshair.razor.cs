@@ -8,7 +8,6 @@ using Annium.Blazor.Charts.Internal.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
-
 using NodaTime;
 using static Annium.Blazor.Charts.Internal.Constants;
 

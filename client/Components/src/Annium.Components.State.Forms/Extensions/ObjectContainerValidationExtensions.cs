@@ -42,7 +42,7 @@ public static class ObjectContainerValidationExtensions
     {
         var children = state.Children
             .Where(x => x.Value is IStatusContainer)
-            .ToDictionary(x => x.Key, x => (IStatusContainer) x.Value);
+            .ToDictionary(x => x.Key, x => (IStatusContainer)x.Value);
 
         using (state.Mute())
         {

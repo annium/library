@@ -6,7 +6,7 @@ internal static class Constants
 {
     public const int AnimationFrameMs = 40;
     public const decimal ScrollMultiplier = 0.5m;
-    public static int GridLine => (int) (GridHalfLine * 2);
+    public static int GridLine => (int)(GridHalfLine * 2);
     public const float GridHalfLine = 0.5f;
     public const string GridStyle = "#eee";
     public const string SeriesLabelFontFamily = "sans-serif";

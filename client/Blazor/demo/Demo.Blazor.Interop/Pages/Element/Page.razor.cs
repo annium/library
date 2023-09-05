@@ -5,7 +5,6 @@ using Annium.Blazor.Interop.Domain;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
 
-
 namespace Demo.Blazor.Interop.Pages.Element;
 
 public partial class Page : ILogSubject, IDisposable

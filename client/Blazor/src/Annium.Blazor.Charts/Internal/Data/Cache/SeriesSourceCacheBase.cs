@@ -196,14 +196,14 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
             return match switch
             {
                 LookupMatch.NearestRight => items[0],
-                _ => default,
+                _                        => default,
             };
 
         if (_compare(items[^1], moment) < 0)
             return match switch
             {
                 LookupMatch.NearestLeft => items[^1],
-                _ => default,
+                _                       => default,
             };
 
         var l = 0;
@@ -224,9 +224,9 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
 
         return match switch
         {
-            LookupMatch.NearestLeft => r >= 0 ? items[r] : default,
+            LookupMatch.NearestLeft  => r >= 0 ? items[r] : default,
             LookupMatch.NearestRight => l < items.Count ? items[l] : default,
-            _ => default,
+            _                        => default,
         };
     }
 }

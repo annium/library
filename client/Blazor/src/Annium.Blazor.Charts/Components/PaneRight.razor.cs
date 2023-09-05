@@ -8,7 +8,6 @@ using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
-
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;

@@ -7,7 +7,6 @@ using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
-
 using OneOf;
 
 namespace Annium.Blazor.Charts.Components;

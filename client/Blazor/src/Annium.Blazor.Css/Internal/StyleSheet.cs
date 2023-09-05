@@ -19,7 +19,7 @@ internal class StyleSheet : IStyleSheet
             .ToArray();
         foreach (var field in fields)
             rules.Add(
-                (CssRule) field.GetValue(set)! ??
+                (CssRule)field.GetValue(set)! ??
                 throw new InvalidOperationException($"Field {field} contains empty rule")
             );
 

@@ -7,7 +7,6 @@ using Annium.Blazor.Interop;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
 
-
 namespace Annium.Blazor.Charts.Components;
 
 public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject
@@ -33,7 +32,7 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject
         if (width == 1)
             RenderLineCandles(SeriesContext.Canvas, values);
         else
-            RenderNormalCandles(SeriesContext.Canvas, values, ((double) width / 2).CeilInt32(), width);
+            RenderNormalCandles(SeriesContext.Canvas, values, ((double)width / 2).CeilInt32(), width);
     }
 
     private void RenderLineCandles(

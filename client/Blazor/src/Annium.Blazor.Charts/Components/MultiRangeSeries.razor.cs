@@ -7,7 +7,6 @@ using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
-
 using NodaTime;
 using OneOf;
 
@@ -34,7 +33,7 @@ public partial class MultiRangeSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     protected override void RenderValues(IReadOnlyList<TM> items)
     {
         var width = GetWidth();
-        var offset = Centered ? width == 1 ? 0 : ((double) width / 2).CeilInt32() : 0;
+        var offset = Centered ? width == 1 ? 0 : ((double)width / 2).CeilInt32() : 0;
         var lastMoment = ContinueLast ? ChartContext.View.End : ChartContext.FromX(ChartContext.ToX(items[^1].Moment) + width);
         var ctx = SeriesContext.Canvas;
 

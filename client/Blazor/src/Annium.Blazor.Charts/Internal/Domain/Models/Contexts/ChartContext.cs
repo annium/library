@@ -70,7 +70,7 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject
             throw new ArgumentException("Resolutions list is empty");
 
         _zooms = zooms.ToList();
-        SetZoom(_zooms[(_zooms.Count / (decimal) 2).FloorInt32()]);
+        SetZoom(_zooms[(_zooms.Count / (decimal)2).FloorInt32()]);
         _resolutions = resolutions.Select(i => Duration.FromMinutes(i)).ToList();
         SetResolution(_resolutions[0]);
 

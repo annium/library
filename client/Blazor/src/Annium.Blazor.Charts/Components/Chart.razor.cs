@@ -12,22 +12,26 @@ using Annium.Blazor.Interop.Domain;
 using Annium.Extensions.Jobs;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
-
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
 public partial class Chart : ILogSubject, IAsyncDisposable
 {
-    [Parameter, EditorRequired] public IChartContext ChartContext { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public IChartContext ChartContext { get; set; } = default!;
 
-    [Parameter] public string? CssClass { get; set; }
+    [Parameter]
+    public string? CssClass { get; set; }
 
-    [Parameter] public RenderFragment ChildContent { get; set; } = default!;
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = default!;
 
-    [Inject] public ILogger Logger { get; set; } = default!;
+    [Inject]
+    public ILogger Logger { get; set; } = default!;
 
-    [Inject] private Style Styles { get; set; } = default!;
+    [Inject]
+    private Style Styles { get; set; } = default!;
 
     private string Class => ClassBuilder.With(Styles.Container).With(CssClass).Build();
     private Div _container = default!;

@@ -21,7 +21,7 @@ internal class StorageBase : IStorageBase
         string storage
     )
     {
-        _js = (IJSInProcessRuntime) js;
+        _js = (IJSInProcessRuntime)js;
         _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
         _storage = storage;
     }

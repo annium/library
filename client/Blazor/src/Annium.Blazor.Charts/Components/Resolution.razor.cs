@@ -6,7 +6,6 @@ using Annium.Blazor.Core.Tools;
 using Annium.Blazor.Css;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
-
 using NodaTime;
 
 namespace Annium.Blazor.Charts.Components;
@@ -39,9 +38,9 @@ public partial class Resolution : ILogSubject, IAsyncDisposable
 
     private string Humanize(Duration resolution) => resolution.TotalMinutes switch
     {
-        < 60 => $"{resolution.TotalMinutes}m",
+        < 60   => $"{resolution.TotalMinutes}m",
         < 1440 => $"{resolution.TotalHours}h",
-        _ => $"{resolution.TotalDays}d",
+        _      => $"{resolution.TotalDays}d",
     };
 
     public ValueTask DisposeAsync()

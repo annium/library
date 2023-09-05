@@ -6,7 +6,6 @@ using Annium.Blazor.Interop;
 using Annium.Logging;
 using Annium.NodaTime.Extensions;
 using Microsoft.AspNetCore.Components;
-
 using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
@@ -56,7 +55,7 @@ public partial class XAxis : ILogSubject, IAsyncDisposable
             if (m.IsMidnight())
             {
                 var text = m.ToString("dd.MM", null);
-                var offset = ((double) ctx.MeasureTextWidth(text) / 2).CeilInt32();
+                var offset = ((double)ctx.MeasureTextWidth(text) / 2).CeilInt32();
 
                 ctx.Font = $"bold {LabelFontSize}px {LabelFontFamily}";
                 ctx.FillText(text, x - offset, baseline);
@@ -65,7 +64,7 @@ public partial class XAxis : ILogSubject, IAsyncDisposable
             else
             {
                 var text = m.ToString("HH:mm", null);
-                var offset = ((double) ctx.MeasureTextWidth(text) / 2).CeilInt32();
+                var offset = ((double)ctx.MeasureTextWidth(text) / 2).CeilInt32();
 
                 ctx.FillText(text, x - offset, baseline);
             }

@@ -7,7 +7,6 @@ using Annium.Blazor.Css;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
 
-
 namespace Annium.Blazor.Charts.Components;
 
 public partial class Pane : ILogSubject, IAsyncDisposable

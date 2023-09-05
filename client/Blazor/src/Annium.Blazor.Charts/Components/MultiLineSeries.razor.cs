@@ -7,7 +7,6 @@ using Annium.Blazor.Charts.Extensions;
 using Annium.Blazor.Interop;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
-
 using NodaTime;
 using OneOf;
 
@@ -94,7 +93,7 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject
 
             ctx.BeginPath();
             ctx.MoveTo(x, y);
-            ctx.Arc(x, y, radius, 0, (float) (2 * Math.PI), false);
+            ctx.Arc(x, y, radius, 0, (float)(2 * Math.PI), false);
             ctx.FillStyle = color;
             ctx.Fill();
             ctx.ClosePath();

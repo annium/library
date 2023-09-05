@@ -78,7 +78,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
             throw OperationException($"failed to find handler {callbackId}");
 
         var values = args.Select((x, i) => x.Deserialize(ConstructorTypes[i])).ToArray();
-        var data = (T) Activator.CreateInstance(typeof(T), values)!;
+        var data = (T)Activator.CreateInstance(typeof(T), values)!;
         handle(data);
     }
 
