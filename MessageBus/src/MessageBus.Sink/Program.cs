@@ -2,7 +2,7 @@ using System;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Entrypoint;
 using Annium.Infrastructure.MessageBus.Node;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Annium.Threading;
 using MessageBus.Sink;
 
@@ -12,7 +12,7 @@ await using var entry = Entrypoint.Default
 
 var (provider, ct) = entry;
 
-var logSubject = provider.Resolve<ILogSubject<Program>>();
+var logSubject = provider.Resolve<ILogSubject>();
 var socket = provider.Resolve<IMessageBusSocket>();
 
 var cfg = provider.Resolve<EndpointsConfiguration>();

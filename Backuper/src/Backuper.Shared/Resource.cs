@@ -1,13 +1,13 @@
 using System;
 using System.Threading.Tasks;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 
 namespace Backuper.Shared;
 
-public abstract class Resource<T> : ILogSubject<Resource<T>>
+public abstract class Resource<T> : ILogSubject
     where T : class
 {
-    public ILogger<Resource<T>> Logger { get; }
+    public ILogger Logger { get; }
     protected T Entity { get; }
     private readonly string _category;
     private readonly string _type;
@@ -16,7 +16,7 @@ public abstract class Resource<T> : ILogSubject<Resource<T>>
         T entity,
         string category,
         string type,
-        ILogger<Resource<T>> logger
+        ILogger logger
     )
     {
         Entity = entity;
@@ -29,15 +29,15 @@ public abstract class Resource<T> : ILogSubject<Resource<T>>
     {
         try
         {
-            Debug($"{operation} start");
+            this.Debug($"{operation} start");
             var result = await handleAsync();
-            Debug($"{operation} succeed");
+            this.Debug($"{operation} succeed");
 
             return result;
         }
         catch
         {
-            Debug($"{operation} failed");
+            this.Debug($"{operation} failed");
             throw;
         }
     }
@@ -46,18 +46,14 @@ public abstract class Resource<T> : ILogSubject<Resource<T>>
     {
         try
         {
-            Debug($"{operation} start");
+            this.Debug($"{operation} start");
             await handleAsync();
-            Debug($"{operation} succeed");
+            this.Debug($"{operation} succeed");
         }
         catch
         {
-            Debug($"{operation} failed");
+            this.Debug($"{operation} failed");
             throw;
         }
     }
-
-    private void Debug(string message) => this.Log().Debug(Msg(message));
-
-    private string Msg(string message) => $"{_category} {_type}: {message}";
 }

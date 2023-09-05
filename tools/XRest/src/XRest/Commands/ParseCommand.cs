@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Extensions.Arguments;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Annium.Serialization.Abstractions;
 using XRest.Clients.Shared;
 using XRest.Clients.Shared.Components;
@@ -18,11 +18,11 @@ internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ICommandD
     public static string Description => "parse API";
     private readonly IApiModelLoader _apiModelLoader;
     private readonly ISerializer<string> _serializer;
-    public ILogger<ParseCommand> Logger { get; }
+    public ILogger Logger { get; }
 
     public ParseCommand(
         IApiModelLoader apiModelLoader,
-        ILogger<ParseCommand> logger,
+        ILogger logger,
         IIndex<SerializerKey, ISerializer<string>> serializers
     )
     {

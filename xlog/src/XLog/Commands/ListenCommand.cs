@@ -6,19 +6,19 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Annium.Net;
 
 namespace XLog.Commands;
 
-internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, ICommandDescriptor, ILogSubject<ListenCommand>
+internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, ICommandDescriptor, ILogSubject
 {
     public static string Id => string.Empty;
     public static string Description => "listen";
-    public ILogger<ListenCommand> Logger { get; }
+    public ILogger Logger { get; }
 
     public ListenCommand(
-        ILogger<ListenCommand> logger
+        ILogger logger
     )
     {
         Logger = logger;
@@ -30,7 +30,7 @@ internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, IComman
     )
     {
         var endpoint = IPEndPointExt.Parse(cfg.Endpoint, 1111);
-        this.Log().Info($"Listen at {endpoint} {(cfg.KeepAlive > 0 ? $"with KeepAlive {cfg.KeepAlive}s" : "w/o KeepAlive")}");
+        this.Info($"Listen at {endpoint} {(cfg.KeepAlive > 0 ? $"with KeepAlive {cfg.KeepAlive}s" : "w/o KeepAlive")}");
         Func<byte[], NetworkStream, Task<int>> receive = cfg.KeepAlive > 0 ? ReceiveKeepAlive : Receive;
         var server = new TcpListener(endpoint);
         server.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 2);
@@ -50,7 +50,7 @@ internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, IComman
             try
             {
                 client = await server.AcceptTcpClientAsync();
-                this.Log().Debug("Client connected");
+                this.Debug("Client connected");
                 var ns = client.GetStream();
 
                 while (client.Connected)
@@ -61,19 +61,19 @@ internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, IComman
             }
             catch (OperationCanceledException)
             {
-                this.Log().Debug(nameof(OperationCanceledException));
+                this.Debug(nameof(OperationCanceledException));
             }
             catch (ObjectDisposedException e)
             {
-                this.Log().Debug($"{nameof(ObjectDisposedException)}: {e}");
+                this.Debug($"{nameof(ObjectDisposedException)}: {e}");
             }
             catch (IOException e)
             {
-                this.Log().Debug($"{nameof(IOException)}: {e}");
+                this.Debug($"{nameof(IOException)}: {e}");
             }
             catch (SocketException e)
             {
-                this.Log().Debug($"{nameof(SocketException)}: {e}");
+                this.Debug($"{nameof(SocketException)}: {e}");
             }
             finally
             {
@@ -86,7 +86,7 @@ internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, IComman
                 client.Dispose();
             }
 
-            this.Log().Debug("Client disconnected");
+            this.Debug("Client disconnected");
         }
 
         server.Stop();

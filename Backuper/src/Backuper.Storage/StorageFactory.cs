@@ -1,5 +1,5 @@
 using System;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Annium.Storage.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,7 +26,7 @@ public class StorageFactory
         return new StorageProxy(
             storage,
             configuration.Type,
-            (ILogger<StorageProxy>) _sp.GetRequiredService(typeof(ILogger<>).MakeGenericType(storage.GetType()))
+            (ILogger) _sp.GetRequiredService(typeof(ILogger).MakeGenericType(storage.GetType()))
         );
     }
 }

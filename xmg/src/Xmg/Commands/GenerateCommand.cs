@@ -2,7 +2,7 @@ using System.IO;
 using System.Threading;
 using Annium;
 using Annium.Extensions.Arguments;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Xmg.Configuration.Abstractions;
 using Xmg.Configuration.Components;
 using Xmg.Migration.Abstractions;
@@ -11,11 +11,11 @@ using Config = Xmg.Configuration.Abstractions.Config;
 
 namespace Xmg.Commands;
 
-internal class GenerateCommand : Command<GenerateCommandConfig>, ICommandDescriptor, ILogSubject<GenerateCommand>
+internal class GenerateCommand : Command<GenerateCommandConfig>, ICommandDescriptor, ILogSubject
 {
     public static string Id => "gen";
     public static string Description => "generate Migration";
-    public ILogger<GenerateCommand> Logger { get; }
+    public ILogger Logger { get; }
     private readonly ITimeProvider _timeProvider;
     private readonly IConfiguratorFactory _configuratorFactory;
     private readonly IMigratorFactory _migratorFactory;
@@ -24,7 +24,7 @@ internal class GenerateCommand : Command<GenerateCommandConfig>, ICommandDescrip
         ITimeProvider timeProvider,
         IConfiguratorFactory configuratorFactory,
         IMigratorFactory migratorFactory,
-        ILogger<GenerateCommand> logger
+        ILogger logger
     )
     {
         _timeProvider = timeProvider;
@@ -38,7 +38,7 @@ internal class GenerateCommand : Command<GenerateCommandConfig>, ICommandDescrip
         CancellationToken ct
     )
     {
-        this.Log().Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
+        this.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
 
         var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
         var configurationCfg = new Config(cfg.Assembly);
@@ -48,13 +48,13 @@ internal class GenerateCommand : Command<GenerateCommandConfig>, ICommandDescrip
         var migrationVersion = _timeProvider.Now.ToDateTimeOffset().ToString("yyyyMMdd");
 
 
-        this.Log().Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");
+        this.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");
 
         var migrator = _migratorFactory.GetForProvider(cfg.MigrationProvider);
         var migrationCfg = new Migration.Abstractions.Config(cfg.Namespace, migrationName, migrationVersion);
         var migration = migrator.CreateMigration(database, migrationCfg);
 
-        this.Log().Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) files");
+        this.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) files");
         if (!Directory.Exists(cfg.Output))
             Directory.CreateDirectory(cfg.Output);
         foreach (var (file, content) in migration.Files)

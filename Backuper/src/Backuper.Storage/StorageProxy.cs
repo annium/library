@@ -1,6 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Annium.Storage.Abstractions;
 using Backuper.Shared;
 
@@ -11,7 +11,7 @@ public class StorageProxy : Resource<IStorage>, IStorage
     public StorageProxy(
         IStorage entity,
         string type,
-        ILogger<StorageProxy> logger
+        ILogger logger
     ) : base(entity, "Storage", type, logger)
     {
     }

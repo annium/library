@@ -1,5 +1,4 @@
 using System.Text;
-using Xmg.Migration.Abstractions.Views;
 
 namespace Xmg.Migration.FluentMigrator.Views;
 

@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Backuper.Shared;
 
 namespace Backuper.Notification.Abstract;
@@ -9,7 +9,7 @@ public class ChannelProxy : Resource<IChannel>, IChannel
     public ChannelProxy(
         IChannel entity,
         string type,
-        ILogger<ChannelProxy> logger
+        ILogger logger
     ) : base(entity, "Channel", type, logger)
     {
     }

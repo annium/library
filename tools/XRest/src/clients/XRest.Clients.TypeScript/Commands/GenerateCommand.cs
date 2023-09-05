@@ -3,18 +3,18 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using XRest.Clients.Shared;
 using XRest.Clients.Shared.Components;
 using XRest.Clients.TypeScript.Components;
 
 namespace XRest.Clients.TypeScript.Commands;
 
-internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ICommandDescriptor, ILogSubject<GenerateCommand>
+internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ICommandDescriptor, ILogSubject
 {
     public static string Id => "gen";
     public static string Description => "generate client";
-    public ILogger<GenerateCommand> Logger { get; }
+    public ILogger Logger { get; }
     private readonly IApiModelLoader _apiModelLoader;
     private readonly IProcessor _processor;
     private readonly IWriter _writer;
@@ -23,7 +23,7 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ICo
         IApiModelLoader apiModelLoader,
         IProcessor processor,
         IWriter writer,
-        ILogger<GenerateCommand> logger
+        ILogger logger
     )
     {
         _apiModelLoader = apiModelLoader;
@@ -34,17 +34,17 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ICo
 
     public override async Task HandleAsync(GenerateCommandConfiguration cfg, CancellationToken ct)
     {
-        this.Log().Info($"Generate '{cfg.ProjectName}' client");
+        this.Info($"Generate '{cfg.ProjectName}' client");
 
-        this.Log().Info($"Load '{cfg.ProjectName}' model");
+        this.Info($"Load '{cfg.ProjectName}' model");
         var model = await _apiModelLoader.Load(cfg);
 
-        this.Log().Info("Process api model to api view");
+        this.Info("Process api model to api view");
         var view = _processor.Process(model);
 
-        this.Log().Info($"Write api view to {cfg.Output}");
+        this.Info($"Write api view to {cfg.Output}");
         _writer.Write(cfg.Output, view);
-        this.Log().Info($"Client written to {cfg.Output}");
+        this.Info($"Client written to {cfg.Output}");
     }
 }
 

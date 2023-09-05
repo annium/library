@@ -3,15 +3,16 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Annium.Extensions.Jobs;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Backuper.Api.Tools;
 using Backuper.Notification.Abstract;
+using ILogger = Annium.Logging.ILogger;
 
 namespace Backuper.Api.State;
 
-public class StateManager : ILogSubject<StateManager>
+public class StateManager : ILogSubject
 {
-    public ILogger<StateManager> Logger { get; }
+    public ILogger Logger { get; }
     private readonly IScheduler _scheduler;
     private readonly Namer _namer;
 
@@ -21,7 +22,7 @@ public class StateManager : ILogSubject<StateManager>
     public StateManager(
         IScheduler scheduler,
         Namer namer,
-        ILogger<StateManager> logger
+        ILogger logger
     )
     {
         _scheduler = scheduler;
@@ -40,17 +41,17 @@ public class StateManager : ILogSubject<StateManager>
 
     private async Task StartAsync()
     {
-        this.Log().Debug($"StateManager starting");
+        this.Debug($"StateManager starting");
 
-        this.Log().Debug($"Setup connections");
+        this.Debug($"Setup connections");
         var connections = State!.Servers.Values.Select(s => s.Connection).ToArray();
         await Task.WhenAll(connections.Select(s => s.SetupAsync()));
 
-        this.Log().Debug($"Setup storages");
+        this.Debug($"Setup storages");
         var storages = State.Servers.Values.SelectMany(s => s.Plans.Values).Select(p => p.Storage).ToArray();
         await Task.WhenAll(storages.Select(s => s.SetupAsync()));
 
-        this.Log().Debug($"Schedule operations");
+        this.Debug($"Schedule operations");
         foreach (var server in State.Servers.Values)
         foreach (var plan in server.Plans.Values)
             _scheduler.Schedule(() => BackupAsync(server, plan), plan.Interval);

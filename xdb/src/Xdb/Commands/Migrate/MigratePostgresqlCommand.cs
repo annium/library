@@ -5,25 +5,25 @@ using Annium.Core.DependencyInjection;
 using Annium.Core.Runtime.Loader;
 using Annium.Extensions.Arguments;
 using Annium.linq2db.PostgreSql;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Annium.Serialization.Abstractions;
 using Xdb.Core.Migrations;
 using Constants = Annium.Serialization.Yaml.Constants;
 
 namespace Xdb.Commands.Migrate;
 
-internal class MigratePostgresqlCommand : Command<MigratePostgresqlCommandConfiguration>, ICommandDescriptor, ILogSubject<MigratePostgresqlCommand>
+internal class MigratePostgresqlCommand : Command<MigratePostgresqlCommandConfiguration>, ICommandDescriptor, ILogSubject
 {
     public static string Id => "postgresql";
     public static string Description => "migrate postgresql database";
-    public ILogger<MigratePostgresqlCommand> Logger { get; }
+    public ILogger Logger { get; }
     private readonly IAssemblyLoaderBuilder _assemblyLoaderBuilder;
     private readonly ISerializer<string> _serializer;
 
     public MigratePostgresqlCommand(
         IAssemblyLoaderBuilder assemblyLoaderBuilder,
         IIndex<SerializerKey, ISerializer<string>> serializers,
-        ILogger<MigratePostgresqlCommand> logger
+        ILogger logger
     )
     {
         Logger = logger;

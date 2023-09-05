@@ -2,20 +2,20 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 
 namespace XSass.Internal.Components;
 
-internal class Crawler : ILogSubject<Crawler>
+internal class Crawler : ILogSubject
 {
-    public ILogger<Crawler> Logger { get; }
+    public ILogger Logger { get; }
     private readonly Configuration _cfg;
     private readonly Compiler _compiler;
 
     public Crawler(
         Configuration cfg,
         Compiler compiler,
-        ILogger<Crawler> logger
+        ILogger logger
     )
     {
         _cfg = cfg;
@@ -25,7 +25,7 @@ internal class Crawler : ILogSubject<Crawler>
 
     public async Task Run(string directory)
     {
-        this.Log().Debug($"Run in {directory}");
+        this.Debug($"Run in {directory}");
         if (_cfg.Include.Length == 0)
             await Process(directory);
         else
@@ -34,7 +34,7 @@ internal class Crawler : ILogSubject<Crawler>
 
     private async Task Process(string directory)
     {
-        this.Log().Debug($"Process {directory}");
+        this.Debug($"Process {directory}");
         var files = Directory.EnumerateFiles(directory)
             .Where(file => _cfg.Extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)));
 

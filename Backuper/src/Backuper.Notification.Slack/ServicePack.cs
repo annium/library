@@ -1,6 +1,6 @@
 using System;
 using Annium.Core.DependencyInjection;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Annium.Net.Http;
 using Backuper.Notification.Abstract;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +13,7 @@ public class ServicePack : ServicePackBase
     {
         Func<Configuration, IChannel> Factory(IServiceProvider sp) => configuration =>
             new ChannelProxy(new Channel(sp.GetRequiredService<IHttpRequestFactory>(), configuration), configuration.Type,
-                sp.GetRequiredService<ILogger<ChannelProxy>>());
+                sp.GetRequiredService<ILogger>());
 
         container.Add(Factory).AsSelf().Singleton();
     }

@@ -2,20 +2,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using LibSassHost;
 
 namespace XSass.Internal.Components;
 
-internal class Compiler : ILogSubject<Compiler>
+internal class Compiler : ILogSubject
 {
-    public ILogger<Compiler> Logger { get; }
+    public ILogger Logger { get; }
     private const string Css = ".css";
     private readonly CompilationOptions _opts;
 
     public Compiler(
         Configuration cfg,
-        ILogger<Compiler> logger
+        ILogger logger
     )
     {
         Logger = logger;
@@ -38,17 +38,17 @@ internal class Compiler : ILogSubject<Compiler>
         var fileInfo = new FileInfo(file);
         if (fileInfo.Name.StartsWith("_"))
         {
-            this.Log().Trace($"Compile: skip private {file}");
+            this.Trace($"Compile: skip private {file}");
             return;
         }
 
-        this.Log().Debug($"Compile: process {file}");
+        this.Debug($"Compile: process {file}");
         var result = SassCompiler.CompileFile(file, options: _opts);
         var newFile = fileInfo.FullName.Replace(fileInfo.Extension, Css);
 
         if (File.Exists(newFile) && result.CompiledContent == await File.ReadAllTextAsync(newFile))
         {
-            this.Log().Trace($"Compile: skip unchanged {file}");
+            this.Trace($"Compile: skip unchanged {file}");
             return;
         }
 

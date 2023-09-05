@@ -3,24 +3,24 @@ using System.Net.Mime;
 using System.Threading;
 using Annium.Core.DependencyInjection;
 using Annium.Extensions.Arguments;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Annium.Serialization.Abstractions;
 using Xmg.Configuration.Abstractions;
 using Xmg.Configuration.Components;
 
 namespace Xmg.Commands;
 
-internal class ParseCommand : Command<ParseCommandConfig>, ICommandDescriptor, ILogSubject<ParseCommand>
+internal class ParseCommand : Command<ParseCommandConfig>, ICommandDescriptor, ILogSubject
 {
     public static string Id => "parse";
     public static string Description => "parse database configuration";
-    public ILogger<ParseCommand> Logger { get; }
+    public ILogger Logger { get; }
     private readonly IConfiguratorFactory _configuratorFactory;
     private readonly ISerializer<string> _serializer;
 
     public ParseCommand(
         IConfiguratorFactory configuratorFactory,
-        ILogger<ParseCommand> logger,
+        ILogger logger,
         IIndex<SerializerKey, ISerializer<string>> serializers
     )
     {
@@ -34,11 +34,11 @@ internal class ParseCommand : Command<ParseCommandConfig>, ICommandDescriptor, I
         CancellationToken ct
     )
     {
-        this.Log().Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
+        this.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
         var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
         var database = configurator.LoadConfiguration(new Config(cfg.Assembly));
 
-        this.Log().Debug($"Save '{cfg.ProjectName}' configuration to {cfg.Output}");
+        this.Debug($"Save '{cfg.ProjectName}' configuration to {cfg.Output}");
         File.WriteAllText(cfg.Output, _serializer.Serialize(database));
     }
 }

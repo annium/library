@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Annium.Logging.Abstractions;
+using Annium.Logging;
 using Backuper.Shared;
 
 namespace Backuper.Connection.Abstract;
@@ -9,7 +9,7 @@ public class ConnectionProxy : Resource<IConnection>, IConnection
     public ConnectionProxy(
         IConnection entity,
         string type,
-        ILogger<ConnectionProxy> logger
+        ILogger logger
     ) : base(entity, "Connection", type, logger)
     {
     }
