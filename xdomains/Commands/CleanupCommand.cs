@@ -27,6 +27,6 @@ internal class CleanupCommand : Command<CleanupCommandConfiguration>, ICommandDe
 
 internal class CleanupCommandConfiguration
 {
-    [Option("f", isRequired : false)]
+    [Option("f", isRequired: false)]
     public bool Force { get; set; }
 }

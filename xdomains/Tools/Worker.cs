@@ -49,11 +49,11 @@ internal class Worker
         {
             var isFree = _parser.IsFree(result);
 
-            lock(locker)
+            lock (locker)
             {
                 Trace();
                 if (isFree)
-                    File.AppendAllLines(Path.Combine("results", $"{domain.Split('.')[0]}.txt"), new [] { domain });
+                    File.AppendAllLines(Path.Combine("results", $"{domain.Split('.')[0]}.txt"), new[] { domain });
             }
         }
 

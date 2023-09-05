@@ -19,11 +19,11 @@ public class ConnectionFactory
     {
         var factoryType = typeof(Func<,>).MakeGenericType(configuration.GetType(), typeof(IConnection));
 
-        var factory = (Delegate) _provider.GetRequiredService(factoryType);
+        var factory = (Delegate)_provider.GetRequiredService(factoryType);
 
         try
         {
-            var storage = (IConnection) factory.DynamicInvoke(configuration)!;
+            var storage = (IConnection)factory.DynamicInvoke(configuration)!;
 
             return storage;
         }

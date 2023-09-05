@@ -68,7 +68,7 @@ internal partial class TypeRegistry
             return BaseType.Nullable.MakeGenericType(Resolve(elementType));
         }
 
-        var view = (ClassView) Resolve(definition);
+        var view = (ClassView)Resolve(definition);
         var arguments = type.GetGenericArguments().Select(Resolve).ToArray();
 
         return view.MakeGenericType(arguments);

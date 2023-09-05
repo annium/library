@@ -19,11 +19,11 @@ public class ChannelFactory
     {
         var factoryType = typeof(Func<,>).MakeGenericType(configuration.GetType(), typeof(IChannel));
 
-        var factory = (Delegate) _provider.GetRequiredService(factoryType);
+        var factory = (Delegate)_provider.GetRequiredService(factoryType);
 
         try
         {
-            var storage = (IChannel) factory.DynamicInvoke(configuration)!;
+            var storage = (IChannel)factory.DynamicInvoke(configuration)!;
 
             return storage;
         }

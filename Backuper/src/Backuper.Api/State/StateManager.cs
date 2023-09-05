@@ -6,7 +6,6 @@ using Annium.Extensions.Jobs;
 using Annium.Logging;
 using Backuper.Api.Tools;
 using Backuper.Notification.Abstract;
-using ILogger = Annium.Logging.ILogger;
 
 namespace Backuper.Api.State;
 

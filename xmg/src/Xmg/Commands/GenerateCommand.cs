@@ -62,7 +62,6 @@ internal class GenerateCommand : Command<GenerateCommandConfig>, ICommandDescrip
     }
 }
 
-
 internal class GenerateCommandConfig
 {
     [Option("cp", true)]

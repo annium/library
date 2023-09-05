@@ -34,9 +34,9 @@ internal class QueryCommand : AsyncCommand<QueryCommandConfiguration>, ICommandD
 
 internal class QueryCommandConfiguration
 {
-    [Option("f", isRequired : false)]
+    [Option("f", isRequired: false)]
     public bool Filter { get; set; }
 
-    [Option("dp", isRequired : false)]
+    [Option("dp", isRequired: false)]
     public int DegreeOfParallelism { get; set; } = 100;
 }

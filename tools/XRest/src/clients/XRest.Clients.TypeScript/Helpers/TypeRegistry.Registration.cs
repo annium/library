@@ -16,7 +16,7 @@ internal partial class TypeRegistry
 
         foreach (var (type, view) in views.Where(x => x.Value is ClassView))
         {
-            var classView = (ClassView) view;
+            var classView = (ClassView)view;
             var properties = type.GetAllPublicProperties()
                 .Select(ResolveProperty)
                 .ToArray();

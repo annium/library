@@ -43,7 +43,6 @@ internal class ParseCommand : Command<ParseCommandConfig>, ICommandDescriptor, I
     }
 }
 
-
 internal class ParseCommandConfig
 {
     [Option("cp", true)]

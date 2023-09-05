@@ -33,7 +33,7 @@ public abstract class MigrationEngineBase<T>
         InitBuilder.WithScriptsFromFileSystem(Path.Combine(folder, "Scripts", "Init"));
         MigrationsBuilder.WithScriptsFromFileSystem(Path.Combine(folder, "Scripts", "Migrations"));
 
-        return (T) this;
+        return (T)this;
     }
 
     public T WithScriptsFromAssembly(Assembly assembly)
@@ -41,7 +41,7 @@ public abstract class MigrationEngineBase<T>
         InitBuilder.WithScriptsEmbeddedInAssembly(assembly, x => x.Contains(".Scripts.Init."));
         MigrationsBuilder.WithScriptsEmbeddedInAssembly(assembly, x => x.Contains(".Scripts.Migrations."));
 
-        return (T) this;
+        return (T)this;
     }
 
     public T WithVariable(string name, string value)
@@ -49,16 +49,16 @@ public abstract class MigrationEngineBase<T>
         InitBuilder.WithVariable(name, value);
         MigrationsBuilder.WithVariable(name, value);
 
-        return (T) this;
+        return (T)this;
     }
 
-    public T WithVariables(IReadOnlyDictionary<string,string> variables)
+    public T WithVariables(IReadOnlyDictionary<string, string> variables)
     {
         var vars = variables.ToDictionary();
         InitBuilder.WithVariables(vars);
         MigrationsBuilder.WithVariables(vars);
 
-        return (T) this;
+        return (T)this;
     }
 
     public void Execute()

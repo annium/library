@@ -6,7 +6,7 @@ using XRest.Clients.Csharp.Views.Models;
 namespace XRest.Clients.Csharp.Views.Api;
 
 internal sealed record ApiView(
-    Namespace Namespace, 
+    Namespace Namespace,
     IClientView Client,
     IReadOnlyCollection<IModelView> Models
 );

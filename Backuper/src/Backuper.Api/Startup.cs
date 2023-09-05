@@ -24,9 +24,6 @@ public class Startup
             .AllowAnyHeader()
             .AllowCredentials()
             .SetPreflightMaxAge(TimeSpan.FromDays(7)));
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
-        });
+        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }
 }

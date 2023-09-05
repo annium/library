@@ -26,7 +26,7 @@ public class StorageFactory
         return new StorageProxy(
             storage,
             configuration.Type,
-            (ILogger) _sp.GetRequiredService(typeof(ILogger).MakeGenericType(storage.GetType()))
+            (ILogger)_sp.GetRequiredService(typeof(ILogger).MakeGenericType(storage.GetType()))
         );
     }
 }

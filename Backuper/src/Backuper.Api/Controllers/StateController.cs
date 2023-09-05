@@ -97,7 +97,7 @@ public class StateController : ServerController
         {
             await NotifyAll(ch => ch.ErrorAsync($"{server} {plan}: manual backup {backupId} procedure failed: {e}"));
 
-            return new ObjectResult(e.Message) { StatusCode = (int) HttpStatusCode.InternalServerError };
+            return new ObjectResult(e.Message) { StatusCode = (int)HttpStatusCode.InternalServerError };
         }
 
         Task NotifyAll(Func<IChannel, Task> notifyChannel) =>
@@ -153,7 +153,7 @@ public class StateController : ServerController
         {
             await NotifyAll(ch => ch.ErrorAsync($"{server} {plan}: restore procedure failed: {e}"));
 
-            return new ObjectResult(e.Message) { StatusCode = (int) HttpStatusCode.InternalServerError };
+            return new ObjectResult(e.Message) { StatusCode = (int)HttpStatusCode.InternalServerError };
         }
 
         Task NotifyAll(Func<IChannel, Task> notifyChannel) =>
@@ -194,7 +194,7 @@ public class StateController : ServerController
         {
             await NotifyAll(ch => ch.ErrorAsync($"{server} {plan}: delete {backupId} procedure failed: {e}"));
 
-            return new ObjectResult(e.Message) { StatusCode = (int) HttpStatusCode.InternalServerError };
+            return new ObjectResult(e.Message) { StatusCode = (int)HttpStatusCode.InternalServerError };
         }
 
         Task NotifyAll(Func<IChannel, Task> notifyChannel) =>

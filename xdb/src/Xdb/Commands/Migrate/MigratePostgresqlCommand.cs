@@ -47,7 +47,7 @@ internal class MigratePostgresqlCommand : Command<MigratePostgresqlCommandConfig
         }
         else
             throw new ArgumentException("Specify either directory or assembly with migrations");
-        
+
         engine.Execute();
     }
 }

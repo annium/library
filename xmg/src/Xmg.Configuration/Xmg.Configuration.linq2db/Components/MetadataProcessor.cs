@@ -94,19 +94,19 @@ internal class MetadataProcessor : IMetadataProcessor
         //     return null;
 
         var foreignColumn = table.Columns.Values.SingleOrDefault(x => x.Member.Name == column.Association.ThisKey)
-                            ?? throw new InvalidOperationException(
-                                $"Foreign table '{table}' has no key column '{column.Association.ThisKey}'. Ensure table '{table}' configuration is valid."
-                            );
+            ?? throw new InvalidOperationException(
+                $"Foreign table '{table}' has no key column '{column.Association.ThisKey}'. Ensure table '{table}' configuration is valid."
+            );
 
         var targetType = column.Member.GetMemberType();
         var primaryTable = db.Tables.Values.SingleOrDefault(x => x.Type == targetType)
-                           ?? throw new InvalidOperationException(
-                               $"Foreign table refers to value of type '{targetType}', that was not discovered during discovery process. Ensure type '{targetType}' configuration is declared."
-                           );
+            ?? throw new InvalidOperationException(
+                $"Foreign table refers to value of type '{targetType}', that was not discovered during discovery process. Ensure type '{targetType}' configuration is declared."
+            );
         var primaryColumn = primaryTable.Columns.Values.SingleOrDefault(x => x.Member.Name == column.Association.OtherKey)
-                            ?? throw new InvalidOperationException(
-                                $"Primary table '{primaryTable}' has no column, mapped to '{table}'.'{foreignColumn.Name}'. Ensure table '{primaryTable}' configuration is valid."
-                            );
+            ?? throw new InvalidOperationException(
+                $"Primary table '{primaryTable}' has no column, mapped to '{table}'.'{foreignColumn.Name}'. Ensure table '{primaryTable}' configuration is valid."
+            );
 
         return new TableForeignKeyConstraint(
             table.Schema,

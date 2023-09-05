@@ -43,6 +43,6 @@ internal static class ProcessorTypeExtensions
         var definition = type.GetGenericTypeDefinition();
 
         return definition == typeof(IDictionary<,>) ||
-               definition == typeof(IReadOnlyDictionary<,>);
+            definition == typeof(IReadOnlyDictionary<,>);
     }
 }
