@@ -14,7 +14,6 @@
         <ToolCommandName>xlink</ToolCommandName>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
     </ItemGroup>
 </Project>

@@ -15,7 +15,6 @@
         <ProjectReference Include="../XRest.Clients.Shared/XRest.Clients.Shared.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Annium.Data.Models" Version="0.1.0" />
         <PackageReference Include="Annium.Data.Operations" Version="0.1.0" />
     </ItemGroup>
     <ItemGroup>

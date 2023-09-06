@@ -14,7 +14,6 @@
     <ItemGroup>
         <PackageReference Include="Annium.Configuration.CommandLine" Version="0.1.0" />
         <PackageReference Include="Annium.Configuration.Yaml" Version="0.1.0" />
-        <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
         <PackageReference Include="NetMQ" Version="4.0.1.6" />
     </ItemGroup>

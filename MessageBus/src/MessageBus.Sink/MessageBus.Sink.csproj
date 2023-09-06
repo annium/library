@@ -14,11 +14,8 @@
     <ItemGroup>
         <PackageReference Include="Annium.Configuration.CommandLine" Version="0.1.0" />
         <PackageReference Include="Annium.Configuration.Yaml" Version="0.1.0" />
-        <PackageReference Include="Annium.Core.DependencyInjection" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
-        <PackageReference Include="Annium.Core.Mapper" Version="0.1.0" />
         <PackageReference Include="Annium.Infrastructure.MessageBus.Node" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
-        <PackageReference Include="Annium.Serialization.Json" Version="0.1.0" />
     </ItemGroup>
 </Project>
