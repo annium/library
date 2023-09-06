@@ -2,30 +2,31 @@ using System;
 using System.Collections.Generic;
 using Annium.Core.DependencyInjection;
 using Microsoft.AspNetCore.Components;
+using Xunit.Abstractions;
 
 namespace Annium.Blazor.Routing.Tests;
 
-public abstract class TestBase
+public abstract class TestBase : Testing.Lib.TestBase
 {
     protected FakeNavigationManager NavigationManager { get; }
 
-    private readonly IServiceProvider _serviceProvider;
-
-    protected TestBase()
+    protected TestBase(ITestOutputHelper outputHelper)
+        : base(outputHelper)
     {
-        var container = new ServiceContainer();
-        container.AddRuntime(GetType().Assembly);
-        container.AddMapper();
-        container.AddRouting();
-        container.Add<FakeNavigationManager>().AsSelf().As<NavigationManager>().Singleton();
-        _serviceProvider = container.BuildServiceProvider();
-        NavigationManager = _serviceProvider.Resolve<FakeNavigationManager>();
+        Register(container =>
+        {
+            container.AddMapper();
+            container.AddRouting();
+            container.Add<FakeNavigationManager>().AsSelf().As<NavigationManager>().Singleton();
+        });
+
+        NavigationManager = Get<FakeNavigationManager>();
     }
 
     public T GetRouting<T>()
         where T : IRouting
     {
-        return _serviceProvider.Resolve<T>();
+        return Get<T>();
     }
 
     protected class FakeNavigationManager : NavigationManager

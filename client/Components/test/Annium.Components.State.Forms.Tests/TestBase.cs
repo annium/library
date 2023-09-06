@@ -1,21 +1,23 @@
 using Annium.Core.DependencyInjection;
 using Annium.Extensions.Validation;
+using Xunit.Abstractions;
 
 namespace Annium.Components.State.Forms.Tests;
 
-public abstract class TestBase
+public abstract class TestBase : Testing.Lib.TestBase
 {
-    protected IStateFactory GetFactory() => new ServiceContainer()
-        .AddRuntime(GetType().Assembly)
-        .AddMapper()
-        .AddStateFactory()
-        .BuildServiceProvider()
-        .Resolve<IStateFactory>();
+    protected TestBase(ITestOutputHelper outputHelper) : base(outputHelper)
+    {
+        Register(container =>
+        {
+            container.AddMapper();
+            container.AddStateFactory();
+            container.AddValidation();
+            container.AddLocalization(opts => opts.UseInMemoryStorage());
+        });
+    }
 
-    protected IValidator<T> GetValidator<T>() => new ServiceContainer()
-        .AddRuntime(GetType().Assembly)
-        .AddValidation()
-        .AddLocalization(opts => opts.UseInMemoryStorage())
-        .BuildServiceProvider()
-        .Resolve<IValidator<T>>();
+    protected IStateFactory GetFactory() => Get<IStateFactory>();
+
+    protected IValidator<T> GetValidator<T>() => Get<IValidator<T>>();
 }

@@ -1,10 +1,15 @@
 using Annium.Testing;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Annium.Blazor.Routing.Tests;
 
 public class RouteTest : TestBase
 {
+    public RouteTest(ITestOutputHelper outputHelper) : base(outputHelper)
+    {
+    }
+
     [Fact]
     public void Link_Works()
     {

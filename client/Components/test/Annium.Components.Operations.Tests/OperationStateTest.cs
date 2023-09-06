@@ -2,11 +2,16 @@ using Annium.Components.State.Operations;
 using Annium.Data.Operations;
 using Annium.Testing;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Annium.Components.Operations.Tests;
 
 public class OperationStateTest : TestBase
 {
+    public OperationStateTest(ITestOutputHelper outputHelper) : base(outputHelper)
+    {
+    }
+
     [Fact]
     public void OperationState_Start_Ok()
     {

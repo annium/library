@@ -4,11 +4,16 @@ using System.Linq;
 using System.Reactive;
 using Annium.Testing;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Annium.Components.State.Forms.Tests;
 
 public class MapContainerTest : TestBase
 {
+    public MapContainerTest(ITestOutputHelper outputHelper) : base(outputHelper)
+    {
+    }
+
     [Fact]
     public void Create_Ok()
     {

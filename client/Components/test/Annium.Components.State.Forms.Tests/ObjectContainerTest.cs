@@ -5,11 +5,16 @@ using Annium.Components.State.Forms.Extensions;
 using Annium.Extensions.Validation;
 using Annium.Testing;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Annium.Components.State.Forms.Tests;
 
 public class ObjectContainerTest : TestBase
 {
+    public ObjectContainerTest(ITestOutputHelper outputHelper) : base(outputHelper)
+    {
+    }
+
     [Fact]
     public void Create_Ok()
     {

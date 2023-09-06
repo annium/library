@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using System.Reactive;
 using Annium.Testing;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Annium.Components.State.Forms.Tests;
 
 public class ComplexTest : TestBase
 {
+    public ComplexTest(ITestOutputHelper outputHelper) : base(outputHelper)
+    {
+    }
+
     [Fact]
     public void Init_Ok()
     {
