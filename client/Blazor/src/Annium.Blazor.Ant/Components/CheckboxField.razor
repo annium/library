@@ -2,7 +2,7 @@
 
 <AntDesign.Checkbox
     Checked="@InternalState.Value"
-    CheckedChange="@((bool e) => InternalState.Set(e))"
+    CheckedChange="@(e => InternalState.Set(e))"
     @attributes="Attributes">
     @ChildContent
 </AntDesign.Checkbox>

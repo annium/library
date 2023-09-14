@@ -27,7 +27,6 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
     public bool HasChanged => _states.Values.Any(x => x.Ref.HasChanged);
     public bool HasBeenTouched => _states.Values.Any(x => x.Ref.HasBeenTouched);
     public IReadOnlyDictionary<string, ITrackedState> Children => _states.ToDictionary(x => x.Key.Name, x => x.Value.Ref);
-    private T _initialValue;
     private readonly IReadOnlyDictionary<PropertyInfo, StateReference> _states;
 
     public ObjectContainer(
@@ -35,8 +34,6 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
         IStateFactory stateFactory
     )
     {
-        _initialValue = initialValue;
-
         var states = new Dictionary<PropertyInfo, StateReference>();
         _states = states;
 
@@ -55,8 +52,6 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
 
     public void Init(T value)
     {
-        _initialValue = value;
-
         using (Mute())
         {
             foreach (var property in Properties)

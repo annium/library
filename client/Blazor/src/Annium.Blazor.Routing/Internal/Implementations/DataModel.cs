@@ -41,7 +41,7 @@ internal class DataModel : IDataModel
 
     public IReadOnlyDictionary<string, object?> ToParams(object data)
     {
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (data is null)
             return new Dictionary<string, object?>();
 

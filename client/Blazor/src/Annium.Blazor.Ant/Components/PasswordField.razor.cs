@@ -9,19 +9,20 @@ namespace Annium.Blazor.Ant.Components;
 public partial class PasswordField
 {
     [CascadingParameter]
-    public IFormField<string> FormField { get; set; } = default!;
+    [EditorRequired]
+    public required IFormField<string> FormField { get; set; }
 
     [Parameter]
-    public IAtomicContainer<string> State { get; set; } = default!;
+    public IAtomicContainer<string>? State { get; set; }
 
     [Parameter]
     public EventCallback<KeyboardEventArgs> OnPressEnter { get; set; }
 
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public RenderFragment ChildContent { get; set; } = delegate { };
 
     [Parameter(CaptureUnmatchedValues = true)]
-    public IReadOnlyDictionary<string, object> Attributes { get; set; } = default!;
+    public IReadOnlyDictionary<string, object> Attributes { get; set; } = new Dictionary<string, object>();
 
     [Inject]
     private IMapper Mapper { get; set; } = default!;

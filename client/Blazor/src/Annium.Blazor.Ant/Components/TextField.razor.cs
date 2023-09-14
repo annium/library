@@ -10,19 +10,20 @@ namespace Annium.Blazor.Ant.Components;
 public partial class TextField<TValue> where TValue : IEquatable<TValue>
 {
     [CascadingParameter]
-    public IFormField<TValue> FormField { get; set; } = default!;
+    [EditorRequired]
+    public required IFormField<TValue> FormField { get; set; }
 
     [Parameter]
-    public IAtomicContainer<TValue> State { get; set; } = default!;
+    public IAtomicContainer<TValue>? State { get; set; }
 
     [Parameter]
     public EventCallback<KeyboardEventArgs> OnPressEnter { get; set; }
 
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public RenderFragment ChildContent { get; set; } = delegate { };
 
     [Parameter(CaptureUnmatchedValues = true)]
-    public IReadOnlyDictionary<string, object> Attributes { get; set; } = default!;
+    public IReadOnlyDictionary<string, object> Attributes { get; set; } = new Dictionary<string, object>();
 
     [Inject]
     private IMapper Mapper { get; set; } = default!;

@@ -238,6 +238,7 @@ public class ObjectContainerTest : TestBase
         public int Age { get; set; }
     }
 
+    // ReSharper disable once UnusedType.Local
     private class UserValidator : Validator<User>
     {
         public UserValidator()

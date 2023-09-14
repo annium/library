@@ -8,14 +8,14 @@ namespace Annium.Blazor.Ant.Components;
 public partial class DatePickerField
 {
     [CascadingParameter]
-    public IFormField<DateTime> FormField { get; set; } = default!;
+    [EditorRequired]
+    public required IFormField<DateTime> FormField { get; set; }
 
     [Parameter]
-    public IAtomicContainer<DateTime> State { get; set; } = default!;
+    public IAtomicContainer<DateTime>? State { get; set; }
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
-
 
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object> Attributes { get; set; } = new Dictionary<string, object>();

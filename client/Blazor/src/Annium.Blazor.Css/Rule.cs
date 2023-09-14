@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -11,7 +9,7 @@ namespace Annium.Blazor.Css;
 
 public static class Rule
 {
-    private static int _index = 0;
+    private static int _index;
     private static int Index => Interlocked.Increment(ref _index);
 
     public static CssTopLevelRule Class(string name)
@@ -45,8 +43,6 @@ public static class Rule
     public static CssTopLevelRule TagId(string tag, [CallerLineNumber] int line = 0, [CallerFilePath] string file = "", [CallerMemberName] string member = "")
         => new CssRuleInternal($"{tag}{RuleType.Id}{GenerateName(line, file, member)}");
 
-    private static readonly IDictionary<Type, int> TypeRules = new Dictionary<Type, int>();
-
     private static string GenerateName(int line, string file, string member)
     {
         var filePath = Regex.Replace(file, "(.razor|.cs|[:#.])", string.Empty)
@@ -55,7 +51,6 @@ public static class Rule
             .Split(Path.DirectorySeparatorChar)
             .ToArray();
         var fileName = string.Join('-', filePath.Length > 4 ? filePath.TakeLast(4) : filePath);
-        ;
         var memberName = member == ".ctor" ? "constructor" : member;
 
         return $"{fileName}_{memberName}_{line}_{Index}";

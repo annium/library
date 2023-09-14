@@ -117,7 +117,7 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
         _sources.Add(source);
         _sourceRanges[source] = ValueRange.Create(decimal.MinValue, decimal.MaxValue);
         source.OnBoundsChange += UpdateBounds;
-        Chart?.RequestDraw();
+        Chart.RequestDraw();
 
         return Disposable.Create(() =>
         {
@@ -127,7 +127,7 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
             this.Trace($"untrack source {source.GetFullId()}");
             _sourceRanges.Remove(source);
             source.OnBoundsChange -= UpdateBounds;
-            Chart?.RequestDraw();
+            Chart.RequestDraw();
 
             if (_sources.Count == 0)
                 ResetRangeAndView();

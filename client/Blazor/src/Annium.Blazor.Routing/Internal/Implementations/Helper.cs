@@ -16,7 +16,7 @@ internal class Helper
         template = template.StartsWith(Separator) ? template[1..] : template;
 
         var parts = template == string.Empty ? Array.Empty<string>() : template.Split('/');
-        if (parts.Any(x => x is null || x == string.Empty || x.Contains(' ')))
+        if (parts.Any(x => string.IsNullOrWhiteSpace(x) || x.Contains(' ')))
             throw new ArgumentException($"Template '{template}' can't contain empty parts or whitespace");
 
         return parts;

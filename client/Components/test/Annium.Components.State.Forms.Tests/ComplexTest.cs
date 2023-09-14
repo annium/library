@@ -5,6 +5,8 @@ using Annium.Testing;
 using Xunit;
 using Xunit.Abstractions;
 
+// ReSharper disable UnusedAutoPropertyAccessor.Local
+
 namespace Annium.Components.State.Forms.Tests;
 
 public class ComplexTest : TestBase

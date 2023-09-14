@@ -83,9 +83,9 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject
 
         foreach (var item in value.Items)
         {
-            var width = Width.Match(x => x, x => x(item));
-            var radius = Radius.Match(x => x, x => x(item));
-            var color = ItemColor.Match(x => x, x => x(item));
+            var width = Width.Match(v => v, v => v(item));
+            var radius = Radius.Match(v => v, v => v(item));
+            var color = ItemColor.Match(v => v, v => v(item));
             var y = PaneContext.ToY(item.Value);
 
             ctx.StrokeStyle = color;
