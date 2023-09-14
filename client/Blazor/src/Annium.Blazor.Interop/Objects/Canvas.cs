@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 using static Annium.Blazor.Interop.Internal.Constants;
 
 // ReSharper disable InconsistentNaming
-
+// ReSharper disable once CheckNamespace
 namespace Annium.Blazor.Interop;
 
 public sealed partial record Canvas : ReferenceElement

@@ -1,11 +1,11 @@
 using System;
 using System.Runtime.InteropServices.JavaScript;
-using Annium.Blazor.Interop.Domain;
 using Annium.Blazor.Interop.Internal;
 using Annium.Blazor.Interop.Internal.Extensions;
 using Annium.Logging;
 using static Annium.Blazor.Interop.Internal.Constants;
 
+// ReSharper disable once CheckNamespace
 namespace Annium.Blazor.Interop;
 
 public abstract partial record Element : IObject, IDisposable

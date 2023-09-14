@@ -1,4 +1,5 @@
-namespace Annium.Blazor.Interop.Domain;
+// ReSharper disable once CheckNamespace
+namespace Annium.Blazor.Interop;
 
 public readonly record struct MouseEvent(
     int X,

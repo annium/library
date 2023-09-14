@@ -1,6 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Components;
 
+// ReSharper disable once CheckNamespace
 namespace Annium.Blazor.Css;
 
 public partial class StyleSheet : IDisposable

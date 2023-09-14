@@ -1,3 +1,4 @@
+// ReSharper disable once CheckNamespace
 namespace Annium.Blazor.Css;
 
 public static class CursorExtensions

@@ -1,5 +1,6 @@
 using Annium.Blazor.Css.Internal;
 
+// ReSharper disable once CheckNamespace
 namespace Annium.Blazor.Css;
 
 public class FlexDirection : ImplicitString<FlexDirection>

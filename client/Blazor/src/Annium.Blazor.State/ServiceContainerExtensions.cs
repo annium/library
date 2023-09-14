@@ -1,7 +1,8 @@
+using Annium.Blazor.State;
 using Annium.Blazor.State.Internal;
-using Annium.Core.DependencyInjection;
 
-namespace Annium.Blazor.State;
+// ReSharper disable once CheckNamespace
+namespace Annium.Core.DependencyInjection;
 
 public static class ServiceContainerExtensions
 {

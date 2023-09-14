@@ -1,6 +1,7 @@
 using Annium.Blazor.Css;
 using StyleSheet = Annium.Blazor.Css.Internal.StyleSheet;
 
+// ReSharper disable once CheckNamespace
 namespace Annium.Core.DependencyInjection;
 
 public static class ServiceContainerExtensions

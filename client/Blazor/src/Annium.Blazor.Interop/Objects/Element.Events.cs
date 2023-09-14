@@ -1,7 +1,7 @@
 using System;
-using Annium.Blazor.Interop.Domain;
 using Annium.Blazor.Interop.Internal;
 
+// ReSharper disable once CheckNamespace
 namespace Annium.Blazor.Interop;
 
 public partial record Element

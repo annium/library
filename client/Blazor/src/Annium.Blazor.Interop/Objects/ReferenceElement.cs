@@ -2,9 +2,10 @@ using System;
 using Annium.Blazor.Interop.Internal.Extensions;
 using Microsoft.AspNetCore.Components;
 
+// ReSharper disable once CheckNamespace
 namespace Annium.Blazor.Interop;
 
-public partial record ReferenceElement : Element
+public record ReferenceElement : Element
 {
     public override string Id => _id.Value;
     private readonly Lazy<string> _id;

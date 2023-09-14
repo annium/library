@@ -4,6 +4,7 @@ using Annium.Blazor.Charts.Internal.Data.Sources;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
+// ReSharper disable once CheckNamespace
 namespace Annium.Core.DependencyInjection;
 
 public static class ServiceContainerExtensions

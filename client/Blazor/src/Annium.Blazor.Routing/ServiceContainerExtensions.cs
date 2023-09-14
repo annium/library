@@ -4,6 +4,7 @@ using Annium.Blazor.Routing.Internal.Implementations;
 
 [assembly: InternalsVisibleTo("Annium.Blazor.Routing.Tests")]
 
+// ReSharper disable once CheckNamespace
 namespace Annium.Core.DependencyInjection;
 
 public static class ServiceContainerExtensions

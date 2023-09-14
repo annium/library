@@ -1,6 +1,6 @@
 // ReSharper disable InconsistentNaming
-
-namespace Annium.Blazor.Interop.Domain;
+// ReSharper disable once CheckNamespace
+namespace Annium.Blazor.Interop;
 
 public enum MouseEventEnum
 {
