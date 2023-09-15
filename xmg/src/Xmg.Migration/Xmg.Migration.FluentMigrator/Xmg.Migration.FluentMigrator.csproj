@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <PackageId>Xmg.Migration.FluentMigrator</PackageId>
         <PackageVersion>0.1.0</PackageVersion>

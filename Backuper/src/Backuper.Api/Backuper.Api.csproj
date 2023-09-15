@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
     <PropertyGroup>
         <PackageId>Backuper.Api</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
