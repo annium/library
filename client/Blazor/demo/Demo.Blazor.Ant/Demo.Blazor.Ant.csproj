@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
     <PropertyGroup>
         <PackageId>Demo.Blazor.Ant</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
