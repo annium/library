@@ -1,5 +1,25 @@
-TFM := net6.0
+TFM := net7.0
 BIN_DEBUG := bin/Debug/$(TFM)
+
+format:
+	xs format -sc -ic
+install:
+	xs remote restore -user $(user) -password $(pass)
+
+update:
+	xs update all dotnet -debug -sc -ic
+
+clean:
+	xs clean -sc -ic
+
+build:
+	dotnet build --nologo -v q
+
+test:
+	dotnet test --nologo -v q
+
+publish:
+	xs publish all 0.1.0 -p 1
 
 demo-blazor-ant:
 	cd web/demo/Demo.Blazor.Ant && dotnet watch run
