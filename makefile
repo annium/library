@@ -1,8 +1,28 @@
 REGISTRY := registry.annium.com
 
-install: install-xa install-xc install-xdb install-xdomains install-xlink install-xmg install-xrest install-xws
+format:
+	xs format -sc -ic
+install:
+	xs remote restore -user $(user) -password $(pass)
 
-uninstall: uninstall-xa uninstall-xc uninstall-xdb uninstall-xdomains uninstall-xlink uninstall-xmg uninstall-xrest uninstall-xws
+update:
+	xs update all dotnet -debug -sc -ic
+
+clean:
+	xs clean -sc -ic
+
+build:
+	dotnet build --nologo -v q
+
+test:
+	dotnet test --nologo -v q
+
+publish:
+	make publish-tools
+
+install-all: install-xa install-xc install-xdb install-xdomains install-xlink install-xmg install-xrest install-xws
+
+uninstall-all: uninstall-xa uninstall-xc uninstall-xdb uninstall-xdomains uninstall-xlink uninstall-xmg uninstall-xrest uninstall-xws
 
 install-xa install-xc install-xdb install-xdomains install-xlink install-xmg install-xrest install-xws:
 	./$(subst install-,,$@)/scripts/nix_install.sh
@@ -10,8 +30,9 @@ install-xa install-xc install-xdb install-xdomains install-xlink install-xmg ins
 uninstall-xa uninstall-xc uninstall-xdb uninstall-xdomains uninstall-xlink uninstall-xmg uninstall-xrest uninstall-xws:
 	./$(subst uninstall-,,$@)/scripts/nix_uninstall.sh
 
+publish-all: publish-images publish-tools
 
-publish: publish-backuper publish-mbus-proxy publish-mbus-sink publish-tools
+publish-images: publish-backuper publish-mbus-proxy publish-mbus-sink
 
 publish-backuper:
 	$(call publish,Backuper/src,Backuper.Api/app.dockerfile,backuper)
