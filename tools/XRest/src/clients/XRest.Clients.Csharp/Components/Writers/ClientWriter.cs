@@ -42,12 +42,6 @@ internal class ClientWriter
                 client.Namespace,
             });
 
-        _writer.Write(output, "ClientBase", "Templates.ClientBase", new
-        {
-            Usages = new[] { Constants.NetHttpNamespace },
-            client.Namespace,
-        });
-
         WriteAbstractClient(output, client.Namespace.ToNamespace(), client, generateTestClient);
     }
 

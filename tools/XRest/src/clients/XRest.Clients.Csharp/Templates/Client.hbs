@@ -4,10 +4,13 @@ using {{ ns }};
 
 namespace {{ namespace }};
 
-public class {{ type }} : ClientBase
+public class {{ type }}
 {
-    public {{ type }}(IHttpRequest request) : base(request)
+    private readonly IHttpRequest _request;
+
+    internal {{ type }}(IHttpRequest request)
     {
+        _request = request;
     }
     {{~ for action in actions ~}}
 
@@ -17,7 +20,7 @@ public class {{ type }} : ClientBase
     {{~ end ~}}
     )
     {
-        return await Request.Clone()
+        return await _request
             .{{ action.method }}({{~ if action.path_parameters.size > 0 ~}}${{~ end ~}}"{{ action.path }}")
             {{~ for parameter in action.query_parameters ~}}
             .Param("{{ parameter.name }}", {{ parameter.name }})
