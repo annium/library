@@ -11,8 +11,9 @@ namespace XRest.Clients.Csharp.Components.Processors;
 
 internal static class ClientBuilder
 {
-    private static readonly Namespace TplNamespace = Constants.TplNamespace.ToNamespace();
-    private static readonly Namespace HttpNamespace = Constants.NetHttpNamespace.ToNamespace();
+    private static readonly Namespace SystemThreadingNamespace = Constants.SystemThreadingNamespace.ToNamespace();
+    private static readonly Namespace SystemThreadingTasksNamespace = Constants.SystemThreadingTasksNamespace.ToNamespace();
+    private static readonly Namespace AnniumNetHttpNamespace = Constants.AnniumNetHttpNamespace.ToNamespace();
 
     public static IClientView BuildClient(
         Namespace clientsNamespace,
@@ -26,7 +27,7 @@ internal static class ClientBuilder
 
         if (controllers.Count == 1)
             return new ClientContainerView(
-                new[] { controllers.First().Namespace, HttpNamespace }.ToUsagesFrom(clientsNamespace).ToUsageStrings(),
+                new[] { controllers.First().Namespace, AnniumNetHttpNamespace }.ToUsagesFrom(clientsNamespace).ToUsageStrings(),
                 clientsNamespace.ToString(),
                 name,
                 type,
@@ -46,7 +47,7 @@ internal static class ClientBuilder
 
         var usages = childControllers
             .Select(x => x.Namespace)
-            .Append(HttpNamespace)
+            .Append(AnniumNetHttpNamespace)
             .Concat(ancestors.Keys)
             .ToUsagesFrom(clientsNamespace)
             .ToUsageStrings();
@@ -67,7 +68,7 @@ internal static class ClientBuilder
     private static IClientView BuildClientNode(ControllerView controller)
     {
         var usages = controller.Usages
-            .Concat(new[] { TplNamespace, HttpNamespace })
+            .Concat(new[] { SystemThreadingNamespace, SystemThreadingTasksNamespace, AnniumNetHttpNamespace })
             .ToUsagesFrom(controller.Namespace)
             .ToUsageStrings();
         var @namespace = controller.Namespace.ToString();

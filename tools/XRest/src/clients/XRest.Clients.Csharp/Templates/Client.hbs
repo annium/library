@@ -15,12 +15,20 @@ public class {{ type }}
     {{~ for action in actions ~}}
 
     public async {{ if action.has_response }}Task<{{ action.response }}>{{ else }}Task{{ end }} {{ action.name }}(
-    {{~ for parameter in action.parameters ~}}
-        {{ parameter.type}} {{ parameter.name }}{{~ if !for.last }},{{~ end }}
-    {{~ end ~}}
+        {{~ for parameter in action.parameters ~}}
+        {{ parameter.type}} {{ parameter.name }},
+        {{~ end ~}}
+        {{~ if action.has_response ~}}
+        {{ action.response }} defaultValue,
+        {{~ end ~}}
+        CancellationToken ct = default
     )
     {
+        {{~ if action.has_response ~}}
         return await _request
+        {{~ else ~}}
+        await _request
+        {{~ end ~}}
             .{{ action.method }}({{~ if action.path_parameters.size > 0 ~}}${{~ end ~}}"{{ action.path }}")
             {{~ for parameter in action.query_parameters ~}}
             .Param("{{ parameter.name }}", {{ parameter.name }})
@@ -28,7 +36,7 @@ public class {{ type }}
             {{~ if action.has_body ~}}
             .JsonContent(body)
             {{~ end ~}}
-            .{{ if action.has_response }}AsAsync<{{ action.response }}>{{ else }}AsAsync{{ end }}();
+            .{{ if action.has_response }}AsAsync(defaultValue, ct){{ else }}RunAsync(ct){{ end }};
     }
     {{~ end ~}}
 }

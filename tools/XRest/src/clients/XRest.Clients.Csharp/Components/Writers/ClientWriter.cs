@@ -24,7 +24,7 @@ internal class ClientWriter
 
         _writer.TryWrite(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
         {
-            Usages = new[] { Constants.NetHttpNamespace },
+            Usages = new[] { Constants.AnniumNetHttpNamespace },
             client.Namespace,
         });
 
@@ -36,8 +36,8 @@ internal class ClientWriter
                     "System.Collections.Generic",
                     "System.Linq",
                     "System.Threading.Tasks",
-                    Constants.DataOperationsNamespace,
-                    Constants.NetHttpNamespace,
+                    Constants.AnniumDataOperationsNamespace,
+                    Constants.AnniumNetHttpNamespace,
                 },
                 client.Namespace,
             });
