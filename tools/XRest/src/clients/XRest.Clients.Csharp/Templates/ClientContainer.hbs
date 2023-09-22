@@ -9,7 +9,7 @@ namespace {{ namespace }};
 public class {{ type }}
 {
     {{~ for client in clients ~}}
-    public {{ client.type }} {{ client.name }} => new (_request);
+    public {{ client.type }} {{ client.name }} => new(_request);
     {{~ end ~}}
     private readonly IHttpRequest _request;
 
