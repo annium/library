@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using XRest.Core;
 
 // ReSharper disable once CheckNamespace
-
 namespace Annium.Core.DependencyInjection;
 
 public static class ServiceContainerExtensions
