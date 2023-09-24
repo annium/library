@@ -6,7 +6,7 @@
 @inherits BaseComponent
 
 <div>
-    <FormField TValue="bool" State="_state.At(x => x.IsChecked)">
+    <FormField TValue="bool" State="_state.AtAtomic(x => x.IsChecked)">
         <CheckboxField>checkbox</CheckboxField>
     </FormField>
     <Button OnClick="@Toggle">toggle</Button>

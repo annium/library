@@ -6,7 +6,6 @@ using System.Reflection;
 using Annium.Components.State.Core;
 using Annium.Core.Mapper;
 using Annium.Data.Models.Extensions;
-using NodaTime;
 
 namespace Annium.Components.State.Forms.Internal;
 
@@ -109,28 +108,30 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         return false;
     }
 
-    public IArrayContainer<TI> At<TI>(Expression<Func<Dictionary<TKey, TValue>, List<TI>>> ex) where TI : notnull, new() => At<IArrayContainer<TI>>(ex);
+    public IObjectContainer<TI> AtObject<TI>(Expression<Func<Dictionary<TKey, TValue>, TI>> ex)
+        where TI : notnull, new()
+    {
+        return At<IObjectContainer<TI>>(ex);
+    }
 
-    public IMapContainer<TK, TV> At<TK, TV>(Expression<Func<Dictionary<TKey, TValue>, Dictionary<TK, TV>>> ex) where TK : notnull where TV : notnull, new() =>
-        At<IMapContainer<TK, TV>>(ex);
+    public IArrayContainer<TI> AtArray<TI>(Expression<Func<Dictionary<TKey, TValue>, List<TI>>> ex)
+        where TI : notnull, new()
+    {
+        return At<IArrayContainer<TI>>(ex);
+    }
 
-    public IAtomicContainer<sbyte> At(Expression<Func<Dictionary<TKey, TValue>, sbyte>> ex) => At<IAtomicContainer<sbyte>>(ex);
-    public IAtomicContainer<short> At(Expression<Func<Dictionary<TKey, TValue>, short>> ex) => At<IAtomicContainer<short>>(ex);
-    public IAtomicContainer<int> At(Expression<Func<Dictionary<TKey, TValue>, int>> ex) => At<IAtomicContainer<int>>(ex);
-    public IAtomicContainer<long> At(Expression<Func<Dictionary<TKey, TValue>, long>> ex) => At<IAtomicContainer<long>>(ex);
-    public IAtomicContainer<byte> At(Expression<Func<Dictionary<TKey, TValue>, byte>> ex) => At<IAtomicContainer<byte>>(ex);
-    public IAtomicContainer<ushort> At(Expression<Func<Dictionary<TKey, TValue>, ushort>> ex) => At<IAtomicContainer<ushort>>(ex);
-    public IAtomicContainer<uint> At(Expression<Func<Dictionary<TKey, TValue>, uint>> ex) => At<IAtomicContainer<uint>>(ex);
-    public IAtomicContainer<ulong> At(Expression<Func<Dictionary<TKey, TValue>, ulong>> ex) => At<IAtomicContainer<ulong>>(ex);
-    public IAtomicContainer<decimal> At(Expression<Func<Dictionary<TKey, TValue>, decimal>> ex) => At<IAtomicContainer<decimal>>(ex);
-    public IAtomicContainer<float> At(Expression<Func<Dictionary<TKey, TValue>, float>> ex) => At<IAtomicContainer<float>>(ex);
-    public IAtomicContainer<double> At(Expression<Func<Dictionary<TKey, TValue>, double>> ex) => At<IAtomicContainer<double>>(ex);
-    public IAtomicContainer<string> At(Expression<Func<Dictionary<TKey, TValue>, string>> ex) => At<IAtomicContainer<string>>(ex);
-    public IAtomicContainer<bool> At(Expression<Func<Dictionary<TKey, TValue>, bool>> ex) => At<IAtomicContainer<bool>>(ex);
-    public IAtomicContainer<DateTime> At(Expression<Func<Dictionary<TKey, TValue>, DateTime>> ex) => At<IAtomicContainer<DateTime>>(ex);
-    public IAtomicContainer<DateTimeOffset> At(Expression<Func<Dictionary<TKey, TValue>, DateTimeOffset>> ex) => At<IAtomicContainer<DateTimeOffset>>(ex);
-    public IAtomicContainer<Instant> At(Expression<Func<Dictionary<TKey, TValue>, Instant>> ex) => At<IAtomicContainer<Instant>>(ex);
-    public IObjectContainer<TI> At<TI>(Expression<Func<Dictionary<TKey, TValue>, TI>> ex) where TI : notnull, new() => At<IObjectContainer<TI>>(ex);
+    public IMapContainer<TK, TV> AtMap<TK, TV>(Expression<Func<Dictionary<TKey, TValue>, Dictionary<TK, TV>>> ex)
+        where TK : notnull
+        where TV : notnull, new()
+    {
+        return At<IMapContainer<TK, TV>>(ex);
+    }
+
+    public IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<Dictionary<TKey, TValue>, TI>> ex)
+        where TI : IEquatable<TI>
+    {
+        return At<IAtomicContainer<TI>>(ex);
+    }
 
     public void Add(TKey key, TValue item)
     {

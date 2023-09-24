@@ -30,9 +30,9 @@ public class ArrayContainerTest : TestBase
         state.Value.IsEqual(initialValue);
         var children = state.Children;
         foreach (var j in Enumerable.Range(0, children.Count - 1))
-            children.At(j).IsEqual(state.At(x => x[j]));
+            children.At(j).IsEqual(state.AtAtomic(x => x[j]));
         var i = 0;
-        state.At(x => x[i]).Value.Is(initialValue.At(0));
+        state.AtAtomic(x => x[i]).Value.Is(initialValue.At(0));
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -56,7 +56,7 @@ public class ArrayContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x[0]).Value.Is(initialValue.At(0));
+        state.AtAtomic(x => x[0]).Value.Is(initialValue.At(0));
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -66,7 +66,7 @@ public class ArrayContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x[0]).Value.Is(otherValue.At(0));
+        state.AtAtomic(x => x[0]).Value.Is(otherValue.At(0));
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -76,7 +76,7 @@ public class ArrayContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x[0]).Value.Is(initialValue.At(0));
+        state.AtAtomic(x => x[0]).Value.Is(initialValue.At(0));
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
         log.Has(2);
@@ -98,7 +98,7 @@ public class ArrayContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x[0]).Value.Is(initialValue.At(0));
+        state.AtAtomic(x => x[0]).Value.Is(initialValue.At(0));
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -108,7 +108,7 @@ public class ArrayContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x[0]).Value.Is(otherValue.At(0));
+        state.AtAtomic(x => x[0]).Value.Is(otherValue.At(0));
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -118,7 +118,7 @@ public class ArrayContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x[0]).Value.Is(otherValue.At(0));
+        state.AtAtomic(x => x[0]).Value.Is(otherValue.At(0));
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.Has(2);
@@ -137,7 +137,7 @@ public class ArrayContainerTest : TestBase
 
         // act
         state.Set(otherValue).IsTrue();
-        state.At(x => x[0]).SetStatus(Status.Validating);
+        state.AtAtomic(x => x[0]).SetStatus(Status.Validating);
 
         // assert
         state.Value.IsEqual(otherValue);
@@ -152,7 +152,7 @@ public class ArrayContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x[0]).Value.Is(initialValue.At(0));
+        state.AtAtomic(x => x[0]).Value.Is(initialValue.At(0));
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -171,7 +171,7 @@ public class ArrayContainerTest : TestBase
         state.Changed.Subscribe(log.Add);
 
         // act
-        state.At(x => x[0]).SetStatus(Status.Validating);
+        state.AtAtomic(x => x[0]).SetStatus(Status.Validating);
 
         // assert
         state.IsStatus(Status.None, Status.Validating).IsTrue();

@@ -30,9 +30,9 @@ public class MapContainerTest : TestBase
         state.Value.IsEqual(initialValue);
         var value = state.Value;
         foreach (var itemKey in initialValue.Keys)
-            value[itemKey].Is(state.At(x => x[itemKey]).Value);
+            value[itemKey].Is(state.AtAtomic(x => x[itemKey]).Value);
         var key = initialValue.Keys.First();
-        state.At(x => x[key]).Value.Is(initialValue[key]);
+        state.AtAtomic(x => x[key]).Value.Is(initialValue[key]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -56,7 +56,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x["a"]).Value.Is(initialValue["a"]);
+        state.AtAtomic(x => x["a"]).Value.Is(initialValue["a"]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -66,7 +66,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x["c"]).Value.Is(otherValue["c"]);
+        state.AtAtomic(x => x["c"]).Value.Is(otherValue["c"]);
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -76,7 +76,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x["a"]).Value.Is(initialValue["a"]);
+        state.AtAtomic(x => x["a"]).Value.Is(initialValue["a"]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
         log.Has(2);
@@ -98,7 +98,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x["a"]).Value.Is(initialValue["a"]);
+        state.AtAtomic(x => x["a"]).Value.Is(initialValue["a"]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -108,7 +108,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x["c"]).Value.Is(otherValue["c"]);
+        state.AtAtomic(x => x["c"]).Value.Is(otherValue["c"]);
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -118,7 +118,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x["a"]).Value.Is(otherValue["a"]);
+        state.AtAtomic(x => x["a"]).Value.Is(otherValue["a"]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.Has(2);
@@ -137,7 +137,7 @@ public class MapContainerTest : TestBase
 
         // act
         state.Set(otherValue).IsTrue();
-        state.At(x => x["c"]).SetStatus(Status.Validating);
+        state.AtAtomic(x => x["c"]).SetStatus(Status.Validating);
 
         // assert
         state.Value.IsEqual(otherValue);
@@ -152,7 +152,7 @@ public class MapContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x["c"]).Value.Is(initialValue["c"]);
+        state.AtAtomic(x => x["c"]).Value.Is(initialValue["c"]);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -171,7 +171,7 @@ public class MapContainerTest : TestBase
         state.Changed.Subscribe(log.Add);
 
         // act
-        state.At(x => x["a"]).SetStatus(Status.Validating);
+        state.AtAtomic(x => x["a"]).SetStatus(Status.Validating);
 
         // assert
         state.IsStatus(Status.None, Status.Validating).IsTrue();

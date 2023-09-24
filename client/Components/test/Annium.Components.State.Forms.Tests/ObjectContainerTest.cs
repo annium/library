@@ -29,9 +29,9 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.Children.At(nameof(User.Age)).Is(state.At(x => x.Age));
-        state.Children.At(nameof(User.Name)).Is(state.At(x => x.Name));
-        state.At(x => x.Name).Value.Is(initialValue.Name);
+        state.Children.At(nameof(User.Age)).Is(state.AtAtomic(x => x.Age));
+        state.Children.At(nameof(User.Name)).Is(state.AtAtomic(x => x.Name));
+        state.AtAtomic(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -58,7 +58,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.Is(initialValue.Name);
+        state.AtAtomic(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -68,7 +68,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x.Name).Value.Is(otherValue.Name);
+        state.AtAtomic(x => x.Name).Value.Is(otherValue.Name);
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -78,7 +78,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.Is(initialValue.Name);
+        state.AtAtomic(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
         log.Has(2);
@@ -103,7 +103,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.Is(initialValue.Name);
+        state.AtAtomic(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -113,7 +113,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x.Name).Value.Is(otherValue.Name);
+        state.AtAtomic(x => x.Name).Value.Is(otherValue.Name);
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -123,7 +123,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x.Name).Value.Is(otherValue.Name);
+        state.AtAtomic(x => x.Name).Value.Is(otherValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.Has(2);
@@ -145,7 +145,7 @@ public class ObjectContainerTest : TestBase
 
         // act
         state.Set(otherValue).IsTrue();
-        state.At(x => x.Name).SetStatus(Status.Validating);
+        state.AtAtomic(x => x.Name).SetStatus(Status.Validating);
 
         // assert
         state.Value.IsEqual(otherValue);
@@ -160,7 +160,7 @@ public class ObjectContainerTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.Is(initialValue.Name);
+        state.AtAtomic(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -179,7 +179,7 @@ public class ObjectContainerTest : TestBase
         state.Changed.Subscribe(log.Add);
 
         // act
-        state.At(x => x.Name).SetStatus(Status.Validating);
+        state.AtAtomic(x => x.Name).SetStatus(Status.Validating);
 
         // assert
         state.IsStatus(Status.None, Status.Validating).IsTrue();

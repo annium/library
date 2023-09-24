@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Annium.Components.State.Core;
-using NodaTime;
 
 namespace Annium.Components.State.Forms.Internal;
 
@@ -113,25 +112,30 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
         return false;
     }
 
-    public IArrayContainer<TI> At<TI>(Expression<Func<T, List<TI>>> ex) where TI : notnull, new() => At<IArrayContainer<TI>>(ex);
-    public IMapContainer<TK, TV> At<TK, TV>(Expression<Func<T, Dictionary<TK, TV>>> ex) where TK : notnull where TV : notnull, new() => At<IMapContainer<TK, TV>>(ex);
-    public IAtomicContainer<sbyte> At(Expression<Func<T, sbyte>> ex) => At<IAtomicContainer<sbyte>>(ex);
-    public IAtomicContainer<short> At(Expression<Func<T, short>> ex) => At<IAtomicContainer<short>>(ex);
-    public IAtomicContainer<int> At(Expression<Func<T, int>> ex) => At<IAtomicContainer<int>>(ex);
-    public IAtomicContainer<long> At(Expression<Func<T, long>> ex) => At<IAtomicContainer<long>>(ex);
-    public IAtomicContainer<byte> At(Expression<Func<T, byte>> ex) => At<IAtomicContainer<byte>>(ex);
-    public IAtomicContainer<ushort> At(Expression<Func<T, ushort>> ex) => At<IAtomicContainer<ushort>>(ex);
-    public IAtomicContainer<uint> At(Expression<Func<T, uint>> ex) => At<IAtomicContainer<uint>>(ex);
-    public IAtomicContainer<ulong> At(Expression<Func<T, ulong>> ex) => At<IAtomicContainer<ulong>>(ex);
-    public IAtomicContainer<decimal> At(Expression<Func<T, decimal>> ex) => At<IAtomicContainer<decimal>>(ex);
-    public IAtomicContainer<float> At(Expression<Func<T, float>> ex) => At<IAtomicContainer<float>>(ex);
-    public IAtomicContainer<double> At(Expression<Func<T, double>> ex) => At<IAtomicContainer<double>>(ex);
-    public IAtomicContainer<string> At(Expression<Func<T, string>> ex) => At<IAtomicContainer<string>>(ex);
-    public IAtomicContainer<bool> At(Expression<Func<T, bool>> ex) => At<IAtomicContainer<bool>>(ex);
-    public IAtomicContainer<DateTime> At(Expression<Func<T, DateTime>> ex) => At<IAtomicContainer<DateTime>>(ex);
-    public IAtomicContainer<DateTimeOffset> At(Expression<Func<T, DateTimeOffset>> ex) => At<IAtomicContainer<DateTimeOffset>>(ex);
-    public IAtomicContainer<Instant> At(Expression<Func<T, Instant>> ex) => At<IAtomicContainer<Instant>>(ex);
-    public IObjectContainer<TI> At<TI>(Expression<Func<T, TI>> ex) where TI : notnull, new() => At<IObjectContainer<TI>>(ex);
+    public IObjectContainer<TI> AtObject<TI>(Expression<Func<T, TI>> ex)
+        where TI : notnull, new()
+    {
+        return At<IObjectContainer<TI>>(ex);
+    }
+
+    public IArrayContainer<TI> AtArray<TI>(Expression<Func<T, List<TI>>> ex)
+        where TI : notnull, new()
+    {
+        return At<IArrayContainer<TI>>(ex);
+    }
+
+    public IMapContainer<TK, TV> AtMap<TK, TV>(Expression<Func<T, Dictionary<TK, TV>>> ex)
+        where TK : notnull
+        where TV : notnull, new()
+    {
+        return At<IMapContainer<TK, TV>>(ex);
+    }
+
+    public IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<T, TI>> ex)
+        where TI : IEquatable<TI>
+    {
+        return At<IAtomicContainer<TI>>(ex);
+    }
 
     private T CreateValue()
     {

@@ -22,7 +22,7 @@ public partial class Page : ILogSubject
 
     private void Toggle()
     {
-        _state.At(x => x.IsChecked).Set(!_state.At(x => x.IsChecked).Value);
+        _state.AtAtomic(x => x.IsChecked).Set(!_state.AtAtomic(x => x.IsChecked).Value);
     }
 }
 

@@ -29,7 +29,7 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Author).At(x => x.Name).Value.Is(initialValue.Author.Name);
+        state.AtObject(x => x.Author).AtAtomic(x => x.Name).Value.Is(initialValue.Author.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -53,7 +53,7 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.Is(initialValue.Name);
+        state.AtAtomic(x => x.Name).Value.Is(initialValue.Name);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         log.IsEmpty();
@@ -63,9 +63,9 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(otherValue);
-        state.At(x => x.Name).Value.Is(otherValue.Name);
-        state.At(x => x.Author).Value.IsEqual(otherValue.Author);
-        state.At(x => x.Messages).Value.IsEqual(otherValue.Messages);
+        state.AtAtomic(x => x.Name).Value.Is(otherValue.Name);
+        state.AtObject(x => x.Author).Value.IsEqual(otherValue.Author);
+        state.AtArray(x => x.Messages).Value.IsEqual(otherValue.Messages);
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -75,9 +75,9 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Name).Value.Is(initialValue.Name);
-        state.At(x => x.Author).Value.IsEqual(initialValue.Author);
-        state.At(x => x.Messages).Value.IsEqual(initialValue.Messages);
+        state.AtAtomic(x => x.Name).Value.Is(initialValue.Name);
+        state.AtObject(x => x.Author).Value.IsEqual(initialValue.Author);
+        state.AtArray(x => x.Messages).Value.IsEqual(initialValue.Messages);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsTrue();
         log.Has(2);
@@ -96,7 +96,7 @@ public class ComplexTest : TestBase
 
         // act
         state.Set(otherValue).IsTrue();
-        state.At(x => x.Name).SetStatus(Status.Validating);
+        state.AtAtomic(x => x.Name).SetStatus(Status.Validating);
 
         // assert
         state.Value.IsEqual(otherValue);
@@ -111,7 +111,10 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.At(x => x.Messages).At(x => x[0]).At(x => x.Text).Value.Is(initialValue.Messages.At(0).Text);
+        state.AtArray(x => x.Messages)
+            .AtObject(x => x[0])
+            .AtAtomic(x => x.Text)
+            .Value.Is(initialValue.Messages.At(0).Text);
         state.HasChanged.IsFalse();
         state.HasBeenTouched.IsFalse();
         state.IsStatus(Status.None).IsTrue();
@@ -130,7 +133,7 @@ public class ComplexTest : TestBase
         state.Changed.Subscribe(log.Add);
 
         // act
-        state.At(x => x.Name).SetStatus(Status.Validating);
+        state.AtAtomic(x => x.Name).SetStatus(Status.Validating);
 
         // assert
         state.IsStatus(Status.None, Status.Validating).IsTrue();
