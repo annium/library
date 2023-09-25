@@ -6,10 +6,11 @@ using System.Reflection;
 using Annium.Components.State.Core;
 using Annium.Core.Mapper;
 using Annium.Data.Models.Extensions;
+using Annium.Logging;
 
 namespace Annium.Components.State.Forms.Internal;
 
-internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
+internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubject
     where T : notnull, new()
 {
     private static MethodInfo Factory { get; } = StateFactoryResolver.ResolveFactory(typeof(T));
@@ -17,7 +18,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
     public bool HasChanged => !Value.IsShallowEqual(_initialValue, _mapper);
     public bool HasBeenTouched => _hasBeenTouched || _states.Any(x => x.Ref.HasBeenTouched);
     public IReadOnlyList<ITrackedState> Children => _states.Select(x => x.Ref).ToArray();
-
+    public ILogger Logger { get; }
     private readonly IStateFactory _stateFactory;
     private readonly IMapper _mapper;
     private readonly IList<StateReference> _states = new List<StateReference>();
@@ -27,12 +28,14 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
     public ArrayContainer(
         List<T> initialValue,
         IStateFactory stateFactory,
-        IMapper mapper
+        IMapper mapper,
+        ILogger logger
     )
     {
         _initialValue = initialValue;
         _stateFactory = stateFactory;
         _mapper = mapper;
+        Logger = logger;
         Init(_initialValue);
     }
 
@@ -133,7 +136,6 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
     }
 
     public IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<List<T>, TI>> ex)
-        where TI : IEquatable<TI>
     {
         return At<IAtomicContainer<TI>>(ex);
     }
@@ -164,11 +166,19 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>
 
     private TX At<TX>(LambdaExpression ex) where TX : ITrackedState
     {
-        var index = ResolveIndex(ex);
-        if (index < 0 || index >= _states.Count)
-            throw new IndexOutOfRangeException($"There's no item in container with index {index}");
+        try
+        {
+            var index = ResolveIndex(ex);
+            if (index < 0 || index >= _states.Count)
+                throw new IndexOutOfRangeException($"There's no item in container with index {index}");
 
-        return (TX)_states[index].Ref;
+            return (TX)_states[index].Ref;
+        }
+        catch (Exception e)
+        {
+            this.Error(e);
+            throw;
+        }
     }
 
     private List<T> CreateValue()

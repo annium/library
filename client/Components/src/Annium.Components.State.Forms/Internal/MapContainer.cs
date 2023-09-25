@@ -6,10 +6,11 @@ using System.Reflection;
 using Annium.Components.State.Core;
 using Annium.Core.Mapper;
 using Annium.Data.Models.Extensions;
+using Annium.Logging;
 
 namespace Annium.Components.State.Forms.Internal;
 
-internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey, TValue>
+internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey, TValue>, ILogSubject
     where TKey : notnull
     where TValue : notnull, new()
 {
@@ -18,6 +19,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     public bool HasChanged => !Value.IsShallowEqual(_initialValue, _mapper);
     public bool HasBeenTouched => _hasBeenTouched || _states.Values.Any(x => x.Ref.HasBeenTouched);
     public IReadOnlyCollection<TKey> Keys => _states.Keys.ToArray();
+    public ILogger Logger { get; }
     private readonly IStateFactory _stateFactory;
     private readonly IMapper _mapper;
     private readonly IDictionary<TKey, StateReference> _states;
@@ -27,12 +29,14 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     public MapContainer(
         Dictionary<TKey, TValue> initialValue,
         IStateFactory stateFactory,
-        IMapper mapper
+        IMapper mapper,
+        ILogger logger
     )
     {
         _initialValue = initialValue;
         _stateFactory = stateFactory;
         _mapper = mapper;
+        Logger = logger;
         _states = new Dictionary<TKey, StateReference>();
         Init(_initialValue);
     }
@@ -128,7 +132,6 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     }
 
     public IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<Dictionary<TKey, TValue>, TI>> ex)
-        where TI : IEquatable<TI>
     {
         return At<IAtomicContainer<TI>>(ex);
     }
@@ -151,11 +154,19 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
 
     private TX At<TX>(LambdaExpression ex) where TX : ITrackedState
     {
-        var key = ResolveKey(ex);
-        if (!_states.ContainsKey(key))
-            throw new IndexOutOfRangeException($"There's no item in container with key {key}");
+        try
+        {
+            var key = ResolveKey(ex);
+            if (!_states.ContainsKey(key))
+                throw new IndexOutOfRangeException($"There's no item in container with key {key}");
 
-        return (TX)_states[key].Ref;
+            return (TX)_states[key].Ref;
+        }
+        catch (Exception e)
+        {
+            this.Error(e);
+            throw;
+        }
     }
 
     private Dictionary<TKey, TValue> CreateValue()

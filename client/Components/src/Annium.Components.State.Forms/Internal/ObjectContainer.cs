@@ -4,10 +4,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Annium.Components.State.Core;
+using Annium.Logging;
 
 namespace Annium.Components.State.Forms.Internal;
 
-internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
+internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>, ILogSubject
     where T : notnull, new()
 {
     // ReSharper disable once StaticMemberInGenericType
@@ -26,13 +27,16 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
     public bool HasChanged => _states.Values.Any(x => x.Ref.HasChanged);
     public bool HasBeenTouched => _states.Values.Any(x => x.Ref.HasBeenTouched);
     public IReadOnlyDictionary<string, ITrackedState> Children => _states.ToDictionary(x => x.Key.Name, x => x.Value.Ref);
+    public ILogger Logger { get; }
     private readonly IReadOnlyDictionary<PropertyInfo, StateReference> _states;
 
     public ObjectContainer(
         T initialValue,
-        IStateFactory stateFactory
+        IStateFactory stateFactory,
+        ILogger logger
     )
     {
+        Logger = logger;
         var states = new Dictionary<PropertyInfo, StateReference>();
         _states = states;
 
@@ -132,7 +136,6 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
     }
 
     public IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<T, TI>> ex)
-        where TI : IEquatable<TI>
     {
         return At<IAtomicContainer<TI>>(ex);
     }
@@ -149,7 +152,19 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>
         return value;
     }
 
-    private TX At<TX>(LambdaExpression ex) where TX : ITrackedState => (TX)_states[ResolveProperty(ex)].Ref;
+    private TX At<TX>(LambdaExpression ex)
+        where TX : ITrackedState
+    {
+        try
+        {
+            return (TX)_states[ResolveProperty(ex)].Ref;
+        }
+        catch (Exception e)
+        {
+            this.Error(e);
+            throw;
+        }
+    }
 
     private PropertyInfo ResolveProperty(LambdaExpression ex)
     {

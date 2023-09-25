@@ -23,6 +23,9 @@ internal static class StateFactoryResolver
         if (type.GetInterfaces().Contains(typeof(IEquatable<>).MakeGenericType(type)))
             return ResolveFactory(AtomicFactory, type);
 
+        if (type.IsEnum)
+            return ResolveFactory(AtomicFactory, type);
+
         return ResolveFactory(ObjectFactory, type);
     }
 

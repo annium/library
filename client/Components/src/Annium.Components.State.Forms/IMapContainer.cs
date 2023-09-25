@@ -20,8 +20,7 @@ public interface IMapContainer<TKey, TValue> : IValueTrackedState<Dictionary<TKe
         where TK : notnull
         where TV : notnull, new();
 
-    IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<Dictionary<TKey, TValue>, TI>> ex)
-        where TI : IEquatable<TI>;
+    IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<Dictionary<TKey, TValue>, TI>> ex);
 
     void Add(TKey key, TValue item);
     void Remove(TKey key);

@@ -1,20 +1,25 @@
-using System;
+using System.Collections.Generic;
 using Annium.Components.State.Core;
+using Annium.Logging;
 
 namespace Annium.Components.State.Forms.Internal;
 
-internal class AtomicContainer<T> : ObservableState, IAtomicContainer<T>
-    where T : IEquatable<T>
+internal class AtomicContainer<T> : ObservableState, IAtomicContainer<T>, ILogSubject
 {
     public T Value { get; private set; }
-    public bool HasChanged => !Value.Equals(_initialValue);
+    public bool HasChanged => !EqualityComparer<T>.Default.Equals(Value, _initialValue);
     public bool HasBeenTouched { get; private set; }
     public Status Status { get; private set; }
     public string Message { get; private set; } = string.Empty;
+    public ILogger Logger { get; }
     private T _initialValue;
 
-    public AtomicContainer(T initialValue)
+    public AtomicContainer(
+        T initialValue,
+        ILogger logger
+    )
     {
+        Logger = logger;
         Value = _initialValue = initialValue;
     }
 
@@ -28,7 +33,7 @@ internal class AtomicContainer<T> : ObservableState, IAtomicContainer<T>
 
     public bool Set(T value)
     {
-        if (value.Equals(Value))
+        if (EqualityComparer<T>.Default.Equals(value, Value))
             return false;
 
         Value = value;

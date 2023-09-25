@@ -19,8 +19,7 @@ public interface IArrayContainer<T> : IValueTrackedState<List<T>>
         where TK : notnull
         where TV : notnull, new();
 
-    IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<List<T>, TI>> ex)
-        where TI : IEquatable<TI>;
+    IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<List<T>, TI>> ex);
 
     void Add(T item);
     void Insert(int index, T item);

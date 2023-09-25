@@ -19,6 +19,5 @@ public interface IObjectContainer<T> : IValueTrackedState<T>
         where TK : notnull
         where TV : notnull, new();
 
-    IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<T, TI>> ex)
-        where TI : IEquatable<TI>;
+    IAtomicContainer<TI> AtAtomic<TI>(Expression<Func<T, TI>> ex);
 }
