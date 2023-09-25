@@ -5,8 +5,7 @@ namespace Annium.Components.State.Forms;
 
 public interface IStateFactory
 {
-    IAtomicContainer<T> CreateAtomic<T>(T defaultValue)
-        where T : IEquatable<T>;
+    IAtomicContainer<T> CreateAtomic<T>(T defaultValue);
 
     IArrayContainer<T> CreateArray<T>(List<T> initialValue)
         where T : notnull, new();

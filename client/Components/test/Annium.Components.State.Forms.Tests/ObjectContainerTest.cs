@@ -210,7 +210,7 @@ public class ObjectContainerTest : TestBase
         });
 
         // assert
-        state.IsStatus(Status.Error).IsTrue();
+        state.HasStatus(Status.Error).IsTrue();
 
         // act
         state.Set(new User
@@ -230,12 +230,20 @@ public class ObjectContainerTest : TestBase
     {
         Name = "Max",
         Age = 20,
+        Sex = Sex.Male,
     };
 
     private class User
     {
         public string Name { get; set; } = string.Empty;
         public int Age { get; set; }
+        public Sex Sex { get; set; }
+    }
+
+    private enum Sex
+    {
+        Female,
+        Male,
     }
 
     // ReSharper disable once UnusedType.Local

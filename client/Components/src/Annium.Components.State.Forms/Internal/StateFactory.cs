@@ -21,7 +21,6 @@ internal class StateFactory : IStateFactory
     }
 
     public IAtomicContainer<T> CreateAtomic<T>(T defaultValue)
-        where T : IEquatable<T>
     {
         return new AtomicContainer<T>(defaultValue, _logger);
     }

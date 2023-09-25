@@ -32,6 +32,9 @@ internal static class StateFactoryResolver
     private static MethodInfo ResolveFactory(MethodInfo factory, Type type)
     {
         var template = factory.GetParameters().Single().ParameterType;
+        if (template.IsGenericParameter)
+            return factory.MakeGenericMethod(type);
+
         var args = template.ResolveGenericArgumentsByImplementation(type);
 
         if (args is null)
