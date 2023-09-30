@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Annium.Blazor.Routing.Internal.Implementations.Locations;
 using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Core.Mapper;
 using Microsoft.AspNetCore.Components;
 
-namespace Annium.Blazor.Routing.Internal.Implementations.Routes;
+namespace Annium.Blazor.Routing.Internal.Routes;
 
 internal class Route : RouteBase, IRoute
 {

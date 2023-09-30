@@ -1,8 +1,8 @@
-using Annium.Blazor.Routing.Internal.Implementations.Routes;
+using Annium.Blazor.Routing.Internal.Routes;
 using Annium.Core.Mapper;
 using Microsoft.AspNetCore.Components;
 
-namespace Annium.Blazor.Routing.Internal.Implementations;
+namespace Annium.Blazor.Routing.Internal;
 
 internal class RouteFactory : IRouteFactory
 {

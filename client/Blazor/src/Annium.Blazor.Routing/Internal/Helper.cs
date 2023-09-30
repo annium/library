@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Annium.Blazor.Routing.Internal.Implementations;
+namespace Annium.Blazor.Routing.Internal;
 
 internal class Helper
 {

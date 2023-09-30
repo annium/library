@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Annium.Blazor.Routing.Internal.Implementations.Locations.Segments;
-using Annium.Blazor.Routing.Internal.Locations;
+using Annium.Blazor.Routing.Internal.Locations.Segments;
 using Annium.Core.Mapper;
 
-namespace Annium.Blazor.Routing.Internal.Implementations.Locations;
+namespace Annium.Blazor.Routing.Internal.Locations;
 
 internal class LocationPath : ILocationPath
 {

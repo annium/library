@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Annium.Blazor.Routing.Internal.Implementations.Locations;
 using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Core.Mapper;
 using Annium.Data.Models.Extensions;
 using Annium.Linq;
 using Microsoft.AspNetCore.Components;
 
-namespace Annium.Blazor.Routing.Internal.Implementations.Routes;
+namespace Annium.Blazor.Routing.Internal.Routes;
 
 internal class Route<TData> : RouteBase, IRoute<TData>
     where TData : notnull, new()

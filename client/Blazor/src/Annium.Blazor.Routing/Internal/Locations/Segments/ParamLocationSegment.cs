@@ -1,7 +1,7 @@
 using System;
 using Annium.Core.Mapper;
 
-namespace Annium.Blazor.Routing.Internal.Implementations.Locations.Segments;
+namespace Annium.Blazor.Routing.Internal.Locations.Segments;
 
 internal sealed record ParamLocationSegment(string Name, Type Type) : ILocationSegment
 {

@@ -1,9 +1,8 @@
 using System;
 using Annium.Blazor.Routing.Internal.Locations;
-using Annium.Blazor.Routing.Internal.Routes;
 using Microsoft.AspNetCore.Components;
 
-namespace Annium.Blazor.Routing.Internal.Implementations.Routes;
+namespace Annium.Blazor.Routing.Internal.Routes;
 
 internal abstract class RouteBase : IRouteBase
 {

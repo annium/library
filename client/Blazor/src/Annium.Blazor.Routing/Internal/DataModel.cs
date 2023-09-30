@@ -6,7 +6,7 @@ using Annium.Core.Mapper;
 using Annium.Net.Base;
 using Annium.Reflection;
 
-namespace Annium.Blazor.Routing.Internal.Implementations;
+namespace Annium.Blazor.Routing.Internal;
 
 internal class DataModel : IDataModel
 {

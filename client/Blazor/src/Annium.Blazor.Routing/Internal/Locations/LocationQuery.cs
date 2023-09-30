@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Core.Mapper;
 using Microsoft.Extensions.Primitives;
 
-namespace Annium.Blazor.Routing.Internal.Implementations.Locations;
+namespace Annium.Blazor.Routing.Internal.Locations;
 
 internal class LocationQuery : ILocationQuery
 {

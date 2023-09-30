@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Annium.Blazor.Routing.Internal.Implementations;
+using Annium.Blazor.Routing.Internal;
 using Annium.Blazor.Routing.Internal.Locations;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;

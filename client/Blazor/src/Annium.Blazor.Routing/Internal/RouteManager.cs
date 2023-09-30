@@ -3,7 +3,7 @@ using System.Linq;
 using Annium.Blazor.Routing.Internal.Locations;
 using Annium.Blazor.Routing.Internal.Routes;
 
-namespace Annium.Blazor.Routing.Internal.Implementations;
+namespace Annium.Blazor.Routing.Internal;
 
 internal class RouteManager : IRouteMatcher, IRouteContainer
 {

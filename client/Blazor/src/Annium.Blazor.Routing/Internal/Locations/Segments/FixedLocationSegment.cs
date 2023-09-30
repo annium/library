@@ -1,4 +1,4 @@
-namespace Annium.Blazor.Routing.Internal.Implementations.Locations.Segments;
+namespace Annium.Blazor.Routing.Internal.Locations.Segments;
 
 internal sealed record FixedLocationSegment(string Part) : ILocationSegment
 {
