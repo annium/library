@@ -4,5 +4,5 @@ namespace Annium.Blazor.Routing.Internal;
 
 internal interface IRouteMatcher
 {
-    LocationData? Match(RawLocation rawLocation, PathMatch match);
+    LocationData? Match(RawLocation rawLocation, PathMatch pathMatch);
 }

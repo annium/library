@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Annium.Blazor.Routing.Internal;
 using Annium.Blazor.Routing.Internal.Locations;
+using Annium.Logging;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 
 namespace Annium.Blazor.Routing;
 
-public class Router : IComponent, IHandleAfterRender, IDisposable
+public class Router : IComponent, IHandleAfterRender, IDisposable, ILogSubject
 {
     [Parameter]
     public RenderFragment NotFound { get; set; } = default!;
@@ -21,6 +23,9 @@ public class Router : IComponent, IHandleAfterRender, IDisposable
 
     [Inject]
     public INavigationInterception NavigationInterception { get; set; } = default!;
+
+    [Inject]
+    public ILogger Logger { get; set; } = default!;
 
     [Inject]
     internal RouteManager RouteManager { get; set; } = default!;
@@ -78,10 +83,25 @@ public class Router : IComponent, IHandleAfterRender, IDisposable
 
     private void Refresh()
     {
-        var rawLocation = RawLocation.Parse(NavigationManager.ToBaseRelativePath(_location));
-        var locationData = RouteManager.Match(rawLocation, PathMatch.Exact) ?? RouteManager.Match(rawLocation, PathMatch.Start);
+        this.Trace("start");
 
-        var fragment = locationData is null ? NotFound : Found(new RouteData(locationData.PageType, locationData.RouteValues!));
-        _renderHandle.Render(fragment);
+        this.Trace<string>("parse location: {location}", _location);
+        var rawLocation = RawLocation.Parse(NavigationManager.ToBaseRelativePath(_location));
+
+        this.Trace<string>("find location for {location}", JsonSerializer.Serialize(rawLocation));
+        // var locationData = RouteManager.Match(rawLocation, PathMatch.Exact) ?? RouteManager.Match(rawLocation, PathMatch.Start);
+        var locationData = RouteManager.Match(rawLocation, PathMatch.Exact);
+
+        if (locationData is null)
+        {
+            this.Trace("render not found");
+            _renderHandle.Render(NotFound);
+        }
+        else
+        {
+            this.Trace<string?, string>("render location of {pageType} with {values}", locationData.PageType.FullName, JsonSerializer.Serialize(locationData.RouteValues));
+            var fragment = Found(new RouteData(locationData.PageType, locationData.RouteValues!));
+            _renderHandle.Render(fragment);
+        }
     }
 }
