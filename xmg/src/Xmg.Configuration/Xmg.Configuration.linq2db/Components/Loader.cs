@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using Annium.Core.Runtime.Loader;
-using Annium.linq2db.Extensions.Configuration.Metadata;
+using Annium.linq2db.Extensions;
 
 namespace Xmg.Configuration.linq2db.Components;
 

@@ -1,4 +1,4 @@
-using Annium.linq2db.Extensions.Configuration.Metadata;
+using Annium.linq2db.Extensions;
 using Xmg.Core.Models;
 
 namespace Xmg.Configuration.linq2db.Components;

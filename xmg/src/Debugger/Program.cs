@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using Annium.linq2db.Extensions.Configuration;
+using Annium.linq2db.Extensions;
 
 namespace Debugger;
 
