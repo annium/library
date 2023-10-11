@@ -21,14 +21,14 @@ test:
 publish:
 	make publish-tools
 
-install-all: install-xa install-xc install-xdb install-xdomains install-xlink install-xmg install-xrest install-xws
+install-all: install-xa install-xc install-xdb install-xdomains install-xfiles install-xlink install-xmg install-xrest install-xws
 
-uninstall-all: uninstall-xa uninstall-xc uninstall-xdb uninstall-xdomains uninstall-xlink uninstall-xmg uninstall-xrest uninstall-xws
+uninstall-all: uninstall-xa uninstall-xc uninstall-xdb uninstall-xdomains uninstall-xfiles uninstall-xlink uninstall-xmg uninstall-xrest uninstall-xws
 
-install-xa install-xc install-xdb install-xdomains install-xlink install-xmg install-xrest install-xws:
+install-xa install-xc install-xdb install-xdomains install-xfiles install-xlink install-xmg install-xrest install-xws:
 	./$(subst install-,,$@)/scripts/nix_install.sh
 
-uninstall-xa uninstall-xc uninstall-xdb uninstall-xdomains uninstall-xlink uninstall-xmg uninstall-xrest uninstall-xws:
+uninstall-xa uninstall-xc uninstall-xdb uninstall-xdomains uninstall-xfiles uninstall-xlink uninstall-xmg uninstall-xrest uninstall-xws:
 	./$(subst uninstall-,,$@)/scripts/nix_uninstall.sh
 
 publish-all: publish-images publish-tools
