@@ -1,4 +1,4 @@
-namespace XFiles.Commands;
+namespace Xf.Commands;
 
 public class SyncCommand
 {

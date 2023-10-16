@@ -1,7 +1,7 @@
 using System;
 using Annium.Core.DependencyInjection;
 
-namespace XFiles;
+namespace Xf;
 
 internal class ServicePack : ServicePackBase
 {

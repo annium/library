@@ -1,7 +1,7 @@
 using Annium.Core.Entrypoint;
 using Annium.Extensions.Arguments;
-using XFiles;
-using Group = XFiles.Commands.Group;
+using Xf;
+using Group = Xf.Commands.Group;
 
 await using var entry = Entrypoint.Default
     .UseServicePack<ServicePack>()

@@ -1,6 +1,6 @@
 using Annium.Extensions.Arguments;
 
-namespace XFiles.Commands;
+namespace Xf.Commands;
 
 internal class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 {

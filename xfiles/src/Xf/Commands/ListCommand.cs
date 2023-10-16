@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using Annium.Extensions.Arguments;
 
-namespace XFiles.Commands;
+namespace Xf.Commands;
 
 internal class ListCommand : Command<ListCommandConfiguration>, ICommandDescriptor
 {

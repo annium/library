@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-dir=$(dirname $(dirname "${BASH_SOURCE[0]}"))/src/XFiles
+dir=$(dirname $(dirname "${BASH_SOURCE[0]}"))/src/Xf
 
 echo "Compile."
 dotnet pack $dir --configuration release --output .

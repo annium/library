@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <PackageId>xf</PackageId>
+        <PackageId>Xf</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
         <Description>file tools</Description>
         <TargetFramework>net7.0</TargetFramework>
