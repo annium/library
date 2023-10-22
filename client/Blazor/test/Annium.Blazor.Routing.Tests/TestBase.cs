@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Annium.Blazor.Routing.Tests;
 
-public abstract class TestBase : Testing.Lib.TestBase
+public abstract class TestBase : Testing.TestBase
 {
     protected FakeNavigationManager NavigationManager { get; }
 

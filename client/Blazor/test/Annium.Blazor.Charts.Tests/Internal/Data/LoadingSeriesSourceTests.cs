@@ -6,7 +6,6 @@ using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Runtime.Time;
 using Annium.Testing;
-using Annium.Testing.Lib;
 using NodaTime;
 using Xunit;
 using Xunit.Abstractions;

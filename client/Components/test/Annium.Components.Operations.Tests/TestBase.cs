@@ -4,7 +4,7 @@ using Xunit.Abstractions;
 
 namespace Annium.Components.Operations.Tests;
 
-public abstract class TestBase : Testing.Lib.TestBase
+public abstract class TestBase : Testing.TestBase
 {
     protected TestBase(ITestOutputHelper outputHelper) : base(outputHelper)
     {
