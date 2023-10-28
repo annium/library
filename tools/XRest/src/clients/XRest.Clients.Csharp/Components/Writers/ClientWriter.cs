@@ -10,9 +10,7 @@ internal class ClientWriter
 {
     private readonly FileWriter _writer;
 
-    public ClientWriter(
-        FileWriter writer
-    )
+    public ClientWriter(FileWriter writer)
     {
         _writer = writer;
     }
@@ -22,25 +20,31 @@ internal class ClientWriter
         if (!Directory.Exists(output))
             Directory.CreateDirectory(output);
 
-        _writer.TryWrite(output, "HttpRequestExtensions", "Templates.HttpRequestExtensions", new
-        {
-            Usages = new[] { Constants.AnniumNetHttpNamespace },
-            client.Namespace,
-        });
+        _writer.TryWrite(
+            output,
+            "HttpRequestExtensions",
+            "Templates.HttpRequestExtensions",
+            new { Usages = new[] { Constants.AnniumNetHttpNamespace }, client.Namespace, }
+        );
 
         if (generateTestClient)
-            _writer.Write(output, "HttpResponseExtensions", "Templates.HttpResponseExtensions", new
-            {
-                Usages = new[]
+            _writer.Write(
+                output,
+                "HttpResponseExtensions",
+                "Templates.HttpResponseExtensions",
+                new
                 {
-                    "System.Collections.Generic",
-                    "System.Linq",
-                    "System.Threading.Tasks",
-                    Constants.AnniumDataOperationsNamespace,
-                    Constants.AnniumNetHttpNamespace,
-                },
-                client.Namespace,
-            });
+                    Usages = new[]
+                    {
+                        "System.Collections.Generic",
+                        "System.Linq",
+                        "System.Threading.Tasks",
+                        Constants.AnniumDataOperationsNamespace,
+                        Constants.AnniumNetHttpNamespace,
+                    },
+                    client.Namespace,
+                }
+            );
 
         WriteAbstractClient(output, client.Namespace.ToNamespace(), client, generateTestClient);
     }
@@ -58,7 +62,12 @@ internal class ClientWriter
         }
     }
 
-    private void WriteClientContainer(string rootDir, Namespace rootNs, ClientContainerView container, bool generateTestClient)
+    private void WriteClientContainer(
+        string rootDir,
+        Namespace rootNs,
+        ClientContainerView container,
+        bool generateTestClient
+    )
     {
         var output = GetOutputPath(rootDir, rootNs, container.Namespace.ToNamespace());
         if (!Directory.Exists(output))

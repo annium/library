@@ -23,9 +23,7 @@ internal class ControllerView
         IReadOnlyCollection<DefinedTypeView> exports
     )
     {
-        ImportSource = ns == string.Empty
-            ? "./shared"
-            : $"{ns.ToNamespace().Select(_ => "..").Join("/")}/shared";
+        ImportSource = ns == string.Empty ? "./shared" : $"{ns.ToNamespace().Select(_ => "..").Join("/")}/shared";
         Namespace = ns;
         Name = name;
         Imports = imports;

@@ -12,19 +12,20 @@ namespace XRest.Clients.Csharp.Components.Processors;
 
 internal static class RefProcessor
 {
-    public static string Process(IRef reference, ProcessingContext ctx) => reference switch
-    {
-        BaseTypeRef x         => Process(x, ctx),
-        NullableRef x         => Process(x, ctx),
-        GenericParameterRef x => Process(x),
-        EnumRef x             => Process(x, ctx),
-        ArrayRef x            => Process(x, ctx),
-        RecordRef x           => Process(x, ctx),
-        StructRef x           => Process(x, ctx),
-        InterfaceRef x        => Process(x, ctx),
-        PromiseRef x          => Process(x, ctx),
-        _                     => throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported ref {reference}")
-    };
+    public static string Process(IRef reference, ProcessingContext ctx) =>
+        reference switch
+        {
+            BaseTypeRef x => Process(x, ctx),
+            NullableRef x => Process(x, ctx),
+            GenericParameterRef x => Process(x),
+            EnumRef x => Process(x, ctx),
+            ArrayRef x => Process(x, ctx),
+            RecordRef x => Process(x, ctx),
+            StructRef x => Process(x, ctx),
+            InterfaceRef x => Process(x, ctx),
+            PromiseRef x => Process(x, ctx),
+            _ => throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported ref {reference}")
+        };
 
     private static string Process(BaseTypeRef reference, ProcessingContext ctx)
     {
@@ -60,7 +61,11 @@ internal static class RefProcessor
             case BaseType.Void:
                 return typeof(void).Name;
             default:
-                throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported base type {reference}");
+                throw new ArgumentOutOfRangeException(
+                    nameof(reference),
+                    reference,
+                    $"Unsupported base type {reference}"
+                );
         }
 
         string Type<T>()

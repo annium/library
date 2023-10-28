@@ -13,10 +13,7 @@ internal class Compiler : ILogSubject
     private const string Css = ".css";
     private readonly CompilationOptions _opts;
 
-    public Compiler(
-        Configuration cfg,
-        ILogger logger
-    )
+    public Compiler(Configuration cfg, ILogger logger)
     {
         Logger = logger;
         _opts = new CompilationOptions

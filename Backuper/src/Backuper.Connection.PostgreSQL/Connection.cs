@@ -12,10 +12,7 @@ public class Connection : IConnection
     private readonly Configuration _cfg;
     private readonly IShell _shell;
 
-    public Connection(
-        Configuration cfg,
-        IShell shell
-    )
+    public Connection(Configuration cfg, IShell shell)
     {
         _cfg = cfg;
         _shell = shell;
@@ -58,13 +55,15 @@ public class Connection : IConnection
             throw new InvalidOperationException("restore failed");
     }
 
-    private string GetConnectionString() => string.Join(';',
-        $"Host={_cfg.Host}",
-        $"Port={_cfg.Port}",
-        $"Database={_cfg.Db}",
-        $"Username={_cfg.User}",
-        $"Password={_cfg.Pass}",
-        "SSL Mode=Prefer",
-        "Trust Server Certificate=true"
-    );
+    private string GetConnectionString() =>
+        string.Join(
+            ';',
+            $"Host={_cfg.Host}",
+            $"Port={_cfg.Port}",
+            $"Database={_cfg.Db}",
+            $"Username={_cfg.User}",
+            $"Password={_cfg.Pass}",
+            "SSL Mode=Prefer",
+            "Trust Server Certificate=true"
+        );
 }

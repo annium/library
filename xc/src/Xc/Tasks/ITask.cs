@@ -1,5 +1,3 @@
 namespace Xc.Tasks;
 
-internal interface ITask
-{
-}
+internal interface ITask { }

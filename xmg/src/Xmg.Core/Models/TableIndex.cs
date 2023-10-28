@@ -9,10 +9,7 @@ public class TableIndex
     public IReadOnlyCollection<string> Columns { get; }
     public bool IsUnique { get; }
 
-    public TableIndex(
-        IReadOnlyCollection<string> columns,
-        bool isUnique
-    )
+    public TableIndex(IReadOnlyCollection<string> columns, bool isUnique)
     {
         Columns = columns;
         IsUnique = isUnique;

@@ -17,17 +17,12 @@ internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, IComman
     public static string Description => "listen";
     public ILogger Logger { get; }
 
-    public ListenCommand(
-        ILogger logger
-    )
+    public ListenCommand(ILogger logger)
     {
         Logger = logger;
     }
 
-    public override async Task HandleAsync(
-        ListenCommandConfiguration cfg,
-        CancellationToken ct
-    )
+    public override async Task HandleAsync(ListenCommandConfiguration cfg, CancellationToken ct)
     {
         var endpoint = IPEndPointExt.Parse(cfg.Endpoint, 1111);
         this.Info($"Listen at {endpoint} {(cfg.KeepAlive > 0 ? $"with KeepAlive {cfg.KeepAlive}s" : "w/o KeepAlive")}");

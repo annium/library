@@ -9,7 +9,9 @@ internal static class WriterHelper
     public static string GetOutputPath(string rootDir, Namespace rootNs, Namespace ns)
     {
         if (!ns.StartsWith(rootNs))
-            throw new InvalidOperationException($"Can't resolve relative path when namespace '{ns}' is not containing root namespace '{rootNs}'");
+            throw new InvalidOperationException(
+                $"Can't resolve relative path when namespace '{ns}' is not containing root namespace '{rootNs}'"
+            );
 
         return ns == rootNs ? rootDir : ns.From(rootNs).ToPath(rootDir);
     }

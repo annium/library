@@ -16,9 +16,7 @@ internal static class ApiModelBuilder
             .GroupBy(x => x.ControllerTypeInfo)
             .ToArray();
 
-        var controllers = controllerActions
-            .Select(item => ControllerModelBuilder.Build(item.ToArray(), ctx))
-            .ToArray();
+        var controllers = controllerActions.Select(item => ControllerModelBuilder.Build(item.ToArray(), ctx)).ToArray();
 
         return new ApiModel(controllers, ctx.Mapper.GetModels());
     }

@@ -7,9 +7,7 @@ internal class Cache
     private const string CacheDir = "cache";
     private readonly Settings _settings;
 
-    public Cache(
-        Settings settings
-    )
+    public Cache(Settings settings)
     {
         _settings = settings;
         Directory.CreateDirectory(settings.RootedPath(CacheDir));

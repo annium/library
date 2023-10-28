@@ -24,12 +24,15 @@ internal static class Program
                     .UseKestrel(server =>
                     {
                         server.AddServerHeader = false;
-                        server.ListenAnyIP(5000, listen =>
-                        {
-                            var certFile = Path.GetFullPath(Path.Combine("certs", "cert.pfx"));
-                            if (File.Exists(certFile))
-                                listen.UseHttps(certFile);
-                        });
+                        server.ListenAnyIP(
+                            5000,
+                            listen =>
+                            {
+                                var certFile = Path.GetFullPath(Path.Combine("certs", "cert.pfx"));
+                                if (File.Exists(certFile))
+                                    listen.UseHttps(certFile);
+                            }
+                        );
                     })
                     .UseStartup<Startup>();
             });

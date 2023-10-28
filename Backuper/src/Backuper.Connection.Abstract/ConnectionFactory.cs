@@ -8,9 +8,7 @@ public class ConnectionFactory
 {
     private readonly IServiceProvider _provider;
 
-    public ConnectionFactory(
-        IServiceProvider provider
-    )
+    public ConnectionFactory(IServiceProvider provider)
     {
         _provider = provider;
     }

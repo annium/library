@@ -12,9 +12,7 @@ internal class CleanupCommand : Command<CleanupCommandConfiguration>, ICommandDe
 
     private readonly Cache _cache;
 
-    public CleanupCommand(
-        Cache cache
-    )
+    public CleanupCommand(Cache cache)
     {
         _cache = cache;
     }

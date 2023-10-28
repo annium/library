@@ -22,7 +22,9 @@ internal class ServicePack : ServicePackBase
 
     public override void Setup(IServiceProvider provider)
     {
-        Action<LogRoute<DefaultLogContext>> logRoute = provider.Resolve<Configuration>().Debug ? route => route.UseConsole() : _ => { };
+        Action<LogRoute<DefaultLogContext>> logRoute = provider.Resolve<Configuration>().Debug
+            ? route => route.UseConsole()
+            : _ => { };
         provider.UseLogging(logRoute);
     }
 }

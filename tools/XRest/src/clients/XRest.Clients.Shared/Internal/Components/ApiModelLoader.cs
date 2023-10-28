@@ -11,18 +11,14 @@ internal class ApiModelLoader : IApiModelLoader
 {
     private readonly IHttpRequestFactory _httpRequestFactory;
 
-    public ApiModelLoader(
-        IIndex<string, IHttpRequestFactory> httpRequestFactories
-    )
+    public ApiModelLoader(IIndex<string, IHttpRequestFactory> httpRequestFactories)
     {
         _httpRequestFactory = httpRequestFactories[Constants.IndexKey];
     }
 
     public async Task<ApiModel> Load(ISourceLoaderConfiguration cfg)
     {
-        var model = await _httpRequestFactory.New(cfg.Server)
-            .Get(Constants.ApiSourceEndpoint)
-            .AsAsync<ApiModel>();
+        var model = await _httpRequestFactory.New(cfg.Server).Get(Constants.ApiSourceEndpoint).AsAsync<ApiModel>();
 
         return model;
     }

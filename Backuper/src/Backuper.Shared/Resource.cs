@@ -12,12 +12,7 @@ public abstract class Resource<T> : ILogSubject
     private readonly string _category;
     private readonly string _type;
 
-    protected Resource(
-        T entity,
-        string category,
-        string type,
-        ILogger logger
-    )
+    protected Resource(T entity, string category, string type, ILogger logger)
     {
         Entity = entity;
         _category = category;

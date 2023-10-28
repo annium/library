@@ -11,9 +11,7 @@ internal class Writer : IWriter
 {
     private readonly ITemplateWriter _templateWriter;
 
-    public Writer(
-        ITemplateWriter templateWriter
-    )
+    public Writer(ITemplateWriter templateWriter)
     {
         _templateWriter = templateWriter;
     }

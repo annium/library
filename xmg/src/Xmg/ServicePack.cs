@@ -17,8 +17,7 @@ internal class ServicePack : ServicePackBase
         container.AddTime().WithRealTime().SetDefault();
         container.AddMapper();
         container.AddArguments();
-        container.AddSerializers()
-            .WithJson(isDefault: true);
+        container.AddSerializers().WithJson(isDefault: true);
         container.AddLogging();
     }
 

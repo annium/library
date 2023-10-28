@@ -33,10 +33,7 @@ internal class GenerateCommand : Command<GenerateCommandConfig>, ICommandDescrip
         Logger = logger;
     }
 
-    public override void Handle(
-        GenerateCommandConfig cfg,
-        CancellationToken ct
-    )
+    public override void Handle(GenerateCommandConfig cfg, CancellationToken ct)
     {
         this.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
 
@@ -46,7 +43,6 @@ internal class GenerateCommand : Command<GenerateCommandConfig>, ICommandDescrip
 
         var migrationName = cfg.Name;
         var migrationVersion = _timeProvider.Now.ToDateTimeOffset().ToString("yyyyMMdd");
-
 
         this.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");
 

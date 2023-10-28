@@ -16,7 +16,8 @@ internal class TypeCollector
             return;
 
         var definition = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
-        var isCollected = !KnownTypes.BuiltIn.Contains(definition) && !definition.IsSkipped() && _collectedTypes.Add(definition);
+        var isCollected =
+            !KnownTypes.BuiltIn.Contains(definition) && !definition.IsSkipped() && _collectedTypes.Add(definition);
 
         if (type.IsGenericType)
             foreach (var typeArgument in type.GenericTypeArguments)
@@ -28,9 +29,7 @@ internal class TypeCollector
 
     private void CollectPropertiesTypes(Type type)
     {
-        var propertyTypes = type.GetAllPublicProperties()
-            .Select(x => x.PropertyType)
-            .ToArray();
+        var propertyTypes = type.GetAllPublicProperties().Select(x => x.PropertyType).ToArray();
 
         foreach (var propertyType in propertyTypes)
             CollectTypes(propertyType);

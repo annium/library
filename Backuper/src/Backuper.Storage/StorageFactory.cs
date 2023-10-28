@@ -10,10 +10,7 @@ public class StorageFactory
     private readonly IServiceProvider _sp;
     private readonly IStorageFactory _storageFactory;
 
-    public StorageFactory(
-        IServiceProvider sp,
-        IStorageFactory storageFactory
-    )
+    public StorageFactory(IServiceProvider sp, IStorageFactory storageFactory)
     {
         _sp = sp;
         _storageFactory = storageFactory;

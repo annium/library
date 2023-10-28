@@ -10,15 +10,11 @@ internal class Configurator : IConfigurator
     private readonly IMetadataProcessor _metadataProcessor;
     public ConfigurationProvider Provider => ConfigurationProvider.Linq2db;
 
-    public Configurator(
-        ILoader loader,
-        IMetadataProcessor metadataProcessor
-    )
+    public Configurator(ILoader loader, IMetadataProcessor metadataProcessor)
     {
         _loader = loader;
         _metadataProcessor = metadataProcessor;
     }
-
 
     public Database LoadConfiguration(Config cfg)
     {

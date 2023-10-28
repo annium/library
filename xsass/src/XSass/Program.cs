@@ -5,9 +5,7 @@ using XSass;
 using XSass.Internal;
 using XSass.Internal.Components;
 
-await using var entry = Entrypoint.Default
-    .UseServicePack<ServicePack>()
-    .Setup();
+await using var entry = Entrypoint.Default.UseServicePack<ServicePack>().Setup();
 
 var (provider, _) = entry;
 

@@ -6,9 +6,7 @@ internal class DeleteSchemaOperation : IDeleteSchemaOperation
 {
     private readonly string _schema;
 
-    public DeleteSchemaOperation(
-        string schema
-    )
+    public DeleteSchemaOperation(string schema)
     {
         _schema = schema;
     }

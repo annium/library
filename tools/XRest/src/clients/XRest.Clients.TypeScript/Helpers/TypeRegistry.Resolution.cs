@@ -44,12 +44,12 @@ internal partial class TypeRegistry
         // IDictionary<> | IReadOnlyDictionary
         if (type.IsDictionary())
         {
-            var keyValueTypeParams = type.GetTargetImplementation(typeof(IEnumerable<>))!.GetGenericArguments().Single().GetGenericArguments();
+            var keyValueTypeParams = type.GetTargetImplementation(typeof(IEnumerable<>))!
+                .GetGenericArguments()
+                .Single()
+                .GetGenericArguments();
 
-            return BaseType.Record.MakeGenericType(
-                Resolve(keyValueTypeParams[0]),
-                Resolve(keyValueTypeParams[1])
-            );
+            return BaseType.Record.MakeGenericType(Resolve(keyValueTypeParams[0]), Resolve(keyValueTypeParams[1]));
         }
 
         // IEnumerable<>
@@ -75,7 +75,8 @@ internal partial class TypeRegistry
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool TryResolve(Type type, out DefinedTypeView? view) => _views.TryGet(type, out view) || KnownTypes.BuiltIn.TryGet(type, out view);
+    private bool TryResolve(Type type, out DefinedTypeView? view) =>
+        _views.TryGet(type, out view) || KnownTypes.BuiltIn.TryGet(type, out view);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private DefinedTypeView ResolveInternal(Type type)

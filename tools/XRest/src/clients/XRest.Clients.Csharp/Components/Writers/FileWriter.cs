@@ -7,9 +7,7 @@ internal class FileWriter
 {
     private readonly ITemplateWriter _templateWriter;
 
-    public FileWriter(
-        ITemplateWriter templateWriter
-    )
+    public FileWriter(ITemplateWriter templateWriter)
     {
         _templateWriter = templateWriter;
     }

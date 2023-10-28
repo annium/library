@@ -12,14 +12,7 @@ public class Parser
         "not registered",
     };
 
-    private readonly string[] _isBusy =
-    {
-        "creation date",
-        "prohibited",
-        "registered",
-        "registrant",
-        "reserved",
-    };
+    private readonly string[] _isBusy = { "creation date", "prohibited", "registered", "registrant", "reserved", };
 
     public bool IsFree(string result)
     {

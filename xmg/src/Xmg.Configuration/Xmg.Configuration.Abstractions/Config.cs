@@ -4,9 +4,7 @@ public class Config
 {
     public string Assembly { get; }
 
-    public Config(
-        string assembly
-    )
+    public Config(string assembly)
     {
         Assembly = assembly;
     }

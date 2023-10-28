@@ -19,12 +19,8 @@ public class StateController : ServerController
 
     private readonly Namer _namer;
 
-    public StateController(
-        Func<State.State> getState,
-        Namer namer,
-        IMediator mediator,
-        IServiceProvider sp
-    ) : base(mediator, sp)
+    public StateController(Func<State.State> getState, Namer namer, IMediator mediator, IServiceProvider sp)
+        : base(mediator, sp)
     {
         _getState = getState;
         _namer = namer;
@@ -61,7 +57,10 @@ public class StateController : ServerController
             await NotifyAll(ch => ch.InfoAsync($"{server} {plan}: start manual backup {backupId} procedure"));
 
             // cleanup
-            var deletedItems = (await plan.Storage.ListAsync()).OrderByDescending(i => i).Skip(plan.Capacity - 1).ToArray();
+            var deletedItems = (await plan.Storage.ListAsync())
+                .OrderByDescending(i => i)
+                .Skip(plan.Capacity - 1)
+                .ToArray();
             if (deletedItems.Length > 0)
             {
                 await NotifyAll(ch => ch.InfoAsync($"{server} {plan}: cleanup {deletedItems.Length} old backups"));

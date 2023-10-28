@@ -14,9 +14,7 @@ internal class TemplateWriter : ITemplateWriter
 {
     private readonly IResourceLoader _resourceLoader;
 
-    public TemplateWriter(
-        IResourceLoader resourceLoader
-    )
+    public TemplateWriter(IResourceLoader resourceLoader)
     {
         _resourceLoader = resourceLoader;
     }

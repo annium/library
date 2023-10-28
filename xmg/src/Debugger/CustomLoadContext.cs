@@ -58,34 +58,34 @@ public class CustomLoadContext : AssemblyLoadContext
         return IntPtr.Zero;
     }
 
-
     private class CustomAssemblyResolver
     {
         private readonly ICompilationAssemblyResolver _assemblyResolver;
         private readonly DependencyContext? _dependencyContext;
 
-        public CustomAssemblyResolver(
-            AssemblyLoadContext assemblyLoadContext,
-            string rootAssemblyPath
-        )
+        public CustomAssemblyResolver(AssemblyLoadContext assemblyLoadContext, string rootAssemblyPath)
         {
             var assembly = assemblyLoadContext.LoadFromAssemblyPath(rootAssemblyPath);
             _dependencyContext = DependencyContext.Load(assembly);
 
-            _assemblyResolver = new CompositeCompilationAssemblyResolver
-            (new ICompilationAssemblyResolver[]
-            {
-                new AppBaseCompilationAssemblyResolver(Path.GetDirectoryName(rootAssemblyPath)!),
-                new ReferenceAssemblyPathResolver(),
-                new PackageCompilationAssemblyResolver()
-            });
+            _assemblyResolver = new CompositeCompilationAssemblyResolver(
+                new ICompilationAssemblyResolver[]
+                {
+                    new AppBaseCompilationAssemblyResolver(Path.GetDirectoryName(rootAssemblyPath)!),
+                    new ReferenceAssemblyPathResolver(),
+                    new PackageCompilationAssemblyResolver()
+                }
+            );
         }
 
         public string? ResolveAssemblyToPath(AssemblyName name)
         {
-            var library = _dependencyContext?.RuntimeLibraries.FirstOrDefault(NamesMatch) ?? _dependencyContext?.RuntimeLibraries.FirstOrDefault(ResourceAssetPathMatch);
+            var library =
+                _dependencyContext?.RuntimeLibraries.FirstOrDefault(NamesMatch)
+                ?? _dependencyContext?.RuntimeLibraries.FirstOrDefault(ResourceAssetPathMatch);
 
-            if (library is null) return default;
+            if (library is null)
+                return default;
 
             var wrapper = new CompilationLibrary(
                 library.Type,
@@ -94,7 +94,8 @@ public class CustomLoadContext : AssemblyLoadContext
                 library.Hash,
                 library.RuntimeAssemblyGroups.SelectMany(g => g.AssetPaths),
                 library.Dependencies,
-                library.Serviceable);
+                library.Serviceable
+            );
 
             var assemblies = new List<string>();
             _assemblyResolver.TryResolveAssemblyPaths(wrapper, assemblies);

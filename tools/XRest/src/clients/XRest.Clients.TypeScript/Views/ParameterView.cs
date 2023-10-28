@@ -9,11 +9,7 @@ internal class ParameterView
     public ParameterLocationEnum Location { get; }
     public DefinedTypeView Type { get; }
 
-    public ParameterView(
-        string name,
-        ParameterLocationEnum location,
-        DefinedTypeView type
-    )
+    public ParameterView(string name, ParameterLocationEnum location, DefinedTypeView type)
     {
         Name = name;
         Location = location;

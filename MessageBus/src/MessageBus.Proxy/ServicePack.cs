@@ -10,9 +10,6 @@ internal class ServicePack : ServicePackBase
     {
         container.AddRuntime(GetType().Assembly);
         container.AddMapper();
-        container.AddConfiguration<Configuration>(x => x
-            .AddYamlFile("configuration.yml")
-            .AddCommandLineArgs()
-        );
+        container.AddConfiguration<Configuration>(x => x.AddYamlFile("configuration.yml").AddCommandLineArgs());
     }
 }

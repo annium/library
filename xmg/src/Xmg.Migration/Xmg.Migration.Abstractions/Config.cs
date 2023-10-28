@@ -6,11 +6,7 @@ public class Config
     public string MigrationName { get; }
     public string MigrationVersion { get; }
 
-    public Config(
-        string migrationNamespace,
-        string migrationName,
-        string migrationVersion
-    )
+    public Config(string migrationNamespace, string migrationName, string migrationVersion)
     {
         MigrationNamespace = migrationNamespace;
         MigrationName = migrationName;

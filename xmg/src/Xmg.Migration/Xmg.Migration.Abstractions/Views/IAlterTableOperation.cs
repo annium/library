@@ -1,5 +1,3 @@
 namespace Xmg.Migration.Abstractions.Views;
 
-public interface IAlterTableOperation : IOperation
-{
-}
+public interface IAlterTableOperation : IOperation { }

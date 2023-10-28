@@ -5,9 +5,7 @@ namespace Xc.Tasks;
 
 internal class ConfigureTask : IActionTask<RootSetup, string>
 {
-    public ConfigureTask()
-    {
-    }
+    public ConfigureTask() { }
 
     public void Execute(RootSetup cfg, string env)
     {

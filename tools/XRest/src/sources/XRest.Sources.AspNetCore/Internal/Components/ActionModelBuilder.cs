@@ -31,7 +31,9 @@ internal static class ActionModelBuilder
             .Where(x => x.BindingInfo?.BindingSource?.Id != Constants.BindingBody)
             .SelectMany(x => BuildParameterModels(x, routeParameters, ctx))
             .ToArray();
-        var body = action.Parameters.SingleOrDefault(x => x.BindingInfo?.BindingSource?.Id == Constants.BindingBody)?.ParameterType;
+        var body = action.Parameters
+            .SingleOrDefault(x => x.BindingInfo?.BindingSource?.Id == Constants.BindingBody)
+            ?.ParameterType;
         var response = action.MethodInfo.ReturnType;
 
         foreach (var method in methods)
@@ -45,24 +47,45 @@ internal static class ActionModelBuilder
             );
     }
 
-    private static IEnumerable<ParameterModel> BuildParameterModels(ParameterDescriptor param, IReadOnlyCollection<string> routeParameters, MappingContext ctx)
+    private static IEnumerable<ParameterModel> BuildParameterModels(
+        ParameterDescriptor param,
+        IReadOnlyCollection<string> routeParameters,
+        MappingContext ctx
+    )
     {
         if (ParseHelper.IsSkippedType(param.ParameterType))
             return Array.Empty<ParameterModel>();
 
         if (routeParameters.Contains(param.Name))
-            return new[] { new ParameterModel(ParameterLocationEnum.Path, ctx.Map(param.ParameterType.ToContextualType()), param.Name) };
+            return new[]
+            {
+                new ParameterModel(
+                    ParameterLocationEnum.Path,
+                    ctx.Map(param.ParameterType.ToContextualType()),
+                    param.Name
+                )
+            };
 
         if (ParseHelper.IsAllowedQueryType(param.ParameterType, ctx.Config))
-            return new[] { new ParameterModel(ParameterLocationEnum.Query, ctx.Map(param.ParameterType.ToContextualType()), param.Name) };
+            return new[]
+            {
+                new ParameterModel(
+                    ParameterLocationEnum.Query,
+                    ctx.Map(param.ParameterType.ToContextualType()),
+                    param.Name
+                )
+            };
 
         return param.ParameterType
             .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
             .Where(p => p.CanRead)
-            .Select(p => new ParameterModel(
-                ParameterLocationEnum.Query,
-                ctx.Map(p.ToContextualProperty().PropertyType),
-                p.Name.CamelCase()
-            ));
+            .Select(
+                p =>
+                    new ParameterModel(
+                        ParameterLocationEnum.Query,
+                        ctx.Map(p.ToContextualProperty().PropertyType),
+                        p.Name.CamelCase()
+                    )
+            );
     }
 }

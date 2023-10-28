@@ -20,13 +20,14 @@ internal static class ControllerModelBuilder
             .ToList();
         if (sample.RouteValues.TryGetValue(Constants.RouteArea, out var area) && !string.IsNullOrWhiteSpace(area))
             nsParts.Insert(0, area.PascalCase());
-        if (sample.RouteValues.TryGetValue(Constants.RouteDynamicKey, out var dynamicKey) && !string.IsNullOrWhiteSpace(dynamicKey))
+        if (
+            sample.RouteValues.TryGetValue(Constants.RouteDynamicKey, out var dynamicKey)
+            && !string.IsNullOrWhiteSpace(dynamicKey)
+        )
             nsParts.Add(dynamicKey.PascalCase());
         var ns = Namespace.New(nsParts);
         var name = sample.RouteValues[Constants.RouteController]!;
-        var actionModels = actions
-            .SelectMany(x => ActionModelBuilder.Build(x, ctx))
-            .ToArray();
+        var actionModels = actions.SelectMany(x => ActionModelBuilder.Build(x, ctx)).ToArray();
 
         return new ControllerModel(ns, name, actionModels);
     }

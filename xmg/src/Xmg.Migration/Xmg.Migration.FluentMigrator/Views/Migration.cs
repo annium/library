@@ -7,9 +7,7 @@ internal class Migration : IMigration
 {
     public IReadOnlyDictionary<string, string> Files { get; }
 
-    public Migration(
-        IReadOnlyDictionary<string, string> files
-    )
+    public Migration(IReadOnlyDictionary<string, string> files)
     {
         Files = files;
     }

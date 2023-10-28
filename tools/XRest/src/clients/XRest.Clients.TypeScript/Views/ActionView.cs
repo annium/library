@@ -13,8 +13,10 @@ internal class ActionView
     public string Method { get; }
     public string Path { get; }
     public IReadOnlyCollection<ParameterView> Parameters { get; }
-    public IReadOnlyCollection<ParameterView> RouteParameters => Parameters.Where(x => x.Location == ParameterLocationEnum.Path).ToArray();
-    public IReadOnlyCollection<ParameterView> QueryParameters => Parameters.Where(x => x.Location == ParameterLocationEnum.Query).ToArray();
+    public IReadOnlyCollection<ParameterView> RouteParameters =>
+        Parameters.Where(x => x.Location == ParameterLocationEnum.Path).ToArray();
+    public IReadOnlyCollection<ParameterView> QueryParameters =>
+        Parameters.Where(x => x.Location == ParameterLocationEnum.Query).ToArray();
     public bool HasBody => !(Body is null);
     public DefinedTypeView? Body { get; }
     public DefinedTypeView Response { get; }

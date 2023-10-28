@@ -11,5 +11,6 @@ public class PlanConfiguration
 
     public int Capacity { get; set; }
 
-    public Dictionary<string, Notification.Abstract.ConfigurationBase> Notifications { get; set; } = new Dictionary<string, Notification.Abstract.ConfigurationBase>();
+    public Dictionary<string, Notification.Abstract.ConfigurationBase> Notifications { get; set; } =
+        new Dictionary<string, Notification.Abstract.ConfigurationBase>();
 }

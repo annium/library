@@ -1,5 +1,3 @@
 namespace Xmg.Migration.Abstractions.Views;
 
-public interface ICreateTableForeignKeyOperation : IOperation
-{
-}
+public interface ICreateTableForeignKeyOperation : IOperation { }

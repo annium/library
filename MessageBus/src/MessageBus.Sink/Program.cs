@@ -6,9 +6,7 @@ using Annium.Logging;
 using Annium.Threading;
 using MessageBus.Sink;
 
-await using var entry = Entrypoint.Default
-    .UseServicePack<ServicePack>()
-    .Setup();
+await using var entry = Entrypoint.Default.UseServicePack<ServicePack>().Setup();
 
 var (provider, ct) = entry;
 

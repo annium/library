@@ -13,17 +13,16 @@ internal class ServicePack : ServicePackBase
         container.AddRuntime(GetType().Assembly);
         container.AddTime().WithRealTime().SetDefault();
         container.AddLogging();
-        container.AddSerializers()
-            .WithJson(isDefault: true);
+        container.AddSerializers().WithJson(isDefault: true);
 
         container.AddMapper();
-        container.AddConfiguration<EndpointsConfiguration>(x => x
-            .AddYamlFile("configuration.yml")
-            .AddCommandLineArgs()
+        container.AddConfiguration<EndpointsConfiguration>(
+            x => x.AddYamlFile("configuration.yml").AddCommandLineArgs()
         );
-        container.AddNetMQMessageBus((sp, opts) => opts
-            .WithSerializer(sp.Resolve<ISerializer<string>>())
-            .WithEndpoints(sp.Resolve<EndpointsConfiguration>())
+        container.AddNetMQMessageBus(
+            (sp, opts) =>
+                opts.WithSerializer(sp.Resolve<ISerializer<string>>())
+                    .WithEndpoints(sp.Resolve<EndpointsConfiguration>())
         );
     }
 

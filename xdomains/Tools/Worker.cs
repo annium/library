@@ -15,23 +15,14 @@ internal class Worker
 
     private readonly Settings _settings;
 
-    public Worker(
-        Resolver resolver,
-        Parser parser,
-        Settings settings
-    )
+    public Worker(Resolver resolver, Parser parser, Settings settings)
     {
         _resolver = resolver;
         _parser = parser;
         _settings = settings;
     }
 
-    public async Task RunAsync(
-        string[] query,
-        string[] zones,
-        int degreeOfParallelism,
-        CancellationToken ct
-    )
+    public async Task RunAsync(string[] query, string[] zones, int degreeOfParallelism, CancellationToken ct)
     {
         var domains = GetDomains(query, zones).ToArray();
 
@@ -70,25 +61,32 @@ internal class Worker
             zones = File.ReadAllLines(_settings.RootedPath("zones.txt"));
 
         foreach (var name in query)
-        foreach (var zone in zones)
-            yield return $"{name}{zone}";
+            foreach (var zone in zones)
+                yield return $"{name}{zone}";
     }
 
-    private Task CheckDomains(string[] domains, Action<string, string> done, int degreeOfParallelism, CancellationToken ct)
+    private Task CheckDomains(
+        string[] domains,
+        Action<string, string> done,
+        int degreeOfParallelism,
+        CancellationToken ct
+    )
     {
         var semaphore = new Semaphore(degreeOfParallelism, degreeOfParallelism);
 
-        return Task.WhenAll(domains.Select(async domain =>
-        {
-            if (ct.IsCancellationRequested)
-                return string.Empty;
+        return Task.WhenAll(
+            domains.Select(async domain =>
+            {
+                if (ct.IsCancellationRequested)
+                    return string.Empty;
 
-            semaphore.WaitOne();
-            var result = await _resolver.ResolveAsync(domain);
-            semaphore.Release();
-            done(domain, result);
+                semaphore.WaitOne();
+                var result = await _resolver.ResolveAsync(domain);
+                semaphore.Release();
+                done(domain, result);
 
-            return result;
-        }));
+                return result;
+            })
+        );
     }
 }

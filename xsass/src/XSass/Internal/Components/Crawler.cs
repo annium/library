@@ -12,11 +12,7 @@ internal class Crawler : ILogSubject
     private readonly Configuration _cfg;
     private readonly Compiler _compiler;
 
-    public Crawler(
-        Configuration cfg,
-        Compiler compiler,
-        ILogger logger
-    )
+    public Crawler(Configuration cfg, Compiler compiler, ILogger logger)
     {
         _cfg = cfg;
         _compiler = compiler;
@@ -35,7 +31,8 @@ internal class Crawler : ILogSubject
     private async Task Process(string directory)
     {
         this.Debug($"Process {directory}");
-        var files = Directory.EnumerateFiles(directory)
+        var files = Directory
+            .EnumerateFiles(directory)
             .Where(file => _cfg.Extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)));
 
         await _compiler.CompileFilesAsync(files);

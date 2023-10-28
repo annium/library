@@ -16,9 +16,7 @@ internal class QueryCommand : AsyncCommand<QueryCommandConfiguration>, ICommandD
 
     private readonly Worker _worker;
 
-    public QueryCommand(
-        Worker worker
-    )
+    public QueryCommand(Worker worker)
     {
         _worker = worker;
     }

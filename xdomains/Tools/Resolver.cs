@@ -7,9 +7,7 @@ internal class Resolver
 {
     private readonly Cache _cache;
 
-    public Resolver(
-        Cache cache
-    )
+    public Resolver(Cache cache)
     {
         _cache = cache;
     }

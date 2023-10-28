@@ -11,9 +11,7 @@ internal class ShowCommand : Command<RootCommandConfiguration>, ICommandDescript
     public static string Id => "show";
     public static string Description => "show solution";
 
-    public ShowCommand(
-        Func<LoadSetupTask> createLoadSetupTask
-    )
+    public ShowCommand(Func<LoadSetupTask> createLoadSetupTask)
     {
         _createLoadSetupTask = createLoadSetupTask;
     }

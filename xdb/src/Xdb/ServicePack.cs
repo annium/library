@@ -13,12 +13,16 @@ internal class ServicePack : ServicePackBase
         container.AddArguments();
         container.AddLogging();
         container.AddMapper();
-        container.AddSerializers()
-            .WithYaml((s, d) =>
-            {
-                s.WithNamingConvention(CamelCaseNamingConvention.Instance);
-                d.WithNamingConvention(CamelCaseNamingConvention.Instance);
-            }, isDefault: true);
+        container
+            .AddSerializers()
+            .WithYaml(
+                (s, d) =>
+                {
+                    s.WithNamingConvention(CamelCaseNamingConvention.Instance);
+                    d.WithNamingConvention(CamelCaseNamingConvention.Instance);
+                },
+                isDefault: true
+            );
         container.AddAssemblyLoader();
     }
 

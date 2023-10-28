@@ -9,17 +9,16 @@ namespace XRest.Clients.TypeScript.Helpers;
 
 internal static class ProcessorTypeExtensions
 {
-    public static IReadOnlyCollection<PropertyInfo> GetAllPublicProperties(this Type type) => type
-        .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
-        .Where(x => x.CanRead)
-        .ToArray();
+    public static IReadOnlyCollection<PropertyInfo> GetAllPublicProperties(this Type type) =>
+        type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
+            .Where(x => x.CanRead)
+            .ToArray();
 
     public static bool IsSkipped(this Type type) =>
         KnownTypes.Skipped.Contains(type) || type.IsDictionary() || type.IsArray();
 
     public static bool IsDictionary(this Type type) =>
-        type.IsDictionaryType() ||
-        type.GetInterfaces().Any(IsDictionaryType);
+        type.IsDictionaryType() || type.GetInterfaces().Any(IsDictionaryType);
 
     public static bool IsArray(this Type type)
     {
@@ -30,9 +29,9 @@ internal static class ProcessorTypeExtensions
             return true;
 
         return type.GetInterfaces()
-            .Any(x => x.IsGenericType
-                ? x.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-                : x == typeof(IEnumerable));
+            .Any(
+                x => x.IsGenericType ? x.GetGenericTypeDefinition() == typeof(IEnumerable<>) : x == typeof(IEnumerable)
+            );
     }
 
     private static bool IsDictionaryType(this Type type)
@@ -42,7 +41,6 @@ internal static class ProcessorTypeExtensions
 
         var definition = type.GetGenericTypeDefinition();
 
-        return definition == typeof(IDictionary<,>) ||
-            definition == typeof(IReadOnlyDictionary<,>);
+        return definition == typeof(IDictionary<,>) || definition == typeof(IReadOnlyDictionary<,>);
     }
 }

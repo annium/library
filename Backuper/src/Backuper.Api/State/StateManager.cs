@@ -15,14 +15,9 @@ public class StateManager : ILogSubject
     private readonly IScheduler _scheduler;
     private readonly Namer _namer;
 
-
     public State? State { get; private set; }
 
-    public StateManager(
-        IScheduler scheduler,
-        Namer namer,
-        ILogger logger
-    )
+    public StateManager(IScheduler scheduler, Namer namer, ILogger logger)
     {
         _scheduler = scheduler;
         _namer = namer;
@@ -52,8 +47,8 @@ public class StateManager : ILogSubject
 
         this.Debug($"Schedule operations");
         foreach (var server in State.Servers.Values)
-        foreach (var plan in server.Plans.Values)
-            _scheduler.Schedule(() => BackupAsync(server, plan), plan.Interval);
+            foreach (var plan in server.Plans.Values)
+                _scheduler.Schedule(() => BackupAsync(server, plan), plan.Interval);
     }
 
     private async Task BackupAsync(Server server, Plan plan)
@@ -62,7 +57,10 @@ public class StateManager : ILogSubject
         try
         {
             // cleanup
-            var deletedItems = (await plan.Storage.ListAsync()).OrderByDescending(i => i).Skip(plan.Capacity - 1).ToArray();
+            var deletedItems = (await plan.Storage.ListAsync())
+                .OrderByDescending(i => i)
+                .Skip(plan.Capacity - 1)
+                .ToArray();
             if (deletedItems.Length > 0)
             {
                 foreach (var item in deletedItems)
@@ -76,7 +74,8 @@ public class StateManager : ILogSubject
 
             // upload backup
             var name = _namer.GetName();
-            using (var fs = File.OpenRead(path)) await plan.Storage.UploadAsync(fs, name);
+            using (var fs = File.OpenRead(path))
+                await plan.Storage.UploadAsync(fs, name);
 
             // delete temp file
             if (File.Exists(path))

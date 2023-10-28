@@ -7,12 +7,7 @@ public class TableColumn
     public int? Length { get; }
     public bool CanBeNull { get; }
 
-    public TableColumn(
-        string name,
-        DataType type,
-        int? length,
-        bool canBeNull
-    )
+    public TableColumn(string name, DataType type, int? length, bool canBeNull)
     {
         Name = name;
         Type = type;

@@ -3,9 +3,7 @@ using Annium.Extensions.Arguments;
 using xdomains;
 using Group = xdomains.Commands.Group;
 
-await using var entry = Entrypoint.Default
-    .UseServicePack<ServicePack>()
-    .Setup();
+await using var entry = Entrypoint.Default.UseServicePack<ServicePack>().Setup();
 
 var (provider, ct) = entry;
 

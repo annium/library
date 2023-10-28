@@ -1,5 +1,3 @@
 namespace Xmg.Migration.Abstractions.Views;
 
-public interface IDeleteTablePrimaryKeyOperation : IOperation
-{
-}
+public interface IDeleteTablePrimaryKeyOperation : IOperation { }

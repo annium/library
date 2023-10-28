@@ -38,7 +38,7 @@ internal class UsedTypeViewsCollector
         var definition = view switch
         {
             ClassView cv => cv.IsGenericType ? cv.GetGenericDefinition() : cv,
-            _            => view,
+            _ => view,
         };
         var isBuiltIn = KnownTypes.BuiltIn.Contains(definition);
         var isRegistered = !isBuiltIn && registry.Register(definition);

@@ -12,7 +12,8 @@ namespace XRest.Clients.Csharp.Components.Processors;
 internal static class ClientBuilder
 {
     private static readonly Namespace SystemThreadingNamespace = Constants.SystemThreadingNamespace.ToNamespace();
-    private static readonly Namespace SystemThreadingTasksNamespace = Constants.SystemThreadingTasksNamespace.ToNamespace();
+    private static readonly Namespace SystemThreadingTasksNamespace =
+        Constants.SystemThreadingTasksNamespace.ToNamespace();
     private static readonly Namespace AnniumNetHttpNamespace = Constants.AnniumNetHttpNamespace.ToNamespace();
 
     public static IClientView BuildClient(
@@ -27,7 +28,9 @@ internal static class ClientBuilder
 
         if (controllers.Count == 1)
             return new ClientContainerView(
-                new[] { controllers.First().Namespace, AnniumNetHttpNamespace }.ToUsagesFrom(clientsNamespace).ToUsageStrings(),
+                new[] { controllers.First().Namespace, AnniumNetHttpNamespace }
+                    .ToUsagesFrom(clientsNamespace)
+                    .ToUsageStrings(),
                 clientsNamespace.ToString(),
                 name,
                 type,
@@ -40,10 +43,7 @@ internal static class ClientBuilder
 
         var ancestors = lookup[false]
             .GroupBy(x => x.Namespace)
-            .ToDictionary(
-                x => x.Key,
-                x => BuildClient(x.Key, x.Key[^1], $"{x.Key[^1]}Root", x.ToArray())
-            );
+            .ToDictionary(x => x.Key, x => BuildClient(x.Key, x.Key[^1], $"{x.Key[^1]}Root", x.ToArray()));
 
         var usages = childControllers
             .Select(x => x.Namespace)
@@ -52,15 +52,9 @@ internal static class ClientBuilder
             .ToUsagesFrom(clientsNamespace)
             .ToUsageStrings();
 
-        var children = childControllers
-            .Select(BuildClientNode)
-            .OrderBy(x => x.Namespace.ToString())
-            .ToArray();
+        var children = childControllers.Select(BuildClientNode).OrderBy(x => x.Namespace.ToString()).ToArray();
 
-        var clients = ancestors.Values
-            .OrderBy(x => x.Namespace.ToString())
-            .Concat(children)
-            .ToArray();
+        var clients = ancestors.Values.OrderBy(x => x.Namespace.ToString()).Concat(children).ToArray();
 
         return new ClientContainerView(usages, clientsNamespace.ToString(), name, type, clients);
     }

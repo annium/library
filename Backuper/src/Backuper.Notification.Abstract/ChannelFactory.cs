@@ -8,9 +8,7 @@ public class ChannelFactory
 {
     private readonly IServiceProvider _provider;
 
-    public ChannelFactory(
-        IServiceProvider provider
-    )
+    public ChannelFactory(IServiceProvider provider)
     {
         _provider = provider;
     }

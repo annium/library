@@ -13,19 +13,10 @@ public abstract class MigrationEngineBase<T>
     protected readonly UpgradeEngineBuilder InitBuilder;
     protected readonly UpgradeEngineBuilder MigrationsBuilder;
 
-    protected MigrationEngineBase(
-        UpgradeEngineBuilder initBuilder,
-        UpgradeEngineBuilder migrationsBuilder
-    )
+    protected MigrationEngineBase(UpgradeEngineBuilder initBuilder, UpgradeEngineBuilder migrationsBuilder)
     {
-        InitBuilder = initBuilder
-            .WithTransactionPerScript()
-            .WithVariablesEnabled()
-            .LogToConsole();
-        MigrationsBuilder = migrationsBuilder
-            .WithTransactionPerScript()
-            .WithVariablesEnabled()
-            .LogToConsole();
+        InitBuilder = initBuilder.WithTransactionPerScript().WithVariablesEnabled().LogToConsole();
+        MigrationsBuilder = migrationsBuilder.WithTransactionPerScript().WithVariablesEnabled().LogToConsole();
     }
 
     public T WithScriptsFromDirectory(string folder)

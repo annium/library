@@ -19,12 +19,7 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ICo
     private readonly IProcessor _processor;
     private readonly IWriter _writer;
 
-    public GenerateCommand(
-        IApiModelLoader apiModelLoader,
-        IProcessor processor,
-        IWriter writer,
-        ILogger logger
-    )
+    public GenerateCommand(IApiModelLoader apiModelLoader, IProcessor processor, IWriter writer, ILogger logger)
     {
         _apiModelLoader = apiModelLoader;
         _processor = processor;

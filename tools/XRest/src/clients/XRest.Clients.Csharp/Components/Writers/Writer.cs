@@ -9,10 +9,7 @@ internal class Writer
     private readonly ClientWriter _clientWriter;
     private readonly ModelWriter _modelWriter;
 
-    public Writer(
-        ClientWriter clientWriter,
-        ModelWriter modelWriter
-    )
+    public Writer(ClientWriter clientWriter, ModelWriter modelWriter)
     {
         _clientWriter = clientWriter;
         _modelWriter = modelWriter;
@@ -21,6 +18,10 @@ internal class Writer
     public void Write(string output, ApiView api, bool generateTestClient)
     {
         _clientWriter.Write(Path.Combine(output, Constants.ClientsNamespace), api.Client, generateTestClient);
-        _modelWriter.Write(Path.Combine(output, Constants.ModelsNamespace), api.Namespace.Append(Constants.ModelsNamespace), api.Models);
+        _modelWriter.Write(
+            Path.Combine(output, Constants.ModelsNamespace),
+            api.Namespace.Append(Constants.ModelsNamespace),
+            api.Models
+        );
     }
 }

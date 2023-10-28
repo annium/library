@@ -8,10 +8,7 @@ internal class RootSetup
 
     public IReadOnlyDictionary<string, IReadOnlyDictionary<string, TargetSetup>> Targets { get; }
 
-    public RootSetup(
-        string source,
-        IReadOnlyDictionary<string, IReadOnlyDictionary<string, TargetSetup>> targets
-    )
+    public RootSetup(string source, IReadOnlyDictionary<string, IReadOnlyDictionary<string, TargetSetup>> targets)
     {
         Source = source;
         Targets = targets;

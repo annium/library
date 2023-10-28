@@ -10,10 +10,7 @@ public class Channel : IChannel
     private readonly IHttpRequestFactory _httpRequestFactory;
     private readonly Configuration _cfg;
 
-    public Channel(
-        IHttpRequestFactory httpRequestFactory,
-        Configuration cfg
-    )
+    public Channel(IHttpRequestFactory httpRequestFactory, Configuration cfg)
     {
         _httpRequestFactory = httpRequestFactory;
         _cfg = cfg;

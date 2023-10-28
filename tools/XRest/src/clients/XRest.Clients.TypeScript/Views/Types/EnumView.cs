@@ -9,10 +9,8 @@ internal record EnumView : DefinedTypeView
 
     public IReadOnlyDictionary<string, object> Values { get; }
 
-    public EnumView(
-        string name,
-        IReadOnlyDictionary<string, object> values
-    ) : base(name)
+    public EnumView(string name, IReadOnlyDictionary<string, object> values)
+        : base(name)
     {
         if (values.Count == 0)
             throw new ArgumentException($"Enum '{this}' values count must be greater than 0");

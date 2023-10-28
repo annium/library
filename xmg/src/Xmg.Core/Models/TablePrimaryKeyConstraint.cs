@@ -10,11 +10,7 @@ public class TablePrimaryKeyConstraint
     private readonly string? _schema;
     private readonly string _table;
 
-    public TablePrimaryKeyConstraint(
-        string? schema,
-        string table,
-        IReadOnlyCollection<string> columns
-    )
+    public TablePrimaryKeyConstraint(string? schema, string table, IReadOnlyCollection<string> columns)
     {
         _schema = schema;
         _table = table;

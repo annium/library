@@ -2,6 +2,4 @@ using Xmg.Migration.Abstractions.Views;
 
 namespace Xmg.Migration.FluentMigrator.Views;
 
-internal class RenameTableOperation : IRenameTableOperation
-{
-}
+internal class RenameTableOperation : IRenameTableOperation { }

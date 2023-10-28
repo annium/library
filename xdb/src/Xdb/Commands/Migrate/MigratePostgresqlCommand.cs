@@ -12,7 +12,10 @@ using Constants = Annium.Serialization.Yaml.Constants;
 
 namespace Xdb.Commands.Migrate;
 
-internal class MigratePostgresqlCommand : Command<MigratePostgresqlCommandConfiguration>, ICommandDescriptor, ILogSubject
+internal class MigratePostgresqlCommand
+    : Command<MigratePostgresqlCommandConfiguration>,
+        ICommandDescriptor,
+        ILogSubject
 {
     public static string Id => "postgresql";
     public static string Description => "migrate postgresql database";

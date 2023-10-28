@@ -8,9 +8,7 @@ internal class CreateTableForeignKeyOperation : ICreateTableForeignKeyOperation
 {
     private readonly TableForeignKeyConstraint _key;
 
-    public CreateTableForeignKeyOperation(
-        TableForeignKeyConstraint key
-    )
+    public CreateTableForeignKeyOperation(TableForeignKeyConstraint key)
     {
         _key = key;
     }

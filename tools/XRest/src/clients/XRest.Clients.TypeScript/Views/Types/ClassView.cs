@@ -15,10 +15,8 @@ internal record ClassView : DefinedTypeView
     private IReadOnlyCollection<TypePropertyView> _definitionProperties = Array.Empty<TypePropertyView>();
     private bool _isConfigured;
 
-    public ClassView(
-        string name,
-        IReadOnlyCollection<GenericParameterView> genericParameters
-    ) : this(name)
+    public ClassView(string name, IReadOnlyCollection<GenericParameterView> genericParameters)
+        : this(name)
     {
         if (genericParameters.Count == 0)
             throw new ArgumentException("Generic parameters count must be greater than 0");
@@ -28,25 +26,21 @@ internal record ClassView : DefinedTypeView
         IsGenericTypeDefinition = true;
     }
 
-    public ClassView(
-        string name
-    ) : base(name)
-    {
-    }
+    public ClassView(string name)
+        : base(name) { }
 
     private ClassView(
         string name,
         IReadOnlyCollection<GenericParameterView> genericParameters,
         IReadOnlyCollection<DefinedTypeView> genericArguments
-    ) : this(name, genericParameters)
+    )
+        : this(name, genericParameters)
     {
         GenericArguments = genericArguments;
         IsGenericTypeDefinition = false;
     }
 
-    public ClassView Configure(
-        IReadOnlyCollection<TypePropertyView> properties
-    )
+    public ClassView Configure(IReadOnlyCollection<TypePropertyView> properties)
     {
         if (_isConfigured)
             throw new InvalidOperationException("ClassView is already configured");
@@ -72,9 +66,7 @@ internal record ClassView : DefinedTypeView
         return this;
     }
 
-    public ClassView MakeGenericType(
-        params DefinedTypeView[] arguments
-    )
+    public ClassView MakeGenericType(params DefinedTypeView[] arguments)
     {
         if (!IsGenericTypeDefinition)
             throw new InvalidOperationException($"{this} is not generic type definition");
@@ -113,7 +105,8 @@ internal record ClassView : DefinedTypeView
         return new ClassView(Name, GenericParameters).Configure(_definitionProperties, Array.Empty<TypePropertyView>());
     }
 
-    public IReadOnlyCollection<DefinedTypeView> GetPropertyTypes() => Properties.Select(x => x.Type).OfType<DefinedTypeView>().Distinct().ToArray();
+    public IReadOnlyCollection<DefinedTypeView> GetPropertyTypes() =>
+        Properties.Select(x => x.Type).OfType<DefinedTypeView>().Distinct().ToArray();
 
     public override string ToString()
     {

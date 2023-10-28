@@ -6,9 +6,7 @@ public class Namer
 {
     private readonly ITimeProvider _timeProvider;
 
-    public Namer(
-        ITimeProvider timeProvider
-    )
+    public Namer(ITimeProvider timeProvider)
     {
         _timeProvider = timeProvider;
     }

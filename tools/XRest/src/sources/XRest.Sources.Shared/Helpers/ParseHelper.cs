@@ -40,8 +40,7 @@ public static class ParseHelper
         var baseMethodInfo = methodInfo.GetBaseDefinition();
         var declaringTypeInfo = baseMethodInfo.DeclaringType!.GetTypeInfo();
 
-        return
-            typeof(IDisposable).GetTypeInfo().IsAssignableFrom(declaringTypeInfo) &&
-            declaringTypeInfo.GetRuntimeInterfaceMap(typeof(IDisposable)).TargetMethods[0] == baseMethodInfo;
+        return typeof(IDisposable).GetTypeInfo().IsAssignableFrom(declaringTypeInfo)
+            && declaringTypeInfo.GetRuntimeInterfaceMap(typeof(IDisposable)).TargetMethods[0] == baseMethodInfo;
     }
 }

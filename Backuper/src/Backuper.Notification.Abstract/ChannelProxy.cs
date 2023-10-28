@@ -6,13 +6,8 @@ namespace Backuper.Notification.Abstract;
 
 public class ChannelProxy : Resource<IChannel>, IChannel
 {
-    public ChannelProxy(
-        IChannel entity,
-        string type,
-        ILogger logger
-    ) : base(entity, "Channel", type, logger)
-    {
-    }
+    public ChannelProxy(IChannel entity, string type, ILogger logger)
+        : base(entity, "Channel", type, logger) { }
 
     public Task InfoAsync(string message) => SafeAsync("info", () => Entity.InfoAsync(message));
 

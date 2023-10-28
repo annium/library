@@ -11,11 +11,7 @@ internal class CreateTablePrimaryKeyOperation : ICreateTablePrimaryKeyOperation
     private readonly string _table;
     private readonly TablePrimaryKeyConstraint _primaryKey;
 
-    public CreateTablePrimaryKeyOperation(
-        string? schema,
-        string table,
-        TablePrimaryKeyConstraint primaryKey
-    )
+    public CreateTablePrimaryKeyOperation(string? schema, string table, TablePrimaryKeyConstraint primaryKey)
     {
         _schema = schema;
         _table = table;

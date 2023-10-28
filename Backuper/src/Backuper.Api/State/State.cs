@@ -6,9 +6,7 @@ public class State
 {
     public IReadOnlyDictionary<string, Server> Servers { get; }
 
-    public State(
-        IReadOnlyDictionary<string, Server> servers
-    )
+    public State(IReadOnlyDictionary<string, Server> servers)
     {
         Servers = servers;
     }

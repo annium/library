@@ -8,11 +8,7 @@ internal class TypePropertyView
     public TypeView Type { get; }
     public bool IsOptional { get; }
 
-    public TypePropertyView(
-        string name,
-        TypeView type,
-        bool isOptional
-    )
+    public TypePropertyView(string name, TypeView type, bool isOptional)
     {
         Name = name.CamelCase();
         Type = type;

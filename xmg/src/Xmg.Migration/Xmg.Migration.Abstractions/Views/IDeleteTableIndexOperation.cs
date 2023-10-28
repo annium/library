@@ -1,5 +1,3 @@
 namespace Xmg.Migration.Abstractions.Views;
 
-public class DeleteTableIndexOperation : IOperation
-{
-}
+public class DeleteTableIndexOperation : IOperation { }

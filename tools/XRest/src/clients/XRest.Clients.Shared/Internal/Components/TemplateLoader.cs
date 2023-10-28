@@ -14,10 +14,7 @@ internal class TemplateLoader : ITemplateLoader
     private readonly Assembly _templateAssembly;
     private readonly IResourceLoader _resourceLoader;
 
-    public TemplateLoader(
-        Assembly templateAssembly,
-        IResourceLoader resourceLoader
-    )
+    public TemplateLoader(Assembly templateAssembly, IResourceLoader resourceLoader)
     {
         _templateAssembly = templateAssembly;
         _resourceLoader = resourceLoader;

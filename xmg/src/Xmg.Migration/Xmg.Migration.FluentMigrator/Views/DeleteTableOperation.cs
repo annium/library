@@ -7,10 +7,7 @@ internal class DeleteTableOperation : Abstractions.Views.DeleteTableOperation
     private readonly string? _schema;
     private readonly string _table;
 
-    public DeleteTableOperation(
-        string? schema,
-        string table
-    )
+    public DeleteTableOperation(string? schema, string table)
     {
         _schema = schema;
         _table = table;

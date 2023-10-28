@@ -7,10 +7,7 @@ public class Schema
     public string Name { get; }
     public IReadOnlyCollection<Table> Tables { get; }
 
-    public Schema(
-        string name,
-        IReadOnlyCollection<Table> tables
-    )
+    public Schema(string name, IReadOnlyCollection<Table> tables)
     {
         Name = name;
         Tables = tables;

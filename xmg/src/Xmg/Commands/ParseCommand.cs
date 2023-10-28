@@ -29,10 +29,7 @@ internal class ParseCommand : Command<ParseCommandConfig>, ICommandDescriptor, I
         _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
     }
 
-    public override void Handle(
-        ParseCommandConfig cfg,
-        CancellationToken ct
-    )
+    public override void Handle(ParseCommandConfig cfg, CancellationToken ct)
     {
         this.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
         var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);

@@ -5,9 +5,7 @@ using MessageBus.Proxy;
 using NetMQ;
 using NetMQ.Sockets;
 
-await using var entry = Entrypoint.Default
-    .UseServicePack<ServicePack>()
-    .Setup();
+await using var entry = Entrypoint.Default.UseServicePack<ServicePack>().Setup();
 
 var (provider, ct) = entry;
 

@@ -15,22 +15,20 @@ internal class ServicePack : ServicePackBase
     public override void Register(IServiceContainer container, IServiceProvider provider)
     {
         container.AddTime().WithRealTime().SetDefault();
-        container.AddSerializers()
+        container
+            .AddSerializers()
             .WithJson(opts => opts.ConfigureForOperations().ConfigureForNodaTime(), isDefault: true);
         container.AddLogging();
         container.AddXRest();
 
         // server
         container.Collection.AddCors();
-        container.Collection.AddControllers()
-            .AddDefaultJsonOptions();
+        container.Collection.AddControllers().AddDefaultJsonOptions();
         container.Add(new WebHostConfiguration()).AsSelf().Singleton();
     }
 
     public override void Setup(IServiceProvider provider)
     {
-        provider.UseLogging(route =>
-            route.UseConsole()
-        );
+        provider.UseLogging(route => route.UseConsole());
     }
 }

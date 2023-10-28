@@ -26,16 +26,23 @@ internal static class Program
         Console.WriteLine("Done");
     }
 
-    private static (Type configurationType, Type entityType)[] CollectTypes(Assembly assembly, Predicate<Type> predicate)
+    private static (Type configurationType, Type entityType)[] CollectTypes(
+        Assembly assembly,
+        Predicate<Type> predicate
+    )
     {
         var allTypes = assembly.GetTypes();
         var concreteClasses = allTypes.Where(x => x.IsClass && !x.IsAbstract && !x.IsGenericType).ToArray();
 
         var configurationTypes = concreteClasses
-            .Select(x => (
-                x,
-                i: x.GetInterfaces().SingleOrDefault(i => i.IsGenericType && predicate(i.GetGenericTypeDefinition()))
-            ))
+            .Select(
+                x =>
+                    (
+                        x,
+                        i: x.GetInterfaces()
+                            .SingleOrDefault(i => i.IsGenericType && predicate(i.GetGenericTypeDefinition()))
+                    )
+            )
             .Where(p => p.i != null)
             .Select(p => (p.x, p.i!.GenericTypeArguments.Single()))
             .ToArray();

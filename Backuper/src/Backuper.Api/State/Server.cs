@@ -9,11 +9,7 @@ public class Server
     public IConnection Connection { get; }
     public IReadOnlyDictionary<string, Plan> Plans { get; }
 
-    public Server(
-        string name,
-        IConnection connection,
-        IReadOnlyDictionary<string, Plan> plans
-    )
+    public Server(string name, IConnection connection, IReadOnlyDictionary<string, Plan> plans)
     {
         Name = name;
         Connection = connection;

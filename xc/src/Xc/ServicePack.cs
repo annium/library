@@ -14,7 +14,8 @@ internal class ServicePack : ServicePackBase
         container.AddLogging();
         container.AddMapper();
 
-        container.AddAll(GetType().Assembly)
+        container
+            .AddAll(GetType().Assembly)
             .AssignableTo<ITask>()
             .Where(x => x.IsClass)
             .AsSelf()

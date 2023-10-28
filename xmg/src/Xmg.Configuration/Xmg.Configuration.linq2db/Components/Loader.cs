@@ -9,9 +9,7 @@ internal class Loader : ILoader
 {
     private readonly IAssemblyLoaderBuilder _assemblyLoaderBuilder;
 
-    public Loader(
-        IAssemblyLoaderBuilder assemblyLoaderBuilder
-    )
+    public Loader(IAssemblyLoaderBuilder assemblyLoaderBuilder)
     {
         _assemblyLoaderBuilder = assemblyLoaderBuilder;
     }

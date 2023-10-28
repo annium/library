@@ -57,8 +57,5 @@ public class StateFactory
     private IReadOnlyDictionary<string, TR> ResolveAll<TC, TR>(
         IDictionary<string, TC> config,
         Func<string, TC, TR> resolve
-    ) => config.ToDictionary(
-        pair => pair.Key,
-        pair => resolve(pair.Key, pair.Value)
-    );
+    ) => config.ToDictionary(pair => pair.Key, pair => resolve(pair.Key, pair.Value));
 }

@@ -1,5 +1,3 @@
 namespace Xmg.Migration.Abstractions.Views;
 
-public interface ICreateTableColumnOperation : IOperation
-{
-}
+public interface ICreateTableColumnOperation : IOperation { }

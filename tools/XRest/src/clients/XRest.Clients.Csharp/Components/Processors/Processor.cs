@@ -15,9 +15,7 @@ internal static class Processor
             rootNamespace.Append(Constants.ModelsNamespace.ToNamespace()),
             api.Models
         );
-        var controllers = api.Controllers
-            .Select(x => ControllerProcessor.Process(x, apiCtx))
-            .ToArray();
+        var controllers = api.Controllers.Select(x => ControllerProcessor.Process(x, apiCtx)).ToArray();
 
         var client = ClientBuilder.BuildClient(apiCtx.ClientsNamespace, "Root", "Root", controllers);
 

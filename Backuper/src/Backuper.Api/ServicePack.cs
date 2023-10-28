@@ -25,10 +25,7 @@ internal class ServicePack : ServicePackBase
         container.AddRuntime(GetType().Assembly);
         container.AddTime().WithRealTime().SetDefault();
         container.AddConfiguration<Configuration>(x => x.AddYamlFile(Path.Combine("configuration", "config.yml")));
-        container
-            .AddStorage()
-            .AddFileSystemStorage()
-            .AddS3Storage();
+        container.AddStorage().AddFileSystemStorage().AddS3Storage();
 
         container.Add<StateFactory>().AsSelf().Singleton();
         container.Add<StateManager>().AsSelf().Singleton();

@@ -8,18 +8,19 @@ internal static class DefaultValueProcessor
     private const string New = "new()";
     private const string Default = "default!";
 
-    public static string Resolve(IRef reference, ProcessingContext ctx) => reference switch
-    {
-        BaseTypeRef x       => Resolve(x),
-        NullableRef         => string.Empty,
-        GenericParameterRef => Default,
-        EnumRef             => string.Empty,
-        ArrayRef x          => Resolve(x, ctx),
-        RecordRef           => New,
-        StructRef           => Default,
-        InterfaceRef        => Default,
-        _                   => throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported ref {reference}")
-    };
+    public static string Resolve(IRef reference, ProcessingContext ctx) =>
+        reference switch
+        {
+            BaseTypeRef x => Resolve(x),
+            NullableRef => string.Empty,
+            GenericParameterRef => Default,
+            EnumRef => string.Empty,
+            ArrayRef x => Resolve(x, ctx),
+            RecordRef => New,
+            StructRef => Default,
+            InterfaceRef => Default,
+            _ => throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported ref {reference}")
+        };
 
     private static string Resolve(BaseTypeRef reference)
     {
@@ -48,7 +49,11 @@ internal static class DefaultValueProcessor
             case BaseType.YearMonth:
                 return string.Empty;
             default:
-                throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported type {reference} for default value");
+                throw new ArgumentOutOfRangeException(
+                    nameof(reference),
+                    reference,
+                    $"Unsupported type {reference} for default value"
+                );
         }
     }
 

@@ -12,18 +12,14 @@ internal class LoadSetupTask : IFuncTask<RootSetup, string>
 {
     private readonly Func<IConfigurationBuilder> _createConfigurationBuilder;
 
-    public LoadSetupTask(
-        Func<IConfigurationBuilder> createConfigurationBuilder
-    )
+    public LoadSetupTask(Func<IConfigurationBuilder> createConfigurationBuilder)
     {
         _createConfigurationBuilder = createConfigurationBuilder;
     }
 
     public RootSetup Execute(string root)
     {
-        var cfg = _createConfigurationBuilder()
-            .AddYamlFile(ConfigPath(root))
-            .Build<Setup.Raw.RootSetup>();
+        var cfg = _createConfigurationBuilder().AddYamlFile(ConfigPath(root)).Build<Setup.Raw.RootSetup>();
         var source = Path.GetFullPath(Path.Combine(root, cfg.Source));
 
         var targets = cfg.Includes.ToDictionary(x => x.Key, x => Include(root, source, x.Value));
@@ -51,7 +47,11 @@ internal class LoadSetupTask : IFuncTask<RootSetup, string>
     {
         return new TargetSetup(
             cfg.Copy.Select(x => Path.GetFullPath(FilePath(source, x))).ToArray(),
-            cfg.To.Select(x => Path.GetFullPath(x.StartsWith('/') ? Path.Combine(root, x[1..]) : Path.Combine(root, path, x))).ToArray()
+            cfg.To
+                .Select(
+                    x => Path.GetFullPath(x.StartsWith('/') ? Path.Combine(root, x[1..]) : Path.Combine(root, path, x))
+                )
+                .ToArray()
         );
     }
 }

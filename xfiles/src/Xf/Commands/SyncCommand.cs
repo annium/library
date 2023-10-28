@@ -1,6 +1,3 @@
 namespace Xf.Commands;
 
-public class SyncCommand
-{
-    
-}
+public class SyncCommand { }

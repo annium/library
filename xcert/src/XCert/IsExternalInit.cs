@@ -2,7 +2,5 @@
 
 namespace XCert
 {
-    public class IsExternalInit
-    {
-    }
+    public class IsExternalInit { }
 }
