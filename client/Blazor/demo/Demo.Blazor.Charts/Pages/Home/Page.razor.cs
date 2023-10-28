@@ -37,37 +37,59 @@ public partial class Page
     private ISeriesSource<PointValue> _openSeries = default!;
     private ISeriesSource<MultiValue<RangeItem>> _multiRangeSeries = default!;
     private ISeriesSource<MultiValue<LinePointItem>> _multiLineSeries = default!;
-    private Func<ICandle, string> _getCandleLabel = delegate { return string.Empty; };
-    private Func<RangeItem, string> _getRangeLabelText = delegate { return string.Empty; };
-    private Func<IPaneContext, Instant, int> _getRangeLabelLeft = delegate { return 0; };
-    private Func<IPaneContext, RangeItem, int> _getRangeLabelTop = delegate { return 0; };
-    private Func<LinePointItem, string> _getLineLabelText = delegate { return string.Empty; };
-    private Func<IPaneContext, Instant, int> _getLineLabelLeft = delegate { return 0; };
-    private Func<IPaneContext, LinePointItem, int> _getLineLabelTop = delegate { return 0; };
+    private Func<ICandle, string> _getCandleLabel = delegate
+    {
+        return string.Empty;
+    };
+    private Func<RangeItem, string> _getRangeLabelText = delegate
+    {
+        return string.Empty;
+    };
+    private Func<IPaneContext, Instant, int> _getRangeLabelLeft = delegate
+    {
+        return 0;
+    };
+    private Func<IPaneContext, RangeItem, int> _getRangeLabelTop = delegate
+    {
+        return 0;
+    };
+    private Func<LinePointItem, string> _getLineLabelText = delegate
+    {
+        return string.Empty;
+    };
+    private Func<IPaneContext, Instant, int> _getLineLabelLeft = delegate
+    {
+        return 0;
+    };
+    private Func<IPaneContext, LinePointItem, int> _getLineLabelTop = delegate
+    {
+        return 0;
+    };
 
     protected override void OnInitialized()
     {
         ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
 
         _candleSeries = SeriesSourceFactory.CreateChecked(ChartContext.Resolution, LoadCandles);
-        _openSeries = SeriesSourceFactory.CreateUnchecked(_candleSeries, x => x.Close > x.Open * 1.001m ? new PointValue(x.Moment, x.Open) : null);
+        _openSeries = SeriesSourceFactory.CreateUnchecked(
+            _candleSeries,
+            x => x.Close > x.Open * 1.001m ? new PointValue(x.Moment, x.Open) : null
+        );
         _multiRangeSeries = SeriesSourceFactory.CreateChecked(
             _candleSeries,
-            x => new MultiValue<RangeItem>(x.Moment, new[]
-                {
-                    new RangeItem(2 * x.Low - x.High, x.Low),
-                    new RangeItem(x.High, 2 * x.High - x.Low)
-                }
-            )
+            x =>
+                new MultiValue<RangeItem>(
+                    x.Moment,
+                    new[] { new RangeItem(2 * x.Low - x.High, x.Low), new RangeItem(x.High, 2 * x.High - x.Low) }
+                )
         );
         _multiLineSeries = SeriesSourceFactory.CreateChecked(
             _candleSeries,
-            x => new MultiValue<LinePointItem>(x.Moment, new[]
-                {
-                    new LinePointItem(false, x.Low * .98m),
-                    new LinePointItem(true, x.High * 1.02m)
-                }
-            )
+            x =>
+                new MultiValue<LinePointItem>(
+                    x.Moment,
+                    new[] { new LinePointItem(false, x.Low * .98m), new LinePointItem(true, x.High * 1.02m) }
+                )
         );
 
         _getCandleLabel = x =>
@@ -88,11 +110,7 @@ public partial class Page
         _getLineLabelTop = (ctx, point) => ctx.ToY(point.Value);
     }
 
-    private async Task<IReadOnlyList<ICandle>> LoadCandles(
-        Duration resolution,
-        Instant start,
-        Instant end
-    )
+    private async Task<IReadOnlyList<ICandle>> LoadCandles(Duration resolution, Instant start, Instant end)
     {
         var response = await Api.New("https://finnhub.io")
             .Get("/api/v1/crypto/candle")

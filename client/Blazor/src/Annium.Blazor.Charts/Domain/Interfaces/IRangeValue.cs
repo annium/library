@@ -1,5 +1,3 @@
 namespace Annium.Blazor.Charts.Domain.Interfaces;
 
-public interface IRangeValue : IRangeItem, ITimeSeries
-{
-}
+public interface IRangeValue : IRangeItem, ITimeSeries { }

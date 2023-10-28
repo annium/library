@@ -11,7 +11,8 @@ public static class ServiceContainerExtensions
         container.Add<ILocalStorage, LocalStorage>().Singleton();
         container.Add<ISessionStorage, SessionStorage>().Singleton();
 
-        container.AddAll()
+        container
+            .AddAll()
             .AssignableTo<StateBase>()
             .Where(x => x is { IsClass: true, IsAbstract: false })
             .AsSelf()

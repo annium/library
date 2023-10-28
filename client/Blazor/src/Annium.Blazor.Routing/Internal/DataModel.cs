@@ -10,10 +10,8 @@ namespace Annium.Blazor.Routing.Internal;
 
 internal class DataModel : IDataModel
 {
-    public static IReadOnlyCollection<PropertyInfo> ResolveProperties<T>() => typeof(T)
-        .GetProperties()
-        .Where(x => x.CanWrite)
-        .ToArray();
+    public static IReadOnlyCollection<PropertyInfo> ResolveProperties<T>() =>
+        typeof(T).GetProperties().Where(x => x.CanWrite).ToArray();
 
     public static DataModel Create<T>(IReadOnlyCollection<PropertyInfo> properties, IMapper mapper)
     {
@@ -28,11 +26,7 @@ internal class DataModel : IDataModel
     private readonly IReadOnlyDictionary<string, PropertyInfo> _properties;
     private readonly IMapper _mapper;
 
-    private DataModel(
-        Type type,
-        IEnumerable<PropertyInfo> properties,
-        IMapper mapper
-    )
+    private DataModel(Type type, IEnumerable<PropertyInfo> properties, IMapper mapper)
     {
         _type = type;
         _mapper = mapper;
@@ -47,7 +41,9 @@ internal class DataModel : IDataModel
 
         var dataType = data.GetType();
         if (dataType != _type && !data.GetType().IsDerivedFrom(_type))
-            throw new ArgumentException($"Data type '{data.GetType().FriendlyName()}' is not derived from '{_type.FriendlyName()}'");
+            throw new ArgumentException(
+                $"Data type '{data.GetType().FriendlyName()}' is not derived from '{_type.FriendlyName()}'"
+            );
 
         var values = new Dictionary<string, object?>();
         foreach (var (key, property) in _properties)
@@ -101,7 +97,9 @@ internal class DataModel : IDataModel
             if (value is null || value.Equals(value.GetType().DefaultValue()))
                 continue;
 
-            query[key] = property.PropertyType.IsEnumerable() ? _mapper.Map<string[]>(value) : _mapper.Map<string>(value);
+            query[key] = property.PropertyType.IsEnumerable()
+                ? _mapper.Map<string[]>(value)
+                : _mapper.Map<string>(value);
         }
 
         return query;

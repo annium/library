@@ -103,10 +103,7 @@ public interface ISeriesSourceFactory
 
     #region checked dependent
 
-    ISeriesSource<TD> CreateChecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<TS, TD> getValues
-    )
+    ISeriesSource<TD> CreateChecked<TS, TD>(ISeriesSource<TS> source, Func<TS, TD> getValues)
         where TD : ITimeSeries;
 
     ISeriesSource<TD> CreateChecked<TS, TD>(

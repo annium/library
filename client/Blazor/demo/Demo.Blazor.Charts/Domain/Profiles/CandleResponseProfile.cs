@@ -18,13 +18,7 @@ public class CandleResponseProfile : Profile
 
         for (var i = 0; i < x.Moments.Length; i++)
             candles.Add(
-                new Candle(
-                    Instant.FromUnixTimeSeconds(x.Moments[i]),
-                    x.Opens[i],
-                    x.Highs[i],
-                    x.Lows[i],
-                    x.Closes[i]
-                )
+                new Candle(Instant.FromUnixTimeSeconds(x.Moments[i]), x.Opens[i], x.Highs[i], x.Lows[i], x.Closes[i])
             );
 
         return candles;

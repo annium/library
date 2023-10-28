@@ -25,12 +25,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     private List<T> _initialValue;
     private bool _hasBeenTouched;
 
-    public ArrayContainer(
-        List<T> initialValue,
-        IStateFactory stateFactory,
-        IMapper mapper,
-        ILogger logger
-    )
+    public ArrayContainer(List<T> initialValue, IStateFactory stateFactory, IMapper mapper, ILogger logger)
     {
         _initialValue = initialValue;
         _stateFactory = stateFactory;
@@ -164,7 +159,8 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
         NotifyChanged();
     }
 
-    private TX At<TX>(LambdaExpression ex) where TX : ITrackedState
+    private TX At<TX>(LambdaExpression ex)
+        where TX : ITrackedState
     {
         try
         {
@@ -193,7 +189,14 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
 
     private int ResolveIndex(LambdaExpression ex)
     {
-        if (ex.Body is MethodCallExpression { NodeType: ExpressionType.Call, Method.IsSpecialName: true, Arguments.Count: 1 } body)
+        if (
+            ex.Body is MethodCallExpression
+            {
+                NodeType: ExpressionType.Call,
+                Method.IsSpecialName: true,
+                Arguments.Count: 1
+            } body
+        )
         {
             var arg = body.Arguments.ElementAt(0);
             if (arg is ConstantExpression constant && constant.Value?.GetType() == typeof(int))
@@ -227,10 +230,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
         public IValueTrackedState<T> Ref { get; }
         public IDisposable Subscription { get; }
 
-        public StateReference(
-            IValueTrackedState<T> @ref,
-            IDisposable subscription
-        )
+        public StateReference(IValueTrackedState<T> @ref, IDisposable subscription)
         {
             Ref = @ref;
             Subscription = subscription;

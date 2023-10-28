@@ -1,5 +1,3 @@
 namespace Annium.Blazor.State;
 
-public interface ILocalStorage : IStorageBase
-{
-}
+public interface ILocalStorage : IStorageBase { }

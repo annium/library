@@ -9,13 +9,7 @@ public class Style : RuleSet
         .HeightPercent(100)
         .FlexColumn(AlignItems.Center, JustifyContent.SpaceEvenly);
 
-    public readonly CssRule Block = Rule.Class()
-        .WidthPercent(30)
-        .HeightPercent(20)
-        .BackgroundColor("lightblue");
+    public readonly CssRule Block = Rule.Class().WidthPercent(30).HeightPercent(20).BackgroundColor("lightblue");
 
-    public readonly CssRule ResizedBlock = Rule.Class()
-        .WidthPercent(30)
-        .HeightPercent(30)
-        .BackgroundColor("lightblue");
+    public readonly CssRule ResizedBlock = Rule.Class().WidthPercent(30).HeightPercent(30).BackgroundColor("lightblue");
 }

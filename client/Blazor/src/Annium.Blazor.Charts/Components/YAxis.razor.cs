@@ -37,7 +37,8 @@ public partial class YAxis : ILogSubject, IAsyncDisposable
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         _disposable += ChartContext.OnUpdate(Draw);
     }

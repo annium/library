@@ -9,9 +9,7 @@ internal class TimeSeriesComparer<T> : IComparer<T>
 {
     public static IComparer<T> Default { get; } = new TimeSeriesComparer<T>();
 
-    private TimeSeriesComparer()
-    {
-    }
+    private TimeSeriesComparer() { }
 
     public int Compare(T? x, T? y)
     {

@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace Annium.Blazor.Ant.Components;
 
-public partial class TextField<TValue> where TValue : IEquatable<TValue>
+public partial class TextField<TValue>
+    where TValue : IEquatable<TValue>
 {
     [CascadingParameter]
     [EditorRequired]

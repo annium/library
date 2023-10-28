@@ -15,16 +15,8 @@ public static class ServiceContainerExtensions
 
     public static IServiceContainer AddApiServices(this IServiceContainer container)
     {
-        container.AddAll()
-            .AssignableTo<IApi>()
-            .Where(x => x.IsClass)
-            .AsInterfaces()
-            .Scoped();
-        container.AddAll()
-            .AssignableTo<IApiService>()
-            .Where(x => x.IsClass)
-            .AsInterfaces()
-            .Scoped();
+        container.AddAll().AssignableTo<IApi>().Where(x => x.IsClass).AsInterfaces().Scoped();
+        container.AddAll().AssignableTo<IApiService>().Where(x => x.IsClass).AsInterfaces().Scoped();
 
         return container;
     }

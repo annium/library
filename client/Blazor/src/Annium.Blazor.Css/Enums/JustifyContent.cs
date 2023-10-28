@@ -17,7 +17,6 @@ public class JustifyContent : ImplicitString<JustifyContent>
     public static readonly JustifyContent SpaceEvenly = new("space-evenly");
     public static readonly JustifyContent Stretch = new("stretch");
 
-    private JustifyContent(string type) : base(type)
-    {
-    }
+    private JustifyContent(string type)
+        : base(type) { }
 }

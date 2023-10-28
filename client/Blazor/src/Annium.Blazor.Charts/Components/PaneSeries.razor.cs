@@ -44,7 +44,8 @@ public partial class PaneSeries : ILogSubject, IAsyncDisposable
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         SetSize();
         SeriesContext.Init(_canvas, _overlay);
@@ -126,11 +127,6 @@ public partial class PaneSeries : ILogSubject, IAsyncDisposable
             .Set("grid-area", "1 / 1 / 2 / 2")
             .Set("line-height", "0");
 
-        public readonly CssRule Canvas = Rule.Class()
-            .PositionAbsolute()
-            .LeftPx(0)
-            .RightPx(0)
-            .TopPx(0)
-            .BottomPx(0);
+        public readonly CssRule Canvas = Rule.Class().PositionAbsolute().LeftPx(0).RightPx(0).TopPx(0).BottomPx(0);
     }
 }

@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Components;
 
 namespace Annium.Blazor.MatBlazor.Components
 {
-    public partial class TextField<TValue> where TValue : IEquatable<TValue>
+    public partial class TextField<TValue>
+        where TValue : IEquatable<TValue>
     {
         [Parameter]
         public IAtomicContainer<TValue> State { get; set; } = default!;
@@ -23,8 +24,7 @@ namespace Annium.Blazor.MatBlazor.Components
 
         public TextField()
         {
-            _classBuilder = ClassBuilder
-                .With(() => State.IsStatus(Status.Error), "mdc-text-field--invalid");
+            _classBuilder = ClassBuilder.With(() => State.IsStatus(Status.Error), "mdc-text-field--invalid");
         }
     }
 }

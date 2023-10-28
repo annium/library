@@ -49,10 +49,14 @@ public class Router : IComponent, IHandleAfterRender, IDisposable, ILogSubject
         parameters.SetParameterProperties(this);
 
         if (Found is null)
-            throw new InvalidOperationException($"The {nameof(Router)} component requires a value for the parameter {nameof(Found)}.");
+            throw new InvalidOperationException(
+                $"The {nameof(Router)} component requires a value for the parameter {nameof(Found)}."
+            );
 
         if (NotFound is null)
-            throw new InvalidOperationException($"The {nameof(Router)} component requires a value for the parameter {nameof(NotFound)}.");
+            throw new InvalidOperationException(
+                $"The {nameof(Router)} component requires a value for the parameter {nameof(NotFound)}."
+            );
 
         Refresh();
 
@@ -99,7 +103,11 @@ public class Router : IComponent, IHandleAfterRender, IDisposable, ILogSubject
         }
         else
         {
-            this.Trace<string?, string>("render location of {pageType} with {values}", locationData.PageType.FullName, JsonSerializer.Serialize(locationData.RouteValues));
+            this.Trace<string?, string>(
+                "render location of {pageType} with {values}",
+                locationData.PageType.FullName,
+                JsonSerializer.Serialize(locationData.RouteValues)
+            );
             var fragment = Found(new RouteData(locationData.PageType, locationData.RouteValues!));
             _renderHandle.Render(fragment);
         }

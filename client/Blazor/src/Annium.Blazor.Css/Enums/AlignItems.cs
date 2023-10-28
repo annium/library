@@ -16,7 +16,6 @@ public class AlignItems : ImplicitString<AlignItems>
     public static readonly AlignItems Revert = new("revert");
     public static readonly AlignItems Stretch = new("stretch");
 
-    private AlignItems(string type) : base(type)
-    {
-    }
+    private AlignItems(string type)
+        : base(type) { }
 }

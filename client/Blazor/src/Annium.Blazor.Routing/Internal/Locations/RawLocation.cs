@@ -20,10 +20,7 @@ internal sealed record RawLocation
     public IReadOnlyList<string> Segments { get; }
     public IReadOnlyDictionary<string, StringValues> Parameters { get; }
 
-    private RawLocation(
-        IReadOnlyList<string> segments,
-        IReadOnlyDictionary<string, StringValues> parameters
-    )
+    private RawLocation(IReadOnlyList<string> segments, IReadOnlyDictionary<string, StringValues> parameters)
     {
         Segments = segments;
         Parameters = parameters;

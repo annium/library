@@ -6,9 +6,7 @@ namespace Annium.Core.DependencyInjection;
 
 public static class ServiceContainerExtensions
 {
-    public static IServiceContainer AddStateFactory(
-        this IServiceContainer container
-    )
+    public static IServiceContainer AddStateFactory(this IServiceContainer container)
     {
         container.Add<IStateFactory, StateFactory>().Singleton();
 

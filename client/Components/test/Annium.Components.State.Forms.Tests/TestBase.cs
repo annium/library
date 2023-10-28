@@ -6,7 +6,8 @@ namespace Annium.Components.State.Forms.Tests;
 
 public abstract class TestBase : Testing.TestBase
 {
-    protected TestBase(ITestOutputHelper outputHelper) : base(outputHelper)
+    protected TestBase(ITestOutputHelper outputHelper)
+        : base(outputHelper)
     {
         Register(container =>
         {

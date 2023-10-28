@@ -6,9 +6,7 @@ namespace Annium.Core.DependencyInjection;
 
 public static class ServiceContainerExtensions
 {
-    public static IServiceContainer AddInterop(
-        this IServiceContainer container
-    )
+    public static IServiceContainer AddInterop(this IServiceContainer container)
     {
         container.Add(sp => (IJSInProcessRuntime)sp.Resolve<IJSRuntime>()).AsSelf().Singleton();
 

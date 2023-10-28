@@ -80,7 +80,8 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
 
     public void LoadItems(Instant start, Instant end)
     {
-        LoadData(start, end).ContinueWith(t =>
+        LoadData(start, end)
+            .ContinueWith(t =>
             {
                 if (t.IsCompletedSuccessfully)
                     Loaded();
@@ -90,8 +91,7 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
                     if (t.Exception is not null)
                         this.Error(t.Exception);
                 }
-            }
-        );
+            });
     }
 
     public void SetResolution(Duration resolution)
@@ -119,7 +119,9 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
         this.Trace($"start for {info}");
 
         var emptyRanges = _cache.GetEmptyRanges(min, max);
-        var dataset = await Task.WhenAll(emptyRanges.Select(async range => (range, await LoadInRange(range.Start, range.End))));
+        var dataset = await Task.WhenAll(
+            emptyRanges.Select(async range => (range, await LoadInRange(range.Start, range.End)))
+        );
 
         foreach (var (range, data) in dataset)
         {

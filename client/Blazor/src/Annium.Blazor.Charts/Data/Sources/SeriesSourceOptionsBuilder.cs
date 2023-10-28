@@ -18,7 +18,10 @@ public class SeriesSourceOptionsBuilder
 
     public static SeriesSourceOptionsBuilder Init(Duration resolution, decimal bufferZone, decimal loadZone)
     {
-        var options = new Dictionary<Duration, SeriesSourceResolutionOptions> { { resolution, new SeriesSourceResolutionOptions(bufferZone, loadZone) } };
+        var options = new Dictionary<Duration, SeriesSourceResolutionOptions>
+        {
+            { resolution, new SeriesSourceResolutionOptions(bufferZone, loadZone) }
+        };
 
         return new SeriesSourceOptionsBuilder(options);
     }

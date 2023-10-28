@@ -152,7 +152,8 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         NotifyChanged();
     }
 
-    private TX At<TX>(LambdaExpression ex) where TX : ITrackedState
+    private TX At<TX>(LambdaExpression ex)
+        where TX : ITrackedState
     {
         try
         {
@@ -181,7 +182,10 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
 
     private TKey ResolveKey(LambdaExpression ex)
     {
-        if (ex.Body is MethodCallExpression { Method.IsSpecialName: true } body && body.Method.ReturnType == typeof(TValue))
+        if (
+            ex.Body is MethodCallExpression { Method.IsSpecialName: true } body
+            && body.Method.ReturnType == typeof(TValue)
+        )
         {
             var parameters = body.Method.GetParameters();
             if (parameters.Length == 1 && parameters[0].ParameterType == typeof(TKey))
@@ -212,10 +216,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         public IValueTrackedState<TValue> Ref { get; }
         public IDisposable Subscription { get; }
 
-        public StateReference(
-            IValueTrackedState<TValue> @ref,
-            IDisposable subscription
-        )
+        public StateReference(IValueTrackedState<TValue> @ref, IDisposable subscription)
         {
             Ref = @ref;
             Subscription = subscription;

@@ -13,7 +13,6 @@ public class TextAlign : ImplicitString<TextAlign>
     public static readonly TextAlign Revert = new("revert");
     public static readonly TextAlign Justify = new("justify");
 
-    private TextAlign(string type) : base(type)
-    {
-    }
+    private TextAlign(string type)
+        : base(type) { }
 }

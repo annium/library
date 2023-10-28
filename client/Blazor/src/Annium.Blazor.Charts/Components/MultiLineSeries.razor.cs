@@ -17,7 +17,11 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     where TI : IPointItem
 {
     [Parameter, EditorRequired]
-    public Func<TI, TI, bool> IsRelated { get; set; } = delegate { return false; };
+    public Func<TI, TI, bool> IsRelated { get; set; } =
+        delegate
+        {
+            return false;
+        };
 
     [Parameter]
     public OneOf<string, Func<TI, string>> ItemColor { get; set; } = "black";

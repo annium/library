@@ -34,7 +34,8 @@ public partial class XAxis : ILogSubject, IAsyncDisposable
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         _disposable += Chart.OnUpdate(Draw);
     }

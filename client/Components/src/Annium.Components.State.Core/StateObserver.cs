@@ -12,7 +12,10 @@ public static class StateObserver
 {
     private static readonly object[] EmptyArgs = Array.Empty<object>();
 
-    private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<Func<object, IObservableState>>> ObservableAccessors = new();
+    private static readonly ConcurrentDictionary<
+        Type,
+        IReadOnlyCollection<Func<object, IObservableState>>
+    > ObservableAccessors = new();
 
     public static IDisposable ObserveObject<T>(T target, Action handleChange)
         where T : class
@@ -37,9 +40,7 @@ public static class StateObserver
         foreach (var property in properties)
             accessors.Add(instance => (IObservableState)property.GetMethod!.Invoke(instance, EmptyArgs)!);
 
-        var fields = type.GetFields(flags)
-            .Where(x => x.FieldType.IsDerivedFrom(typeof(IObservableState)))
-            .ToArray();
+        var fields = type.GetFields(flags).Where(x => x.FieldType.IsDerivedFrom(typeof(IObservableState))).ToArray();
         foreach (var field in fields)
             accessors.Add(instance => (IObservableState)field.GetValue(instance)!);
 

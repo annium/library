@@ -10,11 +10,7 @@ internal abstract class RouteBase : IRouteBase
     public Type PageType { get; }
     protected NavigationManager NavigationManager { get; }
 
-    protected RouteBase(
-        NavigationManager navigationManager,
-        string template,
-        Type pageType
-    )
+    protected RouteBase(NavigationManager navigationManager, string template, Type pageType)
     {
         NavigationManager = navigationManager;
         Template = template;

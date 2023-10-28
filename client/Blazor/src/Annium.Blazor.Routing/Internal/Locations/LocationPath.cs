@@ -20,7 +20,8 @@ internal class LocationPath : ILocationPath
     {
         var propertiesDictionary = properties.ToPropertiesDictionary();
         var pathProperties = new Dictionary<string, PropertyInfo>();
-        var segments = Helper.ParseTemplateParts(template)
+        var segments = Helper
+            .ParseTemplateParts(template)
             .Select<string, ILocationSegment>(x =>
             {
                 var match = ParamRe.Match(x);
@@ -43,10 +44,7 @@ internal class LocationPath : ILocationPath
     private readonly IReadOnlyList<ILocationSegment> _segments;
     private readonly IMapper _mapper;
 
-    private LocationPath(
-        IReadOnlyList<ILocationSegment> segments,
-        IMapper mapper
-    )
+    private LocationPath(IReadOnlyList<ILocationSegment> segments, IMapper mapper)
     {
         _segments = segments;
         _mapper = mapper;
@@ -86,16 +84,20 @@ internal class LocationPath : ILocationPath
         return new LocationMatch(true, routeValues);
     }
 
-    public string Link(IReadOnlyDictionary<string, object?> parameters) => string.Join(Constants.Separator, _segments.Select(x =>
-    {
-        if (x is FixedLocationSegment fs)
-            return fs.Part;
-        if (x is ParamLocationSegment ps)
-            if (parameters.TryGetValue(ps.Name, out var value))
-                return _mapper.Map<string>(value);
-            else
-                throw new ArgumentException($"Path requires parameter '{ps.Name}'");
+    public string Link(IReadOnlyDictionary<string, object?> parameters) =>
+        string.Join(
+            Constants.Separator,
+            _segments.Select(x =>
+            {
+                if (x is FixedLocationSegment fs)
+                    return fs.Part;
+                if (x is ParamLocationSegment ps)
+                    if (parameters.TryGetValue(ps.Name, out var value))
+                        return _mapper.Map<string>(value);
+                    else
+                        throw new ArgumentException($"Path requires parameter '{ps.Name}'");
 
-        throw new NotImplementedException($"Segment {x} is not supported");
-    }));
+                throw new NotImplementedException($"Segment {x} is not supported");
+            })
+        );
 }

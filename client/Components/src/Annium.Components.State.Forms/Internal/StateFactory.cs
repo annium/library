@@ -11,10 +11,7 @@ internal class StateFactory : IStateFactory
     private readonly IMapper _mapper;
     private readonly ILogger _logger;
 
-    public StateFactory(
-        IMapper mapper,
-        ILogger logger
-    )
+    public StateFactory(IMapper mapper, ILogger logger)
     {
         _mapper = mapper;
         _logger = logger;

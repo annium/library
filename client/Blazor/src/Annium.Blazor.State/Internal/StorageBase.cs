@@ -15,11 +15,7 @@ internal class StorageBase : IStorageBase
 
     private readonly string _storage;
 
-    protected StorageBase(
-        IJSRuntime js,
-        IIndex<SerializerKey, ISerializer<string>> serializers,
-        string storage
-    )
+    protected StorageBase(IJSRuntime js, IIndex<SerializerKey, ISerializer<string>> serializers, string storage)
     {
         _js = (IJSInProcessRuntime)js;
         _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
@@ -33,9 +29,7 @@ internal class StorageBase : IStorageBase
         if (length == 0)
             return Array.Empty<string>();
 
-        var keys = Enumerable.Range(0, length)
-            .Select(i => _js.Invoke<string>($"{_storage}.key", i))
-            .ToArray();
+        var keys = Enumerable.Range(0, length).Select(i => _js.Invoke<string>($"{_storage}.key", i)).ToArray();
 
         return keys;
     }

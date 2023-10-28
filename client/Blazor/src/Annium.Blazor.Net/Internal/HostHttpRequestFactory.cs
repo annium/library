@@ -9,10 +9,7 @@ internal class HostHttpRequestFactory : IHostHttpRequestFactory
     private readonly IHttpRequestFactory _requestFactory;
     private readonly Uri _baseAddress;
 
-    public HostHttpRequestFactory(
-        IHttpRequestFactory requestFactory,
-        IWebAssemblyHostEnvironment hostEnvironment
-    )
+    public HostHttpRequestFactory(IHttpRequestFactory requestFactory, IWebAssemblyHostEnvironment hostEnvironment)
     {
         _requestFactory = requestFactory;
         _baseAddress = new Uri(hostEnvironment.BaseAddress);

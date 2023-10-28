@@ -17,7 +17,8 @@ public partial class MultiLabel<TValue, TItem> : LabelBase<TItem>
     {
         base.OnAfterRender(firstRender);
 
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         Disposable += ChartContext.OnLookupChanged(HandleLookup);
     }

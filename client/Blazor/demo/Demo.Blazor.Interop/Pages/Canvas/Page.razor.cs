@@ -16,7 +16,8 @@ public partial class Page : ILogSubject, IDisposable
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         Console.WriteLine("Canvas manipulation here");
     }

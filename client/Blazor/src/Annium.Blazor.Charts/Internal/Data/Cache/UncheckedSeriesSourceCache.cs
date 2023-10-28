@@ -11,17 +11,14 @@ internal sealed class UncheckedSeriesSourceCache<T> : SeriesSourceCacheBase<Unch
         Duration resolution,
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment
-    ) : base(
-        resolution,
-        (start, end, data) => new UncheckedCacheChunk<T>(start, end, data, ItemComparer.For(compare)),
-        compareToMoment,
-        chunk => chunk.Range.Start,
-        chunk => chunk.Range.End
     )
-    {
-    }
+        : base(
+            resolution,
+            (start, end, data) => new UncheckedCacheChunk<T>(start, end, data, ItemComparer.For(compare)),
+            compareToMoment,
+            chunk => chunk.Range.Start,
+            chunk => chunk.Range.End
+        ) { }
 
-    protected override void PostProcessDataChange()
-    {
-    }
+    protected override void PostProcessDataChange() { }
 }

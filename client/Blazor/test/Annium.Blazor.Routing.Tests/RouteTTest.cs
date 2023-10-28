@@ -8,9 +8,8 @@ namespace Annium.Blazor.Routing.Tests;
 
 public class RouteTTest : TestBase
 {
-    public RouteTTest(ITestOutputHelper outputHelper) : base(outputHelper)
-    {
-    }
+    public RouteTTest(ITestOutputHelper outputHelper)
+        : base(outputHelper) { }
 
     [Fact]
     public void Link_Works()
@@ -19,7 +18,16 @@ public class RouteTTest : TestBase
         var route = GetRouting<Routing>().Search;
 
         // assert
-        route.Link(new SearchData { Sex = Sex.Male, Name = new[] { "alex", "anna" }, Age = 30 }).Is("pages/search/Male?name=alex&name=anna&age=30");
+        route
+            .Link(
+                new SearchData
+                {
+                    Sex = Sex.Male,
+                    Name = new[] { "alex", "anna" },
+                    Age = 30
+                }
+            )
+            .Is("pages/search/Male?name=alex&name=anna&age=30");
     }
 
     [Fact]
@@ -29,7 +37,14 @@ public class RouteTTest : TestBase
         var route = GetRouting<Routing>().Search;
 
         // act
-        route.Go(new SearchData { Sex = Sex.Male, Name = new[] { "alex", "anna" }, Age = 30 });
+        route.Go(
+            new SearchData
+            {
+                Sex = Sex.Male,
+                Name = new[] { "alex", "anna" },
+                Age = 30
+            }
+        );
 
         // assert
         NavigationManager.Locations.At(0).Is("pages/search/Male?name=alex&name=anna&age=30");
@@ -46,7 +61,16 @@ public class RouteTTest : TestBase
         route.IsAt().IsTrue();
         route.IsAt(new SearchData { Sex = Sex.Male }).IsTrue();
         route.IsAt(new SearchData { Sex = Sex.Female }).IsFalse();
-        route.IsAt(new SearchData { Sex = Sex.Male, Name = new[] { "alex", "anna" }, Age = 30 }).IsTrue();
+        route
+            .IsAt(
+                new SearchData
+                {
+                    Sex = Sex.Male,
+                    Name = new[] { "alex", "anna" },
+                    Age = 30
+                }
+            )
+            .IsTrue();
         route.IsAt(new SearchData { Sex = Sex.Male, Name = new[] { "alex", "ann" } }).IsFalse();
         NavigationManager.NavigateTo("pages");
         route.IsAt().IsFalse();
@@ -61,7 +85,16 @@ public class RouteTTest : TestBase
 
         // assert
         NavigationManager.NavigateTo("pages/search/Male?name=alex&name=anna&age=30");
-        route.GetParams().IsEqual(new SearchData { Sex = Sex.Male, Name = new[] { "alex", "anna" }, Age = 30 });
+        route
+            .GetParams()
+            .IsEqual(
+                new SearchData
+                {
+                    Sex = Sex.Male,
+                    Name = new[] { "alex", "anna" },
+                    Age = 30
+                }
+            );
         NavigationManager.NavigateTo("profile/Male?name=alex&name=anna&age=30");
         route.TryGetParams(out _).IsFalse();
     }
@@ -76,9 +109,7 @@ public class RouteTTest : TestBase
         }
     }
 
-    public class SearchPage
-    {
-    }
+    public class SearchPage { }
 
     public sealed record SearchData
     {

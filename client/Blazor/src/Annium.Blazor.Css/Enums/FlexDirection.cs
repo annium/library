@@ -10,7 +10,6 @@ public class FlexDirection : ImplicitString<FlexDirection>
     public static readonly FlexDirection RowReverse = new("row-reverse");
     public static readonly FlexDirection ColumnReverse = new("column-reverse");
 
-    private FlexDirection(string type) : base(type)
-    {
-    }
+    private FlexDirection(string type)
+        : base(type) { }
 }

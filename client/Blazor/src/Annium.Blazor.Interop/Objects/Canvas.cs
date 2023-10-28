@@ -9,9 +9,8 @@ namespace Annium.Blazor.Interop;
 
 public sealed partial record Canvas : ReferenceElement
 {
-    public Canvas(ElementReference reference) : base(reference)
-    {
-    }
+    public Canvas(ElementReference reference)
+        : base(reference) { }
 
     #region Width
 
@@ -281,7 +280,15 @@ public sealed partial record Canvas : ReferenceElement
         Arc(Id, x, y, radius, startAngle, endAngle, antiClockwise);
 
     [JSImport($"{JsPath}canvas.arc")]
-    private static partial void Arc(string id, float x, float y, float radius, float startAngle, float endAngle, bool antiClockwise);
+    private static partial void Arc(
+        string id,
+        float x,
+        float y,
+        float radius,
+        float startAngle,
+        float endAngle,
+        bool antiClockwise
+    );
 
     #endregion
 

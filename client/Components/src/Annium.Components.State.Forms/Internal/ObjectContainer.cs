@@ -26,15 +26,12 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>, ILogSu
     public T Value => CreateValue();
     public bool HasChanged => _states.Values.Any(x => x.Ref.HasChanged);
     public bool HasBeenTouched => _states.Values.Any(x => x.Ref.HasBeenTouched);
-    public IReadOnlyDictionary<string, ITrackedState> Children => _states.ToDictionary(x => x.Key.Name, x => x.Value.Ref);
+    public IReadOnlyDictionary<string, ITrackedState> Children =>
+        _states.ToDictionary(x => x.Key.Name, x => x.Value.Ref);
     public ILogger Logger { get; }
     private readonly IReadOnlyDictionary<PropertyInfo, StateReference> _states;
 
-    public ObjectContainer(
-        T initialValue,
-        IStateFactory stateFactory,
-        ILogger logger
-    )
+    public ObjectContainer(T initialValue, IStateFactory stateFactory, ILogger logger)
     {
         Logger = logger;
         var states = new Dictionary<PropertyInfo, StateReference>();
@@ -43,7 +40,11 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>, ILogSu
         foreach (var property in Properties)
         {
             var create = Factories[property];
-            var @ref = (ITrackedState)create.Invoke(stateFactory, new[] { property.GetMethod!.Invoke(initialValue, Array.Empty<object>())! })!;
+            var @ref = (ITrackedState)
+                create.Invoke(
+                    stateFactory,
+                    new[] { property.GetMethod!.Invoke(initialValue, Array.Empty<object>())! }
+                )!;
             @ref.Changed.Subscribe(_ => NotifyChanged());
             var type = @ref.GetType();
             var get = type.GetProperty(nameof(IValueTrackedState<object>.Value))!.GetMethod!;
@@ -181,12 +182,7 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>, ILogSu
         public MethodInfo Set { get; }
         public MethodInfo Init { get; }
 
-        public StateReference(
-            ITrackedState @ref,
-            MethodInfo get,
-            MethodInfo set,
-            MethodInfo init
-        )
+        public StateReference(ITrackedState @ref, MethodInfo get, MethodInfo set, MethodInfo init)
         {
             Ref = @ref;
             Get = get;

@@ -6,9 +6,8 @@ namespace Annium.Components.Operations.Tests;
 
 public abstract class TestBase : Testing.TestBase
 {
-    protected TestBase(ITestOutputHelper outputHelper) : base(outputHelper)
-    {
-    }
+    protected TestBase(ITestOutputHelper outputHelper)
+        : base(outputHelper) { }
 
     protected (T, Func<int>) Arrange<T>(Func<T> factory)
         where T : IOperationStateBase

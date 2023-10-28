@@ -34,8 +34,7 @@ public abstract partial record Element : IObject, IDisposable
     [JSImport($"{JsPath}element.setStyle")]
     private static partial void SetStyle(string id, string style);
 
-    public DomRect GetBoundingClientRect()
-        => Ctx.Call<DomRect>("element.getBoundingClientRect", Id);
+    public DomRect GetBoundingClientRect() => Ctx.Call<DomRect>("element.getBoundingClientRect", Id);
 
     public void Dispose()
     {

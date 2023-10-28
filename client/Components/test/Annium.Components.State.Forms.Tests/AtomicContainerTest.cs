@@ -9,9 +9,8 @@ namespace Annium.Components.State.Forms.Tests;
 
 public class AtomicContainerTest : TestBase
 {
-    public AtomicContainerTest(ITestOutputHelper outputHelper) : base(outputHelper)
-    {
-    }
+    public AtomicContainerTest(ITestOutputHelper outputHelper)
+        : base(outputHelper) { }
 
     [Fact]
     public void Create_Ok()

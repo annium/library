@@ -34,9 +34,7 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
     private readonly Dictionary<ISeriesSource, ManagedValueRange<decimal>> _sourceRanges = new();
     private int _isInitiated;
 
-    public void Init(
-        IChartContext chart
-    )
+    public void Init(IChartContext chart)
     {
         if (Interlocked.CompareExchange(ref _isInitiated, 1, 0) != 0)
             throw new InvalidOperationException($"Can't init {nameof(PaneContext)} more than once");
@@ -60,14 +58,13 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
         var sourceRange = _sourceRanges[source];
         sourceRange.Set(min, max);
 
-        var renderingRanges = _sourceRanges.Values.Where(x => x.Start != decimal.MinValue || x.End != decimal.MaxValue).ToArray();
+        var renderingRanges = _sourceRanges.Values
+            .Where(x => x.Start != decimal.MinValue || x.End != decimal.MaxValue)
+            .ToArray();
         if (renderingRanges.Length > 0)
         {
             this.Trace($"update Pane range from {renderingRanges.Length} rendering source(s)");
-            _range.Set(
-                renderingRanges.Min(x => x.Start),
-                renderingRanges.Max(x => x.End)
-            );
+            _range.Set(renderingRanges.Min(x => x.Start), renderingRanges.Max(x => x.End));
         }
         else
         {
@@ -81,7 +78,9 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
             return false;
         }
 
-        this.Trace($"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}");
+        this.Trace(
+            $"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}"
+        );
         (start, end) = Range;
 
         // no rendering ranges
@@ -162,9 +161,10 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
 
     private void UpdateBounds(ValueRange<Instant> bounds)
     {
-        var (start, end) = _sources.Count == 0
-            ? (FutureBound, PastBound)
-            : (Instant.Min(_bounds.Start, bounds.Start), Instant.Max(_bounds.End, bounds.End));
+        var (start, end) =
+            _sources.Count == 0
+                ? (FutureBound, PastBound)
+                : (Instant.Min(_bounds.Start, bounds.Start), Instant.Max(_bounds.End, bounds.End));
 
         if (start == _bounds.Start && end == _bounds.End)
             return;

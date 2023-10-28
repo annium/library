@@ -14,10 +14,7 @@ internal class AtomicContainer<T> : ObservableState, IAtomicContainer<T>, ILogSu
     public ILogger Logger { get; }
     private T _initialValue;
 
-    public AtomicContainer(
-        T initialValue,
-        ILogger logger
-    )
+    public AtomicContainer(T initialValue, ILogger logger)
     {
         Logger = logger;
         Value = _initialValue = initialValue;

@@ -72,7 +72,6 @@ internal static class ChartContextExtensions
             ctx.ClearRect(0, 0, rect.Width.CeilInt32(), rect.Height.CeilInt32());
     }
 
-
     private static Duration GetAlignmentDuration(this IChartContext context)
     {
         var block = DefaultBlockSize * context.Resolution.TotalMinutes / context.Zoom;
@@ -80,17 +79,17 @@ internal static class ChartContextExtensions
         return block switch
         {
             > 11520 => Duration.FromDays(8),
-            > 5760  => Duration.FromDays(4),
-            > 2880  => Duration.FromDays(2),
-            > 1440  => Duration.FromDays(1),
-            > 720   => Duration.FromHours(12),
-            > 360   => Duration.FromHours(6),
-            > 240   => Duration.FromHours(4),
-            > 120   => Duration.FromHours(2),
-            > 60    => Duration.FromHours(1),
-            > 30    => Duration.FromMinutes(30),
-            > 15    => Duration.FromMinutes(15),
-            _       => Duration.FromMinutes(block > 5 ? 5 : 3)
+            > 5760 => Duration.FromDays(4),
+            > 2880 => Duration.FromDays(2),
+            > 1440 => Duration.FromDays(1),
+            > 720 => Duration.FromHours(12),
+            > 360 => Duration.FromHours(6),
+            > 240 => Duration.FromHours(4),
+            > 120 => Duration.FromHours(2),
+            > 60 => Duration.FromHours(1),
+            > 30 => Duration.FromMinutes(30),
+            > 15 => Duration.FromMinutes(15),
+            _ => Duration.FromMinutes(block > 5 ? 5 : 3)
         };
     }
 }

@@ -15,9 +15,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
 {
     private readonly ILogger _logger;
 
-    public SeriesSourceFactory(
-        ILogger logger
-    )
+    public SeriesSourceFactory(ILogger logger)
     {
         _logger = logger;
     }
@@ -30,8 +28,13 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
         ISeriesSourceOptions? options = null
-    )
-        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), (_, start, end) => Task.FromResult(load(start, end)), options);
+    ) =>
+        Create(
+            resolution,
+            new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment),
+            (_, start, end) => Task.FromResult(load(start, end)),
+            options
+        );
 
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
@@ -39,8 +42,13 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
         ISeriesSourceOptions? options = null
-    )
-        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), (duration, start, end) => Task.FromResult(load(duration, start, end)), options);
+    ) =>
+        Create(
+            resolution,
+            new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment),
+            (duration, start, end) => Task.FromResult(load(duration, start, end)),
+            options
+        );
 
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
@@ -48,8 +56,13 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
         ISeriesSourceOptions? options = null
-    )
-        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), (_, start, end) => load(start, end), options);
+    ) =>
+        Create(
+            resolution,
+            new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment),
+            (_, start, end) => load(start, end),
+            options
+        );
 
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
@@ -57,8 +70,7 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<T, T, int> compare,
         Func<T, Instant, int> compareToMoment,
         ISeriesSourceOptions? options = null
-    )
-        => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), load, options);
+    ) => Create(resolution, new UncheckedSeriesSourceCache<T>(resolution, compare, compareToMoment), load, options);
 
     #endregion
 
@@ -69,32 +81,41 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<Instant, Instant, IReadOnlyList<T>> load,
         ISeriesSourceOptions? options = null
     )
-        where T : ITimeSeries
-        => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (_, start, end) => Task.FromResult(load(start, end)), options);
+        where T : ITimeSeries =>
+        Create(
+            resolution,
+            new CheckedSeriesSourceCache<T>(resolution),
+            (_, start, end) => Task.FromResult(load(start, end)),
+            options
+        );
 
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, IReadOnlyList<T>> load,
         ISeriesSourceOptions? options = null
     )
-        where T : ITimeSeries
-        => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (duration, start, end) => Task.FromResult(load(duration, start, end)), options);
+        where T : ITimeSeries =>
+        Create(
+            resolution,
+            new CheckedSeriesSourceCache<T>(resolution),
+            (duration, start, end) => Task.FromResult(load(duration, start, end)),
+            options
+        );
 
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Instant, Instant, Task<IReadOnlyList<T>>> load,
         ISeriesSourceOptions? options = null
     )
-        where T : ITimeSeries
-        => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (_, start, end) => load(start, end), options);
+        where T : ITimeSeries =>
+        Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (_, start, end) => load(start, end), options);
 
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
         ISeriesSourceOptions? options = null
     )
-        where T : ITimeSeries
-        => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), load, options);
+        where T : ITimeSeries => Create(resolution, new CheckedSeriesSourceCache<T>(resolution), load, options);
 
     #endregion
 
@@ -105,60 +126,71 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         Func<TS, TD?> getValues,
         Func<TD, TD, int> compare,
         Func<TD, Instant, int> compareToMoment
-    )
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment), (chunk, _, _, _) =>
-        {
-            var result = new List<TD>(chunk.Count);
-            foreach (var sourceItem in chunk)
+    ) =>
+        Create(
+            source,
+            new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment),
+            (chunk, _, _, _) =>
             {
-                var resultItem = getValues(sourceItem);
-                if (resultItem is not null)
-                    result.Add(resultItem);
-            }
+                var result = new List<TD>(chunk.Count);
+                foreach (var sourceItem in chunk)
+                {
+                    var resultItem = getValues(sourceItem);
+                    if (resultItem is not null)
+                        result.Add(resultItem);
+                }
 
-            return result;
-        });
+                return result;
+            }
+        );
 
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues,
         Func<TD, TD, int> compare,
         Func<TD, Instant, int> compareToMoment
-    )
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment), (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray());
+    ) =>
+        Create(
+            source,
+            new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment),
+            (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray()
+        );
 
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues,
         Func<TD, TD, int> compare,
         Func<TD, Instant, int> compareToMoment
-    )
-        => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment), getValues);
+    ) => Create(source, new UncheckedSeriesSourceCache<TD>(source.Resolution, compare, compareToMoment), getValues);
 
     #endregion
 
     #region checked dependent
 
-    public ISeriesSource<TD> CreateChecked<TS, TD>(
-        ISeriesSource<TS> source,
-        Func<TS, TD> getValues
-    )
-        where TD : ITimeSeries
-        => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, _, _, _) => chunk.Select(getValues).ToArray());
+    public ISeriesSource<TD> CreateChecked<TS, TD>(ISeriesSource<TS> source, Func<TS, TD> getValues)
+        where TD : ITimeSeries =>
+        Create(
+            source,
+            new CheckedSeriesSourceCache<TD>(source.Resolution),
+            (chunk, _, _, _) => chunk.Select(getValues).ToArray()
+        );
 
     public ISeriesSource<TD> CreateChecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
-        where TD : ITimeSeries
-        => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray());
+        where TD : ITimeSeries =>
+        Create(
+            source,
+            new CheckedSeriesSourceCache<TD>(source.Resolution),
+            (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray()
+        );
 
     public ISeriesSource<TD> CreateChecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
     )
-        where TD : ITimeSeries
-        => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), getValues);
+        where TD : ITimeSeries => Create(source, new CheckedSeriesSourceCache<TD>(source.Resolution), getValues);
 
     #endregion
 
@@ -172,7 +204,13 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         ISeriesSourceOptions? options
     )
     {
-        return new LoadingSeriesSource<T>(cache, resolution, load, options ?? SeriesSourceOptionsBuilder.Default, _logger);
+        return new LoadingSeriesSource<T>(
+            cache,
+            resolution,
+            load,
+            options ?? SeriesSourceOptionsBuilder.Default,
+            _logger
+        );
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

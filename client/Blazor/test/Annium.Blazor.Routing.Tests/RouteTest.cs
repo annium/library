@@ -6,9 +6,8 @@ namespace Annium.Blazor.Routing.Tests;
 
 public class RouteTest : TestBase
 {
-    public RouteTest(ITestOutputHelper outputHelper) : base(outputHelper)
-    {
-    }
+    public RouteTest(ITestOutputHelper outputHelper)
+        : base(outputHelper) { }
 
     [Fact]
     public void Link_Works()
@@ -57,7 +56,5 @@ public class RouteTest : TestBase
         }
     }
 
-    public class StaticPage
-    {
-    }
+    public class StaticPage { }
 }

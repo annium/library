@@ -10,11 +10,7 @@ internal class RouteFactory : IRouteFactory
     private readonly IRouteContainer _routeContainer;
     private readonly IMapper _mapper;
 
-    public RouteFactory(
-        NavigationManager navigationManager,
-        IRouteContainer routeContainer,
-        IMapper mapper
-    )
+    public RouteFactory(NavigationManager navigationManager, IRouteContainer routeContainer, IMapper mapper)
     {
         _navigationManager = navigationManager;
         _routeContainer = routeContainer;

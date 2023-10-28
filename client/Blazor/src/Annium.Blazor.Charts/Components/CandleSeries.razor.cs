@@ -35,10 +35,7 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject
             RenderNormalCandles(SeriesContext.Canvas, values, ((double)width / 2).CeilInt32(), width);
     }
 
-    private void RenderLineCandles(
-        Canvas ctx,
-        IReadOnlyList<T> values
-    )
+    private void RenderLineCandles(Canvas ctx, IReadOnlyList<T> values)
     {
         ctx.FillStyle = UpColor;
         foreach (var item in values.Where(x => x.Open < x.Close))
@@ -71,12 +68,7 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject
         }
     }
 
-    private void RenderNormalCandles(
-        Canvas ctx,
-        IReadOnlyList<T> values,
-        int offset,
-        int width
-    )
+    private void RenderNormalCandles(Canvas ctx, IReadOnlyList<T> values, int offset, int width)
     {
         ctx.FillStyle = UpColor;
         foreach (var item in values.Where(x => x.Open < x.Close))

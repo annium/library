@@ -9,23 +9,15 @@ public class Style : RuleSet
         .WidthPercent(100)
         .HeightPercent(100);
 
-    public readonly CssRule CandlesPane = Rule.Class()
-        .FlexGrow(1);
+    public readonly CssRule CandlesPane = Rule.Class().FlexGrow(1);
 
-    public readonly CssRule Resolution = Rule.Class()
-        .HeightPx(20)
-        .RightRem(1)
-        .TopRem(1);
+    public readonly CssRule Resolution = Rule.Class().HeightPx(20).RightRem(1).TopRem(1);
 
-    public readonly CssRule LinesPane = Rule.Class()
-        .HeightPercent(8);
+    public readonly CssRule LinesPane = Rule.Class().HeightPercent(8);
 
-    public readonly CssRule BottomPane = Rule.Class()
-        .HeightRem(2);
+    public readonly CssRule BottomPane = Rule.Class().HeightRem(2);
 
-    public readonly CssRule PaneRight = Rule.Class()
-        .WidthRem(4);
+    public readonly CssRule PaneRight = Rule.Class().WidthRem(4);
 
-    public readonly CssRule PaneBottom = Rule.Class()
-        .HeightRem(2);
+    public readonly CssRule PaneBottom = Rule.Class().HeightRem(2);
 }

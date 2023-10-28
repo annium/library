@@ -5,7 +5,6 @@ internal class RuleType : ImplicitString<RuleType>
     public static readonly RuleType Id = new("#");
     public static readonly RuleType Class = new(".");
 
-    private RuleType(string type) : base(type)
-    {
-    }
+    private RuleType(string type)
+        : base(type) { }
 }

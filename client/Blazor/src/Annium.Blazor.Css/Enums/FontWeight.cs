@@ -15,7 +15,6 @@ public class FontWeight : ImplicitString<FontWeight>
     public static readonly FontWeight W800 = new("800");
     public static readonly FontWeight W900 = new("900");
 
-    private FontWeight(string type) : base(type)
-    {
-    }
+    private FontWeight(string type)
+        : base(type) { }
 }

@@ -77,19 +77,15 @@ public partial class Chart : ILogSubject, IAsyncDisposable
         if (_chartContext.IsLocked)
             return;
 
-        var changed = e.CtrlKey
-            ? HandleZoomDelta(e.DeltaY)
-            : HandleScrollDelta(e.DeltaX);
+        var changed = e.CtrlKey ? HandleZoomDelta(e.DeltaY) : HandleScrollDelta(e.DeltaX);
 
         if (changed)
             _chartContext.RequestDraw();
     }
 
-    private void HandlePointerMove(MouseEvent e) =>
-        _chartContext.RequestOverlay(new Point(e.X, e.Y));
+    private void HandlePointerMove(MouseEvent e) => _chartContext.RequestOverlay(new Point(e.X, e.Y));
 
-    private void HandlePointerOut(MouseEvent _) =>
-        _chartContext.RequestOverlay(null);
+    private void HandlePointerOut(MouseEvent _) => _chartContext.RequestOverlay(null);
 
     private void CheckState()
     {

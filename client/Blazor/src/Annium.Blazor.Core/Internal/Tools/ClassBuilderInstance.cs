@@ -10,9 +10,7 @@ internal class ClassBuilderInstance<T> : IClassBuilder<T>
 {
     private readonly List<Func<T, string?>> _rules = new();
 
-    internal ClassBuilderInstance()
-    {
-    }
+    internal ClassBuilderInstance() { }
 
     private ClassBuilderInstance(IEnumerable<Func<T, string?>> rules)
     {
@@ -29,8 +27,7 @@ internal class ClassBuilderInstance<T> : IClassBuilder<T>
         return string.Join(" ", _rules.Select(x => x(data)).Where(x => !string.IsNullOrWhiteSpace(x)));
     }
 
-    public IClassBuilder<T> With(string? className) =>
-        Rule(_ => className);
+    public IClassBuilder<T> With(string? className) => Rule(_ => className);
 
     public IClassBuilder<T> With(Func<bool> predicate, string? className) =>
         Rule(_ => predicate() ? className : string.Empty);
@@ -38,11 +35,9 @@ internal class ClassBuilderInstance<T> : IClassBuilder<T>
     public IClassBuilder<T> With(Func<T, bool> predicate, string? className) =>
         Rule(x => predicate(x) ? className : string.Empty);
 
-    public IClassBuilder<T> With(Func<string?> fetch) =>
-        Rule(_ => fetch());
+    public IClassBuilder<T> With(Func<string?> fetch) => Rule(_ => fetch());
 
-    public IClassBuilder<T> With(Func<T, string?> fetch) =>
-        Rule(fetch);
+    public IClassBuilder<T> With(Func<T, string?> fetch) => Rule(fetch);
 
     public IClassBuilder<T> With(Func<bool> predicate, Func<string?> fetch) =>
         Rule(_ => predicate() ? fetch() : string.Empty);
@@ -72,9 +67,7 @@ internal class ClassBuilderInstance : IClassBuilder
 {
     private readonly List<Func<string?>> _rules = new();
 
-    internal ClassBuilderInstance()
-    {
-    }
+    internal ClassBuilderInstance() { }
 
     private ClassBuilderInstance(IEnumerable<Func<string?>> rules)
     {
@@ -91,14 +84,12 @@ internal class ClassBuilderInstance : IClassBuilder
         return string.Join(" ", _rules.Select(x => x()).Where(x => !string.IsNullOrWhiteSpace(x)));
     }
 
-    public IClassBuilder With(string? className) =>
-        Rule(() => className);
+    public IClassBuilder With(string? className) => Rule(() => className);
 
     public IClassBuilder With(Func<bool> predicate, string? className) =>
         Rule(() => predicate() ? className : string.Empty);
 
-    public IClassBuilder With(Func<string?> fetch) =>
-        Rule(fetch);
+    public IClassBuilder With(Func<string?> fetch) => Rule(fetch);
 
     public IClassBuilder With(Func<bool> predicate, Func<string?> fetch) =>
         Rule(() => predicate() ? fetch() : string.Empty);

@@ -1,5 +1,3 @@
 namespace Annium.Blazor.Net;
 
-public interface IApi
-{
-}
+public interface IApi { }

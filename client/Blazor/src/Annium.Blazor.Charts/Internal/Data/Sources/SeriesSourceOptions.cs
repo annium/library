@@ -20,6 +20,8 @@ internal sealed record SeriesSourceOptions : ISeriesSourceOptions
             if (target <= resolution)
                 return options;
 
-        throw new InvalidOperationException($"No configuration for resolution {resolution}. Add resolution configuration for this or lesser resolution");
+        throw new InvalidOperationException(
+            $"No configuration for resolution {resolution}. Add resolution configuration for this or lesser resolution"
+        );
     }
 }

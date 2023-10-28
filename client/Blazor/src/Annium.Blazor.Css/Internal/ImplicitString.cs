@@ -11,5 +11,6 @@ public abstract class ImplicitString<T>
     }
 
     public override string ToString() => _type;
+
     public static implicit operator string(ImplicitString<T> rule) => rule.ToString();
 }

@@ -15,7 +15,8 @@ public class ServicePack : ServicePackBase
         container.AddLogging();
         container.AddMapper();
         container.AddHttpRequestFactory(true);
-        container.AddSerializers()
+        container
+            .AddSerializers()
             .WithJson(opts => opts.ConfigureForOperations().ConfigureForNodaTime(), isDefault: true);
 
         // web
@@ -32,7 +33,9 @@ public class ServicePack : ServicePackBase
 
     public override void Setup(IServiceProvider provider)
     {
-        provider.UseLogging(route => route.UseConsole(m =>
+        provider.UseLogging(
+            route =>
+                route.UseConsole(m =>
                 {
                     var sb = new StringBuilder();
                     sb.Append(m.Subject());
@@ -40,8 +43,7 @@ public class ServicePack : ServicePackBase
                         sb.Append(m.Location());
 
                     return $"{sb} >> {m.Message}";
-                }
-            )
+                })
         );
     }
 }

@@ -16,7 +16,11 @@ public partial class MultiBlockSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     where TI : IRangeItem
 {
     [Parameter, EditorRequired]
-    public Func<TI, TI, bool> IsRelated { get; set; } = delegate { return false; };
+    public Func<TI, TI, bool> IsRelated { get; set; } =
+        delegate
+        {
+            return false;
+        };
 
     [Parameter, EditorRequired]
     public OneOf<string, Func<TI, string>> ItemColor { get; set; }
@@ -35,11 +39,7 @@ public partial class MultiBlockSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void RenderBlock(
-        Canvas ctx,
-        TM a,
-        TM b
-    )
+    private void RenderBlock(Canvas ctx, TM a, TM b)
     {
         var left = PaneContext.ToX(a.Moment);
         var right = PaneContext.ToX(b.Moment);

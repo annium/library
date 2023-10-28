@@ -17,7 +17,8 @@ public partial class Label<T> : LabelBase<T>
     {
         base.OnAfterRender(firstRender);
 
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         Disposable += ChartContext.OnLookupChanged(HandleLookup);
     }

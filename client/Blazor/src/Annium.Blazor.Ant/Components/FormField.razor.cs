@@ -18,9 +18,10 @@ public partial class FormField<TValue> : IFormField<TValue>
     [Parameter]
     public string? Class { get; set; }
 
-    private string ClassName => ClassBuilder
-        .With("ant-form-item")
-        .With(() => State.HasBeenTouched && State.HasStatus(Status.Error), "ant-form-item-has-error")
-        .With(Class ?? string.Empty)
-        .Build();
+    private string ClassName =>
+        ClassBuilder
+            .With("ant-form-item")
+            .With(() => State.HasBeenTouched && State.HasStatus(Status.Error), "ant-form-item-has-error")
+            .With(Class ?? string.Empty)
+            .Build();
 }

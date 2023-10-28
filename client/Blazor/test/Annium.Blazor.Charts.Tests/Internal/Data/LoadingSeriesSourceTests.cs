@@ -48,6 +48,7 @@ public class LoadingSeriesSourceTests : TestBase
 
     private sealed record Item(Instant Moment) : ITimeSeries, IComparable<Item>
     {
-        public int CompareTo(Item? other) => Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));
+        public int CompareTo(Item? other) =>
+            Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));
     }
 }

@@ -21,12 +21,8 @@ internal class Route<TData> : RouteBase, IRoute<TData>
     private readonly IDataModel _pathModel;
     private readonly IDataModel _queryModel;
 
-    public Route(
-        NavigationManager navigationManager,
-        string template,
-        Type pageType,
-        IMapper mapper
-    ) : base(navigationManager, template, pageType)
+    public Route(NavigationManager navigationManager, string template, Type pageType, IMapper mapper)
+        : base(navigationManager, template, pageType)
     {
         var properties = DataModel.ResolveProperties<TData>();
         _mapper = mapper;
@@ -70,7 +66,8 @@ internal class Route<TData> : RouteBase, IRoute<TData>
             return true;
 
         // get parameters with non-default values
-        var parameters = _model.ToParams(data)
+        var parameters = _model
+            .ToParams(data)
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             .Where(x => x.Value is not null && !x.Value.Equals(_defaultParameters[x.Key]))
             .ToDictionary(x => x.Key, x => x.Value);

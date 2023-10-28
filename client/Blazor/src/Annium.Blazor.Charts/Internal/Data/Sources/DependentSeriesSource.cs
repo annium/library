@@ -10,9 +10,7 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
-internal class DependentSeriesSource<TS, TD> :
-    ISeriesSource<TD>,
-    ILogSubject
+internal class DependentSeriesSource<TS, TD> : ISeriesSource<TD>, ILogSubject
 {
     public event Action Loaded = delegate { };
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
@@ -63,7 +61,9 @@ internal class DependentSeriesSource<TS, TD> :
         foreach (var range in emptyRanges)
         {
             if (!_source.GetItems(range.Start, range.End, out var rangeSource))
-                throw new InvalidOperationException($"Series source {_source} invalid behavior: expected to get data in range {range.S()}");
+                throw new InvalidOperationException(
+                    $"Series source {_source} invalid behavior: expected to get data in range {range.S()}"
+                );
 
             var rangeData = _getValues(rangeSource, _source.Resolution, range.Start, range.End);
             this.Trace($"save {rangeData.Count} item(s) ({rangeSource.Count} sourced) in {range.S()} to cache");
@@ -97,6 +97,7 @@ internal class DependentSeriesSource<TS, TD> :
     }
 
     private void TriggerLoaded() => Loaded();
+
     private void TriggerBoundsChanged(ValueRange<Instant> bounds) => OnBoundsChange(bounds);
 
     public void Dispose()

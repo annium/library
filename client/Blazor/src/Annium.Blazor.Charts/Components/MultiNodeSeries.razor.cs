@@ -26,8 +26,8 @@ public partial class MultiNodeSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     protected override void RenderValues(IReadOnlyList<TM> values)
     {
         foreach (var value in values)
-        foreach (var item in value.Items)
-            RenderItem(item, SeriesContext.Canvas, PaneContext.ToX(value.Moment), PaneContext.ToY(item.Value));
+            foreach (var item in value.Items)
+                RenderItem(item, SeriesContext.Canvas, PaneContext.ToX(value.Moment), PaneContext.ToY(item.Value));
     }
 
     protected override (decimal min, decimal max) GetBounds(IReadOnlyList<TM> values)

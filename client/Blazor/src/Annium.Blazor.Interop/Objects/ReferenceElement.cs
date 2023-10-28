@@ -10,9 +10,7 @@ public record ReferenceElement : Element
     public override string Id => _id.Value;
     private readonly Lazy<string> _id;
 
-    public ReferenceElement(
-        ElementReference reference
-    )
+    public ReferenceElement(ElementReference reference)
     {
         _id = new Lazy<string>(() =>
         {

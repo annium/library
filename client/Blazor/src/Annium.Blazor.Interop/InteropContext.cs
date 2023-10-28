@@ -21,9 +21,7 @@ internal sealed class InteropContextInstance : IInteropContext
 {
     public IJSInProcessRuntime InProcessRuntime { get; }
 
-    public InteropContextInstance(
-        IJSInProcessRuntime inProcessRuntime
-    )
+    public InteropContextInstance(IJSInProcessRuntime inProcessRuntime)
     {
         InProcessRuntime = inProcessRuntime;
     }

@@ -21,10 +21,20 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
     public LookupMatch Match { get; set; } = LookupMatch.Exact;
 
     [Parameter]
-    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, int>, Func<IPaneContext, Instant, T, int>>? Left { get; set; }
+    public OneOf<
+        int,
+        Func<T, int>,
+        Func<IPaneContext, Instant, int>,
+        Func<IPaneContext, Instant, T, int>
+    >? Left { get; set; }
 
     [Parameter]
-    public OneOf<int, Func<T, int>, Func<IPaneContext, Instant, int>, Func<IPaneContext, Instant, T, int>>? Right { get; set; }
+    public OneOf<
+        int,
+        Func<T, int>,
+        Func<IPaneContext, Instant, int>,
+        Func<IPaneContext, Instant, T, int>
+    >? Right { get; set; }
 
     [Parameter]
     public OneOf<int, Func<T, int>, Func<IPaneContext, T, int>>? Top { get; set; }
@@ -76,11 +86,7 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
             var x = GetX(Left, moment, item) ?? rect.Width.FloorInt32() - GetX(Right, moment, item)!.Value;
             var y = GetY(Top, item) ?? rect.Height.FloorInt32() - GetY(Bottom, item)!.Value;
 
-            var text = Text.Match(
-                value => value,
-                get => get(item),
-                get => get(moment, item)
-            );
+            var text = Text.Match(value => value, get => get(item), get => get(moment, item));
 
             ctx.Font = $"{FontSize}px {FontFamily}";
             ctx.TextBaseline = CanvasTextBaseline.middle;
@@ -97,7 +103,11 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
         ctx.Restore();
     }
 
-    private int? GetX(OneOf<int, Func<T, int>, Func<IPaneContext, Instant, int>, Func<IPaneContext, Instant, T, int>>? getter, Instant moment, T item)
+    private int? GetX(
+        OneOf<int, Func<T, int>, Func<IPaneContext, Instant, int>, Func<IPaneContext, Instant, T, int>>? getter,
+        Instant moment,
+        T item
+    )
     {
         if (!getter.HasValue)
             return null;
@@ -115,11 +125,7 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
         if (!getter.HasValue)
             return null;
 
-        return getter.Value.Match(
-            value => value,
-            get => get(item),
-            get => get(PaneContext, item)
-        );
+        return getter.Value.Match(value => value, get => get(item), get => get(PaneContext, item));
     }
 
     public ValueTask DisposeAsync()

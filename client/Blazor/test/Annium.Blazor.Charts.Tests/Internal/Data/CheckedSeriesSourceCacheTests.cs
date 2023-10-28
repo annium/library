@@ -132,7 +132,8 @@ public class CheckedSeriesSourceCacheTests : TestBase
         var cache = CreateCache();
 
         // assert
-        cache.GetEmptyRanges(_moment - M(2), _moment + M(2))
+        cache
+            .GetEmptyRanges(_moment - M(2), _moment + M(2))
             .IsEqual(new[] { ValueRange.Create(_moment - M(2), _moment + M(2)) });
 
         // arrange
@@ -147,13 +148,16 @@ public class CheckedSeriesSourceCacheTests : TestBase
         cache.GetEmptyRanges(start1, end1).IsEmpty();
         cache.GetEmptyRanges(start1 - M(2), end1).IsEqual(new[] { ValueRange.Create(start1 - M(2), start1 - M(1)) });
         cache.GetEmptyRanges(start1, end1 + M(2)).IsEqual(new[] { ValueRange.Create(end1 + M(1), end1 + M(2)) });
-        cache.GetEmptyRanges(start1 - M(2), end2 + M(2)).IsEqual(new[]
-            {
-                ValueRange.Create(start1 - M(2), start1 - M(1)),
-                ValueRange.Create(end1 + M(1), start2 - M(1)),
-                ValueRange.Create(end2 + M(1), end2 + M(2)),
-            }
-        );
+        cache
+            .GetEmptyRanges(start1 - M(2), end2 + M(2))
+            .IsEqual(
+                new[]
+                {
+                    ValueRange.Create(start1 - M(2), start1 - M(1)),
+                    ValueRange.Create(end1 + M(1), start2 - M(1)),
+                    ValueRange.Create(end2 + M(1), end2 + M(2)),
+                }
+            );
     }
 
     [Fact]
@@ -174,13 +178,16 @@ public class CheckedSeriesSourceCacheTests : TestBase
         cache.GetEmptyRanges(start1, end1).IsEmpty();
         cache.GetEmptyRanges(start1 - M(2), end1).IsEqual(new[] { ValueRange.Create(start1 - M(2), start1 - M(1)) });
         cache.GetEmptyRanges(start1, end1 + M(2)).IsEqual(new[] { ValueRange.Create(end1 + M(1), end1 + M(2)) });
-        cache.GetEmptyRanges(start1 - M(2), end2 + M(2)).IsEqual(new[]
-            {
-                ValueRange.Create(start1 - M(2), start1 - M(1)),
-                ValueRange.Create(end1 + M(1), start2 - M(1)),
-                ValueRange.Create(end2 + M(1), end2 + M(2)),
-            }
-        );
+        cache
+            .GetEmptyRanges(start1 - M(2), end2 + M(2))
+            .IsEqual(
+                new[]
+                {
+                    ValueRange.Create(start1 - M(2), start1 - M(1)),
+                    ValueRange.Create(end1 + M(1), start2 - M(1)),
+                    ValueRange.Create(end2 + M(1), end2 + M(2)),
+                }
+            );
     }
 
     [Fact]
@@ -213,12 +220,11 @@ public class CheckedSeriesSourceCacheTests : TestBase
         cache.AddData(start1, end1, items1);
 
         // assert
-        cache.GetEmptyRanges(start1 - M(2), end2 + M(2)).IsEqual(new[]
-            {
-                ValueRange.Create(start1 - M(2), start1 - M(1)),
-                ValueRange.Create(end2 + M(1), end2 + M(2)),
-            }
-        );
+        cache
+            .GetEmptyRanges(start1 - M(2), end2 + M(2))
+            .IsEqual(
+                new[] { ValueRange.Create(start1 - M(2), start1 - M(1)), ValueRange.Create(end2 + M(1), end2 + M(2)), }
+            );
     }
 
     [Fact]
@@ -236,12 +242,11 @@ public class CheckedSeriesSourceCacheTests : TestBase
         cache.AddData(start2, end2, items2);
 
         // assert
-        cache.GetEmptyRanges(start1 - M(2), end2 + M(2)).IsEqual(new[]
-            {
-                ValueRange.Create(start1 - M(2), start1 - M(1)),
-                ValueRange.Create(end2 + M(1), end2 + M(2)),
-            }
-        );
+        cache
+            .GetEmptyRanges(start1 - M(2), end2 + M(2))
+            .IsEqual(
+                new[] { ValueRange.Create(start1 - M(2), start1 - M(1)), ValueRange.Create(end2 + M(1), end2 + M(2)), }
+            );
     }
 
     [Fact]
@@ -259,13 +264,16 @@ public class CheckedSeriesSourceCacheTests : TestBase
         cache.AddData(start2, end2, items2);
 
         // assert
-        cache.GetEmptyRanges(start1 - M(2), end2 + M(2)).IsEqual(new[]
-            {
-                ValueRange.Create(start1 - M(2), start1 - M(1)),
-                ValueRange.Create(end1 + M(1), start2 - M(1)),
-                ValueRange.Create(end2 + M(1), end2 + M(2)),
-            }
-        );
+        cache
+            .GetEmptyRanges(start1 - M(2), end2 + M(2))
+            .IsEqual(
+                new[]
+                {
+                    ValueRange.Create(start1 - M(2), start1 - M(1)),
+                    ValueRange.Create(end1 + M(1), start2 - M(1)),
+                    ValueRange.Create(end2 + M(1), end2 + M(2)),
+                }
+            );
     }
 
     [Fact]
@@ -327,6 +335,7 @@ public class CheckedSeriesSourceCacheTests : TestBase
 
     private sealed record Item(Instant Moment) : ITimeSeries, IComparable<Item>
     {
-        public int CompareTo(Item? other) => Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));
+        public int CompareTo(Item? other) =>
+            Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));
     }
 }

@@ -8,9 +8,8 @@ namespace Annium.Components.Operations.Tests;
 
 public class OperationStateTest : TestBase
 {
-    public OperationStateTest(ITestOutputHelper outputHelper) : base(outputHelper)
-    {
-    }
+    public OperationStateTest(ITestOutputHelper outputHelper)
+        : base(outputHelper) { }
 
     [Fact]
     public void OperationState_Start_Ok()

@@ -11,9 +11,8 @@ namespace Annium.Components.State.Forms.Tests;
 
 public class ComplexTest : TestBase
 {
-    public ComplexTest(ITestOutputHelper outputHelper) : base(outputHelper)
-    {
-    }
+    public ComplexTest(ITestOutputHelper outputHelper)
+        : base(outputHelper) { }
 
     [Fact]
     public void Init_Ok()
@@ -111,7 +110,8 @@ public class ComplexTest : TestBase
 
         // assert
         state.Value.IsEqual(initialValue);
-        state.AtArray(x => x.Messages)
+        state
+            .AtArray(x => x.Messages)
             .AtObject(x => x[0])
             .AtAtomic(x => x.Text)
             .Value.Is(initialValue.Messages.At(0).Text);
@@ -144,28 +144,43 @@ public class ComplexTest : TestBase
         log.Has(1);
     }
 
-    private Blog Arrange() => new()
-    {
-        Name = "Sample",
-        Author = new User { Name = "Max" },
-        Messages = new() { new Message { Text = "one", IsRead = true }, new Message { Text = "two" } },
-        EmbeddedDictionary = new Dictionary<string, Dictionary<int, Message>>
+    private Blog Arrange() =>
+        new()
         {
+            Name = "Sample",
+            Author = new User { Name = "Max" },
+            Messages = new()
             {
-                "a", new Dictionary<int, Message>
+                new Message { Text = "one", IsRead = true },
+                new Message { Text = "two" }
+            },
+            EmbeddedDictionary = new Dictionary<string, Dictionary<int, Message>>
+            {
                 {
-                    { 1, new Message { Text = "hey", IsRead = true } }
+                    "a",
+                    new Dictionary<int, Message>
+                    {
+                        {
+                            1,
+                            new Message { Text = "hey", IsRead = true }
+                        }
+                    }
                 }
             }
-        }
-    };
+        };
 
-    private Blog ArrangeOther() => new()
-    {
-        Name = "Demo",
-        Author = new User { Name = "Lex" },
-        Messages = new() { new Message { Text = "three", IsRead = true }, new Message { Text = "four" }, new Message { Text = "five", IsRead = true } },
-    };
+    private Blog ArrangeOther() =>
+        new()
+        {
+            Name = "Demo",
+            Author = new User { Name = "Lex" },
+            Messages = new()
+            {
+                new Message { Text = "three", IsRead = true },
+                new Message { Text = "four" },
+                new Message { Text = "five", IsRead = true }
+            },
+        };
 
     private class Blog
     {

@@ -14,13 +14,11 @@ internal class StyleSheet : IStyleSheet
         var rules = new List<CssRule>();
         var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        var fields = set.GetType().GetFields(flags)
-            .Where(x => x.FieldType.IsAssignableFrom(typeof(CssRule)))
-            .ToArray();
+        var fields = set.GetType().GetFields(flags).Where(x => x.FieldType.IsAssignableFrom(typeof(CssRule))).ToArray();
         foreach (var field in fields)
             rules.Add(
-                (CssRule)field.GetValue(set)! ??
-                throw new InvalidOperationException($"Field {field} contains empty rule")
+                (CssRule)field.GetValue(set)!
+                    ?? throw new InvalidOperationException($"Field {field} contains empty rule")
             );
 
         return rules;
@@ -29,16 +27,14 @@ internal class StyleSheet : IStyleSheet
     public string Css { get; private set; } = string.Empty;
     public event Action CssChanged = delegate { };
 
-    private StyleSheet()
-    {
-    }
+    private StyleSheet() { }
 
     public void Render(RuleSet ruleSet)
     {
 #if DEBUG
         var separator = Environment.NewLine;
 #else
-            var separator = string.Empty;
+        var separator = string.Empty;
 #endif
         Css += string.Join(separator, GetRules(ruleSet).Select(x => x.ToCss()));
         CssChanged.Invoke();

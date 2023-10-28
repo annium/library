@@ -10,9 +10,8 @@ namespace Annium.Components.State.Forms.Tests;
 
 public class MapContainerTest : TestBase
 {
-    public MapContainerTest(ITestOutputHelper outputHelper) : base(outputHelper)
-    {
-    }
+    public MapContainerTest(ITestOutputHelper outputHelper)
+        : base(outputHelper) { }
 
     [Fact]
     public void Create_Ok()
@@ -196,13 +195,15 @@ public class MapContainerTest : TestBase
         state.Add("d", 7);
 
         // assert
-        state.Value.IsEqual(new Dictionary<string, int>
-        {
-            { "a", 2 },
-            { "b", 4 },
-            { "c", 8 },
-            { "d", 7 },
-        });
+        state.Value.IsEqual(
+            new Dictionary<string, int>
+            {
+                { "a", 2 },
+                { "b", 4 },
+                { "c", 8 },
+                { "d", 7 },
+            }
+        );
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -222,11 +223,7 @@ public class MapContainerTest : TestBase
         state.Remove("b");
 
         // assert
-        state.Value.IsEqual(new Dictionary<string, int>
-        {
-            { "a", 2 },
-            { "c", 8 },
-        });
+        state.Value.IsEqual(new Dictionary<string, int> { { "a", 2 }, { "c", 8 }, });
         state.HasChanged.IsTrue();
         state.HasBeenTouched.IsTrue();
         log.Has(1);
@@ -253,16 +250,13 @@ public class MapContainerTest : TestBase
         log.Has(3);
     }
 
-    private Dictionary<string, int> Arrange() => new()
-    {
-        { "a", 2 },
-        { "b", 4 },
-        { "c", 8 },
-    };
+    private Dictionary<string, int> Arrange() =>
+        new()
+        {
+            { "a", 2 },
+            { "b", 4 },
+            { "c", 8 },
+        };
 
-    private Dictionary<string, int> ArrangeOther() => new()
-    {
-        { "a", 2 },
-        { "c", 4 }
-    };
+    private Dictionary<string, int> ArrangeOther() => new() { { "a", 2 }, { "c", 4 } };
 }

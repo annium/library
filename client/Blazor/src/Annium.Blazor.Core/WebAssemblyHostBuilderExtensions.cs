@@ -25,7 +25,10 @@ public static class WebAssemblyHostBuilderExtensions
         return builder;
     }
 
-    public static async Task AddConfiguration<T>(this WebAssemblyHostBuilder builder, Func<IConfigurationContainer, Task> configure)
+    public static async Task AddConfiguration<T>(
+        this WebAssemblyHostBuilder builder,
+        Func<IConfigurationContainer, Task> configure
+    )
         where T : class, new()
     {
         var container = new ServiceContainer(builder.Services);

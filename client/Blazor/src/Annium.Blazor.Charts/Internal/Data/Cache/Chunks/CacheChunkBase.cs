@@ -14,12 +14,7 @@ internal abstract record CacheChunkBase<T>
     public List<T> Items { get; }
     private readonly ManagedValueRange<Instant> _range;
 
-    protected CacheChunkBase(
-        Instant start,
-        Instant end,
-        IReadOnlyCollection<T> items,
-        IComparer<T> comparer
-    )
+    protected CacheChunkBase(Instant start, Instant end, IReadOnlyCollection<T> items, IComparer<T> comparer)
     {
         _comparer = comparer;
         _range = ValueRange.Create(start, end);

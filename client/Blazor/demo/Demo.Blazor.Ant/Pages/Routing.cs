@@ -7,9 +7,7 @@ public class Routing : IRouting
 {
     public IRoute Home { get; }
 
-    public Routing(
-        IRouteFactory routeFactory
-    )
+    public Routing(IRouteFactory routeFactory)
     {
         Home = routeFactory.Create<Page>("/");
     }

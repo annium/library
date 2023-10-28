@@ -8,10 +8,7 @@ namespace Annium.Blazor.Routing.Internal.Locations;
 
 internal class LocationQuery : ILocationQuery
 {
-    public static ILocationQuery Create(
-        IReadOnlyCollection<PropertyInfo> properties,
-        IMapper mapper
-    )
+    public static ILocationQuery Create(IReadOnlyCollection<PropertyInfo> properties, IMapper mapper)
     {
         return new LocationQuery(properties.ToPropertiesDictionary(), mapper);
     }
@@ -19,10 +16,7 @@ internal class LocationQuery : ILocationQuery
     private readonly IReadOnlyDictionary<string, PropertyInfo> _properties;
     private readonly IMapper _mapper;
 
-    private LocationQuery(
-        IReadOnlyDictionary<string, PropertyInfo> properties,
-        IMapper mapper
-    )
+    private LocationQuery(IReadOnlyDictionary<string, PropertyInfo> properties, IMapper mapper)
     {
         _properties = properties;
         _mapper = mapper;
@@ -40,7 +34,9 @@ internal class LocationQuery : ILocationQuery
             var type = property.PropertyType;
             try
             {
-                var value = type.IsEnumerable() ? _mapper.Map(raw.ToArray(), type) : _mapper.Map(raw.FirstOrDefault()!, type);
+                var value = type.IsEnumerable()
+                    ? _mapper.Map(raw.ToArray(), type)
+                    : _mapper.Map(raw.FirstOrDefault()!, type);
                 routeValues[key] = value;
             }
             catch

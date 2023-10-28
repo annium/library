@@ -9,7 +9,6 @@ public class FlexWrap : ImplicitString<FlexWrap>
     public static readonly FlexWrap Wrap = new("wrap");
     public static readonly FlexWrap WrapReverse = new("wrap-reverse");
 
-    private FlexWrap(string type) : base(type)
-    {
-    }
+    private FlexWrap(string type)
+        : base(type) { }
 }

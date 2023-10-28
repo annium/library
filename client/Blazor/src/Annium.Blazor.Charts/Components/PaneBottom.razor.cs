@@ -44,7 +44,8 @@ public partial class PaneBottom : ILogSubject, IAsyncDisposable
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         SetSize();
         SideContext.Init(_canvas, _overlay);
@@ -105,11 +106,6 @@ public partial class PaneBottom : ILogSubject, IAsyncDisposable
             .Set("grid-area", "2 / 1 / 3 / 2")
             .Set("line-height", "0");
 
-        public readonly CssRule Canvas = Rule.Class()
-            .PositionAbsolute()
-            .LeftPx(0)
-            .RightPx(0)
-            .TopPx(0)
-            .BottomPx(0);
+        public readonly CssRule Canvas = Rule.Class().PositionAbsolute().LeftPx(0).RightPx(0).TopPx(0).BottomPx(0);
     }
 }

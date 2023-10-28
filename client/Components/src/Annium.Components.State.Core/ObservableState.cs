@@ -12,10 +12,7 @@ public abstract class ObservableState : IObservableState
 
     protected ObservableState()
     {
-        Changed = Observable.FromEvent(
-            handle => StateChanged += handle,
-            handle => StateChanged -= handle
-        );
+        Changed = Observable.FromEvent(handle => StateChanged += handle, handle => StateChanged -= handle);
     }
 
     public IDisposable Mute()

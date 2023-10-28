@@ -27,7 +27,12 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject
     public bool IsLocked => _panes.Any(x => x.IsLocked);
     public int MsPerPx { get; private set; }
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-    public int TimeZoneOffset { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault().GetUtcOffset(NodaConstants.UnixEpoch).ToTimeSpan().TotalMinutes.FloorInt32();
+    public int TimeZoneOffset { get; } =
+        DateTimeZoneProviders.Tzdb
+            .GetSystemDefault()
+            .GetUtcOffset(NodaConstants.UnixEpoch)
+            .ToTimeSpan()
+            .TotalMinutes.FloorInt32();
     public ValueRange<Instant> Bounds => _bounds;
     public ValueRange<Instant> View => _view;
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
@@ -41,10 +46,7 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject
     private int _isCanvasDirty = 1;
     private (Point?, bool) _overlayRequest;
 
-    public ChartContext(
-        ITimeProvider timeProvider,
-        ILogger logger
-    )
+    public ChartContext(ITimeProvider timeProvider, ILogger logger)
     {
         Logger = logger;
         Moment = timeProvider.Now;
@@ -58,10 +60,7 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject
         RequestDraw();
     }
 
-    public void Configure(
-        IReadOnlyList<int> zooms,
-        IReadOnlyList<int> resolutions
-    )
+    public void Configure(IReadOnlyList<int> zooms, IReadOnlyList<int> resolutions)
     {
         if (zooms.Count == 0)
             throw new ArgumentException("Zooms list is empty");
@@ -147,9 +146,10 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject
 
     private void UpdateBounds(ValueRange<Instant> bounds)
     {
-        var (start, end) = _panes.Count == 0
-            ? (FutureBound, PastBound)
-            : (Instant.Min(_bounds.Start, bounds.Start), Instant.Max(_bounds.End, bounds.End));
+        var (start, end) =
+            _panes.Count == 0
+                ? (FutureBound, PastBound)
+                : (Instant.Min(_bounds.Start, bounds.Start), Instant.Max(_bounds.End, bounds.End));
 
         if (start == _bounds.Start && end == _bounds.End)
             return;

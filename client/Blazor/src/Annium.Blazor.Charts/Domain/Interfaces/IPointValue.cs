@@ -1,5 +1,3 @@
 namespace Annium.Blazor.Charts.Domain.Interfaces;
 
-public interface IPointValue : IPointItem, ITimeSeries
-{
-}
+public interface IPointValue : IPointItem, ITimeSeries { }

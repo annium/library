@@ -12,10 +12,7 @@ internal sealed record SeriesContext : IManagedSeriesContext
     public DomRect Rect { get; private set; }
     private int _isInitiated;
 
-    public void Init(
-        Canvas canvas,
-        Canvas overlay
-    )
+    public void Init(Canvas canvas, Canvas overlay)
     {
         if (Interlocked.CompareExchange(ref _isInitiated, 1, 0) != 0)
             throw new InvalidOperationException($"Can't init {nameof(VerticalSideContext)} more than once");

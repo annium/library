@@ -24,7 +24,8 @@ public partial class Page : ILogSubject, IDisposable
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         _disposable += Window.OnResize(Handler<ResizeEvent>("resize", "window"));
         _disposable += _input;

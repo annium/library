@@ -8,9 +8,7 @@ public class Routing : IRouting
     public IRoute Canvas { get; }
     public IRoute Element { get; }
 
-    public Routing(
-        IRouteFactory routeFactory
-    )
+    public Routing(IRouteFactory routeFactory)
     {
         Canvas = routeFactory.Create<Page>("/canvas");
         Element = routeFactory.Create<Element.Page>("/element");

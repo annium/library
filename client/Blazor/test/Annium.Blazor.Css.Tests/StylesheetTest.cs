@@ -11,10 +11,7 @@ public class StylesheetTest
     public void Stylesheet_Works()
     {
         // arrange
-        var sp = new ServiceContainer()
-            .AddRuntime(GetType().Assembly)
-            .AddCss()
-            .BuildServiceProvider();
+        var sp = new ServiceContainer().AddRuntime(GetType().Assembly).AddCss().BuildServiceProvider();
         var styleSheet = sp.Resolve<IStyleSheet>();
 
         // assert: before any RuleSet resolved - it's empty
@@ -32,8 +29,5 @@ public class StylesheetTest
 
 internal class Styles : RuleSet
 {
-    private CssRule _html = Rule.Tag("html")
-        .Set("display", "flex")
-        .Set("width", "100%")
-        .Set("min-height", "100vh");
+    private CssRule _html = Rule.Tag("html").Set("display", "flex").Set("width", "100%").Set("min-height", "100vh");
 }

@@ -15,6 +15,7 @@ internal class CssRuleInternal : CssTopLevelRule
 
 #if DEBUG
     private const int Indent = 2;
+
     private static string PropertyToCss(KeyValuePair<string, string> pair) => $"{pair.Key}: {pair.Value};";
 
     private static void WriteCss(string inheritedSelector, CssRuleInternal rule, StringBuilder sb, int indent = 0)
@@ -101,7 +102,7 @@ internal class CssRuleInternal : CssTopLevelRule
 #if DEBUG
     public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($" > {selector}", configure);
 #else
-        public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($">{selector}", configure);
+    public override CssRule Child(string selector, Action<CssRule> configure) => AddRule($">{selector}", configure);
 #endif
 
     public override CssRule Inheritor(string selector, Action<CssRule> configure) => AddRule($" {selector}", configure);

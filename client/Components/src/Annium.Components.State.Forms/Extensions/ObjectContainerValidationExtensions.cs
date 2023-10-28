@@ -17,13 +17,21 @@ public static class ObjectContainerValidationExtensions
         return state.Changed.SubscribeValidator(state, validator);
     }
 
-    public static IObjectContainer<T> UseValidator<T>(this IObjectContainer<T> state, IValidator<T> validator, TimeSpan dueTime)
+    public static IObjectContainer<T> UseValidator<T>(
+        this IObjectContainer<T> state,
+        IValidator<T> validator,
+        TimeSpan dueTime
+    )
         where T : notnull, new()
     {
         return state.Changed.Throttle(dueTime).SubscribeValidator(state, validator);
     }
 
-    private static IObjectContainer<T> SubscribeValidator<T>(this IObservable<Unit> observable, IObjectContainer<T> state, IValidator<T> validator)
+    private static IObjectContainer<T> SubscribeValidator<T>(
+        this IObservable<Unit> observable,
+        IObjectContainer<T> state,
+        IValidator<T> validator
+    )
         where T : notnull, new()
     {
         var cts = new CancellationTokenSource();

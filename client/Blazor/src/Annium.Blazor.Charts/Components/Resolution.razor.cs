@@ -29,19 +29,21 @@ public partial class Resolution : ILogSubject, IAsyncDisposable
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+            return;
 
         _disposable += ChartContext.OnUpdate(StateHasChanged);
     }
 
     private Action HandleResolutionSelect(Duration resolution) => () => ChartContext.SetResolution(resolution);
 
-    private string Humanize(Duration resolution) => resolution.TotalMinutes switch
-    {
-        < 60   => $"{resolution.TotalMinutes}m",
-        < 1440 => $"{resolution.TotalHours}h",
-        _      => $"{resolution.TotalDays}d",
-    };
+    private string Humanize(Duration resolution) =>
+        resolution.TotalMinutes switch
+        {
+            < 60 => $"{resolution.TotalMinutes}m",
+            < 1440 => $"{resolution.TotalHours}h",
+            _ => $"{resolution.TotalDays}d",
+        };
 
     public ValueTask DisposeAsync()
     {
@@ -59,7 +61,6 @@ public partial class Resolution : ILogSubject, IAsyncDisposable
             .MarginPx(0, 5)
             .Set("cursor", "pointer");
 
-        public readonly CssRule ActiveResolution = Rule.Class()
-            .FontWeightBold();
+        public readonly CssRule ActiveResolution = Rule.Class().FontWeightBold();
     }
 }
