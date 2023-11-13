@@ -24,7 +24,7 @@
         <PackageReference Include="Annium.Logging.Microsoft" Version="0.1.0" />
         <PackageReference Include="Annium.NodaTime.Serialization.Json" Version="0.1.0" />
         <PackageReference Include="Annium.Serialization.Json" Version="0.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.11" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.11" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.13" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.13" />
     </ItemGroup>
 </Project>
