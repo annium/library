@@ -3,7 +3,7 @@
         <PackageId>xdomains</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
         <Description>xdomains</Description>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <OutputType>Exe</OutputType>
         <DebugType>portable</DebugType>
         <LangVersion>11.0</LangVersion>
