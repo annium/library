@@ -15,10 +15,10 @@ clean:
 	xs clean -sc -ic
 
 build:
-	dotnet build --nologo -v q
+	dotnet build -c Release --nologo -v q
 
 test:
-	dotnet test --nologo -v q
+	dotnet test -c Release --no-build --nologo -v q
 
 publish:
 	make publish-tools
