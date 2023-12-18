@@ -1,4 +1,6 @@
+using System;
 using System.Threading.Tasks;
+using Annium;
 using Annium.Core.DependencyInjection;
 using Annium.Net.Http;
 using XRest.Clients.Shared.Components;
@@ -11,15 +13,15 @@ internal class ApiModelLoader : IApiModelLoader
 {
     private readonly IHttpRequestFactory _httpRequestFactory;
 
-    public ApiModelLoader(IIndex<string, IHttpRequestFactory> httpRequestFactories)
+    public ApiModelLoader(IServiceProvider sp)
     {
-        _httpRequestFactory = httpRequestFactories[Constants.IndexKey];
+        _httpRequestFactory = sp.ResolveKeyed<IHttpRequestFactory>(Constants.IndexKey);
     }
 
     public async Task<ApiModel> Load(ISourceLoaderConfiguration cfg)
     {
         var model = await _httpRequestFactory.New(cfg.Server).Get(Constants.ApiSourceEndpoint).AsAsync<ApiModel>();
 
-        return model;
+        return model.NotNull();
     }
 }

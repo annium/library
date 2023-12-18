@@ -23,15 +23,12 @@ internal class MigratePostgresqlCommand
     private readonly IAssemblyLoaderBuilder _assemblyLoaderBuilder;
     private readonly ISerializer<string> _serializer;
 
-    public MigratePostgresqlCommand(
-        IAssemblyLoaderBuilder assemblyLoaderBuilder,
-        IIndex<SerializerKey, ISerializer<string>> serializers,
-        ILogger logger
-    )
+    public MigratePostgresqlCommand(IServiceProvider sp, IAssemblyLoaderBuilder assemblyLoaderBuilder, ILogger logger)
     {
         Logger = logger;
         _assemblyLoaderBuilder = assemblyLoaderBuilder;
-        _serializer = serializers[SerializerKey.CreateDefault(Constants.MediaType)];
+        var serializerKey = SerializerKey.CreateDefault(Constants.MediaType);
+        _serializer = sp.ResolveKeyed<ISerializer<string>>(serializerKey);
     }
 
     public override void Handle(MigratePostgresqlCommandConfiguration cfg, CancellationToken ct)

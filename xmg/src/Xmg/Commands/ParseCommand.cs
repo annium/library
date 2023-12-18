@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Net.Mime;
 using System.Threading;
@@ -18,15 +19,12 @@ internal class ParseCommand : Command<ParseCommandConfig>, ICommandDescriptor, I
     private readonly IConfiguratorFactory _configuratorFactory;
     private readonly ISerializer<string> _serializer;
 
-    public ParseCommand(
-        IConfiguratorFactory configuratorFactory,
-        ILogger logger,
-        IIndex<SerializerKey, ISerializer<string>> serializers
-    )
+    public ParseCommand(IServiceProvider sp, IConfiguratorFactory configuratorFactory, ILogger logger)
     {
-        _configuratorFactory = configuratorFactory;
         Logger = logger;
-        _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
+        _configuratorFactory = configuratorFactory;
+        var serializerKey = SerializerKey.CreateDefault(MediaTypeNames.Application.Json);
+        _serializer = sp.ResolveKeyed<ISerializer<string>>(serializerKey);
     }
 
     public override void Handle(ParseCommandConfig cfg, CancellationToken ct)

@@ -23,17 +23,18 @@ internal class XRestMiddleware
 
     public XRestMiddleware(
         RequestDelegate next,
+        IServiceProvider sp,
         IApiDescriptionGroupCollectionProvider descriptionProvider,
         IModelMapper modelMapper,
-        IMapperConfig mapperConfig,
-        IIndex<SerializerKey, ISerializer<string>> serializers
+        IMapperConfig mapperConfig
     )
     {
         _next = next;
         _descriptionProvider = descriptionProvider;
         _modelMapper = modelMapper;
         _mapperConfig = mapperConfig;
-        _serializer = serializers[SerializerKey.Create(Constants.IndexKey, MediaTypeNames.Application.Json)];
+        var serializerKey = SerializerKey.Create(Constants.IndexKey, MediaTypeNames.Application.Json);
+        _serializer = sp.ResolveKeyed<ISerializer<string>>(serializerKey);
         _description = new Lazy<string>(BuildApiDescription, isThreadSafe: true);
     }
 
