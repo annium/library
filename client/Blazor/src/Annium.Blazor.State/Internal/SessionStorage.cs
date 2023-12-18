@@ -1,11 +1,10 @@
-using Annium.Core.DependencyInjection;
-using Annium.Serialization.Abstractions;
+using System;
 using Microsoft.JSInterop;
 
 namespace Annium.Blazor.State.Internal;
 
 internal class SessionStorage : StorageBase, ISessionStorage
 {
-    public SessionStorage(IJSRuntime js, IIndex<SerializerKey, ISerializer<string>> serializers)
-        : base(js, serializers, "sessionStorage") { }
+    public SessionStorage(IServiceProvider sp, IJSRuntime js)
+        : base(sp, js, "sessionStorage") { }
 }

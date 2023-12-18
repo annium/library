@@ -15,10 +15,11 @@ internal class StorageBase : IStorageBase
 
     private readonly string _storage;
 
-    protected StorageBase(IJSRuntime js, IIndex<SerializerKey, ISerializer<string>> serializers, string storage)
+    protected StorageBase(IServiceProvider sp, IJSRuntime js, string storage)
     {
         _js = (IJSInProcessRuntime)js;
-        _serializer = serializers[SerializerKey.CreateDefault(MediaTypeNames.Application.Json)];
+        var serializerKey = SerializerKey.CreateDefault(MediaTypeNames.Application.Json);
+        _serializer = sp.ResolveKeyed<ISerializer<string>>(serializerKey);
         _storage = storage;
     }
 
