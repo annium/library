@@ -11,10 +11,10 @@
         <Nullable>enable</Nullable>
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>xdb</ToolCommandName>
-        <NoWarn>$(NoWarn);NETSDK1206</NoWarn>
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="../Xdb.Core/Xdb.Core.csproj" />
+        <ProjectReference Include="../Xdb.PostgreSql/Xdb.PostgreSql.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Annium.Configuration.Yaml" Version="0.1.0" />

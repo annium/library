@@ -1,8 +1,10 @@
 using DbUp.Builder;
 
-namespace Xdb.Core.Migrations;
+// ReSharper disable once CheckNamespace
 
-public class PostgresqlMigrationEngine : MigrationEngineBase<PostgresqlMigrationEngine>
+namespace Xdb;
+
+public sealed class PostgresqlMigrationEngine : MigrationEngineBase<PostgresqlMigrationEngine>
 {
     public PostgresqlMigrationEngine(
         UpgradeEngineBuilder initBuilder,

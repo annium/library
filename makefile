@@ -48,6 +48,7 @@ publish-mbus-sink:
 
 publish-tools:
 	xs publish xdb.core 0.1.0
+	xs publish xdb.postgresql 0.1.0
 	xs publish xrest.core 0.1.0
 	xs publish xrest.sources 0.1.0
 

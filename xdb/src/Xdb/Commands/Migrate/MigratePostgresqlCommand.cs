@@ -7,7 +7,6 @@ using Annium.Extensions.Arguments;
 using Annium.linq2db.PostgreSql;
 using Annium.Logging;
 using Annium.Serialization.Abstractions;
-using Xdb.Core.Migrations;
 using Constants = Annium.Serialization.Yaml.Constants;
 
 namespace Xdb.Commands.Migrate;
@@ -35,7 +34,7 @@ internal class MigratePostgresqlCommand
     {
         var config = _serializer.Deserialize<PostgreSqlConfiguration>(File.ReadAllText(cfg.Config));
 
-        var engine = Migrator.ForPostgresql(config.ConnectionString, cfg.Schema);
+        var engine = Migrator.Instance.ForPostgresql(config.ConnectionString, cfg.Schema);
 
         if (!string.IsNullOrWhiteSpace(cfg.Directory))
             engine.WithScriptsFromDirectory(cfg.Directory);

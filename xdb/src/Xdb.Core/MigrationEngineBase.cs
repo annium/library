@@ -5,7 +5,9 @@ using System.Linq;
 using System.Reflection;
 using DbUp.Builder;
 
-namespace Xdb.Core.Migrations;
+// ReSharper disable once CheckNamespace
+
+namespace Xdb;
 
 public abstract class MigrationEngineBase<T>
     where T : MigrationEngineBase<T>
