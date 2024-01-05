@@ -11,6 +11,7 @@
         <Nullable>enable</Nullable>
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>xdb</ToolCommandName>
+        <NoWarn>$(NoWarn);NETSDK1206</NoWarn>
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="../Xdb.Core/Xdb.Core.csproj" />
