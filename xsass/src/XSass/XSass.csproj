@@ -14,10 +14,10 @@
         <PackageReference Include="Annium.Configuration.Yaml" Version="0.1.0" />
         <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
-        <PackageReference Include="LibSassHost" Version="1.3.3" />
-        <PackageReference Include="LibSassHost.Native.linux-x64" Version="1.3.3" />
-        <PackageReference Include="LibSassHost.Native.osx-x64" Version="1.3.3" />
-        <PackageReference Include="LibSassHost.Native.win-x64" Version="1.3.3" />
+        <PackageReference Include="LibSassHost" Version="1.4.0" />
+        <PackageReference Include="LibSassHost.Native.linux-x64" Version="1.4.0" />
+        <PackageReference Include="LibSassHost.Native.osx-x64" Version="1.4.0" />
+        <PackageReference Include="LibSassHost.Native.win-x64" Version="1.4.0" />
     </ItemGroup>
     <PropertyGroup>
         <NuspecFile>package.nuspec</NuspecFile>

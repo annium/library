@@ -16,6 +16,6 @@
     <ItemGroup>
         <PackageReference Include="Annium.Data.Operations.Serialization.Json" Version="0.1.0" />
         <PackageReference Include="Annium.NodaTime.Serialization.Json" Version="0.1.0" />
-        <PackageReference Include="NSwag.AspNetCore" Version="14.0.0-preview009" />
+        <PackageReference Include="NSwag.AspNetCore" Version="14.0.2" />
     </ItemGroup>
 </Project>

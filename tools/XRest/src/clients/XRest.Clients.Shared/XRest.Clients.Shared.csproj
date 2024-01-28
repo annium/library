@@ -16,6 +16,6 @@
     <ItemGroup>
         <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
         <PackageReference Include="Annium.Net.Http" Version="0.1.0" />
-        <PackageReference Include="Scriban" Version="5.9.0" />
+        <PackageReference Include="Scriban" Version="5.9.1" />
     </ItemGroup>
 </Project>
