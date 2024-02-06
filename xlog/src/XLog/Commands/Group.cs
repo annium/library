@@ -10,5 +10,6 @@ public class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
     public Group()
     {
         Add<ListenCommand>();
+        Add<StatsCommand>();
     }
 }

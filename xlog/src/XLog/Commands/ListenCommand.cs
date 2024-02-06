@@ -13,7 +13,7 @@ namespace XLog.Commands;
 
 internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, ICommandDescriptor, ILogSubject
 {
-    public static string Id => string.Empty;
+    public static string Id => "listen";
     public static string Description => "listen";
     public ILogger Logger { get; }
 
