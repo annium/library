@@ -35,6 +35,10 @@ internal class StatsCommand : Command<StatsCommandConfiguration>, ICommandDescri
         using var reader = File.OpenText(file);
         while (reader.ReadLine() is { } line)
         {
+            // logger line starts from date time
+            if (!line.StartsWith('['))
+                continue;
+
             var start = line.IndexOf(At, StringComparison.InvariantCulture) + 4;
             if (start < 4)
                 continue;
