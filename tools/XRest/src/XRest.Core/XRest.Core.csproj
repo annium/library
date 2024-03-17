@@ -3,6 +3,7 @@
         <PackageId>XRest.Core</PackageId>
         <PackageVersion>0.1.0</PackageVersion>
         <Description>XRest.Core</Description>
+        <Solutions></Solutions>
         <TargetFramework>net8.0</TargetFramework>
         <OutputType>Library</OutputType>
         <DebugType>portable</DebugType>
