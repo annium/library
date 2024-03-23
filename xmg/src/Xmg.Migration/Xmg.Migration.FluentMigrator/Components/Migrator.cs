@@ -57,8 +57,8 @@ internal class Migrator : IMigrator
 
             // create tables in schema
             foreach (var table in schema.Tables)
-                foreach (var operation in CreateTableOperations(schema.Name, table).ToArray())
-                    yield return operation;
+            foreach (var operation in CreateTableOperations(schema.Name, table).ToArray())
+                yield return operation;
         }
     }
 

@@ -12,13 +12,13 @@ internal static class ActionProcessor
         var name = action.Name;
         var path = action.Path;
 
-        var pathParameters = action.Parameters
-            .Where(x => x.Location == ParameterLocationEnum.Path)
+        var pathParameters = action
+            .Parameters.Where(x => x.Location == ParameterLocationEnum.Path)
             .Select(x => new ParameterView(RefProcessor.Process(x.Type, ctx), x.Name))
             .ToArray();
 
-        var queryParameters = action.Parameters
-            .Where(x => x.Location == ParameterLocationEnum.Query)
+        var queryParameters = action
+            .Parameters.Where(x => x.Location == ParameterLocationEnum.Query)
             .Select(x => new ParameterView(RefProcessor.Process(x.Type, ctx), x.Name))
             .ToArray();
 

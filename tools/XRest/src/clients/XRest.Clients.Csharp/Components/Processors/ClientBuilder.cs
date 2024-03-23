@@ -61,8 +61,8 @@ internal static class ClientBuilder
 
     private static IClientView BuildClientNode(ControllerView controller)
     {
-        var usages = controller.Usages
-            .Concat(new[] { SystemThreadingNamespace, SystemThreadingTasksNamespace, AnniumNetHttpNamespace })
+        var usages = controller
+            .Usages.Concat(new[] { SystemThreadingNamespace, SystemThreadingTasksNamespace, AnniumNetHttpNamespace })
             .ToUsagesFrom(controller.Namespace)
             .ToUsageStrings();
         var @namespace = controller.Namespace.ToString();

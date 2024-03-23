@@ -17,14 +17,13 @@ public class Startup
     {
         app.UseExceptionMiddleware();
         app.UseRouting();
-        app.UseCors(
-            builder =>
-                builder
-                    .SetIsOriginAllowed(o => true)
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials()
-                    .SetPreflightMaxAge(TimeSpan.FromDays(7))
+        app.UseCors(builder =>
+            builder
+                .SetIsOriginAllowed(o => true)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .SetPreflightMaxAge(TimeSpan.FromDays(7))
         );
         app.UseEndpoints(endpoints =>
         {

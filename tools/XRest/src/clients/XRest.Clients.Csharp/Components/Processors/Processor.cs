@@ -19,8 +19,8 @@ internal static class Processor
 
         var client = ClientBuilder.BuildClient(apiCtx.ClientsNamespace, "Root", "Root", controllers);
 
-        var models = api.Models
-            .Select(x => ModelProcessor.Process(x, new ProcessingContext(apiCtx.ModelsNamespace, api.Models)))
+        var models = api
+            .Models.Select(x => ModelProcessor.Process(x, new ProcessingContext(apiCtx.ModelsNamespace, api.Models)))
             .ToArray();
 
         return new ApiView(rootNamespace, client, models);

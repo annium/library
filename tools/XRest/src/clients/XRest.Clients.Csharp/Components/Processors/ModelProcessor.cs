@@ -30,15 +30,15 @@ internal static class ModelProcessor
         var argsCount = model.Args.Count;
         var args = model.Args.Select(x => RefProcessor.Process(x, ctx)).Join(", ");
 
-        var extendsList = model.Base
-            .Yield()
+        var extendsList = model
+            .Base.Yield()
             .OfType<IGenericModelRef>()
             .Concat(model.Interfaces)
             .Select(x => RefProcessor.Process(x, ctx))
             .Join(", ");
 
-        var fields = model.Fields
-            .Select(x =>
+        var fields = model
+            .Fields.Select(x =>
             {
                 var type = RefProcessor.Process(x.Type, ctx);
                 var defaultValue = DefaultValueProcessor.Resolve(x.Type, ctx);
@@ -72,8 +72,8 @@ internal static class ModelProcessor
 
         var extendList = model.Interfaces.Select(x => RefProcessor.Process(x, ctx)).Join(", ");
 
-        var fields = model.Fields
-            .Select(x =>
+        var fields = model
+            .Fields.Select(x =>
             {
                 var type = RefProcessor.Process(x.Type, ctx);
 

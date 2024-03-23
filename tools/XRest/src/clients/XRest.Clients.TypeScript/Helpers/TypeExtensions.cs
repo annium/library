@@ -29,8 +29,8 @@ internal static class ProcessorTypeExtensions
             return true;
 
         return type.GetInterfaces()
-            .Any(
-                x => x.IsGenericType ? x.GetGenericTypeDefinition() == typeof(IEnumerable<>) : x == typeof(IEnumerable)
+            .Any(x =>
+                x.IsGenericType ? x.GetGenericTypeDefinition() == typeof(IEnumerable<>) : x == typeof(IEnumerable)
             );
     }
 

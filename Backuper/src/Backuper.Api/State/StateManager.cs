@@ -47,8 +47,8 @@ public class StateManager : ILogSubject
 
         this.Debug($"Schedule operations");
         foreach (var server in State.Servers.Values)
-            foreach (var plan in server.Plans.Values)
-                _scheduler.Schedule(() => BackupAsync(server, plan), plan.Interval);
+        foreach (var plan in server.Plans.Values)
+            _scheduler.Schedule(() => BackupAsync(server, plan), plan.Interval);
     }
 
     private async Task BackupAsync(Server server, Plan plan)

@@ -18,8 +18,8 @@ internal static class ActionModelBuilder
 {
     public static IEnumerable<ActionModel> Build(ControllerActionDescriptor action, MappingContext ctx)
     {
-        var methods = action.ActionConstraints!
-            .OfType<HttpMethodActionConstraint>()
+        var methods = action
+            .ActionConstraints!.OfType<HttpMethodActionConstraint>()
             .SelectMany(x => x.HttpMethods)
             .Select(x => new HttpMethod(x))
             .ToArray();
@@ -27,12 +27,12 @@ internal static class ActionModelBuilder
         var route = RouteHelper.NormalizeRoute(action.AttributeRouteInfo!.Template!);
         var routeParameters = RouteHelper.ParseRouteParameters(route);
 
-        var parameters = action.Parameters
-            .Where(x => x.BindingInfo?.BindingSource?.Id != Constants.BindingBody)
+        var parameters = action
+            .Parameters.Where(x => x.BindingInfo?.BindingSource?.Id != Constants.BindingBody)
             .SelectMany(x => BuildParameterModels(x, routeParameters, ctx))
             .ToArray();
-        var body = action.Parameters
-            .SingleOrDefault(x => x.BindingInfo?.BindingSource?.Id == Constants.BindingBody)
+        var body = action
+            .Parameters.SingleOrDefault(x => x.BindingInfo?.BindingSource?.Id == Constants.BindingBody)
             ?.ParameterType;
         var response = action.MethodInfo.ReturnType;
 
@@ -76,16 +76,13 @@ internal static class ActionModelBuilder
                 )
             };
 
-        return param.ParameterType
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
+        return param
+            .ParameterType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
             .Where(p => p.CanRead)
-            .Select(
-                p =>
-                    new ParameterModel(
-                        ParameterLocationEnum.Query,
-                        ctx.Map(p.ToContextualProperty().PropertyType),
-                        p.Name.CamelCase()
-                    )
-            );
+            .Select(p => new ParameterModel(
+                ParameterLocationEnum.Query,
+                ctx.Map(p.ToContextualProperty().PropertyType),
+                p.Name.CamelCase()
+            ));
     }
 }

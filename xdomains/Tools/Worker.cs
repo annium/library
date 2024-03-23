@@ -61,8 +61,8 @@ internal class Worker
             zones = File.ReadAllLines(_settings.RootedPath("zones.txt"));
 
         foreach (var name in query)
-            foreach (var zone in zones)
-                yield return $"{name}{zone}";
+        foreach (var zone in zones)
+            yield return $"{name}{zone}";
     }
 
     private Task CheckDomains(

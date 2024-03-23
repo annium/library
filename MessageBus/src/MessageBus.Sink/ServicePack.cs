@@ -16,8 +16,8 @@ internal class ServicePack : ServicePackBase
         container.AddSerializers().WithJson(isDefault: true);
 
         container.AddMapper();
-        container.AddConfiguration<EndpointsConfiguration>(
-            x => x.AddYamlFile("configuration.yml").AddCommandLineArgs()
+        container.AddConfiguration<EndpointsConfiguration>(x =>
+            x.AddYamlFile("configuration.yml").AddCommandLineArgs()
         );
         container.AddNetMQMessageBus(
             (sp, opts) =>

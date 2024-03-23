@@ -31,8 +31,8 @@ internal class MetadataProcessor : IMetadataProcessor
 
         var primaryKey = ResolvePrimaryKey(table.Schema, table.Name, table.Columns.Values);
 
-        var foreignKeys = table.Columns.Values
-            .Select(x => ProcessForeignKey(database, table, x)!)
+        var foreignKeys = table
+            .Columns.Values.Select(x => ProcessForeignKey(database, table, x)!)
             .Where(x => x != null!)
             .ToArray();
 
