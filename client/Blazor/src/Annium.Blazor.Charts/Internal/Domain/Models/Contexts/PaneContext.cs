@@ -58,8 +58,8 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
         var sourceRange = _sourceRanges[source];
         sourceRange.Set(min, max);
 
-        var renderingRanges = _sourceRanges.Values
-            .Where(x => x.Start != decimal.MinValue || x.End != decimal.MaxValue)
+        var renderingRanges = _sourceRanges
+            .Values.Where(x => x.Start != decimal.MinValue || x.End != decimal.MaxValue)
             .ToArray();
         if (renderingRanges.Length > 0)
         {

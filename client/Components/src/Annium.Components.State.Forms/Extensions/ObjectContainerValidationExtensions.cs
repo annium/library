@@ -48,8 +48,8 @@ public static class ObjectContainerValidationExtensions
     private static void Validate<T>(this IObjectContainer<T> state, IValidator<T> validator, CancellationToken ct)
         where T : notnull, new()
     {
-        var children = state.Children
-            .Where(x => x.Value is IStatusContainer)
+        var children = state
+            .Children.Where(x => x.Value is IStatusContainer)
             .ToDictionary(x => x.Key, x => (IStatusContainer)x.Value);
 
         using (state.Mute())

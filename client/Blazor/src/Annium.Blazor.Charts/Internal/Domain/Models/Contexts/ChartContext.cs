@@ -28,8 +28,8 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject
     public int MsPerPx { get; private set; }
     public DateTimeZone TimeZone { get; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
     public int TimeZoneOffset { get; } =
-        DateTimeZoneProviders.Tzdb
-            .GetSystemDefault()
+        DateTimeZoneProviders
+            .Tzdb.GetSystemDefault()
             .GetUtcOffset(NodaConstants.UnixEpoch)
             .ToTimeSpan()
             .TotalMinutes.FloorInt32();

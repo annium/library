@@ -77,19 +77,17 @@ public partial class Page
         );
         _multiRangeSeries = SeriesSourceFactory.CreateChecked(
             _candleSeries,
-            x =>
-                new MultiValue<RangeItem>(
-                    x.Moment,
-                    new[] { new RangeItem(2 * x.Low - x.High, x.Low), new RangeItem(x.High, 2 * x.High - x.Low) }
-                )
+            x => new MultiValue<RangeItem>(
+                x.Moment,
+                new[] { new RangeItem(2 * x.Low - x.High, x.Low), new RangeItem(x.High, 2 * x.High - x.Low) }
+            )
         );
         _multiLineSeries = SeriesSourceFactory.CreateChecked(
             _candleSeries,
-            x =>
-                new MultiValue<LinePointItem>(
-                    x.Moment,
-                    new[] { new LinePointItem(false, x.Low * .98m), new LinePointItem(true, x.High * 1.02m) }
-                )
+            x => new MultiValue<LinePointItem>(
+                x.Moment,
+                new[] { new LinePointItem(false, x.Low * .98m), new LinePointItem(true, x.High * 1.02m) }
+            )
         );
 
         _getCandleLabel = x =>

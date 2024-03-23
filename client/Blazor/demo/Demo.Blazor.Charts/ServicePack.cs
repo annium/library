@@ -33,17 +33,16 @@ public class ServicePack : ServicePackBase
 
     public override void Setup(IServiceProvider provider)
     {
-        provider.UseLogging(
-            route =>
-                route.UseConsole(m =>
-                {
-                    var sb = new StringBuilder();
-                    sb.Append(m.Subject());
-                    if (m.Line != 0)
-                        sb.Append(m.Location());
+        provider.UseLogging(route =>
+            route.UseConsole(m =>
+            {
+                var sb = new StringBuilder();
+                sb.Append(m.Subject());
+                if (m.Line != 0)
+                    sb.Append(m.Location());
 
-                    return $"{sb} >> {m.Message}";
-                })
+                return $"{sb} >> {m.Message}";
+            })
         );
     }
 }
