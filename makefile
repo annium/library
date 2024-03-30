@@ -47,10 +47,11 @@ publish-mbus-sink:
 	$(call publish,MessageBus/src/MessageBus.Sink,app.dockerfile,mbus.sink)
 
 publish-tools:
-	xs publish xdb.core 0.1.0
-	xs publish xdb.postgresql 0.1.0
-	xs publish xrest.core 0.1.0
-	xs publish xrest.sources 0.1.0
+	$(call publish-package,xdb/src/Xdb.Core/Xdb.Core.csproj)
+	$(call publish-package,xdb/src/Xdb.PostgreSql/Xdb.PostgreSql.csproj)
+	$(call publish-package,xrest/src/XRest.Core/XRest.Core.csproj)
+	$(call publish-package,xrest/src/sources/XRest.Sources.AspNetCore/XRest.Sources.AspNetCore.csproj)
+	$(call publish-package,xrest/src/sources/XRest.Sources.Shared/XRest.Sources.Shared.csproj)
 
 define publish
 	@$(eval context := $(1))
@@ -58,6 +59,14 @@ define publish
 	@$(eval tag := $(3))
 	@docker build -t $(REGISTRY)/tools/$(tag) -f $(context)/$(dockerfile) $(context)
 	@docker push $(REGISTRY)/tools/$(tag)
+endef
+
+define publish-package
+	@$(eval project := $(1))
+	@$(eval registry := $(2))
+	dotnet pack $(project) --no-build -o . -c Release -p:PackageVersion=0.1.0 -p:SymbolPackageFormat=snupkg
+	dotnet nuget push "*.nupkg" --source https://dotnet.pkg.annium.com/v3/index.json --api-key $(shell cat .xs.credentials)
+	find . -type f -name '*.nupkg' | xargs rm
 endef
 
 .PHONY: $(MAKECMDGOALS)
