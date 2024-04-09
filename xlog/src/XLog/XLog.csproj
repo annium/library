@@ -17,5 +17,8 @@
         <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
         <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
         <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
+        <PackageReference Include="Annium.Net.Http" Version="0.1.0" />
+        <PackageReference Include="Annium.Serialization.Json" Version="0.1.0" />
+        <PackageReference Include="Annium.Serialization.Yaml" Version="0.1.0" />
     </ItemGroup>
 </Project>

@@ -1,5 +1,7 @@
 using System;
 using Annium.Core.DependencyInjection;
+using XLog.Components;
+using XLog.Internal.Components;
 
 namespace XLog;
 
@@ -9,9 +11,14 @@ internal class ServicePack : ServicePackBase
     {
         container.AddRuntime(GetType().Assembly);
         container.AddTime().WithRealTime().SetDefault();
+        container.AddHttpRequestFactory(isDefault: true);
+        container.AddSerializers().WithJson(isDefault: true).WithYaml(isDefault: true);
         container.AddMapper();
         container.AddLogging();
         container.AddArguments();
+
+        // components
+        container.Add<IConfigurationManager, ConfigurationManager>().Singleton();
     }
 
     public override void Setup(IServiceProvider provider)
