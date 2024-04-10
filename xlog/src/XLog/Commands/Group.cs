@@ -9,6 +9,7 @@ public class Group : Annium.Extensions.Arguments.Group, ICommandDescriptor
 
     public Group()
     {
+        Add<Graylog.Group>();
         Add<ListenCommand>();
         Add<StatsCommand>();
     }
