@@ -1,7 +1,10 @@
 using System;
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium;
@@ -10,6 +13,7 @@ using Annium.Logging;
 using Annium.Net.Http;
 using Humanizer;
 using MongoDB.Bson;
+using OneOf;
 using XLog.Components;
 
 namespace XLog.Commands.Graylog;
@@ -22,7 +26,11 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
     private readonly IConfigurationManager _configurationManager;
     private readonly IHttpRequestFactory _httpRequestFactory;
 
-    public DumpCommand(IConfigurationManager configurationManager, IHttpRequestFactory httpRequestFactory, ILogger logger)
+    public DumpCommand(
+        IConfigurationManager configurationManager,
+        IHttpRequestFactory httpRequestFactory,
+        ILogger logger
+    )
     {
         _configurationManager = configurationManager;
         _httpRequestFactory = httpRequestFactory;
@@ -48,10 +56,10 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
         if (!isValid)
             return;
 
-        var time = ResolveRelativeTime(cfg.Time);
-        if (time == 0)
+        var time = ResolveTime(cfg.Time);
+        if (time.IsT2)
         {
-            this.Warn($"Invalid time spec {cfg.Time}. Specify relative time in 1d, 2h or 3m format");
+            this.Error(time.AsT2);
             return;
         }
 
@@ -69,7 +77,8 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
 
     private async Task DownLoadAsync(string server, string sessionId, string jobId, string file, CancellationToken ct)
     {
-        var response = await _httpRequestFactory.New(server)
+        var response = await _httpRequestFactory
+            .New(server)
             .Get($"api/views/search/messages/job/{jobId}/raw.csv")
             .Header("X-Requested-By", "cli")
             .Cookie("authentication", sessionId)
@@ -121,11 +130,9 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
         // start line "
         if (span[0] == '\n' && span[1] == '"')
             span[1] = (byte)'[';
-
         // end line "
         else if (span[2] == '"' && span[3] == '\n')
             span[2] = (byte)' ';
-
         // timestamp delimiter Z",
         else if (span[0] == 'Z' && span[1] == '"' && span[2] == ',' && span[3] == '"')
         {
@@ -133,7 +140,6 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
             span[2] = (byte)' ';
             span[3] = (byte)' ';
         }
-
         // field delimiter ","
         else if (span[1] == '"' && span[2] == ',' && span[3] == '"')
         {
@@ -145,18 +151,18 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
 
     private async Task<string?> ExportAsync(string server, string sessionId, string searchId, string subId)
     {
-        var response = await _httpRequestFactory.New(server)
+        var response = await _httpRequestFactory
+            .New(server)
             .Post($"api/views/export/{searchId}/{subId}")
             .Header("X-Requested-By", "cli")
             .Cookie("authentication", sessionId)
-            .JsonContent(new
-            {
-                execution_state = new
+            .JsonContent(
+                new
                 {
-                    parameter_bindinds = new { }
-                },
-                fields_in_order = new[] { "timestamp", "source", "log_level", "message" }
-            })
+                    execution_state = new { parameter_bindinds = new { } },
+                    fields_in_order = new[] { "timestamp", "source", "log_level", "message" }
+                }
+            )
             .RunAsync();
         if (response.IsSuccess)
             return await response.Content.ReadAsStringAsync();
@@ -165,59 +171,52 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
         return null;
     }
 
-    private async Task<(string searchId, string subId)?> SearchAsync(string server, string sessionId, string query, int time)
+    private async Task<(string searchId, string subId)?> SearchAsync(
+        string server,
+        string sessionId,
+        string query,
+        OneOf<AbsoluteTime, RelativeTime, Exception> time
+    )
     {
         var searchId = ObjectId.GenerateNewId().ToString();
         var queryId = Guid.NewGuid().ToString();
         var subId = Guid.NewGuid().ToString();
 
-        var response = await _httpRequestFactory.New(server)
+        var response = await _httpRequestFactory
+            .New(server)
             .Post("api/views/search")
             .Header("X-Requested-By", "cli")
             .Cookie("authentication", sessionId)
-            .JsonContent(new
-            {
-                id = searchId,
-                queries = new[]
+            .JsonContent(
+                new
                 {
-                    new
+                    id = searchId,
+                    queries = new[]
                     {
-                        id = queryId,
-                        query = new
+                        new
                         {
-                            type = "elasticsearch",
-                            query_string = query
-                        },
-                        timerange = new
-                        {
-                            type = "relative",
-                            from = time
-                        },
-                        filter = null as object,
-                        search_types = new[]
-                        {
-                            new
+                            id = queryId,
+                            query = new { type = "elasticsearch", query_string = query },
+                            timerange = time.Value,
+                            filter = null as object,
+                            search_types = new[]
                             {
-                                offset = 0,
-                                decorators = Array.Empty<string>(),
-                                type = "messages",
-                                id = subId,
-                                limit = 150,
-                                filters = Array.Empty<string>(),
-                                sort = new[]
+                                new
                                 {
-                                    new
-                                    {
-                                        field = "timestamp",
-                                        order = "ASC"
-                                    }
+                                    offset = 0,
+                                    decorators = Array.Empty<string>(),
+                                    type = "messages",
+                                    id = subId,
+                                    limit = 150,
+                                    filters = Array.Empty<string>(),
+                                    sort = new[] { new { field = "timestamp", order = "ASC" } }
                                 }
                             }
                         }
-                    }
-                },
-                parameters = Array.Empty<string>()
-            })
+                    },
+                    parameters = Array.Empty<string>()
+                }
+            )
             .RunAsync();
         if (response.IsSuccess)
             return (searchId, subId);
@@ -228,20 +227,20 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
 
     private async Task<bool> ValidateAsync(string server, string sessionId, string query)
     {
-        var response = await _httpRequestFactory.New(server)
+        var response = await _httpRequestFactory
+            .New(server)
             .Post("api/search/validate")
             .Header("X-Requested-By", "cli")
             .Cookie("authentication", sessionId)
-            .JsonContent(new
-            {
-                query,
-                timerange = new { type = "relative", from = 14400 },
-                streams = Array.Empty<string>()
-            })
-            .AsResponseAsync(new
-            {
-                status = string.Empty
-            });
+            .JsonContent(
+                new
+                {
+                    query,
+                    timerange = new { type = "relative", from = 14400 },
+                    streams = Array.Empty<string>()
+                }
+            )
+            .AsResponseAsync(new { status = string.Empty });
         var status = response.Data.status;
         if (status == "OK")
             return true;
@@ -252,15 +251,18 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
 
     private async Task<string?> LogInAsync(string server, string login, string pass)
     {
-        var response = await _httpRequestFactory.New(server)
+        var response = await _httpRequestFactory
+            .New(server)
             .Post("api/system/sessions")
             .Header("X-Requested-By", "cli")
-            .JsonContent(new
-            {
-                host = server,
-                username = login,
-                password = pass
-            })
+            .JsonContent(
+                new
+                {
+                    host = server,
+                    username = login,
+                    password = pass
+                }
+            )
             .AsResponseAsync(new { session_id = string.Empty });
         var sessionId = response.Data.session_id;
         if (!sessionId.IsNullOrWhiteSpace())
@@ -270,28 +272,90 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
         return null;
     }
 
-    private int ResolveRelativeTime(string time)
+    private OneOf<AbsoluteTime, RelativeTime, Exception> ResolveTime(string time)
     {
         time = time.ToLowerInvariant();
 
-        if (TryParse(time, 'd', out var days))
-            return days * 86400;
+        if (TryParseRelative(time, 'd', 86400, out var days))
+            return days;
 
-        if (TryParse(time, 'h', out var hours))
-            return hours * 3600;
+        if (TryParseRelative(time, 'h', 3600, out var hours))
+            return hours;
 
-        if (TryParse(time, 'm', out var minutes))
-            return minutes * 60;
+        if (TryParseRelative(time, 'm', 60, out var minutes))
+            return minutes;
 
-        return 0;
+        if (TryParseAbsolute(time, out var result))
+            return result;
 
-        static bool TryParse(string value, char unit, out int result)
+        return new Exception($"Failed to parse time: {time}");
+
+        static bool TryParseRelative(
+            string value,
+            char unit,
+            uint multiplier,
+            [NotNullWhen(true)] out RelativeTime? result
+        )
         {
-            if (value.EndsWith(unit) && int.TryParse(value[..^1], out result) && result > 0)
+            if (value.EndsWith(unit) && uint.TryParse(value[..^1], out var val) && val > 0)
+            {
+                result = new RelativeTime(val * multiplier);
                 return true;
+            }
 
-            result = 0;
+            result = null;
             return false;
+        }
+
+        static bool TryParseAbsolute(string value, [NotNullWhen(true)] out AbsoluteTime? result)
+        {
+            result = null;
+
+            var parts = value
+                .Split('_', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .ToArray();
+            if (parts.Length != 2)
+                return false;
+
+            if (!DateTime.TryParse(parts[0], out var from) || !DateTime.TryParse(parts[1], out var to))
+                return false;
+
+            result = new AbsoluteTime(from.InUtc(), to.InUtc());
+
+            return true;
+        }
+    }
+
+    private record RelativeTime
+    {
+        [JsonPropertyName("type")]
+        public string Type { get; } = "relative";
+
+        [JsonPropertyName("from")]
+        public uint From { get; }
+
+        public RelativeTime(uint from)
+        {
+            From = from;
+        }
+    }
+
+    private record AbsoluteTime
+    {
+        [JsonPropertyName("type")]
+        public string Type { get; } = "absolute";
+
+        [JsonPropertyName("from")]
+        public string From { get; }
+
+        [JsonPropertyName("to")]
+        public string To { get; }
+
+        public AbsoluteTime(DateTime from, DateTime to)
+        {
+            From = from.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
+            To = to.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
         }
     }
 }

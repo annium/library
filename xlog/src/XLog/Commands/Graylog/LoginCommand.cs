@@ -17,7 +17,11 @@ internal class LoginCommand : AsyncCommand<LoginCommandConfiguration>, ICommandD
     private readonly IConfigurationManager _configurationManager;
     private readonly IHttpRequestFactory _httpRequestFactory;
 
-    public LoginCommand(IConfigurationManager configurationManager, IHttpRequestFactory httpRequestFactory, ILogger logger)
+    public LoginCommand(
+        IConfigurationManager configurationManager,
+        IHttpRequestFactory httpRequestFactory,
+        ILogger logger
+    )
     {
         _configurationManager = configurationManager;
         _httpRequestFactory = httpRequestFactory;
@@ -37,15 +41,18 @@ internal class LoginCommand : AsyncCommand<LoginCommandConfiguration>, ICommandD
 
     private async Task<string?> LogInAsync(LoginCommandConfiguration cfg)
     {
-        var response = await _httpRequestFactory.New(cfg.Server)
+        var response = await _httpRequestFactory
+            .New(cfg.Server)
             .Post("api/system/sessions")
             .Header("X-Requested-By", "cli")
-            .JsonContent(new
-            {
-                host = cfg.Server,
-                username = cfg.Login,
-                password = cfg.Password
-            })
+            .JsonContent(
+                new
+                {
+                    host = cfg.Server,
+                    username = cfg.Login,
+                    password = cfg.Password
+                }
+            )
             .AsResponseAsync(new { session_id = string.Empty });
         var sessionId = response.Data.session_id;
         if (!sessionId.IsNullOrWhiteSpace())

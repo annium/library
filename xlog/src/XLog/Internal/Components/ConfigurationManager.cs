@@ -10,19 +10,29 @@ namespace XLog.Internal.Components;
 
 internal class ConfigurationManager : IConfigurationManager
 {
-    private static readonly string ConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".xlog");
+    private static readonly string ConfigPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        ".xlog"
+    );
     private readonly ISerializer<string> _serializer;
     private readonly Configuration _config;
 
     public ConfigurationManager(IServiceProvider sp)
     {
         _serializer = sp.ResolveKeyed<ISerializer<string>>(SerializerKey.CreateDefault(Constants.MediaType));
-        _config = File.Exists(ConfigPath) ? _serializer.Deserialize<Configuration>(File.ReadAllText(ConfigPath)) : new();
+        _config = File.Exists(ConfigPath)
+            ? _serializer.Deserialize<Configuration>(File.ReadAllText(ConfigPath))
+            : new();
     }
 
     public void GraylogLogin(string name, string server, string login, string pass)
     {
-        _config.Graylog[name] = new GraylogCredentials { Server = server, Login = login, Pass = pass };
+        _config.Graylog[name] = new GraylogCredentials
+        {
+            Server = server,
+            Login = login,
+            Pass = pass
+        };
         Save();
     }
 
