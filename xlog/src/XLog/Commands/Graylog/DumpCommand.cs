@@ -59,7 +59,7 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
         if (opts is null)
             return;
 
-        var (searchId, queryId, subId) = opts.Value;
+        var (searchId, subId) = opts.Value;
         var jobId = await ExportAsync(server, sessionId, searchId, subId);
         if (jobId is null)
             return;
@@ -165,92 +165,7 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
         return null;
     }
 
-    private async Task<bool> ExecuteAsync(string server, string sessionId, string searchId, string queryId)
-    {
-        var response = await _httpRequestFactory.New(server)
-            .Post($"api/views/search/{searchId}/execute")
-            .Header("X-Requested-By", "cli")
-            .Cookie("authentication", sessionId)
-            .JsonContent(new
-            {
-                global_override = new
-                {
-                    keep_queries = new[]
-                    {
-                        queryId
-                    }
-                },
-                parameter_bindings = new { }
-            })
-            .RunAsync();
-        if (response.IsSuccess)
-            return true;
-
-        this.Error<string>("Execute failed: {response}", await response.Content.ReadAsStringAsync());
-        return false;
-    }
-
-    private async Task<(string searchId, string queryId, string subId)?> SaveMetadataAsync(string server, string sessionId, string query, int time)
-    {
-        var searchId = ObjectId.GenerateNewId().ToString();
-        var queryId = Guid.NewGuid().ToString();
-        var subId = Guid.NewGuid().ToString();
-
-        var response = await _httpRequestFactory.New(server)
-            .Post("api/views/search/metadata")
-            .Header("X-Requested-By", "cli")
-            .Cookie("authentication", sessionId)
-            .JsonContent(new
-            {
-                id = searchId,
-                queries = new[]
-                {
-                    new
-                    {
-                        id = queryId,
-                        query = new
-                        {
-                            type = "elasticsearch",
-                            query_string = query
-                        },
-                        timerange = new
-                        {
-                            type = "relative",
-                            from = time
-                        },
-                        search_types = new[]
-                        {
-                            new
-                            {
-                                offset = 0,
-                                decorators = Array.Empty<string>(),
-                                type = "messages",
-                                id = subId,
-                                limit = 150,
-                                filters = Array.Empty<string>(),
-                                sort = new[]
-                                {
-                                    new
-                                    {
-                                        field = "timestamp",
-                                        order = "ASC"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                parameters = Array.Empty<string>()
-            })
-            .RunAsync();
-        if (response.IsSuccess)
-            return (searchId, queryId, subId);
-
-        this.Error<string>("Metadata save failed: {response}", await response.Content.ReadAsStringAsync());
-        return null;
-    }
-
-    private async Task<(string searchId, string queryId, string subId)?> SearchAsync(string server, string sessionId, string query, int time)
+    private async Task<(string searchId, string subId)?> SearchAsync(string server, string sessionId, string query, int time)
     {
         var searchId = ObjectId.GenerateNewId().ToString();
         var queryId = Guid.NewGuid().ToString();
@@ -305,7 +220,7 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
             })
             .RunAsync();
         if (response.IsSuccess)
-            return (searchId, queryId, subId);
+            return (searchId, subId);
 
         this.Error<string>("Search failed: {response}", await response.Content.ReadAsStringAsync());
         return null;
