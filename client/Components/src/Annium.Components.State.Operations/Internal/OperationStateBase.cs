@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Annium.Components.State.Core;
 using Annium.Data.Operations;
 using Annium.Linq;
@@ -27,6 +28,35 @@ internal abstract class OperationStateBase : ObservableState, IOperationStateBas
         HasSucceed = false;
         HasFailed = false;
         NotifyChanged();
+    }
+
+    public string ErrorState()
+    {
+        var sb = new StringBuilder();
+
+        if (PlainErrors.Count > 0)
+        {
+            sb.AppendLine($"{PlainErrors.Count} plain errors:");
+            foreach (var error in PlainErrors)
+                sb.AppendLine($"- {error}");
+        }
+        else
+            sb.AppendLine("no plain errors");
+
+        if (LabeledErrors.Count > 0)
+        {
+            sb.AppendLine($"{LabeledErrors.Count} labeled errors:");
+            foreach (var (label, errors) in LabeledErrors)
+            {
+                sb.AppendLine($"- {label}:");
+                foreach (var error in errors)
+                    sb.AppendLine($"-- {error}");
+            }
+        }
+        else
+            sb.AppendLine("no labeled errors");
+
+        return sb.ToString();
     }
 
     protected void SucceedInternal()
