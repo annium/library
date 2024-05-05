@@ -48,8 +48,8 @@ internal class LoadSetupTask : IFuncTask<RootSetup, string>
         return new TargetSetup(
             cfg.Copy.Select(x => Path.GetFullPath(FilePath(source, x))).ToArray(),
             cfg.To.Select(x =>
-                Path.GetFullPath(x.StartsWith('/') ? Path.Combine(root, x[1..]) : Path.Combine(root, path, x))
-            )
+                    Path.GetFullPath(x.StartsWith('/') ? Path.Combine(root, x[1..]) : Path.Combine(root, path, x))
+                )
                 .ToArray()
         );
     }
