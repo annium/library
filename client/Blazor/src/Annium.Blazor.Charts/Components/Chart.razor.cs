@@ -110,7 +110,7 @@ public partial class Chart : ILogSubject, IAsyncDisposable
 
     private bool ChangeZoom(int delta)
     {
-        var zoomIndex = ResolveZoomIndex();
+        var zoomIndex = _chartContext.ResolveZoomIndex();
 
         var newZoomIndex = (zoomIndex + delta).Within(0, _chartContext.Zooms.Count - 1);
         if (newZoomIndex == zoomIndex)
@@ -119,19 +119,6 @@ public partial class Chart : ILogSubject, IAsyncDisposable
         _chartContext.SetZoom(_chartContext.Zooms[newZoomIndex]);
 
         return true;
-    }
-
-    private int ResolveZoomIndex()
-    {
-        var index = 0;
-        foreach (var zoom in _chartContext.Zooms)
-        {
-            if (zoom == _chartContext.Zoom)
-                return index;
-            index++;
-        }
-
-        throw new InvalidOperationException("Failed to resolve zoom index");
     }
 
     private bool HandleScrollDelta(decimal delta)

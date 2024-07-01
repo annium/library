@@ -12,6 +12,7 @@ public class Style : RuleSet
     public readonly CssRule CandlesPane = Rule.Class().FlexGrow(1);
 
     public readonly CssRule Resolution = Rule.Class().HeightPx(20).RightRem(1).TopRem(1);
+    public readonly CssRule Zoom = Rule.Class().RightRem(1).BottomRem(1);
 
     public readonly CssRule LinesPane = Rule.Class().HeightPercent(8);
 
