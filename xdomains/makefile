@@ -2,6 +2,9 @@ build:
 	@dotnet build xdomains.csproj
 
 run:
-	@dotnet bin/Debug/netcoreapp3.1/xdomains.dll query -f
+	@dotnet run -- query -f
+
+zones:
+	@cat raw.txt | cut -d$$'\t' -f 1 > zones.txt
 
 .PHONY: $(MAKECMDGOALS)

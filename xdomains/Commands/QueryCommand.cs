@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
@@ -23,8 +22,17 @@ internal class QueryCommand : AsyncCommand<QueryCommandConfiguration>, ICommandD
 
     public override Task HandleAsync(QueryCommandConfiguration cfg, CancellationToken ct)
     {
-        var query = File.ReadAllLines("query.txt").OfType<string>().ToArray();
-        var filter = cfg.Filter ? File.ReadAllLines("filter.txt").OfType<string>().ToArray() : Array.Empty<string>();
+        const string queryFile = "query.txt";
+        const string filterFile = "filter.txt";
+
+        if (!File.Exists(queryFile))
+            Console.WriteLine($"{queryFile} not found");
+
+        if (cfg.Filter && !File.Exists(filterFile))
+            Console.WriteLine($"{filterFile} not found");
+
+        var query = File.ReadAllLines(queryFile);
+        var filter = cfg.Filter && File.Exists(filterFile) ? File.ReadAllLines(filterFile) : [];
 
         return _worker.RunAsync(query, filter, cfg.DegreeOfParallelism, ct);
     }
