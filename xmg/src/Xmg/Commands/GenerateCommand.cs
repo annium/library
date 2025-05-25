@@ -35,7 +35,11 @@ internal class GenerateCommand : Command<GenerateCommandConfig>, ICommandDescrip
 
     public override void Handle(GenerateCommandConfig cfg, CancellationToken ct)
     {
-        this.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
+        this.Debug<string, string>(
+            "Load '{projectName}' configuration from '{assembly}'",
+            cfg.ProjectName,
+            cfg.Assembly
+        );
 
         var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
         var configurationCfg = new Config(cfg.Assembly);
@@ -44,13 +48,23 @@ internal class GenerateCommand : Command<GenerateCommandConfig>, ICommandDescrip
         var migrationName = cfg.Name;
         var migrationVersion = _timeProvider.Now.ToDateTimeOffset().ToString("yyyyMMdd");
 
-        this.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) from Database model");
+        this.Debug<string, string, string>(
+            "Create '{projectName}' migration '{migrationName}' ({migrationVersion}) from Database model",
+            cfg.ProjectName,
+            migrationName,
+            migrationVersion
+        );
 
         var migrator = _migratorFactory.GetForProvider(cfg.MigrationProvider);
         var migrationCfg = new Migration.Abstractions.Config(cfg.Namespace, migrationName, migrationVersion);
         var migration = migrator.CreateMigration(database, migrationCfg);
 
-        this.Debug($"Create '{cfg.ProjectName}' migration '{migrationName}' ({migrationVersion}) files");
+        this.Debug<string, string, string>(
+            "Create '{projectName}' migration '{migrationName}' ({migrationVersion}) files",
+            cfg.ProjectName,
+            migrationName,
+            migrationVersion
+        );
         if (!Directory.Exists(cfg.Output))
             Directory.CreateDirectory(cfg.Output);
         foreach (var (file, content) in migration.Files)

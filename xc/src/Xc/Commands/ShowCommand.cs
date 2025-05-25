@@ -18,6 +18,6 @@ internal class ShowCommand : Command<RootCommandConfiguration>, ICommandDescript
 
     public override void Handle(RootCommandConfiguration cfg, CancellationToken ct)
     {
-        var setup = _createLoadSetupTask().Execute(cfg.Path);
+        _createLoadSetupTask().Execute(cfg.Path);
     }
 }

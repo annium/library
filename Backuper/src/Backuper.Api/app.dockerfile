@@ -1,8 +1,8 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine as builder
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine as builder
 COPY . /code
 RUN dotnet publish -c release -o /app /code/Backuper.Api
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
 RUN apk add --no-cache \
     curl \
     postgresql-client

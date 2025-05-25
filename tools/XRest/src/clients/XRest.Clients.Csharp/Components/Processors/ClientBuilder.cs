@@ -11,10 +11,10 @@ namespace XRest.Clients.Csharp.Components.Processors;
 
 internal static class ClientBuilder
 {
-    private static readonly Namespace SystemThreadingNamespace = Constants.SystemThreadingNamespace.ToNamespace();
-    private static readonly Namespace SystemThreadingTasksNamespace =
+    private static readonly Namespace _systemThreadingNamespace = Constants.SystemThreadingNamespace.ToNamespace();
+    private static readonly Namespace _systemThreadingTasksNamespace =
         Constants.SystemThreadingTasksNamespace.ToNamespace();
-    private static readonly Namespace AnniumNetHttpNamespace = Constants.AnniumNetHttpNamespace.ToNamespace();
+    private static readonly Namespace _anniumNetHttpNamespace = Constants.AnniumNetHttpNamespace.ToNamespace();
 
     public static IClientView BuildClient(
         Namespace clientsNamespace,
@@ -28,7 +28,7 @@ internal static class ClientBuilder
 
         if (controllers.Count == 1)
             return new ClientContainerView(
-                new[] { controllers.First().Namespace, AnniumNetHttpNamespace }
+                new[] { controllers.First().Namespace, _anniumNetHttpNamespace }
                     .ToUsagesFrom(clientsNamespace)
                     .ToUsageStrings(),
                 clientsNamespace.ToString(),
@@ -47,7 +47,7 @@ internal static class ClientBuilder
 
         var usages = childControllers
             .Select(x => x.Namespace)
-            .Append(AnniumNetHttpNamespace)
+            .Append(_anniumNetHttpNamespace)
             .Concat(ancestors.Keys)
             .ToUsagesFrom(clientsNamespace)
             .ToUsageStrings();
@@ -62,7 +62,7 @@ internal static class ClientBuilder
     private static IClientView BuildClientNode(ControllerView controller)
     {
         var usages = controller
-            .Usages.Concat(new[] { SystemThreadingNamespace, SystemThreadingTasksNamespace, AnniumNetHttpNamespace })
+            .Usages.Concat([_systemThreadingNamespace, _systemThreadingTasksNamespace, _anniumNetHttpNamespace])
             .ToUsagesFrom(controller.Namespace)
             .ToUsageStrings();
         var @namespace = controller.Namespace.ToString();

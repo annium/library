@@ -19,7 +19,7 @@ internal static class DefaultValueProcessor
             RecordRef => New,
             StructRef => Default,
             InterfaceRef => Default,
-            _ => throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported ref {reference}")
+            _ => throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported ref {reference}"),
         };
 
     private static string Resolve(BaseTypeRef reference)

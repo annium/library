@@ -14,9 +14,9 @@ public class StateFactory
 
     private readonly ConnectionFactory _connectionFactory;
 
-    private readonly StorageFactory _storageFactory;
+    // private readonly StorageFactory _storageFactory;
 
-    private readonly ChannelFactory _channelFactory;
+    // private readonly ChannelFactory _channelFactory;
 
     public StateFactory(
         Configuration config,
@@ -27,8 +27,8 @@ public class StateFactory
     {
         _config = config;
         _connectionFactory = connectionFactory;
-        _storageFactory = storageFactory;
-        _channelFactory = channelFactory;
+        // _storageFactory = storageFactory;
+        // _channelFactory = channelFactory;
     }
 
     public State GetState()
@@ -48,10 +48,11 @@ public class StateFactory
 
     private Plan ResolvePlan(string name, PlanConfiguration cfg)
     {
-        var storage = _storageFactory.CreateStorage(cfg.Storage);
-        var channels = ResolveAll(cfg.Notifications, (n, c) => _channelFactory.CreateChannel(c));
-
-        return new Plan(name, storage, cfg.Interval, cfg.Capacity, channels);
+        throw new NotImplementedException();
+        // var storage = _storageFactory.CreateStorage(cfg.Storage);
+        // var channels = ResolveAll(cfg.Notifications, (n, c) => _channelFactory.CreateChannel(c));
+        //
+        // return new Plan(name, storage, cfg.Interval, cfg.Capacity, channels);
     }
 
     private IReadOnlyDictionary<string, TR> ResolveAll<TC, TR>(

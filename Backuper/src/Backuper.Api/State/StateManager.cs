@@ -30,22 +30,20 @@ public class StateManager : ILogSubject
             throw new InvalidOperationException($"State is already set");
 
         State = state;
+#pragma warning disable VSTHRD002
         StartAsync().GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
     }
 
     private async Task StartAsync()
     {
-        this.Debug($"StateManager starting");
+        this.Debug("StateManager starting");
 
-        this.Debug($"Setup connections");
+        this.Debug("Setup connections");
         var connections = State!.Servers.Values.Select(s => s.Connection).ToArray();
         await Task.WhenAll(connections.Select(s => s.SetupAsync()));
 
-        this.Debug($"Setup storages");
-        var storages = State.Servers.Values.SelectMany(s => s.Plans.Values).Select(p => p.Storage).ToArray();
-        await Task.WhenAll(storages.Select(s => s.SetupAsync()));
-
-        this.Debug($"Schedule operations");
+        this.Debug("Schedule operations");
         foreach (var server in State.Servers.Values)
         foreach (var plan in server.Plans.Values)
             _scheduler.Schedule(() => BackupAsync(server, plan), plan.Interval);
@@ -81,14 +79,16 @@ public class StateManager : ILogSubject
             if (File.Exists(path))
                 File.Delete(path);
 
-            await NotifyAll(ch => ch.InfoAsync($"{server} {plan}: scheduled backup {backupId} procedure succeed"));
+            await NotifyAllAsync(ch => ch.InfoAsync($"{server} {plan}: scheduled backup {backupId} procedure succeed"));
         }
         catch (Exception e)
         {
-            await NotifyAll(ch => ch.ErrorAsync($"{server} {plan}: scheduled backup {backupId} procedure failed: {e}"));
+            await NotifyAllAsync(ch =>
+                ch.ErrorAsync($"{server} {plan}: scheduled backup {backupId} procedure failed: {e}")
+            );
         }
 
-        Task NotifyAll(Func<IChannel, Task> notifyChannel) =>
+        Task NotifyAllAsync(Func<IChannel, Task> notifyChannel) =>
             Task.WhenAll(plan.Notifications.Values.Select(notifyChannel));
     }
 }

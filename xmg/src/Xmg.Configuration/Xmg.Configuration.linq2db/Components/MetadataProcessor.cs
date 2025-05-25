@@ -19,7 +19,7 @@ internal class MetadataProcessor : IMetadataProcessor
             if (schemas.TryGetValue(schema, out var tables))
                 tables.Add(table);
             else
-                schemas[schema] = new List<Table> { table };
+                schemas[schema] = [table];
         }
 
         return new Database(schemas.Select(x => new Schema(x.Key, x.Value)).ToArray());
@@ -36,10 +36,7 @@ internal class MetadataProcessor : IMetadataProcessor
             .Where(x => x != null!)
             .ToArray();
 
-        return (
-            table.Schema ?? string.Empty,
-            new Table(table.Name, columns, primaryKey, Array.Empty<TableIndex>(), foreignKeys)
-        );
+        return (table.Schema ?? string.Empty, new Table(table.Name, columns, primaryKey, [], foreignKeys));
     }
 
     private TableColumn? ProcessColumn(TableMetadata table, ColumnMetadata column)

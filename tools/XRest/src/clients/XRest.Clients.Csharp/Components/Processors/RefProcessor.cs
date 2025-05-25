@@ -24,7 +24,7 @@ internal static class RefProcessor
             StructRef x => Process(x, ctx),
             InterfaceRef x => Process(x, ctx),
             PromiseRef x => Process(x, ctx),
-            _ => throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported ref {reference}")
+            _ => throw new ArgumentOutOfRangeException(nameof(reference), reference, $"Unsupported ref {reference}"),
         };
 
     private static string Process(BaseTypeRef reference, ProcessingContext ctx)

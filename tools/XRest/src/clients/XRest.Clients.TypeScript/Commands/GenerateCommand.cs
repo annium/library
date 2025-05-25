@@ -29,17 +29,17 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ICo
 
     public override async Task HandleAsync(GenerateCommandConfiguration cfg, CancellationToken ct)
     {
-        this.Info($"Generate '{cfg.ProjectName}' client");
+        this.Info<string>("Generate '{projectName}' client", cfg.ProjectName);
 
-        this.Info($"Load '{cfg.ProjectName}' model");
-        var model = await _apiModelLoader.Load(cfg);
+        this.Info<string>("Load '{projectName}' model", cfg.ProjectName);
+        var model = await _apiModelLoader.LoadAsync(cfg);
 
         this.Info("Process api model to api view");
         var view = _processor.Process(model);
 
-        this.Info($"Write api view to {cfg.Output}");
+        this.Info<string>("Write api view to {output}", cfg.Output);
         _writer.Write(cfg.Output, view);
-        this.Info($"Client written to {cfg.Output}");
+        this.Info<string>("Client written to {output}", cfg.Output);
     }
 }
 

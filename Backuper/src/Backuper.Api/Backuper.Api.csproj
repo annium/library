@@ -1,25 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-    <PropertyGroup>
-        <PackageId>Backuper.Api</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>Backuper Api</Description>
-        <Solutions></Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Exe</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>false</IsPackable>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="../Backuper.Connection.PostgreSQL/Backuper.Connection.PostgreSQL.csproj" />
-        <ProjectReference Include="../Backuper.Notification.Slack/Backuper.Notification.Slack.csproj" />
-        <ProjectReference Include="../Backuper.Storage/Backuper.Storage.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Annium.AspNetCore.Extensions" Version="0.1.0" />
-        <PackageReference Include="Annium.Configuration.Yaml" Version="0.1.0" />
-        <PackageReference Include="Annium.Extensions.Jobs" Version="0.1.0" />
-        <PackageReference Include="Annium.Logging.Microsoft" Version="0.1.0" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Tools</Solutions>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Backuper.Connection.PostgreSQL/Backuper.Connection.PostgreSQL.csproj" />
+    <ProjectReference Include="../Backuper.Notification.Slack/Backuper.Notification.Slack.csproj" />
+    <ProjectReference Include="../Backuper.Storage/Backuper.Storage.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.AspNetCore.Extensions" />
+    <PackageReference Include="Annium.Configuration.Yaml" />
+    <PackageReference Include="Annium.Extensions.Jobs" />
+    <PackageReference Include="Annium.Logging.Microsoft" />
+  </ItemGroup>
 </Project>

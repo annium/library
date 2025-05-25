@@ -1,26 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>XLog</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>XLog</Description>
-        <Solutions></Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Exe</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>true</IsPackable>
-        <Nullable>enable</Nullable>
-        <PackAsTool>true</PackAsTool>
-        <ToolCommandName>xlog</ToolCommandName>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
-        <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
-        <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
-        <PackageReference Include="Annium.Net.Http" Version="0.1.0" />
-        <PackageReference Include="Annium.Serialization.Json" Version="0.1.0" />
-        <PackageReference Include="Annium.Serialization.Yaml" Version="0.1.0" />
-        <PackageReference Include="Humanizer" Version="2.14.1" />
-        <PackageReference Include="MongoDB.Driver" Version="2.24.0" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Tools</Solutions>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>xlog</ToolCommandName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Core.Entrypoint" />
+    <PackageReference Include="Annium.Extensions.Arguments" />
+    <PackageReference Include="Annium.Logging.Console" />
+    <PackageReference Include="Annium.Net.Http" />
+    <PackageReference Include="Annium.Serialization.Json" />
+    <PackageReference Include="Annium.Serialization.Yaml" />
+    <PackageReference Include="Humanizer" />
+    <PackageReference Include="MongoDB.Driver" />
+  </ItemGroup>
 </Project>

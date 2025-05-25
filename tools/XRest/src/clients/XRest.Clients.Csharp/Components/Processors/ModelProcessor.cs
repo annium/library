@@ -18,7 +18,7 @@ internal static class ModelProcessor
             StructModel x => Process(x, ctx),
             InterfaceModel x => Process(x, ctx),
             EnumModel x => Process(x, ctx),
-            _ => throw new ArgumentOutOfRangeException(nameof(model), model, $"Unsupported model {model}")
+            _ => throw new ArgumentOutOfRangeException(nameof(model), model, $"Unsupported model {model}"),
         };
 
     private static StructView Process(StructModel model, ProcessingContext ctx)
@@ -100,6 +100,6 @@ internal static class ModelProcessor
         var @namespace = model.Namespace.Prepend(ctx.ModelsNamespace);
         var name = model.Name;
 
-        return new EnumView(Array.Empty<string>(), @namespace, name, model.Values.ToDictionary());
+        return new EnumView([], @namespace, name, model.Values.ToDictionary());
     }
 }

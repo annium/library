@@ -54,27 +54,27 @@ internal static class ActionModelBuilder
     )
     {
         if (ParseHelper.IsSkippedType(param.ParameterType))
-            return Array.Empty<ParameterModel>();
+            return [];
 
         if (routeParameters.Contains(param.Name))
-            return new[]
-            {
+            return
+            [
                 new ParameterModel(
                     ParameterLocationEnum.Path,
                     ctx.Map(param.ParameterType.ToContextualType()),
                     param.Name
-                )
-            };
+                ),
+            ];
 
         if (ParseHelper.IsAllowedQueryType(param.ParameterType, ctx.Config))
-            return new[]
-            {
+            return
+            [
                 new ParameterModel(
                     ParameterLocationEnum.Query,
                     ctx.Map(param.ParameterType.ToContextualType()),
                     param.Name
-                )
-            };
+                ),
+            ];
 
         return param
             .ParameterType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)

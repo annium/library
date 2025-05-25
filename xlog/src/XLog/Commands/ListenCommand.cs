@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -25,8 +26,12 @@ internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, IComman
     public override async Task HandleAsync(ListenCommandConfiguration cfg, CancellationToken ct)
     {
         var endpoint = IPEndPointExt.Parse(cfg.Endpoint, 1111);
-        this.Info($"Listen at {endpoint} {(cfg.KeepAlive > 0 ? $"with KeepAlive {cfg.KeepAlive}s" : "w/o KeepAlive")}");
-        Func<byte[], NetworkStream, Task<int>> receive = cfg.KeepAlive > 0 ? ReceiveKeepAlive : Receive;
+        this.Info<IPEndPoint, string>(
+            "Listen at {endpoint} {keepAlive}",
+            endpoint,
+            cfg.KeepAlive > 0 ? $"with KeepAlive {cfg.KeepAlive}s" : "w/o KeepAlive"
+        );
+        Func<byte[], NetworkStream, Task<int>> receive = cfg.KeepAlive > 0 ? ReceiveKeepAliveAsync : ReceiveAsync;
         var server = new TcpListener(endpoint);
         server.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 2);
         server.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 2);
@@ -41,7 +46,7 @@ internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, IComman
             var pool = ArrayPool<byte>.Shared;
             var buffer = pool.Rent(1024);
 
-            TcpClient? client = default!;
+            TcpClient? client = null;
             try
             {
                 client = await server.AcceptTcpClientAsync();
@@ -60,15 +65,15 @@ internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, IComman
             }
             catch (ObjectDisposedException e)
             {
-                this.Debug($"{nameof(ObjectDisposedException)}: {e}");
+                this.Debug("{type}: {exception}", nameof(ObjectDisposedException), e);
             }
             catch (IOException e)
             {
-                this.Debug($"{nameof(IOException)}: {e}");
+                this.Debug("{type}: {exception}", nameof(IOException), e);
             }
             catch (SocketException e)
             {
-                this.Debug($"{nameof(SocketException)}: {e}");
+                this.Debug("{type}: {exception}", nameof(SocketException), e);
             }
             finally
             {
@@ -86,7 +91,7 @@ internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, IComman
 
         server.Stop();
 
-        async Task<int> ReceiveKeepAlive(byte[] buffer, NetworkStream ns)
+        async Task<int> ReceiveKeepAliveAsync(byte[] buffer, NetworkStream ns)
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(TimeSpan.FromSeconds(cfg.KeepAlive));
@@ -94,7 +99,7 @@ internal class ListenCommand : AsyncCommand<ListenCommandConfiguration>, IComman
             return await ns.ReadAsync(buffer, 0, buffer.Length, cts.Token);
         }
 
-        async Task<int> Receive(byte[] buffer, NetworkStream ns)
+        async Task<int> ReceiveAsync(byte[] buffer, NetworkStream ns)
         {
             return await ns.ReadAsync(buffer, 0, buffer.Length, ct);
         }

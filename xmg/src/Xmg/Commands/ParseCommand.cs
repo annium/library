@@ -29,11 +29,15 @@ internal class ParseCommand : Command<ParseCommandConfig>, ICommandDescriptor, I
 
     public override void Handle(ParseCommandConfig cfg, CancellationToken ct)
     {
-        this.Debug($"Load '{cfg.ProjectName}' configuration from '{cfg.Assembly}'");
+        this.Debug<string, string>(
+            "Load '{projectName}' configuration from '{assembly}'",
+            cfg.ProjectName,
+            cfg.Assembly
+        );
         var configurator = _configuratorFactory.GetForProvider(cfg.ConfigurationProvider);
         var database = configurator.LoadConfiguration(new Config(cfg.Assembly));
 
-        this.Debug($"Save '{cfg.ProjectName}' configuration to {cfg.Output}");
+        this.Debug<string, string>("Save '{projectName}' configuration to {output}", cfg.ProjectName, cfg.Output);
         File.WriteAllText(cfg.Output, _serializer.Serialize(database));
     }
 }

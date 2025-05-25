@@ -12,7 +12,7 @@ internal class StatsCommand : Command<StatsCommandConfiguration>, ICommandDescri
 {
     public static string Id => "stats";
     public static string Description => "log stats";
-    private static readonly string At = " at ";
+    private static readonly string _at = " at ";
     public ILogger Logger { get; }
 
     public StatsCommand(ILogger logger)
@@ -39,7 +39,7 @@ internal class StatsCommand : Command<StatsCommandConfiguration>, ICommandDescri
             if (!line.StartsWith('['))
                 continue;
 
-            var start = line.IndexOf(At, StringComparison.InvariantCulture) + 4;
+            var start = line.IndexOf(_at, StringComparison.InvariantCulture) + 4;
             if (start < 4)
                 continue;
 

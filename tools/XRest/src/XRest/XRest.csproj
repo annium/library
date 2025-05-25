@@ -1,24 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>XRest</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>XRest</Description>
-        <Solutions></Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Exe</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>true</IsPackable>
-        <Nullable>enable</Nullable>
-        <PackAsTool>true</PackAsTool>
-        <ToolCommandName>xrest</ToolCommandName>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="../clients/XRest.Clients.Csharp/XRest.Clients.Csharp.csproj" />
-        <ProjectReference Include="../clients/XRest.Clients.TypeScript/XRest.Clients.TypeScript.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
-        <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Tools</Solutions>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>xrest</ToolCommandName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../clients/XRest.Clients.Csharp/XRest.Clients.Csharp.csproj" />
+    <ProjectReference Include="../clients/XRest.Clients.TypeScript/XRest.Clients.TypeScript.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Core.Entrypoint" />
+    <PackageReference Include="Annium.Logging.Console" />
+  </ItemGroup>
 </Project>

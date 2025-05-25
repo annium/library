@@ -24,7 +24,7 @@ internal class ClientWriter
             output,
             "HttpRequestExtensions",
             "Templates.HttpRequestExtensions",
-            new { Usages = new[] { Constants.AnniumNetHttpNamespace }, client.Namespace, }
+            new { Usages = new[] { Constants.AnniumNetHttpNamespace }, client.Namespace }
         );
 
         if (generateTestClient)

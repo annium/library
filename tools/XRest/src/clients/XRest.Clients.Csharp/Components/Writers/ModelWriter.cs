@@ -83,6 +83,6 @@ internal class ModelWriter
             StructView x => x.ArgsCount * 100,
             InterfaceView x => x.ArgsCount,
             EnumView => -1,
-            _ => throw new ArgumentOutOfRangeException(nameof(model), model, $"Unsupported model {model}")
+            _ => throw new ArgumentOutOfRangeException(nameof(model), model, $"Unsupported model {model}"),
         };
 }

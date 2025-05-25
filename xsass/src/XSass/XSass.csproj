@@ -1,27 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>XSass</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>SassBuilder</Description>
-        <Solutions></Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Exe</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>true</IsPackable>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Annium.Configuration.Yaml" Version="0.1.0" />
-        <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
-        <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
-        <PackageReference Include="LibSassHost" Version="1.4.0" />
-        <PackageReference Include="LibSassHost.Native.linux-x64" Version="1.4.0" />
-        <PackageReference Include="LibSassHost.Native.osx-x64" Version="1.4.0" />
-        <PackageReference Include="LibSassHost.Native.win-x64" Version="1.4.0" />
-    </ItemGroup>
-    <PropertyGroup>
-        <NuspecFile>package.nuspec</NuspecFile>
-        <NuspecProperties>publishDir=$([MSBuild]::NormalizeDirectory($(MSBuildProjectDirectory)/bin/$(Configuration)))</NuspecProperties>
-    </PropertyGroup>
+  <PropertyGroup>
+    <Solutions>Tools</Solutions>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Configuration.Yaml" />
+    <PackageReference Include="Annium.Core.Entrypoint" />
+    <PackageReference Include="Annium.Logging.Console" />
+    <PackageReference Include="LibSassHost" />
+    <PackageReference Include="LibSassHost.Native.linux-x64" />
+    <PackageReference Include="LibSassHost.Native.osx-x64" />
+    <PackageReference Include="LibSassHost.Native.win-x64" />
+  </ItemGroup>
+  <PropertyGroup>
+    <NuspecFile>package.nuspec</NuspecFile>
+    <NuspecProperties>publishDir=$([MSBuild]::NormalizeDirectory($(MSBuildProjectDirectory)/bin/$(Configuration)))</NuspecProperties>
+  </PropertyGroup>
 </Project>

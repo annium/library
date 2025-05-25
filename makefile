@@ -1,21 +1,27 @@
 REGISTRY := registry.annium.com
 
-format:
-	xs format -sc -ic
-	dotnet csharpier .
-
 setup:
 	xs remote restore -user $(user) -password $(pass)
 	dotnet tool restore
 
+format:
+	dotnet csharpier format .
+	xx format -sc -ic
+
+format-full: format
+	dotnet format style
+	dotnet format analyzers
+
 update:
-	xs update all -sc -ic
+	xx update all -sc -ic
 
 clean:
-	xs clean -sc -ic
+	xx clean -sc -ic
+	find . -type f -name '*.nupkg' | xargs rm
 
+buildNumber?=0
 build:
-	dotnet build -c Release --nologo -v q
+	dotnet build -c Release --nologo -v q -p:BuildNumber=$(buildNumber)
 
 test:
 	dotnet test -c Release --no-build --nologo -v q

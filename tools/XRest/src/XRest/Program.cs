@@ -7,4 +7,4 @@ await using var entry = Entrypoint.Default.UseServicePack<ServicePack>().Setup()
 
 var (provider, ct) = entry;
 
-Commander.Run<Group>(provider, args, ct);
+await Commander.RunAsync<Group>(provider, args, ct);

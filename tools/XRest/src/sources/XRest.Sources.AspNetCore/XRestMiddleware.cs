@@ -38,7 +38,7 @@ internal class XRestMiddleware
         _description = new Lazy<string>(BuildApiDescription, isThreadSafe: true);
     }
 
-    public async Task Invoke(HttpContext context)
+    public async Task InvokeAsync(HttpContext context)
     {
         if (!context.Request.Path.Equals($"/{Constants.ApiSourceEndpoint}"))
         {

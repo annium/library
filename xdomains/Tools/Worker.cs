@@ -34,7 +34,7 @@ internal class Worker
         var i = -1;
         Trace();
 
-        await CheckDomains(domains, HandleResolved, degreeOfParallelism, ct);
+        await CheckDomainsAsync(domains, HandleResolved, degreeOfParallelism, ct);
 
         void HandleResolved(string domain, string result)
         {
@@ -44,7 +44,7 @@ internal class Worker
             {
                 Trace();
                 if (isFree)
-                    File.AppendAllLines(Path.Combine("results", $"{domain.Split('.')[0]}.txt"), new[] { domain });
+                    File.AppendAllLines(Path.Combine("results", $"{domain.Split('.')[0]}.txt"), [domain]);
             }
         }
 
@@ -65,7 +65,7 @@ internal class Worker
             yield return $"{name}{zone}";
     }
 
-    private Task CheckDomains(
+    private Task CheckDomainsAsync(
         string[] domains,
         Action<string, string> done,
         int degreeOfParallelism,

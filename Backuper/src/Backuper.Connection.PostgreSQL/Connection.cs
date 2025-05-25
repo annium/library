@@ -29,11 +29,9 @@ public class Connection : IConnection
         var path = Path.GetTempFileName();
         var result = await _shell
             .Cmd(
-                "pg_dump -Fc -v",
-                $"--dbname=postgresql://{_cfg.User}:{_cfg.Pass}@{_cfg.Host}:{_cfg.Port}/{_cfg.Db}",
-                $"-f {path}"
+                $"pg_dump -Fc -v --dbname=postgresql://{_cfg.User}:{_cfg.Pass}@{_cfg.Host}:{_cfg.Port}/{_cfg.Db} -f {path}"
             )
-            .Pipe(true)
+            .Print(true)
             .RunAsync();
         if (!result.IsSuccess)
             throw new InvalidOperationException("backup failed");
@@ -45,11 +43,9 @@ public class Connection : IConnection
     {
         var result = await _shell
             .Cmd(
-                "pg_restore -Fc --clean --if-exists -v",
-                $"--dbname=postgresql://{_cfg.User}:{_cfg.Pass}@{_cfg.Host}:{_cfg.Port}/{_cfg.Db}",
-                path
+                $"pg_restore -Fc --clean --if-exists -v --dbname=postgresql://{_cfg.User}:{_cfg.Pass}@{_cfg.Host}:{_cfg.Port}/{_cfg.Db} {path}"
             )
-            .Pipe(true)
+            .Print(true)
             .RunAsync();
         if (!result.IsSuccess)
             throw new InvalidOperationException("restore failed");

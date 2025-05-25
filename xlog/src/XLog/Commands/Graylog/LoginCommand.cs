@@ -50,7 +50,7 @@ internal class LoginCommand : AsyncCommand<LoginCommandConfiguration>, ICommandD
                 {
                     host = cfg.Server,
                     username = cfg.Login,
-                    password = cfg.Password
+                    password = cfg.Password,
                 }
             )
             .AsResponseAsync(new { session_id = string.Empty });

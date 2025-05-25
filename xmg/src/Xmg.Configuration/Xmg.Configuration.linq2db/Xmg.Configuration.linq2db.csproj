@@ -1,21 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>Xmg.Configuration.linq2db</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>Xmg.Configuration.linq2db</Description>
-        <Solutions></Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Library</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>false</IsPackable>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="../Xmg.Configuration.Abstractions/Xmg.Configuration.Abstractions.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Annium.Core.Runtime.Loader" Version="0.1.0" />
-        <PackageReference Include="Annium.linq2db.Extensions" Version="0.1.0" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Tools</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Xmg.Configuration.Abstractions/Xmg.Configuration.Abstractions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Core.Runtime.Loader" />
+    <PackageReference Include="Annium.linq2db.Extensions" />
+  </ItemGroup>
 </Project>

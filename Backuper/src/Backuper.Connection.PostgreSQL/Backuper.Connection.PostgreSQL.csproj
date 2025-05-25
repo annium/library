@@ -1,20 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>Backuper.Connection.PostgreSQL</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>Backuper.Connection.PostgreSQL</Description>
-        <Solutions></Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Library</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>false</IsPackable>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="../Backuper.Connection.Abstract/Backuper.Connection.Abstract.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Npgsql" Version="8.0.1" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Tools</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Backuper.Connection.Abstract/Backuper.Connection.Abstract.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Npgsql" />
+  </ItemGroup>
 </Project>

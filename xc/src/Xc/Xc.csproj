@@ -1,22 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>Xc</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>Xc</Description>
-        <Solutions></Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Exe</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>true</IsPackable>
-        <Nullable>enable</Nullable>
-        <PackAsTool>true</PackAsTool>
-        <ToolCommandName>xc</ToolCommandName>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Annium.Configuration.Yaml" Version="0.1.0" />
-        <PackageReference Include="Annium.Core.Entrypoint" Version="0.1.0" />
-        <PackageReference Include="Annium.Extensions.Arguments" Version="0.1.0" />
-        <PackageReference Include="Annium.Logging.Console" Version="0.1.0" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Tools</Solutions>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>xc</ToolCommandName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Configuration.Yaml" />
+    <PackageReference Include="Annium.Core.Entrypoint" />
+    <PackageReference Include="Annium.Extensions.Arguments" />
+    <PackageReference Include="Annium.Logging.Console" />
+  </ItemGroup>
 </Project>

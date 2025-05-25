@@ -5,7 +5,7 @@ namespace XRest.Clients.Csharp.Helpers;
 
 internal static class ProcessorHelper
 {
-    private static readonly IReadOnlyDictionary<Type, string> BaseTypeNames = new Dictionary<Type, string>
+    private static readonly IReadOnlyDictionary<Type, string> _baseTypeNames = new Dictionary<Type, string>
     {
         { typeof(int), "int" },
         { typeof(uint), "uint" },
@@ -25,5 +25,5 @@ internal static class ProcessorHelper
         { typeof(void), "void" },
     };
 
-    public static bool IsBaseType(Type type) => BaseTypeNames.ContainsKey(type);
+    public static bool IsBaseType(Type type) => _baseTypeNames.ContainsKey(type);
 }

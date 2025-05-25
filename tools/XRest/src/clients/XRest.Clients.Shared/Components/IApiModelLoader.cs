@@ -5,5 +5,5 @@ namespace XRest.Clients.Shared.Components;
 
 public interface IApiModelLoader
 {
-    Task<ApiModel> Load(ISourceLoaderConfiguration cfg);
+    Task<ApiModel> LoadAsync(ISourceLoaderConfiguration cfg);
 }

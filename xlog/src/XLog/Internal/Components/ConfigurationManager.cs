@@ -10,7 +10,7 @@ namespace XLog.Internal.Components;
 
 internal class ConfigurationManager : IConfigurationManager
 {
-    private static readonly string ConfigPath = Path.Combine(
+    private static readonly string _configPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
         ".xlog"
     );
@@ -20,8 +20,8 @@ internal class ConfigurationManager : IConfigurationManager
     public ConfigurationManager(IServiceProvider sp)
     {
         _serializer = sp.ResolveKeyed<ISerializer<string>>(SerializerKey.CreateDefault(Constants.MediaType));
-        _config = File.Exists(ConfigPath)
-            ? _serializer.Deserialize<Configuration>(File.ReadAllText(ConfigPath))
+        _config = File.Exists(_configPath)
+            ? _serializer.Deserialize<Configuration>(File.ReadAllText(_configPath))
             : new();
     }
 
@@ -31,7 +31,7 @@ internal class ConfigurationManager : IConfigurationManager
         {
             Server = server,
             Login = login,
-            Pass = pass
+            Pass = pass,
         };
         Save();
     }
@@ -50,7 +50,7 @@ internal class ConfigurationManager : IConfigurationManager
     private void Save()
     {
         var raw = _serializer.Serialize(_config);
-        File.WriteAllText(ConfigPath, raw);
+        File.WriteAllText(_configPath, raw);
     }
 
     private class Configuration

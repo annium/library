@@ -11,9 +11,7 @@ public class StorageProxy : Resource<IStorage>, IStorage
     public StorageProxy(IStorage entity, string type, ILogger logger)
         : base(entity, "Storage", type, logger) { }
 
-    public Task SetupAsync() => SafeAsync("setup", Entity.SetupAsync);
-
-    public Task<string[]> ListAsync() => SafeAsync("list", Entity.ListAsync);
+    public Task<string[]> ListAsync(string prefix = "") => SafeAsync("list", () => Entity.ListAsync(prefix));
 
     public Task UploadAsync(Stream source, string name) => SafeAsync("upload", () => Entity.UploadAsync(source, name));
 

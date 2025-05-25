@@ -19,18 +19,18 @@ internal class Crawler : ILogSubject
         Logger = logger;
     }
 
-    public async Task Run(string directory)
+    public async Task RunAsync(string directory)
     {
-        this.Debug($"Run in {directory}");
+        this.Debug<string>("Run in {directory}", directory);
         if (_cfg.Include.Length == 0)
-            await Process(directory);
+            await ProcessAsync(directory);
         else
-            await Task.WhenAll(_cfg.Include.Select(x => Process(Path.Combine(directory, x))));
+            await Task.WhenAll(_cfg.Include.Select(x => ProcessAsync(Path.Combine(directory, x))));
     }
 
-    private async Task Process(string directory)
+    private async Task ProcessAsync(string directory)
     {
-        this.Debug($"Process {directory}");
+        this.Debug<string>("Process {directory}", directory);
         var files = Directory
             .EnumerateFiles(directory)
             .Where(file => _cfg.Extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)));
@@ -43,7 +43,7 @@ internal class Crawler : ILogSubject
             if (_cfg.Exclude.Any(dir => dir.Equals(subDirectoryName, StringComparison.OrdinalIgnoreCase)))
                 continue;
 
-            await Process(subDirectory);
+            await ProcessAsync(subDirectory);
         }
     }
 }

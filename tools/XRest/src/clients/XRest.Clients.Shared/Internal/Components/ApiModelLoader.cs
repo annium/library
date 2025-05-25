@@ -18,7 +18,7 @@ internal class ApiModelLoader : IApiModelLoader
         _httpRequestFactory = sp.ResolveKeyed<IHttpRequestFactory>(Constants.IndexKey);
     }
 
-    public async Task<ApiModel> Load(ISourceLoaderConfiguration cfg)
+    public async Task<ApiModel> LoadAsync(ISourceLoaderConfiguration cfg)
     {
         var model = await _httpRequestFactory.New(cfg.Server).Get(Constants.ApiSourceEndpoint).AsAsync<ApiModel>();
 

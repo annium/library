@@ -1,8 +1,8 @@
 <Project>
-    <PropertyGroup>
-        <SassExe>dotnet "$(MSBuildThisFileDirectory)/net7.0/XSass.dll"</SassExe>
-    </PropertyGroup>
-    <Target Name="CompileSass" AfterTargets="BeforeBuild">
-        <Exec Command="$(SassExe) $(TargetPathWithTargetPlatformMoniker)" />
-    </Target>
+  <PropertyGroup>
+    <SassExe>dotnet "$(MSBuildThisFileDirectory)/net7.0/XSass.dll"</SassExe>
+  </PropertyGroup>
+  <Target Name="CompileSass" AfterTargets="BeforeBuild">
+    <Exec Command="$(SassExe) $(TargetPathWithTargetPlatformMoniker)" />
+  </Target>
 </Project>

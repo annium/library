@@ -9,10 +9,10 @@ internal record ClassView : DefinedTypeView
     public override TypeViewEnum Type => TypeViewEnum.Class;
     public bool IsGenericType { get; }
     public bool IsGenericTypeDefinition { get; private set; }
-    public IReadOnlyCollection<DefinedTypeView> GenericArguments { get; } = Array.Empty<DefinedTypeView>();
-    public IReadOnlyCollection<GenericParameterView> GenericParameters { get; } = Array.Empty<GenericParameterView>();
-    public IReadOnlyCollection<TypePropertyView> Properties { get; private set; } = Array.Empty<TypePropertyView>();
-    private IReadOnlyCollection<TypePropertyView> _definitionProperties = Array.Empty<TypePropertyView>();
+    public IReadOnlyCollection<DefinedTypeView> GenericArguments { get; } = [];
+    public IReadOnlyCollection<GenericParameterView> GenericParameters { get; } = [];
+    public IReadOnlyCollection<TypePropertyView> Properties { get; private set; } = [];
+    private IReadOnlyCollection<TypePropertyView> _definitionProperties = [];
     private bool _isConfigured;
 
     public ClassView(string name, IReadOnlyCollection<GenericParameterView> genericParameters)
@@ -59,7 +59,7 @@ internal record ClassView : DefinedTypeView
         if (_isConfigured)
             throw new InvalidOperationException("ClassView is already configured");
 
-        _definitionProperties = properties;
+        _definitionProperties = definitionProperties;
         Properties = properties;
         _isConfigured = true;
 
@@ -102,7 +102,7 @@ internal record ClassView : DefinedTypeView
         if (IsGenericTypeDefinition)
             return this;
 
-        return new ClassView(Name, GenericParameters).Configure(_definitionProperties, Array.Empty<TypePropertyView>());
+        return new ClassView(Name, GenericParameters).Configure(_definitionProperties, []);
     }
 
     public IReadOnlyCollection<DefinedTypeView> GetPropertyTypes() =>

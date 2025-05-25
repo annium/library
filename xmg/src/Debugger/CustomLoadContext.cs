@@ -69,12 +69,11 @@ public class CustomLoadContext : AssemblyLoadContext
             _dependencyContext = DependencyContext.Load(assembly);
 
             _assemblyResolver = new CompositeCompilationAssemblyResolver(
-                new ICompilationAssemblyResolver[]
-                {
+                [
                     new AppBaseCompilationAssemblyResolver(Path.GetDirectoryName(rootAssemblyPath)!),
                     new ReferenceAssemblyPathResolver(),
-                    new PackageCompilationAssemblyResolver()
-                }
+                    new PackageCompilationAssemblyResolver(),
+                ]
             );
         }
 

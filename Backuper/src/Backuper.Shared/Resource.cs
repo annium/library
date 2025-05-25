@@ -9,14 +9,10 @@ public abstract class Resource<T> : ILogSubject
 {
     public ILogger Logger { get; }
     protected T Entity { get; }
-    private readonly string _category;
-    private readonly string _type;
 
     protected Resource(T entity, string category, string type, ILogger logger)
     {
         Entity = entity;
-        _category = category;
-        _type = type;
         Logger = logger;
     }
 
@@ -24,15 +20,15 @@ public abstract class Resource<T> : ILogSubject
     {
         try
         {
-            this.Debug($"{operation} start");
+            this.Debug<string>("{operation} start", operation);
             var result = await handleAsync();
-            this.Debug($"{operation} succeed");
+            this.Debug<string>("{operation} succeed", operation);
 
             return result;
         }
         catch
         {
-            this.Debug($"{operation} failed");
+            this.Debug<string>("{operation} failed", operation);
             throw;
         }
     }
@@ -41,13 +37,13 @@ public abstract class Resource<T> : ILogSubject
     {
         try
         {
-            this.Debug($"{operation} start");
+            this.Debug<string>("{operation} start", operation);
             await handleAsync();
-            this.Debug($"{operation} succeed");
+            this.Debug<string>("{operation} succeed", operation);
         }
         catch
         {
-            this.Debug($"{operation} failed");
+            this.Debug<string>("{operation} failed", operation);
             throw;
         }
     }

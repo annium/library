@@ -11,5 +11,5 @@ var (provider, _) = entry;
 
 var configuration = provider.Resolve<Configuration>();
 Console.WriteLine($"Sass compilation at: {configuration.Root}");
-await provider.Resolve<Crawler>().Run(configuration.Root);
+await provider.Resolve<Crawler>().RunAsync(configuration.Root);
 Console.WriteLine("Sass compilation succeed");

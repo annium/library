@@ -50,12 +50,15 @@ internal class ColumnSyntax
             DataType.SByte => "Int16()",
             DataType.SmallMoney => "Currency()",
             DataType.VarChar => _column.Length.HasValue ? $"String({_column.Length.Value})" : "String()",
-            DataType.UInt16
-                => throw new NotSupportedException($"Column '{_column.Name}' type '{_column.Type}' is not supported"),
-            DataType.UInt32
-                => throw new NotSupportedException($"Column '{_column.Name}' type '{_column.Type}' is not supported"),
-            DataType.UInt64
-                => throw new NotSupportedException($"Column '{_column.Name}' type '{_column.Type}' is not supported"),
-            _ => throw new NotSupportedException($"Column '{_column.Name}' type '{_column.Type}' is not supported")
+            DataType.UInt16 => throw new NotSupportedException(
+                $"Column '{_column.Name}' type '{_column.Type}' is not supported"
+            ),
+            DataType.UInt32 => throw new NotSupportedException(
+                $"Column '{_column.Name}' type '{_column.Type}' is not supported"
+            ),
+            DataType.UInt64 => throw new NotSupportedException(
+                $"Column '{_column.Name}' type '{_column.Type}' is not supported"
+            ),
+            _ => throw new NotSupportedException($"Column '{_column.Name}' type '{_column.Type}' is not supported"),
         };
 }

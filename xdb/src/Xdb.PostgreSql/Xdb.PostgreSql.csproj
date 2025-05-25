@@ -1,20 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>Xdb.PostgreSql</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>Xdb.PostgreSql</Description>
-        <Solutions></Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Library</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>true</IsPackable>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="../Xdb.Core/Xdb.Core.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="dbup-postgresql" Version="5.0.39" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Tools</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Xdb.Core/Xdb.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="dbup-postgresql" />
+  </ItemGroup>
 </Project>

@@ -42,7 +42,7 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
         var credentials = _configurationManager.GraylogGetCredentials(cfg.Server);
         if (credentials is null)
         {
-            this.Warn($"No credentials found for server {cfg.Server}. Login first");
+            this.Warn<string>("No credentials found for server {server}. Login first", cfg.Server);
             return;
         }
 
@@ -160,7 +160,7 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
                 new
                 {
                     execution_state = new { parameter_bindinds = new { } },
-                    fields_in_order = new[] { "timestamp", "source", "log_level", "message" }
+                    fields_in_order = new[] { "timestamp", "source", "log_level", "message" },
                 }
             )
             .RunAsync();
@@ -209,12 +209,12 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
                                     id = subId,
                                     limit = 150,
                                     filters = Array.Empty<string>(),
-                                    sort = new[] { new { field = "timestamp", order = "ASC" } }
-                                }
-                            }
-                        }
+                                    sort = new[] { new { field = "timestamp", order = "ASC" } },
+                                },
+                            },
+                        },
                     },
-                    parameters = Array.Empty<string>()
+                    parameters = Array.Empty<string>(),
                 }
             )
             .RunAsync();
@@ -237,7 +237,7 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
                 {
                     query,
                     timerange = new { type = "relative", from = 14400 },
-                    streams = Array.Empty<string>()
+                    streams = Array.Empty<string>(),
                 }
             )
             .AsResponseAsync(new { status = string.Empty });
@@ -260,7 +260,7 @@ internal class DumpCommand : AsyncCommand<DumpCommandConfiguration>, ICommandDes
                 {
                     host = server,
                     username = login,
-                    password = pass
+                    password = pass,
                 }
             )
             .AsResponseAsync(new { session_id = string.Empty });

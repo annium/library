@@ -35,17 +35,17 @@ internal class Compiler : ILogSubject
         var fileInfo = new FileInfo(file);
         if (fileInfo.Name.StartsWith("_"))
         {
-            this.Trace($"Compile: skip private {file}");
+            this.Trace<string>("Compile: skip private {file}", file);
             return;
         }
 
-        this.Debug($"Compile: process {file}");
+        this.Debug<string>("Compile: process {file}", file);
         var result = SassCompiler.CompileFile(file, options: _opts);
         var newFile = fileInfo.FullName.Replace(fileInfo.Extension, Css);
 
         if (File.Exists(newFile) && result.CompiledContent == await File.ReadAllTextAsync(newFile))
         {
-            this.Trace($"Compile: skip unchanged {file}");
+            this.Trace<string>("Compile: skip unchanged {file}", file);
             return;
         }
 
