@@ -7,7 +7,7 @@ namespace Annium.Blazor.Css;
 public partial class StyleSheet : IDisposable
 {
     [Inject]
-    internal Internal.StyleSheet Sheet { get; set; } = default!;
+    internal Internal.StyleSheet Sheet { get; set; } = null!;
 
     protected override void OnInitialized()
     {

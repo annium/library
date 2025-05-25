@@ -6,8 +6,8 @@ namespace Demo.Blazor.Interop.Components.Navigation;
 public partial class Navigation
 {
     [Inject]
-    private Routing Routing { get; set; } = default!;
+    private Routing Routing { get; set; } = null!;
 
     [Inject]
-    private Style Styles { get; set; } = default!;
+    private Style Styles { get; set; } = null!;
 }

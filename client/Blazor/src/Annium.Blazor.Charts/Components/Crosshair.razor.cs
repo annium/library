@@ -31,10 +31,10 @@ public partial class Crosshair : ILogSubject, IAsyncDisposable
     public string LabelStyle { get; set; } = CrosshairLabelStyle;
 
     [CascadingParameter]
-    public IChartContext ChartContext { get; set; } = default!;
+    public IChartContext ChartContext { get; set; } = null!;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);
 
@@ -75,7 +75,7 @@ public partial class Crosshair : ILogSubject, IAsyncDisposable
 
                 ctx.StrokeStyle = LineStyle;
                 ctx.LineWidth = 1;
-                ctx.LineDash = new[] { 6, 6 };
+                ctx.LineDash = [6, 6];
 
                 var y = point.Y - ctxY + 0.5f;
 

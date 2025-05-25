@@ -58,7 +58,9 @@ public static class ObjectContainerValidationExtensions
                 child.SetStatus(Status.Validating);
         }
 
-        var result = validator.GetValidationResult(state).Result;
+#pragma warning disable VSTHRD002
+        var result = validator.GetValidationResultAsync(state).Result;
+#pragma warning restore VSTHRD002
         if (ct.IsCancellationRequested)
             return;
 
@@ -72,7 +74,10 @@ public static class ObjectContainerValidationExtensions
         }
     }
 
-    private static async Task<IResult> GetValidationResult<T>(this IValidator<T> validator, IObjectContainer<T> state)
+    private static async Task<IResult> GetValidationResultAsync<T>(
+        this IValidator<T> validator,
+        IObjectContainer<T> state
+    )
         where T : notnull, new()
     {
         try

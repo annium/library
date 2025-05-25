@@ -16,7 +16,7 @@ namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSubject
 {
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
-    public IChartContext Chart { get; private set; } = default!;
+    public IChartContext Chart { get; private set; } = null!;
     public IReadOnlyCollection<ISeriesSource> Sources => _sources;
     public ISeriesContext? Series { get; private set; }
     public IHorizontalSideContext? Bottom { get; set; }
@@ -63,7 +63,7 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
             .ToArray();
         if (renderingRanges.Length > 0)
         {
-            this.Trace($"update Pane range from {renderingRanges.Length} rendering source(s)");
+            this.Trace("update Pane range from {renderingRangesLength} rendering source(s)", renderingRanges.Length);
             _range.Set(renderingRanges.Min(x => x.Start), renderingRanges.Max(x => x.End));
         }
         else
@@ -74,12 +74,23 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
 
         if (Range.Start == start && Range.End == end)
         {
-            this.Trace($"range of {source.GetFullId()} updated to {min} - {max}, not changed Pane range: {Range}");
+            this.Trace(
+                "range of {sourceId} updated to {min} - {max}, not changed Pane range: {Range}",
+                source.GetFullId(),
+                min,
+                max,
+                Range
+            );
             return false;
         }
 
         this.Trace(
-            $"range of {source.GetFullId()} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}"
+            "range of {sourceId} updated to {min} - {max}, adjusted Pane range: {start} - {end} -> {Range}",
+            min,
+            max,
+            start,
+            end,
+            Range
         );
         (start, end) = Range;
 
@@ -108,11 +119,11 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
     {
         if (_sources.Contains(source))
         {
-            this.Trace($"source {source.GetFullId()} is already tracked");
+            this.Trace<string>("source {sourceId} is already tracked", source.GetFullId());
             return Disposable.Empty;
         }
 
-        this.Trace($"track source {source.GetFullId()}");
+        this.Trace<string>("track source {sourceId}", source.GetFullId());
         _sources.Add(source);
         _sourceRanges[source] = ValueRange.Create(decimal.MinValue, decimal.MaxValue);
         source.OnBoundsChange += UpdateBounds;
@@ -123,7 +134,7 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
             if (!_sources.Remove(source))
                 throw new InvalidOperationException("Source is not registered");
 
-            this.Trace($"untrack source {source.GetFullId()}");
+            this.Trace<string>("untrack source {sourceId}", source.GetFullId());
             _sourceRanges.Remove(source);
             source.OnBoundsChange -= UpdateBounds;
             Chart.RequestDraw();

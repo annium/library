@@ -45,7 +45,7 @@ public class ObjectContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var otherValue = new User { Name = "Lex", };
+        var otherValue = new User { Name = "Lex" };
         var state = factory.CreateObject(initialValue);
         state.Changed.Subscribe(log.Add);
 
@@ -87,7 +87,7 @@ public class ObjectContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var otherValue = new User { Name = "Lex", };
+        var otherValue = new User { Name = "Lex" };
         var state = factory.CreateObject(initialValue);
         state.Changed.Subscribe(log.Add);
 
@@ -129,7 +129,7 @@ public class ObjectContainerTest : TestBase
         var log = new List<Unit>();
         var factory = GetFactory();
         var initialValue = Arrange();
-        var otherValue = new User { Name = "Lex", };
+        var otherValue = new User { Name = "Lex" };
         var state = factory.CreateObject(initialValue);
         state.Changed.Subscribe(log.Add);
 
@@ -193,13 +193,13 @@ public class ObjectContainerTest : TestBase
         state.UseValidator(validator);
 
         // act
-        state.Set(new User { Age = 10, Name = "No", });
+        state.Set(new User { Age = 10, Name = "No" });
 
         // assert
         state.HasStatus(Status.Error).IsTrue();
 
         // act
-        state.Set(new User { Age = 20, Name = "Name", });
+        state.Set(new User { Age = 20, Name = "Name" });
 
         // assert
         state.IsStatus(Status.None).IsTrue();

@@ -20,7 +20,7 @@ public class SeriesSourceOptionsBuilder
     {
         var options = new Dictionary<Duration, SeriesSourceResolutionOptions>
         {
-            { resolution, new SeriesSourceResolutionOptions(bufferZone, loadZone) }
+            { resolution, new SeriesSourceResolutionOptions(bufferZone, loadZone) },
         };
 
         return new SeriesSourceOptionsBuilder(options);

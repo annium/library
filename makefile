@@ -1,33 +1,40 @@
-TFM := net7.0
-BIN_DEBUG := bin/Debug/$(TFM)
-
-format:
-	xs format -sc -ic
-	dotnet csharpier .
-
 setup:
-	xs remote restore -user $(user) -password $(pass)
 	dotnet tool restore
 
+format:
+	dotnet csharpier format .
+	xx format -sc -ic
+
+format-full: format
+	dotnet format style
+	dotnet format analyzers
+
 update:
-	xs update all -sc -ic
+	xx update all -sc -ic
 
 clean:
-	xs clean -sc -ic
+	xx clean -sc -ic
+	find . -type f -name '*.nupkg' | xargs rm
 
+buildNumber?=0
 build:
-	dotnet build -c Release --nologo -v q
+	dotnet build -c Release --nologo -v q -p:BuildNumber=$(buildNumber)
 
 test:
 	dotnet test -c Release --no-build --nologo -v q
 
+pack:
+	dotnet pack --no-build -o . -c Release -p:SymbolPackageFormat=snupkg
+
 publish:
-	dotnet pack --no-build -o . -c Release -p:PackageVersion=0.1.0 -p:SymbolPackageFormat=snupkg
-	dotnet nuget push "*.nupkg" --source https://dotnet.pkg.annium.com/v3/index.json --api-key $(shell cat .xs.credentials)
+	dotnet nuget push "*.nupkg" --source https://api.nuget.org/v3/index.json --api-key $(shell cat .xx.credentials)
 	find . -type f -name '*.nupkg' | xargs rm
 
 demo-blazor-ant:
 	cd web/demo/Demo.Blazor.Ant && dotnet watch run
+
+demo-blazor-ant-prod:
+	cd web/demo/Demo.Blazor.Ant && rm -rf dist && dotnet publish -c Release -o dist && dotnet serve --directory dist/wwwroot -p 5004 -q
 
 demo-blazor-interop:
 	cd web/demo/Demo.Blazor.Interop && dotnet watch run

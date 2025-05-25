@@ -1,20 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>Annium.Components.State.Operations</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>Annium.Components.State.Operations</Description>
-        <Solutions>Annium.Frontend</Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Library</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>true</IsPackable>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="../Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Annium.Data.Operations" Version="0.1.0" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Annium.Frontend</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Data.Operations" />
+  </ItemGroup>
 </Project>

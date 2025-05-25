@@ -23,8 +23,8 @@ public class RouteTTest : TestBase
                 new SearchData
                 {
                     Sex = Sex.Male,
-                    Name = new[] { "alex", "anna" },
-                    Age = 30
+                    Name = ["alex", "anna"],
+                    Age = 30,
                 }
             )
             .Is("pages/search/Male?name=alex&name=anna&age=30");
@@ -41,8 +41,8 @@ public class RouteTTest : TestBase
             new SearchData
             {
                 Sex = Sex.Male,
-                Name = new[] { "alex", "anna" },
-                Age = 30
+                Name = ["alex", "anna"],
+                Age = 30,
             }
         );
 
@@ -66,15 +66,15 @@ public class RouteTTest : TestBase
                 new SearchData
                 {
                     Sex = Sex.Male,
-                    Name = new[] { "alex", "anna" },
-                    Age = 30
+                    Name = ["alex", "anna"],
+                    Age = 30,
                 }
             )
             .IsTrue();
-        route.IsAt(new SearchData { Sex = Sex.Male, Name = new[] { "alex", "ann" } }).IsFalse();
+        route.IsAt(new SearchData { Sex = Sex.Male, Name = ["alex", "ann"] }).IsFalse();
         NavigationManager.NavigateTo("pages");
         route.IsAt().IsFalse();
-        route.IsAt(default, PathMatch.Start).IsTrue();
+        route.IsAt(null, PathMatch.Start).IsTrue();
     }
 
     [Fact]
@@ -91,8 +91,8 @@ public class RouteTTest : TestBase
                 new SearchData
                 {
                     Sex = Sex.Male,
-                    Name = new[] { "alex", "anna" },
-                    Age = 30
+                    Name = ["alex", "anna"],
+                    Age = 30,
                 }
             );
         NavigationManager.NavigateTo("profile/Male?name=alex&name=anna&age=30");
@@ -114,7 +114,7 @@ public class RouteTTest : TestBase
     public sealed record SearchData
     {
         public Sex Sex { get; init; }
-        public string[] Name { get; init; } = Array.Empty<string>();
+        public string[] Name { get; init; } = [];
         public int Age { get; init; }
 
         public bool Equals(SearchData? other) => other is not null && GetHashCode() == other.GetHashCode();
@@ -126,6 +126,6 @@ public class RouteTTest : TestBase
     public enum Sex
     {
         Male,
-        Female
+        Female,
     }
 }

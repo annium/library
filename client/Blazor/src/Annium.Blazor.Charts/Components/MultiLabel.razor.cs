@@ -11,7 +11,7 @@ public partial class MultiLabel<TValue, TItem> : LabelBase<TItem>
     where TValue : IMultiValue<TItem>
 {
     [Parameter, EditorRequired]
-    public ISeriesSource<TValue> Source { get; set; } = default!;
+    public ISeriesSource<TValue> Source { get; set; } = null!;
 
     protected override void OnAfterRender(bool firstRender)
     {

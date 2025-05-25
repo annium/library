@@ -13,7 +13,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
 {
     private const string HandleMethod = $"{nameof(InteropEvent<T>)}.{nameof(Handle)}";
     private static IInteropContext Ctx => InteropContext.Instance;
-    private static readonly IReadOnlyList<Type> ConstructorTypes = typeof(T)
+    private static readonly IReadOnlyList<Type> _constructorTypes = typeof(T)
         .GetConstructors()
         .Single()
         .GetParameters()
@@ -21,7 +21,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
         .ToArray();
 
     public static IInteropEvent<T> Static(string context, string target) =>
-        new InteropEvent<T>(context, new Lazy<string>(target), new Lazy<IEnumerable<object>>(Array.Empty<string>()));
+        new InteropEvent<T>(context, new Lazy<string>(target), new Lazy<IEnumerable<object>>([]));
 
     public static IInteropEvent<T> Element(IObject target) =>
         new InteropEvent<T>(
@@ -52,17 +52,14 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
     {
         var callbackId = Ctx.Apply<int>(
             _binderName,
-            _sharedBindArgs.Value.Concat(new[] { eventKey.ToString(), _netRef, HandleMethod }).Concat(args).ToArray()
+            _sharedBindArgs.Value.Concat([eventKey.ToString(), _netRef, HandleMethod]).Concat(args).ToArray()
         );
         if (!_handlers.TryAdd(callbackId, handle))
             throw OperationException($"failed to add handler {callbackId}");
 
         void Disposer()
         {
-            Ctx.Apply(
-                _unbinderName,
-                _sharedBindArgs.Value.Concat(new object[] { eventKey.ToString()!, callbackId }).ToArray()
-            );
+            Ctx.Apply(_unbinderName, _sharedBindArgs.Value.Concat([eventKey.ToString()!, callbackId]).ToArray());
             if (!_handlers.Remove(callbackId))
                 throw OperationException($"failed to remove handler {callbackId}");
         }
@@ -82,7 +79,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
         if (!_handlers.TryGetValue(callbackId, out var handle))
             throw OperationException($"failed to find handler {callbackId}");
 
-        var values = args.Select((x, i) => x.Deserialize(ConstructorTypes[i])).ToArray();
+        var values = args.Select((x, i) => x.Deserialize(_constructorTypes[i])).ToArray();
         var data = (T)Activator.CreateInstance(typeof(T), values)!;
         handle(data);
     }

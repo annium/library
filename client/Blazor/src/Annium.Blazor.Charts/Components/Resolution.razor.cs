@@ -16,13 +16,13 @@ public partial class Resolution : ILogSubject, IAsyncDisposable
     public string? CssClass { get; set; }
 
     [CascadingParameter]
-    public IChartContext ChartContext { get; set; } = default!;
+    public IChartContext ChartContext { get; set; } = null!;
 
     [Inject]
-    private Style Styles { get; set; } = default!;
+    private Style Styles { get; set; } = null!;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     private string Class => ClassBuilder.With(Styles.Container).With(CssClass).Build();
     private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);

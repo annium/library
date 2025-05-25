@@ -33,7 +33,7 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     public OneOf<int, Func<TI, int>> Radius { get; set; } = 2;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     protected override int MinValuesToRender => 1;
 

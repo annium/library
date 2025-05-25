@@ -19,7 +19,7 @@ public partial class MultiNodeSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     public Renderer RenderItem { get; set; } = delegate { };
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     protected override int MinValuesToRender => 1;
 

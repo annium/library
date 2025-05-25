@@ -4,6 +4,6 @@ public abstract class RuleSet
 {
     protected RuleSet()
     {
-        Internal.StyleSheet.Instance.Render(this);
+        Internal.StyleSheet.Instance.Add(this);
     }
 }

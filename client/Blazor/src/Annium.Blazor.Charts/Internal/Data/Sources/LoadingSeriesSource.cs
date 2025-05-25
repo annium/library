@@ -51,27 +51,27 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
         var (min, max) = GetBounds(start, end, _resolutionOptions.BufferZone);
         var info = $"{start.S()} - {end.S()} (as {min.S()} - {max.S()})";
 
-        this.Trace($"start for {info}");
+        this.Trace<string>("start for {info}", info);
 
         // no data was attempted to load
         if (_cache.IsEmpty)
         {
-            this.Trace($"cache is empty for {info}");
-            data = Array.Empty<T>();
+            this.Trace<string>("cache is empty for {info}", info);
+            data = [];
 
             return false;
         }
 
         if (_cache.HasData(min, max))
         {
-            this.Trace($"all data is available for {info}");
+            this.Trace<string>("all data is available for {info}", info);
             data = _cache.GetData(start, end);
 
             return true;
         }
 
-        this.Trace($"some data is missing for {info}");
-        data = Array.Empty<T>();
+        this.Trace<string>("some data is missing for {info}", info);
+        data = [];
 
         return false;
     }
@@ -80,18 +80,20 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
 
     public void LoadItems(Instant start, Instant end)
     {
-        LoadData(start, end)
+#pragma warning disable VSTHRD110
+        LoadDataAsync(start, end)
             .ContinueWith(t =>
             {
                 if (t.IsCompletedSuccessfully)
                     Loaded();
                 else
                 {
-                    this.Error($"load in {start.S()} - {end.S()} failed in {t.Status} status");
+                    this.Error("load in {start} - {end} failed in {status} status", start.S(), end.S(), t.Status);
                     if (t.Exception is not null)
                         this.Error(t.Exception);
                 }
             });
+#pragma warning restore VSTHRD110
     }
 
     public void SetResolution(Duration resolution)
@@ -109,35 +111,40 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
         _cache.Clear();
     }
 
-    private async Task LoadData(Instant start, Instant end)
+    private async Task LoadDataAsync(Instant start, Instant end)
     {
         Volatile.Write(ref _isLoading, 1);
 
         var (min, max) = GetBounds(start, end, _resolutionOptions.LoadZone);
         var info = $"{start.S()} - {end.S()} (as {min.S()} - {max.S()})";
 
-        this.Trace($"start for {info}");
+        this.Trace<string>("start for {info}", info);
 
         var emptyRanges = _cache.GetEmptyRanges(min, max);
         var dataset = await Task.WhenAll(
-            emptyRanges.Select(async range => (range, await LoadInRange(range.Start, range.End)))
+            emptyRanges.Select(async range => (range, await LoadInRangeAsync(range.Start, range.End)))
         );
 
         foreach (var (range, data) in dataset)
         {
-            this.Trace($"save {data.Count} item(s) to cache for {range.Start.S()} - {range.End.S()}");
+            this.Trace<int, string, string>(
+                "save {dataCount} item(s) to cache for {rangeStart} - {rangeEnd}",
+                data.Count,
+                range.Start.S(),
+                range.End.S()
+            );
             _cache.AddData(range.Start, range.End, data);
         }
 
-        this.Trace($"done for {info}");
+        this.Trace<string>("done for {info}", info);
 
         Volatile.Write(ref _isLoading, 0);
     }
 
-    private async Task<IReadOnlyList<T>> LoadInRange(Instant start, Instant end)
+    private async Task<IReadOnlyList<T>> LoadInRangeAsync(Instant start, Instant end)
     {
         var info = $"{start.S()} - {end.S()}";
-        this.Trace($"start for {info}");
+        this.Trace<string>("start for {info}", info);
 
         var items = await _load(Resolution, start, end);
 

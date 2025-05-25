@@ -6,7 +6,7 @@ namespace Annium.Blazor.MatBlazor.Components;
 public partial class Checkbox
 {
     [Parameter]
-    public IAtomicContainer<bool> State { get; set; } = default!;
+    public IAtomicContainer<bool> State { get; set; } = null!;
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }

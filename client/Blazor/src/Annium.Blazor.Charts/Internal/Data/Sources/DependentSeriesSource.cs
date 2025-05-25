@@ -41,7 +41,7 @@ internal class DependentSeriesSource<TS, TD> : ISeriesSource<TD>, ILogSubject
     {
         if (_cache.HasData(start, end))
         {
-            this.Trace($"get data in {start.S()} - {end.S()}: found in cache");
+            this.Trace<string, string>("get data in {start} - {end}: found in cache", start.S(), end.S());
             data = _cache.GetData(start, end);
 
             return true;
@@ -49,13 +49,13 @@ internal class DependentSeriesSource<TS, TD> : ISeriesSource<TD>, ILogSubject
 
         if (!_source.GetItems(start, end, out _))
         {
-            this.Trace($"get data in {start.S()} - {end.S()}: missing in source");
-            data = Array.Empty<TD>();
+            this.Trace<string, string>("get data in {start} - {end}: missing in source", start.S(), end.S());
+            data = [];
 
             return false;
         }
 
-        this.Trace($"get data in {start.S()} - {end.S()}: found in source, fill cache");
+        this.Trace<string, string>("get data in {start} - {end}: found in source, fill cache", start.S(), end.S());
 
         var emptyRanges = _cache.GetEmptyRanges(start, end);
         foreach (var range in emptyRanges)
@@ -66,12 +66,17 @@ internal class DependentSeriesSource<TS, TD> : ISeriesSource<TD>, ILogSubject
                 );
 
             var rangeData = _getValues(rangeSource, _source.Resolution, range.Start, range.End);
-            this.Trace($"save {rangeData.Count} item(s) ({rangeSource.Count} sourced) in {range.S()} to cache");
+            this.Trace<int, int, string>(
+                "save {rangeDataCount} item(s) ({rangeSourceCount} sourced) in {range} to cache",
+                rangeData.Count,
+                rangeSource.Count,
+                range.S()
+            );
             _cache.AddData(range.Start, range.End, rangeData);
         }
 
         data = _cache.GetData(start, end);
-        this.Trace($"get data in {start} - {end}: served from cache");
+        this.Trace<string, string>("get data in {start} - {end}: served from cache", start.S(), end.S());
 
         return true;
     }

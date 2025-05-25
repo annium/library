@@ -371,14 +371,14 @@ public enum CanvasLineCap
 {
     butt,
     round,
-    square
+    square,
 }
 
 public enum CanvasLineJoin
 {
     bevel,
     miter,
-    round
+    round,
 }
 
 public enum CanvasTextAlign
@@ -387,7 +387,7 @@ public enum CanvasTextAlign
     end,
     left,
     right,
-    center
+    center,
 }
 
 public enum CanvasTextBaseline
@@ -397,5 +397,5 @@ public enum CanvasTextBaseline
     middle,
     alphabetic,
     ideographic,
-    bottom
+    bottom,
 }

@@ -2,7 +2,7 @@ using System;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using NodaTime;
 
-namespace Annium.Blazor.Charts.Domain.Models;
+namespace Demo.Blazor.Charts.Domain;
 
 public record Candle(Instant Moment, decimal Open, decimal High, decimal Low, decimal Close)
     : ICandle,

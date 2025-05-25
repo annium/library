@@ -1,4 +1,4 @@
-using System.Threading;
+using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Testing;
 using Xunit;
@@ -8,7 +8,7 @@ namespace Annium.Blazor.Css.Tests;
 public class StylesheetTest
 {
     [Fact]
-    public void Stylesheet_Works()
+    public async Task Stylesheet_Works()
     {
         // arrange
         var sp = new ServiceContainer().AddRuntime(GetType().Assembly).AddCss().BuildServiceProvider();
@@ -20,14 +20,14 @@ public class StylesheetTest
         // act - resolve RuleSet
         sp.Resolve<Styles>();
 
-        SpinWait.SpinUntil(() => styleSheet.Css.Length > 0, 100);
-
-        // assert
-        styleSheet.Css.IsNot(string.Empty);
+        await Expect.ToAsync(() => styleSheet.Css.IsNot(string.Empty), 100);
     }
 }
 
 internal class Styles : RuleSet
 {
-    private CssRule _html = Rule.Tag("html").Set("display", "flex").Set("width", "100%").Set("min-height", "100vh");
+    public readonly CssRule Html = Rule.Tag("html")
+        .Set("display", "flex")
+        .Set("width", "100%")
+        .Set("min-height", "100vh");
 }

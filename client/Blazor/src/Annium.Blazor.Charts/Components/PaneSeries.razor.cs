@@ -18,28 +18,28 @@ public partial class PaneSeries : ILogSubject, IAsyncDisposable
     public string? CssClass { get; set; }
 
     [Parameter]
-    public RenderFragment ChildContent { get; set; } = default!;
+    public RenderFragment ChildContent { get; set; } = null!;
 
     [CascadingParameter]
-    internal IChartContext ChartContext { get; set; } = default!;
+    internal IChartContext ChartContext { get; set; } = null!;
 
     [CascadingParameter]
-    internal IManagedPaneContext PaneContext { get; set; } = default!;
+    internal IManagedPaneContext PaneContext { get; set; } = null!;
 
     [Inject]
-    private IManagedSeriesContext SeriesContext { get; set; } = default!;
+    private IManagedSeriesContext SeriesContext { get; set; } = null!;
 
     [Inject]
-    private Style Styles { get; set; } = default!;
+    private Style Styles { get; set; } = null!;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     private string Class => ClassBuilder.With(Styles.Block).With(CssClass).Build();
 
-    private Div _block = default!;
-    private Canvas _canvas = default!;
-    private Canvas _overlay = default!;
+    private Div _block = null!;
+    private Canvas _canvas = null!;
+    private Canvas _overlay = null!;
     private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);
 
     protected override void OnAfterRender(bool firstRender)

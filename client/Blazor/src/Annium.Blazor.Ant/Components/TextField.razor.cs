@@ -27,7 +27,7 @@ public partial class TextField<TValue>
     public IReadOnlyDictionary<string, object> Attributes { get; set; } = new Dictionary<string, object>();
 
     [Inject]
-    private IMapper Mapper { get; set; } = default!;
+    private IMapper Mapper { get; set; } = null!;
 
     private TValue Value => InternalState.Value;
 

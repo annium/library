@@ -28,7 +28,7 @@ internal class StorageBase : IStorageBase
         var length = _js.Invoke<int>("eval", $"{_storage}.length");
 
         if (length == 0)
-            return Array.Empty<string>();
+            return [];
 
         var keys = Enumerable.Range(0, length).Select(i => _js.Invoke<string>($"{_storage}.key", i)).ToArray();
 

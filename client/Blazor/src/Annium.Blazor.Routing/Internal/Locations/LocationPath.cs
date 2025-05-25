@@ -10,7 +10,7 @@ namespace Annium.Blazor.Routing.Internal.Locations;
 
 internal class LocationPath : ILocationPath
 {
-    private static readonly Regex ParamRe = new(@"^\{([A-z0-9]+)\}$", RegexOptions.Compiled | RegexOptions.Singleline);
+    private static readonly Regex _paramRe = new(@"^\{([A-z0-9]+)\}$", RegexOptions.Compiled | RegexOptions.Singleline);
 
     public static (ILocationPath, IReadOnlyCollection<PropertyInfo>) Parse(
         string template,
@@ -24,7 +24,7 @@ internal class LocationPath : ILocationPath
             .ParseTemplateParts(template)
             .Select<string, ILocationSegment>(x =>
             {
-                var match = ParamRe.Match(x);
+                var match = _paramRe.Match(x);
                 if (!match.Success)
                     return new FixedLocationSegment(x);
 

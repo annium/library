@@ -7,26 +7,26 @@ namespace Annium.Components.State.Forms.Internal;
 
 internal static class StateFactoryResolver
 {
-    private static readonly MethodInfo AtomicFactory = GetFactory(nameof(IStateFactory.CreateAtomic));
-    private static readonly MethodInfo ArrayFactory = GetFactory(nameof(IStateFactory.CreateArray));
-    private static readonly MethodInfo MapFactory = GetFactory(nameof(IStateFactory.CreateMap));
-    private static readonly MethodInfo ObjectFactory = GetFactory(nameof(IStateFactory.CreateObject));
+    private static readonly MethodInfo _atomicFactory = GetFactory(nameof(IStateFactory.CreateAtomic));
+    private static readonly MethodInfo _arrayFactory = GetFactory(nameof(IStateFactory.CreateArray));
+    private static readonly MethodInfo _mapFactory = GetFactory(nameof(IStateFactory.CreateMap));
+    private static readonly MethodInfo _objectFactory = GetFactory(nameof(IStateFactory.CreateObject));
 
     public static MethodInfo ResolveFactory(Type type)
     {
         if (type.IsRecordLike())
-            return ResolveFactory(MapFactory, type);
+            return ResolveFactory(_mapFactory, type);
 
         if (type.IsArrayLike())
-            return ResolveFactory(ArrayFactory, type);
+            return ResolveFactory(_arrayFactory, type);
 
         if (type.GetInterfaces().Contains(typeof(IEquatable<>).MakeGenericType(type)))
-            return ResolveFactory(AtomicFactory, type);
+            return ResolveFactory(_atomicFactory, type);
 
         if (type.IsEnum)
-            return ResolveFactory(AtomicFactory, type);
+            return ResolveFactory(_atomicFactory, type);
 
-        return ResolveFactory(ObjectFactory, type);
+        return ResolveFactory(_objectFactory, type);
     }
 
     private static MethodInfo ResolveFactory(MethodInfo factory, Type type)

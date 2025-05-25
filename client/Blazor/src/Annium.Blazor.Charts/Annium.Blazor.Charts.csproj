@@ -1,24 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
-    <PropertyGroup>
-        <PackageId>Annium.Blazor.Charts</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>Annium.Blazor.Charts</Description>
-        <Solutions>Annium.Frontend</Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Library</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>true</IsPackable>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="../Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
-        <ProjectReference Include="../Annium.Blazor.Css/Annium.Blazor.Css.csproj" />
-        <ProjectReference Include="../Annium.Blazor.Interop/Annium.Blazor.Interop.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Annium.Data.Models" Version="0.1.0" />
-        <PackageReference Include="Annium.Extensions.Jobs" Version="0.1.0" />
-        <PackageReference Include="OneOf" Version="3.0.263" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Annium.Frontend</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
+    <ProjectReference Include="../Annium.Blazor.Css/Annium.Blazor.Css.csproj" />
+    <ProjectReference Include="../Annium.Blazor.Interop/Annium.Blazor.Interop.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Data.Models" />
+    <PackageReference Include="Annium.Extensions.Jobs" />
+    <PackageReference Include="OneOf" />
+  </ItemGroup>
 </Project>

@@ -14,16 +14,16 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
     where T : ITimeSeries
 {
     [Parameter, EditorRequired]
-    public ISeriesSource<T> Source { get; set; } = default!;
+    public ISeriesSource<T> Source { get; set; } = null!;
 
     [CascadingParameter]
-    public IChartContext ChartContext { get; set; } = default!;
+    public IChartContext ChartContext { get; set; } = null!;
 
     [CascadingParameter]
-    internal IPaneContext PaneContext { get; set; } = default!;
+    internal IPaneContext PaneContext { get; set; } = null!;
 
     [CascadingParameter]
-    public ISeriesContext SeriesContext { get; set; } = default!;
+    public ISeriesContext SeriesContext { get; set; } = null!;
 
     protected abstract int MinValuesToRender { get; }
 
@@ -35,7 +35,7 @@ public abstract partial class SeriesBase<T> : IAsyncDisposable
 
         await base.SetParametersAsync(parameters);
 
-        if (Source != source && source != default!)
+        if (Source != source && source != null!)
         {
             _disposable.DisposeAndReset();
             _disposable += PaneContext.RegisterSource(Source);

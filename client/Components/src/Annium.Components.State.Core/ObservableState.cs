@@ -31,7 +31,7 @@ public abstract class ObservableState : IObservableState
     private void Unmute() => _isMuted = false;
 }
 
-file struct MuteScope : IDisposable
+file readonly struct MuteScope : IDisposable
 {
     private readonly Action _unmute;
 

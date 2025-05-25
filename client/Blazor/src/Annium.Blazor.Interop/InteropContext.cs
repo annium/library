@@ -6,11 +6,11 @@ namespace Annium.Blazor.Interop;
 
 public static class InteropContext
 {
-    public static IInteropContext Instance { get; private set; } = default!;
+    public static IInteropContext Instance { get; private set; } = null!;
 
     public static void Init(IServiceProvider sp)
     {
-        if (Instance != default!)
+        if (Instance != null!)
             throw new InvalidOperationException("Can't init more than once");
 
         Instance = sp.Resolve<IInteropContext>();

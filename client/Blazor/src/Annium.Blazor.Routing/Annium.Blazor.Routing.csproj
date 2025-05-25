@@ -1,20 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
-    <PropertyGroup>
-        <PackageId>Annium.Blazor.Routing</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>Annium.Blazor.Routing</Description>
-        <Solutions>Annium.Frontend</Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Library</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>true</IsPackable>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Annium.Data.Models" Version="0.1.0" />
-        <PackageReference Include="Annium.Net.Base" Version="0.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.1" />
-        <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="8.0.1" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Annium.Frontend</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Data.Models" />
+    <PackageReference Include="Annium.Net.Base" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" />
+  </ItemGroup>
 </Project>

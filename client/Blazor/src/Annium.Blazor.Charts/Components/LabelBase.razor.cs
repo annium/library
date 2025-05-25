@@ -52,13 +52,13 @@ public abstract partial class LabelBase<T> : IAsyncDisposable
     public OneOf<string, Func<T, string>> Color { get; set; } = SeriesLabelStyle;
 
     [CascadingParameter]
-    public IChartContext ChartContext { get; set; } = default!;
+    public IChartContext ChartContext { get; set; } = null!;
 
     [CascadingParameter]
-    internal IPaneContext PaneContext { get; set; } = default!;
+    internal IPaneContext PaneContext { get; set; } = null!;
 
     [CascadingParameter]
-    public ISeriesContext SeriesContext { get; set; } = default!;
+    public ISeriesContext SeriesContext { get; set; } = null!;
 
     protected AsyncDisposableBox Disposable = Annium.Disposable.AsyncBox(VoidLogger.Instance);
 

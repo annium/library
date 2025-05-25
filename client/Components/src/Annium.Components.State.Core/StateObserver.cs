@@ -10,17 +10,17 @@ namespace Annium.Components.State.Core;
 
 public static class StateObserver
 {
-    private static readonly object[] EmptyArgs = Array.Empty<object>();
+    private static readonly object[] _emptyArgs = [];
 
     private static readonly ConcurrentDictionary<
         Type,
         IReadOnlyCollection<Func<object, IObservableState>>
-    > ObservableAccessors = new();
+    > _observableAccessors = new();
 
     public static IDisposable ObserveObject<T>(T target, Action handleChange)
         where T : class
     {
-        var accessors = ObservableAccessors.GetOrAdd(target.GetType(), DiscoverObservableAccessors);
+        var accessors = _observableAccessors.GetOrAdd(target.GetType(), DiscoverObservableAccessors);
 
         var disposable = Disposable.Box(VoidLogger.Instance);
         foreach (var get in accessors)
@@ -38,7 +38,7 @@ public static class StateObserver
             .Where(x => x.PropertyType.IsDerivedFrom(typeof(IObservableState)))
             .ToArray();
         foreach (var property in properties)
-            accessors.Add(instance => (IObservableState)property.GetMethod!.Invoke(instance, EmptyArgs)!);
+            accessors.Add(instance => (IObservableState)property.GetMethod!.Invoke(instance, _emptyArgs)!);
 
         var fields = type.GetFields(flags).Where(x => x.FieldType.IsDerivedFrom(typeof(IObservableState))).ToArray();
         foreach (var field in fields)

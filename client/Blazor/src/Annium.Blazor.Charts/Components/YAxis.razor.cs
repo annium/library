@@ -22,16 +22,16 @@ public partial class YAxis : ILogSubject, IAsyncDisposable
     public string LabelStyle { get; set; } = AxisLabelStyle;
 
     [CascadingParameter]
-    public IChartContext ChartContext { get; set; } = default!;
+    public IChartContext ChartContext { get; set; } = null!;
 
     [CascadingParameter]
-    public IPaneContext PaneContext { get; set; } = default!;
+    public IPaneContext PaneContext { get; set; } = null!;
 
     [CascadingParameter]
-    public IVerticalSideContext SideContext { get; set; } = default!;
+    public IVerticalSideContext SideContext { get; set; } = null!;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);
 

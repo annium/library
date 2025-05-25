@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using Annium.Core.DependencyInjection;
 using Annium.Logging.Shared;
+using Demo.Blazor.Charts.Domain.Converters;
 
 namespace Demo.Blazor.Charts;
 
@@ -17,7 +18,7 @@ public class ServicePack : ServicePackBase
         container.AddHttpRequestFactory(true);
         container
             .AddSerializers()
-            .WithJson(opts => opts.ConfigureForOperations().ConfigureForNodaTime(), isDefault: true);
+            .WithJson(opts => opts.ResetConverters().AddConverter<CandleConverter>(), isDefault: true);
 
         // web
         container.AddRouting();

@@ -89,7 +89,7 @@ internal static class ChartContextExtensions
             > 60 => Duration.FromHours(1),
             > 30 => Duration.FromMinutes(30),
             > 15 => Duration.FromMinutes(15),
-            _ => Duration.FromMinutes(block > 5 ? 5 : 3)
+            _ => Duration.FromMinutes(block > 5 ? 5 : 3),
         };
     }
 }

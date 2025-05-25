@@ -10,13 +10,13 @@ namespace Annium.Blazor.MatBlazor.Components
         where TValue : IEquatable<TValue>
     {
         [Parameter]
-        public IAtomicContainer<TValue> State { get; set; } = default!;
+        public IAtomicContainer<TValue> State { get; set; } = null!;
 
         [Parameter]
         public string? Class { get; set; }
 
         [Parameter(CaptureUnmatchedValues = true)]
-        public IReadOnlyDictionary<string, object> Attributes { get; set; } = default!;
+        public IReadOnlyDictionary<string, object> Attributes { get; set; } = null!;
 
         public string ClassName => _classBuilder.Clone().With(Class ?? string.Empty).Build();
 

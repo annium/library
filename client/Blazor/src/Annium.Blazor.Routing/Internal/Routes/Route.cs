@@ -14,7 +14,7 @@ internal class Route : RouteBase, IRoute
     public Route(NavigationManager navigationManager, string template, Type pageType, IMapper mapper)
         : base(navigationManager, template, pageType)
     {
-        _path = LocationPath.Parse(template, Array.Empty<PropertyInfo>(), mapper).Item1;
+        _path = LocationPath.Parse(template, [], mapper).Item1;
     }
 
     public string Link()

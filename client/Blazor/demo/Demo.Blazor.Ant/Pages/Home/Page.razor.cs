@@ -7,12 +7,12 @@ namespace Demo.Blazor.Ant.Pages.Home;
 public partial class Page : ILogSubject
 {
     [Inject]
-    public IStateFactory StateFactory { get; set; } = default!;
+    public IStateFactory StateFactory { get; set; } = null!;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
-    private IObjectContainer<Data> _state = default!;
+    private IObjectContainer<Data> _state = null!;
 
     protected override void OnInitialized()
     {

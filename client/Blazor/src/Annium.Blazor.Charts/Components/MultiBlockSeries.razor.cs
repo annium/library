@@ -26,7 +26,7 @@ public partial class MultiBlockSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     public OneOf<string, Func<TI, string>> ItemColor { get; set; }
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     protected override int MinValuesToRender => 1;
 

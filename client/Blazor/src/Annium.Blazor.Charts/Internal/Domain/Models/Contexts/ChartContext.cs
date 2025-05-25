@@ -38,9 +38,9 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject
     public IReadOnlyCollection<IPaneContext> Panes => _panes;
     public DomRect Rect { get; private set; }
 
-    private List<int> _zooms = new() { 1 };
-    private List<Duration> _resolutions = new() { Duration.FromMinutes(1) };
-    private readonly List<IPaneContext> _panes = new();
+    private List<int> _zooms = [1];
+    private List<Duration> _resolutions = [Duration.FromMinutes(1)];
+    private readonly List<IPaneContext> _panes = [];
     private readonly ManagedValueRange<Instant> _bounds = ValueRange.Create(FutureBound, PastBound);
     private readonly ManagedValueRange<Instant> _view = ValueRange.Create(FutureBound, PastBound);
     private int _isCanvasDirty = 1;

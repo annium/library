@@ -40,11 +40,7 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>, ILogSu
         foreach (var property in Properties)
         {
             var create = Factories[property];
-            var @ref = (ITrackedState)
-                create.Invoke(
-                    stateFactory,
-                    new[] { property.GetMethod!.Invoke(initialValue, Array.Empty<object>())! }
-                )!;
+            var @ref = (ITrackedState)create.Invoke(stateFactory, [property.GetMethod!.Invoke(initialValue, [])!])!;
             @ref.Changed.Subscribe(_ => NotifyChanged());
             var type = @ref.GetType();
             var get = type.GetProperty(nameof(IValueTrackedState<object>.Value))!.GetMethod!;
@@ -61,8 +57,8 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>, ILogSu
             foreach (var property in Properties)
             {
                 var state = _states[property];
-                var propertyValue = property.GetMethod!.Invoke(value, Array.Empty<object>())!;
-                state.Init.Invoke(state.Ref, new[] { propertyValue });
+                var propertyValue = property.GetMethod!.Invoke(value, [])!;
+                state.Init.Invoke(state.Ref, [propertyValue]);
             }
         }
 
@@ -77,8 +73,8 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>, ILogSu
             foreach (var property in Properties)
             {
                 var state = _states[property];
-                var propertyValue = property.GetMethod!.Invoke(value, Array.Empty<object>())!;
-                changed = (bool)state.Set.Invoke(state.Ref, new[] { propertyValue })! || changed;
+                var propertyValue = property.GetMethod!.Invoke(value, [])!;
+                changed = (bool)state.Set.Invoke(state.Ref, [propertyValue])! || changed;
             }
         }
 
@@ -147,7 +143,7 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>, ILogSu
         foreach (var property in Properties)
         {
             var state = _states[property];
-            property.SetMethod!.Invoke(value, new[] { state.Get.Invoke(state.Ref, Array.Empty<object>()) });
+            property.SetMethod!.Invoke(value, [state.Get.Invoke(state.Ref, [])]);
         }
 
         return value;

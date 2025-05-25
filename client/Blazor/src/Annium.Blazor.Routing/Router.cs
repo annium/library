@@ -13,25 +13,25 @@ namespace Annium.Blazor.Routing;
 public class Router : IComponent, IHandleAfterRender, IDisposable, ILogSubject
 {
     [Parameter]
-    public RenderFragment NotFound { get; set; } = default!;
+    public RenderFragment NotFound { get; set; } = null!;
 
     [Parameter]
-    public RenderFragment<RouteData> Found { get; set; } = default!;
+    public RenderFragment<RouteData> Found { get; set; } = null!;
 
     [Inject]
-    public NavigationManager NavigationManager { get; set; } = default!;
+    public NavigationManager NavigationManager { get; set; } = null!;
 
     [Inject]
-    public INavigationInterception NavigationInterception { get; set; } = default!;
+    public INavigationInterception NavigationInterception { get; set; } = null!;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     [Inject]
-    internal RouteManager RouteManager { get; set; } = default!;
+    internal RouteManager RouteManager { get; set; } = null!;
 
     [Inject]
-    internal IEnumerable<IRouting> Routings { get; set; } = Array.Empty<IRouting>();
+    internal IEnumerable<IRouting> Routings { get; set; } = [];
 
     private RenderHandle _renderHandle;
     private bool _navigationInterceptionEnabled;

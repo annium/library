@@ -7,8 +7,8 @@ namespace Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
 
 internal sealed record HorizontalSideContext : IManagedHorizontalSideContext
 {
-    public Canvas Canvas { get; private set; } = default!;
-    public Canvas Overlay { get; private set; } = default!;
+    public Canvas Canvas { get; private set; } = null!;
+    public Canvas Overlay { get; private set; } = null!;
     public DomRect Rect { get; private set; }
     private int _isInitiated;
 

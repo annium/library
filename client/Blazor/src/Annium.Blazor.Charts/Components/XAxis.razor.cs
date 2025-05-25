@@ -22,13 +22,13 @@ public partial class XAxis : ILogSubject, IAsyncDisposable
     public string LabelStyle { get; set; } = AxisLabelStyle;
 
     [CascadingParameter]
-    public IChartContext Chart { get; set; } = default!;
+    public IChartContext Chart { get; set; } = null!;
 
     [CascadingParameter]
-    public IHorizontalSideContext SideContext { get; set; } = default!;
+    public IHorizontalSideContext SideContext { get; set; } = null!;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);
 

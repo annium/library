@@ -149,11 +149,7 @@ public class ComplexTest : TestBase
         {
             Name = "Sample",
             Author = new User { Name = "Max" },
-            Messages = new()
-            {
-                new Message { Text = "one", IsRead = true },
-                new Message { Text = "two" }
-            },
+            Messages = [new Message { Text = "one", IsRead = true }, new Message { Text = "two" }],
             EmbeddedDictionary = new Dictionary<string, Dictionary<int, Message>>
             {
                 {
@@ -163,10 +159,10 @@ public class ComplexTest : TestBase
                         {
                             1,
                             new Message { Text = "hey", IsRead = true }
-                        }
+                        },
                     }
-                }
-            }
+                },
+            },
         };
 
     private Blog ArrangeOther() =>
@@ -174,19 +170,19 @@ public class ComplexTest : TestBase
         {
             Name = "Demo",
             Author = new User { Name = "Lex" },
-            Messages = new()
-            {
+            Messages =
+            [
                 new Message { Text = "three", IsRead = true },
                 new Message { Text = "four" },
-                new Message { Text = "five", IsRead = true }
-            },
+                new Message { Text = "five", IsRead = true },
+            ],
         };
 
     private class Blog
     {
         public string Name { get; set; } = string.Empty;
-        public User Author { get; set; } = default!;
-        public List<Message> Messages { get; set; } = new();
+        public User Author { get; set; } = null!;
+        public List<Message> Messages { get; set; } = [];
         public Dictionary<string, Dictionary<int, Message>> EmbeddedDictionary { get; set; } = new();
     }
 

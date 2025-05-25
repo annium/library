@@ -9,16 +9,14 @@ namespace Demo.Blazor.Interop.Pages.Element;
 public partial class Page : ILogSubject, IDisposable
 {
     [Inject]
-    private Style Styles { get; set; } = default!;
+    private Style Styles { get; set; } = null!;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
-    private Div _container = default!;
-    private Div _block = default!;
-    private Div _eventsBlock = default!;
-    private Div _resizedBlock = default!;
-    private Input _input = default!;
+    private Div _eventsBlock = null!;
+    private Div _resizedBlock = null!;
+    private Input _input = null!;
     private bool _isResized;
     private DisposableBox _disposable = Disposable.Box(VoidLogger.Instance);
 

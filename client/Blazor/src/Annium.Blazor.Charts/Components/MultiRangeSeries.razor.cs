@@ -26,7 +26,7 @@ public partial class MultiRangeSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     public bool ContinueLast { get; set; }
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     protected override int MinValuesToRender => 1;
 

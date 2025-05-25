@@ -11,7 +11,7 @@ public partial class Label<T> : LabelBase<T>
     where T : ITimeSeries
 {
     [Parameter, EditorRequired]
-    public ISeriesSource<T> Source { get; set; } = default!;
+    public ISeriesSource<T> Source { get; set; } = null!;
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -30,6 +30,6 @@ public partial class Label<T> : LabelBase<T>
 
         var item = Source.GetItem(moment.Value, Match);
         if (item is not null)
-            RenderItems(moment.Value, new[] { item });
+            RenderItems(moment.Value, [item]);
     }
 }

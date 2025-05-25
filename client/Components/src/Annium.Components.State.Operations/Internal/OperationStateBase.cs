@@ -10,7 +10,7 @@ namespace Annium.Components.State.Operations.Internal;
 internal abstract class OperationStateBase : ObservableState, IOperationStateBase
 {
     public string PlainError => PlainErrors.Join("; ");
-    public IReadOnlyCollection<string> PlainErrors { get; private set; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> PlainErrors { get; private set; } = [];
     public IReadOnlyDictionary<string, IReadOnlyCollection<string>> LabeledErrors { get; private set; } =
         new Dictionary<string, IReadOnlyCollection<string>>();
     public bool IsOk => PlainErrors.Count == 0 && LabeledErrors.Count == 0;
@@ -22,7 +22,7 @@ internal abstract class OperationStateBase : ObservableState, IOperationStateBas
 
     public void Start()
     {
-        PlainErrors = Array.Empty<string>();
+        PlainErrors = [];
         LabeledErrors = new Dictionary<string, IReadOnlyCollection<string>>();
         IsLoading = true;
         HasSucceed = false;
@@ -61,7 +61,7 @@ internal abstract class OperationStateBase : ObservableState, IOperationStateBas
 
     protected void SucceedInternal()
     {
-        PlainErrors = Array.Empty<string>();
+        PlainErrors = [];
         LabeledErrors = new Dictionary<string, IReadOnlyCollection<string>>();
         IsLoading = false;
         HasSucceed = true;
@@ -81,7 +81,7 @@ internal abstract class OperationStateBase : ObservableState, IOperationStateBas
 
     protected void ResetInternal()
     {
-        PlainErrors = Array.Empty<string>();
+        PlainErrors = [];
         LabeledErrors = new Dictionary<string, IReadOnlyCollection<string>>();
         IsLoading = false;
         HasSucceed = false;

@@ -20,7 +20,7 @@ public partial class LineSeries<T> : SeriesBase<T>, ILogSubject
     public int[]? Dash { get; set; }
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     protected override int MinValuesToRender => 1;
 

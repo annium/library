@@ -215,7 +215,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
 
     private void AddInternal(int index, T item)
     {
-        var state = (IValueTrackedState<T>)Factory.Invoke(_stateFactory, new[] { (object)item })!;
+        var state = (IValueTrackedState<T>)Factory.Invoke(_stateFactory, [(object)item])!;
         _states.Insert(index, new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
     }
 

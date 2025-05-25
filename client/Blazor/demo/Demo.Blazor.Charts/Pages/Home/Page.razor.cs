@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Annium;
 using Annium.Blazor.Charts.Data.Sources;
@@ -8,7 +7,6 @@ using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Domain.Interfaces;
 using Annium.Blazor.Charts.Domain.Models;
 using Annium.Blazor.Charts.Extensions;
-using Annium.Core.Mapper;
 using Annium.Net.Http;
 using Demo.Blazor.Charts.Domain;
 using Microsoft.AspNetCore.Components;
@@ -19,24 +17,21 @@ namespace Demo.Blazor.Charts.Pages.Home;
 public partial class Page
 {
     [Inject]
-    private IChartContext ChartContext { get; set; } = default!;
+    private IChartContext ChartContext { get; set; } = null!;
 
     [Inject]
-    private IHttpRequestFactory Api { get; set; } = default!;
+    private IHttpRequestFactory Api { get; set; } = null!;
 
     [Inject]
-    private ISeriesSourceFactory SeriesSourceFactory { get; set; } = default!;
+    private ISeriesSourceFactory SeriesSourceFactory { get; set; } = null!;
 
     [Inject]
-    private IMapper Mapper { get; set; } = default!;
+    private Style Styles { get; set; } = null!;
 
-    [Inject]
-    private Style Styles { get; set; } = default!;
-
-    private ISeriesSource<ICandle> _candleSeries = default!;
-    private ISeriesSource<PointValue> _openSeries = default!;
-    private ISeriesSource<MultiValue<RangeItem>> _multiRangeSeries = default!;
-    private ISeriesSource<MultiValue<LinePointItem>> _multiLineSeries = default!;
+    private ISeriesSource<ICandle> _candleSeries = null!;
+    private ISeriesSource<PointValue> _openSeries = null!;
+    private ISeriesSource<MultiValue<RangeItem>> _multiRangeSeries = null!;
+    private ISeriesSource<MultiValue<LinePointItem>> _multiLineSeries = null!;
     private Func<ICandle, string> _getCandleLabel = delegate
     {
         return string.Empty;
@@ -68,9 +63,9 @@ public partial class Page
 
     protected override void OnInitialized()
     {
-        ChartContext.Configure(ImmutableArray.Create(1, 2, 4, 8, 16), ImmutableArray.Create(1, 5, 15, 30));
+        ChartContext.Configure([1, 2, 4, 8, 16], [1, 5, 15, 30]);
 
-        _candleSeries = SeriesSourceFactory.CreateChecked(ChartContext.Resolution, LoadCandles);
+        _candleSeries = SeriesSourceFactory.CreateChecked(ChartContext.Resolution, LoadCandlesAsync);
         _openSeries = SeriesSourceFactory.CreateUnchecked(
             _candleSeries,
             x => x.Close > x.Open * 1.001m ? new PointValue(x.Moment, x.Open) : null
@@ -79,14 +74,14 @@ public partial class Page
             _candleSeries,
             x => new MultiValue<RangeItem>(
                 x.Moment,
-                new[] { new RangeItem(2 * x.Low - x.High, x.Low), new RangeItem(x.High, 2 * x.High - x.Low) }
+                [new RangeItem(2 * x.Low - x.High, x.Low), new RangeItem(x.High, 2 * x.High - x.Low)]
             )
         );
         _multiLineSeries = SeriesSourceFactory.CreateChecked(
             _candleSeries,
             x => new MultiValue<LinePointItem>(
                 x.Moment,
-                new[] { new LinePointItem(false, x.Low * .98m), new LinePointItem(true, x.High * 1.02m) }
+                [new LinePointItem(false, x.Low * .98m), new LinePointItem(true, x.High * 1.02m)]
             )
         );
 
@@ -108,20 +103,17 @@ public partial class Page
         _getLineLabelTop = (ctx, point) => ctx.ToY(point.Value);
     }
 
-    private async Task<IReadOnlyList<ICandle>> LoadCandles(Duration resolution, Instant start, Instant end)
+    private async Task<IReadOnlyList<ICandle>> LoadCandlesAsync(Duration resolution, Instant start, Instant end)
     {
-        var response = await Api.New("https://finnhub.io")
-            .Get("/api/v1/crypto/candle")
-            .Param("symbol", "BINANCE:BTCUSDT")
-            .Param("resolution", resolution.TotalMinutes.FloorInt32())
-            .Param("from", start.ToUnixTimeSeconds())
-            .Param("to", end.ToUnixTimeSeconds())
-            .Param("token", "cc76b1qad3i1sic4jej0")
-            .AsAsync<CandleResponse>();
+        var response = await Api.New("https://api.binance.com")
+            .Get("/api/v3/klines")
+            .Param("symbol", "BTCUSDT")
+            .Param("interval", $"{resolution.TotalMinutes.FloorInt32()}m")
+            .Param("startTime", start.ToUnixTimeMilliseconds())
+            .Param("endTime", end.ToUnixTimeMilliseconds())
+            .AsAsync<Candle[]>();
 
-        var candles = Mapper.Map<IReadOnlyList<Candle>>(response);
-
-        return candles;
+        return response ?? [];
     }
 
     private sealed record LinePointItem(bool IsUpper, decimal Value) : IPointItem;

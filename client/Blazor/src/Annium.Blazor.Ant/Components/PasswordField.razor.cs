@@ -25,7 +25,7 @@ public partial class PasswordField
     public IReadOnlyDictionary<string, object> Attributes { get; set; } = new Dictionary<string, object>();
 
     [Inject]
-    private IMapper Mapper { get; set; } = default!;
+    private IMapper Mapper { get; set; } = null!;
 
     private string Value => InternalState.Value;
 

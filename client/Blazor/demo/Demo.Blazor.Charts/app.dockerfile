@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine as builder
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine as builder
 COPY . /code
 RUN dotnet publish -c Release -o /dist /code
 

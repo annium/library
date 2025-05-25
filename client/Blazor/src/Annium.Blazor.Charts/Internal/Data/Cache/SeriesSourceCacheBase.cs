@@ -58,7 +58,7 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
             if (chunk.Range.Contains(range, RangeBounds.Both))
                 return chunk.Items.Where(x => _compare(x, start) >= 0 && _compare(x, end) <= 0).ToArray();
 
-        return Array.Empty<T>();
+        return [];
     }
 
     public T? GetItem(Instant moment, LookupMatch match = LookupMatch.Exact)

@@ -1,22 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>Annium.Blazor.State</PackageId>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Description>Annium.Blazor.Storage</Description>
-        <Solutions>Annium.Frontend</Solutions>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Library</OutputType>
-        <DebugType>portable</DebugType>
-        <WarningsAsErrors>true</WarningsAsErrors>
-        <IsPackable>true</IsPackable>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="../../../shared/src/Annium.Components.State.Forms/Annium.Components.State.Forms.csproj" />
-        <ProjectReference Include="../../../shared/src/Annium.Components.State.Operations/Annium.Components.State.Operations.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Annium.Serialization.Abstractions" Version="0.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.1" />
-    </ItemGroup>
+  <PropertyGroup>
+    <Solutions>Annium.Frontend</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../shared/src/Annium.Components.State.Forms/Annium.Components.State.Forms.csproj" />
+    <ProjectReference Include="../../../shared/src/Annium.Components.State.Operations/Annium.Components.State.Operations.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Serialization.Abstractions" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+  </ItemGroup>
 </Project>

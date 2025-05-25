@@ -22,7 +22,7 @@ public partial class CandleSeries<T> : SeriesBase<T>, ILogSubject
     public string StaleColor { get; set; } = "#999999";
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     protected override int MinValuesToRender => 1;
 

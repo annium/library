@@ -223,7 +223,7 @@ public class CheckedSeriesSourceCacheTests : TestBase
         cache
             .GetEmptyRanges(start1 - M(2), end2 + M(2))
             .IsEqual(
-                new[] { ValueRange.Create(start1 - M(2), start1 - M(1)), ValueRange.Create(end2 + M(1), end2 + M(2)), }
+                new[] { ValueRange.Create(start1 - M(2), start1 - M(1)), ValueRange.Create(end2 + M(1), end2 + M(2)) }
             );
     }
 
@@ -245,7 +245,7 @@ public class CheckedSeriesSourceCacheTests : TestBase
         cache
             .GetEmptyRanges(start1 - M(2), end2 + M(2))
             .IsEqual(
-                new[] { ValueRange.Create(start1 - M(2), start1 - M(1)), ValueRange.Create(end2 + M(1), end2 + M(2)), }
+                new[] { ValueRange.Create(start1 - M(2), start1 - M(1)), ValueRange.Create(end2 + M(1), end2 + M(2)) }
             );
     }
 

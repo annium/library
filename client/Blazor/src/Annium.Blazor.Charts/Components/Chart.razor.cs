@@ -18,24 +18,23 @@ namespace Annium.Blazor.Charts.Components;
 public partial class Chart : ILogSubject, IAsyncDisposable
 {
     [Parameter, EditorRequired]
-    public IChartContext ChartContext { get; set; } = default!;
+    public IChartContext ChartContext { get; set; } = null!;
 
     [Parameter]
     public string? CssClass { get; set; }
 
     [Parameter]
-    public RenderFragment ChildContent { get; set; } = default!;
+    public RenderFragment ChildContent { get; set; } = null!;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     [Inject]
-    private Style Styles { get; set; } = default!;
+    private Style Styles { get; set; } = null!;
 
     private string Class => ClassBuilder.With(Styles.Container).With(CssClass).Build();
-    private Div _container = default!;
-    private IManagedChartContext _chartContext = default!;
-    private decimal _rawZoom;
+    private Div _container = null!;
+    private IManagedChartContext _chartContext = null!;
     private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);
 
     protected override void OnParametersSet()
@@ -43,7 +42,6 @@ public partial class Chart : ILogSubject, IAsyncDisposable
         this.Trace("request draw");
         _chartContext = (IManagedChartContext)ChartContext;
         _chartContext.RequestDraw();
-        _rawZoom = _chartContext.Zoom;
     }
 
     protected override void OnAfterRender(bool firstRender)

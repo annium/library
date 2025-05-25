@@ -262,5 +262,5 @@ public class ArrayContainerTest : TestBase
         log.Has(3);
     }
 
-    private List<int> Arrange() => new() { 2, 8 };
+    private List<int> Arrange() => [2, 8];
 }

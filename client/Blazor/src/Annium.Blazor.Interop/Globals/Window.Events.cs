@@ -6,21 +6,21 @@ namespace Annium.Blazor.Interop;
 
 public static partial class Window
 {
-    private static readonly IInteropEvent<KeyboardEvent> KeyboardEvent = InteropEvent<KeyboardEvent>.Static(
+    private static readonly IInteropEvent<KeyboardEvent> _keyboardEvent = InteropEvent<KeyboardEvent>.Static(
         "window",
         "window"
     );
 
-    private static readonly IInteropEvent<ResizeEvent> ResizeEvent = InteropEvent<ResizeEvent>.Static(
+    private static readonly IInteropEvent<ResizeEvent> _resizeEvent = InteropEvent<ResizeEvent>.Static(
         "window",
         "window"
     );
 
     public static Action OnKeyDown(Action<KeyboardEvent> handle, bool preventDefault) =>
-        KeyboardEvent.Register(KeyboardEventEnum.keydown, handle, preventDefault);
+        _keyboardEvent.Register(KeyboardEventEnum.keydown, handle, preventDefault);
 
     public static Action OnKeyUp(Action<KeyboardEvent> handle, bool preventDefault) =>
-        KeyboardEvent.Register(KeyboardEventEnum.keyup, handle, preventDefault);
+        _keyboardEvent.Register(KeyboardEventEnum.keyup, handle, preventDefault);
 
-    public static Action OnResize(Action<ResizeEvent> handle) => ResizeEvent.Register("resize", handle);
+    public static Action OnResize(Action<ResizeEvent> handle) => _resizeEvent.Register("resize", handle);
 }

@@ -15,19 +15,19 @@ public partial class Pane : ILogSubject, IAsyncDisposable
     public string? CssClass { get; set; }
 
     [Parameter]
-    public RenderFragment ChildContent { get; set; } = default!;
+    public RenderFragment ChildContent { get; set; } = null!;
 
     [CascadingParameter]
-    internal IChartContext ChartContext { get; set; } = default!;
+    internal IChartContext ChartContext { get; set; } = null!;
 
     [Inject]
-    private IManagedPaneContext PaneContext { get; set; } = default!;
+    private IManagedPaneContext PaneContext { get; set; } = null!;
 
     [Inject]
-    private Style Styles { get; set; } = default!;
+    private Style Styles { get; set; } = null!;
 
     [Inject]
-    public ILogger Logger { get; set; } = default!;
+    public ILogger Logger { get; set; } = null!;
 
     private string Class => ClassBuilder.With(Styles.Block).With(CssClass).Build();
     private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);

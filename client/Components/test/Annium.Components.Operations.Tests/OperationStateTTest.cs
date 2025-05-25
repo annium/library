@@ -21,7 +21,7 @@ public class OperationStateTTest : TestBase
         op.Start();
 
         // assert
-        op.Data.Is(default(int));
+        op.Data.Is(0);
         op.HasErrors.IsFalse();
         op.IsLoading.IsTrue();
         op.IsLoaded.IsFalse();
@@ -85,7 +85,7 @@ public class OperationStateTTest : TestBase
         op.Fail(failure);
 
         // assert
-        op.Data.Is(default(int));
+        op.Data.Is(0);
         op.HasErrors.IsTrue();
         op.PlainErrors.IsEqual(failure.PlainErrors);
         op.LabeledErrors.IsEqual(failure.LabeledErrors);
@@ -108,7 +108,7 @@ public class OperationStateTTest : TestBase
         op.Reset();
 
         // assert
-        op.Data.Is(default(int));
+        op.Data.Is(0);
         op.HasErrors.IsFalse();
         op.IsLoading.IsFalse();
         op.IsLoaded.IsFalse();

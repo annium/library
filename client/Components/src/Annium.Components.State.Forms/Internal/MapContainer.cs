@@ -201,7 +201,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
 
     private void AddInternal(TKey key, TValue item)
     {
-        var state = (IValueTrackedState<TValue>)Factory.Invoke(_stateFactory, new[] { (object)item })!;
+        var state = (IValueTrackedState<TValue>)Factory.Invoke(_stateFactory, [(object)item])!;
         _states[key] = new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged()));
     }
 
