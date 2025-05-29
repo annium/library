@@ -1,5 +1,3 @@
-using System;
-
 namespace XLog.Components;
 
 public interface IConfigurationManager

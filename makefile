@@ -1,7 +1,6 @@
 REGISTRY := registry.annium.com
 
 setup:
-	xs remote restore -user $(user) -password $(pass)
 	dotnet tool restore
 
 format:
@@ -53,8 +52,6 @@ publish-mbus-sink:
 	$(call publish,MessageBus/src/MessageBus.Sink,app.dockerfile,mbus.sink)
 
 publish-tools:
-	$(call publish-package,xdb/src/Xdb.Core/Xdb.Core.csproj)
-	$(call publish-package,xdb/src/Xdb.PostgreSql/Xdb.PostgreSql.csproj)
 	$(call publish-package,xrest/src/XRest.Core/XRest.Core.csproj)
 	$(call publish-package,xrest/src/sources/XRest.Sources.AspNetCore/XRest.Sources.AspNetCore.csproj)
 	$(call publish-package,xrest/src/sources/XRest.Sources.Shared/XRest.Sources.Shared.csproj)

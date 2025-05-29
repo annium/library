@@ -36,19 +36,22 @@ static (Type configurationType, Type entityType)[] CollectTypes(Assembly assembl
     return configurationTypes;
 }
 
-internal class PluginLoadContext : AssemblyLoadContext
+namespace Debugger
 {
-    private readonly AssemblyDependencyResolver _resolver;
-
-    public PluginLoadContext(string assemblyPath)
+    internal class PluginLoadContext : AssemblyLoadContext
     {
-        _resolver = new AssemblyDependencyResolver(assemblyPath);
-    }
+        private readonly AssemblyDependencyResolver _resolver;
 
-    protected override Assembly? Load(AssemblyName assemblyName)
-    {
-        var assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+        public PluginLoadContext(string assemblyPath)
+        {
+            _resolver = new AssemblyDependencyResolver(assemblyPath);
+        }
 
-        return assemblyPath is null ? null : LoadFromAssemblyPath(assemblyPath);
+        protected override Assembly? Load(AssemblyName assemblyName)
+        {
+            var assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+
+            return assemblyPath is null ? null : LoadFromAssemblyPath(assemblyPath);
+        }
     }
 }

@@ -1,5 +1,3 @@
-using System;
-
 namespace Xc.Setup.Raw;
 
 internal class TargetSetup

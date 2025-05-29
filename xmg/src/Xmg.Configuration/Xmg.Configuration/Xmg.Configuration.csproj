@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Solutions>Tools</Solutions>
+    <Solutions>Annium.Tools</Solutions>
     <OutputType>Library</OutputType>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
