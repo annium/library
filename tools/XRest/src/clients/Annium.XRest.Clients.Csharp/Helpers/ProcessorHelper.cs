@@ -1,0 +1,29 @@
+using System;
+using System.Collections.Generic;
+
+namespace Annium.XRest.Clients.Csharp.Helpers;
+
+internal static class ProcessorHelper
+{
+    private static readonly IReadOnlyDictionary<Type, string> _baseTypeNames = new Dictionary<Type, string>
+    {
+        { typeof(int), "int" },
+        { typeof(uint), "uint" },
+        { typeof(long), "long" },
+        { typeof(ulong), "ulong" },
+        { typeof(short), "short" },
+        { typeof(ushort), "ushort" },
+        { typeof(byte), "byte" },
+        { typeof(sbyte), "sbyte" },
+        { typeof(bool), "bool" },
+        { typeof(float), "float" },
+        { typeof(double), "double" },
+        { typeof(decimal), "decimal" },
+        { typeof(char), "char" },
+        { typeof(string), "string" },
+        { typeof(object), "object" },
+        { typeof(void), "void" },
+    };
+
+    public static bool IsBaseType(Type type) => _baseTypeNames.ContainsKey(type);
+}

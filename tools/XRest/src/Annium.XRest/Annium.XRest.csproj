@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Solutions>Annium.Tools</Solutions>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>xrest</ToolCommandName>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../clients/Annium.XRest.Clients.Csharp/Annium.XRest.Clients.Csharp.csproj" />
+    <ProjectReference Include="../clients/Annium.XRest.Clients.TypeScript/Annium.XRest.Clients.TypeScript.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Core.Entrypoint" />
+    <PackageReference Include="Annium.Logging.Console" />
+  </ItemGroup>
+</Project>

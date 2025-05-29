@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <Solutions>Annium.Tools</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Annium.XRest.Sources.Shared/Annium.XRest.Sources.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Data.Operations.Serialization.Json" />
+    <PackageReference Include="Annium.NodaTime.Serialization.Json" />
+    <PackageReference Include="NSwag.AspNetCore" />
+  </ItemGroup>
+</Project>

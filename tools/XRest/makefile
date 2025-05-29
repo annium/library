@@ -1,13 +1,27 @@
+include ../lib.mk
+
+publish:
+	$(call publish-package,src/Annium.XRest.Core)
+	$(call publish-package,src/Annium.XRest)
+	$(call publish-package,src/sources/Annium.XRest.Sources.Shared)
+	$(call publish-package,src/sources/Annium.XRest.Sources.AspNetCore)
+
+install:
+	$(call nix-install)
+
+uninstall:
+	$(call nix-uninstall)
+
 server:
-	dotnet run --project demo/XRest.Demo.Server
+	dotnet run --project demo/Annium.XRest.Demo.Server
 
 gen:
 	dotnet run \
-		dotnet gen \
+		cs gen \
 		-s http://localhost:5000 \
-		-ns XRest.Demo.Client.Api \
-		-o demo/XRest.Demo.Client/Api \
+		-ns Annium.XRest.Demo.Client.Api \
+		-o demo/Annium.XRest.Demo.Client/Api \
 		-trace \
-		--project src/XRest
+		--project src/Annium.XRest
 
 .PHONY: $(MAKECMDGOALS)
