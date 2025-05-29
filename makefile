@@ -6,17 +6,17 @@ setup:
 
 format:
 	dotnet csharpier format .
-	xx format -sc -ic
+	xs format -sc -ic
 
 format-full: format
 	dotnet format style
 	dotnet format analyzers
 
 update:
-	xx update all -sc -ic
+	xs update all -sc -ic
 
 clean:
-	xx clean -sc -ic
+	xs clean -sc -ic
 	find . -type f -name '*.nupkg' | xargs rm
 
 buildNumber?=0
