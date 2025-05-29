@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Annium.Core.DependencyInjection;
 using Microsoft.AspNetCore.Components;
-using Xunit.Abstractions;
+using Xunit;
 
 namespace Annium.Blazor.Routing.Tests;
 

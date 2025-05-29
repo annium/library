@@ -1,6 +1,6 @@
 using Annium.Core.DependencyInjection;
 using Annium.Extensions.Validation;
-using Xunit.Abstractions;
+using Xunit;
 
 namespace Annium.Components.State.Forms.Tests;
 

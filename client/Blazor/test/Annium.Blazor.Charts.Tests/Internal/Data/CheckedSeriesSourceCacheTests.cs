@@ -8,7 +8,6 @@ using Annium.Data.Models;
 using Annium.Testing;
 using NodaTime;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Annium.Blazor.Charts.Tests.Internal.Data;
 

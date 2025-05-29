@@ -1,6 +1,6 @@
 using System;
 using Annium.Components.State.Operations;
-using Xunit.Abstractions;
+using Xunit;
 
 namespace Annium.Components.Operations.Tests;
 
