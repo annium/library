@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -5,59 +6,63 @@ using System.Threading;
 using System.Threading.Tasks;
 using Annium.DocLint.Internal.Services;
 using Annium.Extensions.Arguments;
-using Annium.Logging;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 
 namespace Annium.DocLint.Commands;
 
-internal class LintCommand(LintService lintService, ILogger logger)
-    : AsyncCommand<LintCommandConfiguration>,
-        ICommandDescriptor,
-        ILogSubject
+internal class LintCommand(LintService lintService) : AsyncCommand<LintCommandConfiguration>, ICommandDescriptor
 {
     public static string Id => "lint";
     public static string Description => "lint documentation of files in specified directory";
-    public ILogger Logger { get; } = logger;
 
     public override async Task HandleAsync(LintCommandConfiguration cfg, CancellationToken ct)
     {
         var workingDirectory = cfg.WorkingDirectory.IsNullOrWhiteSpace()
             ? Directory.GetCurrentDirectory()
-            : cfg.WorkingDirectory;
+            : Path.GetFullPath(cfg.WorkingDirectory);
         if (!Directory.Exists(workingDirectory))
         {
-            this.Error<string>("Working directory {directory} does not exist", workingDirectory);
+            Console.WriteLine($"Working directory {workingDirectory} does not exist");
             return;
         }
 
         var paths = ResolvePaths(workingDirectory, cfg.Include, cfg.Exclude);
         if (paths.Count == 0)
         {
-            this.Error("No files matched");
+            Console.WriteLine("No files matched");
             return;
         }
 
-        this.Info("run linting on {count} files", paths.Count);
-        var results = await Task.WhenAll(paths.Select(lintService.LintAsync));
+        Console.WriteLine($"run linting on {paths.Count} files");
+        // var results = await Task.WhenAll(paths.Select(lintService.LintAsync));
+        var results = new List<IReadOnlyList<string>>(paths.Count);
+        foreach (var path in paths)
+            results.Add(await lintService.LintAsync(path));
+
+        var validFiles = results.Count(x => x.Count == 0);
+        if (validFiles > 0)
+            Console.WriteLine($"linted {validFiles} files successfully");
+
+        var invalidFiles = results.Count(x => x.Count > 0);
+        if (invalidFiles == 0)
+            return;
 
         var totalErrors = results.Sum(x => x.Count);
-        if (totalErrors == 0)
-        {
-            this.Info("linted {count} files successfully", paths.Count);
-            return;
-        }
+        Console.WriteLine($"linted {invalidFiles} files with {totalErrors} error(s):");
 
-        this.Error("linting of {count} files failed with {errors} error(s)", paths.Count, totalErrors);
         for (var i = 0; i < paths.Count; i++)
         {
             var errors = results[i];
             if (errors.Count == 0)
                 continue;
-            this.Error("file {file} has {errors} error(s):", errors.Count);
+
+            Console.WriteLine($"file {paths[i]} has {errors.Count} error(s):");
             foreach (var error in errors)
-                this.Error<string>("- {error}", error);
+                Console.WriteLine($"- {error}");
         }
+
+        throw new Exception("linting failed");
     }
 
     private IReadOnlyList<string> ResolvePaths(string workingDirectory, string[] includes, string[] excludes)
@@ -68,7 +73,7 @@ internal class LintCommand(LintService lintService, ILogger logger)
 
         var result = matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(workingDirectory)));
 
-        return result.Files.Select(x => x.Path).ToArray();
+        return result.Files.OrderBy(x => x.Path).Select(x => Path.Combine(workingDirectory, x.Path)).ToArray();
     }
 }
 
