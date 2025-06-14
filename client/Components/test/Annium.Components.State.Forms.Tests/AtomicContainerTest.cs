@@ -6,11 +6,21 @@ using Xunit;
 
 namespace Annium.Components.State.Forms.Tests;
 
+/// <summary>
+/// Tests for atomic container functionality including creation, value setting, initialization, and reset operations.
+/// </summary>
 public class AtomicContainerTest : TestBase
 {
+    /// <summary>
+    /// Initializes a new instance of the AtomicContainerTest class.
+    /// </summary>
+    /// <param name="outputHelper">The test output helper for logging.</param>
     public AtomicContainerTest(ITestOutputHelper outputHelper)
         : base(outputHelper) { }
 
+    /// <summary>
+    /// Tests that creating an atomic container correctly initializes with the provided value.
+    /// </summary>
     [Fact]
     public void Create_Ok()
     {
@@ -29,6 +39,9 @@ public class AtomicContainerTest : TestBase
         log.IsEmpty();
     }
 
+    /// <summary>
+    /// Tests that setting values correctly updates state and triggers change notifications.
+    /// </summary>
     [Fact]
     public void Set_Ok()
     {
@@ -59,6 +72,9 @@ public class AtomicContainerTest : TestBase
         log.Has(2);
     }
 
+    /// <summary>
+    /// Tests that initializing with a value correctly resets change tracking state.
+    /// </summary>
     [Fact]
     public void Init_Ok()
     {
@@ -89,6 +105,9 @@ public class AtomicContainerTest : TestBase
         log.Has(2);
     }
 
+    /// <summary>
+    /// Tests that resetting an atomic container correctly restores the initial value and state.
+    /// </summary>
     [Fact]
     public void Reset_Ok()
     {

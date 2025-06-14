@@ -7,11 +7,21 @@ using Xunit;
 
 namespace Annium.Components.State.Forms.Tests;
 
+/// <summary>
+/// Tests for array container functionality including creation, modification, status tracking, and change notifications.
+/// </summary>
 public class ArrayContainerTest : TestBase
 {
+    /// <summary>
+    /// Initializes a new instance of the ArrayContainerTest class.
+    /// </summary>
+    /// <param name="outputHelper">The test output helper for logging.</param>
     public ArrayContainerTest(ITestOutputHelper outputHelper)
         : base(outputHelper) { }
 
+    /// <summary>
+    /// Tests that creating an array container correctly initializes state and child containers.
+    /// </summary>
     [Fact]
     public void Create_Ok()
     {
@@ -38,6 +48,9 @@ public class ArrayContainerTest : TestBase
         log.IsEmpty();
     }
 
+    /// <summary>
+    /// Tests that setting array values correctly updates state and triggers change notifications.
+    /// </summary>
     [Fact]
     public void Set_Ok()
     {
@@ -80,6 +93,9 @@ public class ArrayContainerTest : TestBase
         log.Has(2);
     }
 
+    /// <summary>
+    /// Tests that initializing array values correctly resets change tracking state.
+    /// </summary>
     [Fact]
     public void Init_Ok()
     {
@@ -122,6 +138,9 @@ public class ArrayContainerTest : TestBase
         log.Has(2);
     }
 
+    /// <summary>
+    /// Tests that resetting an array container correctly restores initial state and clears statuses.
+    /// </summary>
     [Fact]
     public void Reset_Ok()
     {
@@ -158,6 +177,9 @@ public class ArrayContainerTest : TestBase
         log.Has(3);
     }
 
+    /// <summary>
+    /// Tests that status propagation from child containers to parent array container works correctly.
+    /// </summary>
     [Fact]
     public void Status_Ok()
     {
@@ -180,6 +202,9 @@ public class ArrayContainerTest : TestBase
         log.Has(1);
     }
 
+    /// <summary>
+    /// Tests that adding elements to the array correctly updates state and triggers change notifications.
+    /// </summary>
     [Fact]
     public void Add_Ok()
     {
@@ -200,6 +225,9 @@ public class ArrayContainerTest : TestBase
         log.Has(1);
     }
 
+    /// <summary>
+    /// Tests that inserting elements at specific positions correctly updates state and triggers change notifications.
+    /// </summary>
     [Fact]
     public void Insert_Ok()
     {
@@ -220,6 +248,9 @@ public class ArrayContainerTest : TestBase
         log.Has(1);
     }
 
+    /// <summary>
+    /// Tests that removing elements at specific positions correctly updates state and triggers change notifications.
+    /// </summary>
     [Fact]
     public void RemoveAt_Ok()
     {
@@ -240,6 +271,9 @@ public class ArrayContainerTest : TestBase
         log.Has(1);
     }
 
+    /// <summary>
+    /// Tests that change tracking correctly identifies when array state returns to original values.
+    /// </summary>
     [Fact]
     public void HasChanged_Ok()
     {
@@ -261,5 +295,9 @@ public class ArrayContainerTest : TestBase
         log.Has(3);
     }
 
+    /// <summary>
+    /// Creates a test array with initial values for testing.
+    /// </summary>
+    /// <returns>A list containing test integer values.</returns>
     private List<int> Arrange() => [2, 8];
 }

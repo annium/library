@@ -11,10 +11,18 @@ using OneOf;
 
 namespace Annium.Blazor.Charts.Components;
 
+/// <summary>
+/// Renders multiple block series where blocks are drawn between related range items across consecutive data points
+/// </summary>
+/// <typeparam name="TM">The multi-value type that implements IMultiValue</typeparam>
+/// <typeparam name="TI">The range item type that implements IRangeItem</typeparam>
 public partial class MultiBlockSeries<TM, TI> : SeriesBase<TM>, ILogSubject
     where TM : IMultiValue<TI>
     where TI : IRangeItem
 {
+    /// <summary>
+    /// Gets or sets the function that determines if two range items are related and should be connected with a block
+    /// </summary>
     [Parameter, EditorRequired]
     public Func<TI, TI, bool> IsRelated { get; set; } =
         delegate
@@ -22,14 +30,27 @@ public partial class MultiBlockSeries<TM, TI> : SeriesBase<TM>, ILogSubject
             return false;
         };
 
+    /// <summary>
+    /// Gets or sets the color for block items, either as a static color string or a function that returns color based on the item
+    /// </summary>
     [Parameter, EditorRequired]
     public OneOf<string, Func<TI, string>> ItemColor { get; set; }
 
+    /// <summary>
+    /// Gets or sets the logger instance for this component
+    /// </summary>
     [Inject]
     public ILogger Logger { get; set; } = null!;
 
+    /// <summary>
+    /// Gets the minimum number of values required to render this series
+    /// </summary>
     protected override int MinValuesToRender => 1;
 
+    /// <summary>
+    /// Renders the block values on the canvas by drawing blocks between related items
+    /// </summary>
+    /// <param name="items">The collection of multi-value items to render</param>
     protected override void RenderValues(IReadOnlyList<TM> items)
     {
         var ctx = SeriesContext.Canvas;
@@ -38,6 +59,12 @@ public partial class MultiBlockSeries<TM, TI> : SeriesBase<TM>, ILogSubject
             RenderBlock(ctx, items[i], items[i + 1]);
     }
 
+    /// <summary>
+    /// Renders blocks between two consecutive multi-value items for related range items
+    /// </summary>
+    /// <param name="ctx">The canvas context for rendering</param>
+    /// <param name="a">The first multi-value item</param>
+    /// <param name="b">The second multi-value item</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void RenderBlock(Canvas ctx, TM a, TM b)
     {
@@ -55,6 +82,11 @@ public partial class MultiBlockSeries<TM, TI> : SeriesBase<TM>, ILogSubject
         }
     }
 
+    /// <summary>
+    /// Calculates the minimum and maximum bounds for the given items
+    /// </summary>
+    /// <param name="items">The collection of multi-value items to analyze</param>
+    /// <returns>A tuple containing the minimum and maximum values</returns>
     protected override (decimal min, decimal max) GetBounds(IReadOnlyList<TM> items)
     {
         var min = decimal.MaxValue;

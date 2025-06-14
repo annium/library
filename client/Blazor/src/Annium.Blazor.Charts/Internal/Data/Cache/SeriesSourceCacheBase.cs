@@ -9,20 +9,73 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data.Cache;
 
+/// <summary>
+/// Base class for series source caches that manage time-based data storage and retrieval.
+/// Provides common functionality for chunk-based caching, data lookup, and cache optimization.
+/// </summary>
+/// <typeparam name="TChunk">The type of cache chunk used to store data</typeparam>
+/// <typeparam name="T">The type of data items stored in the cache</typeparam>
 internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
     where TChunk : CacheChunkBase<T>
 {
+    /// <summary>
+    /// Event raised when the cache bounds change.
+    /// </summary>
     public event Action<ValueRange<Instant>> OnBoundsChange = delegate { };
+
+    /// <summary>
+    /// Gets a value indicating whether the cache is empty (contains no chunks).
+    /// </summary>
     public bool IsEmpty => Chunks.Count == 0;
+
+    /// <summary>
+    /// Gets the overall time bounds of all cached data.
+    /// </summary>
     public ValueRange<Instant> Bounds => _bounds;
+
+    /// <summary>
+    /// The time resolution for data points in the cache.
+    /// </summary>
     protected Duration Resolution;
+
+    /// <summary>
+    /// Gets the collection of cache chunks ordered by time.
+    /// </summary>
     protected IList<TChunk> Chunks { get; } = new List<TChunk>();
+
+    /// <summary>
+    /// Managed bounds for the entire cache.
+    /// </summary>
     private readonly ManagedValueRange<Instant> _bounds;
+
+    /// <summary>
+    /// Function to create new cache chunks.
+    /// </summary>
     private readonly Func<Instant, Instant, IReadOnlyCollection<T>, TChunk> _createChunk;
+
+    /// <summary>
+    /// Function to compare data items with time instants.
+    /// </summary>
     private readonly Func<T, Instant, int> _compare;
+
+    /// <summary>
+    /// Function to get the start time of a chunk.
+    /// </summary>
     private readonly Func<TChunk, Instant> _getStart;
+
+    /// <summary>
+    /// Function to get the end time of a chunk.
+    /// </summary>
     private readonly Func<TChunk, Instant> _getEnd;
 
+    /// <summary>
+    /// Initializes a new instance of the SeriesSourceCacheBase class with the specified configuration.
+    /// </summary>
+    /// <param name="resolution">The time resolution for data points in the cache</param>
+    /// <param name="createChunk">Function to create new cache chunks</param>
+    /// <param name="compare">Function to compare data items with time instants</param>
+    /// <param name="getStart">Function to get the start time of a chunk</param>
+    /// <param name="getEnd">Function to get the end time of a chunk</param>
     protected SeriesSourceCacheBase(
         Duration resolution,
         Func<Instant, Instant, IReadOnlyCollection<T>, TChunk> createChunk,
@@ -39,6 +92,12 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         _bounds = ValueRange.Create(NodaConstants.UnixEpoch, NodaConstants.UnixEpoch);
     }
 
+    /// <summary>
+    /// Determines whether the cache contains data for the specified time range.
+    /// </summary>
+    /// <param name="start">The start time of the range to check</param>
+    /// <param name="end">The end time of the range to check</param>
+    /// <returns>True if the cache contains data for the entire specified range; otherwise, false</returns>
     public bool HasData(Instant start, Instant end)
     {
         var range = ValueRange.Create(start, end);
@@ -50,6 +109,12 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         return false;
     }
 
+    /// <summary>
+    /// Retrieves all data items within the specified time range.
+    /// </summary>
+    /// <param name="start">The start time of the range to retrieve</param>
+    /// <param name="end">The end time of the range to retrieve</param>
+    /// <returns>A read-only list of data items within the specified time range</returns>
     public IReadOnlyList<T> GetData(Instant start, Instant end)
     {
         var range = ValueRange.Create(start, end);
@@ -61,6 +126,12 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         return [];
     }
 
+    /// <summary>
+    /// Retrieves a specific data item at or near the specified time instant.
+    /// </summary>
+    /// <param name="moment">The time instant to search for</param>
+    /// <param name="match">The lookup match strategy to use</param>
+    /// <returns>The data item at or near the specified time instant, or null if not found</returns>
     public T? GetItem(Instant moment, LookupMatch match = LookupMatch.Exact)
     {
         foreach (var chunk in Chunks)
@@ -70,6 +141,12 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         return default;
     }
 
+    /// <summary>
+    /// Identifies time ranges within the specified period that are not covered by cached data.
+    /// </summary>
+    /// <param name="start">The start time of the period to analyze</param>
+    /// <param name="end">The end time of the period to analyze</param>
+    /// <returns>A read-only list of time ranges that are not covered by cached data</returns>
     public IReadOnlyList<ValueRange<Instant>> GetEmptyRanges(Instant start, Instant end)
     {
         var ranges = new List<ValueRange<Instant>>();
@@ -99,6 +176,12 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         return ranges;
     }
 
+    /// <summary>
+    /// Adds new data to the cache for the specified time range.
+    /// </summary>
+    /// <param name="start">The start time of the data range</param>
+    /// <param name="end">The end time of the data range</param>
+    /// <param name="data">The collection of data items to add</param>
     public void AddData(Instant start, Instant end, IReadOnlyCollection<T> data)
     {
         var newChunk = _createChunk(start, end, data);
@@ -140,6 +223,10 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         PostProcessDataChange();
     }
 
+    /// <summary>
+    /// Sets a new time resolution for the cache, clearing all existing data.
+    /// </summary>
+    /// <param name="resolution">The new time resolution to use</param>
     public void SetResolution(Duration resolution)
     {
         if (resolution == Resolution)
@@ -150,20 +237,37 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         ResetBounds();
     }
 
+    /// <summary>
+    /// Clears all cached data and resets the cache bounds.
+    /// </summary>
     public void Clear()
     {
         Chunks.Clear();
         ResetBounds();
     }
 
+    /// <summary>
+    /// Performs post-processing operations after data changes. Override in derived classes to implement specific behaviors.
+    /// </summary>
     protected abstract void PostProcessDataChange();
 
+    /// <summary>
+    /// Synchronizes the cache bounds with the actual data range.
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void SyncBounds() => SetBounds(_getStart(Chunks[0]), _getEnd(Chunks[^1]));
 
+    /// <summary>
+    /// Resets the cache bounds to the Unix epoch.
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ResetBounds() => SetBounds(NodaConstants.UnixEpoch, NodaConstants.UnixEpoch);
 
+    /// <summary>
+    /// Sets the cache bounds and raises the bounds change event if the bounds have changed.
+    /// </summary>
+    /// <param name="start">The new start bound</param>
+    /// <param name="end">The new end bound</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void SetBounds(Instant start, Instant end)
     {
@@ -174,6 +278,9 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         OnBoundsChange(_bounds);
     }
 
+    /// <summary>
+    /// Optimizes the cache by merging adjacent chunks that are contiguous in time.
+    /// </summary>
     private void Optimize()
     {
         var i = 0;
@@ -193,6 +300,13 @@ internal abstract class SeriesSourceCacheBase<TChunk, T> : ISeriesSourceCache<T>
         }
     }
 
+    /// <summary>
+    /// Retrieves a specific item from a chunk using binary search with the specified lookup match strategy.
+    /// </summary>
+    /// <param name="chunk">The chunk to search in</param>
+    /// <param name="moment">The time instant to search for</param>
+    /// <param name="match">The lookup match strategy to use</param>
+    /// <returns>The found item or null if not found according to the match strategy</returns>
     private T? GetChunkItem(TChunk chunk, Instant moment, LookupMatch match)
     {
         var items = chunk.Items;

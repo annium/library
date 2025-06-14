@@ -6,8 +6,18 @@ using NodaTime;
 
 namespace Demo.Blazor.Charts.Domain.Converters;
 
+/// <summary>
+/// JSON converter for Candle objects that handles array-based serialization format
+/// </summary>
 public class CandleConverter : JsonConverter<Candle>
 {
+    /// <summary>
+    /// Reads and converts JSON array to a Candle object
+    /// </summary>
+    /// <param name="reader">The JSON reader</param>
+    /// <param name="typeToConvert">The type to convert to</param>
+    /// <param name="options">JSON serializer options</param>
+    /// <returns>The deserialized Candle object or null</returns>
     public override Candle? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartArray)
@@ -64,6 +74,12 @@ public class CandleConverter : JsonConverter<Candle>
         throw new JsonException("Unexpected end of json");
     }
 
+    /// <summary>
+    /// Writes a Candle object to JSON (not implemented)
+    /// </summary>
+    /// <param name="writer">The JSON writer</param>
+    /// <param name="value">The Candle value to write</param>
+    /// <param name="options">JSON serializer options</param>
     public override void Write(Utf8JsonWriter writer, Candle value, JsonSerializerOptions options)
     {
         throw new NotImplementedException();

@@ -4,10 +4,21 @@ using System.Linq;
 
 namespace Annium.Blazor.Routing.Internal;
 
+/// <summary>
+/// Provides helper methods for routing operations.
+/// </summary>
 internal class Helper
 {
+    /// <summary>
+    /// The path separator character used in routing templates.
+    /// </summary>
     private const char Separator = '/';
 
+    /// <summary>
+    /// Parses a route template string into its individual parts.
+    /// </summary>
+    /// <param name="template">The template string to parse.</param>
+    /// <returns>A list of template parts split by the separator character.</returns>
     public static IReadOnlyList<string> ParseTemplateParts(string template)
     {
         if (template is null || string.IsNullOrWhiteSpace(template) && template.Length > 0)

@@ -7,11 +7,21 @@ using Xunit;
 
 namespace Annium.Components.State.Forms.Tests;
 
+/// <summary>
+/// Tests for map/dictionary container state management functionality
+/// </summary>
 public class MapContainerTest : TestBase
 {
+    /// <summary>
+    /// Initializes a new instance of the MapContainerTest class
+    /// </summary>
+    /// <param name="outputHelper">The test output helper</param>
     public MapContainerTest(ITestOutputHelper outputHelper)
         : base(outputHelper) { }
 
+    /// <summary>
+    /// Tests that map container creation works correctly
+    /// </summary>
     [Fact]
     public void Create_Ok()
     {
@@ -38,6 +48,9 @@ public class MapContainerTest : TestBase
         log.IsEmpty();
     }
 
+    /// <summary>
+    /// Tests that setting values on map container state works correctly
+    /// </summary>
     [Fact]
     public void Set_Ok()
     {
@@ -80,6 +93,9 @@ public class MapContainerTest : TestBase
         log.Has(2);
     }
 
+    /// <summary>
+    /// Tests that initializing map container state works correctly
+    /// </summary>
     [Fact]
     public void Init_Ok()
     {
@@ -122,6 +138,9 @@ public class MapContainerTest : TestBase
         log.Has(2);
     }
 
+    /// <summary>
+    /// Tests that resetting map container state to initial values works correctly
+    /// </summary>
     [Fact]
     public void Reset_Ok()
     {
@@ -158,6 +177,9 @@ public class MapContainerTest : TestBase
         log.Has(3);
     }
 
+    /// <summary>
+    /// Tests that status management for map container state works correctly
+    /// </summary>
     [Fact]
     public void Status_Ok()
     {
@@ -180,6 +202,9 @@ public class MapContainerTest : TestBase
         log.Has(1);
     }
 
+    /// <summary>
+    /// Tests that adding items to map container state works correctly
+    /// </summary>
     [Fact]
     public void Add_Ok()
     {
@@ -208,6 +233,9 @@ public class MapContainerTest : TestBase
         log.Has(1);
     }
 
+    /// <summary>
+    /// Tests that removing items from map container state works correctly
+    /// </summary>
     [Fact]
     public void Remove_Ok()
     {
@@ -228,6 +256,9 @@ public class MapContainerTest : TestBase
         log.Has(1);
     }
 
+    /// <summary>
+    /// Tests that change tracking for map container state works correctly
+    /// </summary>
     [Fact]
     public void HasChanged_Ok()
     {
@@ -249,6 +280,10 @@ public class MapContainerTest : TestBase
         log.Has(3);
     }
 
+    /// <summary>
+    /// Creates a sample dictionary for testing
+    /// </summary>
+    /// <returns>A dictionary with sample data</returns>
     private Dictionary<string, int> Arrange() =>
         new()
         {
@@ -257,5 +292,9 @@ public class MapContainerTest : TestBase
             { "c", 8 },
         };
 
+    /// <summary>
+    /// Creates an alternative dictionary for testing
+    /// </summary>
+    /// <returns>A dictionary with different sample data</returns>
     private Dictionary<string, int> ArrangeOther() => new() { { "a", 2 }, { "c", 4 } };
 }

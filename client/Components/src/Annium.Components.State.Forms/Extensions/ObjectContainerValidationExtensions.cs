@@ -9,14 +9,34 @@ using Annium.Extensions.Validation;
 
 namespace Annium.Components.State.Forms.Extensions;
 
+/// <summary>
+/// Provides extension methods for adding validation support to object containers.
+/// </summary>
 public static class ObjectContainerValidationExtensions
 {
+    /// <summary>
+    /// Adds validation to an object container using the specified validator.
+    /// Validation is triggered immediately when the container value changes.
+    /// </summary>
+    /// <typeparam name="T">The type of object being validated.</typeparam>
+    /// <param name="state">The object container to add validation to.</param>
+    /// <param name="validator">The validator to use for validation.</param>
+    /// <returns>The same object container instance with validation enabled.</returns>
     public static IObjectContainer<T> UseValidator<T>(this IObjectContainer<T> state, IValidator<T> validator)
         where T : notnull, new()
     {
         return state.Changed.SubscribeValidator(state, validator);
     }
 
+    /// <summary>
+    /// Adds validation to an object container using the specified validator with throttling.
+    /// Validation is triggered after the specified delay when the container value changes.
+    /// </summary>
+    /// <typeparam name="T">The type of object being validated.</typeparam>
+    /// <param name="state">The object container to add validation to.</param>
+    /// <param name="validator">The validator to use for validation.</param>
+    /// <param name="dueTime">The delay before validation is triggered after value changes.</param>
+    /// <returns>The same object container instance with throttled validation enabled.</returns>
     public static IObjectContainer<T> UseValidator<T>(
         this IObjectContainer<T> state,
         IValidator<T> validator,
@@ -27,6 +47,14 @@ public static class ObjectContainerValidationExtensions
         return state.Changed.Throttle(dueTime).SubscribeValidator(state, validator);
     }
 
+    /// <summary>
+    /// Subscribes a validator to an observable stream to perform validation when events occur.
+    /// </summary>
+    /// <typeparam name="T">The type of object being validated.</typeparam>
+    /// <param name="observable">The observable stream to subscribe to.</param>
+    /// <param name="state">The object container to validate.</param>
+    /// <param name="validator">The validator to use for validation.</param>
+    /// <returns>The same object container instance.</returns>
     private static IObjectContainer<T> SubscribeValidator<T>(
         this IObservable<Unit> observable,
         IObjectContainer<T> state,
@@ -45,6 +73,13 @@ public static class ObjectContainerValidationExtensions
         return state;
     }
 
+    /// <summary>
+    /// Performs validation on an object container and updates the status of child containers based on validation results.
+    /// </summary>
+    /// <typeparam name="T">The type of object being validated.</typeparam>
+    /// <param name="state">The object container to validate.</param>
+    /// <param name="validator">The validator to use for validation.</param>
+    /// <param name="ct">The cancellation token to check for cancellation requests.</param>
     private static void Validate<T>(this IObjectContainer<T> state, IValidator<T> validator, CancellationToken ct)
         where T : notnull, new()
     {
@@ -74,6 +109,13 @@ public static class ObjectContainerValidationExtensions
         }
     }
 
+    /// <summary>
+    /// Gets the validation result for an object container's value, handling any exceptions that occur during validation.
+    /// </summary>
+    /// <typeparam name="T">The type of object being validated.</typeparam>
+    /// <param name="validator">The validator to use for validation.</param>
+    /// <param name="state">The object container containing the value to validate.</param>
+    /// <returns>A task representing the validation result.</returns>
     private static async Task<IResult> GetValidationResultAsync<T>(
         this IValidator<T> validator,
         IObjectContainer<T> state

@@ -11,10 +11,20 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Data.Sources;
 
+/// <summary>
+/// Factory for creating various types of series sources with different loading and caching strategies
+/// </summary>
 internal class SeriesSourceFactory : ISeriesSourceFactory
 {
+    /// <summary>
+    /// Logger instance for the factory
+    /// </summary>
     private readonly ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the SeriesSourceFactory class
+    /// </summary>
+    /// <param name="logger">Logger instance for the factory</param>
     public SeriesSourceFactory(ILogger logger)
     {
         _logger = logger;
@@ -22,6 +32,16 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
 
     #region unchecked loading
 
+    /// <summary>
+    /// Creates an unchecked series source with synchronous loading
+    /// </summary>
+    /// <typeparam name="T">The type of data items in the series</typeparam>
+    /// <param name="resolution">The time resolution for the series</param>
+    /// <param name="load">Function to load data synchronously</param>
+    /// <param name="compare">Function to compare two data items</param>
+    /// <param name="compareToMoment">Function to compare a data item to a moment in time</param>
+    /// <param name="options">Optional configuration options</param>
+    /// <returns>A new series source instance</returns>
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
         Func<Instant, Instant, IReadOnlyList<T>> load,
@@ -36,6 +56,16 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
             options
         );
 
+    /// <summary>
+    /// Creates an unchecked series source with synchronous loading that includes resolution parameter
+    /// </summary>
+    /// <typeparam name="T">The type of data items in the series</typeparam>
+    /// <param name="resolution">The time resolution for the series</param>
+    /// <param name="load">Function to load data synchronously with resolution parameter</param>
+    /// <param name="compare">Function to compare two data items</param>
+    /// <param name="compareToMoment">Function to compare a data item to a moment in time</param>
+    /// <param name="options">Optional configuration options</param>
+    /// <returns>A new series source instance</returns>
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, IReadOnlyList<T>> load,
@@ -50,6 +80,16 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
             options
         );
 
+    /// <summary>
+    /// Creates an unchecked series source with asynchronous loading
+    /// </summary>
+    /// <typeparam name="T">The type of data items in the series</typeparam>
+    /// <param name="resolution">The time resolution for the series</param>
+    /// <param name="load">Function to load data asynchronously</param>
+    /// <param name="compare">Function to compare two data items</param>
+    /// <param name="compareToMoment">Function to compare a data item to a moment in time</param>
+    /// <param name="options">Optional configuration options</param>
+    /// <returns>A new series source instance</returns>
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
         Func<Instant, Instant, Task<IReadOnlyList<T>>> load,
@@ -64,6 +104,16 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
             options
         );
 
+    /// <summary>
+    /// Creates an unchecked series source with asynchronous loading that includes resolution parameter
+    /// </summary>
+    /// <typeparam name="T">The type of data items in the series</typeparam>
+    /// <param name="resolution">The time resolution for the series</param>
+    /// <param name="load">Function to load data asynchronously with resolution parameter</param>
+    /// <param name="compare">Function to compare two data items</param>
+    /// <param name="compareToMoment">Function to compare a data item to a moment in time</param>
+    /// <param name="options">Optional configuration options</param>
+    /// <returns>A new series source instance</returns>
     public ISeriesSource<T> CreateUnchecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
@@ -76,6 +126,14 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
 
     #region checked loading
 
+    /// <summary>
+    /// Creates a checked series source with synchronous loading for time series data
+    /// </summary>
+    /// <typeparam name="T">The type of time series data items</typeparam>
+    /// <param name="resolution">The time resolution for the series</param>
+    /// <param name="load">Function to load data synchronously</param>
+    /// <param name="options">Optional configuration options</param>
+    /// <returns>A new series source instance</returns>
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Instant, Instant, IReadOnlyList<T>> load,
@@ -89,6 +147,14 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
             options
         );
 
+    /// <summary>
+    /// Creates a checked series source with synchronous loading that includes resolution parameter for time series data
+    /// </summary>
+    /// <typeparam name="T">The type of time series data items</typeparam>
+    /// <param name="resolution">The time resolution for the series</param>
+    /// <param name="load">Function to load data synchronously with resolution parameter</param>
+    /// <param name="options">Optional configuration options</param>
+    /// <returns>A new series source instance</returns>
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, IReadOnlyList<T>> load,
@@ -102,6 +168,14 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
             options
         );
 
+    /// <summary>
+    /// Creates a checked series source with asynchronous loading for time series data
+    /// </summary>
+    /// <typeparam name="T">The type of time series data items</typeparam>
+    /// <param name="resolution">The time resolution for the series</param>
+    /// <param name="load">Function to load data asynchronously</param>
+    /// <param name="options">Optional configuration options</param>
+    /// <returns>A new series source instance</returns>
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Instant, Instant, Task<IReadOnlyList<T>>> load,
@@ -110,6 +184,14 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         where T : ITimeSeries =>
         Create(resolution, new CheckedSeriesSourceCache<T>(resolution), (_, start, end) => load(start, end), options);
 
+    /// <summary>
+    /// Creates a checked series source with asynchronous loading that includes resolution parameter for time series data
+    /// </summary>
+    /// <typeparam name="T">The type of time series data items</typeparam>
+    /// <param name="resolution">The time resolution for the series</param>
+    /// <param name="load">Function to load data asynchronously with resolution parameter</param>
+    /// <param name="options">Optional configuration options</param>
+    /// <returns>A new series source instance</returns>
     public ISeriesSource<T> CreateChecked<T>(
         Duration resolution,
         Func<Duration, Instant, Instant, Task<IReadOnlyList<T>>> load,
@@ -121,6 +203,16 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
 
     #region unchecked dependent
 
+    /// <summary>
+    /// Creates an unchecked dependent series source that transforms individual source items
+    /// </summary>
+    /// <typeparam name="TS">The type of source data items</typeparam>
+    /// <typeparam name="TD">The type of destination data items</typeparam>
+    /// <param name="source">The source series to derive data from</param>
+    /// <param name="getValues">Function to transform a source item to a destination item</param>
+    /// <param name="compare">Function to compare two destination items</param>
+    /// <param name="compareToMoment">Function to compare a destination item to a moment in time</param>
+    /// <returns>A new dependent series source instance</returns>
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<TS, TD?> getValues,
@@ -144,6 +236,16 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
             }
         );
 
+    /// <summary>
+    /// Creates an unchecked dependent series source that transforms source items with time context
+    /// </summary>
+    /// <typeparam name="TS">The type of source data items</typeparam>
+    /// <typeparam name="TD">The type of destination data items</typeparam>
+    /// <param name="source">The source series to derive data from</param>
+    /// <param name="getValues">Function to transform a source item to multiple destination items with time context</param>
+    /// <param name="compare">Function to compare two destination items</param>
+    /// <param name="compareToMoment">Function to compare a destination item to a moment in time</param>
+    /// <returns>A new dependent series source instance</returns>
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues,
@@ -156,6 +258,16 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
             (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray()
         );
 
+    /// <summary>
+    /// Creates an unchecked dependent series source that transforms collections of source items
+    /// </summary>
+    /// <typeparam name="TS">The type of source data items</typeparam>
+    /// <typeparam name="TD">The type of destination data items</typeparam>
+    /// <param name="source">The source series to derive data from</param>
+    /// <param name="getValues">Function to transform a collection of source items to destination items</param>
+    /// <param name="compare">Function to compare two destination items</param>
+    /// <param name="compareToMoment">Function to compare a destination item to a moment in time</param>
+    /// <returns>A new dependent series source instance</returns>
     public ISeriesSource<TD> CreateUnchecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues,
@@ -167,6 +279,14 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
 
     #region checked dependent
 
+    /// <summary>
+    /// Creates a checked dependent series source that transforms individual source items for time series data
+    /// </summary>
+    /// <typeparam name="TS">The type of source data items</typeparam>
+    /// <typeparam name="TD">The type of destination time series data items</typeparam>
+    /// <param name="source">The source series to derive data from</param>
+    /// <param name="getValues">Function to transform a source item to a destination item</param>
+    /// <returns>A new dependent series source instance</returns>
     public ISeriesSource<TD> CreateChecked<TS, TD>(ISeriesSource<TS> source, Func<TS, TD> getValues)
         where TD : ITimeSeries =>
         Create(
@@ -175,6 +295,14 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
             (chunk, _, _, _) => chunk.Select(getValues).ToArray()
         );
 
+    /// <summary>
+    /// Creates a checked dependent series source that transforms source items with time context for time series data
+    /// </summary>
+    /// <typeparam name="TS">The type of source data items</typeparam>
+    /// <typeparam name="TD">The type of destination time series data items</typeparam>
+    /// <param name="source">The source series to derive data from</param>
+    /// <param name="getValues">Function to transform a source item to multiple destination items with time context</param>
+    /// <returns>A new dependent series source instance</returns>
     public ISeriesSource<TD> CreateChecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<TS, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
@@ -186,6 +314,14 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
             (chunk, resolution, start, end) => chunk.SelectMany(x => getValues(x, resolution, start, end)).ToArray()
         );
 
+    /// <summary>
+    /// Creates a checked dependent series source that transforms collections of source items for time series data
+    /// </summary>
+    /// <typeparam name="TS">The type of source data items</typeparam>
+    /// <typeparam name="TD">The type of destination time series data items</typeparam>
+    /// <param name="source">The source series to derive data from</param>
+    /// <param name="getValues">Function to transform a collection of source items to destination items</param>
+    /// <returns>A new dependent series source instance</returns>
     public ISeriesSource<TD> CreateChecked<TS, TD>(
         ISeriesSource<TS> source,
         Func<IReadOnlyList<TS>, Duration, Instant, Instant, IReadOnlyCollection<TD>> getValues
@@ -196,6 +332,15 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
 
     #region base
 
+    /// <summary>
+    /// Creates a loading series source with the specified cache and load function
+    /// </summary>
+    /// <typeparam name="T">The type of data items in the series</typeparam>
+    /// <param name="resolution">The time resolution for the series</param>
+    /// <param name="cache">The cache for storing loaded data</param>
+    /// <param name="load">Function to load data asynchronously</param>
+    /// <param name="options">Optional configuration options</param>
+    /// <returns>A new loading series source instance</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ISeriesSource<T> Create<T>(
         Duration resolution,
@@ -213,6 +358,15 @@ internal class SeriesSourceFactory : ISeriesSourceFactory
         );
     }
 
+    /// <summary>
+    /// Creates a dependent series source with the specified source, cache, and transformation function
+    /// </summary>
+    /// <typeparam name="TS">The type of source data items</typeparam>
+    /// <typeparam name="TD">The type of destination data items</typeparam>
+    /// <param name="source">The source series to derive data from</param>
+    /// <param name="cache">The cache for storing transformed data</param>
+    /// <param name="getValues">Function to transform source data into destination data</param>
+    /// <returns>A new dependent series source instance</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ISeriesSource<TD> Create<TS, TD>(
         ISeriesSource<TS> source,

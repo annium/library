@@ -8,11 +8,21 @@ using Xunit;
 
 namespace Annium.Components.State.Forms.Tests;
 
+/// <summary>
+/// Tests for object container state management functionality
+/// </summary>
 public class ObjectContainerTest : TestBase
 {
+    /// <summary>
+    /// Initializes a new instance of the ObjectContainerTest class
+    /// </summary>
+    /// <param name="outputHelper">The test output helper</param>
     public ObjectContainerTest(ITestOutputHelper outputHelper)
         : base(outputHelper) { }
 
+    /// <summary>
+    /// Tests that object container creation works correctly
+    /// </summary>
     [Fact]
     public void Create_Ok()
     {
@@ -37,6 +47,9 @@ public class ObjectContainerTest : TestBase
         log.IsEmpty();
     }
 
+    /// <summary>
+    /// Tests that setting values on object container state works correctly
+    /// </summary>
     [Fact]
     public void Set_Ok()
     {
@@ -79,6 +92,9 @@ public class ObjectContainerTest : TestBase
         log.Has(2);
     }
 
+    /// <summary>
+    /// Tests that initializing object container state works correctly
+    /// </summary>
     [Fact]
     public void Init_Ok()
     {
@@ -121,6 +137,9 @@ public class ObjectContainerTest : TestBase
         log.Has(2);
     }
 
+    /// <summary>
+    /// Tests that resetting object container state to initial values works correctly
+    /// </summary>
     [Fact]
     public void Reset_Ok()
     {
@@ -157,6 +176,9 @@ public class ObjectContainerTest : TestBase
         log.Has(3);
     }
 
+    /// <summary>
+    /// Tests that status management for object container state works correctly
+    /// </summary>
     [Fact]
     public void Status_Ok()
     {
@@ -179,6 +201,9 @@ public class ObjectContainerTest : TestBase
         log.Has(1);
     }
 
+    /// <summary>
+    /// Tests that validation for object container state works correctly
+    /// </summary>
     [Fact]
     public void Validation_Ok()
     {
@@ -207,6 +232,10 @@ public class ObjectContainerTest : TestBase
         log.Has(2);
     }
 
+    /// <summary>
+    /// Creates a sample user object for testing
+    /// </summary>
+    /// <returns>A user object with sample data</returns>
     private User Arrange() =>
         new()
         {
@@ -215,22 +244,52 @@ public class ObjectContainerTest : TestBase
             Sex = Sex.Male,
         };
 
+    /// <summary>
+    /// Represents a user entity for testing purposes
+    /// </summary>
     private class User
     {
+        /// <summary>
+        /// Gets or sets the user name
+        /// </summary>
         public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the user age
+        /// </summary>
         public int Age { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user sex
+        /// </summary>
         public Sex Sex { get; set; }
     }
 
+    /// <summary>
+    /// Represents the sex/gender options for testing purposes
+    /// </summary>
     private enum Sex
     {
+        /// <summary>
+        /// Female sex
+        /// </summary>
         Female,
+
+        /// <summary>
+        /// Male sex
+        /// </summary>
         Male,
     }
 
+    /// <summary>
+    /// Validator for User objects used in testing
+    /// </summary>
     // ReSharper disable once UnusedType.Local
     private class UserValidator : Validator<User>
     {
+        /// <summary>
+        /// Initializes a new instance of the UserValidator class
+        /// </summary>
         public UserValidator()
         {
             Field(x => x.Age).GreaterThan(18);

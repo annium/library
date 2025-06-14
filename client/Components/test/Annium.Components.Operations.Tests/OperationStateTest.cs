@@ -5,11 +5,21 @@ using Xunit;
 
 namespace Annium.Components.Operations.Tests;
 
+/// <summary>
+/// Tests for non-generic OperationState operations including start, succeed, fail, and reset scenarios.
+/// </summary>
 public class OperationStateTest : TestBase
 {
+    /// <summary>
+    /// Initializes a new instance of the OperationStateTest class.
+    /// </summary>
+    /// <param name="outputHelper">The test output helper for logging.</param>
     public OperationStateTest(ITestOutputHelper outputHelper)
         : base(outputHelper) { }
 
+    /// <summary>
+    /// Tests that starting an operation state correctly sets loading state and fires change notification.
+    /// </summary>
     [Fact]
     public void OperationState_Start_Ok()
     {
@@ -28,6 +38,9 @@ public class OperationStateTest : TestBase
         getChanges().Is(1);
     }
 
+    /// <summary>
+    /// Tests that succeeding an operation state correctly updates state and fires change notifications.
+    /// </summary>
     [Fact]
     public void OperationState_Succeed_Ok()
     {
@@ -47,6 +60,9 @@ public class OperationStateTest : TestBase
         getChanges().Is(2);
     }
 
+    /// <summary>
+    /// Tests that failing an operation state correctly sets error state and fires change notifications.
+    /// </summary>
     [Fact]
     public void OperationState_Failed_Ok()
     {
@@ -69,6 +85,9 @@ public class OperationStateTest : TestBase
         getChanges().Is(2);
     }
 
+    /// <summary>
+    /// Tests that resetting an operation state correctly returns it to initial state and fires change notification.
+    /// </summary>
     [Fact]
     public void OperationState_Reset_Ok()
     {

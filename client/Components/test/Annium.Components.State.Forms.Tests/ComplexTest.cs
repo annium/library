@@ -8,11 +8,21 @@ using Xunit;
 
 namespace Annium.Components.State.Forms.Tests;
 
+/// <summary>
+/// Tests for complex nested object state management functionality
+/// </summary>
 public class ComplexTest : TestBase
 {
+    /// <summary>
+    /// Initializes a new instance of the ComplexTest class
+    /// </summary>
+    /// <param name="outputHelper">The test output helper</param>
     public ComplexTest(ITestOutputHelper outputHelper)
         : base(outputHelper) { }
 
+    /// <summary>
+    /// Tests that complex object state initialization works correctly
+    /// </summary>
     [Fact]
     public void Init_Ok()
     {
@@ -35,6 +45,9 @@ public class ComplexTest : TestBase
         log.IsEmpty();
     }
 
+    /// <summary>
+    /// Tests that setting values on complex object state works correctly
+    /// </summary>
     [Fact]
     public void Set_Ok()
     {
@@ -81,6 +94,9 @@ public class ComplexTest : TestBase
         log.Has(2);
     }
 
+    /// <summary>
+    /// Tests that resetting complex object state to initial values works correctly
+    /// </summary>
     [Fact]
     public void Reset_Ok()
     {
@@ -121,6 +137,9 @@ public class ComplexTest : TestBase
         log.Has(3);
     }
 
+    /// <summary>
+    /// Tests that status management for complex object state works correctly
+    /// </summary>
     [Fact]
     public void Status_Ok()
     {
@@ -143,6 +162,10 @@ public class ComplexTest : TestBase
         log.Has(1);
     }
 
+    /// <summary>
+    /// Creates a sample blog object for testing
+    /// </summary>
+    /// <returns>A blog object with sample data</returns>
     private Blog Arrange() =>
         new()
         {
@@ -164,6 +187,10 @@ public class ComplexTest : TestBase
             },
         };
 
+    /// <summary>
+    /// Creates an alternative blog object for testing
+    /// </summary>
+    /// <returns>A blog object with different sample data</returns>
     private Blog ArrangeOther() =>
         new()
         {
@@ -177,22 +204,62 @@ public class ComplexTest : TestBase
             ],
         };
 
+    /// <summary>
+    /// Represents a blog entity for testing purposes
+    /// </summary>
+    /// <summary>
+    /// Represents a blog entity for testing purposes
+    /// </summary>
     private class Blog
     {
+        /// <summary>
+        /// Gets or sets the blog name
+        /// </summary>
         public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the blog author
+        /// </summary>
         public User Author { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the list of messages in the blog
+        /// </summary>
         public List<Message> Messages { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the embedded dictionary for testing complex nested structures
+        /// </summary>
         public Dictionary<string, Dictionary<int, Message>> EmbeddedDictionary { get; set; } = new();
     }
 
+    /// <summary>
+    /// Represents a user entity for testing purposes
+    /// </summary>
+    /// <summary>
+    /// Represents a user entity for testing purposes
+    /// </summary>
     private class User
     {
+        /// <summary>
+        /// Gets or sets the user name
+        /// </summary>
         public string Name { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Represents a message entity for testing purposes
+    /// </summary>
     private class Message
     {
+        /// <summary>
+        /// Gets or sets the message text
+        /// </summary>
         public string Text { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the message has been read
+        /// </summary>
         public bool IsRead { get; set; }
     }
 }

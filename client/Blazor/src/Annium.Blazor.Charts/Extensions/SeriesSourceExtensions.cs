@@ -9,8 +9,19 @@ using Annium.NodaTime.Extensions;
 
 namespace Annium.Blazor.Charts.Extensions;
 
+/// <summary>
+/// Extension methods for ISeriesSource to provide rendering and subscription utilities
+/// </summary>
 public static class SeriesSourceExtensions
 {
+    /// <summary>
+    /// Sets up automatic rendering of series data when the chart context updates or data is loaded
+    /// </summary>
+    /// <typeparam name="T">The type of time series data</typeparam>
+    /// <param name="source">The series source to render from</param>
+    /// <param name="chartContext">The chart context that provides view information</param>
+    /// <param name="render">The action to call with the loaded data for rendering</param>
+    /// <returns>A disposable that can be used to unsubscribe from updates</returns>
     public static IDisposable RenderTo<T>(
         this ISeriesSource<T> source,
         IChartContext chartContext,

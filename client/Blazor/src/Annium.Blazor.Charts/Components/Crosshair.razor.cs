@@ -13,36 +13,70 @@ using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
+/// <summary>
+/// Provides crosshair functionality that displays interactive lines and labels at the current mouse position on the chart
+/// </summary>
 public partial class Crosshair : ILogSubject, IAsyncDisposable
 {
+    /// <summary>
+    /// Gets or sets the style for the crosshair lines
+    /// </summary>
     [Parameter]
     public string LineStyle { get; set; } = CrosshairLineStyle;
 
+    /// <summary>
+    /// Gets or sets the background color for crosshair labels
+    /// </summary>
     [Parameter]
     public string LabelBackground { get; set; } = CrosshairLabelBackground;
 
+    /// <summary>
+    /// Gets or sets the font family for crosshair labels
+    /// </summary>
     [Parameter]
     public string LabelFontFamily { get; set; } = CrosshairLabelFontFamily;
 
+    /// <summary>
+    /// Gets or sets the font size for crosshair labels
+    /// </summary>
     [Parameter]
     public int LabelFontSize { get; set; } = CrosshairLabelFontSize;
 
+    /// <summary>
+    /// Gets or sets the text style for crosshair labels
+    /// </summary>
     [Parameter]
     public string LabelStyle { get; set; } = CrosshairLabelStyle;
 
+    /// <summary>
+    /// Gets or sets the chart context provided by the parent chart component
+    /// </summary>
     [CascadingParameter]
     public IChartContext ChartContext { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the logger instance for this component
+    /// </summary>
     [Inject]
     public ILogger Logger { get; set; } = null!;
 
+    /// <summary>
+    /// Holds disposable resources for cleanup
+    /// </summary>
     private AsyncDisposableBox _disposable = Disposable.AsyncBox(VoidLogger.Instance);
 
+    /// <summary>
+    /// Called when parameters are set, requests a chart redraw
+    /// </summary>
     protected override void OnParametersSet()
     {
         ChartContext.RequestDraw();
     }
 
+    /// <summary>
+    /// Called after the component has been rendered
+    /// </summary>
+    /// <param name="firstRender">True if this is the first time the component is being rendered</param>
     protected override void OnAfterRender(bool firstRender)
     {
         if (!firstRender)
@@ -51,6 +85,11 @@ public partial class Crosshair : ILogSubject, IAsyncDisposable
         _disposable += ChartContext.OnLookupChanged(HandleLookup);
     }
 
+    /// <summary>
+    /// Handles lookup events to render crosshair at the specified moment and point
+    /// </summary>
+    /// <param name="m">The moment in time for the crosshair</param>
+    /// <param name="p">The screen point for the crosshair</param>
     private void HandleLookup(Instant? m, Point? p)
     {
         if (m is null || p is null)
@@ -153,6 +192,10 @@ public partial class Crosshair : ILogSubject, IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Disposes of the component's resources asynchronously
+    /// </summary>
+    /// <returns>A ValueTask representing the asynchronous dispose operation</returns>
     public ValueTask DisposeAsync()
     {
         return _disposable.DisposeAsync();

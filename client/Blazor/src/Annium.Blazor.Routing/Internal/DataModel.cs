@@ -8,11 +8,26 @@ using Annium.Reflection;
 
 namespace Annium.Blazor.Routing.Internal;
 
+/// <summary>
+/// Provides data model functionality for converting between objects, parameters, and URI queries in routing.
+/// </summary>
 internal class DataModel : IDataModel
 {
+    /// <summary>
+    /// Resolves all writable properties of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type to resolve properties for.</typeparam>
+    /// <returns>A collection of writable property information.</returns>
     public static IReadOnlyCollection<PropertyInfo> ResolveProperties<T>() =>
         typeof(T).GetProperties().Where(x => x.CanWrite).ToArray();
 
+    /// <summary>
+    /// Creates a new DataModel instance for the specified type with the given properties and mapper.
+    /// </summary>
+    /// <typeparam name="T">The type this data model represents.</typeparam>
+    /// <param name="properties">The properties to include in the data model.</param>
+    /// <param name="mapper">The mapper to use for type conversions.</param>
+    /// <returns>A new DataModel instance.</returns>
     public static DataModel Create<T>(IReadOnlyCollection<PropertyInfo> properties, IMapper mapper)
     {
         foreach (var property in properties)
@@ -22,10 +37,27 @@ internal class DataModel : IDataModel
         return new DataModel(typeof(T), properties, mapper);
     }
 
+    /// <summary>
+    /// The type this data model represents.
+    /// </summary>
     private readonly Type _type;
+
+    /// <summary>
+    /// Dictionary of property names (camelCase) to PropertyInfo objects.
+    /// </summary>
     private readonly IReadOnlyDictionary<string, PropertyInfo> _properties;
+
+    /// <summary>
+    /// The mapper used for type conversions.
+    /// </summary>
     private readonly IMapper _mapper;
 
+    /// <summary>
+    /// Initializes a new instance of the DataModel class.
+    /// </summary>
+    /// <param name="type">The type this data model represents.</param>
+    /// <param name="properties">The properties to include in the data model.</param>
+    /// <param name="mapper">The mapper to use for type conversions.</param>
     private DataModel(Type type, IEnumerable<PropertyInfo> properties, IMapper mapper)
     {
         _type = type;
@@ -33,6 +65,11 @@ internal class DataModel : IDataModel
         _properties = properties.ToPropertiesDictionary();
     }
 
+    /// <summary>
+    /// Converts an object instance to a dictionary of parameter names and values.
+    /// </summary>
+    /// <param name="data">The object to convert to parameters.</param>
+    /// <returns>A dictionary containing parameter names and their corresponding values.</returns>
     public IReadOnlyDictionary<string, object?> ToParams(object data)
     {
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
@@ -52,6 +89,12 @@ internal class DataModel : IDataModel
         return values;
     }
 
+    /// <summary>
+    /// Converts a dictionary of parameters to an object instance of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type to create and populate.</typeparam>
+    /// <param name="parameters">The parameters to use for populating the object.</param>
+    /// <returns>A new instance of type T populated with the parameter values.</returns>
     public T ToData<T>(IReadOnlyDictionary<string, object?> parameters)
         where T : new()
     {
@@ -68,6 +111,11 @@ internal class DataModel : IDataModel
         return data;
     }
 
+    /// <summary>
+    /// Converts a URI query to a dictionary of parameter names and values.
+    /// </summary>
+    /// <param name="query">The URI query to convert.</param>
+    /// <returns>A dictionary containing parameter names and their corresponding values.</returns>
     public IReadOnlyDictionary<string, object?> ToParams(UriQuery query)
     {
         var parameters = new Dictionary<string, object?>();
@@ -84,6 +132,11 @@ internal class DataModel : IDataModel
         return parameters;
     }
 
+    /// <summary>
+    /// Converts a dictionary of parameters to a URI query.
+    /// </summary>
+    /// <param name="parameters">The parameters to convert to a URI query.</param>
+    /// <returns>A URI query containing the parameter values.</returns>
     public UriQuery ToQuery(IReadOnlyDictionary<string, object?> parameters)
     {
         var query = UriQuery.New();

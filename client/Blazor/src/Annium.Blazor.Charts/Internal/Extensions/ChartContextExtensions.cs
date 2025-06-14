@@ -9,10 +9,22 @@ using NodaTime;
 
 namespace Annium.Blazor.Charts.Internal.Extensions;
 
+/// <summary>
+/// Extension methods for <see cref="IChartContext"/> to provide additional chart functionality.
+/// </summary>
 internal static class ChartContextExtensions
 {
+    /// <summary>
+    /// Default block size in pixels used for alignment calculations.
+    /// </summary>
     private const int DefaultBlockSize = 80;
 
+    /// <summary>
+    /// Subscribes to chart context update events and returns an unsubscription action.
+    /// </summary>
+    /// <param name="context">The chart context to subscribe to.</param>
+    /// <param name="draw">The action to execute when the chart is updated.</param>
+    /// <returns>An action that unsubscribes the draw action from the chart updates.</returns>
     public static Action OnUpdate(this IChartContext context, Action draw)
     {
         context.Updated += draw;
@@ -20,6 +32,12 @@ internal static class ChartContextExtensions
         return () => context.Updated -= draw;
     }
 
+    /// <summary>
+    /// Subscribes to chart context lookup changed events and returns an unsubscription action.
+    /// </summary>
+    /// <param name="context">The chart context to subscribe to.</param>
+    /// <param name="handle">The action to execute when the lookup changes, receiving instant and point information.</param>
+    /// <returns>An action that unsubscribes the handle action from the lookup changed events.</returns>
     public static Action OnLookupChanged(this IChartContext context, Action<Instant?, Point?> handle)
     {
         context.LookupChanged += handle;
@@ -27,6 +45,11 @@ internal static class ChartContextExtensions
         return () => context.LookupChanged -= handle;
     }
 
+    /// <summary>
+    /// Calculates vertical grid lines for the chart based on time alignment within the current view.
+    /// </summary>
+    /// <param name="context">The chart context containing view and timezone information.</param>
+    /// <returns>A dictionary mapping X-coordinate positions to their corresponding local date times.</returns>
     public static IReadOnlyDictionary<int, LocalDateTime> GetVerticalLines(this IChartContext context)
     {
         var lines = new Dictionary<int, LocalDateTime>();
@@ -51,6 +74,10 @@ internal static class ChartContextExtensions
         return lines;
     }
 
+    /// <summary>
+    /// Clears all overlay contexts for all panes in the chart, including series, bottom labels, and right labels.
+    /// </summary>
+    /// <param name="context">The chart context containing panes to clear.</param>
     public static void ClearOverlays(this IChartContext context)
     {
         foreach (var pane in context.Panes)
@@ -72,6 +99,11 @@ internal static class ChartContextExtensions
             ctx.ClearRect(0, 0, rect.Width.CeilInt32(), rect.Height.CeilInt32());
     }
 
+    /// <summary>
+    /// Calculates the appropriate duration alignment for grid lines based on chart resolution and zoom level.
+    /// </summary>
+    /// <param name="context">The chart context containing resolution and zoom information.</param>
+    /// <returns>A duration representing the optimal alignment interval for the current chart scale.</returns>
     private static Duration GetAlignmentDuration(this IChartContext context)
     {
         var block = DefaultBlockSize * context.Resolution.TotalMinutes / context.Zoom;

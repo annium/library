@@ -5,8 +5,14 @@ using Xunit;
 
 namespace Annium.Blazor.Core.Tests.Tools;
 
+/// <summary>
+/// Tests for the ClassBuilder functionality
+/// </summary>
 public class ClassBuilderTest
 {
+    /// <summary>
+    /// Tests that the generic ClassBuilder works correctly with various conditions and value providers
+    /// </summary>
     [Fact]
     public void ClassBuilderT_Works()
     {
@@ -33,6 +39,9 @@ public class ClassBuilderTest
         named.Is("plain plain-if plain-if-value get get-if get-if-value x_val x_val-if x_val-if-value female");
     }
 
+    /// <summary>
+    /// Tests that cloning a generic ClassBuilder works correctly
+    /// </summary>
     [Fact]
     public void ClassBuilderT_Clone_Works()
     {
@@ -48,6 +57,9 @@ public class ClassBuilderTest
         two.Is("plain two");
     }
 
+    /// <summary>
+    /// Tests that the non-generic ClassBuilder works correctly with various conditions and value providers
+    /// </summary>
     [Fact]
     public void ClassBuilder_Works()
     {
@@ -67,6 +79,9 @@ public class ClassBuilderTest
         className.Is("plain plain-if get male");
     }
 
+    /// <summary>
+    /// Tests that cloning a non-generic ClassBuilder works correctly
+    /// </summary>
     [Fact]
     public void ClassBuilder_Clone_Works()
     {
@@ -82,15 +97,35 @@ public class ClassBuilderTest
         two.Is("plain two");
     }
 
+    /// <summary>
+    /// Test user class for ClassBuilder testing
+    /// </summary>
     private class User
     {
+        /// <summary>
+        /// Gets or sets the gender of the user
+        /// </summary>
         public Gender Gender { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the user
+        /// </summary>
         public string Name { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Gender enumeration for testing purposes
+    /// </summary>
     private enum Gender : byte
     {
+        /// <summary>
+        /// Male gender
+        /// </summary>
         Male,
+
+        /// <summary>
+        /// Female gender
+        /// </summary>
         Female,
     }
 }

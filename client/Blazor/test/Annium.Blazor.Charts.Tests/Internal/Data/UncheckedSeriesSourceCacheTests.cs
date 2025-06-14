@@ -11,16 +11,29 @@ using Xunit;
 
 namespace Annium.Blazor.Charts.Tests.Internal.Data;
 
+/// <summary>
+/// Tests for the UncheckedSeriesSourceCache functionality
+/// </summary>
 public class UncheckedSeriesSourceCacheTests : TestBase
 {
+    /// <summary>
+    /// A fixed moment in time used as a reference point for tests
+    /// </summary>
     private readonly Instant _moment = new LocalDateTime(2020, 1, 15, 14, 20).InUtc().ToInstant();
 
+    /// <summary>
+    /// Initializes a new instance of the UncheckedSeriesSourceCacheTests class
+    /// </summary>
+    /// <param name="outputHelper">The test output helper</param>
     public UncheckedSeriesSourceCacheTests(ITestOutputHelper outputHelper)
         : base(outputHelper)
     {
         Register(container => container.AddCharts());
     }
 
+    /// <summary>
+    /// Tests that the cache correctly reports its empty state
+    /// </summary>
     [Fact]
     public void IsEmpty()
     {
@@ -39,6 +52,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
         cache.IsEmpty.IsFalse();
     }
 
+    /// <summary>
+    /// Tests that the cache correctly reports its bounds
+    /// </summary>
     [Fact]
     public void Bounds()
     {
@@ -59,6 +75,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
         cache.Bounds.End.Is(end);
     }
 
+    /// <summary>
+    /// Tests that the cache correctly reports whether it has data for specific ranges
+    /// </summary>
     [Fact]
     public void HasData()
     {
@@ -80,6 +99,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
         cache.HasData(end1, start2).IsFalse();
     }
 
+    /// <summary>
+    /// Tests that the cache correctly retrieves data for specific ranges
+    /// </summary>
     [Fact]
     public void GetData()
     {
@@ -101,6 +123,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
         cache.GetData(end1, start2).IsEmpty();
     }
 
+    /// <summary>
+    /// Tests that the cache correctly retrieves individual items by timestamp with various lookup strategies
+    /// </summary>
     [Fact]
     public void GetItem()
     {
@@ -152,6 +177,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
         cache.GetItem(end4).IsDefault();
     }
 
+    /// <summary>
+    /// Tests that the cache correctly identifies empty ranges within requested bounds
+    /// </summary>
     [Fact]
     public void GetEmptyRanges()
     {
@@ -187,6 +215,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
             );
     }
 
+    /// <summary>
+    /// Tests adding initial data to the cache
+    /// </summary>
     [Fact]
     public void AddData_Init()
     {
@@ -217,6 +248,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
             );
     }
 
+    /// <summary>
+    /// Tests that adding intersecting data ranges throws an exception
+    /// </summary>
     [Fact]
     public void AddData_Intersection()
     {
@@ -232,6 +266,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
         Wrap.It(() => cache.AddData(start2, end2, items2)).Throws<InvalidOperationException>().Reports("intersect");
     }
 
+    /// <summary>
+    /// Tests adding data before existing data ranges
+    /// </summary>
     [Fact]
     public void AddData_Before()
     {
@@ -254,6 +291,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
             );
     }
 
+    /// <summary>
+    /// Tests adding data after existing data ranges
+    /// </summary>
     [Fact]
     public void AddData_After()
     {
@@ -276,6 +316,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
             );
     }
 
+    /// <summary>
+    /// Tests adding data with empty ranges between existing data
+    /// </summary>
     [Fact]
     public void AddData_EmptyRange()
     {
@@ -303,6 +346,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
             );
     }
 
+    /// <summary>
+    /// Tests that changing the resolution clears the cache
+    /// </summary>
     [Fact]
     public void SetResolution()
     {
@@ -322,6 +368,9 @@ public class UncheckedSeriesSourceCacheTests : TestBase
         cache.IsEmpty.IsTrue();
     }
 
+    /// <summary>
+    /// Tests that clearing the cache empties it
+    /// </summary>
     [Fact]
     public void Clear()
     {
@@ -341,6 +390,10 @@ public class UncheckedSeriesSourceCacheTests : TestBase
         cache.IsEmpty.IsTrue();
     }
 
+    /// <summary>
+    /// Creates a new UncheckedSeriesSourceCache instance for testing
+    /// </summary>
+    /// <returns>A new cache instance with comparison functions</returns>
     private ISeriesSourceCache<Item> CreateCache() =>
         new UncheckedSeriesSourceCache<Item>(
             M(1),
@@ -348,8 +401,20 @@ public class UncheckedSeriesSourceCacheTests : TestBase
             (x, moment) => x.Moment.CompareTo(moment)
         );
 
+    /// <summary>
+    /// Creates a time range starting from a given instant
+    /// </summary>
+    /// <param name="from">The starting instant</param>
+    /// <param name="length">The length in minutes</param>
+    /// <returns>A tuple containing start and end instants</returns>
     private (Instant start, Instant end) Range(Instant from, int length) => (from, from + M(length));
 
+    /// <summary>
+    /// Creates a list of test items with specified time offsets
+    /// </summary>
+    /// <param name="start">The starting instant</param>
+    /// <param name="offsets">Array of minute offsets from start</param>
+    /// <returns>A list of test items</returns>
     private IReadOnlyList<Item> Items(Instant start, params int[] offsets)
     {
         var items = new List<Item>();
@@ -360,13 +425,32 @@ public class UncheckedSeriesSourceCacheTests : TestBase
         return items;
     }
 
+    /// <summary>
+    /// Creates a Duration from minutes
+    /// </summary>
+    /// <param name="minutes">The number of minutes</param>
+    /// <returns>A Duration representing the specified minutes</returns>
     private Duration M(int minutes) => Duration.FromMinutes(minutes);
 
+    /// <summary>
+    /// A test item that implements IComparable for both Item and Instant comparisons
+    /// </summary>
+    /// <param name="Moment">The timestamp of the item</param>
     private sealed record Item(Instant Moment) : IComparable<Item>, IComparable<Instant>
     {
+        /// <summary>
+        /// Compares this item to another item by their timestamps
+        /// </summary>
+        /// <param name="other">The other item to compare to</param>
+        /// <returns>A value indicating the relative order of the items</returns>
         public int CompareTo(Item? other) =>
             Moment.CompareTo(other?.Moment ?? throw new InvalidOperationException($"Can't compare {this} to null"));
 
+        /// <summary>
+        /// Compares this item to an instant by timestamp
+        /// </summary>
+        /// <param name="other">The instant to compare to</param>
+        /// <returns>A value indicating the relative order</returns>
         public int CompareTo(Instant other) => Moment.CompareTo(other);
     }
 }
