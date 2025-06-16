@@ -28,7 +28,7 @@ pack:
 	dotnet pack --no-build -o . -c Release -p:SymbolPackageFormat=snupkg
 
 publish:
-	dotnet nuget push "*.nupkg" --source https://api.nuget.org/v3/index.json --api-key $(apiKey)
+	dotnet nuget push "*.nupkg" --source https://dotnet.pkg.annium.com/v3/index.json --api-key $(shell cat .xs.credentials)
 	find . -type f -name '*.nupkg' | xargs rm
 
 docs-lint:
