@@ -1,8 +1,9 @@
+using Annium.Core.DependencyInjection;
+using Annium.Net.Types;
 using Annium.XRest.Core;
 using Microsoft.Extensions.DependencyInjection;
 
-// ReSharper disable once CheckNamespace
-namespace Annium.Core.DependencyInjection;
+namespace Annium.XRest.Sources.AspNetCore;
 
 public static class ServiceContainerExtensions
 {

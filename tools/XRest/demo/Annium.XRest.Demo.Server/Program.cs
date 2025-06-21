@@ -1,5 +1,8 @@
-using Annium.Core.DependencyInjection;
+using Annium.AspNetCore.Extensions;
+using Annium.Infrastructure.Hosting;
+using Annium.Logging.Microsoft;
 using Annium.XRest.Demo.Server;
+using Annium.XRest.Sources.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);

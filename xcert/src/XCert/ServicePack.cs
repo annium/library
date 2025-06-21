@@ -1,5 +1,9 @@
 using System;
 using Annium.Core.DependencyInjection;
+using Annium.Core.Mapper;
+using Annium.Core.Runtime;
+using Annium.Logging.Console;
+using Annium.Logging.Shared;
 
 namespace XCert
 {

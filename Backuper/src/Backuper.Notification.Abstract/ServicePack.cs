@@ -1,5 +1,7 @@
 using System;
 using Annium.Core.DependencyInjection;
+using Annium.Logging.Console;
+using Annium.Logging.Shared;
 
 namespace Backuper.Notification.Abstract;
 

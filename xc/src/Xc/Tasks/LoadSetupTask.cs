@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Annium.Configuration.Abstractions;
+using Annium.Configuration.Yaml;
 using Xc.Setup;
 using static Xc.Helper;
 

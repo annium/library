@@ -1,5 +1,6 @@
 using System;
 using Annium.Core.DependencyInjection;
+using Annium.Core.Runtime;
 using Annium.XRest.Clients.Shared.Components;
 using Annium.XRest.Clients.Shared.Internal.Components;
 
