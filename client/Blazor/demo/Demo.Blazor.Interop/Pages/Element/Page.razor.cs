@@ -3,6 +3,7 @@ using Annium;
 using Annium.Blazor.Interop;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace Demo.Blazor.Interop.Pages.Element;
 
@@ -94,5 +95,5 @@ public partial class Page : ILogSubject, IDisposable
     /// <summary>
     /// Toggles the size of the resized block between normal and enlarged states.
     /// </summary>
-    private void ToggleResizedBlockSize() => _isResized = !_isResized;
+    private void ToggleResizedBlockSize(KeyboardEventArgs _) => _isResized = !_isResized;
 }

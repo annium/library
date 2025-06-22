@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Annium.Components.State.Forms;
 using Annium.Core.Mapper;
+using AntDesign;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 
 namespace Annium.Blazor.Ant.Components;
 
@@ -28,7 +28,7 @@ public partial class PasswordField
     /// Event callback triggered when the Enter key is pressed in the password field.
     /// </summary>
     [Parameter]
-    public EventCallback<KeyboardEventArgs> OnPressEnter { get; set; }
+    public EventCallback<PressEnterEventArgs> OnPressEnter { get; set; }
 
     /// <summary>
     /// The child content to be rendered inside the password field component.

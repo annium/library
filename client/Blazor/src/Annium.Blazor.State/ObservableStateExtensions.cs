@@ -13,12 +13,17 @@ namespace Annium.Blazor.State;
 public static class ObservableStateExtensions
 {
     /// <summary>
+    /// Name of the StateHasChanged method on ComponentBase
+    /// </summary>
+    private const string StateHasChangedMethodName = "StateHasChanged";
+
+    /// <summary>
     /// Cached reflection reference to the StateHasChanged method on ComponentBase
     /// </summary>
     private static readonly MethodInfo _stateHasChanged =
-        typeof(ComponentBase).GetMethod(nameof(_stateHasChanged), BindingFlags.Instance | BindingFlags.NonPublic)
+        typeof(ComponentBase).GetMethod(StateHasChangedMethodName, BindingFlags.Instance | BindingFlags.NonPublic)
         ?? throw new InvalidOperationException(
-            $"Failed to discover {nameof(_stateHasChanged)} on {typeof(ObservableState).FriendlyName()}"
+            $"Failed to discover {StateHasChangedMethodName} on {typeof(ObservableState).FriendlyName()}"
         );
 
     /// <summary>
