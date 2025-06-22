@@ -14,7 +14,7 @@ public class {{ type }}
     }
     {{~ for action in actions ~}}
 
-    public async {{ if action.has_response }}Task<{{ action.response }}>{{ else }}Task{{ end }} {{ action.name }}(
+    public async {{ if action.has_response }}Task<{{ action.response }}>{{ else }}Task{{ end }} {{ action.name }}Async(
         {{~ for parameter in action.parameters ~}}
         {{ parameter.type}} {{ parameter.name }},
         {{~ end ~}}
