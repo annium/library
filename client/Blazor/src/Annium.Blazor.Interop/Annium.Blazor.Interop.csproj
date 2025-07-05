@@ -1,18 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor" InitialTargets="CompileScripts">
   <PropertyGroup>
     <Solutions>Annium.Frontend</Solutions>
     <OutputType>Library</OutputType>
     <IsPackable>true</IsPackable>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <TypeScriptToolsVersion>4.5</TypeScriptToolsVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Annium.Core.DependencyInjection" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" />
   </ItemGroup>
-  <ItemGroup>
-    <TypeScriptCompile Include="wwwroot\**\*.ts" />
-  </ItemGroup>
+  <Target Name="InstallTsc">
+    <Exec Command="npm ci" />
+  </Target>
+  <Target Name="CompileScripts" DependsOnTargets="InstallTsc">
+    <Exec Command="npm run compile" />
+  </Target>
 </Project>

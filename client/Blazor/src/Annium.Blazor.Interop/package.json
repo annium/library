@@ -1,0 +1,9 @@
+{
+  "name": "interop",
+  "scripts": {
+    "compile": "tsc"
+  },
+  "dependencies": {
+    "typescript": "5.8.3"
+  }
+}

@@ -49,11 +49,6 @@ docs-serve:
 docs-watch:
 	dotnet tool run docfx docfx.json --serve
 
-gen-rsa-keys:
-	openssl req -x509 -noenc -days 3650 -keyout private.pem -out cert.pem
-	openssl rsa -in private.pem -pubout -out public.pem 
-	openssl pkcs12 -export -inkey private.pem -in cert.pem -out cert.pfx
-	rm cert.pem
 
 demo-blazor-ant:
 	cd web/demo/Demo.Blazor.Ant && dotnet watch run
