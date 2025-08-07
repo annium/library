@@ -1,9 +1,7 @@
-using Annium.Blazor.Css;
+using Annium.Core.DependencyInjection;
 using Annium.Core.Runtime;
-using StyleSheet = Annium.Blazor.Css.Internal.StyleSheet;
 
-// ReSharper disable once CheckNamespace
-namespace Annium.Core.DependencyInjection;
+namespace Annium.Blazor.Css;
 
 /// <summary>
 /// Extension methods for configuring CSS services in the dependency injection container.
@@ -21,7 +19,7 @@ public static class ServiceContainerExtensions
         container.AddAll().AssignableTo<RuleSet>().AsSelf().Singleton();
 
         // register stylesheet
-        container.Add(StyleSheet.Instance).AsSelf().AsInterfaces().Singleton();
+        container.Add(Internal.StyleSheet.Instance).AsSelf().AsInterfaces().Singleton();
 
         return container;
     }

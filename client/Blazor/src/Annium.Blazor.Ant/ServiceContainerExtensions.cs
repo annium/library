@@ -1,7 +1,7 @@
+using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
-// ReSharper disable once CheckNamespace
-namespace Annium.Core.DependencyInjection;
+namespace Annium.Blazor.Ant;
 
 /// <summary>
 /// Extension methods for configuring Ant Design services in the dependency injection container.

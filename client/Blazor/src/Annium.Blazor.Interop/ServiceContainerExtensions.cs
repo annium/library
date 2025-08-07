@@ -1,8 +1,7 @@
-using Annium.Blazor.Interop;
+using Annium.Core.DependencyInjection;
 using Microsoft.JSInterop;
 
-// ReSharper disable once CheckNamespace
-namespace Annium.Core.DependencyInjection;
+namespace Annium.Blazor.Interop;
 
 /// <summary>
 /// Provides extension methods for configuring interop services in the service container.

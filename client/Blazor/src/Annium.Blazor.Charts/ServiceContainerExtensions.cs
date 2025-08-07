@@ -3,9 +3,9 @@ using Annium.Blazor.Charts.Domain.Contexts;
 using Annium.Blazor.Charts.Internal.Data.Sources;
 using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts;
 using Annium.Blazor.Charts.Internal.Domain.Models.Contexts;
+using Annium.Core.DependencyInjection;
 
-// ReSharper disable once CheckNamespace
-namespace Annium.Core.DependencyInjection;
+namespace Annium.Blazor.Charts;
 
 /// <summary>
 /// Provides extension methods for registering chart-related services in the service container.

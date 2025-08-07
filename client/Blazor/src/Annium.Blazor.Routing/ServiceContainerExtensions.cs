@@ -1,12 +1,11 @@
 using System.Runtime.CompilerServices;
-using Annium.Blazor.Routing;
 using Annium.Blazor.Routing.Internal;
+using Annium.Core.DependencyInjection;
 using Annium.Core.Runtime;
 
 [assembly: InternalsVisibleTo("Annium.Blazor.Routing.Tests")]
 
-// ReSharper disable once CheckNamespace
-namespace Annium.Core.DependencyInjection;
+namespace Annium.Blazor.Routing;
 
 /// <summary>
 /// Extension methods for configuring Blazor routing services in the dependency injection container

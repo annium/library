@@ -95,5 +95,6 @@ public partial class Page : ILogSubject, IDisposable
     /// <summary>
     /// Toggles the size of the resized block between normal and enlarged states.
     /// </summary>
+    /// <param name="_">The event.</param>
     private void ToggleResizedBlockSize(MouseEventArgs _) => _isResized = !_isResized;
 }

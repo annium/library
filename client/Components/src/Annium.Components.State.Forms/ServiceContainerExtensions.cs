@@ -1,8 +1,7 @@
-using Annium.Components.State.Forms;
 using Annium.Components.State.Forms.Internal;
+using Annium.Core.DependencyInjection;
 
-// ReSharper disable once CheckNamespace
-namespace Annium.Core.DependencyInjection;
+namespace Annium.Components.State.Forms;
 
 /// <summary>
 /// Provides extension methods for registering state form services in the service container.

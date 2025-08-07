@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Annium.Blazor.Charts.Domain.Lookup;
 using Annium.Blazor.Charts.Internal.Data.Cache;
-using Annium.Core.DependencyInjection;
 using Annium.Data.Models;
 using Annium.Testing;
 using NodaTime;

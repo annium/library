@@ -1,9 +1,8 @@
-using Annium.Blazor.Net;
 using Annium.Blazor.Net.Internal;
+using Annium.Core.DependencyInjection;
 using Annium.Core.Runtime;
 
-// ReSharper disable once CheckNamespace
-namespace Annium.Core.DependencyInjection;
+namespace Annium.Blazor.Net;
 
 /// <summary>
 /// Extension methods for configuring Blazor.Net services in the service container.
