@@ -1,61 +1,39 @@
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using Annium.Extensions.Arguments;
 using Annium.Logging;
+using Annium.Versioning.Models;
 using Annium.Versioning.Services;
 
 namespace Annium.Versioning.Commands;
 
 internal class SetVersionCommand(IVersionService versionService, ILogger logger)
-    : AsyncCommand<SetVersionCommandConfiguration>,
+    : Command<SetVersionCommandConfiguration>,
         ICommandDescriptor,
         ILogSubject
 {
     public ILogger Logger { get; } = logger;
-    public static string Id => "set";
+    public static string Id => "set-version";
     public static string Description => "set version tag in git repository";
 
-    public override async Task HandleAsync(SetVersionCommandConfiguration cfg, CancellationToken ct)
+    public override void Handle(SetVersionCommandConfiguration cfg, CancellationToken ct)
     {
         var workingDirectory = cfg.WorkingDirectory.IsNullOrWhiteSpace()
             ? Directory.GetCurrentDirectory()
             : Path.GetFullPath(cfg.WorkingDirectory);
         if (!Directory.Exists(workingDirectory))
-        {
-            Console.WriteLine($"Working directory {workingDirectory} does not exist");
-            return;
-        }
+            throw new DirectoryNotFoundException(workingDirectory);
 
-        if (string.IsNullOrWhiteSpace(cfg.Version))
-        {
-            Console.WriteLine("Version is required");
-            return;
-        }
+        // Validate and parse version chain format X.Y
+        if (!VersionChain.TryParse(cfg.Version, out var versionChain))
+            throw new ArgumentException("Version must be in format X.Y where X and Y are natural numbers");
 
-        // Validate version format X.Y
-        var versionPattern = @"^(\d+)\.(\d+)$";
-        var match = Regex.Match(cfg.Version, versionPattern);
-        if (!match.Success)
-        {
-            Console.WriteLine("Version must be in format X.Y where X and Y are natural numbers");
-            return;
-        }
-
-        var major = uint.Parse(match.Groups[1].Value);
-        var minor = uint.Parse(match.Groups[2].Value);
-
-        try
-        {
-            var newVersion = await versionService.SetVersionAsync(workingDirectory, major, minor);
-            Console.WriteLine($"Version {newVersion} set");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to set version: {ex.Message}");
-        }
+        var result = versionService.SetVersion(workingDirectory, versionChain);
+        if (result.IsT0)
+            Console.WriteLine(result.AsT0.ToString());
+        else
+            throw new Exception($"Failed to set version: {result.AsT1}");
     }
 }
 
@@ -65,7 +43,7 @@ internal class SetVersionCommandConfiguration
     [Help("Working directory.")]
     public string WorkingDirectory { get; set; } = string.Empty;
 
-    [Option("v")]
+    [Option("v", true)]
     [Help("Version to set.")]
     public string Version { get; set; } = string.Empty;
 }

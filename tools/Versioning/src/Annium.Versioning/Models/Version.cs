@@ -2,17 +2,15 @@ using System;
 using System.Collections.Generic;
 using Annium.Data.Models;
 
-// ReSharper disable NonReadonlyMemberInGetHashCode
-
 namespace Annium.Versioning.Models;
 
 public sealed record Version : Comparable<Version>
 {
-    public static Version Empty { get; } = new(0, 0, 0, string.Empty);
+    public static Version Empty(VersionChain chain) => new(chain.Major, chain.Minor, 0, string.Empty);
 
     public static bool TryParse(string raw, out Version version)
     {
-        version = Empty;
+        version = new Version(0, 0, 0, string.Empty);
 
         var parts = raw.Split('.', 3);
         if (parts.Length < 3)
@@ -40,10 +38,10 @@ public sealed record Version : Comparable<Version>
         }
     }
 
-    public uint Major { get; private set; }
-    public uint Minor { get; private set; }
-    public uint Patch { get; private set; }
-    public string Suffix { get; private set; }
+    public uint Major { get; init; }
+    public uint Minor { get; init; }
+    public uint Patch { get; init; }
+    public string Suffix { get; init; }
 
     public Version(uint major, uint minor, uint patch, string suffix)
     {
@@ -51,14 +49,6 @@ public sealed record Version : Comparable<Version>
         Minor = minor;
         Patch = patch;
         Suffix = suffix;
-    }
-
-    public void Update(Version version)
-    {
-        Major = version.Major;
-        Minor = version.Minor;
-        Patch = version.Patch;
-        Suffix = version.Suffix;
     }
 
     public override string ToString() => $"{Major}.{Minor}.{Patch}{Suffix}";

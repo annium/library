@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Annium.Logging;
 using Annium.Versioning.Models;
+using OneOf;
 
 namespace Annium.Versioning.Services;
 
@@ -17,59 +18,106 @@ internal class VersionService : IVersionService, ILogSubject
         Logger = logger;
     }
 
-    public Task<Version?> GetCurrentVersionAsync(string repositoryPath)
+    public OneOf<Version, string> GetCurrentVersion(string repositoryPath, VersionChain? versionChain = null)
     {
-        var tags = _gitTagService.GetTags(repositoryPath);
-        this.Info<int>("Found {TagsCount} tags", tags.Count);
+        this.Trace<string>(
+            "finding current version for chain {VersionChain} on HEAD",
+            versionChain?.ToString() ?? "all"
+        );
+        var tagsResult = _gitTagService.GetTags(repositoryPath);
+        if (tagsResult.IsT1)
+            return tagsResult.AsT1;
 
-        var versions = tags.Select(tag =>
-            {
-                if (Version.TryParse(tag, out var version))
-                {
-                    this.Debug<string, Version>("Parsed tag '{Tag}' as version {Version}", tag, version);
-                    return version;
-                }
-                else
-                {
-                    this.Debug<string>("Skipping invalid version tag: {Tag}", tag);
-                    return null;
-                }
-            })
-            .Where(v => v != null)
-            .ToList();
+        var tags = tagsResult.AsT0;
+        var versions = ParseVersions(tags);
+        var filteredVersions = versionChain is null ? versions : FilterByVersionChain(versions, versionChain.Value);
 
-        var result = versions.Count > 0 ? versions.Max() : null;
-        return Task.FromResult(result);
+        this.Trace<int, int, int, string>(
+            "found {TagsCount} tags as {VersionsCount} versions, filtered to {FilteredCount} versions for chain {Chain}",
+            tags.Count,
+            versions.Count,
+            filteredVersions.Count,
+            versionChain?.ToString() ?? "all"
+        );
+
+        var existing = filteredVersions.Count > 0 ? filteredVersions.Max() : null;
+        var result = existing ?? Version.Empty(versionChain ?? VersionChain.Minimal);
+
+        return result;
     }
 
-    public Task<Version> SetVersionAsync(string repositoryPath, uint major, uint minor)
+    public OneOf<Version, string> SetVersion(string repositoryPath, VersionChain versionChain)
     {
-        var tags = _gitTagService.GetTags(repositoryPath);
-        this.Info<int>("Found {TagsCount} tags", tags.Count);
+        this.Trace("setting version for chain {VersionChain} on HEAD", versionChain);
 
-        var versions = tags.Select(tag =>
+        // get HEAD commit tags
+        var headTagsResult = _gitTagService.GetHeadTags(repositoryPath);
+        if (headTagsResult.IsT1)
+            return headTagsResult.AsT1;
+
+        var headTags = headTagsResult.AsT0;
+        var headVersions = ParseVersions(headTags);
+        var headFilteredVersions = FilterByVersionChain(headVersions, versionChain);
+        this.Trace(
+            "found {TagsCount} tags as {VersionsCount} versions, filtered to {FilteredCount} versions for chain {VersionChain} on HEAD",
+            headTags.Count,
+            headVersions.Count,
+            headFilteredVersions.Count,
+            versionChain
+        );
+
+        if (headFilteredVersions.Count > 0)
+        {
+            var version = headFilteredVersions.Max().NotNull();
+            this.Trace("version with chain {VersionChain} already exists on HEAD: {Version}", versionChain, version);
+            return version;
+        }
+
+        // get history tags (excluding HEAD commit tags)
+        var tagsResult = _gitTagService.GetHistoryTags(repositoryPath);
+        if (tagsResult.IsT1)
+            return tagsResult.AsT1;
+
+        var tags = tagsResult.AsT0;
+        var versions = ParseVersions(tags);
+        var filteredVersions = FilterByVersionChain(versions, versionChain);
+        this.Trace(
+            "found {TagsCount} tags as {VersionsCount} versions, filtered to {FilteredCount} versions for chain {VersionChain}",
+            tags.Count,
+            versions.Count,
+            filteredVersions.Count,
+            versionChain
+        );
+
+        var patch = filteredVersions.Count > 0 ? filteredVersions.Max(v => v.Patch) + 1 : 0u;
+        var newVersion = new Version(versionChain.Major, versionChain.Minor, patch, "");
+
+        this.Trace("creating new version {Version}", newVersion);
+        var tag = $"v{newVersion}";
+        var setTagError = _gitTagService.SetTag(repositoryPath, tag);
+
+        return setTagError is null ? newVersion : setTagError;
+    }
+
+    private IReadOnlyList<Version> ParseVersions(IReadOnlyList<string> tags)
+    {
+        return tags.Select(tag =>
             {
-                if (Version.TryParse(tag, out var version))
+                if (tag.StartsWith('v') && Version.TryParse(tag[1..], out var version))
                 {
-                    this.Debug<string, Version>("Parsed tag '{Tag}' as version {Version}", tag, version);
+                    this.Trace("parsed tag '{Tag}' as version {Version}", tag, version);
                     return version;
                 }
-                else
-                {
-                    this.Debug<string>("Skipping invalid version tag: {Tag}", tag);
-                    return null;
-                }
+
+                this.Trace<string>("skipping invalid version tag: {Tag}", tag);
+                return null;
             })
             .OfType<Version>()
-            .Where(v => v.Major == major && v.Minor == minor)
-            .ToList();
+            .ToArray();
+    }
 
-        var maxPatch = versions.Count > 0 ? versions.Max(v => v.Patch) : 0u;
-        var newVersion = new Version(major, minor, maxPatch + 1, "");
-
-        this.Info<Version>("Creating new version {Version}", newVersion);
-        _gitTagService.SetTag(repositoryPath, newVersion.ToString());
-
-        return Task.FromResult(newVersion);
+    private IReadOnlyList<Version> FilterByVersionChain(IReadOnlyList<Version> versions, VersionChain chain)
+    {
+        return versions.Where(v => v.Major == chain.Major && v.Minor == chain.Minor).ToArray();
     }
 }

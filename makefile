@@ -26,9 +26,9 @@ build:
 test:
 	dotnet test -c Release --no-build --nologo -v q
 
-publish: publish-doclint publish-xrest
+publish: publish-doclint publish-versioning publish-xrest
 
-publish-doclint publish-xrest:
+publish-doclint publish-versioning publish-xrest:
 	make -C $(subst publish-,,$@) publish
 
 install: install-doclint install-versioning install-xrest

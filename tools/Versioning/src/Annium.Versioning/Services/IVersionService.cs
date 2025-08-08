@@ -1,10 +1,10 @@
-using System.Threading.Tasks;
 using Annium.Versioning.Models;
+using OneOf;
 
 namespace Annium.Versioning.Services;
 
 public interface IVersionService
 {
-    Task<Version?> GetCurrentVersionAsync(string repositoryPath);
-    Task<Version> SetVersionAsync(string repositoryPath, uint major, uint minor);
+    OneOf<Version, string> GetCurrentVersion(string repositoryPath, VersionChain? versionChain = null);
+    OneOf<Version, string> SetVersion(string repositoryPath, VersionChain versionChain);
 }
