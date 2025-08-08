@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Solutions>Annium.Tools</Solutions>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>versioning</ToolCommandName>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Core.Entrypoint" />
+    <PackageReference Include="Annium.Data.Models" />
+    <PackageReference Include="Annium.Extensions.Arguments" />
+    <PackageReference Include="Annium.Logging.Console" />
+    <PackageReference Include="LibGit2Sharp" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
+  </ItemGroup>
+</Project>

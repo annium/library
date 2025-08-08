@@ -31,14 +31,14 @@ publish: publish-doclint publish-xrest
 publish-doclint publish-xrest:
 	make -C $(subst publish-,,$@) publish
 
-install: install-doclint install-xrest
+install: install-doclint install-versioning install-xrest
 
-install-doclint install-xrest:
+install-doclint install-versioning install-xrest:
 	make -C $(subst install-,,$@) install
 
-uninstall: uninstall-doclint uninstall-xrest
+uninstall: uninstall-doclint uninstall-versioning uninstall-xrest
 
-uninstall-doclint uninstall-xrest:
+uninstall-doclint uninstall-versioning uninstall-xrest:
 	make -C $(subst uninstall-,,$@) uninstall
 
 publish-backuper:
