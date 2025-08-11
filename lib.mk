@@ -10,9 +10,10 @@ endef
 
 define publish-package
 	@$(eval project := $(1))
-	cd $(project) && dotnet pack --no-build -o . -c Release -p:SymbolPackageFormat=snupkg
+	@$(eval packageVersion := $(2))
+	cd $(project) && dotnet pack --no-build -o . -c Release -p:SymbolPackageFormat=snupkg -p:PackageVersion=$(packageVersion)
 	cd $(project) && dotnet nuget push "*.nupkg" --source https://api.nuget.org/v3/index.json --api-key $(shell cat ../.xs.credentials)
-	cd $(project) && find . -type f -name '*.nupkg' | xargs rm
+	cd $(project) && find . -type f -name '*.nupkg' | xargs -I% rm %
 endef
 
 define nix-install

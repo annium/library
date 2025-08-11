@@ -1,7 +1,7 @@
 include ../lib.mk
 
 publish:
-	$(call publish-package,src/Annium.DocLint)
+	$(call publish-package,src/Annium.DocLint,$(packageVersion))
 
 install:
 	$(call nix-install)

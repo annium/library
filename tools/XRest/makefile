@@ -1,10 +1,10 @@
 include ../lib.mk
 
 publish:
-	$(call publish-package,src/Annium.XRest.Core)
-	$(call publish-package,src/Annium.XRest)
-	$(call publish-package,src/sources/Annium.XRest.Sources.Shared)
-	$(call publish-package,src/sources/Annium.XRest.Sources.AspNetCore)
+	$(call publish-package,src/Annium.XRest.Core,$(packageVersion))
+	$(call publish-package,src/Annium.XRest,$(packageVersion))
+	$(call publish-package,src/sources/Annium.XRest.Sources.Shared,$(packageVersion))
+	$(call publish-package,src/sources/Annium.XRest.Sources.AspNetCore,$(packageVersion))
 
 install:
 	$(call nix-install)
