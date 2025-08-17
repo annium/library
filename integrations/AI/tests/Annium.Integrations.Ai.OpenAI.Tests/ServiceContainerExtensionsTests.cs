@@ -16,8 +16,8 @@ public class ServiceContainerExtensionsTests
         container.AddOpenAi(
             new()
             {
-                { "chat-client", new OpenAiConfig("chatkey", "gpt-4o") },
-                { "audio-client", new OpenAiConfig("audiokey", "whisper-1") },
+                { "chat-client", new OpenAiConfig("chatkey", "gpt-4o", null) },
+                { "audio-client", new OpenAiConfig("audiokey", "whisper-1", null) },
             }
         );
 

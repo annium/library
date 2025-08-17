@@ -1,4 +1,5 @@
 using System;
+using System.ClientModel;
 using System.Collections.Immutable;
 using Annium.Core.DependencyInjection;
 using OpenAI;
@@ -31,25 +32,28 @@ public static class ServiceContainerExtensions
 
     private static OpenAIClient BuildOpenAiClient(IServiceProvider sp, object key)
     {
-        var configs = sp.Resolve<OpenAiConfigs>();
+        var config = sp.ResolveConfig(key);
+        var credential = new ApiKeyCredential(config.Key);
+        var options = config.Options ?? new OpenAIClientOptions();
+        var client = new OpenAIClient(credential, options);
 
-        return configs.TryGetValue((string)key, out var keyData)
-            ? new OpenAIClient(keyData.Key)
-            : throw new InvalidOperationException($"Requested key '{key}' was not found in configuration.");
+        return client;
     }
 
     private static ChatClient BuildOpenAiChatClient(IServiceProvider sp, object key)
     {
         var client = sp.ResolveKeyed<OpenAIClient>(key);
+        var config = sp.ResolveConfig(key);
 
-        return client.GetChatClient("gpt-4o");
+        return client.GetChatClient(config.Model);
     }
 
     private static AudioClient BuildOpenAiAudioClient(IServiceProvider sp, object key)
     {
         var client = sp.ResolveKeyed<OpenAIClient>(key);
+        var config = sp.ResolveConfig(key);
 
-        return client.GetAudioClient("whisper-1");
+        return client.GetAudioClient(config.Model);
     }
 
     private static FactoryInfo Factory<T>(Func<IServiceProvider, object, T> factory)
@@ -59,4 +63,17 @@ public static class ServiceContainerExtensions
     }
 
     private record FactoryInfo(Type Type, Func<IServiceProvider, object, object> Factory);
+}
+
+file static class ServiceProviderExtensions
+{
+    public static OpenAiConfig ResolveConfig(this IServiceProvider sp, object key)
+    {
+        var configs = sp.Resolve<OpenAiConfigs>();
+
+        if (!configs.TryGetValue((string)key, out var config))
+            throw new InvalidOperationException($"Requested key '{key}' was not found in configuration.");
+
+        return config;
+    }
 }
