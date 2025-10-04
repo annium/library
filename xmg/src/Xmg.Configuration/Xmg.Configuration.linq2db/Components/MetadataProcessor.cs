@@ -95,8 +95,7 @@ internal class MetadataProcessor : IMetadataProcessor
 
         var targetType = column.Member.GetMemberType();
         var primaryTable =
-            db.Tables.Values.SingleOrDefault(x => x.Type == targetType)
-            ?? throw new InvalidOperationException(
+            db.Tables.Values.SingleOrDefault(x => x.Type == targetType) ?? throw new InvalidOperationException(
                 $"Foreign table refers to value of type '{targetType}', that was not discovered during discovery process. Ensure type '{targetType}' configuration is declared."
             );
         var primaryColumn =
