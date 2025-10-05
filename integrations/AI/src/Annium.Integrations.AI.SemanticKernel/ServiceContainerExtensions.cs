@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Annium.Core.DependencyInjection;
-using Annium.Integrations.Ai.SemanticKernel.Internal;
+using Annium.Integrations.AI.SemanticKernel.Internal;
 using Microsoft.SemanticKernel;
 
-namespace Annium.Integrations.Ai.SemanticKernel;
+namespace Annium.Integrations.AI.SemanticKernel;
 
 public static class ServiceContainerExtensions
 {

@@ -1,6 +1,5 @@
 using Annium.Core.DependencyInjection;
 using Annium.Integrations.AI.OpenAI;
-using Annium.Integrations.Ai.SemanticKernel;
 using Annium.Logging.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel.AudioToText;

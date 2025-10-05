@@ -8,7 +8,7 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.TextGeneration;
 using OpenAI;
 
-namespace Annium.Integrations.Ai.SemanticKernel;
+namespace Annium.Integrations.AI.SemanticKernel;
 
 public static class SemanticKernelBuilderOpenAiExtensions
 {

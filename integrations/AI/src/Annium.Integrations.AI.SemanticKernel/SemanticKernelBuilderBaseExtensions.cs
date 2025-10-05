@@ -7,7 +7,7 @@ using Annium.Core.Runtime;
 using Microsoft.SemanticKernel;
 using ModelContextProtocol.Client;
 
-namespace Annium.Integrations.Ai.SemanticKernel;
+namespace Annium.Integrations.AI.SemanticKernel;
 
 public static class SemanticKernelBuilderBaseExtensions
 {

@@ -1,6 +1,6 @@
 using Annium.Core.DependencyInjection;
 
-namespace Annium.Integrations.Ai.SemanticKernel;
+namespace Annium.Integrations.AI.SemanticKernel;
 
 public interface ISemanticKernelBuilder
 {

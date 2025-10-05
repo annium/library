@@ -5,7 +5,7 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../openai/src/AI.OpenAI/AI.OpenAI.csproj" />
+    <ProjectReference Include="../../../openai/src/Annium.Integrations.AI.OpenAI/Annium.Integrations.AI.OpenAI.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Annium.Core.DependencyInjection" />

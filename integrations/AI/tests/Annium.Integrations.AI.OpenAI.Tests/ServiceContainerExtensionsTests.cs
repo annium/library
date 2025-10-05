@@ -1,10 +1,9 @@
 using Annium.Core.DependencyInjection;
-using Annium.Integrations.AI.OpenAI;
 using OpenAI.Audio;
 using OpenAI.Chat;
 using Xunit;
 
-namespace Annium.Integrations.Ai.OpenAI.Tests;
+namespace Annium.Integrations.AI.OpenAI.Tests;
 
 public class ServiceContainerExtensionsTests
 {
