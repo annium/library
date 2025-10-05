@@ -11,7 +11,7 @@ using OpenAI;
 namespace Annium.Integrations.AI.SemanticKernel;
 
 // ReSharper disable InconsistentNaming
-public static class SemanticKernelBuilderOpenAixExtensions
+public static class SemanticKernelBuilderOpenAIExtensions
 {
     public static ISemanticKernelBuilder WithOpenAIChatCompletion(this ISemanticKernelBuilder builder, string clientId)
     {
