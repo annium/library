@@ -8,29 +8,30 @@ using OpenAI.Chat;
 
 namespace Annium.Integrations.AI.OpenAI;
 
+// ReSharper disable InconsistentNaming
 public static class ServiceContainerExtensions
 {
     private static readonly ImmutableArray<FactoryInfo> _factories =
     [
-        Factory(BuildOpenAiChatClient),
-        Factory(BuildOpenAiAudioClient),
+        Factory(BuildOpenAIChatClient),
+        Factory(BuildOpenAIAudioClient),
     ];
 
-    public static IServiceContainer AddOpenAi(
+    public static IServiceContainer AddOpenAI(
         this IServiceContainer container,
         object clientId,
-        GetOpenAiConfig getConfig
+        GetOpenAIConfig getConfig
     )
     {
         container.Add(getConfig).AsKeyedSelf(clientId).Singleton();
-        container.Add(BuildOpenAiClient).AsKeyedSelf(clientId).Singleton();
+        container.Add(BuildOpenAIClient).AsKeyedSelf(clientId).Singleton();
         foreach (var (type, factory) in _factories)
             container.Add(type, factory).AsKeyedSelf(clientId).Singleton();
 
         return container;
     }
 
-    private static OpenAIClient BuildOpenAiClient(IServiceProvider sp, object key)
+    private static OpenAIClient BuildOpenAIClient(IServiceProvider sp, object key)
     {
         var config = sp.ResolveConfig(key);
         var credential = new ApiKeyCredential(config.Key);
@@ -40,7 +41,7 @@ public static class ServiceContainerExtensions
         return client;
     }
 
-    private static ChatClient BuildOpenAiChatClient(IServiceProvider sp, object key)
+    private static ChatClient BuildOpenAIChatClient(IServiceProvider sp, object key)
     {
         var client = sp.ResolveKeyed<OpenAIClient>(key);
         var config = sp.ResolveConfig(key);
@@ -48,7 +49,7 @@ public static class ServiceContainerExtensions
         return client.GetChatClient(config.Model);
     }
 
-    private static AudioClient BuildOpenAiAudioClient(IServiceProvider sp, object key)
+    private static AudioClient BuildOpenAIAudioClient(IServiceProvider sp, object key)
     {
         var client = sp.ResolveKeyed<OpenAIClient>(key);
         var config = sp.ResolveConfig(key);
@@ -67,9 +68,9 @@ public static class ServiceContainerExtensions
 
 file static class ServiceProviderExtensions
 {
-    public static OpenAiConfig ResolveConfig(this IServiceProvider sp, object key)
+    public static OpenAIConfig ResolveConfig(this IServiceProvider sp, object key)
     {
-        var resolveConfig = sp.ResolveKeyed<GetOpenAiConfig>(key);
+        var resolveConfig = sp.ResolveKeyed<GetOpenAIConfig>(key);
         var config = resolveConfig(sp);
 
         return config;

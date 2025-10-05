@@ -17,10 +17,10 @@ public class ServiceContainerExtensionsTests
         var container = new ServiceContainer();
         container.AddLogging();
         container.Collection.AddLogging();
-        container.AddOpenAi("chat-client", _ => new OpenAiConfig("chatkey", "gpt-5", null));
-        container.AddOpenAi("audio-client", _ => new OpenAiConfig("audiokey", "whisper-1", null));
+        container.AddOpenAI("chat-client", _ => new OpenAIConfig("chatkey", "gpt-5", null));
+        container.AddOpenAI("audio-client", _ => new OpenAIConfig("audiokey", "whisper-1", null));
 #pragma warning disable SKEXP0001
-        container.AddSemanticKernel().WithOpenAiChatCompletion("chat-client").WithOpenAiAudioToText("audio-client");
+        container.AddSemanticKernel().WithOpenAIChatCompletion("chat-client").WithOpenAIAudioToText("audio-client");
 #pragma warning restore SKEXP0001
 
         var provider = container.BuildServiceProvider();

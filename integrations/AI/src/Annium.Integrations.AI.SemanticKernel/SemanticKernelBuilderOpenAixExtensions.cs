@@ -10,15 +10,16 @@ using OpenAI;
 
 namespace Annium.Integrations.AI.SemanticKernel;
 
-public static class SemanticKernelBuilderOpenAiExtensions
+// ReSharper disable InconsistentNaming
+public static class SemanticKernelBuilderOpenAixExtensions
 {
-    public static ISemanticKernelBuilder WithOpenAiChatCompletion(this ISemanticKernelBuilder builder, string clientId)
+    public static ISemanticKernelBuilder WithOpenAIChatCompletion(this ISemanticKernelBuilder builder, string clientId)
     {
         builder
             .Container.Add<OpenAIChatCompletionService>(
                 (sp, key) =>
                 {
-                    var config = sp.ResolveKeyed<GetOpenAiConfig>(key)(sp);
+                    var config = sp.ResolveKeyed<GetOpenAIConfig>(key)(sp);
                     var modelId = config.Model;
                     var client = sp.ResolveKeyed<OpenAIClient>(clientId);
                     var loggerFactory = sp.Resolve<ILoggerFactory>();
@@ -34,13 +35,13 @@ public static class SemanticKernelBuilderOpenAiExtensions
     }
 
     [Experimental("SKEXP0001")]
-    public static ISemanticKernelBuilder WithOpenAiAudioToText(this ISemanticKernelBuilder builder, string clientId)
+    public static ISemanticKernelBuilder WithOpenAIAudioToText(this ISemanticKernelBuilder builder, string clientId)
     {
         builder
             .Container.Add<OpenAIAudioToTextService>(
                 (sp, key) =>
                 {
-                    var config = sp.ResolveKeyed<GetOpenAiConfig>(key)(sp);
+                    var config = sp.ResolveKeyed<GetOpenAIConfig>(key)(sp);
                     var modelId = config.Model;
                     var client = sp.ResolveKeyed<OpenAIClient>(clientId);
                     var loggerFactory = sp.Resolve<ILoggerFactory>();

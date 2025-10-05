@@ -12,8 +12,8 @@ public class ServiceContainerExtensionsTests
     {
         // arrange
         var container = new ServiceContainer();
-        container.AddOpenAi("chat-client", _ => new OpenAiConfig("chatkey", "gpt-5", null));
-        container.AddOpenAi("audio-client", _ => new OpenAiConfig("audiokey", "whisper-1", null));
+        container.AddOpenAI("chat-client", _ => new OpenAIConfig("chatkey", "gpt-5", null));
+        container.AddOpenAI("audio-client", _ => new OpenAIConfig("audiokey", "whisper-1", null));
 
         var provider = container.BuildServiceProvider();
 
