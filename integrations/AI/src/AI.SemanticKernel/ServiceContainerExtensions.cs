@@ -8,7 +8,7 @@ namespace Annium.Integrations.Ai.SemanticKernel;
 
 public static class ServiceContainerExtensions
 {
-    public static ISemanticKernelBuilder AddKernel(this IServiceContainer container)
+    public static ISemanticKernelBuilder AddSemanticKernel(this IServiceContainer container)
     {
         container
             .Add(static sp =>

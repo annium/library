@@ -13,13 +13,8 @@ public class ServiceContainerExtensionsTests
     {
         // arrange
         var container = new ServiceContainer();
-        container.AddOpenAi(
-            new()
-            {
-                { "chat-client", new OpenAiConfig("chatkey", "gpt-4o", null) },
-                { "audio-client", new OpenAiConfig("audiokey", "whisper-1", null) },
-            }
-        );
+        container.AddOpenAi("chat-client", _ => new OpenAiConfig("chatkey", "gpt-5", null));
+        container.AddOpenAi("audio-client", _ => new OpenAiConfig("audiokey", "whisper-1", null));
 
         var provider = container.BuildServiceProvider();
 

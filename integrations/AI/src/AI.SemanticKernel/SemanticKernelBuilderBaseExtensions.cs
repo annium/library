@@ -9,7 +9,7 @@ using ModelContextProtocol.Client;
 
 namespace Annium.Integrations.Ai.SemanticKernel;
 
-public static class SemanticKernelPluginBuilderExtensions
+public static class SemanticKernelBuilderBaseExtensions
 {
     public static ISemanticKernelBuilder WithPluginInstances(this ISemanticKernelBuilder builder)
     {

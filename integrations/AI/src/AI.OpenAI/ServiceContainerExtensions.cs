@@ -16,16 +16,16 @@ public static class ServiceContainerExtensions
         Factory(BuildOpenAiAudioClient),
     ];
 
-    public static IServiceContainer AddOpenAi(this IServiceContainer container, OpenAiConfigs configs)
+    public static IServiceContainer AddOpenAi(
+        this IServiceContainer container,
+        object clientId,
+        GetOpenAiConfig getConfig
+    )
     {
-        container.Add(configs).AsSelf().Singleton();
-
-        foreach (var key in configs.Keys)
-        {
-            container.Add(BuildOpenAiClient).AsKeyedSelf(key).Singleton();
-            foreach (var (type, factory) in _factories)
-                container.Add(type, factory).AsKeyedSelf(key).Singleton();
-        }
+        container.Add(getConfig).AsKeyedSelf(clientId).Singleton();
+        container.Add(BuildOpenAiClient).AsKeyedSelf(clientId).Singleton();
+        foreach (var (type, factory) in _factories)
+            container.Add(type, factory).AsKeyedSelf(clientId).Singleton();
 
         return container;
     }
@@ -69,10 +69,8 @@ file static class ServiceProviderExtensions
 {
     public static OpenAiConfig ResolveConfig(this IServiceProvider sp, object key)
     {
-        var configs = sp.Resolve<OpenAiConfigs>();
-
-        if (!configs.TryGetValue((string)key, out var config))
-            throw new InvalidOperationException($"Requested key '{key}' was not found in configuration.");
+        var resolveConfig = sp.ResolveKeyed<GetOpenAiConfig>(key);
+        var config = resolveConfig(sp);
 
         return config;
     }

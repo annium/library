@@ -5,6 +5,9 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../openai/src/AI.OpenAI/AI.OpenAI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Annium.Core.DependencyInjection" />
     <PackageReference Include="Annium.Core.Runtime" />
     <PackageReference Include="Microsoft.SemanticKernel" />
