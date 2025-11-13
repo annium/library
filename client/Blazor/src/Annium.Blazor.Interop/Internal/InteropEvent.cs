@@ -18,7 +18,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
     /// <summary>
     /// The method name used for JavaScript callback invocation.
     /// </summary>
-    private const string HandleMethod = $"{nameof(InteropEvent<T>)}.{nameof(Handle)}";
+    private const string HandleMethod = $"{nameof(InteropEvent<>)}.{nameof(Handle)}";
 
     /// <summary>
     /// Gets the current interop context instance.

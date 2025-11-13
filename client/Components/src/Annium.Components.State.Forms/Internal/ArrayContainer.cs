@@ -35,7 +35,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     /// <summary>
     /// Gets a value indicating whether the array or any of its items have been touched (modified).
     /// </summary>
-    public bool HasBeenTouched => _hasBeenTouched || _states.Any(x => x.Ref.HasBeenTouched);
+    public bool HasBeenTouched { get => field || _states.Any(x => x.Ref.HasBeenTouched); private set; }
 
     /// <summary>
     /// Gets the child states representing individual items in the array.
@@ -66,11 +66,6 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     /// The initial value of the array.
     /// </summary>
     private List<T> _initialValue;
-
-    /// <summary>
-    /// Indicates whether the array has been touched (modified).
-    /// </summary>
-    private bool _hasBeenTouched;
 
     /// <summary>
     /// Initializes a new instance of the ArrayContainer class.
@@ -110,7 +105,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
                 RemoveInternal(i);
         }
 
-        _hasBeenTouched = false;
+        HasBeenTouched = false;
 
         NotifyChanged();
     }
@@ -147,7 +142,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
 
         if (changed)
         {
-            _hasBeenTouched = true;
+            HasBeenTouched = true;
             NotifyChanged();
         }
 
@@ -244,7 +239,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     {
         using (Mute())
             AddInternal(_states.Count, item);
-        _hasBeenTouched = true;
+        HasBeenTouched = true;
         NotifyChanged();
     }
 
@@ -257,7 +252,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     {
         using (Mute())
             AddInternal(index, item);
-        _hasBeenTouched = true;
+        HasBeenTouched = true;
         NotifyChanged();
     }
 
@@ -269,7 +264,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     {
         using (Mute())
             _states.RemoveAt(index);
-        _hasBeenTouched = true;
+        HasBeenTouched = true;
         NotifyChanged();
     }
 
@@ -349,7 +344,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     /// <param name="item">The item to add.</param>
     private void AddInternal(int index, T item)
     {
-        var state = (IValueTrackedState<T>)Factory.Invoke(_stateFactory, [(object)item])!;
+        var state = (IValueTrackedState<T>)Factory.Invoke(_stateFactory, [item])!;
         _states.Insert(index, new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
     }
 

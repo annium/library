@@ -13,14 +13,9 @@ namespace Annium.Blazor.Css;
 public static class Rule
 {
     /// <summary>
-    /// Thread-safe counter for generating unique rule indices
-    /// </summary>
-    private static int _index;
-
-    /// <summary>
     /// Gets the next unique index for rule generation
     /// </summary>
-    private static int Index => Interlocked.Increment(ref _index);
+    private static int Index => Interlocked.Increment(ref field);
 
     /// <summary>
     /// Creates a CSS class rule with the specified name

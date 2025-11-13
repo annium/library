@@ -37,7 +37,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     /// <summary>
     /// Gets a value indicating whether the dictionary or any of its values have been touched (modified).
     /// </summary>
-    public bool HasBeenTouched => _hasBeenTouched || _states.Values.Any(x => x.Ref.HasBeenTouched);
+    public bool HasBeenTouched { get => field || _states.Values.Any(x => x.Ref.HasBeenTouched); private set; }
 
     /// <summary>
     /// Gets the keys of the dictionary.
@@ -68,11 +68,6 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     /// The initial value of the dictionary.
     /// </summary>
     private Dictionary<TKey, TValue> _initialValue;
-
-    /// <summary>
-    /// Indicates whether the dictionary has been touched (modified).
-    /// </summary>
-    private bool _hasBeenTouched;
 
     /// <summary>
     /// Initializes a new instance of the MapContainer class.
@@ -117,7 +112,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
             }
         }
 
-        _hasBeenTouched = false;
+        HasBeenTouched = false;
 
         NotifyChanged();
     }
@@ -149,7 +144,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
 
         if (changed)
         {
-            _hasBeenTouched = true;
+            HasBeenTouched = true;
             NotifyChanged();
         }
 
@@ -247,7 +242,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     {
         using (Mute())
             AddInternal(key, item);
-        _hasBeenTouched = true;
+        HasBeenTouched = true;
         NotifyChanged();
     }
 
@@ -259,7 +254,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     {
         using (Mute())
             RemoveInternal(key);
-        _hasBeenTouched = true;
+        HasBeenTouched = true;
         NotifyChanged();
     }
 
@@ -332,7 +327,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     /// <param name="item">The value to add.</param>
     private void AddInternal(TKey key, TValue item)
     {
-        var state = (IValueTrackedState<TValue>)Factory.Invoke(_stateFactory, [(object)item])!;
+        var state = (IValueTrackedState<TValue>)Factory.Invoke(_stateFactory, [item])!;
         _states[key] = new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged()));
     }
 

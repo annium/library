@@ -87,9 +87,9 @@ internal class ObjectContainer<T> : ObservableState, IObjectContainer<T>, ILogSu
             var @ref = (ITrackedState)create.Invoke(stateFactory, [property.GetMethod!.Invoke(initialValue, [])!])!;
             @ref.Changed.Subscribe(_ => NotifyChanged());
             var type = @ref.GetType();
-            var get = type.GetProperty(nameof(IValueTrackedState<object>.Value))!.GetMethod!;
-            var set = type.GetMethod(nameof(IValueTrackedState<object>.Set))!;
-            var init = type.GetMethod(nameof(IValueTrackedState<object>.Init))!;
+            var get = type.GetProperty(nameof(IValueTrackedState<>.Value))!.GetMethod!;
+            var set = type.GetMethod(nameof(IValueTrackedState<>.Set))!;
+            var init = type.GetMethod(nameof(IValueTrackedState<>.Init))!;
             states[property] = new StateReference(@ref, get, set, init);
         }
     }
