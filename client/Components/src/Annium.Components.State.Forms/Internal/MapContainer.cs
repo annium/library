@@ -37,7 +37,11 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     /// <summary>
     /// Gets a value indicating whether the dictionary or any of its values have been touched (modified).
     /// </summary>
-    public bool HasBeenTouched { get => field || _states.Values.Any(x => x.Ref.HasBeenTouched); private set; }
+    public bool HasBeenTouched
+    {
+        get => field || _states.Values.Any(x => x.Ref.HasBeenTouched);
+        private set;
+    }
 
     /// <summary>
     /// Gets the keys of the dictionary.

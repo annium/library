@@ -35,7 +35,11 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     /// <summary>
     /// Gets a value indicating whether the array or any of its items have been touched (modified).
     /// </summary>
-    public bool HasBeenTouched { get => field || _states.Any(x => x.Ref.HasBeenTouched); private set; }
+    public bool HasBeenTouched
+    {
+        get => field || _states.Any(x => x.Ref.HasBeenTouched);
+        private set;
+    }
 
     /// <summary>
     /// Gets the child states representing individual items in the array.
