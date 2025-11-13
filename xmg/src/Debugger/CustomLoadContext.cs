@@ -68,13 +68,11 @@ public class CustomLoadContext : AssemblyLoadContext
             var assembly = assemblyLoadContext.LoadFromAssemblyPath(rootAssemblyPath);
             _dependencyContext = DependencyContext.Load(assembly);
 
-            _assemblyResolver = new CompositeCompilationAssemblyResolver(
-                [
-                    new AppBaseCompilationAssemblyResolver(Path.GetDirectoryName(rootAssemblyPath)!),
-                    new ReferenceAssemblyPathResolver(),
-                    new PackageCompilationAssemblyResolver(),
-                ]
-            );
+            _assemblyResolver = new CompositeCompilationAssemblyResolver([
+                new AppBaseCompilationAssemblyResolver(Path.GetDirectoryName(rootAssemblyPath)!),
+                new ReferenceAssemblyPathResolver(),
+                new PackageCompilationAssemblyResolver(),
+            ]);
         }
 
         public string? ResolveAssemblyToPath(AssemblyName name)
