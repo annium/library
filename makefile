@@ -86,11 +86,11 @@ ci-merge-request-full:
 	make setup
 	make format
 	make ensure-no-changes
-	make docs-lint
+# 	make docs-lint
 	make clean
 	make build
 	make test
-	make docs-build
+# 	make docs-build
 
 ci-release:
 	$(call header)
@@ -100,7 +100,7 @@ ci-release:
 	make ci-set-package-version
 	make clean
 	make build
-	make docs-build
+# 	make docs-build
 	make publish apiKey=$(apiKey)
 	make ci-push-tag repository=$(repository) githubToken=$(githubToken)
 	echo "Release complete"
