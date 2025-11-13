@@ -49,13 +49,13 @@ internal class GenerateCommandConfiguration : ISourceLoaderConfiguration
     [Help("Path to API assembly.")]
     public string Assembly
     {
-        get => _assembly;
+        get;
         set
         {
-            _assembly = Path.GetFullPath(value);
+            field = Path.GetFullPath(value);
             ProjectName = Path.GetFileNameWithoutExtension(value);
         }
-    }
+    } = string.Empty;
 
     [Option("s")]
     [Help("Server to load model from.")]
@@ -67,10 +67,7 @@ internal class GenerateCommandConfiguration : ISourceLoaderConfiguration
     [Help("Output directory. Will be removed if exists.")]
     public string Output
     {
-        get => _output;
-        set => _output = Path.GetFullPath(value);
-    }
-
-    private string _assembly = string.Empty;
-    private string _output = string.Empty;
+        get;
+        set => field = Path.GetFullPath(value);
+    } = string.Empty;
 }

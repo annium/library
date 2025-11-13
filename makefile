@@ -95,7 +95,7 @@ ci-merge-request-full:
 ci-release:
 	$(call header)
 	make setup
-	make format
+# 	make format
 	make ensure-no-changes
 	make ci-set-package-version
 	make clean

@@ -54,9 +54,9 @@ internal class GenerateCommandConfiguration : ISourceLoaderConfiguration
     [Help("Output directory. Will be removed if exists.")]
     public string Output
     {
-        get => _output;
-        set => _output = Path.GetFullPath(value);
-    }
+        get;
+        set => field = Path.GetFullPath(value);
+    } = string.Empty;
 
     [Option("ns", isRequired: true)]
     [Help("Root namespace for created classes.")]
@@ -65,6 +65,4 @@ internal class GenerateCommandConfiguration : ISourceLoaderConfiguration
     [Option("t")]
     [Help("Generate test client. Is not ensuring success code and returns data wrapped in responses.")]
     public bool TestClient { get; set; } = false;
-
-    private string _output = string.Empty;
 }
