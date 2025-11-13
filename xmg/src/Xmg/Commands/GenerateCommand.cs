@@ -86,13 +86,13 @@ internal class GenerateCommandConfig
     [Help("Path to Db assembly.")]
     public string Assembly
     {
-        get => _assembly;
+        get;
         set
         {
-            _assembly = Path.GetFullPath(value);
+            field = Path.GetFullPath(value);
             ProjectName = Path.GetFileNameWithoutExtension(value);
         }
-    }
+    } = string.Empty;
 
     public string ProjectName { get; private set; } = string.Empty;
 
@@ -100,9 +100,9 @@ internal class GenerateCommandConfig
     [Help("Output directory. Will be created if missing.")]
     public string Output
     {
-        get => _output;
-        set => _output = Path.GetFullPath(value);
-    }
+        get;
+        set => field = Path.GetFullPath(value);
+    } = string.Empty;
 
     [Option("ns", true)]
     [Help("Migrations namespace.")]
@@ -111,7 +111,4 @@ internal class GenerateCommandConfig
     [Option("n", true)]
     [Help("Migration name.")]
     public string Name { get; set; } = string.Empty;
-
-    private string _assembly = string.Empty;
-    private string _output = string.Empty;
 }

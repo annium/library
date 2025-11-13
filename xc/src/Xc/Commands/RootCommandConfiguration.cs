@@ -9,9 +9,7 @@ internal class RootCommandConfiguration
     [Help("Path to configuration root.")]
     public string Path
     {
-        get => _path;
-        set => _path = System.IO.Path.GetFullPath(value);
-    }
-
-    private string _path = Directory.GetCurrentDirectory();
+        get;
+        set => field = System.IO.Path.GetFullPath(value);
+    } = Directory.GetCurrentDirectory();
 }

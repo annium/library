@@ -52,13 +52,13 @@ internal class ParseCommandConfig
     [Help("Path to Db assembly.")]
     public string Assembly
     {
-        get => _assembly;
+        get;
         set
         {
-            _assembly = Path.GetFullPath(value);
+            field = Path.GetFullPath(value);
             ProjectName = Path.GetFileNameWithoutExtension(value);
         }
-    }
+    } = string.Empty;
 
     public string ProjectName { get; private set; } = string.Empty;
 
@@ -66,10 +66,7 @@ internal class ParseCommandConfig
     [Help("Output file. Will be created if missing.")]
     public string Output
     {
-        get => _output;
-        set => _output = Path.GetFullPath(value);
-    }
-
-    private string _assembly = string.Empty;
-    private string _output = string.Empty;
+        get;
+        set => field = Path.GetFullPath(value);
+    } = string.Empty;
 }
