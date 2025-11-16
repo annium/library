@@ -1,5 +1,6 @@
 using Annium.Blazor.Routing;
 using Demo.Blazor.Interop.Pages.Canvas;
+using Page = Demo.Blazor.Interop.Pages.Dashboard.Page;
 
 namespace Demo.Blazor.Interop.Pages;
 
@@ -8,6 +9,11 @@ namespace Demo.Blazor.Interop.Pages;
 /// </summary>
 public class Routing : IRouting
 {
+    /// <summary>
+    /// Gets the route for the Canvas demo page.
+    /// </summary>
+    public IRoute Dashboard { get; }
+
     /// <summary>
     /// Gets the route for the Canvas demo page.
     /// </summary>
@@ -24,6 +30,7 @@ public class Routing : IRouting
     /// <param name="routeFactory">The factory used to create routes.</param>
     public Routing(IRouteFactory routeFactory)
     {
+        Dashboard = routeFactory.Create<Page>("/");
         Canvas = routeFactory.Create<Page>("/canvas");
         Element = routeFactory.Create<Element.Page>("/element");
     }

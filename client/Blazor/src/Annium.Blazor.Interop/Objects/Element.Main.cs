@@ -68,7 +68,7 @@ public abstract partial record Element : IObject, IDisposable
     /// Gets the bounding client rectangle of the element
     /// </summary>
     /// <returns>The bounding client rectangle</returns>
-    public DomRect GetBoundingClientRect() => Ctx.Call<DomRect>("element.getBoundingClientRect", Id);
+    public DomRect GetBoundingClientRect() => Ctx.CallHelper<DomRect>("element.getBoundingClientRect", Id);
 
     /// <summary>
     /// Releases all resources used by the Element

@@ -29,7 +29,7 @@ public record ReferenceElement : Element
         _id = new Lazy<string>(() =>
         {
             var id = this.GetFullId();
-            Ctx.Call("objectTracker.track", id, reference);
+            Ctx.CallHelper("objectTracker.track", id, reference);
 
             return id;
         });

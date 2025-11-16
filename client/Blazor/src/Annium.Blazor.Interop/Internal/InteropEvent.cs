@@ -117,7 +117,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
     public Action Register<TKey>(TKey eventKey, Action<T> handle, params object[] args)
         where TKey : notnull
     {
-        var callbackId = Ctx.Apply<int>(
+        var callbackId = Ctx.CallHelper<int>(
             _binderName,
             _sharedBindArgs.Value.Concat([eventKey.ToString(), _netRef, HandleMethod]).Concat(args).ToArray()
         );
@@ -126,7 +126,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
 
         void Disposer()
         {
-            Ctx.Apply(_unbinderName, _sharedBindArgs.Value.Concat([eventKey.ToString()!, callbackId]).ToArray());
+            Ctx.CallHelper(_unbinderName, _sharedBindArgs.Value.Concat([eventKey.ToString()!, callbackId]).ToArray());
             if (!_handlers.Remove(callbackId))
                 throw OperationException($"failed to remove handler {callbackId}");
         }
