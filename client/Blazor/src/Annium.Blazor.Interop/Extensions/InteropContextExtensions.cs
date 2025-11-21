@@ -70,6 +70,9 @@ public static class InteropContextExtensions
     /// <param name="identifier">The JavaScript function identifier.</param>
     /// <param name="args">Optional arguments to pass to the function.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ValueTask<IJSObjectReference> CreateAsync(this IInteropContext ctx, string identifier, params object?[]? args) =>
-        ctx.InProcessRuntime.InvokeConstructorAsync(identifier, args);
+    public static ValueTask<IJSObjectReference> CreateAsync(
+        this IInteropContext ctx,
+        string identifier,
+        params object?[]? args
+    ) => ctx.InProcessRuntime.InvokeConstructorAsync(identifier, args);
 }
