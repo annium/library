@@ -10,7 +10,7 @@ public sealed record TelegramBotConfiguration
 
 public sealed record TelegramBotWebhookConfiguration
 {
-    public int InternalPort { get; init; }
+    public ushort InternalPort { get; init; }
     public Uri? ExternalAddress { get; init; }
     public string SecretToken { get; init; } = string.Empty;
 }

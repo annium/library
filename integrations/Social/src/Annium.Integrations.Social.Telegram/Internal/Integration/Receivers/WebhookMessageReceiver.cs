@@ -10,6 +10,7 @@ using Annium.Logging;
 using Annium.Net.Http;
 using Annium.Net.Servers.Web;
 using Annium.Serialization.Abstractions;
+using Annium.Threading;
 
 namespace Annium.Integrations.Social.Telegram.Internal.Integration.Receivers;
 
@@ -31,15 +32,15 @@ internal sealed class WebhookMessageReceiver : ITelegramMessageReceiver, IAsyncD
         _sp = sp;
         Logger = logger;
 
-        var internalPort = config.Webhook?.InternalPort;
-        if (!internalPort.HasValue || internalPort == 0)
-            throw new InvalidOperationException("Webhook internal port is not configured");
+        var cfg = config.Webhook;
+        if (cfg is null)
+            throw new InvalidOperationException("Webhook is not configured");
 
-        var externalAddress = config.Webhook?.ExternalAddress;
+        var externalAddress = cfg.ExternalAddress;
         if (externalAddress is null)
             throw new InvalidOperationException("Webhook external address is not configured");
 
-        var secretToken = config.Webhook?.SecretToken;
+        var secretToken = cfg.SecretToken;
         if (string.IsNullOrWhiteSpace(secretToken))
             throw new InvalidOperationException("Webhook secret token is not configured");
 
@@ -48,7 +49,7 @@ internal sealed class WebhookMessageReceiver : ITelegramMessageReceiver, IAsyncD
         var channel = Channel.CreateUnbounded<Update>();
         Updates = channel.Reader;
 
-        _task = Task.Run(Start(internalPort.Value, externalAddress, secretToken, context, channel.Writer, _cts.Token));
+        _task = Task.Run(Start(cfg.InternalPort, externalAddress, secretToken, context, channel.Writer, _cts.Token));
     }
 
     public async ValueTask DisposeAsync()
@@ -67,7 +68,7 @@ internal sealed class WebhookMessageReceiver : ITelegramMessageReceiver, IAsyncD
     }
 
     private Func<Task> Start(
-        int internalPort,
+        ushort internalPort,
         Uri externalAddress,
         string secretToken,
         ApiContext context,
@@ -93,12 +94,12 @@ internal sealed class WebhookMessageReceiver : ITelegramMessageReceiver, IAsyncD
                 throw new Exception($"Webhook set failure: {setWebhookResponse.Description}");
 
             this.Trace("Start server at port {port}", internalPort);
-            var server = ServerBuilder
-                .New(_sp, internalPort)
+            await using var server = ServerBuilder
+                .New(_sp, port: internalPort)
                 .WithHttpHandler(new WebHookHandler(secretToken, context.Serializer, writer, Logger))
-                .Build();
+                .Start();
 
-            await server.RunAsync(ct);
+            await ct;
 
             this.Trace("done");
         };
