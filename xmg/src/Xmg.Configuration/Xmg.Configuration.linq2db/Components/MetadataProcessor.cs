@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Annium.linq2db.Extensions;
 using Annium.Reflection;
-using LinqToDB.Extensions;
+using LinqToDB.Internal.Extensions;
 using Xmg.Core.Models;
 using LDataType = LinqToDB.DataType;
 
