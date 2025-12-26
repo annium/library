@@ -185,7 +185,7 @@ internal class Route<TData> : RouteBase, IRoute<TData>
             return LocationMatch.Empty;
 
         var queryMatch = _query.Match(raw.Parameters);
-        var values = queryMatch.RouteValues.Merge(pathMatch.RouteValues);
+        var values = queryMatch.RouteValues.ToDictionary().Merge(pathMatch.RouteValues, MergeBehavior.KeepSource);
 
         return new LocationMatch(true, values);
     }
