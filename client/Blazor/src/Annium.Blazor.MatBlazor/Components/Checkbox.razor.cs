@@ -12,7 +12,8 @@ public partial class Checkbox
     /// Gets or sets the atomic container that manages the checkbox state.
     /// </summary>
     [Parameter]
-    public IAtomicContainer<bool> State { get; set; } = null!;
+    [EditorRequired]
+    public required IAtomicContainer<bool> State { get; set; }
 
     /// <summary>
     /// Gets or sets the child content to be rendered within the checkbox label.

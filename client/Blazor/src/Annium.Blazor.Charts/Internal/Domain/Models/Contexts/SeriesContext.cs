@@ -38,7 +38,7 @@ internal sealed record SeriesContext : IManagedSeriesContext
     public void Init(Canvas canvas, Canvas overlay)
     {
         if (Interlocked.CompareExchange(ref _isInitiated, 1, 0) != 0)
-            throw new InvalidOperationException($"Can't init {nameof(VerticalSideContext)} more than once");
+            throw new InvalidOperationException($"Can't init {nameof(SeriesContext)} more than once");
 
         Canvas = canvas;
         Overlay = overlay;

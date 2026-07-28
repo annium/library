@@ -32,11 +32,12 @@ public static class InteropContextExtensions
         ctx.InProcessRuntime.InvokeVoid(identifier, args);
 
     /// <summary>
-    /// Calls a JavaScript function without expecting a return value.
+    /// Calls a JavaScript constructor and returns a reference to the created object.
     /// </summary>
     /// <param name="ctx">The interop context.</param>
-    /// <param name="identifier">The JavaScript function identifier.</param>
-    /// <param name="args">Optional arguments to pass to the function.</param>
+    /// <param name="identifier">The JavaScript constructor identifier.</param>
+    /// <param name="args">Optional arguments to pass to the constructor.</param>
+    /// <returns>A reference to the created JavaScript object.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IJSObjectReference Create(this IInteropContext ctx, string identifier, params object?[]? args) =>
         ctx.InProcessRuntime.InvokeConstructor(identifier, args);
@@ -59,16 +60,18 @@ public static class InteropContextExtensions
     /// <param name="ctx">The interop context.</param>
     /// <param name="identifier">The JavaScript function identifier.</param>
     /// <param name="args">Optional arguments to pass to the function.</param>
+    /// <returns>A value task that completes when the JavaScript call finishes.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ValueTask InvokeAsync(this IInteropContext ctx, string identifier, params object?[]? args) =>
         ctx.InProcessRuntime.InvokeVoidAsync(identifier, args);
 
     /// <summary>
-    /// Calls a JavaScript function without expecting a return value.
+    /// Calls a JavaScript constructor and returns a reference to the created object.
     /// </summary>
     /// <param name="ctx">The interop context.</param>
-    /// <param name="identifier">The JavaScript function identifier.</param>
-    /// <param name="args">Optional arguments to pass to the function.</param>
+    /// <param name="identifier">The JavaScript constructor identifier.</param>
+    /// <param name="args">Optional arguments to pass to the constructor.</param>
+    /// <returns>A value task returning a reference to the created JavaScript object.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ValueTask<IJSObjectReference> CreateAsync(
         this IInteropContext ctx,

@@ -71,6 +71,7 @@ public class SeriesSourceOptionsBuilder
     /// <returns>A new ISeriesSourceOptions instance.</returns>
     public ISeriesSourceOptions Build()
     {
-        return new SeriesSourceOptions(_options);
+        // Snapshot the dictionary so a later Set() on this builder can't mutate an already-built options instance.
+        return new SeriesSourceOptions(new Dictionary<Duration, SeriesSourceResolutionOptions>(_options));
     }
 }

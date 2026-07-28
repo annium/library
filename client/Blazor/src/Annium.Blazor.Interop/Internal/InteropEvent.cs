@@ -67,9 +67,9 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
     private readonly Lazy<IEnumerable<object>> _sharedBindArgs;
 
     /// <summary>
-    /// .NET object reference for JavaScript callbacks.
+    /// .NET object reference for JavaScript callbacks; must be disposed to unpin it from the JS runtime's reference table.
     /// </summary>
-    private readonly object _netRef;
+    private readonly DotNetObjectReference<InteropEvent<T>> _netRef;
 
     /// <summary>
     /// Dictionary mapping callback IDs to their corresponding event handlers.
@@ -126,7 +126,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
 
         void Disposer()
         {
-            Ctx.CallHelper(_unbinderName, _sharedBindArgs.Value.Concat([eventKey.ToString()!, callbackId]).ToArray());
+            Ctx.CallHelper(_unbinderName, _sharedBindArgs.Value.Concat([eventKey.ToString(), callbackId]).ToArray());
             if (!_handlers.Remove(callbackId))
                 throw OperationException($"failed to remove handler {callbackId}");
         }
@@ -152,6 +152,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
             throw OperationException($"failed to find handler {callbackId}");
 
         var values = args.Select((x, i) => x.Deserialize(_constructorTypes[i])).ToArray();
+        // T is always one of the library's readonly record struct event types, so CreateInstance never returns null
         var data = (T)Activator.CreateInstance(typeof(T), values)!;
         handle(data);
     }
@@ -164,6 +165,7 @@ internal sealed record InteropEvent<T> : IInteropEvent<T>
         foreach (var dispose in _disposers)
             dispose();
         _disposers.Clear();
+        _netRef.Dispose();
     }
 
     /// <summary>

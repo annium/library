@@ -17,7 +17,7 @@ namespace Demo.Blazor.Charts.Pages.Home;
 /// <summary>
 /// Home page component for the Demo.Blazor.Charts application demonstrating chart functionality.
 /// </summary>
-public partial class Page
+public partial class Page : IDisposable
 {
     /// <summary>
     /// Gets or sets the chart context for managing chart state and configuration.
@@ -162,6 +162,18 @@ public partial class Page
         _getLineLabelText = point => $"{point.Value:F2}";
         _getLineLabelLeft = (ctx, moment) => ctx.ToX(moment) + 5;
         _getLineLabelTop = (ctx, point) => ctx.ToY(point.Value);
+    }
+
+    /// <summary>
+    /// Disposes the chart data sources created for this page (each <see cref="ISeriesSource{T}"/> owns event
+    /// subscriptions and a cache that would otherwise leak on every navigation to this page).
+    /// </summary>
+    public void Dispose()
+    {
+        _candleSeries.Dispose();
+        _openSeries.Dispose();
+        _multiRangeSeries.Dispose();
+        _multiLineSeries.Dispose();
     }
 
     /// <summary>

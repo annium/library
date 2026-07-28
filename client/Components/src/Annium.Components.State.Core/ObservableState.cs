@@ -16,9 +16,11 @@ public abstract class ObservableState : IObservableState
     private event Action StateChanged = delegate { };
 
     /// <summary>
-    /// Indicates whether change notifications are currently muted.
+    /// The number of currently-active mute scopes. Notifications are suppressed while this is greater than zero,
+    /// so nested / overlapping <see cref="Mute"/> scopes on the same instance (e.g. an external batch wrapping
+    /// internal Set/Init calls that mute themselves) compose correctly instead of unmuting early.
     /// </summary>
-    private bool _isMuted;
+    private int _muteDepth;
 
     protected ObservableState()
     {
@@ -26,12 +28,13 @@ public abstract class ObservableState : IObservableState
     }
 
     /// <summary>
-    /// Temporarily mutes change notifications.
+    /// Temporarily mutes change notifications. Mute scopes nest: notifications resume only when the outermost
+    /// scope is disposed.
     /// </summary>
     /// <returns>A disposable that unmutes the state when disposed.</returns>
     public IDisposable Mute()
     {
-        _isMuted = true;
+        _muteDepth++;
 
         return new MuteScope(Unmute);
     }
@@ -41,14 +44,14 @@ public abstract class ObservableState : IObservableState
     /// </summary>
     protected void NotifyChanged()
     {
-        if (!_isMuted)
+        if (_muteDepth == 0)
             StateChanged.Invoke();
     }
 
     /// <summary>
-    /// Unmutes change notifications.
+    /// Ends one mute scope, restoring notifications once all scopes are disposed.
     /// </summary>
-    private void Unmute() => _isMuted = false;
+    private void Unmute() => _muteDepth--;
 }
 
 /// <summary>

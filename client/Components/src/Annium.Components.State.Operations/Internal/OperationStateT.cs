@@ -14,6 +14,16 @@ internal class OperationState<T> : OperationStateBase, IOperationState<T>
     public T Data { get; private set; } = default!;
 
     /// <summary>
+    /// Starts the operation by setting it to loading state, clearing any prior errors and any stale data from a
+    /// previous run.
+    /// </summary>
+    public override void Start()
+    {
+        Data = default!;
+        base.Start();
+    }
+
+    /// <summary>
     /// Marks the operation as successfully completed with the provided data
     /// </summary>
     /// <param name="data">The data to associate with the successful operation</param>

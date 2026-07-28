@@ -56,7 +56,7 @@ internal class Route : RouteBase, IRoute
     /// <returns>True if the current location matches this route; otherwise, false.</returns>
     public bool IsAt(PathMatch match = PathMatch.Exact)
     {
-        var raw = RawLocation.Parse(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
+        var raw = ParseCurrentLocation();
 
         return Match(raw, match).IsSuccess;
     }

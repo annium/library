@@ -13,9 +13,11 @@ namespace Annium.Blazor.Routing.Tests;
 public abstract class TestBase : Testing.TestBase
 {
     /// <summary>
-    /// Gets the fake navigation manager for testing navigation operations
+    /// Gets the fake navigation manager for testing navigation operations. Resolved lazily from the provider
+    /// (built in <see cref="Annium.Testing.TestBase.InitializeAsync"/>), since the constructor only records
+    /// registrations and must not touch the provider.
     /// </summary>
-    protected FakeNavigationManager NavigationManager { get; }
+    protected FakeNavigationManager NavigationManager => Get<FakeNavigationManager>();
 
     /// <summary>
     /// Initializes a new instance of the TestBase class
@@ -30,8 +32,6 @@ public abstract class TestBase : Testing.TestBase
             container.AddRouting();
             container.Add<FakeNavigationManager>().AsSelf().As<NavigationManager>().Singleton();
         });
-
-        NavigationManager = Get<FakeNavigationManager>();
     }
 
     /// <summary>

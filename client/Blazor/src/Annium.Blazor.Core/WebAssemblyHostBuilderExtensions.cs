@@ -54,6 +54,6 @@ public static class WebAssemblyHostBuilderExtensions
         where T : class, new()
     {
         var container = new ServiceContainer(builder.Services);
-        await container.AddConfigurationAsync<T>(configure);
+        await container.AddConfigurationAsync<T>((cfg, _) => configure(cfg));
     }
 }

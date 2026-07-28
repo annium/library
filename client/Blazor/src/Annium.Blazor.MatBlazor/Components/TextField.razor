@@ -4,7 +4,7 @@
 
 <MatBlazor.MatTextField
     Value="@State.Value"
-    OnInput="@(e => State.Set((TValue)e.Value!))"
+    OnInput="@SetValue"
     Class="@ClassName"
     HelperTextValidation="@true"
     HelperText="@State.Message"

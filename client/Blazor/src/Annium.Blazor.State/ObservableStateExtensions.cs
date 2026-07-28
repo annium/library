@@ -23,7 +23,7 @@ public static class ObservableStateExtensions
     private static readonly MethodInfo _stateHasChanged =
         typeof(ComponentBase).GetMethod(StateHasChangedMethodName, BindingFlags.Instance | BindingFlags.NonPublic)
         ?? throw new InvalidOperationException(
-            $"Failed to discover {StateHasChangedMethodName} on {typeof(ObservableState).FriendlyName()}"
+            $"Failed to discover {StateHasChangedMethodName} on {typeof(ComponentBase).FriendlyName()}"
         );
 
     /// <summary>

@@ -176,8 +176,14 @@ internal sealed record ChartContext : IManagedChartContext, ILogSubject
         if (zooms.Count == 0)
             throw new ArgumentException("Zooms list is empty");
 
+        if (zooms.Any(x => x <= 0))
+            throw new ArgumentException("Zoom values must be positive");
+
         if (resolutions.Count == 0)
             throw new ArgumentException("Resolutions list is empty");
+
+        if (resolutions.Any(x => x <= 0))
+            throw new ArgumentException("Resolution values must be positive");
 
         _zooms = zooms.ToList();
         SetZoom(_zooms[(_zooms.Count / (decimal)2).FloorInt32()]);

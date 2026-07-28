@@ -38,6 +38,13 @@ internal abstract class RouteBase : IRouteBase
     }
 
     /// <summary>
+    /// Parses the navigation manager's current URI (relative to the base path) into a raw location.
+    /// </summary>
+    /// <returns>The parsed current location.</returns>
+    protected RawLocation ParseCurrentLocation() =>
+        RawLocation.Parse(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
+
+    /// <summary>
     /// Attempts to match a raw location against this route.
     /// </summary>
     /// <param name="raw">The raw location to match against.</param>

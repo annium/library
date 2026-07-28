@@ -60,17 +60,7 @@ public partial class TextField<TValue>
     /// Sets the value in the internal state container using the mapper for type conversion.
     /// </summary>
     /// <param name="args">The change event arguments containing the new value.</param>
-    private void SetValue(ChangeEventArgs args)
-    {
-        try
-        {
-            InternalState.Set(Mapper.Map<TValue>(args.Value!));
-        }
-        catch
-        {
-            // ignored
-        }
-    }
+    private void SetValue(ChangeEventArgs args) => FormFieldHelpers.TrySetMappedValue(InternalState, Mapper, args);
 
     /// <summary>
     /// Gets the internal state container, using the external state if provided, otherwise the form field's state.

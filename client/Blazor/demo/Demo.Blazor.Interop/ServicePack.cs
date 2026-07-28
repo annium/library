@@ -1,5 +1,7 @@
 using System;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
 using Annium.Blazor.Routing;
@@ -21,7 +23,9 @@ public class ServicePack : ServicePackBase
     /// </summary>
     /// <param name="container">The service container to register services with</param>
     /// <param name="provider">The service provider for accessing already registered services</param>
-    public override void Register(IServiceContainer container, IServiceProvider provider)
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>A completed task.</returns>
+    public override Task RegisterAsync(IServiceContainer container, IServiceProvider provider, CancellationToken ct)
     {
         // core
         container.AddRuntime(GetType().Assembly);
@@ -33,13 +37,17 @@ public class ServicePack : ServicePackBase
         container.AddRouting();
         container.AddCss();
         container.AddInterop();
+
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Sets up logging configuration for the application
     /// </summary>
     /// <param name="provider">The service provider to configure</param>
-    public override void Setup(IServiceProvider provider)
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>A completed task.</returns>
+    public override Task SetupAsync(IServiceProvider provider, CancellationToken ct)
     {
         provider.UseLogging(route =>
             route.UseConsole(m =>
@@ -52,5 +60,7 @@ public class ServicePack : ServicePackBase
                 return $"{sb} >> {m.Message}";
             })
         );
+
+        return Task.CompletedTask;
     }
 }

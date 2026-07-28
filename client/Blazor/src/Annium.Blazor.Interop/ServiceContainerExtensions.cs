@@ -1,5 +1,8 @@
+using System.Runtime.CompilerServices;
 using Annium.Core.DependencyInjection;
 using Microsoft.JSInterop;
+
+[assembly: InternalsVisibleTo("Annium.Blazor.Interop.Tests")]
 
 namespace Annium.Blazor.Interop;
 

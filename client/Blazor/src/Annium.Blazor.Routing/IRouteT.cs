@@ -42,9 +42,11 @@ public interface IRoute<TData>
     TData GetParams();
 
     /// <summary>
-    /// Creates a parameter-less route bound to the specified data
+    /// Creates a parameter-less, PATH-ONLY route with this route's path parameters baked from the specified data.
+    /// Query-only properties of <typeparamref name="TData"/> are not represented in the result (a non-generic
+    /// route carries no query string) — use <see cref="Link(TData)"/> when the query is needed.
     /// </summary>
-    /// <param name="data">The data to bind to the route</param>
-    /// <returns>A parameter-less route instance with the data pre-bound</returns>
+    /// <param name="data">The data whose path parameters are baked into the route</param>
+    /// <returns>A parameter-less, path-only route instance with the path parameters pre-bound</returns>
     IRoute Bind(TData data);
 }

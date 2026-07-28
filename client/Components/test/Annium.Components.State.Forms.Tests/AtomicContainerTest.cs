@@ -129,4 +129,51 @@ public class AtomicContainerTest : TestBase
         state.HasBeenTouched.IsFalse();
         log.Has(2);
     }
+
+    /// <summary>
+    /// Tests that setting a status with a message updates the Message and notifies once,
+    /// and that setting the exact same status and message again is a no-op that emits no new notification.
+    /// </summary>
+    [Fact]
+    public void SetStatus_WithMessage_ShortCircuitsOnNoopRepeat()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var state = factory.CreateAtomic(5);
+        state.Changed.Subscribe(log.Add);
+
+        // act
+        state.SetStatus(Status.Error, "boom");
+
+        // assert
+        state.Status.Is(Status.Error);
+        state.Message.Is("boom");
+        log.Has(1);
+
+        // act
+        state.SetStatus(Status.Error, "boom");
+
+        // assert
+        state.Status.Is(Status.Error);
+        state.Message.Is("boom");
+        log.Has(1);
+    }
+
+    /// <summary>
+    /// Tests that the single-argument SetStatus overload forwards an empty message.
+    /// </summary>
+    [Fact]
+    public void SetStatus_SingleArg_ForwardsEmptyMessage()
+    {
+        // arrange
+        var factory = GetFactory();
+        var state = factory.CreateAtomic(5);
+
+        // act
+        state.SetStatus(Status.Validating);
+
+        // assert
+        state.Message.Is(string.Empty);
+    }
 }

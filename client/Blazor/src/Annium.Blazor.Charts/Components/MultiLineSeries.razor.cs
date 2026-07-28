@@ -171,22 +171,11 @@ public partial class MultiLineSeries<TM, TI> : SeriesBase<TM>, ILogSubject
         /// <summary>
         /// Gets the time instant of the item.
         /// </summary>
-        public Instant Moment { get; private set; } = Moment;
+        public Instant Moment { get; } = Moment;
 
         /// <summary>
         /// Gets the point item data.
         /// </summary>
-        public TI Item { get; private set; } = Item;
-
-        /// <summary>
-        /// Updates the last item with new moment and item data.
-        /// </summary>
-        /// <param name="moment">The new time instant.</param>
-        /// <param name="item">The new point item data.</param>
-        public void Update(Instant moment, TI item)
-        {
-            Moment = moment;
-            Item = item;
-        }
+        public TI Item { get; } = Item;
     }
 }

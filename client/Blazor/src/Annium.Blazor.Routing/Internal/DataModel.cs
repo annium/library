@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Annium;
 using Annium.Core.Mapper;
 using Annium.Net.Base;
 using Annium.Reflection;
@@ -31,8 +32,10 @@ internal class DataModel : IDataModel
     public static DataModel Create<T>(IReadOnlyCollection<PropertyInfo> properties, IMapper mapper)
     {
         foreach (var property in properties)
-            if (property.DeclaringType != typeof(T))
-                throw new ArgumentException($"Property '{property}' is declared not in type '{typeof(T)}'");
+            // accept properties declared on T OR any of its base types (inherited params are resolved by
+            // ResolveProperties<T> with DeclaringType set to the declaring base, not T)
+            if (property.DeclaringType is null || !property.DeclaringType.IsAssignableFrom(typeof(T)))
+                throw new ArgumentException($"Property '{property}' is not declared in type '{typeof(T)}'");
 
         return new DataModel(typeof(T), properties, mapper);
     }
@@ -126,7 +129,8 @@ internal class DataModel : IDataModel
                 continue;
 
             var type = property.PropertyType;
-            parameters[name] = _mapper.Map(type.IsEnumerable() ? value.ToArray() : value.FirstOrDefault(), type);
+            object? source = type.IsEnumerable() ? value.ToArray() : value.FirstOrDefault();
+            parameters[name] = _mapper.Map(source.NotNull(), type);
         }
 
         return parameters;
@@ -148,6 +152,11 @@ internal class DataModel : IDataModel
                 continue;
 
             if (value is null || value.Equals(value.GetType().DefaultValue()))
+                continue;
+
+            // reference-type default is null, so an empty collection (e.g. string[] []) never equals its
+            // "default" above — treat an empty enumerable as a default and omit it, mirroring value-type defaults
+            if (value is System.Collections.IEnumerable seq and not string && !seq.GetEnumerator().MoveNext())
                 continue;
 
             query[key] = property.PropertyType.IsEnumerable()

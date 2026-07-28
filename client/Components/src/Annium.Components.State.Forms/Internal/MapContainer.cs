@@ -15,7 +15,7 @@ namespace Annium.Components.State.Forms.Internal;
 /// </summary>
 /// <typeparam name="TKey">The type of keys in the dictionary, must be non-null.</typeparam>
 /// <typeparam name="TValue">The type of values in the dictionary, must be non-null and have a parameterless constructor.</typeparam>
-internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey, TValue>, ILogSubject
+internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey, TValue>, ILogSubject, INamedChildStates
     where TKey : notnull
     where TValue : notnull, new()
 {
@@ -49,6 +49,12 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     public IReadOnlyCollection<TKey> Keys => _states.Keys.ToArray();
 
     /// <summary>
+    /// Gets the child states keyed by dictionary key, for routing dotted-path validation errors into nested children.
+    /// </summary>
+    public IEnumerable<KeyValuePair<string, ITrackedState>> NamedChildren =>
+        _states.Select(x => new KeyValuePair<string, ITrackedState>(x.Key.ToString() ?? string.Empty, x.Value.Ref));
+
+    /// <summary>
     /// Gets the logger instance for this container.
     /// </summary>
     public ILogger Logger { get; }
@@ -66,7 +72,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     /// <summary>
     /// The collection of state references for individual dictionary values.
     /// </summary>
-    private readonly IDictionary<TKey, StateReference> _states;
+    private readonly IDictionary<TKey, StateReference<TValue>> _states;
 
     /// <summary>
     /// The initial value of the dictionary.
@@ -91,7 +97,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         _stateFactory = stateFactory;
         _mapper = mapper;
         Logger = logger;
-        _states = new Dictionary<TKey, StateReference>();
+        _states = new Dictionary<TKey, StateReference<TValue>>();
         Init(_initialValue);
     }
 
@@ -104,9 +110,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         _initialValue = value;
         using (Mute())
         {
-            foreach (var key in _states.Keys.ToArray())
-                if (!value.ContainsKey(key))
-                    _states.Remove(key);
+            RemoveStaleKeys(value);
             foreach (var (key, item) in value)
             {
                 if (_states.TryGetValue(key, out var state))
@@ -131,9 +135,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
         var changed = false;
         using (Mute())
         {
-            foreach (var key in _states.Keys.ToArray())
-                if (!value.ContainsKey(key))
-                    _states.Remove(key);
+            RemoveStaleKeys(value);
             foreach (var (key, item) in value)
             {
                 if (_states.TryGetValue(key, out var state))
@@ -271,19 +273,14 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     private TX At<TX>(LambdaExpression ex)
         where TX : ITrackedState
     {
-        try
+        return this.ResolveOrLog(() =>
         {
             var key = ResolveKey(ex);
             if (!_states.ContainsKey(key))
                 throw new IndexOutOfRangeException($"There's no item in container with key {key}");
 
             return (TX)_states[key].Ref;
-        }
-        catch (Exception e)
-        {
-            this.Error(e);
-            throw;
-        }
+        });
     }
 
     /// <summary>
@@ -332,7 +329,7 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     private void AddInternal(TKey key, TValue item)
     {
         var state = (IValueTrackedState<TValue>)Factory.Invoke(_stateFactory, [item])!;
-        _states[key] = new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged()));
+        _states[key] = new StateReference<TValue>(state, state.Changed.Subscribe(_ => NotifyChanged()));
     }
 
     /// <summary>
@@ -346,35 +343,14 @@ internal class MapContainer<TKey, TValue> : ObservableState, IMapContainer<TKey,
     }
 
     /// <summary>
-    /// Represents a reference to a state with its change notification subscription.
+    /// Removes state references for keys that are no longer present in the specified value, disposing their
+    /// change notification subscriptions via the existing internal remove.
     /// </summary>
-    private class StateReference
+    /// <param name="value">The dictionary whose keys define which state references should remain.</param>
+    private void RemoveStaleKeys(Dictionary<TKey, TValue> value)
     {
-        /// <summary>
-        /// Gets the state reference.
-        /// </summary>
-        public IValueTrackedState<TValue> Ref { get; }
-
-        /// <summary>
-        /// Gets the subscription for change notifications.
-        /// </summary>
-        public IDisposable Subscription { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the StateReference class.
-        /// </summary>
-        /// <param name="ref">The state reference.</param>
-        /// <param name="subscription">The change notification subscription.</param>
-        public StateReference(IValueTrackedState<TValue> @ref, IDisposable subscription)
-        {
-            Ref = @ref;
-            Subscription = subscription;
-        }
-
-        /// <summary>
-        /// Returns a string representation of the state reference.
-        /// </summary>
-        /// <returns>A friendly name of the state type.</returns>
-        public override string ToString() => Ref.GetType().FriendlyName();
+        foreach (var key in _states.Keys.ToArray())
+            if (!value.ContainsKey(key))
+                RemoveInternal(key);
     }
 }

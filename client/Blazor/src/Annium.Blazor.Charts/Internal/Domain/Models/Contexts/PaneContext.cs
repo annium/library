@@ -195,7 +195,12 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
             else if (start == 0)
                 _view.Set(-0.5m, 0.5m);
             else
-                _view.Set(start * 0.9m, start * 1.1m);
+            {
+                // Single-value range: pad symmetrically by 10% of the magnitude so the view stays ordered
+                // (Start <= End) for negative values too (e.g. P&L series).
+                var pad = Math.Abs(start) * 0.1m;
+                _view.Set(start - pad, start + pad);
+            }
         }
 
         UpdateDotPerPx();
@@ -303,7 +308,7 @@ internal sealed record PaneContext(ILogger Logger) : IManagedPaneContext, ILogSu
     /// </summary>
     private void ResetRangeAndView()
     {
-        this.Trace(string.Empty);
+        this.Trace("");
         _range.Set(0m, 0m);
         _view.Set(0m, 0m);
         UpdateDotPerPx();

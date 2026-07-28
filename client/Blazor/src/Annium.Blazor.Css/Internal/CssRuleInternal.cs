@@ -111,9 +111,9 @@ internal class CssRuleInternal : CssTopLevelRule
         // media rules
         foreach (var (query, mediaRule) in rule._media)
         {
-            sb.AppendLine($"{query} {{");
+            sb.Append($"{query}{{");
             WriteCss(inheritedSelector, mediaRule, sb);
-            sb.AppendLine("}");
+            sb.Append("}");
         }
     }
 #endif

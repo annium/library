@@ -111,7 +111,7 @@ internal class Route<TData> : RouteBase, IRoute<TData>
     /// <returns>True if the current location matches this route with the specified data; otherwise, false.</returns>
     public bool IsAt(TData? data = default, PathMatch match = PathMatch.Exact)
     {
-        var raw = RawLocation.Parse(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
+        var raw = ParseCurrentLocation();
 
         // ensure location is matched
         var (isSuccess, values) = Match(raw, match);
@@ -145,7 +145,7 @@ internal class Route<TData> : RouteBase, IRoute<TData>
     /// <returns>True if parameters were successfully extracted; otherwise, false.</returns>
     public bool TryGetParams(out TData data)
     {
-        var raw = RawLocation.Parse(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
+        var raw = ParseCurrentLocation();
         data = default!;
 
         // ensure location is matched
@@ -191,10 +191,12 @@ internal class Route<TData> : RouteBase, IRoute<TData>
     }
 
     /// <summary>
-    /// Creates a non-generic route bound to the specified data values.
+    /// Creates a non-generic route whose PATH parameters are baked from the specified data. The result is a
+    /// parameter-free, path-only route: query-only properties of <typeparamref name="TData"/> are not represented
+    /// (a non-generic route carries no query string) — use <see cref="Link(TData)"/> when the query is needed.
     /// </summary>
-    /// <param name="data">The data to bind to the route.</param>
-    /// <returns>A non-generic route with the data values bound.</returns>
+    /// <param name="data">The data whose path parameters are baked into the route.</param>
+    /// <returns>A non-generic, path-only route with the path parameters bound.</returns>
     public IRoute Bind(TData data)
     {
         var pathParams = _pathModel.ToParams(data);

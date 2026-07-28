@@ -155,12 +155,12 @@ public static class FlexboxExtensions
     public static CssRule FlexBasis(this CssRule rule, int basis) => rule.Set("flex-basis", $"{basis}");
 
     /// <summary>
-    /// Sets the flex-basis property (note: method name suggests flex-wrap but sets flex-basis).
+    /// Sets the flex-wrap property.
     /// </summary>
     /// <param name="rule">The CSS rule to modify.</param>
-    /// <param name="basis">The flex-basis value.</param>
+    /// <param name="wrap">The flex-wrap value.</param>
     /// <returns>The modified CSS rule.</returns>
-    public static CssRule FlexWrap(this CssRule rule, int basis) => rule.Set("flex-basis", $"{basis}");
+    public static CssRule FlexWrap(this CssRule rule, FlexWrap wrap) => rule.Set("flex-wrap", wrap);
 
     /// <summary>
     /// Configures a flexbox container with the specified properties.

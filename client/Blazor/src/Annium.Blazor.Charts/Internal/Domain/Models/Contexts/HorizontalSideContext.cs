@@ -38,7 +38,7 @@ internal sealed record HorizontalSideContext : IManagedHorizontalSideContext
     public void Init(Canvas canvas, Canvas overlay)
     {
         if (Interlocked.CompareExchange(ref _isInitiated, 1, 0) != 0)
-            throw new InvalidOperationException($"Can't init {nameof(VerticalSideContext)} more than once");
+            throw new InvalidOperationException($"Can't init {nameof(HorizontalSideContext)} more than once");
 
         Canvas = canvas;
         Overlay = overlay;

@@ -81,7 +81,8 @@ export const getLineDash = (id: string): string => {
   return getContext(id).getLineDash().map(Math.round).join(',')
 }
 export const setLineDash = (id: string, dash: string): void => {
-  getContext(id).setLineDash(dash.split(',').map(Number))
+  // an empty string means "no dash"; splitting it would yield [NaN], so pass an empty array instead
+  getContext(id).setLineDash(dash ? dash.split(',').map(Number) : [])
 }
 
 // font

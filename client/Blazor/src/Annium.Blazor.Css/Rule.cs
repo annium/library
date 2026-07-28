@@ -22,7 +22,7 @@ public static class Rule
     /// </summary>
     /// <param name="name">The class name</param>
     /// <returns>A new CSS top-level rule for the class</returns>
-    public static CssTopLevelRule Class(string name) => new CssRuleInternal($"{string.Empty}{RuleType.Class}{name}");
+    public static CssTopLevelRule Class(string name) => new CssRuleInternal($"{RuleType.Class}{name}");
 
     /// <summary>
     /// Creates a CSS tag rule for the specified HTML tag
@@ -45,7 +45,7 @@ public static class Rule
     /// </summary>
     /// <param name="name">The ID name</param>
     /// <returns>A new CSS top-level rule for the ID</returns>
-    public static CssTopLevelRule Id(string name) => new CssRuleInternal($"{string.Empty}{RuleType.Id}{name}");
+    public static CssTopLevelRule Id(string name) => new CssRuleInternal($"{RuleType.Id}{name}");
 
     /// <summary>
     /// Creates a CSS rule for a specific tag with an ID
@@ -74,7 +74,7 @@ public static class Rule
         [CallerLineNumber] int line = 0,
         [CallerFilePath] string file = "",
         [CallerMemberName] string member = ""
-    ) => new CssRuleInternal($"{string.Empty}{RuleType.Class}{GenerateName(line, file, member)}");
+    ) => new CssRuleInternal($"{RuleType.Class}{GenerateName(line, file, member)}");
 
     /// <summary>
     /// Creates a CSS rule for a specific tag with an auto-generated class name based on caller information (DEBUG only)
@@ -102,7 +102,7 @@ public static class Rule
         [CallerLineNumber] int line = 0,
         [CallerFilePath] string file = "",
         [CallerMemberName] string member = ""
-    ) => new CssRuleInternal($"{string.Empty}{RuleType.Id}{GenerateName(line, file, member)}");
+    ) => new CssRuleInternal($"{RuleType.Id}{GenerateName(line, file, member)}");
 
     /// <summary>
     /// Creates a CSS rule for a specific tag with an auto-generated ID name based on caller information (DEBUG only)
@@ -129,7 +129,7 @@ public static class Rule
     private static string GenerateName(int line, string file, string member)
     {
         var filePath = Regex
-            .Replace(file, "(.razor|.cs|[:#.])", string.Empty)
+            .Replace(file, @"(\.razor|\.cs|[:#.])", string.Empty)
             .Replace(':', '-')
             .TrimStart(Path.DirectorySeparatorChar)
             .Split(Path.DirectorySeparatorChar)
@@ -144,7 +144,7 @@ public static class Rule
     /// Creates a CSS class rule with an auto-generated name (RELEASE only)
     /// </summary>
     /// <returns>A new CSS top-level rule for the auto-generated class</returns>
-    public static CssTopLevelRule Class() => new CssRuleInternal($"{string.Empty}{RuleType.Class}{GenerateName()}");
+    public static CssTopLevelRule Class() => new CssRuleInternal($"{RuleType.Class}{GenerateName()}");
 
     /// <summary>
     /// Creates a CSS rule for a specific tag with an auto-generated class name (RELEASE only)
@@ -157,7 +157,7 @@ public static class Rule
     /// Creates a CSS ID rule with an auto-generated name (RELEASE only)
     /// </summary>
     /// <returns>A new CSS top-level rule for the auto-generated ID</returns>
-    public static CssTopLevelRule Id() => new CssRuleInternal($"{string.Empty}{RuleType.Id}{GenerateName()}");
+    public static CssTopLevelRule Id() => new CssRuleInternal($"{RuleType.Id}{GenerateName()}");
 
     /// <summary>
     /// Creates a CSS rule for a specific tag with an auto-generated ID name (RELEASE only)

@@ -30,8 +30,7 @@ public static class FontExtensions
     /// <param name="rule">The CSS rule to modify.</param>
     /// <param name="fontSize">The font size in pixels.</param>
     /// <returns>The modified CSS rule.</returns>
-    public static CssRule FontSizePx(this CssRule rule, double fontSize) =>
-        rule.Set("font-size", Invariant($"{fontSize}px"));
+    public static CssRule FontSizePx(this CssRule rule, double fontSize) => rule.FontSize(Invariant($"{fontSize}px"));
 
     /// <summary>
     /// Sets the font-size property with an em value.
@@ -39,8 +38,7 @@ public static class FontExtensions
     /// <param name="rule">The CSS rule to modify.</param>
     /// <param name="fontSize">The font size in em units.</param>
     /// <returns>The modified CSS rule.</returns>
-    public static CssRule FontSizeEm(this CssRule rule, double fontSize) =>
-        rule.Set("font-size", Invariant($"{fontSize}em"));
+    public static CssRule FontSizeEm(this CssRule rule, double fontSize) => rule.FontSize(Invariant($"{fontSize}em"));
 
     /// <summary>
     /// Sets the font-size property with a rem value.
@@ -48,8 +46,7 @@ public static class FontExtensions
     /// <param name="rule">The CSS rule to modify.</param>
     /// <param name="fontSize">The font size in rem units.</param>
     /// <returns>The modified CSS rule.</returns>
-    public static CssRule FontSizeRem(this CssRule rule, double fontSize) =>
-        rule.Set("font-size", Invariant($"{fontSize}rem"));
+    public static CssRule FontSizeRem(this CssRule rule, double fontSize) => rule.FontSize(Invariant($"{fontSize}rem"));
 
     /// <summary>
     /// Sets the font-weight property.

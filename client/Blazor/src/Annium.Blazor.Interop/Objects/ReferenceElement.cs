@@ -21,6 +21,12 @@ public record ReferenceElement : Element
     private readonly Lazy<string> _id;
 
     /// <summary>
+    /// Guards against a second release: Dispose must be idempotent, but the objectTracker release fires outside the
+    /// base DisposableBox's own guard
+    /// </summary>
+    private bool _disposed;
+
+    /// <summary>
     /// Initializes a new instance of the ReferenceElement class
     /// </summary>
     /// <param name="reference">The Blazor element reference</param>
@@ -33,6 +39,23 @@ public record ReferenceElement : Element
 
             return id;
         });
+    }
+
+    /// <summary>
+    /// Releases the element, untracking it from the JS objectTracker if its Id was ever resolved (which is what
+    /// registered it); skips the release when the Id was never accessed, since it was never tracked. Unbinds the
+    /// event listeners first (base.Dispose), because the JS off* handlers resolve the element through the
+    /// objectTracker and would throw if it were released beforehand
+    /// </summary>
+    public override void Dispose()
+    {
+        if (_disposed)
+            return;
+        _disposed = true;
+
+        base.Dispose();
+        if (_id.IsValueCreated)
+            Ctx.CallHelper("objectTracker.release", Id);
     }
 
     /// <summary>

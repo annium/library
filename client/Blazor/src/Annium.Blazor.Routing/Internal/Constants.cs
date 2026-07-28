@@ -3,7 +3,7 @@ namespace Annium.Blazor.Routing.Internal;
 /// <summary>
 /// Contains constant values used throughout the routing system.
 /// </summary>
-internal class Constants
+internal static class Constants
 {
     /// <summary>
     /// The path separator character used in routing templates.

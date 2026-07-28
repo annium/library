@@ -43,6 +43,7 @@ public interface IStorageBase
     /// <typeparam name="T">The type to deserialize the value to</typeparam>
     /// <param name="key">The key to retrieve</param>
     /// <returns>The deserialized value</returns>
+    /// <exception cref="System.Collections.Generic.KeyNotFoundException">Thrown when the key is not found in storage</exception>
     T Get<T>(string key);
 
     /// <summary>
@@ -50,6 +51,7 @@ public interface IStorageBase
     /// </summary>
     /// <param name="key">The key to retrieve</param>
     /// <returns>The string value</returns>
+    /// <exception cref="System.Collections.Generic.KeyNotFoundException">Thrown when the key is not found in storage</exception>
     string GetString(string key);
 
     /// <summary>
@@ -58,7 +60,7 @@ public interface IStorageBase
     /// <typeparam name="T">The type of the value to store</typeparam>
     /// <param name="key">The key to store the value under</param>
     /// <param name="value">The value to store</param>
-    /// <returns>True if the value was successfully stored, false otherwise</returns>
+    /// <returns>True if the key was newly created, false if it was updated</returns>
     bool Set<T>(string key, T value);
 
     /// <summary>
@@ -66,7 +68,7 @@ public interface IStorageBase
     /// </summary>
     /// <param name="key">The key to store the value under</param>
     /// <param name="value">The string value to store</param>
-    /// <returns>True if the value was successfully stored, false otherwise</returns>
+    /// <returns>True if the key was newly created, false if it was updated</returns>
     bool SetString(string key, string value);
 
     /// <summary>

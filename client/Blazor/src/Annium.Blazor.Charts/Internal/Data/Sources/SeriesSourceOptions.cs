@@ -31,12 +31,22 @@ internal sealed record SeriesSourceOptions : ISeriesSourceOptions
     /// <returns>The series source resolution options for the specified resolution</returns>
     public SeriesSourceResolutionOptions GetForResolution(Duration resolution)
     {
+        // Pick the closest configured resolution at or below the requested one (largest target <= resolution),
+        // independent of the backing dictionary's enumeration order.
+        SeriesSourceResolutionOptions? best = null;
+        Duration? bestTarget = null;
         foreach (var (target, options) in _options)
-            if (target <= resolution)
-                return options;
+            if (target <= resolution && (bestTarget is null || target > bestTarget.Value))
+            {
+                best = options;
+                bestTarget = target;
+            }
 
-        throw new InvalidOperationException(
-            $"No configuration for resolution {resolution}. Add resolution configuration for this or lesser resolution"
-        );
+        if (best is null)
+            throw new InvalidOperationException(
+                $"No configuration for resolution {resolution}. Add resolution configuration for this or lesser resolution"
+            );
+
+        return best.Value;
     }
 }

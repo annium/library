@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Annium.Net.Base;
 using Microsoft.Extensions.Primitives;
@@ -16,14 +17,30 @@ internal sealed record RawLocation
     /// <returns>A RawLocation instance containing the parsed segments and parameters</returns>
     public static RawLocation Parse(string uri)
     {
+        // drop any URL fragment (#...) first — it is not part of the path or query and must not fold into the
+        // last path segment or the last query value (mirrors the framework Router, which strips '?' and '#')
+        var hashIndex = uri.IndexOf('#');
+        if (hashIndex >= 0)
+            uri = uri[..hashIndex];
+
         if (!uri.Contains('?'))
-            return new RawLocation(Helper.ParseTemplateParts(uri), new Dictionary<string, StringValues>());
+            return new RawLocation(ParseSegments(uri), new Dictionary<string, StringValues>());
 
         var (path, rawQuery, _) = uri.Split('?');
         var query = UriQuery.Parse(rawQuery);
 
-        return new RawLocation(Helper.ParseTemplateParts(path), query);
+        return new RawLocation(ParseSegments(path), query);
     }
+
+    /// <summary>
+    /// Splits a live URL path into its non-empty segments. Unlike the strict template parser, empty segments
+    /// produced by leading/trailing/double slashes are tolerated (dropped) rather than rejected — a real request
+    /// URL like <c>statics/about/</c> must resolve, not crash routing.
+    /// </summary>
+    /// <param name="path">The URL path portion to split.</param>
+    /// <returns>The non-empty path segments.</returns>
+    private static IReadOnlyList<string> ParseSegments(string path) =>
+        path.Split(Constants.Separator, StringSplitOptions.RemoveEmptyEntries);
 
     /// <summary>
     /// Gets the path segments extracted from the URI

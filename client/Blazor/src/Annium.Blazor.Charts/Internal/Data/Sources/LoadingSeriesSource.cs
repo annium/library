@@ -76,6 +76,12 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
     private int _isLoading;
 
     /// <summary>
+    /// Tail of the serialized load chain: each <see cref="LoadItems"/> continues after the previous load completes,
+    /// so overlapping loads recompute their empty ranges against an up-to-date cache instead of colliding.
+    /// </summary>
+    private Task _loading = Task.CompletedTask;
+
+    /// <summary>
     /// Flag indicating whether the source has been disposed (used with Interlocked operations)
     /// </summary>
     private int _isDisposed;
@@ -157,20 +163,45 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
     /// <param name="end">The end time of the range to load</param>
     public void LoadItems(Instant start, Instant end)
     {
-#pragma warning disable VSTHRD110
-        LoadDataAsync(start, end)
-            .ContinueWith(t =>
-            {
-                if (t.IsCompletedSuccessfully)
-                    Loaded();
-                else
-                {
-                    this.Error("load in {start} - {end} failed in {status} status", start.S(), end.S(), t.Status);
-                    if (t.Exception is not null)
-                        this.Error(t.Exception);
-                }
-            });
-#pragma warning restore VSTHRD110
+        // Serialize loads: chain each load after the previous so overlapping calls recompute their empty ranges
+        // against an up-to-date cache instead of colliding in AddData. Blazor WASM is single-threaded, so the
+        // read-modify-write of _loading needs no lock.
+        _loading = LoadSerializedAsync(_loading, start, end);
+    }
+
+    /// <summary>
+    /// Awaits the previous load, then loads the requested range and raises <see cref="Loaded"/> on success.
+    /// Failures are logged, not rethrown, so one failed load does not break the serialized chain.
+    /// </summary>
+    /// <param name="previous">The previous load in the chain to await before starting this one.</param>
+    /// <param name="start">The start time of the range to load.</param>
+    /// <param name="end">The end time of the range to load.</param>
+    /// <returns>A task representing the serialized load.</returns>
+    private async Task LoadSerializedAsync(Task previous, Instant start, Instant end)
+    {
+        try
+        {
+            // VSTHRD003: `previous` is our own prior load task, started in this same (single-threaded) context —
+            // awaiting it to serialize loads is safe, not the cross-context await the analyzer warns about.
+#pragma warning disable VSTHRD003
+            await previous;
+#pragma warning restore VSTHRD003
+        }
+        catch
+        {
+            // a previous load's failure was already logged by its own invocation; don't let it break the chain
+        }
+
+        try
+        {
+            await LoadDataAsync(start, end);
+            Loaded();
+        }
+        catch (Exception e)
+        {
+            this.Error<string, string>("load in {start} - {end} failed", start.S(), end.S());
+            this.Error(e);
+        }
     }
 
     /// <summary>
@@ -205,30 +236,35 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
     {
         Volatile.Write(ref _isLoading, 1);
 
-        var (min, max) = GetBounds(start, end, _resolutionOptions.LoadZone);
-        var info = $"{start.S()} - {end.S()} (as {min.S()} - {max.S()})";
-
-        this.Trace<string>("start for {info}", info);
-
-        var emptyRanges = _cache.GetEmptyRanges(min, max);
-        var dataset = await Task.WhenAll(
-            emptyRanges.Select(async range => (range, await LoadInRangeAsync(range.Start, range.End)))
-        );
-
-        foreach (var (range, data) in dataset)
+        try
         {
-            this.Trace<int, string, string>(
-                "save {dataCount} item(s) to cache for {rangeStart} - {rangeEnd}",
-                data.Count,
-                range.Start.S(),
-                range.End.S()
+            var (min, max) = GetBounds(start, end, _resolutionOptions.LoadZone);
+            var info = $"{start.S()} - {end.S()} (as {min.S()} - {max.S()})";
+
+            this.Trace<string>("start for {info}", info);
+
+            var emptyRanges = _cache.GetEmptyRanges(min, max);
+            var dataset = await Task.WhenAll(
+                emptyRanges.Select(async range => (range, await LoadInRangeAsync(range.Start, range.End)))
             );
-            _cache.AddData(range.Start, range.End, data);
+
+            foreach (var (range, data) in dataset)
+            {
+                this.Trace<int, string, string>(
+                    "save {dataCount} item(s) to cache for {rangeStart} - {rangeEnd}",
+                    data.Count,
+                    range.Start.S(),
+                    range.End.S()
+                );
+                _cache.AddData(range.Start, range.End, data);
+            }
+
+            this.Trace<string>("done for {info}", info);
         }
-
-        this.Trace<string>("done for {info}", info);
-
-        Volatile.Write(ref _isLoading, 0);
+        finally
+        {
+            Volatile.Write(ref _isLoading, 0);
+        }
     }
 
     /// <summary>
@@ -244,7 +280,10 @@ internal class LoadingSeriesSource<T> : ISeriesSource<T>, ILogSubject
 
         var items = await _load(Resolution, start, end);
 
-        this.Trace(items.Count > 0 ? $"loaded {items.Count} item(s) for {info}" : $"no items loaded for {info}");
+        if (items.Count > 0)
+            this.Trace<int, string>("loaded {count} item(s) for {info}", items.Count, info);
+        else
+            this.Trace<string>("no items loaded for {info}", info);
 
         return items;
     }

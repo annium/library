@@ -8,7 +8,6 @@ using Annium.Blazor.Css;
 using Annium.Blazor.Interop;
 using Annium.Logging;
 using Microsoft.AspNetCore.Components;
-using static Annium.Blazor.Charts.Internal.Constants;
 
 namespace Annium.Blazor.Charts.Components;
 
@@ -131,18 +130,8 @@ public partial class PaneSeries : ILogSubject, IAsyncDisposable
 
         ctx.ClearRect(0, 0, width, height);
 
-        ctx.StrokeStyle = GridStyle;
-        ctx.LineWidth = GridLine;
-
         // boundaries
-        ctx.BeginPath();
-        ctx.MoveTo(GridHalfLine, GridHalfLine);
-        ctx.LineTo(width - GridHalfLine, GridHalfLine);
-        ctx.LineTo(width - GridHalfLine, height - GridHalfLine);
-        ctx.LineTo(GridHalfLine, height - GridHalfLine);
-        ctx.LineTo(GridHalfLine, GridHalfLine);
-        ctx.Stroke();
-        ctx.ClosePath();
+        ctx.DrawBoundaries(width, height);
 
         foreach (var y in PaneContext.GetHorizontalLines().Keys)
         {

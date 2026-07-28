@@ -233,6 +233,46 @@ public class ObjectContainerTest : TestBase
     }
 
     /// <summary>
+    /// Tests that accessing a property via an expression that is not a direct property access throws an exception
+    /// </summary>
+    [Fact]
+    public void AtAtomic_NotDirectPropertyAccess_Throws()
+    {
+        // arrange
+        var factory = GetFactory();
+        var state = factory.CreateObject(Arrange());
+
+        // assert
+        Wrap.It(() => state.AtAtomic(x => x.Name.ToUpper())).Throws<ArgumentException>();
+    }
+
+    /// <summary>
+    /// Tests that an external Mute() scope batches inner Set calls: each Set mutes itself internally, but the
+    /// outer scope keeps notifications suppressed (mute scopes nest via a depth counter) until it is disposed.
+    /// </summary>
+    [Fact]
+    public void Mute_ExternalScope_SuppressesInnerSetNotifications()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var state = factory.CreateObject(Arrange());
+        state.Changed.Subscribe(log.Add);
+
+        // act: external batch around inner Set calls (each Set mutes itself internally)
+        using (state.Mute())
+        {
+            state.Set(new User { Name = "Aaa", Age = 1 });
+            state.Set(new User { Name = "Bbb", Age = 2 });
+        }
+
+        // assert: Mute is suppress-only — the whole batch produces no notification (there is no coalesced flush
+        // on unmute), yet the state itself reflects the batched changes.
+        log.IsEmpty();
+        state.Value.Name.Is("Bbb");
+    }
+
+    /// <summary>
     /// Creates a sample user object for testing
     /// </summary>
     /// <returns>A user object with sample data</returns>

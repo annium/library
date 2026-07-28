@@ -287,7 +287,12 @@ public sealed partial record Canvas : ReferenceElement
     /// </summary>
     public int[] LineDash
     {
-        get => GetLineDash(Id).Split(',').Select(int.Parse).ToArray();
+        get
+        {
+            // JS returns "" for an unset dash pattern; "".Split(',') would yield [""] and throw on int.Parse
+            var raw = GetLineDash(Id);
+            return raw.Length == 0 ? [] : raw.Split(',').Select(int.Parse).ToArray();
+        }
         set => SetLineDash(Id, string.Join(',', value));
     }
 

@@ -6,7 +6,7 @@ namespace Annium.Blazor.Interop.Internal.Extensions;
 /// <summary>
 /// Provides extension methods for IInteropContext to simplify JavaScript interop calls.
 /// </summary>
-public static class InteropContextExtensions
+internal static class InteropContextExtensions
 {
     /// <summary>
     /// Calls a JavaScript function and returns the result of type T.

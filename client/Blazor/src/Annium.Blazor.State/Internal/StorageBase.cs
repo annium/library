@@ -79,8 +79,17 @@ internal class StorageBase : IStorageBase
     {
         if (TryGetString(key, out var raw))
         {
-            value = _serializer.Deserialize<T>(raw!);
-            return true;
+            try
+            {
+                value = _serializer.Deserialize<T>(raw!);
+                return true;
+            }
+            catch (Exception)
+            {
+                // Try-pattern contract: a malformed/incompatible stored value yields false, not a throw.
+                value = default;
+                return false;
+            }
         }
 
         value = default;
@@ -98,7 +107,13 @@ internal class StorageBase : IStorageBase
     {
         value = _js.Invoke<string>($"{_storage}.getItem", key);
 
-        return !string.IsNullOrWhiteSpace(value);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            value = null;
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>

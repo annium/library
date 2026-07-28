@@ -5,7 +5,7 @@ namespace Annium.Blazor.Charts.Domain.Contexts;
 /// <summary>
 /// Extension methods for IChartContext providing convenient zoom operations
 /// </summary>
-public static class ChartContextExtensions
+public static class ChartZoomExtensions
 {
     /// <summary>
     /// Increases the zoom level by one step

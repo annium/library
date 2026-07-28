@@ -152,7 +152,6 @@ public class Router : IComponent, IHandleAfterRender, IDisposable, ILogSubject
         var rawLocation = RawLocation.Parse(NavigationManager.ToBaseRelativePath(_location));
 
         this.Trace<string>("find location for {location}", JsonSerializer.Serialize(rawLocation));
-        // var locationData = RouteManager.Match(rawLocation, PathMatch.Exact) ?? RouteManager.Match(rawLocation, PathMatch.Start);
         var locationData = RouteManager.Match(rawLocation, PathMatch.Exact);
 
         if (locationData is null)

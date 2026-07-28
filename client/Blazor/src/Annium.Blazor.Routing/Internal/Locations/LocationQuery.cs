@@ -62,6 +62,7 @@ internal class LocationQuery : ILocationQuery
             {
                 var value = type.IsEnumerable()
                     ? _mapper.Map(raw.ToArray(), type)
+                    // a query key present in the dictionary always carries at least one value, so First is non-null
                     : _mapper.Map(raw.FirstOrDefault()!, type);
                 routeValues[key] = value;
             }

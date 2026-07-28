@@ -73,7 +73,7 @@ public abstract partial record Element : IObject, IDisposable
     /// <summary>
     /// Releases all resources used by the Element
     /// </summary>
-    public void Dispose()
+    public virtual void Dispose()
     {
         _disposable.Dispose();
     }

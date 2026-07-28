@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -14,7 +15,7 @@ namespace Annium.Components.State.Forms.Internal;
 /// Represents a state container for managing arrays of items with change tracking, validation, and nested property access.
 /// </summary>
 /// <typeparam name="T">The type of items in the array, must be non-null and have a parameterless constructor.</typeparam>
-internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubject
+internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubject, INamedChildStates
     where T : notnull, new()
 {
     /// <summary>
@@ -47,6 +48,14 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     public IReadOnlyList<ITrackedState> Children => _states.Select(x => x.Ref).ToArray();
 
     /// <summary>
+    /// Gets the child states keyed by index, for routing dotted-path validation errors into nested children.
+    /// </summary>
+    public IEnumerable<KeyValuePair<string, ITrackedState>> NamedChildren =>
+        _states.Select(
+            (x, i) => new KeyValuePair<string, ITrackedState>(i.ToString(CultureInfo.InvariantCulture), x.Ref)
+        );
+
+    /// <summary>
     /// Gets the logger instance for this container.
     /// </summary>
     public ILogger Logger { get; }
@@ -64,7 +73,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     /// <summary>
     /// The collection of state references for individual array items.
     /// </summary>
-    private readonly IList<StateReference> _states = new List<StateReference>();
+    private readonly IList<StateReference<T>> _states = new List<StateReference<T>>();
 
     /// <summary>
     /// The initial value of the array.
@@ -105,7 +114,9 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
                 AddInternal(_states.Count, value[i]);
 
             var removed = Math.Max(_states.Count - value.Count, 0) + updated;
-            for (int i = updated; i < removed; i++)
+            // remove tail-first: RemoveInternal shifts subsequent items down, so an ascending index would
+            // skip items and run off the end when shrinking by more than one item in a single call.
+            for (int i = removed - 1; i >= updated; i--)
                 RemoveInternal(i);
         }
 
@@ -137,7 +148,9 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
             }
 
             var removed = Math.Max(_states.Count - value.Count, 0) + updated;
-            for (int i = updated; i < removed; i++)
+            // remove tail-first (see Init): shrinking by >1 item with an ascending index skips items and
+            // eventually indexes past the end of the shrinking list.
+            for (int i = removed - 1; i >= updated; i--)
             {
                 RemoveInternal(i);
                 changed = true;
@@ -267,7 +280,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     public void RemoveAt(int index)
     {
         using (Mute())
-            _states.RemoveAt(index);
+            RemoveInternal(index);
         HasBeenTouched = true;
         NotifyChanged();
     }
@@ -281,19 +294,14 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     private TX At<TX>(LambdaExpression ex)
         where TX : ITrackedState
     {
-        try
+        return this.ResolveOrLog(() =>
         {
             var index = ResolveIndex(ex);
             if (index < 0 || index >= _states.Count)
                 throw new IndexOutOfRangeException($"There's no item in container with index {index}");
 
             return (TX)_states[index].Ref;
-        }
-        catch (Exception e)
-        {
-            this.Error(e);
-            throw;
-        }
+        });
     }
 
     /// <summary>
@@ -349,7 +357,7 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     private void AddInternal(int index, T item)
     {
         var state = (IValueTrackedState<T>)Factory.Invoke(_stateFactory, [item])!;
-        _states.Insert(index, new StateReference(state, state.Changed.Subscribe(_ => NotifyChanged())));
+        _states.Insert(index, new StateReference<T>(state, state.Changed.Subscribe(_ => NotifyChanged())));
     }
 
     /// <summary>
@@ -360,38 +368,5 @@ internal class ArrayContainer<T> : ObservableState, IArrayContainer<T>, ILogSubj
     {
         _states[index].Subscription.Dispose();
         _states.RemoveAt(index);
-    }
-
-    /// <summary>
-    /// Represents a reference to a state with its change notification subscription.
-    /// </summary>
-    private class StateReference
-    {
-        /// <summary>
-        /// Gets the state reference.
-        /// </summary>
-        public IValueTrackedState<T> Ref { get; }
-
-        /// <summary>
-        /// Gets the subscription for change notifications.
-        /// </summary>
-        public IDisposable Subscription { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the StateReference class.
-        /// </summary>
-        /// <param name="ref">The state reference.</param>
-        /// <param name="subscription">The change notification subscription.</param>
-        public StateReference(IValueTrackedState<T> @ref, IDisposable subscription)
-        {
-            Ref = @ref;
-            Subscription = subscription;
-        }
-
-        /// <summary>
-        /// Returns a string representation of the state reference.
-        /// </summary>
-        /// <returns>A friendly name of the state type.</returns>
-        public override string ToString() => Ref.GetType().FriendlyName();
     }
 }

@@ -281,6 +281,103 @@ public class MapContainerTest : TestBase
     }
 
     /// <summary>
+    /// Tests that accessing a non-existent key via AtAtomic throws an exception
+    /// </summary>
+    [Fact]
+    public void AtAtomic_MissingKey_Throws()
+    {
+        // arrange
+        var factory = GetFactory();
+        var state = factory.CreateMap(Arrange());
+
+        // assert
+        Wrap.It(() => state.AtAtomic(x => x["z"])).Throws<IndexOutOfRangeException>();
+    }
+
+    /// <summary>
+    /// Tests that Keys reflects the current set of dictionary keys as items are added and removed
+    /// </summary>
+    [Fact]
+    public void Keys_ReflectsCurrentState()
+    {
+        // arrange
+        var factory = GetFactory();
+        var initialValue = Arrange();
+        var state = factory.CreateMap(initialValue);
+
+        // assert
+        state.Keys.IsEqual(initialValue.Keys.ToArray());
+
+        // act
+        state.Add("d", 7);
+
+        // assert
+        state.Keys.IsEqual(new[] { "a", "b", "c", "d" });
+
+        // act
+        state.Remove("a");
+
+        // assert
+        state.Keys.IsEqual(new[] { "b", "c", "d" });
+    }
+
+    /// <summary>
+    /// Tests that touching a value state directly (bypassing the container's own Add/Set/Init/Remove) still
+    /// marks the parent map as touched (pins the `_states.Values.Any(x => x.Ref.HasBeenTouched)` OR-branch).
+    /// </summary>
+    [Fact]
+    public void HasBeenTouched_ChildTouchedDirectly_Ok()
+    {
+        // arrange
+        var factory = GetFactory();
+        var state = factory.CreateMap(Arrange());
+
+        // act
+        state.AtAtomic(x => x["a"]).Set(99);
+
+        // assert
+        state.HasBeenTouched.IsTrue();
+    }
+
+    /// <summary>
+    /// Tests that a non-indexer expression (e.g. a property access) passed to AtAtomic throws an
+    /// ArgumentException, distinct from the IndexOutOfRangeException thrown for a missing key.
+    /// </summary>
+    [Fact]
+    public void AtAtomic_NonIndexExpression_Throws()
+    {
+        // arrange
+        var factory = GetFactory();
+        var state = factory.CreateMap(Arrange());
+
+        // assert
+        Wrap.It(() => state.AtAtomic(x => x.Count)).Throws<ArgumentException>();
+    }
+
+    /// <summary>
+    /// Tests that Remove disposes the removed value's change subscription, so mutating the now-detached child
+    /// no longer notifies the parent map (regression: Remove must not leak the child subscription).
+    /// </summary>
+    [Fact]
+    public void Remove_DisposesRemovedChildSubscription()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var state = factory.CreateMap(Arrange());
+        var removed = state.AtAtomic(x => x["b"]);
+        state.Changed.Subscribe(log.Add);
+
+        // act
+        state.Remove("b");
+        log.Clear();
+        removed.Set(999);
+
+        // assert: the removed child's subscription was disposed → no parent notification fires
+        log.IsEmpty();
+    }
+
+    /// <summary>
     /// Creates a sample dictionary for testing
     /// </summary>
     /// <returns>A dictionary with sample data</returns>

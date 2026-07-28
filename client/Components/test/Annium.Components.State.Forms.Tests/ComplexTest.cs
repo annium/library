@@ -163,6 +163,36 @@ public class ComplexTest : TestBase
     }
 
     /// <summary>
+    /// Tests that navigating through nested AtMap containers reaches the embedded dictionary value, and that
+    /// mutating it through the resolved atomic container is reflected in the top-level value and change tracking.
+    /// </summary>
+    [Fact]
+    public void AtMap_NestedDictionary_Ok()
+    {
+        // arrange
+        var log = new List<Unit>();
+        var factory = GetFactory();
+        var initialValue = Arrange();
+        var state = factory.CreateObject(initialValue);
+        state.Changed.Subscribe(log.Add);
+        var text = state.AtMap(x => x.EmbeddedDictionary).AtMap(x => x["a"]).AtObject(x => x[1]).AtAtomic(x => x.Text);
+
+        // assert
+        text.Value.Is(initialValue.EmbeddedDictionary["a"][1].Text);
+        state.HasChanged.IsFalse();
+        log.IsEmpty();
+
+        // act
+        text.Set("hey there").IsTrue();
+
+        // assert
+        text.Value.Is("hey there");
+        state.Value.EmbeddedDictionary["a"][1].Text.Is("hey there");
+        state.HasChanged.IsTrue();
+        log.Has(1);
+    }
+
+    /// <summary>
     /// Creates a sample blog object for testing
     /// </summary>
     /// <returns>A blog object with sample data</returns>
@@ -207,9 +237,6 @@ public class ComplexTest : TestBase
     /// <summary>
     /// Represents a blog entity for testing purposes
     /// </summary>
-    /// <summary>
-    /// Represents a blog entity for testing purposes
-    /// </summary>
     private class Blog
     {
         /// <summary>
@@ -233,9 +260,6 @@ public class ComplexTest : TestBase
         public Dictionary<string, Dictionary<int, Message>> EmbeddedDictionary { get; set; } = new();
     }
 
-    /// <summary>
-    /// Represents a user entity for testing purposes
-    /// </summary>
     /// <summary>
     /// Represents a user entity for testing purposes
     /// </summary>

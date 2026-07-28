@@ -63,6 +63,7 @@ public partial class Page : ILogSubject, IDisposable
         _input.OnKeyDown(Handler<KeyboardEvent>("keydown", "input"), false);
         _input.OnKeyUp(Handler<KeyboardEvent>("keyup", "input"), false);
 
+        _disposable += _eventsBlock;
         _disposable += _eventsBlock.OnMouseDown(Handler<MouseEvent>("mousedown", "block"));
         _disposable += _eventsBlock.OnMouseUp(Handler<MouseEvent>("mouseup", "block"));
         _disposable += _eventsBlock.OnMouseEnter(Handler<MouseEvent>("mouseenter", "block"));
@@ -72,6 +73,7 @@ public partial class Page : ILogSubject, IDisposable
         _disposable += _eventsBlock.OnMouseMove(Handler<MouseEvent>("mousemove", "block"));
         _disposable += _eventsBlock.OnWheel(Handler<WheelEvent>("wheel", "block"));
 
+        _disposable += _resizedBlock;
         _disposable += _resizedBlock.OnResize(Handler<ResizeEvent>("resize", "block"));
     }
 

@@ -20,7 +20,8 @@ internal sealed record ParamLocationSegment(string Name, Type Type) : ILocationS
     {
         try
         {
-            return mapper.Map(segment, Type);
+            // decode the raw URL segment (Link percent-encodes path params) before converting to the target type
+            return mapper.Map(Uri.UnescapeDataString(segment), Type);
         }
         catch (MappingException)
         {

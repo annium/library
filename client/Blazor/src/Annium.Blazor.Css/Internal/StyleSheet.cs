@@ -38,7 +38,7 @@ internal class StyleSheet : IStyleSheet
         var rules = new List<CssRule>();
         var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        var fields = set.GetType().GetFields(flags).Where(x => x.FieldType.IsAssignableFrom(typeof(CssRule))).ToArray();
+        var fields = set.GetType().GetFields(flags).Where(x => typeof(CssRule).IsAssignableFrom(x.FieldType)).ToArray();
         foreach (var field in fields)
             rules.Add(
                 (CssRule)field.GetValue(set)!

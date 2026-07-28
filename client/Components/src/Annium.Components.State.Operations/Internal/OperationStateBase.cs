@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Annium.Components.State.Core;
 using Annium.Data.Operations;
@@ -58,17 +59,17 @@ internal abstract class OperationStateBase : ObservableState, IOperationStateBas
     public bool HasFailed { get; private set; }
 
     /// <summary>
-    /// Starts the operation by setting it to loading state
+    /// Starts the operation by setting it to loading state and clearing any prior errors. Overridden in the
+    /// typed variant to also clear stale data.
     /// </summary>
-    public void Start()
-    {
-        PlainErrors = [];
-        LabeledErrors = new Dictionary<string, IReadOnlyCollection<string>>();
-        IsLoading = true;
-        HasSucceed = false;
-        HasFailed = false;
-        NotifyChanged();
-    }
+    public virtual void Start() =>
+        SetState(
+            [],
+            new Dictionary<string, IReadOnlyCollection<string>>(),
+            isLoading: true,
+            hasSucceed: false,
+            hasFailed: false
+        );
 
     /// <summary>
     /// Gets a detailed string representation of the current error state
@@ -106,40 +107,62 @@ internal abstract class OperationStateBase : ObservableState, IOperationStateBas
     /// <summary>
     /// Internal method to mark the operation as successfully completed
     /// </summary>
-    protected void SucceedInternal()
-    {
-        PlainErrors = [];
-        LabeledErrors = new Dictionary<string, IReadOnlyCollection<string>>();
-        IsLoading = false;
-        HasSucceed = true;
-        HasFailed = false;
-        NotifyChanged();
-    }
+    protected void SucceedInternal() =>
+        SetState(
+            [],
+            new Dictionary<string, IReadOnlyCollection<string>>(),
+            isLoading: false,
+            hasSucceed: true,
+            hasFailed: false
+        );
 
     /// <summary>
-    /// Internal method to mark the operation as failed with the provided result
+    /// Internal method to mark the operation as failed with the provided result. The result's error collections
+    /// are copied defensively so the operation state cannot later be mutated through the caller's result.
     /// </summary>
     /// <param name="result">The result containing error information</param>
-    protected void FailInternal(IResultBase result)
-    {
-        PlainErrors = result.PlainErrors;
-        LabeledErrors = result.LabeledErrors;
-        IsLoading = false;
-        HasSucceed = false;
-        HasFailed = true;
-        NotifyChanged();
-    }
+    protected void FailInternal(IResultBase result) =>
+        SetState(
+            result.PlainErrors.ToArray(),
+            result.LabeledErrors.ToDictionary(x => x.Key, x => (IReadOnlyCollection<string>)x.Value.ToArray()),
+            isLoading: false,
+            hasSucceed: false,
+            hasFailed: true
+        );
 
     /// <summary>
     /// Internal method to reset the operation state to its initial state
     /// </summary>
-    protected void ResetInternal()
+    protected void ResetInternal() =>
+        SetState(
+            [],
+            new Dictionary<string, IReadOnlyCollection<string>>(),
+            isLoading: false,
+            hasSucceed: false,
+            hasFailed: false
+        );
+
+    /// <summary>
+    /// Assigns the error / loading / status fields in one place and fires a single change notification.
+    /// </summary>
+    /// <param name="plainErrors">The plain error messages.</param>
+    /// <param name="labeledErrors">The labeled error messages.</param>
+    /// <param name="isLoading">Whether the operation is loading.</param>
+    /// <param name="hasSucceed">Whether the operation has succeeded.</param>
+    /// <param name="hasFailed">Whether the operation has failed.</param>
+    private void SetState(
+        IReadOnlyCollection<string> plainErrors,
+        IReadOnlyDictionary<string, IReadOnlyCollection<string>> labeledErrors,
+        bool isLoading,
+        bool hasSucceed,
+        bool hasFailed
+    )
     {
-        PlainErrors = [];
-        LabeledErrors = new Dictionary<string, IReadOnlyCollection<string>>();
-        IsLoading = false;
-        HasSucceed = false;
-        HasFailed = false;
+        PlainErrors = plainErrors;
+        LabeledErrors = labeledErrors;
+        IsLoading = isLoading;
+        HasSucceed = hasSucceed;
+        HasFailed = hasFailed;
         NotifyChanged();
     }
 }

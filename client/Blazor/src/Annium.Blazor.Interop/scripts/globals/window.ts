@@ -1,18 +1,7 @@
 import cbTracker from '../trackers/cbTracker.js';
-import {getLog} from '../log.js';
-
-type KeyboardEventName =
-  | 'keydown'
-  | 'keyup'
-
-type MouseEventName =
-  | 'mousedown'
-  | 'mouseenter'
-  | 'mouseleave'
-  | 'mousemove'
-  | 'mouseout'
-  | 'mouseover'
-  | 'mouseup'
+import { getLog } from '../log.js';
+import * as events from '../events.js';
+import { KeyboardEventName, MouseEventName } from '../events.js';
 
 const log = getLog('window')
 
@@ -22,39 +11,15 @@ export const innerWidth = (): number => window.innerWidth
 export const innerHeight = (): number => window.innerHeight
 
 /* methods */
-export const onKeyboardEvent = (type: KeyboardEventName, ref: DotNet.DotNetObject, method: string, preventDefault: boolean): number => {
-  const callback = cbTracker.track(preventDefault
-    ? (e: KeyboardEvent) => {
-      e.preventDefault();
-      ref.invokeMethod(method, callback.id, [e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey])
-    }
-    : (e: KeyboardEvent) => {
-      ref.invokeMethod(method, callback.id, [e.key, e.code, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey])
-    })
-  log.debug('window', 'onKeyboardEvent', type, 'add callback', callback.id)
-  window.addEventListener(type, callback)
+export const onKeyboardEvent = (type: KeyboardEventName, ref: DotNet.DotNetObject, method: string, preventDefault: boolean): number =>
+  events.onKeyboardEvent(window, 'window', type, ref, method, preventDefault)
+export const offKeyboardEvent = (type: KeyboardEventName, cid: number): void =>
+  events.offKeyboardEvent(window, 'window', type, cid)
 
-  return callback.id
-}
-export const offKeyboardEvent = (type: KeyboardEventName, cid: number): void => {
-  log.debug('window', 'offKeyboardEvent', type, 'release callback', cid)
-  window.removeEventListener(type, cbTracker.release(cid))
-}
-
-export const onMouseEvent = (type: MouseEventName, ref: DotNet.DotNetObject, method: string): number => {
-  const callback = cbTracker.track((e: MouseEvent) => {
-    e.preventDefault();
-    ref.invokeMethod(method, callback.id, [e.clientX, e.clientY, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey])
-  })
-  log.debug('window', 'onMouseEvent', type, 'add callback', callback.id)
-  window.addEventListener(type, callback)
-
-  return callback.id
-}
-export const offMouseEvent = (type: MouseEventName, cid: number): void => {
-  log.debug('window', 'offMouseEvent', type, 'release callback', cid)
-  window.removeEventListener(type, cbTracker.release(cid))
-}
+export const onMouseEvent = (type: MouseEventName, ref: DotNet.DotNetObject, method: string): number =>
+  events.onMouseEvent(window, 'window', type, ref, method)
+export const offMouseEvent = (type: MouseEventName, cid: number): void =>
+  events.offMouseEvent(window, 'window', type, cid)
 
 export const onResizeEvent = (type: 'resize', ref: DotNet.DotNetObject, method: string): number => {
   const callback = cbTracker.track((_: UIEvent) => {
@@ -66,6 +31,6 @@ export const onResizeEvent = (type: 'resize', ref: DotNet.DotNetObject, method: 
   return callback.id
 }
 export const offResizeEvent = (type: 'resize', cid: number): void => {
-  log.debug('window', 'offEvent', type, 'release callback', cid)
+  log.debug('window', 'offResizeEvent', type, 'release callback', cid)
   window.removeEventListener(type, cbTracker.release(cid))
 }
