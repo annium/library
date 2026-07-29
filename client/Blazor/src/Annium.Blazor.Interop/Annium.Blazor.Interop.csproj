@@ -10,10 +10,13 @@
     <PackageReference Include="Annium.Core.DependencyInjection" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
   </ItemGroup>
-  <Target Name="InstallTsc">
-    <Exec Command="npm ci" />
+  <ItemGroup>
+    <TsScript Include="scripts/**/*.ts" />
+  </ItemGroup>
+  <Target Name="InstallTsc" Condition="'$(NoBuild)' != 'true' And '$(DesignTimeBuild)' != 'true'" Inputs="package-lock.json" Outputs="node_modules/.package-lock.json" Returns="">
+    <Exec Command="npm ci" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
-  <Target Name="CompileScripts" DependsOnTargets="InstallTsc">
-    <Exec Command="npm run compile" />
+  <Target Name="CompileScripts" DependsOnTargets="InstallTsc" Condition="'$(NoBuild)' != 'true' And '$(DesignTimeBuild)' != 'true'" Inputs="@(TsScript);tsconfig.json;package-lock.json" Outputs="wwwroot/index.js" Returns="">
+    <Exec Command="npm run compile" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 </Project>

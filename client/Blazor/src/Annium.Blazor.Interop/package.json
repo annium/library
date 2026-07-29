@@ -1,7 +1,7 @@
 {
   "name": "interop",
   "scripts": {
-    "compile": "tsc"
+    "compile": "node node_modules/typescript/bin/tsc"
   },
   "dependencies": {
     "typescript": "5.8.3"
