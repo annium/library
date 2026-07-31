@@ -29,10 +29,6 @@ internal class TemplateLoader : ITemplateLoader
         return Encoding.UTF8.GetString(resource.Content.Span);
     }
 
-    public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
-    {
-        var resource = _resourceLoader.Load(templatePath, _templateAssembly).Single();
-
-        return new ValueTask<string?>(Encoding.UTF8.GetString(resource.Content.Span));
-    }
+    public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath) =>
+        new(Load(context, callerSpan, templatePath));
 }

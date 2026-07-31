@@ -1,3 +1,4 @@
+using System;
 using Annium.Core.Entrypoint;
 using Annium.Extensions.Arguments;
 using Annium.XRest;
@@ -7,4 +8,13 @@ await using var entry = await Entrypoint.Default.UseServicePack<ServicePack>().S
 
 var (provider, ct) = entry;
 
-await Commander.RunAsync<Group>(provider, args, ct);
+try
+{
+    await Commander.RunAsync<Group>(provider, args, ct);
+    return 0;
+}
+catch (Exception e)
+{
+    Console.WriteLine(e.Message);
+    return 1;
+}

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using Annium.Net.Types.Extensions;
@@ -17,6 +18,8 @@ internal class Writer : IWriter
 
     public void Write(string output, ApiView api)
     {
+        EnsureSafeToWipe(output);
+
         if (Directory.Exists(output))
             Directory.Delete(output, true);
         Directory.CreateDirectory(output);
@@ -37,5 +40,36 @@ internal class Writer : IWriter
         where T : class
     {
         File.WriteAllText(Path.Combine(output, file), _templateWriter.Write(template, data));
+    }
+
+    /// <summary>
+    /// The output directory is deleted recursively before generation, so a mistyped <c>-o</c> is
+    /// destructive. Refuse the obviously wrong targets rather than wiping a working tree.
+    /// </summary>
+    private static void EnsureSafeToWipe(string output)
+    {
+        var path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(output));
+
+        if (Path.GetPathRoot(path) == path)
+            throw new InvalidOperationException($"Refusing to generate into a filesystem root: {path}");
+
+        var protectedPaths = new[]
+        {
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            Directory.GetCurrentDirectory(),
+        };
+
+        foreach (var protectedPath in protectedPaths)
+            if (
+                protectedPath.Length > 0
+                && path.Equals(
+                    Path.TrimEndingDirectorySeparator(Path.GetFullPath(protectedPath)),
+                    StringComparison.Ordinal
+                )
+            )
+                throw new InvalidOperationException($"Refusing to generate into {path} — it would be deleted");
+
+        if (Directory.Exists(Path.Combine(path, ".git")))
+            throw new InvalidOperationException($"Refusing to generate into a repository root: {path}");
     }
 }

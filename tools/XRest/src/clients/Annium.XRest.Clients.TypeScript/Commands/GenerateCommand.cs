@@ -32,7 +32,7 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ICo
         this.Info<string>("Generate '{projectName}' client", cfg.ProjectName);
 
         this.Info<string>("Load '{projectName}' model", cfg.ProjectName);
-        var model = await _apiModelLoader.LoadAsync(cfg);
+        var model = await _apiModelLoader.LoadAsync(cfg, ct);
 
         this.Info("Process api model to api view");
         var view = _processor.Process(model);
