@@ -24,25 +24,83 @@ internal class LintService
         var root = syntaxTree.GetRoot(ct);
         var errors = new List<string>();
 
-        // every type in the file, nested ones included — each is visited exactly once and only its
-        // own immediate members are checked, so a nested type's members are not also reported
-        // against the containing type
-        foreach (var typeDeclaration in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
+        // every type in the file, nested ones and enums included — each is visited exactly once and
+        // only its own immediate members are checked, so a nested type's members are not also
+        // reported against the containing type
+        foreach (var typeDeclaration in root.DescendantNodes().OfType<BaseTypeDeclarationSyntax>())
         {
             var typeName = GetQualifiedName(typeDeclaration);
 
             CheckSummary(typeDeclaration, typeName, errors);
 
-            foreach (var member in typeDeclaration.Members)
+            if (typeDeclaration is EnumDeclarationSyntax enumDeclaration)
+            {
+                foreach (var enumMember in enumDeclaration.Members)
+                    CheckSummary(enumMember, $"{typeName}.{enumMember.Identifier.Text}", errors);
+
+                continue;
+            }
+
+            if (typeDeclaration is not TypeDeclarationSyntax type)
+                continue;
+
+            // primary constructor parameters are documented as <param> on the type itself
+            if (type.ParameterList is not null && GetXmlDoc(type) is { } typeXmlDoc)
+                CheckParameters(typeXmlDoc, typeName, type.ParameterList, errors);
+
+            foreach (var member in type.Members)
                 switch (member)
                 {
                     case MethodDeclarationSyntax method:
-                        CheckMethodDocumentation(typeName, method, errors);
+                        CheckInvocable(
+                            method,
+                            $"{typeName}.{method.Identifier.Text}",
+                            method.ParameterList,
+                            method.ReturnType,
+                            errors
+                        );
+                        break;
+                    case ConstructorDeclarationSyntax constructor:
+                        CheckInvocable(
+                            constructor,
+                            $"{typeName}.{constructor.Identifier.Text}",
+                            constructor.ParameterList,
+                            returnType: null,
+                            errors
+                        );
+                        break;
+                    case OperatorDeclarationSyntax @operator:
+                        CheckInvocable(
+                            @operator,
+                            $"{typeName}.operator {@operator.OperatorToken.Text}",
+                            @operator.ParameterList,
+                            @operator.ReturnType,
+                            errors
+                        );
+                        break;
+                    case ConversionOperatorDeclarationSyntax conversion:
+                        CheckInvocable(
+                            conversion,
+                            $"{typeName}.{conversion.ImplicitOrExplicitKeyword.Text} operator {conversion.Type}",
+                            conversion.ParameterList,
+                            conversion.Type,
+                            errors
+                        );
+                        break;
+                    case IndexerDeclarationSyntax indexer:
+                        CheckIndexerDocumentation(typeName, indexer, errors);
                         break;
                     case PropertyDeclarationSyntax property:
                         CheckSummary(property, $"{typeName}.{property.Identifier.Text}", errors);
                         break;
-                    // a single field declaration may declare several variables: `int _a, _b;`
+                    case EventDeclarationSyntax @event:
+                        CheckSummary(@event, $"{typeName}.{@event.Identifier.Text}", errors);
+                        break;
+                    // a single field/event-field declaration may declare several variables: `int _a, _b;`
+                    case EventFieldDeclarationSyntax eventField:
+                        foreach (var variable in eventField.Declaration.Variables)
+                            CheckSummary(eventField, $"{typeName}.{variable.Identifier.Text}", errors);
+                        break;
                     case FieldDeclarationSyntax field:
                         foreach (var variable in field.Declaration.Variables)
                             CheckSummary(field, $"{typeName}.{variable.Identifier.Text}", errors);
@@ -56,36 +114,45 @@ internal class LintService
         return errors;
     }
 
-    private void CheckMethodDocumentation(string typeName, MethodDeclarationSyntax method, List<string> errors)
-    {
-        var name = $"{typeName}.{method.Identifier.Text}";
+    private void CheckDelegateDocumentation(DelegateDeclarationSyntax delegateDeclaration, List<string> errors) =>
+        CheckInvocable(
+            delegateDeclaration,
+            GetQualifiedName(delegateDeclaration),
+            delegateDeclaration.ParameterList,
+            delegateDeclaration.ReturnType,
+            errors
+        );
 
-        var xmlDoc = GetXmlDoc(method);
+    private void CheckIndexerDocumentation(string typeName, IndexerDeclarationSyntax indexer, List<string> errors) =>
+        CheckInvocable(indexer, $"{typeName}.this[]", indexer.ParameterList, indexer.Type, errors);
+
+    /// <summary>
+    /// Checks anything that takes parameters and optionally returns a value — method, constructor,
+    /// operator, indexer or delegate. A null <paramref name="returnType"/> means the declaration
+    /// has no return value to document (a constructor).
+    /// </summary>
+    private void CheckInvocable(
+        SyntaxNode declaration,
+        string name,
+        BaseParameterListSyntax parameterList,
+        TypeSyntax? returnType,
+        List<string> errors
+    )
+    {
+        var required = returnType is null ? "summary, param" : "summary, param, returns";
+
+        var xmlDoc = GetXmlDoc(declaration);
         if (xmlDoc is null)
         {
-            errors.Add($"{name}: Missing documentation. Required blocks: summary, param, returns");
+            errors.Add($"{name}: Missing documentation. Required blocks: {required}");
             return;
         }
 
         CheckSummary(xmlDoc, name, errors);
-        CheckParameters(xmlDoc, name, method.ParameterList, errors);
-        CheckReturns(xmlDoc, name, method.ReturnType, errors);
-    }
+        CheckParameters(xmlDoc, name, parameterList, errors);
 
-    private void CheckDelegateDocumentation(DelegateDeclarationSyntax delegateDeclaration, List<string> errors)
-    {
-        var name = GetQualifiedName(delegateDeclaration);
-
-        var xmlDoc = GetXmlDoc(delegateDeclaration);
-        if (xmlDoc is null)
-        {
-            errors.Add($"{name}: Missing documentation. Required blocks: summary, param, returns");
-            return;
-        }
-
-        CheckSummary(xmlDoc, name, errors);
-        CheckParameters(xmlDoc, name, delegateDeclaration.ParameterList, errors);
-        CheckReturns(xmlDoc, name, delegateDeclaration.ReturnType, errors);
+        if (returnType is not null)
+            CheckReturns(xmlDoc, name, returnType, errors);
     }
 
     private void CheckSummary(SyntaxNode declaration, string name, List<string> errors)
@@ -111,7 +178,7 @@ internal class LintService
     private void CheckParameters(
         DocumentationCommentTriviaSyntax xmlDoc,
         string name,
-        ParameterListSyntax parameterList,
+        BaseParameterListSyntax parameterList,
         List<string> errors
     )
     {
@@ -170,7 +237,7 @@ internal class LintService
         {
             declaration switch
             {
-                TypeDeclarationSyntax type => type.Identifier.Text,
+                BaseTypeDeclarationSyntax type => type.Identifier.Text,
                 DelegateDeclarationSyntax @delegate => @delegate.Identifier.Text,
                 _ => string.Empty,
             },

@@ -328,4 +328,226 @@ public class LintServiceTests
         errors.Count(x => x.StartsWith("A.Run:")).Is(1);
         errors.Count(x => x.StartsWith("B.Run:")).Is(1);
     }
+
+    [Fact]
+    public void Lint_UndocumentedEnum_ReportsTypeAndMembers()
+    {
+        // arrange — enums are not TypeDeclarationSyntax, so they were skipped entirely
+        const string source = """
+            namespace T;
+
+            public enum Sample
+            {
+                One,
+                Two,
+            }
+            """;
+
+        // act
+        var errors = Lint(source);
+
+        // assert
+        errors.Has(3);
+        errors.At(0).IsEqual("Sample: Missing documentation. Required blocks: summary");
+        errors.At(1).IsEqual("Sample.One: Missing documentation. Required blocks: summary");
+        errors.At(2).IsEqual("Sample.Two: Missing documentation. Required blocks: summary");
+    }
+
+    [Fact]
+    public void Lint_DocumentedEnum_ReportsNothing()
+    {
+        // arrange
+        const string source = """
+            namespace T;
+
+            /// <summary>Sample.</summary>
+            public enum Sample
+            {
+                /// <summary>One.</summary>
+                One,
+            }
+            """;
+
+        // act
+        var errors = Lint(source);
+
+        // assert
+        errors.IsEmpty();
+    }
+
+    [Fact]
+    public void Lint_UndocumentedConstructor_ReportsSummaryAndParamButNotReturns()
+    {
+        // arrange
+        const string source = """
+            namespace T;
+
+            /// <summary>Sample.</summary>
+            public class Sample
+            {
+                public Sample(int value) { }
+            }
+            """;
+
+        // act
+        var errors = Lint(source);
+
+        // assert
+        errors.Has(1).At(0).IsEqual("Sample.Sample: Missing documentation. Required blocks: summary, param");
+    }
+
+    [Fact]
+    public void Lint_DocumentedConstructor_ReportsNothing()
+    {
+        // arrange
+        const string source = """
+            namespace T;
+
+            /// <summary>Sample.</summary>
+            public class Sample
+            {
+                /// <summary>Creates.</summary>
+                /// <param name="value">The value.</param>
+                public Sample(int value) { }
+            }
+            """;
+
+        // act
+        var errors = Lint(source);
+
+        // assert
+        errors.IsEmpty();
+    }
+
+    [Fact]
+    public void Lint_UndocumentedEvent_ReportsSummary()
+    {
+        // arrange
+        const string source = """
+            namespace T;
+
+            using System;
+
+            /// <summary>Sample.</summary>
+            public class Sample
+            {
+                public event Action Changed;
+            }
+            """;
+
+        // act
+        var errors = Lint(source);
+
+        // assert
+        errors.Has(1).At(0).IsEqual("Sample.Changed: Missing documentation. Required blocks: summary");
+    }
+
+    [Fact]
+    public void Lint_UndocumentedPrimaryConstructorParameter_ReportsParameterAgainstType()
+    {
+        // arrange
+        const string source = """
+            namespace T;
+
+            /// <summary>Sample.</summary>
+            public record Sample(int Value);
+            """;
+
+        // act
+        var errors = Lint(source);
+
+        // assert
+        errors.Has(1).At(0).IsEqual("Sample.Value: Missing or empty parameter documentation");
+    }
+
+    [Fact]
+    public void Lint_DocumentedPrimaryConstructorParameter_ReportsNothing()
+    {
+        // arrange
+        const string source = """
+            namespace T;
+
+            /// <summary>Sample.</summary>
+            /// <param name="Value">The value.</param>
+            public record Sample(int Value);
+            """;
+
+        // act
+        var errors = Lint(source);
+
+        // assert
+        errors.IsEmpty();
+    }
+
+    [Fact]
+    public void Lint_UndocumentedIndexer_ReportsSummaryParamAndReturns()
+    {
+        // arrange
+        const string source = """
+            namespace T;
+
+            /// <summary>Sample.</summary>
+            public class Sample
+            {
+                public int this[int index] => index;
+            }
+            """;
+
+        // act
+        var errors = Lint(source);
+
+        // assert
+        errors.Has(1).At(0).IsEqual("Sample.this[]: Missing documentation. Required blocks: summary, param, returns");
+    }
+
+    [Fact]
+    public void Lint_UndocumentedOperator_ReportsSummaryParamAndReturns()
+    {
+        // arrange
+        const string source = """
+            namespace T;
+
+            /// <summary>Sample.</summary>
+            public class Sample
+            {
+                public static bool operator ==(Sample a, Sample b) => true;
+
+                public static bool operator !=(Sample a, Sample b) => false;
+            }
+            """;
+
+        // act
+        var errors = Lint(source);
+
+        // assert
+        errors.Has(2);
+        errors.At(0).IsEqual("Sample.operator ==: Missing documentation. Required blocks: summary, param, returns");
+        errors.At(1).IsEqual("Sample.operator !=: Missing documentation. Required blocks: summary, param, returns");
+    }
+
+    [Fact]
+    public void Lint_NestedEnum_QualifiesByContainingType()
+    {
+        // arrange
+        const string source = """
+            namespace T;
+
+            /// <summary>Outer.</summary>
+            public class Outer
+            {
+                public enum Inner
+                {
+                    One,
+                }
+            }
+            """;
+
+        // act
+        var errors = Lint(source);
+
+        // assert
+        errors.Has(2);
+        errors.At(0).IsEqual("Outer.Inner: Missing documentation. Required blocks: summary");
+        errors.At(1).IsEqual("Outer.Inner.One: Missing documentation. Required blocks: summary");
+    }
 }
