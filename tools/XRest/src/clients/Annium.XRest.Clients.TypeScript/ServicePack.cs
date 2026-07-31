@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.XRest.Clients.TypeScript.Commands;
 using Annium.XRest.Clients.TypeScript.Components;
@@ -8,13 +10,15 @@ namespace Annium.XRest.Clients.TypeScript;
 
 public class ServicePack : ServicePackBase
 {
-    public override void Register(IServiceContainer container, IServiceProvider provider)
+    public override Task RegisterAsync(IServiceContainer container, IServiceProvider provider, CancellationToken ct)
     {
         // components
         // container.Add<IProcessor, Processor>().Singleton();
         container.Add<IWriter, Writer>().Singleton();
 
         RegisterCommands(container);
+
+        return Task.CompletedTask;
     }
 
     private void RegisterCommands(IServiceContainer container)

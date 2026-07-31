@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
 using Annium.Core.Runtime;
@@ -20,7 +22,7 @@ internal class ServicePack : ServicePackBase
         Add<Clients.Shared.ServicePack>();
     }
 
-    public override void Register(IServiceContainer container, IServiceProvider provider)
+    public override Task RegisterAsync(IServiceContainer container, IServiceProvider provider, CancellationToken ct)
     {
         container.AddRuntime(GetType().Assembly);
         container.AddTime().WithRealTime().SetDefault();
@@ -29,10 +31,14 @@ internal class ServicePack : ServicePackBase
         container.AddMapper();
         container.AddHttpRequestFactory(Constants.IndexKey);
         container.AddXRestSerializer();
+
+        return Task.CompletedTask;
     }
 
-    public override void Setup(IServiceProvider provider)
+    public override Task SetupAsync(IServiceProvider provider, CancellationToken ct)
     {
         provider.UseLogging(route => route.UseConsole());
+
+        return Task.CompletedTask;
     }
 }

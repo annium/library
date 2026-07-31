@@ -115,14 +115,14 @@ internal static class RefProcessor
         return Process(reference, reference.Args, ctx);
     }
 
-    private static string Process(IModelRef reference, IRef[] refArgs, ProcessingContext ctx)
+    private static string Process(IModelRef reference, IReadOnlyList<IRef> refArgs, ProcessingContext ctx)
     {
         if (ctx.HasModelFor(reference))
             ctx.UseNamespace(reference.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace));
         else
             ctx.UseNamespace(reference.Namespace);
 
-        if (refArgs.Length == 0)
+        if (refArgs.Count == 0)
             return reference.Name;
 
         var sb = new StringBuilder(reference.Name);

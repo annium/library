@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Annium.Configuration.Abstractions;
 using Annium.Configuration.Yaml;
 using Annium.Core.DependencyInjection;
@@ -26,11 +28,18 @@ internal class ServicePack : ServicePackBase
         Add<Storage.ServicePack>();
     }
 
-    public override void Register(IServiceContainer container, IServiceProvider provider)
+    public override async Task RegisterAsync(
+        IServiceContainer container,
+        IServiceProvider provider,
+        CancellationToken ct
+    )
     {
         container.AddRuntime(GetType().Assembly);
         container.AddTime().WithRealTime().SetDefault();
-        container.AddConfiguration<Configuration>(x => x.AddYamlFile(Path.Combine("configuration", "config.yml")));
+        await container.AddConfigurationAsync<Configuration>(
+            x => x.AddYamlFile(Path.Combine("configuration", "config.yml")),
+            ct
+        );
         // container.AddFileSystemStorage().AddS3Storage();
 
         container.Add<StateFactory>().AsSelf().Singleton();
@@ -43,7 +52,7 @@ internal class ServicePack : ServicePackBase
         container.AddLogging();
     }
 
-    public override void Setup(IServiceProvider provider)
+    public override Task SetupAsync(IServiceProvider provider, CancellationToken ct)
     {
         provider.UseLogging(route => route.UseConsole());
 
@@ -59,5 +68,7 @@ internal class ServicePack : ServicePackBase
         {
             throw ex.InnerException!;
         }
+
+        return Task.CompletedTask;
     }
 }

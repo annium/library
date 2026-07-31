@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Extensions.Shell;
 using Annium.Logging;
@@ -8,7 +10,7 @@ namespace Backuper.Connection.PostgreSQL;
 
 public class ServicePack : ServicePackBase
 {
-    public override void Register(IServiceContainer container, IServiceProvider provider)
+    public override Task RegisterAsync(IServiceContainer container, IServiceProvider provider, CancellationToken ct)
     {
         Func<Configuration, IConnection> Factory(IServiceProvider sp) =>
             configuration => new ConnectionProxy(
@@ -18,5 +20,7 @@ public class ServicePack : ServicePackBase
             );
 
         container.Add(Factory).AsSelf().Singleton();
+
+        return Task.CompletedTask;
     }
 }

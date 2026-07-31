@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
 using Annium.Core.Runtime;
@@ -12,7 +14,7 @@ namespace Annium.DocLint;
 
 internal class ServicePack : ServicePackBase
 {
-    public override void Register(IServiceContainer container, IServiceProvider provider)
+    public override Task RegisterAsync(IServiceContainer container, IServiceProvider provider, CancellationToken ct)
     {
         container.AddRuntime(GetType().Assembly);
         container.AddTime().WithRealTime().SetDefault();
@@ -21,10 +23,14 @@ internal class ServicePack : ServicePackBase
         container.AddMapper();
 
         container.Add<LintService>().AsSelf().Singleton();
+
+        return Task.CompletedTask;
     }
 
-    public override void Setup(IServiceProvider provider)
+    public override Task SetupAsync(IServiceProvider provider, CancellationToken ct)
     {
         provider.UseLogging(route => route.UseConsole());
+
+        return Task.CompletedTask;
     }
 }
