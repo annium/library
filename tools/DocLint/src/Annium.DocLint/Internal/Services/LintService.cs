@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,260 +11,174 @@ namespace Annium.DocLint.Internal.Services;
 
 internal class LintService
 {
-    public async Task<IReadOnlyList<string>> LintAsync(string file)
+    public async Task<IReadOnlyList<string>> LintAsync(string file, CancellationToken ct)
     {
-        var sourceText = await File.ReadAllTextAsync(file);
-        var syntaxTree = CSharpSyntaxTree.ParseText(sourceText);
-        var root = await syntaxTree.GetRootAsync();
+        var sourceText = await File.ReadAllTextAsync(file, ct);
+
+        return Lint(sourceText, ct);
+    }
+
+    public IReadOnlyList<string> Lint(string sourceText, CancellationToken ct = default)
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(sourceText, cancellationToken: ct);
+        var root = syntaxTree.GetRoot(ct);
         var errors = new List<string>();
 
-        // Check types (classes, structs, interfaces, delegates)
+        // every type in the file, nested ones included — each is visited exactly once and only its
+        // own immediate members are checked, so a nested type's members are not also reported
+        // against the containing type
         foreach (var typeDeclaration in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
         {
-            CheckTypeDocumentation(typeDeclaration, errors);
+            var typeName = GetQualifiedName(typeDeclaration);
 
-            // Check methods within the type
-            foreach (var methodDeclaration in typeDeclaration.DescendantNodes().OfType<MethodDeclarationSyntax>())
-            {
-                CheckMethodDocumentation(typeDeclaration.Identifier.Text, methodDeclaration, errors);
-            }
+            CheckSummary(typeDeclaration, typeName, errors);
 
-            // Check properties within the type
-            foreach (var propertyDeclaration in typeDeclaration.DescendantNodes().OfType<PropertyDeclarationSyntax>())
-            {
-                CheckPropertyDocumentation(typeDeclaration.Identifier.Text, propertyDeclaration, errors);
-            }
-
-            // Check fields within the type
-            foreach (var fieldDeclaration in typeDeclaration.DescendantNodes().OfType<FieldDeclarationSyntax>())
-            {
-                var fieldName = fieldDeclaration.Declaration.Variables.Single().Identifier.Text;
-                CheckFieldDocumentation(typeDeclaration.Identifier.Text, fieldName, fieldDeclaration, errors);
-            }
+            foreach (var member in typeDeclaration.Members)
+                switch (member)
+                {
+                    case MethodDeclarationSyntax method:
+                        CheckMethodDocumentation(typeName, method, errors);
+                        break;
+                    case PropertyDeclarationSyntax property:
+                        CheckSummary(property, $"{typeName}.{property.Identifier.Text}", errors);
+                        break;
+                    // a single field declaration may declare several variables: `int _a, _b;`
+                    case FieldDeclarationSyntax field:
+                        foreach (var variable in field.Declaration.Variables)
+                            CheckSummary(field, $"{typeName}.{variable.Identifier.Text}", errors);
+                        break;
+                }
         }
 
-        // Check delegate declarations
         foreach (var delegateDeclaration in root.DescendantNodes().OfType<DelegateDeclarationSyntax>())
-        {
             CheckDelegateDocumentation(delegateDeclaration, errors);
-        }
 
         return errors;
     }
 
-    private void CheckTypeDocumentation(TypeDeclarationSyntax typeDeclaration, List<string> errors)
+    private void CheckMethodDocumentation(string typeName, MethodDeclarationSyntax method, List<string> errors)
     {
-        var xmlDoc = typeDeclaration
-            .GetLeadingTrivia()
-            .Select(t => t.GetStructure())
-            .OfType<DocumentationCommentTriviaSyntax>()
-            .FirstOrDefault();
+        var name = $"{typeName}.{method.Identifier.Text}";
 
-        if (xmlDoc == null)
+        var xmlDoc = GetXmlDoc(method);
+        if (xmlDoc is null)
         {
-            errors.Add($"{typeDeclaration.Identifier.Text}: Missing documentation. Required blocks: summary");
+            errors.Add($"{name}: Missing documentation. Required blocks: summary, param, returns");
             return;
         }
 
-        var summary = xmlDoc
-            .DescendantNodes()
-            .OfType<XmlElementSyntax>()
-            .FirstOrDefault(x => x.StartTag.Name.LocalName.Text == "summary");
-
-        if (summary == null || string.IsNullOrWhiteSpace(summary.Content.ToString()))
-        {
-            errors.Add($"{typeDeclaration.Identifier.Text}: Missing or empty summary documentation");
-        }
-    }
-
-    private void CheckMethodDocumentation(
-        string typeName,
-        MethodDeclarationSyntax methodDeclaration,
-        List<string> errors
-    )
-    {
-        var xmlDoc = methodDeclaration
-            .GetLeadingTrivia()
-            .Select(t => t.GetStructure())
-            .OfType<DocumentationCommentTriviaSyntax>()
-            .FirstOrDefault();
-
-        if (xmlDoc == null)
-        {
-            errors.Add(
-                $"{typeName}.{methodDeclaration.Identifier.Text}: Missing documentation Required blocks: summary, param, return"
-            );
-            return;
-        }
-
-        var summary = xmlDoc
-            .DescendantNodes()
-            .OfType<XmlElementSyntax>()
-            .FirstOrDefault(x => x.StartTag.Name.LocalName.Text == "summary");
-
-        if (summary == null || string.IsNullOrWhiteSpace(summary.Content.ToString()))
-        {
-            errors.Add($"{typeName}.{methodDeclaration.Identifier.Text}: Missing or empty summary documentation");
-        }
-
-        // Check parameters
-        foreach (var parameter in methodDeclaration.ParameterList.Parameters)
-        {
-            var paramDoc = xmlDoc
-                .DescendantNodes()
-                .OfType<XmlElementSyntax>()
-                .FirstOrDefault(x =>
-                    x.StartTag.Name.LocalName.Text == "param"
-                    && x.StartTag.Attributes.OfType<XmlNameAttributeSyntax>()
-                        .Any(a => a.Identifier.Identifier.Text == parameter.Identifier.Text.TrimStart('@'))
-                );
-
-            if (paramDoc == null || string.IsNullOrWhiteSpace(paramDoc.Content.ToString()))
-            {
-                errors.Add(
-                    $"{typeName}.{methodDeclaration.Identifier.Text}.{parameter.Identifier.Text}: Missing or empty parameter documentation"
-                );
-            }
-        }
-
-        // Check return value if not void
-        if (
-            methodDeclaration.ReturnType is not PredefinedTypeSyntax predefinedType
-            || !predefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword)
-        )
-        {
-            var returns = xmlDoc
-                .DescendantNodes()
-                .OfType<XmlElementSyntax>()
-                .FirstOrDefault(x => x.StartTag.Name.LocalName.Text == "returns");
-
-            if (returns == null || string.IsNullOrWhiteSpace(returns.Content.ToString()))
-            {
-                errors.Add($"{typeName}.{methodDeclaration.Identifier.Text}: Missing or empty returns documentation");
-            }
-        }
-    }
-
-    private void CheckPropertyDocumentation(
-        string typeName,
-        PropertyDeclarationSyntax propertyDeclaration,
-        List<string> errors
-    )
-    {
-        var xmlDoc = propertyDeclaration
-            .GetLeadingTrivia()
-            .Select(t => t.GetStructure())
-            .OfType<DocumentationCommentTriviaSyntax>()
-            .FirstOrDefault();
-
-        if (xmlDoc == null)
-        {
-            errors.Add(
-                $"{typeName}.{propertyDeclaration.Identifier.Text}: Missing documentation. Required blocks: summary"
-            );
-            return;
-        }
-
-        var summary = xmlDoc
-            .DescendantNodes()
-            .OfType<XmlElementSyntax>()
-            .FirstOrDefault(x => x.StartTag.Name.LocalName.Text == "summary");
-
-        if (summary == null || string.IsNullOrWhiteSpace(summary.Content.ToString()))
-        {
-            errors.Add($"{typeName}.{propertyDeclaration.Identifier.Text}: Missing or empty summary documentation");
-        }
-    }
-
-    private void CheckFieldDocumentation(
-        string typeName,
-        string fieldName,
-        FieldDeclarationSyntax fieldDeclaration,
-        List<string> errors
-    )
-    {
-        var xmlDoc = fieldDeclaration
-            .GetLeadingTrivia()
-            .Select(t => t.GetStructure())
-            .OfType<DocumentationCommentTriviaSyntax>()
-            .FirstOrDefault();
-
-        if (xmlDoc == null)
-        {
-            errors.Add($"{typeName}.{fieldName}: Missing documentation. Required blocks: summary");
-            return;
-        }
-
-        var summary = xmlDoc
-            .DescendantNodes()
-            .OfType<XmlElementSyntax>()
-            .FirstOrDefault(x => x.StartTag.Name.LocalName.Text == "summary");
-
-        if (summary == null || string.IsNullOrWhiteSpace(summary.Content.ToString()))
-        {
-            errors.Add($"{typeName}.{fieldName}: Missing or empty summary documentation");
-        }
+        CheckSummary(xmlDoc, name, errors);
+        CheckParameters(xmlDoc, name, method.ParameterList, errors);
+        CheckReturns(xmlDoc, name, method.ReturnType, errors);
     }
 
     private void CheckDelegateDocumentation(DelegateDeclarationSyntax delegateDeclaration, List<string> errors)
     {
-        var xmlDoc = delegateDeclaration
-            .GetLeadingTrivia()
-            .Select(t => t.GetStructure())
-            .OfType<DocumentationCommentTriviaSyntax>()
-            .FirstOrDefault();
+        var name = GetQualifiedName(delegateDeclaration);
 
-        if (xmlDoc == null)
+        var xmlDoc = GetXmlDoc(delegateDeclaration);
+        if (xmlDoc is null)
         {
-            errors.Add($"{delegateDeclaration.Identifier.Text}: Missing documentation. Required blocks: summary");
+            errors.Add($"{name}: Missing documentation. Required blocks: summary, param, returns");
             return;
         }
 
-        var summary = xmlDoc
-            .DescendantNodes()
-            .OfType<XmlElementSyntax>()
-            .FirstOrDefault(x => x.StartTag.Name.LocalName.Text == "summary");
+        CheckSummary(xmlDoc, name, errors);
+        CheckParameters(xmlDoc, name, delegateDeclaration.ParameterList, errors);
+        CheckReturns(xmlDoc, name, delegateDeclaration.ReturnType, errors);
+    }
 
-        if (summary == null || string.IsNullOrWhiteSpace(summary.Content.ToString()))
+    private void CheckSummary(SyntaxNode declaration, string name, List<string> errors)
+    {
+        var xmlDoc = GetXmlDoc(declaration);
+        if (xmlDoc is null)
         {
-            errors.Add($"{delegateDeclaration.Identifier.Text}: Missing or empty summary documentation");
+            errors.Add($"{name}: Missing documentation. Required blocks: summary");
+            return;
         }
 
-        // Check parameters
-        foreach (var parameter in delegateDeclaration.ParameterList.Parameters)
+        CheckSummary(xmlDoc, name, errors);
+    }
+
+    private void CheckSummary(DocumentationCommentTriviaSyntax xmlDoc, string name, List<string> errors)
+    {
+        var summary = GetElement(xmlDoc, "summary");
+
+        if (summary is null || string.IsNullOrWhiteSpace(summary.Content.ToString()))
+            errors.Add($"{name}: Missing or empty summary documentation");
+    }
+
+    private void CheckParameters(
+        DocumentationCommentTriviaSyntax xmlDoc,
+        string name,
+        ParameterListSyntax parameterList,
+        List<string> errors
+    )
+    {
+        foreach (var parameter in parameterList.Parameters)
         {
+            // `@` escapes a keyword identifier and is not part of the documented name
+            var parameterName = parameter.Identifier.Text.TrimStart('@');
+
             var paramDoc = xmlDoc
                 .DescendantNodes()
                 .OfType<XmlElementSyntax>()
                 .FirstOrDefault(x =>
                     x.StartTag.Name.LocalName.Text == "param"
                     && x.StartTag.Attributes.OfType<XmlNameAttributeSyntax>()
-                        .Any(a => a.Identifier.Identifier.Text == parameter.Identifier.Text)
+                        .Any(a => a.Identifier.Identifier.Text == parameterName)
                 );
 
-            if (paramDoc == null || string.IsNullOrWhiteSpace(paramDoc.Content.ToString()))
-            {
-                errors.Add(
-                    $"{delegateDeclaration.Identifier.Text}.{parameter.Identifier.Text}: Missing or empty parameter documentation"
-                );
-            }
+            if (paramDoc is null || string.IsNullOrWhiteSpace(paramDoc.Content.ToString()))
+                errors.Add($"{name}.{parameter.Identifier.Text}: Missing or empty parameter documentation");
         }
+    }
 
-        // Check return value if not void
-        if (
-            delegateDeclaration.ReturnType is not PredefinedTypeSyntax predefinedType
-            || !predefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword)
-        )
+    private void CheckReturns(
+        DocumentationCommentTriviaSyntax xmlDoc,
+        string name,
+        TypeSyntax returnType,
+        List<string> errors
+    )
+    {
+        if (returnType is PredefinedTypeSyntax predefinedType && predefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword))
+            return;
+
+        var returns = GetElement(xmlDoc, "returns");
+
+        if (returns is null || string.IsNullOrWhiteSpace(returns.Content.ToString()))
+            errors.Add($"{name}: Missing or empty returns documentation");
+    }
+
+    private static DocumentationCommentTriviaSyntax? GetXmlDoc(SyntaxNode declaration) =>
+        declaration
+            .GetLeadingTrivia()
+            .Select(t => t.GetStructure())
+            .OfType<DocumentationCommentTriviaSyntax>()
+            .FirstOrDefault();
+
+    private static XmlElementSyntax? GetElement(DocumentationCommentTriviaSyntax xmlDoc, string name) =>
+        xmlDoc.DescendantNodes().OfType<XmlElementSyntax>().FirstOrDefault(x => x.StartTag.Name.LocalName.Text == name);
+
+    /// <summary>
+    /// Builds the declaration name qualified by its containing types, so a nested member reads as
+    /// <c>Outer.Inner.Method</c> instead of colliding with a same-named member of another type.
+    /// </summary>
+    private static string GetQualifiedName(MemberDeclarationSyntax declaration)
+    {
+        var names = new List<string>
         {
-            var returns = xmlDoc
-                .DescendantNodes()
-                .OfType<XmlElementSyntax>()
-                .FirstOrDefault(x => x.StartTag.Name.LocalName.Text == "returns");
-
-            if (returns == null || string.IsNullOrWhiteSpace(returns.Content.ToString()))
+            declaration switch
             {
-                errors.Add($"{delegateDeclaration.Identifier.Text}: Missing or empty returns documentation");
-            }
-        }
+                TypeDeclarationSyntax type => type.Identifier.Text,
+                DelegateDeclarationSyntax @delegate => @delegate.Identifier.Text,
+                _ => string.Empty,
+            },
+        };
+
+        for (var node = declaration.Parent; node is TypeDeclarationSyntax parent; node = node.Parent)
+            names.Insert(0, parent.Identifier.Text);
+
+        return string.Join('.', names);
     }
 }
