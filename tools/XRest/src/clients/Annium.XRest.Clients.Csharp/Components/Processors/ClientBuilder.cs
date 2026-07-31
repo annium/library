@@ -41,9 +41,12 @@ internal static class ClientBuilder
 
         var childControllers = lookup[true].ToArray();
 
+        // the container type lives in the namespace it is named after, so naming it after the bare
+        // last segment ("Admin" inside "…Clients.Admin") makes the reference from the parent resolve
+        // to the namespace instead of the type — CS0118. The "Root" suffix keeps the two distinct.
         var ancestors = lookup[false]
             .GroupBy(x => x.Namespace)
-            .ToDictionary(x => x.Key, x => BuildClient(x.Key, x.Key[^1], $"{x.Key[^1]}Root", x.ToArray()));
+            .ToDictionary(x => x.Key, x => BuildClient(x.Key, $"{x.Key[^1]}Root", $"{x.Key[^1]}Root", x.ToArray()));
 
         var usages = childControllers
             .Select(x => x.Namespace)

@@ -45,8 +45,10 @@ internal static class RefProcessor
                 return reference.Name;
             case BaseType.Guid:
                 return Type<Guid>();
+            // must mirror Annium.Net.Types' own base-type mapping: LocalDateTime ↔ dateTime,
+            // LocalTime ↔ time. Emitting LocalTime here silently dropped the date component
             case BaseType.DateTime:
-                return Type<LocalTime>();
+                return Type<LocalDateTime>();
             case BaseType.DateTimeOffset:
                 return Type<Instant>();
             case BaseType.Date:
