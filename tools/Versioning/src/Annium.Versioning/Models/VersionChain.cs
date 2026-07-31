@@ -4,7 +4,6 @@ namespace Annium.Versioning.Models;
 
 public readonly record struct VersionChain(uint Major, uint Minor)
 {
-    public static VersionChain Empty { get; } = new(0, 0);
     public static VersionChain Minimal { get; } = new(0, 1);
     private static readonly Regex _regex = new(@"^(\d+)\.(\d+)$");
 
