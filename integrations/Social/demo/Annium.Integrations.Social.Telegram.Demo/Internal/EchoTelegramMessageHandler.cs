@@ -21,9 +21,9 @@ internal class EchoTelegramMessageHandler : ITelegramMessageHandler, ILogSubject
         this.Trace("start");
 
         var message = update.Message ?? update.EditedMessage;
-        if (message is null)
+        if (message?.Text is null)
         {
-            this.Trace("noop - no message to echo");
+            this.Trace("noop - no text message to echo");
             return;
         }
 

@@ -16,13 +16,33 @@ using Constants = Annium.Integrations.Social.Telegram.Internal.Constants;
 // ReSharper disable once CheckNamespace
 namespace Annium.Core.DependencyInjection;
 
+/// <summary>
+/// Extension methods for registering a keyed Telegram bot instance (configuration, API client, receiver and host)
+/// into an <see cref="IServiceContainer"/>.
+/// </summary>
 public static class ServiceContainerExtensions
 {
+    /// <summary>
+    /// Registers a keyed Telegram bot under <paramref name="key"/>, resolving <see cref="TelegramBotConfiguration"/>
+    /// directly from the container and using the default receiver, sender and handler wiring.
+    /// </summary>
+    /// <param name="container">The container to register the bot into.</param>
+    /// <param name="key">The key identifying this bot instance's registrations.</param>
+    /// <returns>The same container, for chaining.</returns>
     public static IServiceContainer AddTelegramBot(this IServiceContainer container, string key)
     {
         return container.AddTelegramBot(key, sp => sp.Resolve<TelegramBotConfiguration>(), _ => { });
     }
 
+    /// <summary>
+    /// Registers a keyed Telegram bot under <paramref name="key"/>, resolving <see cref="TelegramBotConfiguration"/>
+    /// directly from the container and letting <paramref name="setup"/> customize the receiver, sender and handler
+    /// registrations.
+    /// </summary>
+    /// <param name="container">The container to register the bot into.</param>
+    /// <param name="key">The key identifying this bot instance's registrations.</param>
+    /// <param name="setup">A callback that customizes the bot's receiver, sender and handler registrations.</param>
+    /// <returns>The same container, for chaining.</returns>
     public static IServiceContainer AddTelegramBot(
         this IServiceContainer container,
         string key,
@@ -32,6 +52,14 @@ public static class ServiceContainerExtensions
         return container.AddTelegramBot(key, sp => sp.Resolve<TelegramBotConfiguration>(), setup);
     }
 
+    /// <summary>
+    /// Registers a keyed Telegram bot under <paramref name="key"/>, building <see cref="TelegramBotConfiguration"/>
+    /// via <paramref name="configure"/> and using the default receiver, sender and handler wiring.
+    /// </summary>
+    /// <param name="container">The container to register the bot into.</param>
+    /// <param name="key">The key identifying this bot instance's registrations.</param>
+    /// <param name="configure">A factory that builds the bot's configuration from the service provider.</param>
+    /// <returns>The same container, for chaining.</returns>
     public static IServiceContainer AddTelegramBot(
         this IServiceContainer container,
         string key,
@@ -41,6 +69,16 @@ public static class ServiceContainerExtensions
         return container.AddTelegramBot(key, configure, _ => { });
     }
 
+    /// <summary>
+    /// Registers a keyed Telegram bot under <paramref name="key"/>: wires up the HTTP request factory, JSON
+    /// serializer, configuration, API client and host, then lets <paramref name="setup"/> customize the receiver,
+    /// sender and handler registrations.
+    /// </summary>
+    /// <param name="container">The container to register the bot into.</param>
+    /// <param name="key">The key identifying this bot instance's registrations.</param>
+    /// <param name="configure">A factory that builds the bot's configuration from the service provider.</param>
+    /// <param name="setup">A callback that customizes the bot's receiver, sender and handler registrations.</param>
+    /// <returns>The same container, for chaining.</returns>
     public static IServiceContainer AddTelegramBot(
         this IServiceContainer container,
         string key,
@@ -85,6 +123,13 @@ public static class ServiceContainerExtensions
         return container;
     }
 
+    /// <summary>
+    /// Builds the <see cref="ApiContext"/> for a keyed bot: the Telegram API base URL derived from its configured
+    /// token, plus the shared HTTP request factory and JSON serializer.
+    /// </summary>
+    /// <param name="sp">The service provider to resolve dependencies from.</param>
+    /// <param name="key">The key identifying this bot instance.</param>
+    /// <returns>The created API context.</returns>
     private static ApiContext CreateApiContext(IServiceProvider sp, object key)
     {
         var config = sp.ResolveKeyed<TelegramBotConfiguration>(key);
