@@ -1,3 +1,9 @@
+# build
 /bin/
 /obj/
+
+# packages
+/*.nupkg
+
+# test output
 /TestResults/
