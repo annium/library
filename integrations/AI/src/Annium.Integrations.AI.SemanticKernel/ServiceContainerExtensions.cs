@@ -6,8 +6,17 @@ using Microsoft.SemanticKernel;
 
 namespace Annium.Integrations.AI.SemanticKernel;
 
+/// <summary>
+/// Container extensions that register the Semantic Kernel itself.
+/// </summary>
 public static class ServiceContainerExtensions
 {
+    /// <summary>
+    /// Registers a transient <see cref="Kernel"/> whose plugins are the union of every registered
+    /// <see cref="KernelPluginCollection"/>, and returns a builder for adding AI services and plugin sources.
+    /// </summary>
+    /// <param name="container">The container to register into.</param>
+    /// <returns>A builder for further Semantic Kernel registrations.</returns>
     public static ISemanticKernelBuilder AddSemanticKernel(this IServiceContainer container)
     {
         container

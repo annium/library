@@ -8,8 +8,14 @@ using Xunit;
 
 namespace Annium.Integrations.AI.SemanticKernel.Tests;
 
+/// <summary>
+/// Tests that OpenAI-backed kernel services resolve under the client key they were registered with.
+/// </summary>
 public class ServiceContainerExtensionsTests
 {
+    /// <summary>
+    /// Chat completion and audio transcription resolve for their respective OpenAI clients.
+    /// </summary>
     [Fact]
     public void RegisterConfiguration_Resolve_Works()
     {

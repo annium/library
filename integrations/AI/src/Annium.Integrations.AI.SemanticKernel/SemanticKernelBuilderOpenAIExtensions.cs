@@ -11,8 +11,18 @@ using OpenAI;
 namespace Annium.Integrations.AI.SemanticKernel;
 
 // ReSharper disable InconsistentNaming
+/// <summary>
+/// Builder extensions wiring OpenAI-backed Semantic Kernel services to a client registered via <c>AddOpenAI</c>.
+/// </summary>
 public static class SemanticKernelBuilderOpenAIExtensions
 {
+    /// <summary>
+    /// Registers chat completion and text generation backed by the OpenAI client and model configured under
+    /// <paramref name="clientId"/>.
+    /// </summary>
+    /// <param name="builder">The kernel builder to register into.</param>
+    /// <param name="clientId">The key of the OpenAI client registration to use.</param>
+    /// <returns>The builder, for chaining.</returns>
     public static ISemanticKernelBuilder WithOpenAIChatCompletion(this ISemanticKernelBuilder builder, string clientId)
     {
         builder
@@ -34,6 +44,13 @@ public static class SemanticKernelBuilderOpenAIExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Registers audio transcription backed by the OpenAI client and model configured under
+    /// <paramref name="clientId"/>.
+    /// </summary>
+    /// <param name="builder">The kernel builder to register into.</param>
+    /// <param name="clientId">The key of the OpenAI client registration to use.</param>
+    /// <returns>The builder, for chaining.</returns>
     [Experimental("SKEXP0001")]
     public static ISemanticKernelBuilder WithOpenAIAudioToText(this ISemanticKernelBuilder builder, string clientId)
     {

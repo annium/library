@@ -7,8 +7,14 @@ using Annium.Logging;
 
 namespace Annium.Integrations.Social.Telegram.Demo.Internal;
 
+/// <summary>
+/// Demo handler replying to every text message with the same text, and ignoring updates that carry none.
+/// </summary>
 internal class EchoTelegramMessageHandler : ITelegramMessageHandler, ILogSubject
 {
+    /// <summary>
+    /// The logger used to trace handling of each update.
+    /// </summary>
     public ILogger Logger { get; }
 
     public EchoTelegramMessageHandler(ILogger logger)
@@ -16,6 +22,13 @@ internal class EchoTelegramMessageHandler : ITelegramMessageHandler, ILogSubject
         Logger = logger;
     }
 
+    /// <summary>
+    /// Echoes the text of the update's message back to its chat, skipping updates without text
+    /// (photos, stickers, service messages).
+    /// </summary>
+    /// <param name="update">The update to handle.</param>
+    /// <param name="api">The API used to reply.</param>
+    /// <returns>A task that completes once the reply has been sent or the update skipped.</returns>
     public async Task ProcessAsync(Update update, ITelegramApi api)
     {
         this.Trace("start");

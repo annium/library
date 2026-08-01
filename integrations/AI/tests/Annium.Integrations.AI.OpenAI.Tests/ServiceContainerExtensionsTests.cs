@@ -5,8 +5,14 @@ using Xunit;
 
 namespace Annium.Integrations.AI.OpenAI.Tests;
 
+/// <summary>
+/// Tests that OpenAI clients resolve under the key they were registered with.
+/// </summary>
 public class ServiceContainerExtensionsTests
 {
+    /// <summary>
+    /// Chat and audio clients resolve independently for each registered client key.
+    /// </summary>
     [Fact]
     public void RegisterConfiguration_Resolve_Works()
     {
