@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Annium.Configuration.Abstractions;
 using Annium.Configuration.Yaml;
 using Annium.Core.DependencyInjection;
@@ -14,15 +16,16 @@ namespace Annium.Integrations.Social.Telegram.Demo;
 
 internal class ServicePack : ServicePackBase
 {
-    public override void Configure(IServiceContainer container)
+    public override async Task ConfigureAsync(IServiceContainer container, CancellationToken ct)
     {
         container.AddRuntime(GetType().Assembly);
-        container.AddConfiguration<Dictionary<string, TelegramBotConfiguration>>(cfg =>
-            cfg.AddYamlFile(Path.Combine("configuration", "bots.yml"))
+        await container.AddConfigurationAsync<Dictionary<string, TelegramBotConfiguration>>(
+            cfg => cfg.AddYamlFile(Path.Combine("configuration", "bots.yml")),
+            ct
         );
     }
 
-    public override void Register(IServiceContainer container, IServiceProvider provider)
+    public override Task RegisterAsync(IServiceContainer container, IServiceProvider provider, CancellationToken ct)
     {
         container.AddTime().WithRealTime().SetDefault();
         container.AddTelegramBot(
@@ -37,10 +40,14 @@ internal class ServicePack : ServicePackBase
         );
         container.AddMapper();
         container.AddLogging();
+
+        return Task.CompletedTask;
     }
 
-    public override void Setup(IServiceProvider provider)
+    public override Task SetupAsync(IServiceProvider provider, CancellationToken ct)
     {
         provider.UseLogging(route => route.UseConsole());
+
+        return Task.CompletedTask;
     }
 }

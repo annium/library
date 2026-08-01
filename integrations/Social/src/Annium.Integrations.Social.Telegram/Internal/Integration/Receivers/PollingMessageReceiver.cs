@@ -70,7 +70,7 @@ internal sealed class PollingMessageReceiver : ITelegramMessageReceiver, IAsyncD
                             }
                         }
                         else
-                            this.Error(response.Description);
+                            this.Error<string>("getUpdates failed: {description}", response.Description);
                     }
 
                     this.Trace("done polling");

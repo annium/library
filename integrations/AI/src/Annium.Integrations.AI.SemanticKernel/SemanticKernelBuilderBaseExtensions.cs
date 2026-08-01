@@ -41,7 +41,7 @@ public static class SemanticKernelBuilderBaseExtensions
         builder
             .Container.Add(sp =>
             {
-                var client = sp.ResolveKeyed<IMcpClient>(name);
+                var client = sp.ResolveKeyed<McpClient>(name);
                 var functions = LoadFunctionsFromServerAsync(client).Result;
                 var plugins = new KernelPluginCollection();
                 plugins.AddFromFunctions(name, functions);
@@ -54,11 +54,11 @@ public static class SemanticKernelBuilderBaseExtensions
 
         return builder;
 
-        static async Task<IMcpClient> CreateMcpClientAsync(string name, string url)
+        static async Task<McpClient> CreateMcpClientAsync(string name, string url)
         {
-            var client = await McpClientFactory.CreateAsync(
-                new SseClientTransport(
-                    new SseClientTransportOptions
+            var client = await McpClient.CreateAsync(
+                new HttpClientTransport(
+                    new HttpClientTransportOptions
                     {
                         Name = name,
                         Endpoint = new Uri(url),
@@ -70,7 +70,7 @@ public static class SemanticKernelBuilderBaseExtensions
             return client;
         }
 
-        static async Task<IReadOnlyCollection<KernelFunction>> LoadFunctionsFromServerAsync(IMcpClient client)
+        static async Task<IReadOnlyCollection<KernelFunction>> LoadFunctionsFromServerAsync(McpClient client)
         {
             var tools = await client.ListToolsAsync();
             var functions = tools.Select(x => x.AsKernelFunction()).ToArray();

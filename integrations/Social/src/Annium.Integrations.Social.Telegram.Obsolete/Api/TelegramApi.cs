@@ -98,15 +98,22 @@ public class TelegramApi : ITelegramApi
     private async Task<TelegramApiResult<TResult>> PostAsync<TResult>(string method, object body, TResult defaultValue)
     {
         var message = GetMessage(HttpMethod.Post, method, new Dictionary<string, string>());
-        message.Content = new StringContent(
+        message.Content = CreateJsonContent(body);
+
+        return await SendAsync(message, defaultValue);
+    }
+
+    private static StringContent CreateJsonContent(object body)
+    {
+        var content = new StringContent(
             JsonSerializer.Serialize(
                 body,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower }
             )
         );
-        message.Content.NotNull().Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-        return await SendAsync(message, defaultValue);
+        return content;
     }
 
     private HttpRequestMessage GetMessage(HttpMethod httpMethod, string method, IDictionary<string, string>? query)
