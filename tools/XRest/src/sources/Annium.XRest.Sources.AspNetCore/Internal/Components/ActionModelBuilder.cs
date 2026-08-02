@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -16,14 +17,23 @@ internal static class ActionModelBuilder
 {
     public static IEnumerable<ActionModel> Build(ControllerActionDescriptor action, MappingContext ctx)
     {
-        var methods = action
-            .ActionConstraints!.OfType<HttpMethodActionConstraint>()
+        // an action without an HTTP method constraint (a bare [Route]) answers every verb — there is
+        // no single method to emit, and ActionConstraints is null rather than empty in that case
+        var methods = (action.ActionConstraints ?? [])
+            .OfType<HttpMethodActionConstraint>()
             .SelectMany(x => x.HttpMethods)
             .Select(x => new HttpMethod(x))
             .ToArray();
+        if (methods.Length == 0)
+            yield break;
 
-        var route = RouteHelper.NormalizeRoute(action.AttributeRouteInfo!.Template!);
-        var routeParameters = RouteHelper.ParseRouteParameters(route);
+        // conventionally routed actions carry no attribute route to describe
+        if (action.AttributeRouteInfo?.Template is not { } template)
+            yield break;
+
+        var parameterNames = action.Parameters.Select(x => x.Name).ToArray();
+        var route = RouteHelper.NormalizeRoute(template, parameterNames);
+        var routeParameters = RouteHelper.ParseRouteParameters(template);
 
         var parameters = action
             .Parameters.Where(x => x.BindingInfo?.BindingSource?.Id != Constants.BindingBody)
@@ -54,7 +64,8 @@ internal static class ActionModelBuilder
         if (ParseHelper.IsSkippedType(param.ParameterType))
             return [];
 
-        if (routeParameters.Contains(param.Name))
+        // route matching is case-insensitive, so `{Id}` binds a parameter declared as `id`
+        if (routeParameters.Contains(param.Name, StringComparer.OrdinalIgnoreCase))
             return
             [
                 new ParameterModel(

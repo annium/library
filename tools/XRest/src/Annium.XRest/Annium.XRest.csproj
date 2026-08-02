@@ -9,7 +9,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../clients/Annium.XRest.Clients.Csharp/Annium.XRest.Clients.Csharp.csproj" />
-    <ProjectReference Include="../clients/Annium.XRest.Clients.TypeScript/Annium.XRest.Clients.TypeScript.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Annium.Core.Entrypoint" />

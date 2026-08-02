@@ -11,7 +11,6 @@ internal class Group : Extensions.Arguments.Group, ICommandDescriptor
     public Group()
     {
         Add<Clients.Csharp.Commands.Group>();
-        Add<Clients.TypeScript.Commands.Group>();
         Add<ParseCommand>();
     }
 }

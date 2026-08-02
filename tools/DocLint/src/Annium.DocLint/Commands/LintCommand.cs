@@ -21,24 +21,21 @@ internal class LintCommand(LintService lintService) : AsyncCommand<LintCommandCo
         var workingDirectory = cfg.WorkingDirectory.IsNullOrWhiteSpace()
             ? Directory.GetCurrentDirectory()
             : Path.GetFullPath(cfg.WorkingDirectory);
+        // a mistyped path or a pattern matching nothing must fail the run: this command is a CI
+        // gate, and exiting 0 without having linted anything reports success for work not done
         if (!Directory.Exists(workingDirectory))
-        {
-            Console.WriteLine($"Working directory {workingDirectory} does not exist");
-            return;
-        }
+            throw new DirectoryNotFoundException($"Working directory {workingDirectory} does not exist");
 
         var paths = ResolvePaths(workingDirectory, cfg.Include, cfg.Exclude);
         if (paths.Count == 0)
-        {
-            Console.WriteLine("No files matched");
-            return;
-        }
+            throw new InvalidOperationException(
+                $"No files matched in {workingDirectory} (include: {string.Join(", ", cfg.Include)}; exclude: {string.Join(", ", cfg.Exclude)})"
+            );
 
         Console.WriteLine($"run linting on {paths.Count} files");
-        // var results = await Task.WhenAll(paths.Select(lintService.LintAsync));
         var results = new List<IReadOnlyList<string>>(paths.Count);
         foreach (var path in paths)
-            results.Add(await lintService.LintAsync(path));
+            results.Add(await lintService.LintAsync(path, ct));
 
         var validFiles = results.Count(x => x.Count == 0);
         if (validFiles > 0)

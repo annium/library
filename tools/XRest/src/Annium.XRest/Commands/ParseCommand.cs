@@ -30,7 +30,7 @@ internal class ParseCommand : AsyncCommand<ParseCommandConfiguration>, ICommandD
 
     public override async Task HandleAsync(ParseCommandConfiguration cfg, CancellationToken ct)
     {
-        var model = await _apiModelLoader.LoadAsync(cfg);
+        var model = await _apiModelLoader.LoadAsync(cfg, ct);
         Console.WriteLine(_serializer.Serialize(model));
     }
 }

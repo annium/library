@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Annium.AspNetCore.Extensions;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
@@ -16,13 +18,15 @@ namespace Annium.XRest.Demo.Server;
 
 internal class ServicePack : ServicePackBase
 {
-    public override void Configure(IServiceContainer container)
+    public override Task ConfigureAsync(IServiceContainer container, CancellationToken ct)
     {
         container.AddRuntime(GetType().Assembly);
         container.AddMapper();
+
+        return Task.CompletedTask;
     }
 
-    public override void Register(IServiceContainer container, IServiceProvider provider)
+    public override Task RegisterAsync(IServiceContainer container, IServiceProvider provider, CancellationToken ct)
     {
         container.AddTime().WithRealTime().SetDefault();
         container
@@ -35,10 +39,14 @@ internal class ServicePack : ServicePackBase
         container.Collection.AddCors();
         container.Collection.AddControllers().AddDefaultJsonOptions();
         container.Add(new WebHostConfiguration()).AsSelf().Singleton();
+
+        return Task.CompletedTask;
     }
 
-    public override void Setup(IServiceProvider provider)
+    public override Task SetupAsync(IServiceProvider provider, CancellationToken ct)
     {
         provider.UseLogging(route => route.UseConsole());
+
+        return Task.CompletedTask;
     }
 }
