@@ -33,28 +33,39 @@ internal class LintCommand(LintService lintService) : AsyncCommand<LintCommandCo
             );
 
         Console.WriteLine($"run linting on {paths.Count} files");
-        var results = new List<IReadOnlyList<string>>(paths.Count);
+        var lintResults = new List<LintResult>(paths.Count);
         foreach (var path in paths)
-            results.Add(await lintService.LintAsync(path, ct));
+            lintResults.Add(await lintService.LintAsync(path, ct));
 
-        var validFiles = results.Count(x => x.Count == 0);
+        // a partial type carries its documentation on one declaration only, so a type-level report is
+        // dropped once any file in this run turns out to document that type
+        var documentedPartialTypes = lintResults.SelectMany(x => x.DocumentedPartialTypes).ToHashSet();
+        var results = lintResults
+            .Select(x =>
+                x.Findings.Where(f => f.PartialType is null || !documentedPartialTypes.Contains(f.PartialType))
+                    .Select(f => f.Message)
+                    .ToArray()
+            )
+            .ToArray();
+
+        var validFiles = results.Count(x => x.Length == 0);
         if (validFiles > 0)
             Console.WriteLine($"linted {validFiles} files successfully");
 
-        var invalidFiles = results.Count(x => x.Count > 0);
+        var invalidFiles = results.Count(x => x.Length > 0);
         if (invalidFiles == 0)
             return;
 
-        var totalErrors = results.Sum(x => x.Count);
+        var totalErrors = results.Sum(x => x.Length);
         Console.WriteLine($"linted {invalidFiles} files with {totalErrors} error(s):");
 
         for (var i = 0; i < paths.Count; i++)
         {
             var errors = results[i];
-            if (errors.Count == 0)
+            if (errors.Length == 0)
                 continue;
 
-            Console.WriteLine($"file {paths[i]} has {errors.Count} error(s):");
+            Console.WriteLine($"file {paths[i]} has {errors.Length} error(s):");
             foreach (var error in errors)
                 Console.WriteLine($"- {error}");
         }
@@ -62,7 +73,7 @@ internal class LintCommand(LintService lintService) : AsyncCommand<LintCommandCo
         throw new Exception("linting failed");
     }
 
-    private IReadOnlyList<string> ResolvePaths(string workingDirectory, string[] includes, string[] excludes)
+    private static IReadOnlyList<string> ResolvePaths(string workingDirectory, string[] includes, string[] excludes)
     {
         var matcher = new Matcher();
         matcher.AddIncludePatterns(includes);

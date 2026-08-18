@@ -11,8 +11,7 @@
     <PackageReference Include="Annium.Core.Entrypoint" />
     <PackageReference Include="Annium.Extensions.Arguments" />
     <PackageReference Include="Annium.Logging.Console" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
   </ItemGroup>
 </Project>
