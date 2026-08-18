@@ -1,11 +1,12 @@
 using System.Reflection;
 using Annium.Blazor.Interop;
 using Annium.Blazor.Interop.Tests.Fakes;
-using Xunit;
+using Xunit.Sdk;
+using Xunit.v3;
 
 // InteropContext.Instance is a process-wide static singleton; these tests mutate its recorded state, so they must
 // not run in parallel with one another.
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
+[assembly: Parallelization(Mode = ParallelMode.None)]
 
 namespace Annium.Blazor.Interop.Tests;
 

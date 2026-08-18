@@ -13,6 +13,8 @@ public abstract class ObservableState : IObservableState
     /// Gets an observable that emits a notification when the state changes.
     /// </summary>
     public IObservable<Unit> Changed { get; }
+
+    /// <summary>Backing event that <see cref="Changed"/> is projected from; raised by <see cref="NotifyChanged"/>.</summary>
     private event Action StateChanged = delegate { };
 
     /// <summary>
@@ -22,6 +24,10 @@ public abstract class ObservableState : IObservableState
     /// </summary>
     private int _muteDepth;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ObservableState"/> class, projecting
+    /// <see cref="Changed"/> from the internal change event.
+    /// </summary>
     protected ObservableState()
     {
         Changed = Observable.FromEvent(handle => StateChanged += handle, handle => StateChanged -= handle);

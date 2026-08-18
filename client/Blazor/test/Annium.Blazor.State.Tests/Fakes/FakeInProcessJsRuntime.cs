@@ -31,6 +31,7 @@ internal sealed class FakeInProcessJsRuntime : IJSInProcessRuntime
     /// JS storage object a call actually targeted.
     /// </summary>
     /// <param name="storage">The JS storage object name.</param>
+    /// <returns>A read-only snapshot of that storage's contents.</returns>
     public IReadOnlyDictionary<string, string> this[string storage] => GetStorage(storage);
 
     /// <summary>
