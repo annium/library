@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -24,9 +25,18 @@ internal class TemplateLoader : ITemplateLoader
 
     public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
     {
-        var resource = _resourceLoader.Load(templatePath, _templateAssembly).Single();
+        // the same named failure Write already reports for the top-level template: `.Single()` on a
+        // miss says only "Sequence contains no elements", which Scriban then wraps, leaving nothing
+        // that names the include or the assembly it was looked for in
+        // the trailing dot forces a name-segment boundary, as Write does: the loader matches by bare
+        // prefix, so `Templates.Client` would otherwise also match `Templates.ClientContainer.hbs`
+        var resources = _resourceLoader.Load($"{templatePath}.", _templateAssembly);
+        if (resources.Count != 1)
+            throw new InvalidOperationException(
+                $"Expected exactly one embedded template matching '{templatePath}' in {_templateAssembly.GetName().Name}, found {resources.Count}"
+            );
 
-        return Encoding.UTF8.GetString(resource.Content.Span);
+        return Encoding.UTF8.GetString(resources.Single().Content.Span);
     }
 
     public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath) =>

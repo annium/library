@@ -10,6 +10,7 @@
     <ProjectReference Include="../../src/sources/Annium.XRest.Sources.AspNetCore/Annium.XRest.Sources.AspNetCore.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Annium.Core.Runtime" />
     <PackageReference Include="Annium.Testing" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>

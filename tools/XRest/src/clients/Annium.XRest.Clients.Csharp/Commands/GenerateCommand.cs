@@ -38,6 +38,15 @@ internal class GenerateCommand : AsyncCommand<GenerateCommandConfiguration>, ICo
         var ns = cfg.Namespace.ToNamespace();
         var view = Processor.Process(ns, model);
 
+        // the output directory is generated in full, so whatever is there belongs to an older run of
+        // this same command: leaving it means a controller or model deleted server-side keeps a client
+        // file that still compiles and calls a route that no longer answers
+        if (Directory.Exists(cfg.Output))
+        {
+            this.Info<string>("Remove existing {output}", cfg.Output);
+            Directory.Delete(cfg.Output, recursive: true);
+        }
+
         this.Info<string>("Write api view to {output}", cfg.Output);
         _writer.Write(cfg.Output, view, cfg.TestClient);
         this.Info<string>("Client written to {output}", cfg.Output);

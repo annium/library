@@ -60,7 +60,8 @@ internal static class RefProcessor
             case BaseType.YearMonth:
                 return Type<YearMonth>();
             case BaseType.Void:
-                return typeof(void).Name;
+                // the keyword, not the CLR name: `System.Void` cannot be written in C# (CS0673)
+                return "void";
             default:
                 throw new ArgumentOutOfRangeException(
                     nameof(reference),
@@ -88,10 +89,14 @@ internal static class RefProcessor
 
     private static string Process(EnumRef reference, ProcessingContext ctx)
     {
-        if (ctx.HasModelFor(reference))
-            ctx.UseNamespace(reference.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace));
-        else
-            ctx.UseNamespace(reference.Namespace);
+        var @namespace = ctx.HasModelFor(reference)
+            ? reference.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace)
+            : reference.Namespace.ToNamespace();
+
+        if (ctx.IsAmbiguous(reference))
+            return $"global::{@namespace}.{reference.Name}";
+
+        ctx.UseNamespace(@namespace);
 
         return reference.Name;
     }
@@ -119,15 +124,24 @@ internal static class RefProcessor
 
     private static string Process(IModelRef reference, IReadOnlyList<IRef> refArgs, ProcessingContext ctx)
     {
-        if (ctx.HasModelFor(reference))
-            ctx.UseNamespace(reference.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace));
+        var @namespace = ctx.HasModelFor(reference)
+            ? reference.Namespace.ToNamespace().Prepend(ctx.ModelsNamespace)
+            : reference.Namespace.ToNamespace();
+
+        // a short name binds to whatever the compiler finds first: another model of that name from a
+        // second `using`, or a generated container declared in the file's own namespace, which wins
+        // silently. Where that can happen the name is written out in full instead, and the `using`
+        // becomes unnecessary
+        var name = reference.Name;
+        if (ctx.IsAmbiguous(reference))
+            name = $"global::{@namespace}.{name}";
         else
-            ctx.UseNamespace(reference.Namespace);
+            ctx.UseNamespace(@namespace);
 
         if (refArgs.Count == 0)
-            return reference.Name;
+            return name;
 
-        var sb = new StringBuilder(reference.Name);
+        var sb = new StringBuilder(name);
         sb.Append('<');
         var args = refArgs.Select(x => Process(x, ctx)).ToArray();
         sb.AppendJoin(", ", args);

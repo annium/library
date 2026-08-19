@@ -7,9 +7,8 @@ namespace Annium.XRest.Clients.Csharp.Components.Processors;
 
 internal static class ActionProcessor
 {
-    public static ActionView Process(ActionModel action, ProcessingContext ctx)
+    public static ActionView Process(ActionModel action, string name, ProcessingContext ctx)
     {
-        var name = action.Name;
         var path = action.Path;
 
         var pathParameters = action
@@ -30,7 +29,17 @@ internal static class ActionProcessor
 
     private static string ResolveResponseType(IRef? response, ProcessingContext ctx)
     {
-        response = response is PromiseRef { Value: { } } promiseResponse ? promiseResponse.Value : response;
+        // the client awaits the call itself, so a promise contributes only what it resolves to — and a
+        // promise resolving to nothing (a `Task`-returning action) leaves the call with no response at
+        // all. Keeping the promise in that case rendered `Task<Task>`, plus a `Task` default-value
+        // parameter, and the generated client did not compile
+        if (response is PromiseRef promise)
+            response = promise.Value;
+
+        // a synchronous `void` action arrives as a plain void base type rather than a promise, and
+        // rendering it produced `Task<Void>` plus a `Void defaultValue` parameter — CS0673
+        if (response is BaseTypeRef { Name: BaseType.Void })
+            response = null;
 
         return response is null ? string.Empty : RefProcessor.Process(response, ctx);
     }

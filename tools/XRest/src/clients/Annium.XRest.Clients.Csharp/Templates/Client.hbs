@@ -16,7 +16,7 @@ public class {{ type }}
 
     public async {{ if action.has_response }}Task<{{ action.response }}>{{ else }}Task{{ end }} {{ action.name }}Async(
         {{~ for parameter in action.parameters ~}}
-        {{ parameter.type}} {{ parameter.name }},
+        {{ parameter.type}} {{ parameter.argument }},
         {{~ end ~}}
         {{~ if action.has_response ~}}
         {{ action.response }} defaultValue,
@@ -31,10 +31,10 @@ public class {{ type }}
         {{~ end ~}}
             .{{ action.method }}({{~ if action.path_parameters.size > 0 ~}}${{~ end ~}}"{{ action.path }}")
             {{~ for parameter in action.query_parameters ~}}
-            .Param("{{ parameter.name }}", {{ parameter.name }})
+            .Param("{{ parameter.name }}", {{ parameter.argument }})
             {{~ end ~}}
             {{~ if action.has_body ~}}
-            .JsonContent(body)
+            .JsonContent({{ action.body_argument }})
             {{~ end ~}}
             .{{ if action.has_response }}AsAsync(defaultValue, ct){{ else }}RunAsync(ct){{ end }};
     }

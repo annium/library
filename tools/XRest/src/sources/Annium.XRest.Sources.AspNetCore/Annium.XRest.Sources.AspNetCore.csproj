@@ -9,8 +9,6 @@
     <ProjectReference Include="../Annium.XRest.Sources.Shared/Annium.XRest.Sources.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Data.Operations.Serialization.Json" />
-    <PackageReference Include="Annium.NodaTime.Serialization.Json" />
     <PackageReference Include="NSwag.AspNetCore" />
   </ItemGroup>
 </Project>
