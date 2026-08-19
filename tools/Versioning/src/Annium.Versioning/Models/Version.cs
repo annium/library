@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Annium.Data.Models;
 
 namespace Annium.Versioning.Models;
@@ -90,12 +91,12 @@ public sealed record Version : Comparable<Version>
 
             for (var i = 0; i < Math.Min(leftParts.Length, rightParts.Length); i++)
             {
-                var leftIsNumeric = uint.TryParse(leftParts[i], out var leftNumber);
-                var rightIsNumeric = uint.TryParse(rightParts[i], out var rightNumber);
+                var leftIsNumeric = IsNumeric(leftParts[i]);
+                var rightIsNumeric = IsNumeric(rightParts[i]);
 
                 int result;
                 if (leftIsNumeric && rightIsNumeric)
-                    result = leftNumber.CompareTo(rightNumber);
+                    result = CompareNumeric(leftParts[i], rightParts[i]);
                 // numeric identifiers always rank lower than alphanumeric ones
                 else if (leftIsNumeric)
                     result = -1;
@@ -110,6 +111,32 @@ public sealed record Version : Comparable<Version>
 
             // all shared identifiers equal — the longer pre-release ranks higher
             return leftParts.Length.CompareTo(rightParts.Length);
+        }
+
+        /// <summary>
+        /// §11 calls an identifier numeric when it is digits only — with no width limit, so parsing it
+        /// into a number would misclassify anything past <c>uint.MaxValue</c> (a millisecond timestamp,
+        /// say) as alphanumeric and rank it by ordinal instead.
+        /// </summary>
+        /// <param name="identifier">The dot-separated pre-release identifier.</param>
+        /// <returns>True when the identifier consists only of digits.</returns>
+        private static bool IsNumeric(string identifier) => identifier.Length > 0 && identifier.All(char.IsAsciiDigit);
+
+        /// <summary>
+        /// Compares two digit-only identifiers by magnitude without parsing them: leading zeros carry
+        /// no value, so the longer remainder is the larger number, and equal lengths compare ordinally.
+        /// </summary>
+        /// <param name="left">The left identifier.</param>
+        /// <param name="right">The right identifier.</param>
+        /// <returns>A negative value, zero or a positive value, as <see cref="IComparable{T}"/> requires.</returns>
+        private static int CompareNumeric(string left, string right)
+        {
+            var leftDigits = left.TrimStart('0');
+            var rightDigits = right.TrimStart('0');
+
+            return leftDigits.Length == rightDigits.Length
+                ? string.CompareOrdinal(leftDigits, rightDigits)
+                : leftDigits.Length.CompareTo(rightDigits.Length);
         }
 
         public int CompareTo(object? obj) =>

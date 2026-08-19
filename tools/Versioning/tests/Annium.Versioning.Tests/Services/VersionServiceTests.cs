@@ -5,6 +5,7 @@ using Annium.Testing;
 using Annium.Versioning.Models;
 using Annium.Versioning.Services;
 using OneOf;
+using OneOf.Types;
 using Xunit;
 
 namespace Annium.Versioning.Tests.Services;
@@ -83,6 +84,9 @@ public class VersionServiceTests
     [InlineData("release-1.2.3")]
     [InlineData("v1.2")]
     [InlineData("vx.y.z")]
+    // every other case fails to parse even once its first character is dropped, so none of them tells
+    // the `v` check apart from no check at all
+    [InlineData("x1.2.9")]
     public void GetCurrentVersion_NonVersionTags_AreIgnored(string tag)
     {
         // arrange
@@ -246,14 +250,14 @@ public class VersionServiceTests
 
         public OneOf<IReadOnlyList<string>, string> GetHistoryTags(string repositoryPath) => HistoryTags;
 
-        public string? SetTag(string repositoryPath, string tag)
+        public OneOf<Success, string> SetTag(string repositoryPath, string tag)
         {
             if (SetTagError is not null)
                 return SetTagError;
 
             SetTags.Add(tag);
 
-            return null;
+            return new Success();
         }
     }
 }

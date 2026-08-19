@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LibGit2Sharp;
 using OneOf;
+using OneOf.Types;
 
 namespace Annium.Versioning.Services;
 
@@ -12,12 +13,12 @@ internal class GitTagService : IGitTagService
         GetTags(repositoryPath, static (_, _) => true);
 
     public OneOf<IReadOnlyList<string>, string> GetHeadTags(string repositoryPath) =>
-        GetTags(repositoryPath, static (tag, headSha) => tag.Target.Sha == headSha);
+        GetTags(repositoryPath, static (tag, headSha) => tag.PeeledTarget.Sha == headSha);
 
     public OneOf<IReadOnlyList<string>, string> GetHistoryTags(string repositoryPath) =>
-        GetTags(repositoryPath, static (tag, headSha) => tag.Target.Sha != headSha);
+        GetTags(repositoryPath, static (tag, headSha) => tag.PeeledTarget.Sha != headSha);
 
-    public string? SetTag(string repositoryPath, string tag)
+    public OneOf<Success, string> SetTag(string repositoryPath, string tag)
     {
         try
         {
@@ -33,7 +34,7 @@ internal class GitTagService : IGitTagService
 
             repository.Tags.Add(tag, head, signature, $"Version {tag}");
 
-            return null;
+            return new Success();
         }
         catch (LibGit2SharpException ex)
         {
@@ -42,8 +43,8 @@ internal class GitTagService : IGitTagService
     }
 
     /// <summary>
-    /// Opens the repository and projects its tags, filtered against the HEAD commit sha.
-    /// The <c>Repository</c> constructor sits inside the try on purpose: it throws
+    /// Opens the repository and projects the tags reachable from HEAD, filtered against the HEAD
+    /// commit sha. The <c>Repository</c> constructor sits inside the try on purpose: it throws
     /// <c>RepositoryNotFoundException</c> for a non-repo path, which must surface as the error
     /// branch of the result rather than escape the service.
     /// </summary>
@@ -54,9 +55,25 @@ internal class GitTagService : IGitTagService
             using var repository = new Repository(repositoryPath);
 
             // null on a repository without commits — no tag target can then match it
-            var headSha = repository.Head.Tip?.Sha;
+            var head = repository.Head.Tip;
+            var headSha = head?.Sha;
 
-            return repository.Tags.Where(x => filter(x, headSha)).Select(x => x.FriendlyName).ToArray();
+            // a version describes the checked-out history, so a tag on a branch HEAD cannot reach —
+            // an abandoned feature branch, an independently numbered release line — must not count;
+            // it would otherwise raise the version every consuming repo builds against
+            var reachable = head is null
+                ? []
+                : repository
+                    .Commits.QueryBy(new CommitFilter { IncludeReachableFrom = head })
+                    .Select(x => x.Sha)
+                    .ToHashSet();
+
+            // PeeledTarget, not Target: an annotated tag targets its annotation object, and a tag on
+            // a tag chains further, while the reachable set holds commits
+            return repository
+                .Tags.Where(x => reachable.Contains(x.PeeledTarget.Sha) && filter(x, headSha))
+                .Select(x => x.FriendlyName)
+                .ToArray();
         }
         catch (LibGit2SharpException ex)
         {

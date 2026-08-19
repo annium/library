@@ -40,7 +40,7 @@ internal class VersionService : IVersionService, ILogSubject
             versionChain?.ToString() ?? "all"
         );
 
-        var existing = filteredVersions.Count > 0 ? filteredVersions.Max() : null;
+        var existing = filteredVersions.Max();
         var result = existing ?? Version.Empty(versionChain ?? VersionChain.Minimal);
 
         return result;
@@ -94,9 +94,9 @@ internal class VersionService : IVersionService, ILogSubject
 
         this.Trace("creating new version {Version}", newVersion);
         var tag = $"v{newVersion}";
-        var setTagError = _gitTagService.SetTag(repositoryPath, tag);
+        var setTagResult = _gitTagService.SetTag(repositoryPath, tag);
 
-        return setTagError is null ? newVersion : setTagError;
+        return setTagResult.IsT1 ? setTagResult.AsT1 : newVersion;
     }
 
     private IReadOnlyList<Version> ParseVersions(IReadOnlyList<string> tags)

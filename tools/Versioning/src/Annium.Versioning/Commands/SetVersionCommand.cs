@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Threading;
 using Annium.Extensions.Arguments;
 using Annium.Logging;
@@ -19,11 +18,7 @@ internal class SetVersionCommand(IVersionService versionService, ILogger logger)
 
     public override void Handle(SetVersionCommandConfiguration cfg, CancellationToken ct)
     {
-        var workingDirectory = cfg.WorkingDirectory.IsNullOrWhiteSpace()
-            ? Directory.GetCurrentDirectory()
-            : Path.GetFullPath(cfg.WorkingDirectory);
-        if (!Directory.Exists(workingDirectory))
-            throw new DirectoryNotFoundException(workingDirectory);
+        var workingDirectory = WorkingDirectory.Resolve(cfg.WorkingDirectory);
 
         // Validate and parse version chain format X.Y
         if (!VersionChain.TryParse(cfg.Version, out var versionChain))

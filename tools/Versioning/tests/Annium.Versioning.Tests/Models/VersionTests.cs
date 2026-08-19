@@ -131,6 +131,22 @@ public class VersionTests
     }
 
     [Fact]
+    public void CompareTo_NumericIdentifiersWiderThanUint_StillComparesNumerically()
+    {
+        // assert — §11 puts no width limit on a numeric identifier, and a millisecond timestamp is
+        // past uint.MaxValue; parsing one into a number ranked it as text, where "1…" sorts below "9…"
+        Parse("1.0.0-9999999999").IsLess(Parse("1.0.0-10000000000"));
+    }
+
+    [Fact]
+    public void CompareTo_NumericIdentifierWithLeadingZeros_ComparesByValue()
+    {
+        // assert — leading zeros carry no value, so the two rank equally (they are not `Equals`, which
+        // is record equality over the raw suffix)
+        Parse("1.0.0-007").CompareTo(Parse("1.0.0-7")).Is(0);
+    }
+
+    [Fact]
     public void CompareTo_NumericAgainstAlphanumericIdentifier_RanksNumericLower()
     {
         // assert
