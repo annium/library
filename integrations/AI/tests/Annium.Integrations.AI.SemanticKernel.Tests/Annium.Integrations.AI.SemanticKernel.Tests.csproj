@@ -10,7 +10,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Annium.Testing" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" />
     <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- hosts a real MCP server for the WithMcpFunctionsFromHttpServerAsync tests, the way the Telegram
+         suite stands up a real Bot API stand-in rather than mocking the transport -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 </Project>

@@ -1,9 +1,12 @@
 using Annium.Core.DependencyInjection;
 using Annium.Integrations.AI.OpenAI;
 using Annium.Logging.Shared;
+using Annium.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel.AudioToText;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Services;
+using Microsoft.SemanticKernel.TextGeneration;
 using Xunit;
 
 namespace Annium.Integrations.AI.SemanticKernel.Tests;
@@ -14,10 +17,11 @@ namespace Annium.Integrations.AI.SemanticKernel.Tests;
 public class ServiceContainerExtensionsTests
 {
     /// <summary>
-    /// Chat completion and audio transcription resolve for their respective OpenAI clients.
+    /// Chat completion and audio transcription resolve for their respective OpenAI clients, each bound to
+    /// the model named by the configuration registered under its key.
     /// </summary>
     [Fact]
-    public void RegisterConfiguration_Resolve_Works()
+    public void RegisterConfiguration_Resolve_BindsEachServiceToItsConfiguredModel()
     {
         // arrange
         var container = new ServiceContainer();
@@ -31,10 +35,18 @@ public class ServiceContainerExtensionsTests
 
         var provider = container.BuildServiceProvider();
 
-        // assert
-        provider.ResolveKeyed<IChatCompletionService>("chat-client");
+        // act
+        var chat = provider.ResolveKeyed<IChatCompletionService>("chat-client");
 #pragma warning disable SKEXP0001
-        provider.ResolveKeyed<IAudioToTextService>("audio-client");
+        var audio = provider.ResolveKeyed<IAudioToTextService>("audio-client");
 #pragma warning restore SKEXP0001
+
+        // assert - resolving alone proves only that the registration exists; the model is what the factory
+        // reads out of the keyed OpenAI config, so asserting it is what ties config to service
+        chat.GetModelId().Is("gpt-5");
+        audio.GetModelId().Is("whisper-1");
+        // the chat registration is published under two interfaces; text generation is the quieter one and
+        // would go unnoticed if the second AsKeyed call were dropped
+        provider.ResolveKeyed<ITextGenerationService>("chat-client").GetModelId().Is("gpt-5");
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Linq;
 using Annium.Core.DependencyInjection;
@@ -33,6 +34,8 @@ public class PluginRegistrationTests
         // assert
         kernel.Plugins.Has(1);
         var plugin = kernel.Plugins.Single();
+        // the plugin is named after its own type, which is how a caller addresses it from a prompt
+        plugin.Name.Is(nameof(EchoPlugin));
         plugin.Select(x => x.Name).Has(1).At(0).Is(nameof(EchoPlugin.Echo));
     }
 
@@ -52,6 +55,26 @@ public class PluginRegistrationTests
 
         // assert
         kernel.Plugins.IsEmpty();
+    }
+
+    /// <summary>
+    /// The kernel is transient: every resolution hands out its own instance, so a caller mutating one
+    /// kernel's plugins or data does not reach into anybody else's.
+    /// </summary>
+    [Fact]
+    public void AddSemanticKernel_ResolvedTwice_ReturnsDistinctKernels()
+    {
+        // arrange
+        var container = Container();
+        container.AddSemanticKernel().WithPluginInstances();
+        var provider = container.BuildServiceProvider();
+
+        // act
+        var first = provider.Resolve<Kernel>();
+        var second = provider.Resolve<Kernel>();
+
+        // assert
+        ReferenceEquals(first, second).IsFalse("the kernel registration is transient");
     }
 
     /// <summary>
@@ -75,6 +98,68 @@ public class PluginRegistrationTests
         // assert
         kernel.Plugins.Has(2);
         kernel.Plugins.Any(x => x.Name == "time").IsTrue();
+    }
+
+    /// <summary>
+    /// Plugin names must be unique across every source: two collections offering the same name make the
+    /// kernel unresolvable, so the collision surfaces on every resolution rather than silently dropping one.
+    /// </summary>
+    [Fact]
+    public void AddSemanticKernel_DuplicatePluginName_FailsToResolveKernel()
+    {
+        // arrange - the discovered EchoPlugin is named after its type; a second source claims that name
+        var container = Container();
+        container.AddSemanticKernel().WithPluginInstances();
+        container
+            .Add(_ => new KernelPluginCollection([
+                KernelPluginFactory.CreateFromObject(new TimePlugin(), nameof(EchoPlugin)),
+            ]))
+            .AsSelf()
+            .Singleton();
+        var provider = container.BuildServiceProvider();
+
+        // act & assert - Semantic Kernel's own collection rejects the duplicate; the merge does not
+        // de-duplicate, so this is a caller error that shows up at resolution
+        Wrap.It(() => provider.Resolve<Kernel>()).Throws<ArgumentException>();
+    }
+
+    /// <summary>
+    /// Discovery without <c>AddRuntime</c> fails loudly at the registration call, rather than leaving a
+    /// kernel that quietly has no plugins.
+    /// </summary>
+    [Fact]
+    public void WithPluginInstances_WithoutRuntime_ThrowsAtRegistration()
+    {
+        // arrange - deliberately no AddRuntime, so no type manager exists to ask for implementations
+        var container = new ServiceContainer();
+        container.AddLogging();
+        container.Collection.AddLogging();
+        var builder = container.AddSemanticKernel();
+
+        // act & assert - the misconfiguration surfaces here, not at kernel resolution
+        Wrap.It(() => builder.WithPluginInstances()).Throws<InvalidOperationException>();
+    }
+
+    /// <summary>
+    /// Scanning an assembly that declares no plugins is the silent case: the kernel resolves with an
+    /// empty plugin collection instead of failing.
+    /// </summary>
+    [Fact]
+    public void WithPluginInstances_ScannedAssemblyWithoutPlugins_ResolvesEmptyKernel()
+    {
+        // arrange - a real assembly is scanned, it simply holds no ISemanticKernelPlugin implementation
+        var container = new ServiceContainer();
+        container.AddRuntime(typeof(Kernel).Assembly);
+        container.AddLogging();
+        container.Collection.AddLogging();
+        container.AddSemanticKernel().WithPluginInstances();
+        var provider = container.BuildServiceProvider();
+
+        // act
+        var kernel = provider.Resolve<Kernel>();
+
+        // assert
+        kernel.Plugins.IsEmpty();
     }
 
     /// <summary>

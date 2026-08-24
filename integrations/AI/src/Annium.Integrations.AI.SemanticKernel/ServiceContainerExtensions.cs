@@ -15,6 +15,11 @@ public static class ServiceContainerExtensions
     /// Registers a transient <see cref="Kernel"/> whose plugins are the union of every registered
     /// <see cref="KernelPluginCollection"/>, and returns a builder for adding AI services and plugin sources.
     /// </summary>
+    /// <remarks>
+    /// Plugin names must be unique across all sources: the union is not de-duplicated, and
+    /// <see cref="KernelPluginCollection"/> rejects a repeated name, so a collision makes every kernel
+    /// resolution throw <see cref="System.ArgumentException"/> rather than silently dropping one plugin.
+    /// </remarks>
     /// <param name="container">The container to register into.</param>
     /// <returns>A builder for further Semantic Kernel registrations.</returns>
     public static ISemanticKernelBuilder AddSemanticKernel(this IServiceContainer container)

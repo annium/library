@@ -56,6 +56,9 @@ public static class SemanticKernelBuilderBaseExtensions
     /// <param name="url">The MCP server endpoint.</param>
     /// <param name="ct">The token that cancels connecting and listing tools.</param>
     /// <returns>The builder, for chaining.</returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="name"/> is already taken by another MCP server on this builder.
+    /// </exception>
     public static async Task<ISemanticKernelBuilder> WithMcpFunctionsFromHttpServerAsync(
         this ISemanticKernelBuilder builder,
         string name,
@@ -63,6 +66,16 @@ public static class SemanticKernelBuilderBaseExtensions
         CancellationToken ct = default
     )
     {
+        // rejected before connecting, so the second server's socket is never opened: a repeated name would
+        // otherwise register a second keyed client that shadows the first, leaving the first one resolvable
+        // by nobody — and therefore never disposed — while the duplicate plugin name broke the kernel anyway
+        if (
+            builder.Container.Collection.Any(x =>
+                x.ServiceType == typeof(McpClient) && x.IsKeyedService && Equals(x.ServiceKey, name)
+            )
+        )
+            throw new ArgumentException($"MCP server '{name}' is already registered", nameof(name));
+
         var client = await McpClient.CreateAsync(
             new HttpClientTransport(
                 new HttpClientTransportOptions
@@ -75,15 +88,39 @@ public static class SemanticKernelBuilderBaseExtensions
             cancellationToken: ct
         );
 
-        var tools = await client.ListToolsAsync(cancellationToken: ct);
-        var functions = tools.Select(x => x.AsKernelFunction()).ToArray();
+        KernelPluginCollection plugins;
+        try
+        {
+            // the client is connected from here on, but nothing owns it until the registrations below are
+            // in place: a failure in between (a cancelled token, a server that drops after the handshake)
+            // would otherwise walk away from a live session nobody can reach to close
+            var tools = await client.ListToolsAsync(cancellationToken: ct);
+            var functions = tools.Select(x => x.AsKernelFunction()).ToArray();
 
-        var plugins = new KernelPluginCollection();
-        plugins.AddFromFunctions(name, functions);
+            plugins = new KernelPluginCollection();
+            plugins.AddFromFunctions(name, functions);
+        }
+        catch
+        {
+            await client.DisposeAsync();
 
-        // registered through factories so that the container owns disposal of the client
+            throw;
+        }
+
         builder.Container.Add((_, _) => client).AsKeyedSelf(name).Singleton();
-        builder.Container.Add(_ => plugins).AsSelf().Singleton();
+        // the plugin collection resolves the client rather than closing over it: the container only tracks
+        // a factory-built singleton for disposal once something has actually resolved it, and nothing on
+        // the ordinary path (resolve the kernel, call its functions) would otherwise ask for the client —
+        // leaving it, and its open connection to the MCP server, alive for the life of the process
+        builder
+            .Container.Add(sp =>
+            {
+                sp.ResolveKeyed<McpClient>(name);
+
+                return plugins;
+            })
+            .AsSelf()
+            .Singleton();
 
         return builder;
     }
