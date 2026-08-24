@@ -42,6 +42,11 @@ internal sealed class PollingMessageReceiver : ITelegramMessageReceiver, IAsyncD
     /// </summary>
     private readonly Task _task;
 
+    /// <summary>
+    /// Creates the receiver and starts its background poll loop.
+    /// </summary>
+    /// <param name="context">The API context used to poll for updates.</param>
+    /// <param name="logger">The logger used to trace the poll loop.</param>
     public PollingMessageReceiver(ApiContext context, ILogger logger)
     {
         Logger = logger;

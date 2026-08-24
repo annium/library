@@ -26,6 +26,12 @@ public sealed record BotOptions
     /// </summary>
     private readonly string _key;
 
+    /// <summary>
+    /// Creates the options for one keyed bot instance and registers the default (polling) receiver,
+    /// which any <c>Use*</c> call in the setup delegate then replaces.
+    /// </summary>
+    /// <param name="container">The DI container the bot's registrations are added to.</param>
+    /// <param name="key">The keyed-service key identifying this bot instance.</param>
     internal BotOptions(IServiceContainer container, string key)
     {
         _container = container;

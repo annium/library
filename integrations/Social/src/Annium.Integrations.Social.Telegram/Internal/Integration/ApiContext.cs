@@ -31,6 +31,12 @@ internal sealed class ApiContext
     /// </summary>
     private readonly IHttpRequestFactory _httpRequestFactory;
 
+    /// <summary>
+    /// Creates the context for one bot.
+    /// </summary>
+    /// <param name="server">The bot's Telegram API base URL.</param>
+    /// <param name="httpRequestFactory">The factory used to create requests against that URL.</param>
+    /// <param name="serializer">The serializer used for requests and responses.</param>
     public ApiContext(Uri server, IHttpRequestFactory httpRequestFactory, ISerializer<Stream> serializer)
     {
         _server = server;

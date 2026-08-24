@@ -52,6 +52,14 @@ internal sealed class TelegramBotHost : ITelegramBotHost, IAsyncDisposable, ILog
     /// </summary>
     private readonly AsyncDisposableBox _disposable;
 
+    /// <summary>
+    /// Creates the host for one keyed bot instance.
+    /// </summary>
+    /// <param name="sp">The provider used to resolve the bot's keyed message handlers.</param>
+    /// <param name="api">The API the handlers reply through.</param>
+    /// <param name="receiver">The receiver supplying incoming updates.</param>
+    /// <param name="key">The keyed-service key identifying this bot instance.</param>
+    /// <param name="logger">The logger used to trace the host lifecycle.</param>
     public TelegramBotHost(
         IServiceProvider sp,
         ITelegramApi api,

@@ -1,6 +1,7 @@
 demo:
-  token: TELEGRAM_BOT_TOKEN_REMOVED
+  # token and webhook.secret_token are secrets and are NOT stored here: ServicePack layers them in
+  # from TELEGRAM_BOT_TOKEN and TELEGRAM_WEBHOOK_SECRET_TOKEN. This file is committed, they are not.
   webhook:
     internal_port: 18080
-    external_address: https://36c4-185-18-6-219.ngrok-free.app
-    secret_token: TELEGRAM_WEBHOOK_SECRET_REMOVED
+    # the tunnel address changes on every ngrok session; override it with TELEGRAM_WEBHOOK_ADDRESS
+    external_address: https://localhost:18080

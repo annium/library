@@ -20,7 +20,8 @@ namespace Annium.Integrations.Social.Telegram.Demo;
 internal class ServicePack : ServicePackBase
 {
     /// <summary>
-    /// Registers runtime type scanning and loads the bot configurations from bots.yml.
+    /// Registers runtime type scanning and loads the bot configurations: the non-secret settings from
+    /// bots.yml, the secrets from the environment on top of them.
     /// </summary>
     /// <param name="container">The container to configure.</param>
     /// <param name="ct">The token that cancels configuration.</param>
@@ -29,9 +30,40 @@ internal class ServicePack : ServicePackBase
     {
         container.AddRuntime(GetType().Assembly);
         await container.AddConfigurationAsync<Dictionary<string, TelegramBotConfiguration>>(
-            cfg => cfg.AddYamlFile(Path.Combine("configuration", "bots.yml")),
+            cfg => cfg.AddYamlFile(Path.Combine("configuration", "bots.yml")).Add(GetSecrets()),
             ct
         );
+    }
+
+    /// <summary>
+    /// Reads the demo bot's secrets from the environment. Sources registered later win, so this layer
+    /// fills in what bots.yml deliberately leaves out.
+    /// </summary>
+    /// <returns>The secret slice of the configuration.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the bot token is not in the environment.</exception>
+    private static object GetSecrets()
+    {
+        var token =
+            Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN")
+            ?? throw new InvalidOperationException(
+                "TELEGRAM_BOT_TOKEN is not set. Get a token from BotFather and export it before running the demo."
+            );
+
+        return new Dictionary<string, object>
+        {
+            ["demo"] = new Dictionary<string, object>
+            {
+                ["token"] = token,
+                ["webhook"] = new Dictionary<string, object>
+                {
+                    // only meaningful for UseWebhookReceiver; harmless empty defaults under polling
+                    ["secret_token"] =
+                        Environment.GetEnvironmentVariable("TELEGRAM_WEBHOOK_SECRET_TOKEN") ?? string.Empty,
+                    ["external_address"] =
+                        Environment.GetEnvironmentVariable("TELEGRAM_WEBHOOK_ADDRESS") ?? "https://localhost:18080",
+                },
+            },
+        };
     }
 
     /// <summary>

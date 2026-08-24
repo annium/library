@@ -17,6 +17,10 @@ internal class EchoTelegramMessageHandler : ITelegramMessageHandler, ILogSubject
     /// </summary>
     public ILogger Logger { get; }
 
+    /// <summary>
+    /// Creates the handler.
+    /// </summary>
+    /// <param name="logger">The logger used to trace handling of each update.</param>
     public EchoTelegramMessageHandler(ILogger logger)
     {
         Logger = logger;

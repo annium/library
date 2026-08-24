@@ -16,6 +16,10 @@ namespace Annium.Integrations.Social.Telegram.Tests;
 /// </summary>
 public class PollingMessageReceiverTests : TestBase
 {
+    /// <summary>
+    /// Creates the fixture.
+    /// </summary>
+    /// <param name="outputHelper">The xunit output helper test logs are written to.</param>
     public PollingMessageReceiverTests(ITestOutputHelper outputHelper)
         : base(outputHelper) { }
 

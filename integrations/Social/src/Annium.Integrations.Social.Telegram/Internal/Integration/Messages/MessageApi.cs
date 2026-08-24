@@ -24,6 +24,11 @@ internal class MessageApi : IMessageApi, ILogSubject
     /// </summary>
     private readonly ApiContext _context;
 
+    /// <summary>
+    /// Creates the message API for one bot.
+    /// </summary>
+    /// <param name="context">The API context used to issue requests.</param>
+    /// <param name="logger">The logger used to trace calls and report rejections.</param>
     public MessageApi(ApiContext context, ILogger logger)
     {
         Logger = logger;

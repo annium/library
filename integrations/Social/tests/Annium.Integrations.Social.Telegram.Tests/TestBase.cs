@@ -23,6 +23,10 @@ namespace Annium.Integrations.Social.Telegram.Tests;
 /// </summary>
 public abstract class TestBase : Testing.TestBase
 {
+    /// <summary>
+    /// Registers the serializer and HTTP request factory the integration resolves.
+    /// </summary>
+    /// <param name="outputHelper">The xunit output helper test logs are written to.</param>
     protected TestBase(ITestOutputHelper outputHelper)
         : base(outputHelper)
     {
@@ -59,6 +63,8 @@ public abstract class TestBase : Testing.TestBase
 /// <summary>
 /// Canned Bot API answer: raw JSON body plus the status code to serve it with.
 /// </summary>
+/// <param name="Body">The raw JSON body to serve.</param>
+/// <param name="StatusCode">The status code to serve it with.</param>
 public sealed record ApiReply(string Body, HttpStatusCode StatusCode = HttpStatusCode.OK);
 
 /// <summary>
@@ -76,6 +82,11 @@ file class ApiHandler : IHttpHandler, ILogSubject
     /// </summary>
     private readonly Func<string, NameValueCollection, ApiReply> _handle;
 
+    /// <summary>
+    /// Creates the handler.
+    /// </summary>
+    /// <param name="handle">The test-supplied handler producing the reply for each call.</param>
+    /// <param name="logger">The logger used to record handling failures.</param>
     public ApiHandler(Func<string, NameValueCollection, ApiReply> handle, ILogger logger)
     {
         _handle = handle;

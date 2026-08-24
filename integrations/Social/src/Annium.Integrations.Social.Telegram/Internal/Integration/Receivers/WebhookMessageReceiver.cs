@@ -47,6 +47,13 @@ internal sealed class WebhookMessageReceiver : ITelegramMessageReceiver, IAsyncD
     /// </summary>
     private readonly Task _task;
 
+    /// <summary>
+    /// Creates the receiver, registers the webhook with Telegram and starts the local server listening for it.
+    /// </summary>
+    /// <param name="sp">The provider used to build the webhook server.</param>
+    /// <param name="config">The bot configuration carrying the webhook address, port and secret token.</param>
+    /// <param name="context">The API context used to register the webhook.</param>
+    /// <param name="logger">The logger used to trace the webhook lifecycle.</param>
     public WebhookMessageReceiver(
         IServiceProvider sp,
         TelegramBotConfiguration config,
@@ -190,6 +197,13 @@ file class WebHookHandler : IHttpHandler, ILogSubject
     /// </summary>
     private readonly ChannelWriter<Update> _writer;
 
+    /// <summary>
+    /// Creates the handler serving the webhook endpoint.
+    /// </summary>
+    /// <param name="secretToken">The secret token every incoming request is checked against.</param>
+    /// <param name="serializer">The serializer used to decode incoming updates.</param>
+    /// <param name="writer">The channel writer decoded updates are published to.</param>
+    /// <param name="logger">The logger used to trace incoming requests.</param>
     public WebHookHandler(
         string secretToken,
         ISerializer<Stream> serializer,
