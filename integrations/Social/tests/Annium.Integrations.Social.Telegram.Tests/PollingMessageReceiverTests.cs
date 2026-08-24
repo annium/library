@@ -122,6 +122,77 @@ public class PollingMessageReceiverTests : TestBase
     }
 
     /// <summary>
+    /// Confirmation never walks backwards: an out-of-order batch must not make the receiver re-ask for
+    /// updates it already took, which would replay them.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task Poll_OutOfOrderBatch_NeverLowersTheOffset()
+    {
+        // arrange - the second update carries a LOWER id than the first, so plain assignment would walk back
+        var offsets = new ConcurrentQueue<string?>();
+        var served = 0;
+        var (server, context) = RunApi(
+            (_, query) =>
+            {
+                offsets.Enqueue(query["offset"]);
+
+                return Interlocked.Increment(ref served) == 1
+                    ? new ApiReply(
+                        """
+                        {"ok":true,"result":[{"update_id":9,"message":{"message_id":1,"chat":{"id":1,"type":"private"},"date":1,"text":"a"}},
+                        {"update_id":4,"message":{"message_id":2,"chat":{"id":1,"type":"private"},"date":1,"text":"b"}}]}
+                        """
+                    )
+                    : new ApiReply("""{"ok":true,"result":[]}""");
+            }
+        );
+        await using var _ = server;
+
+        // act
+        await using var receiver = new PollingMessageReceiver(context, Logger);
+        await ReadOneAsync(receiver);
+        await ReadOneAsync(receiver);
+        await WaitUntilAsync(() => offsets.Count >= 2);
+
+        // assert
+        offsets.TryDequeue(out var first).IsTrue();
+        first.Is("0");
+        offsets.TryDequeue(out var second).IsTrue();
+        second.Is("10");
+    }
+
+    /// <summary>
+    /// A getUpdates answer that cannot be read at all is reported and retried on the same pause as a
+    /// rejected one — the parse failure must not pass silently.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task Poll_UnparseableResponse_LogsAndRetriesWithoutSpinning()
+    {
+        // arrange
+        var calls = 0;
+        var (server, context) = RunApi(
+            (_, _) =>
+            {
+                Interlocked.Increment(ref calls);
+
+                return new ApiReply("this is not json");
+            }
+        );
+        await using var _ = server;
+
+        // act
+        await using var receiver = new PollingMessageReceiver(context, Logger);
+        await WaitUntilAsync(() => calls >= 1);
+        await Task.Delay(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+
+        // assert - same 5s pause as the rejected-response path, and the failure leaves a trace
+        (Volatile.Read(ref calls) <= 2).IsTrue($"expected at most 2 calls in 1s, got {Volatile.Read(ref calls)}");
+        Logs.Any(x => x.Message.Contains("failed to parse")).IsTrue("an unreadable answer must be logged");
+    }
+
+    /// <summary>
     /// A failing getUpdates call is retried on a pause rather than in a hot loop.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>

@@ -49,7 +49,7 @@ internal class MessageApi : IMessageApi, ILogSubject
         var response = await _context
             .Http.Post("sendMessage")
             .JsonContent(request)
-            .WithLogFrom(this)
+            .WithRedactedLogFrom(this)
             .AsAsync<Response<Message>>(ct);
 
         if (response is null)

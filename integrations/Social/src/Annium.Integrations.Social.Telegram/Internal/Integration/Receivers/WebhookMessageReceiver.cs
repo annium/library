@@ -96,6 +96,8 @@ internal sealed class WebhookMessageReceiver : ITelegramMessageReceiver, IAsyncD
         await _cts.CancelAsync();
 
         this.Trace("await run complete");
+        // VSTHRD003: _task is this receiver's own background loop, drained here so disposal does not
+        // return before the loop has actually stopped
 #pragma warning disable VSTHRD003
         await _task;
 #pragma warning restore VSTHRD003
@@ -135,7 +137,7 @@ internal sealed class WebhookMessageReceiver : ITelegramMessageReceiver, IAsyncD
                     .Http.Get("setWebhook")
                     .Param("url", externalAddress)
                     .Param("secret_token", secretToken)
-                    .WithLogFrom(this)
+                    .WithRedactedLogFrom(this)
                     .AsAsync<Response<bool>>(ct);
 
                 if (setWebhookResponse is null)

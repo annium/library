@@ -17,6 +17,14 @@ public sealed record TelegramBotConfiguration
     /// polling.
     /// </summary>
     public TelegramBotWebhookConfiguration? Webhook { get; init; }
+
+    /// <summary>
+    /// Renders the configuration with the token redacted: a record's generated ToString prints every property,
+    /// so any log line or exception message carrying this object would otherwise expose the bot's credential.
+    /// </summary>
+    /// <returns>The configuration with the token replaced by a placeholder.</returns>
+    public override string ToString() =>
+        $"{nameof(TelegramBotConfiguration)} {{ {nameof(Token)} = ***, {nameof(Webhook)} = {Webhook} }}";
 }
 
 /// <summary>
@@ -39,4 +47,12 @@ public sealed record TelegramBotWebhookConfiguration
     /// Telegram. Treat as a secret; never log it.
     /// </summary>
     public string SecretToken { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Renders the configuration with the secret token redacted, for the same reason as the bot token above.
+    /// </summary>
+    /// <returns>The configuration with the secret token replaced by a placeholder.</returns>
+    public override string ToString() =>
+        $"{nameof(TelegramBotWebhookConfiguration)} {{ {nameof(InternalPort)} = {InternalPort}, "
+        + $"{nameof(ExternalAddress)} = {ExternalAddress}, {nameof(SecretToken)} = *** }}";
 }

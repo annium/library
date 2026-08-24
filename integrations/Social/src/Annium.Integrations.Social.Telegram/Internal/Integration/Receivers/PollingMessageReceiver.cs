@@ -65,6 +65,8 @@ internal sealed class PollingMessageReceiver : ITelegramMessageReceiver, IAsyncD
     public async ValueTask DisposeAsync()
     {
         await _cts.CancelAsync();
+        // VSTHRD003: _task is this receiver's own background loop, drained here so disposal does not
+        // return before the loop has actually stopped
 #pragma warning disable VSTHRD003
         await _task;
 #pragma warning restore VSTHRD003
@@ -98,7 +100,7 @@ internal sealed class PollingMessageReceiver : ITelegramMessageReceiver, IAsyncD
                             .Http.Get("getUpdates")
                             .Param("offset", lastUpdateId + 1)
                             .Param("timeout", 60)
-                            .WithLogFrom(this)
+                            .WithRedactedLogFrom(this)
                             .Timeout(TimeSpan.FromMinutes(5))
                             .AsAsync<Response<IReadOnlyList<Update>>>(ct);
 
