@@ -9,7 +9,7 @@
     <ProjectReference Include="../../../../core/Architecture/src/Annium.Architecture.Http/Annium.Architecture.Http.csproj" />
     <ProjectReference Include="../../../../core/Data/src/Annium.Data.Operations.Serialization.Json/Annium.Data.Operations.Serialization.Json.csproj" />
     <ProjectReference Include="../../../../core/Localization/src/Annium.Localization.Abstractions/Annium.Localization.Abstractions.csproj" />
-    <ProjectReference Include="../../../NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj" />
+    <ProjectReference Include="../../../../core/NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj" />
     <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
   </ItemGroup>
 </Project>

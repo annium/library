@@ -167,6 +167,15 @@
     <Project Path="Net/tests/Annium.Net.WebSockets.Benchmark/Annium.Net.WebSockets.Benchmark.csproj" />
     <Project Path="Net/tests/Annium.Net.WebSockets.Tests/Annium.Net.WebSockets.Tests.csproj" />
   </Folder>
+  <Folder Name="/NodaTime/" />
+  <Folder Name="/NodaTime/src/">
+    <Project Path="NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
+    <Project Path="NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj" />
+  </Folder>
+  <Folder Name="/NodaTime/tests/">
+    <Project Path="NodaTime/tests/Annium.NodaTime.Extensions.Tests/Annium.NodaTime.Extensions.Tests.csproj" />
+    <Project Path="NodaTime/tests/Annium.NodaTime.Serialization.Json.Tests/Annium.NodaTime.Serialization.Json.Tests.csproj" />
+  </Folder>
   <Folder Name="/Serialization/" />
   <Folder Name="/Serialization/src/">
     <Project Path="Serialization/src/Annium.Serialization.Abstractions/Annium.Serialization.Abstractions.csproj" />
@@ -182,5 +191,4 @@
     <Project Path="Serialization/tests/Annium.Serialization.MessagePack.Tests/Annium.Serialization.MessagePack.Tests.csproj" />
     <Project Path="Serialization/tests/Annium.Serialization.Yaml.Tests/Annium.Serialization.Yaml.Tests.csproj" />
   </Folder>
-  <Project Path="../integrations/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
 </Solution>

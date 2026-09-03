@@ -11,7 +11,7 @@
     <ProjectReference Include="../../../../core/Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj" />
     <ProjectReference Include="../../../../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
     <ProjectReference Include="../../../../core/Net/src/Annium.Net.WebSockets/Annium.Net.WebSockets.csproj" />
-    <ProjectReference Include="../../../../integrations/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
+    <ProjectReference Include="../../../../core/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
     <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
   </ItemGroup>
   <ItemGroup>

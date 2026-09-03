@@ -16,7 +16,7 @@
     <ProjectReference Include="../../../../core/Data/src/Annium.Data.Operations.Serialization.Json/Annium.Data.Operations.Serialization.Json.csproj" />
     <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj" />
     <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Microsoft/Annium.Logging.Microsoft.csproj" />
-    <ProjectReference Include="../../../../integrations/NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj" />
+    <ProjectReference Include="../../../../core/NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj" />
     <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" />

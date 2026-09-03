@@ -35,7 +35,7 @@
   <Project Path="../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
   <Project Path="../core/Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj" />
   <Project Path="../core/Net/src/Annium.Net.WebSockets/Annium.Net.WebSockets.csproj" />
+  <Project Path="../core/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
   <Project Path="../core/Serialization/src/Annium.Serialization.Abstractions/Annium.Serialization.Abstractions.csproj" />
   <Project Path="../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
-  <Project Path="../integrations/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
 </Solution>

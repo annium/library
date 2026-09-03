@@ -62,15 +62,6 @@
   <Folder Name="/MongoDb/tests/">
     <Project Path="MongoDb/tests/Annium.MongoDb.NodaTime.Tests/Annium.MongoDb.NodaTime.Tests.csproj" />
   </Folder>
-  <Folder Name="/NodaTime/" />
-  <Folder Name="/NodaTime/src/">
-    <Project Path="NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
-    <Project Path="NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj" />
-  </Folder>
-  <Folder Name="/NodaTime/tests/">
-    <Project Path="NodaTime/tests/Annium.NodaTime.Extensions.Tests/Annium.NodaTime.Extensions.Tests.csproj" />
-    <Project Path="NodaTime/tests/Annium.NodaTime.Serialization.Json.Tests/Annium.NodaTime.Serialization.Json.Tests.csproj" />
-  </Folder>
   <Folder Name="/Redis/" />
   <Folder Name="/Redis/src/">
     <Project Path="Redis/src/Annium.Redis/Annium.Redis.csproj" />
@@ -124,6 +115,7 @@
   <Project Path="../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
   <Project Path="../core/Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj" />
   <Project Path="../core/Net/src/Annium.Net.WebSockets/Annium.Net.WebSockets.csproj" />
+  <Project Path="../core/NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj" />
   <Project Path="../core/Serialization/src/Annium.Serialization.Abstractions/Annium.Serialization.Abstractions.csproj" />
   <Project Path="../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
   <Project Path="../server/Infrastructure/src/Annium.Infrastructure.Hosting/Annium.Infrastructure.Hosting.csproj" />

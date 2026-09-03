@@ -59,8 +59,8 @@
   <Project Path="../core/Logging/src/Annium.Logging.Xunit/Annium.Logging.Xunit.csproj" />
   <Project Path="../core/Net/src/Annium.Net.Base/Annium.Net.Base.csproj" />
   <Project Path="../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
+  <Project Path="../core/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
+  <Project Path="../core/NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj" />
   <Project Path="../core/Serialization/src/Annium.Serialization.Abstractions/Annium.Serialization.Abstractions.csproj" />
   <Project Path="../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
-  <Project Path="../integrations/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
-  <Project Path="../integrations/NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj" />
 </Solution>
