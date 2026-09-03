@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Solutions>Annium.Integrations</Solutions>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Annium.Integrations.Social.Telegram/Annium.Integrations.Social.Telegram.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Configuration.Yaml" />
+    <PackageReference Include="Annium.Core.Entrypoint" />
+  </ItemGroup>
+</Project>

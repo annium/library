@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Solutions>Annium.Integrations</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Core.DependencyInjection" />
+    <PackageReference Include="Annium.Net.Http" />
+    <PackageReference Include="Annium.Serialization.Json" />
+  </ItemGroup>
+</Project>
