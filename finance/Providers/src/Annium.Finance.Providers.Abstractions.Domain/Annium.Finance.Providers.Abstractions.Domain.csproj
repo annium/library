@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Solutions>Annium.Finance</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Core.Mapper" />
+    <PackageReference Include="Annium.Data.Operations" />
+    <PackageReference Include="NodaTime" />
+  </ItemGroup>
+</Project>
