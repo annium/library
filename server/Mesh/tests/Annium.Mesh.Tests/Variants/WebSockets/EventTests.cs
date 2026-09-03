@@ -1,0 +1,33 @@
+using System.Threading.Tasks;
+using Annium.Logging;
+using Annium.Mesh.Tests.Variants.Base;
+using Xunit;
+
+namespace Annium.Mesh.Tests.Variants.WebSockets;
+
+/// <summary>
+/// Tests for event messaging functionality using WebSockets transport.
+/// </summary>
+public class EventTests : EventTestsBase<Behavior>
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EventTests"/> class.
+    /// </summary>
+    /// <param name="outputHelper">The test output helper.</param>
+    public EventTests(ITestOutputHelper outputHelper)
+        : base(outputHelper) { }
+
+    /// <summary>
+    /// Tests analytics event messaging.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
+    [Fact(Skip = "broadcast and event feature not wired (dark WIP): handlers commented out, body is a no-op")]
+    public async Task Analytics()
+    {
+        this.Trace("start");
+
+        await Analytics_Base();
+
+        this.Trace("done");
+    }
+}

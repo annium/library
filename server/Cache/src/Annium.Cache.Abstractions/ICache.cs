@@ -1,0 +1,44 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Annium.Cache.Abstractions;
+
+/// <summary>
+/// Generic cache interface for storing and retrieving values by key. Extends
+/// <see cref="IAsyncDisposable"/> so the cache's background lifecycle (e.g. the InMemory
+/// executor) is part of the abstraction and the DI container disposes it on teardown.
+/// </summary>
+/// <typeparam name="TKey">The type of cache keys</typeparam>
+/// <typeparam name="TValue">The type of cached values</typeparam>
+public interface ICache<TKey, TValue> : IAsyncDisposable
+    where TKey : IEquatable<TKey>
+    where TValue : notnull
+{
+    /// <summary>
+    /// Gets an existing item from cache or creates a new one using the provided factory
+    /// </summary>
+    /// <typeparam name="TContext">Type of the state the factory receives, so creating a value needs no closure</typeparam>
+    /// <param name="key">The cache key</param>
+    /// <param name="factory">Factory function to create the value if not found in cache</param>
+    /// <param name="context">Context object passed to the factory function</param>
+    /// <param name="options">Cache options including expiration settings</param>
+    /// <param name="ct">Cancellation token for the awaiting caller</param>
+    /// <returns>The cached or newly created value</returns>
+    ValueTask<TValue> GetOrCreateAsync<TContext>(
+        TKey key,
+        Func<TKey, TContext, CancellationToken, ValueTask<TValue>> factory,
+        TContext context,
+        CacheOptions options,
+        CancellationToken ct = default
+    )
+        where TContext : notnull;
+
+    /// <summary>
+    /// Removes an item from the cache
+    /// </summary>
+    /// <param name="key">The cache key to remove</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>A value task that represents the asynchronous remove operation</returns>
+    ValueTask RemoveAsync(TKey key, CancellationToken ct = default);
+}

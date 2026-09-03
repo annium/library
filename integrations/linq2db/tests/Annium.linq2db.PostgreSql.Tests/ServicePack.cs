@@ -1,0 +1,43 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Annium.Core.DependencyInjection;
+using Annium.linq2db.PostgreSql.Tests.Db;
+using Annium.linq2db.Tests.Lib.Db;
+
+namespace Annium.linq2db.PostgreSql.Tests;
+
+/// <summary>
+/// Service pack for configuring PostgreSQL linq2db test dependencies and database setup
+/// </summary>
+internal class ServicePack : ServicePackBase
+{
+    /// <summary>
+    /// Registers PostgreSQL linq2db services and test database configuration
+    /// </summary>
+    /// <param name="container">Service container for dependency registration</param>
+    /// <param name="provider">Service provider for dependency resolution</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A task that represents the asynchronous registration.</returns>
+    public override Task RegisterAsync(IServiceContainer container, IServiceProvider provider, CancellationToken ct)
+    {
+        container.AddPostgreSql<Connection>();
+        container.AddPostgreSql<ConnectionB>();
+        container.AddPostgreSql<ConnectionC>();
+        container.AddPostgreSql<ConnectionD>();
+        container.Add<Database>().AsSelf().Singleton();
+        container.Add(sp => sp.Resolve<Database>().Config).AsSelf().Singleton();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Sets up the test environment by initializing the PostgreSQL database container
+    /// </summary>
+    /// <param name="provider">Service provider for dependency resolution</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A task that represents the asynchronous setup.</returns>
+    public override async Task SetupAsync(IServiceProvider provider, CancellationToken ct)
+    {
+        await provider.Resolve<Database>().InitAsync();
+    }
+}
