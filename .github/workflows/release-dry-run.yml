@@ -1,0 +1,29 @@
+name: Release (dry run)
+
+# Everything the release does except the two steps that cannot be taken back: no tag is created,
+# nothing is pushed to nuget.org. It exists so the release path gets exercised on a runner before it
+# is trusted with ~130 packages that, once published, can only be unlisted.
+#
+# Manual only. There is no push trigger here and none in a release workflow until there is a release
+# to make - a forgotten marker on a branch is not a thing worth being one commit away from.
+#
+# The version comes out the same as a real release would produce: with no v1.2.x tag yet,
+# `versioning get-version` returns what `set-version` would have written.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: release-dry-run
+  cancel-in-progress: true
+
+jobs:
+  dry-run:
+    uses: annium/workflows/.github/workflows/dotnet-run.yml@v2
+    with:
+      recipe: ci-release-dry
+      timeout-minutes: 30

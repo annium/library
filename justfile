@@ -123,12 +123,16 @@ test-finance-write:
 
 # package
 
+# IncludeSymbols is what actually produces the .snupkg; SymbolPackageFormat only says which format
+# to use once symbols are included. Without it the flag is inert, which is how every release so far
+# shipped without symbols while SourceLink sat configured for exactly that purpose.
 pack:
     #!/usr/bin/env bash
     set -e
     echo "=== pack ==="
     packageVersion=$(dotnet tool run versioning get-version -v $(cat version))
-    dotnet pack Annium.slnx --no-build -o . -c Release -p:SymbolPackageFormat=snupkg -p:PackageVersion=$packageVersion
+    dotnet pack Annium.slnx --no-build -o . -c Release \
+        -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -p:PackageVersion=$packageVersion
 
 publish apiKey:
     @echo "=== $0 ==="
@@ -233,6 +237,25 @@ ci-test-adapters-nightly:
     echo "=== test finance (offline + read) ==="
     dotnet test --solution finance/finance.slnx -c Release --no-build --report-xunit-trx \
         -- --filter-not-trait "block=write"
+
+# everything ci-release does except the two irreversible steps: no tag is created, nothing is
+# pushed. Same version either way - with no v1.2.x tag yet, get-version returns the same number
+# set-version would have written
+ci-release-dry:
+    #!/usr/bin/env bash
+    set -e
+    echo "=== ci-release-dry ==="
+    just setup
+    just format
+    just ensure-no-changes
+    just clean
+    just build
+    just docs-lint
+    just pack
+    echo "=== would publish ==="
+    ls -1 *.nupkg | sed 's/^/  /'
+    echo "  packages: $(ls -1 *.nupkg | wc -l | tr -d ' '), symbols: $(ls -1 *.snupkg | wc -l | tr -d ' ')"
+    just clean
 
 ci-release apiKey repository githubToken:
     #!/usr/bin/env bash
