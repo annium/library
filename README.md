@@ -1,5 +1,7 @@
 # Annium
 
+[![Merge Request](https://github.com/annium/library/actions/workflows/merge-request.yml/badge.svg)](https://github.com/annium/library/actions/workflows/merge-request.yml)
+
 A .NET 10 library: core framework, server-side infrastructure, Blazor client pieces, third-party
 integrations, exchange providers and CLI tooling — built and released together.
 
