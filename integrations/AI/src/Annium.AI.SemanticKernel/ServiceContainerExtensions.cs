@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Annium.Core.DependencyInjection;
 using Annium.AI.SemanticKernel.Internal;
+using Annium.Core.DependencyInjection;
 using Microsoft.SemanticKernel;
 
 namespace Annium.AI.SemanticKernel;

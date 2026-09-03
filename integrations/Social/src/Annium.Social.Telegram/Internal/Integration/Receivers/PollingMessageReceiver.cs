@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using Annium.Social.Telegram.Integration.Receivers;
-using Annium.Social.Telegram.Integration.Shared.Domain;
 using Annium.Logging;
 using Annium.Net.Http;
+using Annium.Social.Telegram.Integration.Receivers;
+using Annium.Social.Telegram.Integration.Shared.Domain;
 
 namespace Annium.Social.Telegram.Internal.Integration.Receivers;
 

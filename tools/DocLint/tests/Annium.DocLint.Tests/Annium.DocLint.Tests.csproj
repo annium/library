@@ -7,10 +7,10 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <ProjectReference Include="../../src/Annium.DocLint/Annium.DocLint.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
 </Project>

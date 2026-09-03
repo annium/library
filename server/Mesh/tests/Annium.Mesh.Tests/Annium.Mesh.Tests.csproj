@@ -8,6 +8,7 @@
     <ThreadPoolMinThreads>256</ThreadPoolMinThreads>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <ProjectReference Include="../../../Mesh/src/Annium.Mesh.Client/Annium.Mesh.Client.csproj" />
     <ProjectReference Include="../../src/Annium.Mesh.Serialization.Json/Annium.Mesh.Serialization.Json.csproj" />
     <ProjectReference Include="../../src/Annium.Mesh.Serialization.MessagePack/Annium.Mesh.Serialization.MessagePack.csproj" />
@@ -18,7 +19,6 @@
     <ProjectReference Include="../../src/Annium.Mesh.Transport.WebSockets/Annium.Mesh.Transport.WebSockets.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
 </Project>

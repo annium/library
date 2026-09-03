@@ -6,9 +6,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Annium.Cache.Abstractions/Annium.Cache.Abstractions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj" />
+    <ProjectReference Include="../Annium.Cache.Abstractions/Annium.Cache.Abstractions.csproj" />
   </ItemGroup>
 </Project>

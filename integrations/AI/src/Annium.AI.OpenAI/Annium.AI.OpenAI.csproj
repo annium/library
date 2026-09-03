@@ -6,6 +6,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../../../core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="OpenAI" />
   </ItemGroup>
 </Project>

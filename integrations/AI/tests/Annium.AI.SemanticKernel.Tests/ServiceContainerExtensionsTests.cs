@@ -1,5 +1,5 @@
-using Annium.Core.DependencyInjection;
 using Annium.AI.OpenAI;
+using Annium.Core.DependencyInjection;
 using Annium.Logging.Shared;
 using Annium.Testing;
 using Microsoft.Extensions.DependencyInjection;

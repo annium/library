@@ -6,13 +6,13 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Data/src/Annium.Data.Models/Annium.Data.Models.csproj" />
+    <ProjectReference Include="../../../../core/Extensions/src/Annium.Extensions.Jobs/Annium.Extensions.Jobs.csproj" />
     <ProjectReference Include="../Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
     <ProjectReference Include="../Annium.Blazor.Css/Annium.Blazor.Css.csproj" />
     <ProjectReference Include="../Annium.Blazor.Interop/Annium.Blazor.Interop.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../core/Data/src/Annium.Data.Models/Annium.Data.Models.csproj" />
-    <ProjectReference Include="../../../../core/Extensions/src/Annium.Extensions.Jobs/Annium.Extensions.Jobs.csproj" />
     <PackageReference Include="OneOf" />
   </ItemGroup>
 </Project>

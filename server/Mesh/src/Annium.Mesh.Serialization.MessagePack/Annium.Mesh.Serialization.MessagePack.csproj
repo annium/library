@@ -6,10 +6,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Annium.Mesh.Serialization.Abstractions/Annium.Mesh.Serialization.Abstractions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Data/src/Annium.Data.Operations.Serialization.MessagePack/Annium.Data.Operations.Serialization.MessagePack.csproj" />
     <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.MessagePack/Annium.Serialization.MessagePack.csproj" />
+    <ProjectReference Include="../Annium.Mesh.Serialization.Abstractions/Annium.Mesh.Serialization.Abstractions.csproj" />
   </ItemGroup>
 </Project>

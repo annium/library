@@ -3,10 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Execution.Background;
+using Annium.Logging;
 using Annium.Social.Telegram.Handlers;
 using Annium.Social.Telegram.Integration;
 using Annium.Social.Telegram.Integration.Receivers;
-using Annium.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Annium.Social.Telegram.Internal;

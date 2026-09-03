@@ -1,10 +1,10 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Annium.Logging;
+using Annium.Net.Http;
 using Annium.Social.Telegram.Integration.Messages;
 using Annium.Social.Telegram.Integration.Messages.Requests;
 using Annium.Social.Telegram.Integration.Shared.Domain;
-using Annium.Logging;
-using Annium.Net.Http;
 
 namespace Annium.Social.Telegram.Internal.Integration.Messages;
 

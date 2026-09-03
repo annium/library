@@ -6,12 +6,10 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../integrations/Redis/src/Annium.Redis/Annium.Redis.csproj" />
-    <ProjectReference Include="../Annium.Cache.Abstractions/Annium.Cache.Abstractions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
     <ProjectReference Include="../../../../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
     <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Abstractions/Annium.Serialization.Abstractions.csproj" />
+    <ProjectReference Include="../../../../integrations/Redis/src/Annium.Redis/Annium.Redis.csproj" />
+    <ProjectReference Include="../Annium.Cache.Abstractions/Annium.Cache.Abstractions.csproj" />
   </ItemGroup>
 </Project>

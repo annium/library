@@ -7,8 +7,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Annium.Social.Telegram.Internal.Integration.Receivers;
 using Annium.Logging;
+using Annium.Social.Telegram.Internal.Integration.Receivers;
 using Annium.Testing;
 using Xunit;
 

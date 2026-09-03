@@ -5,9 +5,7 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Annium.Finance.Providers.Abstractions.Domain/Annium.Finance.Providers.Abstractions.Domain.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Data/src/Annium.Data.Tables/Annium.Data.Tables.csproj" />
+    <ProjectReference Include="../Annium.Finance.Providers.Abstractions.Domain/Annium.Finance.Providers.Abstractions.Domain.csproj" />
   </ItemGroup>
 </Project>

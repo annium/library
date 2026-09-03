@@ -7,6 +7,8 @@
   <ItemGroup>
     <ProjectReference Include="../../../../core/Core/src/Annium.Core.Mapper/Annium.Core.Mapper.csproj" />
     <ProjectReference Include="../../../../core/Data/src/Annium.Data.Operations/Annium.Data.Operations.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="NodaTime" />
   </ItemGroup>
 </Project>

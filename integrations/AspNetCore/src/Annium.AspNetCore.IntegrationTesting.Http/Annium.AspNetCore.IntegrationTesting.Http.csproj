@@ -5,9 +5,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Annium.AspNetCore.IntegrationTesting/Annium.AspNetCore.IntegrationTesting.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
+    <ProjectReference Include="../Annium.AspNetCore.IntegrationTesting/Annium.AspNetCore.IntegrationTesting.csproj" />
   </ItemGroup>
 </Project>

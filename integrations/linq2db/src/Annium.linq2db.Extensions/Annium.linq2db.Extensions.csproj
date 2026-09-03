@@ -8,6 +8,8 @@
   <ItemGroup>
     <ProjectReference Include="../../../../core/Data/src/Annium.Data.Models/Annium.Data.Models.csproj" />
     <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Abstractions/Annium.Serialization.Abstractions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="linq2db" />
   </ItemGroup>
 </Project>

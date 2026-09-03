@@ -6,14 +6,12 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
+    <ProjectReference Include="../../../../core/Architecture/src/Annium.Architecture.CQRS/Annium.Architecture.CQRS.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Microsoft/Annium.Logging.Microsoft.csproj" />
     <ProjectReference Include="../../../../server/Infrastructure/src/Annium.Infrastructure.Hosting/Annium.Infrastructure.Hosting.csproj" />
     <ProjectReference Include="../../../../server/Mesh/src/Annium.Mesh.Serialization.Json/Annium.Mesh.Serialization.Json.csproj" />
     <ProjectReference Include="../../src/Annium.AspNetCore.Extensions/Annium.AspNetCore.Extensions.csproj" />
     <ProjectReference Include="../../src/Annium.AspNetCore.Mesh/Annium.AspNetCore.Mesh.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="../../../../core/Architecture/src/Annium.Architecture.CQRS/Annium.Architecture.CQRS.csproj" />
-    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Microsoft/Annium.Logging.Microsoft.csproj" />
-    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
   </ItemGroup>
 </Project>

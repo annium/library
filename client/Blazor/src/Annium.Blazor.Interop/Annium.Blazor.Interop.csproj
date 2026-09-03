@@ -8,6 +8,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../../../core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
   </ItemGroup>
   <ItemGroup>

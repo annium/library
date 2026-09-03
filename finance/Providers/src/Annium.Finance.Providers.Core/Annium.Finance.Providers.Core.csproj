@@ -5,14 +5,12 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Annium.Finance.Providers.Abstractions.Connectors/Annium.Finance.Providers.Abstractions.Connectors.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj" />
     <ProjectReference Include="../../../../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
     <ProjectReference Include="../../../../core/Net/src/Annium.Net.WebSockets/Annium.Net.WebSockets.csproj" />
     <ProjectReference Include="../../../../core/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
     <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
+    <ProjectReference Include="../Annium.Finance.Providers.Abstractions.Connectors/Annium.Finance.Providers.Abstractions.Connectors.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Annium.Finance.Providers.Core.Tests" />

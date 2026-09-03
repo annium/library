@@ -5,11 +5,11 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
     <ProjectReference Include="../Annium.AI.OpenAI/Annium.AI.OpenAI.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
-    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
     <PackageReference Include="Microsoft.SemanticKernel" />
     <PackageReference Include="ModelContextProtocol.Core" />
   </ItemGroup>

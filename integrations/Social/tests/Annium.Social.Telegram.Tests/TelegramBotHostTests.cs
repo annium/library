@@ -6,12 +6,12 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
+using Annium.Logging;
 using Annium.Social.Telegram.Handlers;
 using Annium.Social.Telegram.Integration;
 using Annium.Social.Telegram.Integration.Receivers;
 using Annium.Social.Telegram.Integration.Shared.Domain;
 using Annium.Social.Telegram.Internal;
-using Annium.Logging;
 using Annium.Testing;
 using Xunit;
 

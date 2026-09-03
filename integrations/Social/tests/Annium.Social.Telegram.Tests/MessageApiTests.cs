@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Annium.Logging;
 using Annium.Social.Telegram.Integration.Messages.Requests;
 using Annium.Social.Telegram.Internal.Integration.Messages;
-using Annium.Logging;
 using Annium.Testing;
 using Xunit;
 

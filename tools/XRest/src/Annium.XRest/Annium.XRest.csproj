@@ -8,10 +8,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../clients/Annium.XRest.Clients.Csharp/Annium.XRest.Clients.Csharp.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Core/src/Annium.Core.Entrypoint/Annium.Core.Entrypoint.csproj" />
     <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj" />
+    <ProjectReference Include="../clients/Annium.XRest.Clients.Csharp/Annium.XRest.Clients.Csharp.csproj" />
   </ItemGroup>
 </Project>

@@ -8,9 +8,9 @@ using Annium.Configuration.Yaml;
 using Annium.Core.DependencyInjection;
 using Annium.Core.Mapper;
 using Annium.Core.Runtime;
-using Annium.Social.Telegram.Demo.Internal;
 using Annium.Logging.Console;
 using Annium.Logging.Shared;
+using Annium.Social.Telegram.Demo.Internal;
 
 namespace Annium.Social.Telegram.Demo;
 

@@ -6,10 +6,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/Annium.Storage.Abstractions/Annium.Storage.Abstractions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.InMemory/Annium.Logging.InMemory.csproj" />
     <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.InMemory/Annium.Logging.InMemory.csproj" />
+    <ProjectReference Include="../../src/Annium.Storage.Abstractions/Annium.Storage.Abstractions.csproj" />
   </ItemGroup>
 </Project>

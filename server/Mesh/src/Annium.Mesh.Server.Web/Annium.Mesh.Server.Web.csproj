@@ -6,9 +6,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Annium.Mesh.Server/Annium.Mesh.Server.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj" />
+    <ProjectReference Include="../Annium.Mesh.Server/Annium.Mesh.Server.csproj" />
   </ItemGroup>
 </Project>

@@ -5,10 +5,8 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/Annium.Social.Telegram/Annium.Social.Telegram.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Configuration/src/Annium.Configuration.Yaml/Annium.Configuration.Yaml.csproj" />
     <ProjectReference Include="../../../../core/Core/src/Annium.Core.Entrypoint/Annium.Core.Entrypoint.csproj" />
+    <ProjectReference Include="../../src/Annium.Social.Telegram/Annium.Social.Telegram.csproj" />
   </ItemGroup>
 </Project>

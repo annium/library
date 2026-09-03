@@ -7,10 +7,10 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <ProjectReference Include="../../src/Annium.Redis/Annium.Redis.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="Testcontainers.Redis" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>

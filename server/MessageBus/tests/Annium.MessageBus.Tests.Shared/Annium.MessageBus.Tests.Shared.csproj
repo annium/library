@@ -7,11 +7,11 @@
     <NoWarn>$(NoWarn);NETSDK1206</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
     <ProjectReference Include="../../src/Annium.MessageBus.Abstractions/Annium.MessageBus.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
-    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="xunit.v3.extensibility.core" />
   </ItemGroup>
 </Project>

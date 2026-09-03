@@ -1,11 +1,11 @@
 using System;
 using Annium.Core.DependencyInjection;
+using Annium.Logging;
 using Annium.Social.Telegram.Handlers;
 using Annium.Social.Telegram.Integration;
 using Annium.Social.Telegram.Integration.Receivers;
 using Annium.Social.Telegram.Internal.Integration;
 using Annium.Social.Telegram.Internal.Integration.Receivers;
-using Annium.Logging;
 
 namespace Annium.Social.Telegram;
 

@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using Annium.Core.DependencyInjection;
 using Annium.AI.OpenAI;
+using Annium.Core.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.AudioToText;
 using Microsoft.SemanticKernel.ChatCompletion;

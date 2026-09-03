@@ -6,10 +6,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj" />
     <ProjectReference Include="../Annium.Mesh.Serialization.Abstractions/Annium.Mesh.Serialization.Abstractions.csproj" />
     <ProjectReference Include="../Annium.Mesh.Transport.Abstractions/Annium.Mesh.Transport.Abstractions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="../../../../core/Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj" />
   </ItemGroup>
 </Project>

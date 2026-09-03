@@ -7,9 +7,7 @@
     <NoWarn>$(NoWarn);NETSDK1206</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/Annium.MessageBus.Abstractions/Annium.MessageBus.Abstractions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
+    <ProjectReference Include="../../src/Annium.MessageBus.Abstractions/Annium.MessageBus.Abstractions.csproj" />
   </ItemGroup>
 </Project>

@@ -6,9 +6,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../../../../core/Data/src/Annium.Data.Operations/Annium.Data.Operations.csproj" />
+    <ProjectReference Include="../Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
   </ItemGroup>
 </Project>

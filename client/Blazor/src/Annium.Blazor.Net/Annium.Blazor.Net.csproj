@@ -8,6 +8,8 @@
   <ItemGroup>
     <ProjectReference Include="../../../../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
     <ProjectReference Include="../../../../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
   </ItemGroup>
 </Project>

@@ -12,6 +12,8 @@
     <ProjectReference Include="../../../../core/Data/src/Annium.Data.Models/Annium.Data.Models.csproj" />
     <ProjectReference Include="../../../../core/Extensions/src/Annium.Extensions.Arguments/Annium.Extensions.Arguments.csproj" />
     <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="LibGit2Sharp" />
   </ItemGroup>
 </Project>

@@ -6,10 +6,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/Annium.linq2db.Extensions/Annium.linq2db.Extensions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
     <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
+    <ProjectReference Include="../../src/Annium.linq2db.Extensions/Annium.linq2db.Extensions.csproj" />
   </ItemGroup>
 </Project>

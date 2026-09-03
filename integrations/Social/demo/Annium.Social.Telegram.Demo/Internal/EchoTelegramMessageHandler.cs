@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
+using Annium.Logging;
 using Annium.Social.Telegram.Handlers;
 using Annium.Social.Telegram.Integration;
 using Annium.Social.Telegram.Integration.Messages.Requests;
 using Annium.Social.Telegram.Integration.Shared.Domain;
-using Annium.Logging;
 
 namespace Annium.Social.Telegram.Demo.Internal;
 

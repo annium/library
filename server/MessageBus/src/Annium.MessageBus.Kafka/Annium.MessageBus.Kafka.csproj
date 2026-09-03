@@ -7,10 +7,10 @@
     <NoWarn>$(NoWarn);NETSDK1206</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
     <ProjectReference Include="../Annium.MessageBus.Abstractions/Annium.MessageBus.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
     <PackageReference Include="Confluent.Kafka" />
   </ItemGroup>
   <ItemGroup>

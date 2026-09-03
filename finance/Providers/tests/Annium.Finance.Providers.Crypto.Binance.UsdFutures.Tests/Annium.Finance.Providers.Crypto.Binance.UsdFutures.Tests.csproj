@@ -6,8 +6,8 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Annium.Finance.Providers.Tests.Lib/Annium.Finance.Providers.Tests.Lib.csproj" />
     <ProjectReference Include="../../src/Annium.Finance.Providers.Crypto.Binance.UsdFutures/Annium.Finance.Providers.Crypto.Binance.UsdFutures.csproj" />
+    <ProjectReference Include="../Annium.Finance.Providers.Tests.Lib/Annium.Finance.Providers.Tests.Lib.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="xunit.v3" />
