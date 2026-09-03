@@ -1,13 +1,13 @@
 <Solution>
   <Folder Name="/AI/" />
   <Folder Name="/AI/src/">
-    <Project Path="AI/src/Annium.Integrations.AI.OpenAI/Annium.Integrations.AI.OpenAI.csproj" />
-    <Project Path="AI/src/Annium.Integrations.AI.SemanticKernel.AspNetCore/Annium.Integrations.AI.SemanticKernel.AspNetCore.csproj" />
-    <Project Path="AI/src/Annium.Integrations.AI.SemanticKernel/Annium.Integrations.AI.SemanticKernel.csproj" />
+    <Project Path="AI/src/Annium.AI.OpenAI/Annium.AI.OpenAI.csproj" />
+    <Project Path="AI/src/Annium.AI.SemanticKernel.AspNetCore/Annium.AI.SemanticKernel.AspNetCore.csproj" />
+    <Project Path="AI/src/Annium.AI.SemanticKernel/Annium.AI.SemanticKernel.csproj" />
   </Folder>
   <Folder Name="/AI/tests/">
-    <Project Path="AI/tests/Annium.Integrations.AI.OpenAI.Tests/Annium.Integrations.AI.OpenAI.Tests.csproj" />
-    <Project Path="AI/tests/Annium.Integrations.AI.SemanticKernel.Tests/Annium.Integrations.AI.SemanticKernel.Tests.csproj" />
+    <Project Path="AI/tests/Annium.AI.OpenAI.Tests/Annium.AI.OpenAI.Tests.csproj" />
+    <Project Path="AI/tests/Annium.AI.SemanticKernel.Tests/Annium.AI.SemanticKernel.Tests.csproj" />
   </Folder>
   <Folder Name="/AspNetCore/" />
   <Folder Name="/AspNetCore/src/">
@@ -78,14 +78,14 @@
   </Folder>
   <Folder Name="/Social/" />
   <Folder Name="/Social/demo/">
-    <Project Path="Social/demo/Annium.Integrations.Social.Telegram.Demo/Annium.Integrations.Social.Telegram.Demo.csproj" />
+    <Project Path="Social/demo/Annium.Social.Telegram.Demo/Annium.Social.Telegram.Demo.csproj" />
   </Folder>
   <Folder Name="/Social/src/">
-    <Project Path="Social/src/Annium.Integrations.Social.Telegram.Obsolete/Annium.Integrations.Social.Telegram.Obsolete.csproj" />
-    <Project Path="Social/src/Annium.Integrations.Social.Telegram/Annium.Integrations.Social.Telegram.csproj" />
+    <Project Path="Social/src/Annium.Social.Telegram.Obsolete/Annium.Social.Telegram.Obsolete.csproj" />
+    <Project Path="Social/src/Annium.Social.Telegram/Annium.Social.Telegram.csproj" />
   </Folder>
   <Folder Name="/Social/tests/">
-    <Project Path="Social/tests/Annium.Integrations.Social.Telegram.Tests/Annium.Integrations.Social.Telegram.Tests.csproj" />
+    <Project Path="Social/tests/Annium.Social.Telegram.Tests/Annium.Social.Telegram.Tests.csproj" />
   </Folder>
   <Project Path="../core/Annium/src/Annium.Analyzers/Annium.Analyzers.csproj" />
   <Project Path="../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
