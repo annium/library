@@ -1,0 +1,44 @@
+name: Merge Request
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: merge-request-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # needs no build at all: csharpier, xs format and doclint all work off sources, so a formatting
+  # slip fails in about a minute rather than after the test containers have come up
+  check:
+    uses: annium/workflows/.github/workflows/dotnet-run.yml@v2
+    with:
+      recipe: ci-check
+
+  # the two groups together compile all 259 projects, so there is no separate build gate: whatever
+  # fails to compile fails in the group that owns it.
+  #
+  # fail-fast: false because two reports are more useful than one - a failure in framework says
+  # nothing about whether adapters is also broken
+  test:
+    needs: check
+    if: ${{ !contains(github.event.pull_request.title, 'skip ci') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [ framework, adapters ]
+    uses: annium/workflows/.github/workflows/dotnet-test.yml@v2
+    with:
+      recipe: ci-test-${{ matrix.group }}
+      artifact: test-results-${{ matrix.group }}
+
+  report:
+    needs: test
+    if: ${{ always() && !contains(github.event.pull_request.title, 'skip ci') }}
+    uses: annium/workflows/.github/workflows/test-report.yml@v2

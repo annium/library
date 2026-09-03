@@ -1,0 +1,54 @@
+name: Nightly
+
+# The merge-request shape, with two differences: the jobs run inside the finance-live-read
+# environment, and they call the -nightly recipes, where the finance `read` block is no longer
+# filtered out. That block reaches real exchanges and real accounts and changes nothing there.
+#
+# Its value is catching exchange API drift early: a read failure here says the exchange changed, not
+# that our code did. That is the question kb/providers/<provider>/manifest.md exists to answer.
+#
+# The `write` block has no counterpart anywhere in CI, deliberately. Its documented procedure -
+# check the position mode, that no position exists on the test symbol the fixture would close as
+# cleanup, and the available margin, then run it alone - is something a person does, and a cancelled
+# runner leaves that cleanup unrun and a real position open.
+#
+# Until the finance-live-read environment holds the six BINANCE_* secrets, this pipeline still runs
+# green: without credentials Exchange.HasCredentials is false and the gated tests skip themselves.
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  check:
+    uses: annium/workflows/.github/workflows/dotnet-run.yml@v2
+    with:
+      recipe: ci-check
+
+  test:
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [ framework, adapters ]
+    uses: annium/workflows/.github/workflows/dotnet-test.yml@v2
+    with:
+      recipe: ci-test-${{ matrix.group }}-nightly
+      artifact: test-results-${{ matrix.group }}
+      environment: finance-live-read
+    secrets: inherit
+
+  report:
+    needs: test
+    if: ${{ always() }}
+    uses: annium/workflows/.github/workflows/test-report.yml@v2
