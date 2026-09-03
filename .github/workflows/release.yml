@@ -1,0 +1,46 @@
+name: Release
+
+# Every push to main releases: version bump, build, pack, push to nuget.org, tag.
+#
+# The same check and test jobs a merge request runs gate it. They are not a second copy - they call
+# the same recipes - so a release cannot pass a bar the pull request did not. `ci-release` therefore
+# runs no tests of its own.
+#
+# `skip ci` in the head-commit message stops it. Use it for commits that change nothing shippable.
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  actions: read
+  checks: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: ${{ !contains(github.event.head_commit.message, 'skip ci') }}
+    uses: annium/workflows/.github/workflows/dotnet-run.yml@v2
+    with:
+      recipe: ci-check
+
+  test:
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [ framework, adapters ]
+    uses: annium/workflows/.github/workflows/dotnet-test.yml@v2
+    with:
+      recipe: ci-test-${{ matrix.group }}
+      artifact: test-results-${{ matrix.group }}
+
+  release:
+    needs: test
+    uses: annium/workflows/.github/workflows/dotnet-release.yml@v2
+    secrets: inherit
