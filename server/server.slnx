@@ -1,0 +1,95 @@
+<Solution>
+  <Folder Name="/Cache/" />
+  <Folder Name="/Cache/src/">
+    <Project Path="Cache/src/Annium.Cache.Abstractions/Annium.Cache.Abstractions.csproj" />
+    <Project Path="Cache/src/Annium.Cache.InMemory/Annium.Cache.InMemory.csproj" />
+    <Project Path="Cache/src/Annium.Cache.Redis/Annium.Cache.Redis.csproj" />
+  </Folder>
+  <Folder Name="/Cache/tests/">
+    <Project Path="Cache/tests/Annium.Cache.InMemory.Tests/Annium.Cache.InMemory.Tests.csproj" />
+    <Project Path="Cache/tests/Annium.Cache.Redis.Tests/Annium.Cache.Redis.Tests.csproj" />
+    <Project Path="Cache/tests/Annium.Cache.Tests.Lib/Annium.Cache.Tests.Lib.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/" />
+  <Folder Name="/Infrastructure/src/">
+    <Project Path="Infrastructure/src/Annium.Infrastructure.Hosting/Annium.Infrastructure.Hosting.csproj" />
+  </Folder>
+  <Folder Name="/Mesh/" />
+  <Folder Name="/Mesh/src/">
+    <Project Path="Mesh/src/Annium.Mesh.Client/Annium.Mesh.Client.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Domain/Annium.Mesh.Domain.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Serialization.Abstractions/Annium.Mesh.Serialization.Abstractions.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Serialization.Json/Annium.Mesh.Serialization.Json.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Serialization.MessagePack/Annium.Mesh.Serialization.MessagePack.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Server.InMemory/Annium.Mesh.Server.InMemory.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Server.Sockets/Annium.Mesh.Server.Sockets.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Server.Web/Annium.Mesh.Server.Web.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Server/Annium.Mesh.Server.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Transport.Abstractions/Annium.Mesh.Transport.Abstractions.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Transport.InMemory/Annium.Mesh.Transport.InMemory.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Transport.Sockets/Annium.Mesh.Transport.Sockets.csproj" />
+    <Project Path="Mesh/src/Annium.Mesh.Transport.WebSockets/Annium.Mesh.Transport.WebSockets.csproj" />
+  </Folder>
+  <Folder Name="/Mesh/tests/">
+    <Project Path="Mesh/tests/Annium.Mesh.Tests/Annium.Mesh.Tests.csproj" />
+  </Folder>
+  <Folder Name="/MessageBus/" />
+  <Folder Name="/MessageBus/src/">
+    <Project Path="MessageBus/src/Annium.MessageBus.Abstractions/Annium.MessageBus.Abstractions.csproj" />
+    <Project Path="MessageBus/src/Annium.MessageBus.InMemory/Annium.MessageBus.InMemory.csproj" />
+    <Project Path="MessageBus/src/Annium.MessageBus.Kafka/Annium.MessageBus.Kafka.csproj" />
+    <Project Path="MessageBus/src/Annium.MessageBus.Nats/Annium.MessageBus.Nats.csproj" />
+    <Project Path="MessageBus/src/Annium.MessageBus.RabbitMq/Annium.MessageBus.RabbitMq.csproj" />
+  </Folder>
+  <Folder Name="/MessageBus/tests/">
+    <Project Path="MessageBus/tests/Annium.MessageBus.Abstractions.Tests/Annium.MessageBus.Abstractions.Tests.csproj" />
+    <Project Path="MessageBus/tests/Annium.MessageBus.InMemory.Tests/Annium.MessageBus.InMemory.Tests.csproj" />
+    <Project Path="MessageBus/tests/Annium.MessageBus.Kafka.Load/Annium.MessageBus.Kafka.Load.csproj" />
+    <Project Path="MessageBus/tests/Annium.MessageBus.Kafka.Tests/Annium.MessageBus.Kafka.Tests.csproj" />
+    <Project Path="MessageBus/tests/Annium.MessageBus.Nats.Load/Annium.MessageBus.Nats.Load.csproj" />
+    <Project Path="MessageBus/tests/Annium.MessageBus.Nats.Tests/Annium.MessageBus.Nats.Tests.csproj" />
+    <Project Path="MessageBus/tests/Annium.MessageBus.RabbitMq.Load/Annium.MessageBus.RabbitMq.Load.csproj" />
+    <Project Path="MessageBus/tests/Annium.MessageBus.RabbitMq.Tests/Annium.MessageBus.RabbitMq.Tests.csproj" />
+    <Project Path="MessageBus/tests/Annium.MessageBus.Tests.Load.Shared/Annium.MessageBus.Tests.Load.Shared.csproj" />
+    <Project Path="MessageBus/tests/Annium.MessageBus.Tests.Shared/Annium.MessageBus.Tests.Shared.csproj" />
+  </Folder>
+  <Folder Name="/Storage/" />
+  <Folder Name="/Storage/src/">
+    <Project Path="Storage/src/Annium.Storage.Abstractions/Annium.Storage.Abstractions.csproj" />
+    <Project Path="Storage/src/Annium.Storage.FileSystem/Annium.Storage.FileSystem.csproj" />
+    <Project Path="Storage/src/Annium.Storage.InMemory/Annium.Storage.InMemory.csproj" />
+    <Project Path="Storage/src/Annium.Storage.S3/Annium.Storage.S3.csproj" />
+  </Folder>
+  <Folder Name="/Storage/tests/">
+    <Project Path="Storage/tests/Annium.Storage.Abstractions.Tests/Annium.Storage.Abstractions.Tests.csproj" />
+    <Project Path="Storage/tests/Annium.Storage.FileSystem.Tests/Annium.Storage.FileSystem.Tests.csproj" />
+    <Project Path="Storage/tests/Annium.Storage.InMemory.Tests/Annium.Storage.InMemory.Tests.csproj" />
+    <Project Path="Storage/tests/Annium.Storage.S3.Tests/Annium.Storage.S3.Tests.csproj" />
+    <Project Path="Storage/tests/Annium.Storage.Tests.Lib/Annium.Storage.Tests.Lib.csproj" />
+  </Folder>
+  <Project Path="../core/Annium/src/Annium.Analyzers/Annium.Analyzers.csproj" />
+  <Project Path="../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
+  <Project Path="../core/Annium/src/Annium/Annium.csproj" />
+  <Project Path="../core/Architecture/src/Annium.Architecture.Base/Annium.Architecture.Base.csproj" />
+  <Project Path="../core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
+  <Project Path="../core/Core/src/Annium.Core.Mapper/Annium.Core.Mapper.csproj" />
+  <Project Path="../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
+  <Project Path="../core/Data/src/Annium.Data.Models/Annium.Data.Models.csproj" />
+  <Project Path="../core/Data/src/Annium.Data.Operations.Serialization.Json/Annium.Data.Operations.Serialization.Json.csproj" />
+  <Project Path="../core/Data/src/Annium.Data.Operations.Serialization.MessagePack/Annium.Data.Operations.Serialization.MessagePack.csproj" />
+  <Project Path="../core/Data/src/Annium.Data.Operations/Annium.Data.Operations.csproj" />
+  <Project Path="../core/Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj" />
+  <Project Path="../core/Extensions/src/Annium.Extensions.Reactive/Annium.Extensions.Reactive.csproj" />
+  <Project Path="../core/Logging/src/Annium.Logging.InMemory/Annium.Logging.InMemory.csproj" />
+  <Project Path="../core/Logging/src/Annium.Logging.Shared/Annium.Logging.Shared.csproj" />
+  <Project Path="../core/Logging/src/Annium.Logging.Xunit/Annium.Logging.Xunit.csproj" />
+  <Project Path="../core/Net/src/Annium.Net.Base/Annium.Net.Base.csproj" />
+  <Project Path="../core/Net/src/Annium.Net.Servers.Sockets/Annium.Net.Servers.Sockets.csproj" />
+  <Project Path="../core/Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj" />
+  <Project Path="../core/Net/src/Annium.Net.Sockets/Annium.Net.Sockets.csproj" />
+  <Project Path="../core/Net/src/Annium.Net.WebSockets/Annium.Net.WebSockets.csproj" />
+  <Project Path="../core/Serialization/src/Annium.Serialization.Abstractions/Annium.Serialization.Abstractions.csproj" />
+  <Project Path="../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
+  <Project Path="../core/Serialization/src/Annium.Serialization.MessagePack/Annium.Serialization.MessagePack.csproj" />
+  <Project Path="../integrations/Redis/src/Annium.Redis/Annium.Redis.csproj" />
+</Solution>

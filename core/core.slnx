@@ -1,0 +1,186 @@
+<Solution>
+  <Folder Name="/Annium/" />
+  <Folder Name="/Annium/src/">
+    <Project Path="Annium/src/Annium.Analyzers/Annium.Analyzers.csproj" />
+    <Project Path="Annium/src/Annium.Testing/Annium.Testing.csproj" />
+    <Project Path="Annium/src/Annium/Annium.csproj" />
+  </Folder>
+  <Folder Name="/Annium/tests/">
+    <Project Path="Annium/tests/Annium.Analyzers.Tests/Annium.Analyzers.Tests.csproj" />
+    <Project Path="Annium/tests/Annium.Testing.Tests/Annium.Testing.Tests.csproj" />
+    <Project Path="Annium/tests/Annium.Tests/Annium.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Architecture/" />
+  <Folder Name="/Architecture/src/">
+    <Project Path="Architecture/src/Annium.Architecture.Base/Annium.Architecture.Base.csproj" />
+    <Project Path="Architecture/src/Annium.Architecture.CQRS/Annium.Architecture.CQRS.csproj" />
+    <Project Path="Architecture/src/Annium.Architecture.Http/Annium.Architecture.Http.csproj" />
+    <Project Path="Architecture/src/Annium.Architecture.Mediator/Annium.Architecture.Mediator.csproj" />
+    <Project Path="Architecture/src/Annium.Architecture.ViewModel/Annium.Architecture.ViewModel.csproj" />
+  </Folder>
+  <Folder Name="/Architecture/tests/">
+    <Project Path="Architecture/tests/Annium.Architecture.Base.Tests/Annium.Architecture.Base.Tests.csproj" />
+    <Project Path="Architecture/tests/Annium.Architecture.CQRS.Tests/Annium.Architecture.CQRS.Tests.csproj" />
+    <Project Path="Architecture/tests/Annium.Architecture.Http.Tests/Annium.Architecture.Http.Tests.csproj" />
+    <Project Path="Architecture/tests/Annium.Architecture.Mediator.Tests/Annium.Architecture.Mediator.Tests.csproj" />
+    <Project Path="Architecture/tests/Annium.Architecture.ViewModel.Tests/Annium.Architecture.ViewModel.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Configuration/" />
+  <Folder Name="/Configuration/src/">
+    <Project Path="Configuration/src/Annium.Configuration.Abstractions/Annium.Configuration.Abstractions.csproj" />
+    <Project Path="Configuration/src/Annium.Configuration.CommandLine/Annium.Configuration.CommandLine.csproj" />
+    <Project Path="Configuration/src/Annium.Configuration.Json/Annium.Configuration.Json.csproj" />
+    <Project Path="Configuration/src/Annium.Configuration.Yaml/Annium.Configuration.Yaml.csproj" />
+  </Folder>
+  <Folder Name="/Configuration/tests/">
+    <Project Path="Configuration/tests/Annium.Configuration.Abstractions.Tests/Annium.Configuration.Abstractions.Tests.csproj" />
+    <Project Path="Configuration/tests/Annium.Configuration.CommandLine.Tests/Annium.Configuration.CommandLine.Tests.csproj" />
+    <Project Path="Configuration/tests/Annium.Configuration.Json.Tests/Annium.Configuration.Json.Tests.csproj" />
+    <Project Path="Configuration/tests/Annium.Configuration.Tests.Lib/Annium.Configuration.Tests.Lib.csproj" />
+    <Project Path="Configuration/tests/Annium.Configuration.Yaml.Tests/Annium.Configuration.Yaml.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Core/" />
+  <Folder Name="/Core/src/">
+    <Project Path="Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
+    <Project Path="Core/src/Annium.Core.Entrypoint/Annium.Core.Entrypoint.csproj" />
+    <Project Path="Core/src/Annium.Core.Mapper/Annium.Core.Mapper.csproj" />
+    <Project Path="Core/src/Annium.Core.Mediator/Annium.Core.Mediator.csproj" />
+    <Project Path="Core/src/Annium.Core.Runtime.Loader/Annium.Core.Runtime.Loader.csproj" />
+    <Project Path="Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
+  </Folder>
+  <Folder Name="/Core/tests/">
+    <Project Path="Core/tests/Annium.Core.DependencyInjection.Tests/Annium.Core.DependencyInjection.Tests.csproj" />
+    <Project Path="Core/tests/Annium.Core.Entrypoint.Tests/Annium.Core.Entrypoint.Tests.csproj" />
+    <Project Path="Core/tests/Annium.Core.Mapper.Tests/Annium.Core.Mapper.Tests.csproj" />
+    <Project Path="Core/tests/Annium.Core.Mediator.Tests/Annium.Core.Mediator.Tests.csproj" />
+    <Project Path="Core/tests/Annium.Core.Runtime.Tests/Annium.Core.Runtime.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Data/" />
+  <Folder Name="/Data/src/">
+    <Project Path="Data/src/Annium.Data.Models/Annium.Data.Models.csproj" />
+    <Project Path="Data/src/Annium.Data.Operations.Serialization.Json/Annium.Data.Operations.Serialization.Json.csproj" />
+    <Project Path="Data/src/Annium.Data.Operations.Serialization.MessagePack/Annium.Data.Operations.Serialization.MessagePack.csproj" />
+    <Project Path="Data/src/Annium.Data.Operations.Testing/Annium.Data.Operations.Testing.csproj" />
+    <Project Path="Data/src/Annium.Data.Operations/Annium.Data.Operations.csproj" />
+    <Project Path="Data/src/Annium.Data.Tables/Annium.Data.Tables.csproj" />
+  </Folder>
+  <Folder Name="/Data/tests/">
+    <Project Path="Data/tests/Annium.Data.Models.Tests/Annium.Data.Models.Tests.csproj" />
+    <Project Path="Data/tests/Annium.Data.Operations.Serialization.Json.Tests/Annium.Data.Operations.Serialization.Json.Tests.csproj" />
+    <Project Path="Data/tests/Annium.Data.Operations.Serialization.MessagePack.Tests/Annium.Data.Operations.Serialization.MessagePack.Tests.csproj" />
+    <Project Path="Data/tests/Annium.Data.Operations.Serialization.Tests.Base/Annium.Data.Operations.Serialization.Tests.Base.csproj" />
+    <Project Path="Data/tests/Annium.Data.Operations.Tests/Annium.Data.Operations.Tests.csproj" />
+    <Project Path="Data/tests/Annium.Data.Tables.Tests/Annium.Data.Tables.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Execution/" />
+  <Folder Name="/Execution/src/">
+    <Project Path="Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj" />
+    <Project Path="Execution/src/Annium.Execution.Flow/Annium.Execution.Flow.csproj" />
+  </Folder>
+  <Folder Name="/Execution/tests/">
+    <Project Path="Execution/tests/Annium.Execution.Background.Tests/Annium.Execution.Background.Tests.csproj" />
+    <Project Path="Execution/tests/Annium.Execution.Flow.Tests/Annium.Execution.Flow.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Extensions/" />
+  <Folder Name="/Extensions/src/">
+    <Project Path="Extensions/src/Annium.Extensions.Arguments/Annium.Extensions.Arguments.csproj" />
+    <Project Path="Extensions/src/Annium.Extensions.CommandLine/Annium.Extensions.CommandLine.csproj" />
+    <Project Path="Extensions/src/Annium.Extensions.Composition/Annium.Extensions.Composition.csproj" />
+    <Project Path="Extensions/src/Annium.Extensions.Jobs/Annium.Extensions.Jobs.csproj" />
+    <Project Path="Extensions/src/Annium.Extensions.Pooling/Annium.Extensions.Pooling.csproj" />
+    <Project Path="Extensions/src/Annium.Extensions.Reactive/Annium.Extensions.Reactive.csproj" />
+    <Project Path="Extensions/src/Annium.Extensions.Shell/Annium.Extensions.Shell.csproj" />
+    <Project Path="Extensions/src/Annium.Extensions.Validation/Annium.Extensions.Validation.csproj" />
+    <Project Path="Extensions/src/Annium.Extensions.Workers/Annium.Extensions.Workers.csproj" />
+  </Folder>
+  <Folder Name="/Extensions/tests/">
+    <Project Path="Extensions/tests/Annium.Extensions.Arguments.Tests/Annium.Extensions.Arguments.Tests.csproj" />
+    <Project Path="Extensions/tests/Annium.Extensions.CommandLine.Tests/Annium.Extensions.CommandLine.Tests.csproj" />
+    <Project Path="Extensions/tests/Annium.Extensions.Composition.Tests/Annium.Extensions.Composition.Tests.csproj" />
+    <Project Path="Extensions/tests/Annium.Extensions.Jobs.Tests/Annium.Extensions.Jobs.Tests.csproj" />
+    <Project Path="Extensions/tests/Annium.Extensions.Pooling.Tests/Annium.Extensions.Pooling.Tests.csproj" />
+    <Project Path="Extensions/tests/Annium.Extensions.Reactive.Tests/Annium.Extensions.Reactive.Tests.csproj" />
+    <Project Path="Extensions/tests/Annium.Extensions.Shell.Tests/Annium.Extensions.Shell.Tests.csproj" />
+    <Project Path="Extensions/tests/Annium.Extensions.Validation.Tests/Annium.Extensions.Validation.Tests.csproj" />
+    <Project Path="Extensions/tests/Annium.Extensions.Workers.Tests/Annium.Extensions.Workers.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Identity/" />
+  <Folder Name="/Identity/src/">
+    <Project Path="Identity/src/Annium.Identity.Tokens.Jwt/Annium.Identity.Tokens.Jwt.csproj" />
+    <Project Path="Identity/src/Annium.Identity.Tokens/Annium.Identity.Tokens.csproj" />
+  </Folder>
+  <Folder Name="/Identity/tests/">
+    <Project Path="Identity/tests/Annium.Identity.Tokens.Jwt.Tests/Annium.Identity.Tokens.Jwt.Tests.csproj" />
+    <Project Path="Identity/tests/Annium.Identity.Tokens.Tests/Annium.Identity.Tokens.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Localization/" />
+  <Folder Name="/Localization/src/">
+    <Project Path="Localization/src/Annium.Localization.Abstractions/Annium.Localization.Abstractions.csproj" />
+    <Project Path="Localization/src/Annium.Localization.InMemory/Annium.Localization.InMemory.csproj" />
+    <Project Path="Localization/src/Annium.Localization.Yaml/Annium.Localization.Yaml.csproj" />
+  </Folder>
+  <Folder Name="/Localization/tests/">
+    <Project Path="Localization/tests/Annium.Localization.Abstractions.Tests/Annium.Localization.Abstractions.Tests.csproj" />
+    <Project Path="Localization/tests/Annium.Localization.InMemory.Tests/Annium.Localization.InMemory.Tests.csproj" />
+    <Project Path="Localization/tests/Annium.Localization.Yaml.Tests/Annium.Localization.Yaml.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Logging/" />
+  <Folder Name="/Logging/src/">
+    <Project Path="Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj" />
+    <Project Path="Logging/src/Annium.Logging.File/Annium.Logging.File.csproj" />
+    <Project Path="Logging/src/Annium.Logging.InMemory/Annium.Logging.InMemory.csproj" />
+    <Project Path="Logging/src/Annium.Logging.Microsoft/Annium.Logging.Microsoft.csproj" />
+    <Project Path="Logging/src/Annium.Logging.Shared/Annium.Logging.Shared.csproj" />
+    <Project Path="Logging/src/Annium.Logging.Xunit/Annium.Logging.Xunit.csproj" />
+  </Folder>
+  <Folder Name="/Logging/tests/">
+    <Project Path="Logging/tests/Annium.Logging.Console.Tests/Annium.Logging.Console.Tests.csproj" />
+    <Project Path="Logging/tests/Annium.Logging.File.Tests/Annium.Logging.File.Tests.csproj" />
+    <Project Path="Logging/tests/Annium.Logging.InMemory.Tests/Annium.Logging.InMemory.Tests.csproj" />
+    <Project Path="Logging/tests/Annium.Logging.Microsoft.Tests/Annium.Logging.Microsoft.Tests.csproj" />
+    <Project Path="Logging/tests/Annium.Logging.Shared.Tests/Annium.Logging.Shared.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Net/" />
+  <Folder Name="/Net/src/">
+    <Project Path="Net/src/Annium.Net.Base/Annium.Net.Base.csproj" />
+    <Project Path="Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
+    <Project Path="Net/src/Annium.Net.Mail.Testing/Annium.Net.Mail.Testing.csproj" />
+    <Project Path="Net/src/Annium.Net.Mail/Annium.Net.Mail.csproj" />
+    <Project Path="Net/src/Annium.Net.Servers.Sockets/Annium.Net.Servers.Sockets.csproj" />
+    <Project Path="Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj" />
+    <Project Path="Net/src/Annium.Net.Sockets/Annium.Net.Sockets.csproj" />
+    <Project Path="Net/src/Annium.Net.Types.Serialization.Json/Annium.Net.Types.Serialization.Json.csproj" />
+    <Project Path="Net/src/Annium.Net.Types/Annium.Net.Types.csproj" />
+    <Project Path="Net/src/Annium.Net.WebSockets/Annium.Net.WebSockets.csproj" />
+  </Folder>
+  <Folder Name="/Net/tests/">
+    <Project Path="Net/tests/Annium.Net.Base.Tests/Annium.Net.Base.Tests.csproj" />
+    <Project Path="Net/tests/Annium.Net.Http.Benchmark/Annium.Net.Http.Benchmark.csproj" />
+    <Project Path="Net/tests/Annium.Net.Http.Tests/Annium.Net.Http.Tests.csproj" />
+    <Project Path="Net/tests/Annium.Net.Mail.Tests/Annium.Net.Mail.Tests.csproj" />
+    <Project Path="Net/tests/Annium.Net.Servers.Sockets.Tests/Annium.Net.Servers.Sockets.Tests.csproj" />
+    <Project Path="Net/tests/Annium.Net.Servers.Web.Tests/Annium.Net.Servers.Web.Tests.csproj" />
+    <Project Path="Net/tests/Annium.Net.Sockets.Tests/Annium.Net.Sockets.Tests.csproj" />
+    <Project Path="Net/tests/Annium.Net.Types.Serialization.Json.Tests/Annium.Net.Types.Serialization.Json.Tests.csproj" />
+    <Project Path="Net/tests/Annium.Net.Types.Tests.Lib/Annium.Net.Types.Tests.Lib.csproj" />
+    <Project Path="Net/tests/Annium.Net.Types.Tests/Annium.Net.Types.Tests.csproj" />
+    <Project Path="Net/tests/Annium.Net.WebSockets.Benchmark/Annium.Net.WebSockets.Benchmark.csproj" />
+    <Project Path="Net/tests/Annium.Net.WebSockets.Tests/Annium.Net.WebSockets.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Serialization/" />
+  <Folder Name="/Serialization/src/">
+    <Project Path="Serialization/src/Annium.Serialization.Abstractions/Annium.Serialization.Abstractions.csproj" />
+    <Project Path="Serialization/src/Annium.Serialization.BinaryString/Annium.Serialization.BinaryString.csproj" />
+    <Project Path="Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
+    <Project Path="Serialization/src/Annium.Serialization.MessagePack/Annium.Serialization.MessagePack.csproj" />
+    <Project Path="Serialization/src/Annium.Serialization.Yaml/Annium.Serialization.Yaml.csproj" />
+  </Folder>
+  <Folder Name="/Serialization/tests/">
+    <Project Path="Serialization/tests/Annium.Serialization.Abstractions.Tests/Annium.Serialization.Abstractions.Tests.csproj" />
+    <Project Path="Serialization/tests/Annium.Serialization.BinaryString.Tests/Annium.Serialization.BinaryString.Tests.csproj" />
+    <Project Path="Serialization/tests/Annium.Serialization.Json.Tests/Annium.Serialization.Json.Tests.csproj" />
+    <Project Path="Serialization/tests/Annium.Serialization.MessagePack.Tests/Annium.Serialization.MessagePack.Tests.csproj" />
+    <Project Path="Serialization/tests/Annium.Serialization.Yaml.Tests/Annium.Serialization.Yaml.Tests.csproj" />
+  </Folder>
+  <Project Path="../integrations/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
+</Solution>

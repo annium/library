@@ -1,0 +1,41 @@
+<Solution>
+  <Folder Name="/Providers/" />
+  <Folder Name="/Providers/src/">
+    <Project Path="Providers/src/Annium.Finance.Providers.Abstractions.Connectors/Annium.Finance.Providers.Abstractions.Connectors.csproj" />
+    <Project Path="Providers/src/Annium.Finance.Providers.Abstractions.Domain/Annium.Finance.Providers.Abstractions.Domain.csproj" />
+    <Project Path="Providers/src/Annium.Finance.Providers.Core/Annium.Finance.Providers.Core.csproj" />
+    <Project Path="Providers/src/Annium.Finance.Providers.Crypto.Binance.Base/Annium.Finance.Providers.Crypto.Binance.Base.csproj" />
+    <Project Path="Providers/src/Annium.Finance.Providers.Crypto.Binance.Spot/Annium.Finance.Providers.Crypto.Binance.Spot.csproj" />
+    <Project Path="Providers/src/Annium.Finance.Providers.Crypto.Binance.UsdFutures/Annium.Finance.Providers.Crypto.Binance.UsdFutures.csproj" />
+  </Folder>
+  <Folder Name="/Providers/tests/">
+    <Project Path="Providers/tests/Annium.Finance.Providers.Abstractions.Domain.Tests/Annium.Finance.Providers.Abstractions.Domain.Tests.csproj" />
+    <Project Path="Providers/tests/Annium.Finance.Providers.Core.Tests/Annium.Finance.Providers.Core.Tests.csproj" />
+    <Project Path="Providers/tests/Annium.Finance.Providers.Crypto.Binance.Base.Tests/Annium.Finance.Providers.Crypto.Binance.Base.Tests.csproj" />
+    <Project Path="Providers/tests/Annium.Finance.Providers.Crypto.Binance.Spot.Tests/Annium.Finance.Providers.Crypto.Binance.Spot.Tests.csproj" />
+    <Project Path="Providers/tests/Annium.Finance.Providers.Crypto.Binance.UsdFutures.Tests/Annium.Finance.Providers.Crypto.Binance.UsdFutures.Tests.csproj" />
+    <Project Path="Providers/tests/Annium.Finance.Providers.Tests.Lib/Annium.Finance.Providers.Tests.Lib.csproj" />
+  </Folder>
+  <Project Path="../core/Annium/src/Annium.Analyzers/Annium.Analyzers.csproj" />
+  <Project Path="../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
+  <Project Path="../core/Annium/src/Annium/Annium.csproj" />
+  <Project Path="../core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
+  <Project Path="../core/Core/src/Annium.Core.Mapper/Annium.Core.Mapper.csproj" />
+  <Project Path="../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
+  <Project Path="../core/Data/src/Annium.Data.Models/Annium.Data.Models.csproj" />
+  <Project Path="../core/Data/src/Annium.Data.Operations.Testing/Annium.Data.Operations.Testing.csproj" />
+  <Project Path="../core/Data/src/Annium.Data.Operations/Annium.Data.Operations.csproj" />
+  <Project Path="../core/Data/src/Annium.Data.Tables/Annium.Data.Tables.csproj" />
+  <Project Path="../core/Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj" />
+  <Project Path="../core/Extensions/src/Annium.Extensions.Reactive/Annium.Extensions.Reactive.csproj" />
+  <Project Path="../core/Logging/src/Annium.Logging.InMemory/Annium.Logging.InMemory.csproj" />
+  <Project Path="../core/Logging/src/Annium.Logging.Shared/Annium.Logging.Shared.csproj" />
+  <Project Path="../core/Logging/src/Annium.Logging.Xunit/Annium.Logging.Xunit.csproj" />
+  <Project Path="../core/Net/src/Annium.Net.Base/Annium.Net.Base.csproj" />
+  <Project Path="../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
+  <Project Path="../core/Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj" />
+  <Project Path="../core/Net/src/Annium.Net.WebSockets/Annium.Net.WebSockets.csproj" />
+  <Project Path="../core/Serialization/src/Annium.Serialization.Abstractions/Annium.Serialization.Abstractions.csproj" />
+  <Project Path="../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
+  <Project Path="../integrations/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
+</Solution>
