@@ -1,0 +1,320 @@
+- name: Home
+  href: index.md
+- name: API Reference
+  items:
+    - name: Core
+      items:
+        - name: Annium
+          items:
+            - name: Annium
+              href: api/core/Annium/Annium/
+            - name: Annium.Analyzers
+              href: api/core/Annium/Annium.Analyzers/
+            - name: Annium.Testing
+              href: api/core/Annium/Annium.Testing/
+        - name: Architecture
+          items:
+            - name: Annium.Architecture.Base
+              href: api/core/Architecture/Annium.Architecture.Base/
+            - name: Annium.Architecture.CQRS
+              href: api/core/Architecture/Annium.Architecture.CQRS/
+            - name: Annium.Architecture.Http
+              href: api/core/Architecture/Annium.Architecture.Http/
+            - name: Annium.Architecture.Mediator
+              href: api/core/Architecture/Annium.Architecture.Mediator/
+            - name: Annium.Architecture.ViewModel
+              href: api/core/Architecture/Annium.Architecture.ViewModel/
+        - name: Configuration
+          items:
+            - name: Annium.Configuration.Abstractions
+              href: api/core/Configuration/Annium.Configuration.Abstractions/
+            - name: Annium.Configuration.CommandLine
+              href: api/core/Configuration/Annium.Configuration.CommandLine/
+            - name: Annium.Configuration.Json
+              href: api/core/Configuration/Annium.Configuration.Json/
+            - name: Annium.Configuration.Yaml
+              href: api/core/Configuration/Annium.Configuration.Yaml/
+        - name: Core
+          items:
+            - name: Annium.Core.DependencyInjection
+              href: api/core/Core/Annium.Core.DependencyInjection/
+            - name: Annium.Core.Entrypoint
+              href: api/core/Core/Annium.Core.Entrypoint/
+            - name: Annium.Core.Mapper
+              href: api/core/Core/Annium.Core.Mapper/
+            - name: Annium.Core.Mediator
+              href: api/core/Core/Annium.Core.Mediator/
+            - name: Annium.Core.Runtime
+              href: api/core/Core/Annium.Core.Runtime/
+            - name: Annium.Core.Runtime.Loader
+              href: api/core/Core/Annium.Core.Runtime.Loader/
+        - name: Data
+          items:
+            - name: Annium.Data.Models
+              href: api/core/Data/Annium.Data.Models/
+            - name: Annium.Data.Operations
+              href: api/core/Data/Annium.Data.Operations/
+            - name: Annium.Data.Operations.Serialization.Json
+              href: api/core/Data/Annium.Data.Operations.Serialization.Json/
+            - name: Annium.Data.Operations.Serialization.MessagePack
+              href: api/core/Data/Annium.Data.Operations.Serialization.MessagePack/
+            - name: Annium.Data.Operations.Testing
+              href: api/core/Data/Annium.Data.Operations.Testing/
+            - name: Annium.Data.Tables
+              href: api/core/Data/Annium.Data.Tables/
+        - name: Execution
+          items:
+            - name: Annium.Execution.Background
+              href: api/core/Execution/Annium.Execution.Background/
+            - name: Annium.Execution.Flow
+              href: api/core/Execution/Annium.Execution.Flow/
+        - name: Extensions
+          items:
+            - name: Annium.Extensions.Arguments
+              href: api/core/Extensions/Annium.Extensions.Arguments/
+            - name: Annium.Extensions.CommandLine
+              href: api/core/Extensions/Annium.Extensions.CommandLine/
+            - name: Annium.Extensions.Composition
+              href: api/core/Extensions/Annium.Extensions.Composition/
+            - name: Annium.Extensions.Jobs
+              href: api/core/Extensions/Annium.Extensions.Jobs/
+            - name: Annium.Extensions.Pooling
+              href: api/core/Extensions/Annium.Extensions.Pooling/
+            - name: Annium.Extensions.Reactive
+              href: api/core/Extensions/Annium.Extensions.Reactive/
+            - name: Annium.Extensions.Shell
+              href: api/core/Extensions/Annium.Extensions.Shell/
+            - name: Annium.Extensions.Validation
+              href: api/core/Extensions/Annium.Extensions.Validation/
+            - name: Annium.Extensions.Workers
+              href: api/core/Extensions/Annium.Extensions.Workers/
+        - name: Identity
+          items:
+            - name: Annium.Identity.Tokens
+              href: api/core/Identity/Annium.Identity.Tokens/
+            - name: Annium.Identity.Tokens.Jwt
+              href: api/core/Identity/Annium.Identity.Tokens.Jwt/
+        - name: Localization
+          items:
+            - name: Annium.Localization.Abstractions
+              href: api/core/Localization/Annium.Localization.Abstractions/
+            - name: Annium.Localization.InMemory
+              href: api/core/Localization/Annium.Localization.InMemory/
+            - name: Annium.Localization.Yaml
+              href: api/core/Localization/Annium.Localization.Yaml/
+        - name: Logging
+          items:
+            - name: Annium.Logging.Console
+              href: api/core/Logging/Annium.Logging.Console/
+            - name: Annium.Logging.File
+              href: api/core/Logging/Annium.Logging.File/
+            - name: Annium.Logging.InMemory
+              href: api/core/Logging/Annium.Logging.InMemory/
+            - name: Annium.Logging.Microsoft
+              href: api/core/Logging/Annium.Logging.Microsoft/
+            - name: Annium.Logging.Shared
+              href: api/core/Logging/Annium.Logging.Shared/
+            - name: Annium.Logging.Xunit
+              href: api/core/Logging/Annium.Logging.Xunit/
+        - name: Net
+          items:
+            - name: Annium.Net.Base
+              href: api/core/Net/Annium.Net.Base/
+            - name: Annium.Net.Http
+              href: api/core/Net/Annium.Net.Http/
+            - name: Annium.Net.Mail
+              href: api/core/Net/Annium.Net.Mail/
+            - name: Annium.Net.Mail.Testing
+              href: api/core/Net/Annium.Net.Mail.Testing/
+            - name: Annium.Net.Servers.Sockets
+              href: api/core/Net/Annium.Net.Servers.Sockets/
+            - name: Annium.Net.Servers.Web
+              href: api/core/Net/Annium.Net.Servers.Web/
+            - name: Annium.Net.Sockets
+              href: api/core/Net/Annium.Net.Sockets/
+            - name: Annium.Net.Types
+              href: api/core/Net/Annium.Net.Types/
+            - name: Annium.Net.Types.Serialization.Json
+              href: api/core/Net/Annium.Net.Types.Serialization.Json/
+            - name: Annium.Net.WebSockets
+              href: api/core/Net/Annium.Net.WebSockets/
+        - name: NodaTime
+          items:
+            - name: Annium.NodaTime.Extensions
+              href: api/core/NodaTime/Annium.NodaTime.Extensions/
+            - name: Annium.NodaTime.Serialization.Json
+              href: api/core/NodaTime/Annium.NodaTime.Serialization.Json/
+        - name: Serialization
+          items:
+            - name: Annium.Serialization.Abstractions
+              href: api/core/Serialization/Annium.Serialization.Abstractions/
+            - name: Annium.Serialization.BinaryString
+              href: api/core/Serialization/Annium.Serialization.BinaryString/
+            - name: Annium.Serialization.Json
+              href: api/core/Serialization/Annium.Serialization.Json/
+            - name: Annium.Serialization.MessagePack
+              href: api/core/Serialization/Annium.Serialization.MessagePack/
+            - name: Annium.Serialization.Yaml
+              href: api/core/Serialization/Annium.Serialization.Yaml/
+    - name: Server
+      items:
+        - name: Cache
+          items:
+            - name: Annium.Cache.Abstractions
+              href: api/server/Cache/Annium.Cache.Abstractions/
+            - name: Annium.Cache.InMemory
+              href: api/server/Cache/Annium.Cache.InMemory/
+            - name: Annium.Cache.Redis
+              href: api/server/Cache/Annium.Cache.Redis/
+        - name: Infrastructure
+          items:
+            - name: Annium.Infrastructure.Hosting
+              href: api/server/Infrastructure/Annium.Infrastructure.Hosting/
+        - name: Mesh
+          items:
+            - name: Annium.Mesh.Client
+              href: api/server/Mesh/Annium.Mesh.Client/
+            - name: Annium.Mesh.Domain
+              href: api/server/Mesh/Annium.Mesh.Domain/
+            - name: Annium.Mesh.Serialization.Abstractions
+              href: api/server/Mesh/Annium.Mesh.Serialization.Abstractions/
+            - name: Annium.Mesh.Serialization.Json
+              href: api/server/Mesh/Annium.Mesh.Serialization.Json/
+            - name: Annium.Mesh.Serialization.MessagePack
+              href: api/server/Mesh/Annium.Mesh.Serialization.MessagePack/
+            - name: Annium.Mesh.Server
+              href: api/server/Mesh/Annium.Mesh.Server/
+            - name: Annium.Mesh.Server.InMemory
+              href: api/server/Mesh/Annium.Mesh.Server.InMemory/
+            - name: Annium.Mesh.Server.Sockets
+              href: api/server/Mesh/Annium.Mesh.Server.Sockets/
+            - name: Annium.Mesh.Server.Web
+              href: api/server/Mesh/Annium.Mesh.Server.Web/
+            - name: Annium.Mesh.Transport.Abstractions
+              href: api/server/Mesh/Annium.Mesh.Transport.Abstractions/
+            - name: Annium.Mesh.Transport.InMemory
+              href: api/server/Mesh/Annium.Mesh.Transport.InMemory/
+            - name: Annium.Mesh.Transport.Sockets
+              href: api/server/Mesh/Annium.Mesh.Transport.Sockets/
+            - name: Annium.Mesh.Transport.WebSockets
+              href: api/server/Mesh/Annium.Mesh.Transport.WebSockets/
+        - name: MessageBus
+          items:
+            - name: Annium.MessageBus.Abstractions
+              href: api/server/MessageBus/Annium.MessageBus.Abstractions/
+            - name: Annium.MessageBus.InMemory
+              href: api/server/MessageBus/Annium.MessageBus.InMemory/
+            - name: Annium.MessageBus.Kafka
+              href: api/server/MessageBus/Annium.MessageBus.Kafka/
+            - name: Annium.MessageBus.Nats
+              href: api/server/MessageBus/Annium.MessageBus.Nats/
+            - name: Annium.MessageBus.RabbitMq
+              href: api/server/MessageBus/Annium.MessageBus.RabbitMq/
+        - name: Storage
+          items:
+            - name: Annium.Storage.Abstractions
+              href: api/server/Storage/Annium.Storage.Abstractions/
+            - name: Annium.Storage.FileSystem
+              href: api/server/Storage/Annium.Storage.FileSystem/
+            - name: Annium.Storage.InMemory
+              href: api/server/Storage/Annium.Storage.InMemory/
+            - name: Annium.Storage.S3
+              href: api/server/Storage/Annium.Storage.S3/
+    - name: Client
+      items:
+        - name: Blazor
+          items:
+            - name: Annium.Blazor.Ant
+              href: api/client/Blazor/Annium.Blazor.Ant/
+            - name: Annium.Blazor.Charts
+              href: api/client/Blazor/Annium.Blazor.Charts/
+            - name: Annium.Blazor.Core
+              href: api/client/Blazor/Annium.Blazor.Core/
+            - name: Annium.Blazor.Css
+              href: api/client/Blazor/Annium.Blazor.Css/
+            - name: Annium.Blazor.Interop
+              href: api/client/Blazor/Annium.Blazor.Interop/
+            - name: Annium.Blazor.MatBlazor
+              href: api/client/Blazor/Annium.Blazor.MatBlazor/
+            - name: Annium.Blazor.Net
+              href: api/client/Blazor/Annium.Blazor.Net/
+            - name: Annium.Blazor.Routing
+              href: api/client/Blazor/Annium.Blazor.Routing/
+            - name: Annium.Blazor.State
+              href: api/client/Blazor/Annium.Blazor.State/
+        - name: Components
+          items:
+            - name: Annium.Components.State.Core
+              href: api/client/Components/Annium.Components.State.Core/
+            - name: Annium.Components.State.Forms
+              href: api/client/Components/Annium.Components.State.Forms/
+            - name: Annium.Components.State.Operations
+              href: api/client/Components/Annium.Components.State.Operations/
+    - name: Finance
+      items:
+        - name: Providers
+          items:
+            - name: Annium.Finance.Providers.Abstractions.Connectors
+              href: api/finance/Providers/Annium.Finance.Providers.Abstractions.Connectors/
+            - name: Annium.Finance.Providers.Abstractions.Domain
+              href: api/finance/Providers/Annium.Finance.Providers.Abstractions.Domain/
+            - name: Annium.Finance.Providers.Core
+              href: api/finance/Providers/Annium.Finance.Providers.Core/
+            - name: Annium.Finance.Providers.Crypto.Binance.Base
+              href: api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.Base/
+            - name: Annium.Finance.Providers.Crypto.Binance.Spot
+              href: api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.Spot/
+            - name: Annium.Finance.Providers.Crypto.Binance.UsdFutures
+              href: api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.UsdFutures/
+    - name: Integrations
+      items:
+        - name: AI
+          items:
+            - name: Annium.AI.OpenAI
+              href: api/integrations/AI/Annium.AI.OpenAI/
+            - name: Annium.AI.SemanticKernel
+              href: api/integrations/AI/Annium.AI.SemanticKernel/
+        - name: AspNetCore
+          items:
+            - name: Annium.AspNetCore.Extensions
+              href: api/integrations/AspNetCore/Annium.AspNetCore.Extensions/
+            - name: Annium.AspNetCore.IntegrationTesting
+              href: api/integrations/AspNetCore/Annium.AspNetCore.IntegrationTesting/
+            - name: Annium.AspNetCore.Mesh
+              href: api/integrations/AspNetCore/Annium.AspNetCore.Mesh/
+        - name: DbUp
+          items:
+            - name: Annium.DbUp.Core
+              href: api/integrations/DbUp/Annium.DbUp.Core/
+            - name: Annium.DbUp.PostgreSql
+              href: api/integrations/DbUp/Annium.DbUp.PostgreSql/
+        - name: EntityFrameworkCore
+          items:
+            - name: Annium.EntityFrameworkCore.Extensions
+              href: api/integrations/EntityFrameworkCore/Annium.EntityFrameworkCore.Extensions/
+        - name: Graylog
+          items:
+            - name: Annium.Graylog.Logging
+              href: api/integrations/Graylog/Annium.Graylog.Logging/
+        - name: MongoDb
+          items:
+            - name: Annium.MongoDb.NodaTime
+              href: api/integrations/MongoDb/Annium.MongoDb.NodaTime/
+        - name: Redis
+          items:
+            - name: Annium.Redis
+              href: api/integrations/Redis/Annium.Redis/
+        - name: Seq
+          items:
+            - name: Annium.Seq.Logging
+              href: api/integrations/Seq/Annium.Seq.Logging/
+        - name: Social
+          items:
+            - name: Annium.Social.Telegram
+              href: api/integrations/Social/Annium.Social.Telegram/
+        - name: linq2db
+          items:
+            - name: Annium.linq2db.Extensions
+              href: api/integrations/linq2db/Annium.linq2db.Extensions/
+            - name: Annium.linq2db.PostgreSql
+              href: api/integrations/linq2db/Annium.linq2db.PostgreSql/

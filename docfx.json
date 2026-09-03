@@ -1,0 +1,3219 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [
+            "client/Blazor/src/Annium.Blazor.Ant/Annium.Blazor.Ant.csproj"
+          ],
+          "exclude": [
+            "client/Blazor/src/Annium.Blazor.Ant/bin/**",
+            "client/Blazor/src/Annium.Blazor.Ant/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Blazor/Annium.Blazor.Ant",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Blazor/src/Annium.Blazor.Charts/Annium.Blazor.Charts.csproj"
+          ],
+          "exclude": [
+            "client/Blazor/src/Annium.Blazor.Charts/bin/**",
+            "client/Blazor/src/Annium.Blazor.Charts/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Blazor/Annium.Blazor.Charts",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Blazor/src/Annium.Blazor.Core/Annium.Blazor.Core.csproj"
+          ],
+          "exclude": [
+            "client/Blazor/src/Annium.Blazor.Core/bin/**",
+            "client/Blazor/src/Annium.Blazor.Core/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Blazor/Annium.Blazor.Core",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Blazor/src/Annium.Blazor.Css/Annium.Blazor.Css.csproj"
+          ],
+          "exclude": [
+            "client/Blazor/src/Annium.Blazor.Css/bin/**",
+            "client/Blazor/src/Annium.Blazor.Css/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Blazor/Annium.Blazor.Css",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Blazor/src/Annium.Blazor.Interop/Annium.Blazor.Interop.csproj"
+          ],
+          "exclude": [
+            "client/Blazor/src/Annium.Blazor.Interop/bin/**",
+            "client/Blazor/src/Annium.Blazor.Interop/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Blazor/Annium.Blazor.Interop",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Blazor/src/Annium.Blazor.MatBlazor/Annium.Blazor.MatBlazor.csproj"
+          ],
+          "exclude": [
+            "client/Blazor/src/Annium.Blazor.MatBlazor/bin/**",
+            "client/Blazor/src/Annium.Blazor.MatBlazor/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Blazor/Annium.Blazor.MatBlazor",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Blazor/src/Annium.Blazor.Net/Annium.Blazor.Net.csproj"
+          ],
+          "exclude": [
+            "client/Blazor/src/Annium.Blazor.Net/bin/**",
+            "client/Blazor/src/Annium.Blazor.Net/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Blazor/Annium.Blazor.Net",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Blazor/src/Annium.Blazor.Routing/Annium.Blazor.Routing.csproj"
+          ],
+          "exclude": [
+            "client/Blazor/src/Annium.Blazor.Routing/bin/**",
+            "client/Blazor/src/Annium.Blazor.Routing/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Blazor/Annium.Blazor.Routing",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Blazor/src/Annium.Blazor.State/Annium.Blazor.State.csproj"
+          ],
+          "exclude": [
+            "client/Blazor/src/Annium.Blazor.State/bin/**",
+            "client/Blazor/src/Annium.Blazor.State/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Blazor/Annium.Blazor.State",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Components/src/Annium.Components.State.Core/Annium.Components.State.Core.csproj"
+          ],
+          "exclude": [
+            "client/Components/src/Annium.Components.State.Core/bin/**",
+            "client/Components/src/Annium.Components.State.Core/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Components/Annium.Components.State.Core",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Components/src/Annium.Components.State.Forms/Annium.Components.State.Forms.csproj"
+          ],
+          "exclude": [
+            "client/Components/src/Annium.Components.State.Forms/bin/**",
+            "client/Components/src/Annium.Components.State.Forms/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Components/Annium.Components.State.Forms",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "client/Components/src/Annium.Components.State.Operations/Annium.Components.State.Operations.csproj"
+          ],
+          "exclude": [
+            "client/Components/src/Annium.Components.State.Operations/bin/**",
+            "client/Components/src/Annium.Components.State.Operations/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/client/Components/Annium.Components.State.Operations",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Annium/src/Annium.Analyzers/Annium.Analyzers.csproj"
+          ],
+          "exclude": [
+            "core/Annium/src/Annium.Analyzers/bin/**",
+            "core/Annium/src/Annium.Analyzers/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Annium/Annium.Analyzers",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Annium/src/Annium.Testing/Annium.Testing.csproj"
+          ],
+          "exclude": [
+            "core/Annium/src/Annium.Testing/bin/**",
+            "core/Annium/src/Annium.Testing/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Annium/Annium.Testing",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Annium/src/Annium/Annium.csproj"
+          ],
+          "exclude": [
+            "core/Annium/src/Annium/bin/**",
+            "core/Annium/src/Annium/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Annium/Annium",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Architecture/src/Annium.Architecture.Base/Annium.Architecture.Base.csproj"
+          ],
+          "exclude": [
+            "core/Architecture/src/Annium.Architecture.Base/bin/**",
+            "core/Architecture/src/Annium.Architecture.Base/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Architecture/Annium.Architecture.Base",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Architecture/src/Annium.Architecture.CQRS/Annium.Architecture.CQRS.csproj"
+          ],
+          "exclude": [
+            "core/Architecture/src/Annium.Architecture.CQRS/bin/**",
+            "core/Architecture/src/Annium.Architecture.CQRS/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Architecture/Annium.Architecture.CQRS",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Architecture/src/Annium.Architecture.Http/Annium.Architecture.Http.csproj"
+          ],
+          "exclude": [
+            "core/Architecture/src/Annium.Architecture.Http/bin/**",
+            "core/Architecture/src/Annium.Architecture.Http/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Architecture/Annium.Architecture.Http",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Architecture/src/Annium.Architecture.Mediator/Annium.Architecture.Mediator.csproj"
+          ],
+          "exclude": [
+            "core/Architecture/src/Annium.Architecture.Mediator/bin/**",
+            "core/Architecture/src/Annium.Architecture.Mediator/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Architecture/Annium.Architecture.Mediator",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Architecture/src/Annium.Architecture.ViewModel/Annium.Architecture.ViewModel.csproj"
+          ],
+          "exclude": [
+            "core/Architecture/src/Annium.Architecture.ViewModel/bin/**",
+            "core/Architecture/src/Annium.Architecture.ViewModel/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Architecture/Annium.Architecture.ViewModel",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Configuration/src/Annium.Configuration.Abstractions/Annium.Configuration.Abstractions.csproj"
+          ],
+          "exclude": [
+            "core/Configuration/src/Annium.Configuration.Abstractions/bin/**",
+            "core/Configuration/src/Annium.Configuration.Abstractions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Configuration/Annium.Configuration.Abstractions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Configuration/src/Annium.Configuration.CommandLine/Annium.Configuration.CommandLine.csproj"
+          ],
+          "exclude": [
+            "core/Configuration/src/Annium.Configuration.CommandLine/bin/**",
+            "core/Configuration/src/Annium.Configuration.CommandLine/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Configuration/Annium.Configuration.CommandLine",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Configuration/src/Annium.Configuration.Json/Annium.Configuration.Json.csproj"
+          ],
+          "exclude": [
+            "core/Configuration/src/Annium.Configuration.Json/bin/**",
+            "core/Configuration/src/Annium.Configuration.Json/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Configuration/Annium.Configuration.Json",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Configuration/src/Annium.Configuration.Yaml/Annium.Configuration.Yaml.csproj"
+          ],
+          "exclude": [
+            "core/Configuration/src/Annium.Configuration.Yaml/bin/**",
+            "core/Configuration/src/Annium.Configuration.Yaml/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Configuration/Annium.Configuration.Yaml",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj"
+          ],
+          "exclude": [
+            "core/Core/src/Annium.Core.DependencyInjection/bin/**",
+            "core/Core/src/Annium.Core.DependencyInjection/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Core/Annium.Core.DependencyInjection",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Core/src/Annium.Core.Entrypoint/Annium.Core.Entrypoint.csproj"
+          ],
+          "exclude": [
+            "core/Core/src/Annium.Core.Entrypoint/bin/**",
+            "core/Core/src/Annium.Core.Entrypoint/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Core/Annium.Core.Entrypoint",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Core/src/Annium.Core.Mapper/Annium.Core.Mapper.csproj"
+          ],
+          "exclude": [
+            "core/Core/src/Annium.Core.Mapper/bin/**",
+            "core/Core/src/Annium.Core.Mapper/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Core/Annium.Core.Mapper",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Core/src/Annium.Core.Mediator/Annium.Core.Mediator.csproj"
+          ],
+          "exclude": [
+            "core/Core/src/Annium.Core.Mediator/bin/**",
+            "core/Core/src/Annium.Core.Mediator/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Core/Annium.Core.Mediator",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Core/src/Annium.Core.Runtime.Loader/Annium.Core.Runtime.Loader.csproj"
+          ],
+          "exclude": [
+            "core/Core/src/Annium.Core.Runtime.Loader/bin/**",
+            "core/Core/src/Annium.Core.Runtime.Loader/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Core/Annium.Core.Runtime.Loader",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj"
+          ],
+          "exclude": [
+            "core/Core/src/Annium.Core.Runtime/bin/**",
+            "core/Core/src/Annium.Core.Runtime/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Core/Annium.Core.Runtime",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Data/src/Annium.Data.Models/Annium.Data.Models.csproj"
+          ],
+          "exclude": [
+            "core/Data/src/Annium.Data.Models/bin/**",
+            "core/Data/src/Annium.Data.Models/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Data/Annium.Data.Models",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Data/src/Annium.Data.Operations.Serialization.Json/Annium.Data.Operations.Serialization.Json.csproj"
+          ],
+          "exclude": [
+            "core/Data/src/Annium.Data.Operations.Serialization.Json/bin/**",
+            "core/Data/src/Annium.Data.Operations.Serialization.Json/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Data/Annium.Data.Operations.Serialization.Json",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Data/src/Annium.Data.Operations.Serialization.MessagePack/Annium.Data.Operations.Serialization.MessagePack.csproj"
+          ],
+          "exclude": [
+            "core/Data/src/Annium.Data.Operations.Serialization.MessagePack/bin/**",
+            "core/Data/src/Annium.Data.Operations.Serialization.MessagePack/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Data/Annium.Data.Operations.Serialization.MessagePack",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Data/src/Annium.Data.Operations.Testing/Annium.Data.Operations.Testing.csproj"
+          ],
+          "exclude": [
+            "core/Data/src/Annium.Data.Operations.Testing/bin/**",
+            "core/Data/src/Annium.Data.Operations.Testing/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Data/Annium.Data.Operations.Testing",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Data/src/Annium.Data.Operations/Annium.Data.Operations.csproj"
+          ],
+          "exclude": [
+            "core/Data/src/Annium.Data.Operations/bin/**",
+            "core/Data/src/Annium.Data.Operations/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Data/Annium.Data.Operations",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Data/src/Annium.Data.Tables/Annium.Data.Tables.csproj"
+          ],
+          "exclude": [
+            "core/Data/src/Annium.Data.Tables/bin/**",
+            "core/Data/src/Annium.Data.Tables/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Data/Annium.Data.Tables",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj"
+          ],
+          "exclude": [
+            "core/Execution/src/Annium.Execution.Background/bin/**",
+            "core/Execution/src/Annium.Execution.Background/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Execution/Annium.Execution.Background",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Execution/src/Annium.Execution.Flow/Annium.Execution.Flow.csproj"
+          ],
+          "exclude": [
+            "core/Execution/src/Annium.Execution.Flow/bin/**",
+            "core/Execution/src/Annium.Execution.Flow/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Execution/Annium.Execution.Flow",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Extensions/src/Annium.Extensions.Arguments/Annium.Extensions.Arguments.csproj"
+          ],
+          "exclude": [
+            "core/Extensions/src/Annium.Extensions.Arguments/bin/**",
+            "core/Extensions/src/Annium.Extensions.Arguments/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Extensions/Annium.Extensions.Arguments",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Extensions/src/Annium.Extensions.CommandLine/Annium.Extensions.CommandLine.csproj"
+          ],
+          "exclude": [
+            "core/Extensions/src/Annium.Extensions.CommandLine/bin/**",
+            "core/Extensions/src/Annium.Extensions.CommandLine/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Extensions/Annium.Extensions.CommandLine",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Extensions/src/Annium.Extensions.Composition/Annium.Extensions.Composition.csproj"
+          ],
+          "exclude": [
+            "core/Extensions/src/Annium.Extensions.Composition/bin/**",
+            "core/Extensions/src/Annium.Extensions.Composition/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Extensions/Annium.Extensions.Composition",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Extensions/src/Annium.Extensions.Jobs/Annium.Extensions.Jobs.csproj"
+          ],
+          "exclude": [
+            "core/Extensions/src/Annium.Extensions.Jobs/bin/**",
+            "core/Extensions/src/Annium.Extensions.Jobs/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Extensions/Annium.Extensions.Jobs",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Extensions/src/Annium.Extensions.Pooling/Annium.Extensions.Pooling.csproj"
+          ],
+          "exclude": [
+            "core/Extensions/src/Annium.Extensions.Pooling/bin/**",
+            "core/Extensions/src/Annium.Extensions.Pooling/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Extensions/Annium.Extensions.Pooling",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Extensions/src/Annium.Extensions.Reactive/Annium.Extensions.Reactive.csproj"
+          ],
+          "exclude": [
+            "core/Extensions/src/Annium.Extensions.Reactive/bin/**",
+            "core/Extensions/src/Annium.Extensions.Reactive/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Extensions/Annium.Extensions.Reactive",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Extensions/src/Annium.Extensions.Shell/Annium.Extensions.Shell.csproj"
+          ],
+          "exclude": [
+            "core/Extensions/src/Annium.Extensions.Shell/bin/**",
+            "core/Extensions/src/Annium.Extensions.Shell/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Extensions/Annium.Extensions.Shell",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Extensions/src/Annium.Extensions.Validation/Annium.Extensions.Validation.csproj"
+          ],
+          "exclude": [
+            "core/Extensions/src/Annium.Extensions.Validation/bin/**",
+            "core/Extensions/src/Annium.Extensions.Validation/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Extensions/Annium.Extensions.Validation",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Extensions/src/Annium.Extensions.Workers/Annium.Extensions.Workers.csproj"
+          ],
+          "exclude": [
+            "core/Extensions/src/Annium.Extensions.Workers/bin/**",
+            "core/Extensions/src/Annium.Extensions.Workers/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Extensions/Annium.Extensions.Workers",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Identity/src/Annium.Identity.Tokens.Jwt/Annium.Identity.Tokens.Jwt.csproj"
+          ],
+          "exclude": [
+            "core/Identity/src/Annium.Identity.Tokens.Jwt/bin/**",
+            "core/Identity/src/Annium.Identity.Tokens.Jwt/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Identity/Annium.Identity.Tokens.Jwt",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Identity/src/Annium.Identity.Tokens/Annium.Identity.Tokens.csproj"
+          ],
+          "exclude": [
+            "core/Identity/src/Annium.Identity.Tokens/bin/**",
+            "core/Identity/src/Annium.Identity.Tokens/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Identity/Annium.Identity.Tokens",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Localization/src/Annium.Localization.Abstractions/Annium.Localization.Abstractions.csproj"
+          ],
+          "exclude": [
+            "core/Localization/src/Annium.Localization.Abstractions/bin/**",
+            "core/Localization/src/Annium.Localization.Abstractions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Localization/Annium.Localization.Abstractions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Localization/src/Annium.Localization.InMemory/Annium.Localization.InMemory.csproj"
+          ],
+          "exclude": [
+            "core/Localization/src/Annium.Localization.InMemory/bin/**",
+            "core/Localization/src/Annium.Localization.InMemory/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Localization/Annium.Localization.InMemory",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Localization/src/Annium.Localization.Yaml/Annium.Localization.Yaml.csproj"
+          ],
+          "exclude": [
+            "core/Localization/src/Annium.Localization.Yaml/bin/**",
+            "core/Localization/src/Annium.Localization.Yaml/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Localization/Annium.Localization.Yaml",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj"
+          ],
+          "exclude": [
+            "core/Logging/src/Annium.Logging.Console/bin/**",
+            "core/Logging/src/Annium.Logging.Console/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Logging/Annium.Logging.Console",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Logging/src/Annium.Logging.File/Annium.Logging.File.csproj"
+          ],
+          "exclude": [
+            "core/Logging/src/Annium.Logging.File/bin/**",
+            "core/Logging/src/Annium.Logging.File/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Logging/Annium.Logging.File",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Logging/src/Annium.Logging.InMemory/Annium.Logging.InMemory.csproj"
+          ],
+          "exclude": [
+            "core/Logging/src/Annium.Logging.InMemory/bin/**",
+            "core/Logging/src/Annium.Logging.InMemory/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Logging/Annium.Logging.InMemory",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Logging/src/Annium.Logging.Microsoft/Annium.Logging.Microsoft.csproj"
+          ],
+          "exclude": [
+            "core/Logging/src/Annium.Logging.Microsoft/bin/**",
+            "core/Logging/src/Annium.Logging.Microsoft/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Logging/Annium.Logging.Microsoft",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Logging/src/Annium.Logging.Shared/Annium.Logging.Shared.csproj"
+          ],
+          "exclude": [
+            "core/Logging/src/Annium.Logging.Shared/bin/**",
+            "core/Logging/src/Annium.Logging.Shared/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Logging/Annium.Logging.Shared",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Logging/src/Annium.Logging.Xunit/Annium.Logging.Xunit.csproj"
+          ],
+          "exclude": [
+            "core/Logging/src/Annium.Logging.Xunit/bin/**",
+            "core/Logging/src/Annium.Logging.Xunit/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Logging/Annium.Logging.Xunit",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Net/src/Annium.Net.Base/Annium.Net.Base.csproj"
+          ],
+          "exclude": [
+            "core/Net/src/Annium.Net.Base/bin/**",
+            "core/Net/src/Annium.Net.Base/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Net/Annium.Net.Base",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj"
+          ],
+          "exclude": [
+            "core/Net/src/Annium.Net.Http/bin/**",
+            "core/Net/src/Annium.Net.Http/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Net/Annium.Net.Http",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Net/src/Annium.Net.Mail.Testing/Annium.Net.Mail.Testing.csproj"
+          ],
+          "exclude": [
+            "core/Net/src/Annium.Net.Mail.Testing/bin/**",
+            "core/Net/src/Annium.Net.Mail.Testing/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Net/Annium.Net.Mail.Testing",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Net/src/Annium.Net.Mail/Annium.Net.Mail.csproj"
+          ],
+          "exclude": [
+            "core/Net/src/Annium.Net.Mail/bin/**",
+            "core/Net/src/Annium.Net.Mail/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Net/Annium.Net.Mail",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Net/src/Annium.Net.Servers.Sockets/Annium.Net.Servers.Sockets.csproj"
+          ],
+          "exclude": [
+            "core/Net/src/Annium.Net.Servers.Sockets/bin/**",
+            "core/Net/src/Annium.Net.Servers.Sockets/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Net/Annium.Net.Servers.Sockets",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj"
+          ],
+          "exclude": [
+            "core/Net/src/Annium.Net.Servers.Web/bin/**",
+            "core/Net/src/Annium.Net.Servers.Web/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Net/Annium.Net.Servers.Web",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Net/src/Annium.Net.Sockets/Annium.Net.Sockets.csproj"
+          ],
+          "exclude": [
+            "core/Net/src/Annium.Net.Sockets/bin/**",
+            "core/Net/src/Annium.Net.Sockets/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Net/Annium.Net.Sockets",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Net/src/Annium.Net.Types.Serialization.Json/Annium.Net.Types.Serialization.Json.csproj"
+          ],
+          "exclude": [
+            "core/Net/src/Annium.Net.Types.Serialization.Json/bin/**",
+            "core/Net/src/Annium.Net.Types.Serialization.Json/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Net/Annium.Net.Types.Serialization.Json",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Net/src/Annium.Net.Types/Annium.Net.Types.csproj"
+          ],
+          "exclude": [
+            "core/Net/src/Annium.Net.Types/bin/**",
+            "core/Net/src/Annium.Net.Types/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Net/Annium.Net.Types",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Net/src/Annium.Net.WebSockets/Annium.Net.WebSockets.csproj"
+          ],
+          "exclude": [
+            "core/Net/src/Annium.Net.WebSockets/bin/**",
+            "core/Net/src/Annium.Net.WebSockets/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Net/Annium.Net.WebSockets",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj"
+          ],
+          "exclude": [
+            "core/NodaTime/src/Annium.NodaTime.Extensions/bin/**",
+            "core/NodaTime/src/Annium.NodaTime.Extensions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/NodaTime/Annium.NodaTime.Extensions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj"
+          ],
+          "exclude": [
+            "core/NodaTime/src/Annium.NodaTime.Serialization.Json/bin/**",
+            "core/NodaTime/src/Annium.NodaTime.Serialization.Json/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/NodaTime/Annium.NodaTime.Serialization.Json",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Serialization/src/Annium.Serialization.Abstractions/Annium.Serialization.Abstractions.csproj"
+          ],
+          "exclude": [
+            "core/Serialization/src/Annium.Serialization.Abstractions/bin/**",
+            "core/Serialization/src/Annium.Serialization.Abstractions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Serialization/Annium.Serialization.Abstractions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Serialization/src/Annium.Serialization.BinaryString/Annium.Serialization.BinaryString.csproj"
+          ],
+          "exclude": [
+            "core/Serialization/src/Annium.Serialization.BinaryString/bin/**",
+            "core/Serialization/src/Annium.Serialization.BinaryString/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Serialization/Annium.Serialization.BinaryString",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj"
+          ],
+          "exclude": [
+            "core/Serialization/src/Annium.Serialization.Json/bin/**",
+            "core/Serialization/src/Annium.Serialization.Json/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Serialization/Annium.Serialization.Json",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Serialization/src/Annium.Serialization.MessagePack/Annium.Serialization.MessagePack.csproj"
+          ],
+          "exclude": [
+            "core/Serialization/src/Annium.Serialization.MessagePack/bin/**",
+            "core/Serialization/src/Annium.Serialization.MessagePack/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Serialization/Annium.Serialization.MessagePack",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "core/Serialization/src/Annium.Serialization.Yaml/Annium.Serialization.Yaml.csproj"
+          ],
+          "exclude": [
+            "core/Serialization/src/Annium.Serialization.Yaml/bin/**",
+            "core/Serialization/src/Annium.Serialization.Yaml/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/core/Serialization/Annium.Serialization.Yaml",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "finance/Providers/src/Annium.Finance.Providers.Abstractions.Connectors/Annium.Finance.Providers.Abstractions.Connectors.csproj"
+          ],
+          "exclude": [
+            "finance/Providers/src/Annium.Finance.Providers.Abstractions.Connectors/bin/**",
+            "finance/Providers/src/Annium.Finance.Providers.Abstractions.Connectors/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/finance/Providers/Annium.Finance.Providers.Abstractions.Connectors",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "finance/Providers/src/Annium.Finance.Providers.Abstractions.Domain/Annium.Finance.Providers.Abstractions.Domain.csproj"
+          ],
+          "exclude": [
+            "finance/Providers/src/Annium.Finance.Providers.Abstractions.Domain/bin/**",
+            "finance/Providers/src/Annium.Finance.Providers.Abstractions.Domain/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/finance/Providers/Annium.Finance.Providers.Abstractions.Domain",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "finance/Providers/src/Annium.Finance.Providers.Core/Annium.Finance.Providers.Core.csproj"
+          ],
+          "exclude": [
+            "finance/Providers/src/Annium.Finance.Providers.Core/bin/**",
+            "finance/Providers/src/Annium.Finance.Providers.Core/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/finance/Providers/Annium.Finance.Providers.Core",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "finance/Providers/src/Annium.Finance.Providers.Crypto.Binance.Base/Annium.Finance.Providers.Crypto.Binance.Base.csproj"
+          ],
+          "exclude": [
+            "finance/Providers/src/Annium.Finance.Providers.Crypto.Binance.Base/bin/**",
+            "finance/Providers/src/Annium.Finance.Providers.Crypto.Binance.Base/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.Base",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "finance/Providers/src/Annium.Finance.Providers.Crypto.Binance.Spot/Annium.Finance.Providers.Crypto.Binance.Spot.csproj"
+          ],
+          "exclude": [
+            "finance/Providers/src/Annium.Finance.Providers.Crypto.Binance.Spot/bin/**",
+            "finance/Providers/src/Annium.Finance.Providers.Crypto.Binance.Spot/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.Spot",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "finance/Providers/src/Annium.Finance.Providers.Crypto.Binance.UsdFutures/Annium.Finance.Providers.Crypto.Binance.UsdFutures.csproj"
+          ],
+          "exclude": [
+            "finance/Providers/src/Annium.Finance.Providers.Crypto.Binance.UsdFutures/bin/**",
+            "finance/Providers/src/Annium.Finance.Providers.Crypto.Binance.UsdFutures/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.UsdFutures",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/AI/src/Annium.AI.OpenAI/Annium.AI.OpenAI.csproj"
+          ],
+          "exclude": [
+            "integrations/AI/src/Annium.AI.OpenAI/bin/**",
+            "integrations/AI/src/Annium.AI.OpenAI/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/AI/Annium.AI.OpenAI",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/AI/src/Annium.AI.SemanticKernel/Annium.AI.SemanticKernel.csproj"
+          ],
+          "exclude": [
+            "integrations/AI/src/Annium.AI.SemanticKernel/bin/**",
+            "integrations/AI/src/Annium.AI.SemanticKernel/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/AI/Annium.AI.SemanticKernel",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/AspNetCore/src/Annium.AspNetCore.Extensions/Annium.AspNetCore.Extensions.csproj"
+          ],
+          "exclude": [
+            "integrations/AspNetCore/src/Annium.AspNetCore.Extensions/bin/**",
+            "integrations/AspNetCore/src/Annium.AspNetCore.Extensions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/AspNetCore/Annium.AspNetCore.Extensions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/AspNetCore/src/Annium.AspNetCore.IntegrationTesting/Annium.AspNetCore.IntegrationTesting.csproj"
+          ],
+          "exclude": [
+            "integrations/AspNetCore/src/Annium.AspNetCore.IntegrationTesting/bin/**",
+            "integrations/AspNetCore/src/Annium.AspNetCore.IntegrationTesting/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/AspNetCore/Annium.AspNetCore.IntegrationTesting",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/AspNetCore/src/Annium.AspNetCore.Mesh/Annium.AspNetCore.Mesh.csproj"
+          ],
+          "exclude": [
+            "integrations/AspNetCore/src/Annium.AspNetCore.Mesh/bin/**",
+            "integrations/AspNetCore/src/Annium.AspNetCore.Mesh/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/AspNetCore/Annium.AspNetCore.Mesh",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/DbUp/src/Annium.DbUp.Core/Annium.DbUp.Core.csproj"
+          ],
+          "exclude": [
+            "integrations/DbUp/src/Annium.DbUp.Core/bin/**",
+            "integrations/DbUp/src/Annium.DbUp.Core/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/DbUp/Annium.DbUp.Core",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/DbUp/src/Annium.DbUp.PostgreSql/Annium.DbUp.PostgreSql.csproj"
+          ],
+          "exclude": [
+            "integrations/DbUp/src/Annium.DbUp.PostgreSql/bin/**",
+            "integrations/DbUp/src/Annium.DbUp.PostgreSql/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/DbUp/Annium.DbUp.PostgreSql",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/EntityFrameworkCore/src/Annium.EntityFrameworkCore.Extensions/Annium.EntityFrameworkCore.Extensions.csproj"
+          ],
+          "exclude": [
+            "integrations/EntityFrameworkCore/src/Annium.EntityFrameworkCore.Extensions/bin/**",
+            "integrations/EntityFrameworkCore/src/Annium.EntityFrameworkCore.Extensions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/EntityFrameworkCore/Annium.EntityFrameworkCore.Extensions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/Graylog/src/Annium.Graylog.Logging/Annium.Graylog.Logging.csproj"
+          ],
+          "exclude": [
+            "integrations/Graylog/src/Annium.Graylog.Logging/bin/**",
+            "integrations/Graylog/src/Annium.Graylog.Logging/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/Graylog/Annium.Graylog.Logging",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/MongoDb/src/Annium.MongoDb.NodaTime/Annium.MongoDb.NodaTime.csproj"
+          ],
+          "exclude": [
+            "integrations/MongoDb/src/Annium.MongoDb.NodaTime/bin/**",
+            "integrations/MongoDb/src/Annium.MongoDb.NodaTime/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/MongoDb/Annium.MongoDb.NodaTime",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/Redis/src/Annium.Redis/Annium.Redis.csproj"
+          ],
+          "exclude": [
+            "integrations/Redis/src/Annium.Redis/bin/**",
+            "integrations/Redis/src/Annium.Redis/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/Redis/Annium.Redis",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/Seq/src/Annium.Seq.Logging/Annium.Seq.Logging.csproj"
+          ],
+          "exclude": [
+            "integrations/Seq/src/Annium.Seq.Logging/bin/**",
+            "integrations/Seq/src/Annium.Seq.Logging/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/Seq/Annium.Seq.Logging",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/Social/src/Annium.Social.Telegram/Annium.Social.Telegram.csproj"
+          ],
+          "exclude": [
+            "integrations/Social/src/Annium.Social.Telegram/bin/**",
+            "integrations/Social/src/Annium.Social.Telegram/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/Social/Annium.Social.Telegram",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/linq2db/src/Annium.linq2db.Extensions/Annium.linq2db.Extensions.csproj"
+          ],
+          "exclude": [
+            "integrations/linq2db/src/Annium.linq2db.Extensions/bin/**",
+            "integrations/linq2db/src/Annium.linq2db.Extensions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/linq2db/Annium.linq2db.Extensions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "integrations/linq2db/src/Annium.linq2db.PostgreSql/Annium.linq2db.PostgreSql.csproj"
+          ],
+          "exclude": [
+            "integrations/linq2db/src/Annium.linq2db.PostgreSql/bin/**",
+            "integrations/linq2db/src/Annium.linq2db.PostgreSql/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/integrations/linq2db/Annium.linq2db.PostgreSql",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Cache/src/Annium.Cache.Abstractions/Annium.Cache.Abstractions.csproj"
+          ],
+          "exclude": [
+            "server/Cache/src/Annium.Cache.Abstractions/bin/**",
+            "server/Cache/src/Annium.Cache.Abstractions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Cache/Annium.Cache.Abstractions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Cache/src/Annium.Cache.InMemory/Annium.Cache.InMemory.csproj"
+          ],
+          "exclude": [
+            "server/Cache/src/Annium.Cache.InMemory/bin/**",
+            "server/Cache/src/Annium.Cache.InMemory/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Cache/Annium.Cache.InMemory",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Cache/src/Annium.Cache.Redis/Annium.Cache.Redis.csproj"
+          ],
+          "exclude": [
+            "server/Cache/src/Annium.Cache.Redis/bin/**",
+            "server/Cache/src/Annium.Cache.Redis/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Cache/Annium.Cache.Redis",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Infrastructure/src/Annium.Infrastructure.Hosting/Annium.Infrastructure.Hosting.csproj"
+          ],
+          "exclude": [
+            "server/Infrastructure/src/Annium.Infrastructure.Hosting/bin/**",
+            "server/Infrastructure/src/Annium.Infrastructure.Hosting/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Infrastructure/Annium.Infrastructure.Hosting",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Client/Annium.Mesh.Client.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Client/bin/**",
+            "server/Mesh/src/Annium.Mesh.Client/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Client",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Domain/Annium.Mesh.Domain.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Domain/bin/**",
+            "server/Mesh/src/Annium.Mesh.Domain/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Domain",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Serialization.Abstractions/Annium.Mesh.Serialization.Abstractions.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Serialization.Abstractions/bin/**",
+            "server/Mesh/src/Annium.Mesh.Serialization.Abstractions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Serialization.Abstractions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Serialization.Json/Annium.Mesh.Serialization.Json.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Serialization.Json/bin/**",
+            "server/Mesh/src/Annium.Mesh.Serialization.Json/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Serialization.Json",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Serialization.MessagePack/Annium.Mesh.Serialization.MessagePack.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Serialization.MessagePack/bin/**",
+            "server/Mesh/src/Annium.Mesh.Serialization.MessagePack/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Serialization.MessagePack",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Server.InMemory/Annium.Mesh.Server.InMemory.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Server.InMemory/bin/**",
+            "server/Mesh/src/Annium.Mesh.Server.InMemory/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Server.InMemory",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Server.Sockets/Annium.Mesh.Server.Sockets.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Server.Sockets/bin/**",
+            "server/Mesh/src/Annium.Mesh.Server.Sockets/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Server.Sockets",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Server.Web/Annium.Mesh.Server.Web.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Server.Web/bin/**",
+            "server/Mesh/src/Annium.Mesh.Server.Web/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Server.Web",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Server/Annium.Mesh.Server.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Server/bin/**",
+            "server/Mesh/src/Annium.Mesh.Server/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Server",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Transport.Abstractions/Annium.Mesh.Transport.Abstractions.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Transport.Abstractions/bin/**",
+            "server/Mesh/src/Annium.Mesh.Transport.Abstractions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Transport.Abstractions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Transport.InMemory/Annium.Mesh.Transport.InMemory.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Transport.InMemory/bin/**",
+            "server/Mesh/src/Annium.Mesh.Transport.InMemory/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Transport.InMemory",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Transport.Sockets/Annium.Mesh.Transport.Sockets.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Transport.Sockets/bin/**",
+            "server/Mesh/src/Annium.Mesh.Transport.Sockets/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Transport.Sockets",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Mesh/src/Annium.Mesh.Transport.WebSockets/Annium.Mesh.Transport.WebSockets.csproj"
+          ],
+          "exclude": [
+            "server/Mesh/src/Annium.Mesh.Transport.WebSockets/bin/**",
+            "server/Mesh/src/Annium.Mesh.Transport.WebSockets/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Mesh/Annium.Mesh.Transport.WebSockets",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/MessageBus/src/Annium.MessageBus.Abstractions/Annium.MessageBus.Abstractions.csproj"
+          ],
+          "exclude": [
+            "server/MessageBus/src/Annium.MessageBus.Abstractions/bin/**",
+            "server/MessageBus/src/Annium.MessageBus.Abstractions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/MessageBus/Annium.MessageBus.Abstractions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/MessageBus/src/Annium.MessageBus.InMemory/Annium.MessageBus.InMemory.csproj"
+          ],
+          "exclude": [
+            "server/MessageBus/src/Annium.MessageBus.InMemory/bin/**",
+            "server/MessageBus/src/Annium.MessageBus.InMemory/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/MessageBus/Annium.MessageBus.InMemory",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/MessageBus/src/Annium.MessageBus.Kafka/Annium.MessageBus.Kafka.csproj"
+          ],
+          "exclude": [
+            "server/MessageBus/src/Annium.MessageBus.Kafka/bin/**",
+            "server/MessageBus/src/Annium.MessageBus.Kafka/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/MessageBus/Annium.MessageBus.Kafka",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/MessageBus/src/Annium.MessageBus.Nats/Annium.MessageBus.Nats.csproj"
+          ],
+          "exclude": [
+            "server/MessageBus/src/Annium.MessageBus.Nats/bin/**",
+            "server/MessageBus/src/Annium.MessageBus.Nats/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/MessageBus/Annium.MessageBus.Nats",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/MessageBus/src/Annium.MessageBus.RabbitMq/Annium.MessageBus.RabbitMq.csproj"
+          ],
+          "exclude": [
+            "server/MessageBus/src/Annium.MessageBus.RabbitMq/bin/**",
+            "server/MessageBus/src/Annium.MessageBus.RabbitMq/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/MessageBus/Annium.MessageBus.RabbitMq",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Storage/src/Annium.Storage.Abstractions/Annium.Storage.Abstractions.csproj"
+          ],
+          "exclude": [
+            "server/Storage/src/Annium.Storage.Abstractions/bin/**",
+            "server/Storage/src/Annium.Storage.Abstractions/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Storage/Annium.Storage.Abstractions",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Storage/src/Annium.Storage.FileSystem/Annium.Storage.FileSystem.csproj"
+          ],
+          "exclude": [
+            "server/Storage/src/Annium.Storage.FileSystem/bin/**",
+            "server/Storage/src/Annium.Storage.FileSystem/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Storage/Annium.Storage.FileSystem",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Storage/src/Annium.Storage.InMemory/Annium.Storage.InMemory.csproj"
+          ],
+          "exclude": [
+            "server/Storage/src/Annium.Storage.InMemory/bin/**",
+            "server/Storage/src/Annium.Storage.InMemory/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Storage/Annium.Storage.InMemory",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    },
+    {
+      "src": [
+        {
+          "files": [
+            "server/Storage/src/Annium.Storage.S3/Annium.Storage.S3.csproj"
+          ],
+          "exclude": [
+            "server/Storage/src/Annium.Storage.S3/bin/**",
+            "server/Storage/src/Annium.Storage.S3/obj/**"
+          ]
+        }
+      ],
+      "dest": "api/server/Storage/Annium.Storage.S3",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": true,
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false,
+      "properties": {
+        "ProduceReferenceAssembly": "true"
+      }
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "index.md",
+          "toc.yml",
+          "api/client/Blazor/Annium.Blazor.Ant/*.{md,yml}",
+          "api/client/Blazor/Annium.Blazor.Charts/*.{md,yml}",
+          "api/client/Blazor/Annium.Blazor.Core/*.{md,yml}",
+          "api/client/Blazor/Annium.Blazor.Css/*.{md,yml}",
+          "api/client/Blazor/Annium.Blazor.Interop/*.{md,yml}",
+          "api/client/Blazor/Annium.Blazor.MatBlazor/*.{md,yml}",
+          "api/client/Blazor/Annium.Blazor.Net/*.{md,yml}",
+          "api/client/Blazor/Annium.Blazor.Routing/*.{md,yml}",
+          "api/client/Blazor/Annium.Blazor.State/*.{md,yml}",
+          "api/client/Components/Annium.Components.State.Core/*.{md,yml}",
+          "api/client/Components/Annium.Components.State.Forms/*.{md,yml}",
+          "api/client/Components/Annium.Components.State.Operations/*.{md,yml}",
+          "api/core/Annium/Annium.Analyzers/*.{md,yml}",
+          "api/core/Annium/Annium.Testing/*.{md,yml}",
+          "api/core/Annium/Annium/*.{md,yml}",
+          "api/core/Architecture/Annium.Architecture.Base/*.{md,yml}",
+          "api/core/Architecture/Annium.Architecture.CQRS/*.{md,yml}",
+          "api/core/Architecture/Annium.Architecture.Http/*.{md,yml}",
+          "api/core/Architecture/Annium.Architecture.Mediator/*.{md,yml}",
+          "api/core/Architecture/Annium.Architecture.ViewModel/*.{md,yml}",
+          "api/core/Configuration/Annium.Configuration.Abstractions/*.{md,yml}",
+          "api/core/Configuration/Annium.Configuration.CommandLine/*.{md,yml}",
+          "api/core/Configuration/Annium.Configuration.Json/*.{md,yml}",
+          "api/core/Configuration/Annium.Configuration.Yaml/*.{md,yml}",
+          "api/core/Core/Annium.Core.DependencyInjection/*.{md,yml}",
+          "api/core/Core/Annium.Core.Entrypoint/*.{md,yml}",
+          "api/core/Core/Annium.Core.Mapper/*.{md,yml}",
+          "api/core/Core/Annium.Core.Mediator/*.{md,yml}",
+          "api/core/Core/Annium.Core.Runtime.Loader/*.{md,yml}",
+          "api/core/Core/Annium.Core.Runtime/*.{md,yml}",
+          "api/core/Data/Annium.Data.Models/*.{md,yml}",
+          "api/core/Data/Annium.Data.Operations.Serialization.Json/*.{md,yml}",
+          "api/core/Data/Annium.Data.Operations.Serialization.MessagePack/*.{md,yml}",
+          "api/core/Data/Annium.Data.Operations.Testing/*.{md,yml}",
+          "api/core/Data/Annium.Data.Operations/*.{md,yml}",
+          "api/core/Data/Annium.Data.Tables/*.{md,yml}",
+          "api/core/Execution/Annium.Execution.Background/*.{md,yml}",
+          "api/core/Execution/Annium.Execution.Flow/*.{md,yml}",
+          "api/core/Extensions/Annium.Extensions.Arguments/*.{md,yml}",
+          "api/core/Extensions/Annium.Extensions.CommandLine/*.{md,yml}",
+          "api/core/Extensions/Annium.Extensions.Composition/*.{md,yml}",
+          "api/core/Extensions/Annium.Extensions.Jobs/*.{md,yml}",
+          "api/core/Extensions/Annium.Extensions.Pooling/*.{md,yml}",
+          "api/core/Extensions/Annium.Extensions.Reactive/*.{md,yml}",
+          "api/core/Extensions/Annium.Extensions.Shell/*.{md,yml}",
+          "api/core/Extensions/Annium.Extensions.Validation/*.{md,yml}",
+          "api/core/Extensions/Annium.Extensions.Workers/*.{md,yml}",
+          "api/core/Identity/Annium.Identity.Tokens.Jwt/*.{md,yml}",
+          "api/core/Identity/Annium.Identity.Tokens/*.{md,yml}",
+          "api/core/Localization/Annium.Localization.Abstractions/*.{md,yml}",
+          "api/core/Localization/Annium.Localization.InMemory/*.{md,yml}",
+          "api/core/Localization/Annium.Localization.Yaml/*.{md,yml}",
+          "api/core/Logging/Annium.Logging.Console/*.{md,yml}",
+          "api/core/Logging/Annium.Logging.File/*.{md,yml}",
+          "api/core/Logging/Annium.Logging.InMemory/*.{md,yml}",
+          "api/core/Logging/Annium.Logging.Microsoft/*.{md,yml}",
+          "api/core/Logging/Annium.Logging.Shared/*.{md,yml}",
+          "api/core/Logging/Annium.Logging.Xunit/*.{md,yml}",
+          "api/core/Net/Annium.Net.Base/*.{md,yml}",
+          "api/core/Net/Annium.Net.Http/*.{md,yml}",
+          "api/core/Net/Annium.Net.Mail.Testing/*.{md,yml}",
+          "api/core/Net/Annium.Net.Mail/*.{md,yml}",
+          "api/core/Net/Annium.Net.Servers.Sockets/*.{md,yml}",
+          "api/core/Net/Annium.Net.Servers.Web/*.{md,yml}",
+          "api/core/Net/Annium.Net.Sockets/*.{md,yml}",
+          "api/core/Net/Annium.Net.Types.Serialization.Json/*.{md,yml}",
+          "api/core/Net/Annium.Net.Types/*.{md,yml}",
+          "api/core/Net/Annium.Net.WebSockets/*.{md,yml}",
+          "api/core/NodaTime/Annium.NodaTime.Extensions/*.{md,yml}",
+          "api/core/NodaTime/Annium.NodaTime.Serialization.Json/*.{md,yml}",
+          "api/core/Serialization/Annium.Serialization.Abstractions/*.{md,yml}",
+          "api/core/Serialization/Annium.Serialization.BinaryString/*.{md,yml}",
+          "api/core/Serialization/Annium.Serialization.Json/*.{md,yml}",
+          "api/core/Serialization/Annium.Serialization.MessagePack/*.{md,yml}",
+          "api/core/Serialization/Annium.Serialization.Yaml/*.{md,yml}",
+          "api/finance/Providers/Annium.Finance.Providers.Abstractions.Connectors/*.{md,yml}",
+          "api/finance/Providers/Annium.Finance.Providers.Abstractions.Domain/*.{md,yml}",
+          "api/finance/Providers/Annium.Finance.Providers.Core/*.{md,yml}",
+          "api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.Base/*.{md,yml}",
+          "api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.Spot/*.{md,yml}",
+          "api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.UsdFutures/*.{md,yml}",
+          "api/integrations/AI/Annium.AI.OpenAI/*.{md,yml}",
+          "api/integrations/AI/Annium.AI.SemanticKernel/*.{md,yml}",
+          "api/integrations/AspNetCore/Annium.AspNetCore.Extensions/*.{md,yml}",
+          "api/integrations/AspNetCore/Annium.AspNetCore.IntegrationTesting/*.{md,yml}",
+          "api/integrations/AspNetCore/Annium.AspNetCore.Mesh/*.{md,yml}",
+          "api/integrations/DbUp/Annium.DbUp.Core/*.{md,yml}",
+          "api/integrations/DbUp/Annium.DbUp.PostgreSql/*.{md,yml}",
+          "api/integrations/EntityFrameworkCore/Annium.EntityFrameworkCore.Extensions/*.{md,yml}",
+          "api/integrations/Graylog/Annium.Graylog.Logging/*.{md,yml}",
+          "api/integrations/MongoDb/Annium.MongoDb.NodaTime/*.{md,yml}",
+          "api/integrations/Redis/Annium.Redis/*.{md,yml}",
+          "api/integrations/Seq/Annium.Seq.Logging/*.{md,yml}",
+          "api/integrations/Social/Annium.Social.Telegram/*.{md,yml}",
+          "api/integrations/linq2db/Annium.linq2db.Extensions/*.{md,yml}",
+          "api/integrations/linq2db/Annium.linq2db.PostgreSql/*.{md,yml}",
+          "api/server/Cache/Annium.Cache.Abstractions/*.{md,yml}",
+          "api/server/Cache/Annium.Cache.InMemory/*.{md,yml}",
+          "api/server/Cache/Annium.Cache.Redis/*.{md,yml}",
+          "api/server/Infrastructure/Annium.Infrastructure.Hosting/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Client/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Domain/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Serialization.Abstractions/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Serialization.Json/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Serialization.MessagePack/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Server.InMemory/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Server.Sockets/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Server.Web/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Server/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Transport.Abstractions/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Transport.InMemory/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Transport.Sockets/*.{md,yml}",
+          "api/server/Mesh/Annium.Mesh.Transport.WebSockets/*.{md,yml}",
+          "api/server/MessageBus/Annium.MessageBus.Abstractions/*.{md,yml}",
+          "api/server/MessageBus/Annium.MessageBus.InMemory/*.{md,yml}",
+          "api/server/MessageBus/Annium.MessageBus.Kafka/*.{md,yml}",
+          "api/server/MessageBus/Annium.MessageBus.Nats/*.{md,yml}",
+          "api/server/MessageBus/Annium.MessageBus.RabbitMq/*.{md,yml}",
+          "api/server/Storage/Annium.Storage.Abstractions/*.{md,yml}",
+          "api/server/Storage/Annium.Storage.FileSystem/*.{md,yml}",
+          "api/server/Storage/Annium.Storage.InMemory/*.{md,yml}",
+          "api/server/Storage/Annium.Storage.S3/*.{md,yml}"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appName": "Annium",
+      "_appTitle": "Annium Documentation",
+      "_appFooter": "Copyright © 2026 Annium",
+      "_enableSearch": true,
+      "_enableNewTab": true,
+      "_disableContribution": false,
+      "_gitContribute": {
+        "repo": "https://github.com/annium/library",
+        "branch": "main"
+      },
+      "_gitUrlPattern": "github"
+    },
+    "fileMetadata": {
+      "_tocTitle": {
+        "api/client/Blazor/Annium.Blazor.Ant/": "Annium.Blazor.Ant",
+        "api/client/Blazor/Annium.Blazor.Charts/": "Annium.Blazor.Charts",
+        "api/client/Blazor/Annium.Blazor.Core/": "Annium.Blazor.Core",
+        "api/client/Blazor/Annium.Blazor.Css/": "Annium.Blazor.Css",
+        "api/client/Blazor/Annium.Blazor.Interop/": "Annium.Blazor.Interop",
+        "api/client/Blazor/Annium.Blazor.MatBlazor/": "Annium.Blazor.MatBlazor",
+        "api/client/Blazor/Annium.Blazor.Net/": "Annium.Blazor.Net",
+        "api/client/Blazor/Annium.Blazor.Routing/": "Annium.Blazor.Routing",
+        "api/client/Blazor/Annium.Blazor.State/": "Annium.Blazor.State",
+        "api/client/Components/Annium.Components.State.Core/": "Annium.Components.State.Core",
+        "api/client/Components/Annium.Components.State.Forms/": "Annium.Components.State.Forms",
+        "api/client/Components/Annium.Components.State.Operations/": "Annium.Components.State.Operations",
+        "api/core/Annium/Annium.Analyzers/": "Annium.Analyzers",
+        "api/core/Annium/Annium.Testing/": "Annium.Testing",
+        "api/core/Annium/Annium/": "Annium",
+        "api/core/Architecture/Annium.Architecture.Base/": "Annium.Architecture.Base",
+        "api/core/Architecture/Annium.Architecture.CQRS/": "Annium.Architecture.CQRS",
+        "api/core/Architecture/Annium.Architecture.Http/": "Annium.Architecture.Http",
+        "api/core/Architecture/Annium.Architecture.Mediator/": "Annium.Architecture.Mediator",
+        "api/core/Architecture/Annium.Architecture.ViewModel/": "Annium.Architecture.ViewModel",
+        "api/core/Configuration/Annium.Configuration.Abstractions/": "Annium.Configuration.Abstractions",
+        "api/core/Configuration/Annium.Configuration.CommandLine/": "Annium.Configuration.CommandLine",
+        "api/core/Configuration/Annium.Configuration.Json/": "Annium.Configuration.Json",
+        "api/core/Configuration/Annium.Configuration.Yaml/": "Annium.Configuration.Yaml",
+        "api/core/Core/Annium.Core.DependencyInjection/": "Annium.Core.DependencyInjection",
+        "api/core/Core/Annium.Core.Entrypoint/": "Annium.Core.Entrypoint",
+        "api/core/Core/Annium.Core.Mapper/": "Annium.Core.Mapper",
+        "api/core/Core/Annium.Core.Mediator/": "Annium.Core.Mediator",
+        "api/core/Core/Annium.Core.Runtime.Loader/": "Annium.Core.Runtime.Loader",
+        "api/core/Core/Annium.Core.Runtime/": "Annium.Core.Runtime",
+        "api/core/Data/Annium.Data.Models/": "Annium.Data.Models",
+        "api/core/Data/Annium.Data.Operations.Serialization.Json/": "Annium.Data.Operations.Serialization.Json",
+        "api/core/Data/Annium.Data.Operations.Serialization.MessagePack/": "Annium.Data.Operations.Serialization.MessagePack",
+        "api/core/Data/Annium.Data.Operations.Testing/": "Annium.Data.Operations.Testing",
+        "api/core/Data/Annium.Data.Operations/": "Annium.Data.Operations",
+        "api/core/Data/Annium.Data.Tables/": "Annium.Data.Tables",
+        "api/core/Execution/Annium.Execution.Background/": "Annium.Execution.Background",
+        "api/core/Execution/Annium.Execution.Flow/": "Annium.Execution.Flow",
+        "api/core/Extensions/Annium.Extensions.Arguments/": "Annium.Extensions.Arguments",
+        "api/core/Extensions/Annium.Extensions.CommandLine/": "Annium.Extensions.CommandLine",
+        "api/core/Extensions/Annium.Extensions.Composition/": "Annium.Extensions.Composition",
+        "api/core/Extensions/Annium.Extensions.Jobs/": "Annium.Extensions.Jobs",
+        "api/core/Extensions/Annium.Extensions.Pooling/": "Annium.Extensions.Pooling",
+        "api/core/Extensions/Annium.Extensions.Reactive/": "Annium.Extensions.Reactive",
+        "api/core/Extensions/Annium.Extensions.Shell/": "Annium.Extensions.Shell",
+        "api/core/Extensions/Annium.Extensions.Validation/": "Annium.Extensions.Validation",
+        "api/core/Extensions/Annium.Extensions.Workers/": "Annium.Extensions.Workers",
+        "api/core/Identity/Annium.Identity.Tokens.Jwt/": "Annium.Identity.Tokens.Jwt",
+        "api/core/Identity/Annium.Identity.Tokens/": "Annium.Identity.Tokens",
+        "api/core/Localization/Annium.Localization.Abstractions/": "Annium.Localization.Abstractions",
+        "api/core/Localization/Annium.Localization.InMemory/": "Annium.Localization.InMemory",
+        "api/core/Localization/Annium.Localization.Yaml/": "Annium.Localization.Yaml",
+        "api/core/Logging/Annium.Logging.Console/": "Annium.Logging.Console",
+        "api/core/Logging/Annium.Logging.File/": "Annium.Logging.File",
+        "api/core/Logging/Annium.Logging.InMemory/": "Annium.Logging.InMemory",
+        "api/core/Logging/Annium.Logging.Microsoft/": "Annium.Logging.Microsoft",
+        "api/core/Logging/Annium.Logging.Shared/": "Annium.Logging.Shared",
+        "api/core/Logging/Annium.Logging.Xunit/": "Annium.Logging.Xunit",
+        "api/core/Net/Annium.Net.Base/": "Annium.Net.Base",
+        "api/core/Net/Annium.Net.Http/": "Annium.Net.Http",
+        "api/core/Net/Annium.Net.Mail.Testing/": "Annium.Net.Mail.Testing",
+        "api/core/Net/Annium.Net.Mail/": "Annium.Net.Mail",
+        "api/core/Net/Annium.Net.Servers.Sockets/": "Annium.Net.Servers.Sockets",
+        "api/core/Net/Annium.Net.Servers.Web/": "Annium.Net.Servers.Web",
+        "api/core/Net/Annium.Net.Sockets/": "Annium.Net.Sockets",
+        "api/core/Net/Annium.Net.Types.Serialization.Json/": "Annium.Net.Types.Serialization.Json",
+        "api/core/Net/Annium.Net.Types/": "Annium.Net.Types",
+        "api/core/Net/Annium.Net.WebSockets/": "Annium.Net.WebSockets",
+        "api/core/NodaTime/Annium.NodaTime.Extensions/": "Annium.NodaTime.Extensions",
+        "api/core/NodaTime/Annium.NodaTime.Serialization.Json/": "Annium.NodaTime.Serialization.Json",
+        "api/core/Serialization/Annium.Serialization.Abstractions/": "Annium.Serialization.Abstractions",
+        "api/core/Serialization/Annium.Serialization.BinaryString/": "Annium.Serialization.BinaryString",
+        "api/core/Serialization/Annium.Serialization.Json/": "Annium.Serialization.Json",
+        "api/core/Serialization/Annium.Serialization.MessagePack/": "Annium.Serialization.MessagePack",
+        "api/core/Serialization/Annium.Serialization.Yaml/": "Annium.Serialization.Yaml",
+        "api/finance/Providers/Annium.Finance.Providers.Abstractions.Connectors/": "Annium.Finance.Providers.Abstractions.Connectors",
+        "api/finance/Providers/Annium.Finance.Providers.Abstractions.Domain/": "Annium.Finance.Providers.Abstractions.Domain",
+        "api/finance/Providers/Annium.Finance.Providers.Core/": "Annium.Finance.Providers.Core",
+        "api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.Base/": "Annium.Finance.Providers.Crypto.Binance.Base",
+        "api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.Spot/": "Annium.Finance.Providers.Crypto.Binance.Spot",
+        "api/finance/Providers/Annium.Finance.Providers.Crypto.Binance.UsdFutures/": "Annium.Finance.Providers.Crypto.Binance.UsdFutures",
+        "api/integrations/AI/Annium.AI.OpenAI/": "Annium.AI.OpenAI",
+        "api/integrations/AI/Annium.AI.SemanticKernel/": "Annium.AI.SemanticKernel",
+        "api/integrations/AspNetCore/Annium.AspNetCore.Extensions/": "Annium.AspNetCore.Extensions",
+        "api/integrations/AspNetCore/Annium.AspNetCore.IntegrationTesting/": "Annium.AspNetCore.IntegrationTesting",
+        "api/integrations/AspNetCore/Annium.AspNetCore.Mesh/": "Annium.AspNetCore.Mesh",
+        "api/integrations/DbUp/Annium.DbUp.Core/": "Annium.DbUp.Core",
+        "api/integrations/DbUp/Annium.DbUp.PostgreSql/": "Annium.DbUp.PostgreSql",
+        "api/integrations/EntityFrameworkCore/Annium.EntityFrameworkCore.Extensions/": "Annium.EntityFrameworkCore.Extensions",
+        "api/integrations/Graylog/Annium.Graylog.Logging/": "Annium.Graylog.Logging",
+        "api/integrations/MongoDb/Annium.MongoDb.NodaTime/": "Annium.MongoDb.NodaTime",
+        "api/integrations/Redis/Annium.Redis/": "Annium.Redis",
+        "api/integrations/Seq/Annium.Seq.Logging/": "Annium.Seq.Logging",
+        "api/integrations/Social/Annium.Social.Telegram/": "Annium.Social.Telegram",
+        "api/integrations/linq2db/Annium.linq2db.Extensions/": "Annium.linq2db.Extensions",
+        "api/integrations/linq2db/Annium.linq2db.PostgreSql/": "Annium.linq2db.PostgreSql",
+        "api/server/Cache/Annium.Cache.Abstractions/": "Annium.Cache.Abstractions",
+        "api/server/Cache/Annium.Cache.InMemory/": "Annium.Cache.InMemory",
+        "api/server/Cache/Annium.Cache.Redis/": "Annium.Cache.Redis",
+        "api/server/Infrastructure/Annium.Infrastructure.Hosting/": "Annium.Infrastructure.Hosting",
+        "api/server/Mesh/Annium.Mesh.Client/": "Annium.Mesh.Client",
+        "api/server/Mesh/Annium.Mesh.Domain/": "Annium.Mesh.Domain",
+        "api/server/Mesh/Annium.Mesh.Serialization.Abstractions/": "Annium.Mesh.Serialization.Abstractions",
+        "api/server/Mesh/Annium.Mesh.Serialization.Json/": "Annium.Mesh.Serialization.Json",
+        "api/server/Mesh/Annium.Mesh.Serialization.MessagePack/": "Annium.Mesh.Serialization.MessagePack",
+        "api/server/Mesh/Annium.Mesh.Server.InMemory/": "Annium.Mesh.Server.InMemory",
+        "api/server/Mesh/Annium.Mesh.Server.Sockets/": "Annium.Mesh.Server.Sockets",
+        "api/server/Mesh/Annium.Mesh.Server.Web/": "Annium.Mesh.Server.Web",
+        "api/server/Mesh/Annium.Mesh.Server/": "Annium.Mesh.Server",
+        "api/server/Mesh/Annium.Mesh.Transport.Abstractions/": "Annium.Mesh.Transport.Abstractions",
+        "api/server/Mesh/Annium.Mesh.Transport.InMemory/": "Annium.Mesh.Transport.InMemory",
+        "api/server/Mesh/Annium.Mesh.Transport.Sockets/": "Annium.Mesh.Transport.Sockets",
+        "api/server/Mesh/Annium.Mesh.Transport.WebSockets/": "Annium.Mesh.Transport.WebSockets",
+        "api/server/MessageBus/Annium.MessageBus.Abstractions/": "Annium.MessageBus.Abstractions",
+        "api/server/MessageBus/Annium.MessageBus.InMemory/": "Annium.MessageBus.InMemory",
+        "api/server/MessageBus/Annium.MessageBus.Kafka/": "Annium.MessageBus.Kafka",
+        "api/server/MessageBus/Annium.MessageBus.Nats/": "Annium.MessageBus.Nats",
+        "api/server/MessageBus/Annium.MessageBus.RabbitMq/": "Annium.MessageBus.RabbitMq",
+        "api/server/Storage/Annium.Storage.Abstractions/": "Annium.Storage.Abstractions",
+        "api/server/Storage/Annium.Storage.FileSystem/": "Annium.Storage.FileSystem",
+        "api/server/Storage/Annium.Storage.InMemory/": "Annium.Storage.InMemory",
+        "api/server/Storage/Annium.Storage.S3/": "Annium.Storage.S3"
+      }
+    },
+    "postProcessors": [
+      "ExtractSearchIndex"
+    ]
+  }
+}
