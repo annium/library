@@ -8,11 +8,11 @@
     <ProjectReference Include="../Annium.Finance.Providers.Abstractions.Connectors/Annium.Finance.Providers.Abstractions.Connectors.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Execution.Background" />
-    <PackageReference Include="Annium.Net.Http" />
-    <PackageReference Include="Annium.Net.WebSockets" />
-    <PackageReference Include="Annium.NodaTime.Extensions" />
-    <PackageReference Include="Annium.Serialization.Json" />
+    <ProjectReference Include="../../../../core/Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj" />
+    <ProjectReference Include="../../../../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
+    <ProjectReference Include="../../../../core/Net/src/Annium.Net.WebSockets/Annium.Net.WebSockets.csproj" />
+    <ProjectReference Include="../../../../integrations/NodaTime/src/Annium.NodaTime.Extensions/Annium.NodaTime.Extensions.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Annium.Finance.Providers.Core.Tests" />

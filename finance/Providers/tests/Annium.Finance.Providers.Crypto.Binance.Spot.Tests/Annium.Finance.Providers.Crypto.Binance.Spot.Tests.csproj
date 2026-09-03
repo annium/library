@@ -6,7 +6,7 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../base/tests/Annium.Finance.Providers.Tests.Lib/Annium.Finance.Providers.Tests.Lib.csproj" />
+    <ProjectReference Include="../Annium.Finance.Providers.Tests.Lib/Annium.Finance.Providers.Tests.Lib.csproj" />
     <ProjectReference Include="../../src/Annium.Finance.Providers.Crypto.Binance.Spot/Annium.Finance.Providers.Crypto.Binance.Spot.csproj" />
   </ItemGroup>
   <ItemGroup>

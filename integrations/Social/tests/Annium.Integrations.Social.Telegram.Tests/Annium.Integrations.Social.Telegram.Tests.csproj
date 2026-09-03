@@ -9,9 +9,9 @@
     <ProjectReference Include="../../src/Annium.Integrations.Social.Telegram/Annium.Integrations.Social.Telegram.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Net.Servers.Web" />
-    <PackageReference Include="Annium.Serialization.Json" />
-    <PackageReference Include="Annium.Testing" />
+    <ProjectReference Include="../../../../core/Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
 </Project>

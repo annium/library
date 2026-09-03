@@ -9,7 +9,7 @@
     <ProjectReference Include="../Annium.Mesh.Serialization.Abstractions/Annium.Mesh.Serialization.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Data.Operations.Serialization.Json" />
-    <PackageReference Include="Annium.Serialization.Json" />
+    <ProjectReference Include="../../../../core/Data/src/Annium.Data.Operations.Serialization.Json/Annium.Data.Operations.Serialization.Json.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
   </ItemGroup>
 </Project>

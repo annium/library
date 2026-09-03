@@ -5,8 +5,8 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Core.Mapper" />
-    <PackageReference Include="Annium.Data.Operations" />
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Mapper/Annium.Core.Mapper.csproj" />
+    <ProjectReference Include="../../../../core/Data/src/Annium.Data.Operations/Annium.Data.Operations.csproj" />
     <PackageReference Include="NodaTime" />
   </ItemGroup>
 </Project>

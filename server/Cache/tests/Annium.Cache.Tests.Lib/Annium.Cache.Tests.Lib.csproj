@@ -9,6 +9,6 @@
     <ProjectReference Include="../../src/Annium.Cache.Abstractions/Annium.Cache.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Testing" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
   </ItemGroup>
 </Project>

@@ -7,8 +7,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../base/Annium/src/Annium.Testing/Annium.Testing.csproj" />
-    <ProjectReference Include="../../../../base/Logging/src/Annium.Logging.Shared/Annium.Logging.Shared.csproj" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Shared/Annium.Logging.Shared.csproj" />
     <ProjectReference Include="../../src/Annium.Graylog.Logging/Annium.Graylog.Logging.csproj" />
   </ItemGroup>
   <ItemGroup>

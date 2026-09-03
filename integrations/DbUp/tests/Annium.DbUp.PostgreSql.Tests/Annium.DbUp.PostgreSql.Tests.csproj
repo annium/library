@@ -10,7 +10,7 @@
     <ProjectReference Include="../../src/Annium.DbUp.PostgreSql/Annium.DbUp.PostgreSql.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Testing" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="xunit.v3" />

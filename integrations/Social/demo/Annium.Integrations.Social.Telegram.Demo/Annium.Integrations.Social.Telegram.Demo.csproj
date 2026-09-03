@@ -8,7 +8,7 @@
     <ProjectReference Include="../../src/Annium.Integrations.Social.Telegram/Annium.Integrations.Social.Telegram.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Configuration.Yaml" />
-    <PackageReference Include="Annium.Core.Entrypoint" />
+    <ProjectReference Include="../../../../core/Configuration/src/Annium.Configuration.Yaml/Annium.Configuration.Yaml.csproj" />
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Entrypoint/Annium.Core.Entrypoint.csproj" />
   </ItemGroup>
 </Project>

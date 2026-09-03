@@ -8,6 +8,6 @@
     <ProjectReference Include="../Annium.Finance.Providers.Abstractions.Domain/Annium.Finance.Providers.Abstractions.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Data.Tables" />
+    <ProjectReference Include="../../../../core/Data/src/Annium.Data.Tables/Annium.Data.Tables.csproj" />
   </ItemGroup>
 </Project>

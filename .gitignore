@@ -1,0 +1,19 @@
+# editors
+.idea/
+*.DotSettings*
+
+# artifacts
+*.log
+*.nupkg
+*.trx
+lcov.info
+.DS_Store
+.DS_STORE
+
+# docs
+/api/
+/_site/
+
+# xs ignore patterns
+.xs.ignore
+.xs.credentials

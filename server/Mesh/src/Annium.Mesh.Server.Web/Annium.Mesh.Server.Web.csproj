@@ -9,6 +9,6 @@
     <ProjectReference Include="../Annium.Mesh.Server/Annium.Mesh.Server.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Net.Servers.Web" />
+    <ProjectReference Include="../../../../core/Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj" />
   </ItemGroup>
 </Project>

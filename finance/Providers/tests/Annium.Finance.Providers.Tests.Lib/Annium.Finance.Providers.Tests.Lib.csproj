@@ -8,7 +8,7 @@
     <ProjectReference Include="../../src/Annium.Finance.Providers.Core/Annium.Finance.Providers.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Net.Servers.Web" />
-    <PackageReference Include="Annium.Testing" />
+    <ProjectReference Include="../../../../core/Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
   </ItemGroup>
 </Project>

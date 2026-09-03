@@ -1,0 +1,41 @@
+# Suppressions and elevations this group arrived with from the backend repository. EditorConfig
+# cascades, so this file adds to the root one rather than replacing it. It exists to be folded
+# into the root set once the group builds on the strict rules alone.
+
+[*.cs]
+# === Backend Audit (kb/specs/2026.04/2026.04.26-backend-audit-execution.md) — Bucket 7 elevations ===
+# Elevate to errors — these should not exist in library code
+# VSTHRD100 async void
+dotnet_diagnostic.VSTHRD100.severity = error
+# VSTHRD103 sync API in async context
+dotnet_diagnostic.VSTHRD103.severity = error
+# VSTHRD110 unobserved Task result
+dotnet_diagnostic.VSTHRD110.severity = error
+# VSTHRD200 Async suffix missing (overrides existing 'none' for production code; test override at [*Test{...}] still applies)
+dotnet_diagnostic.VSTHRD200.severity = error
+
+# Keep as warnings — legitimate use cases / known false positives
+# VSTHRD002 .Result / .Wait()
+dotnet_diagnostic.VSTHRD002.severity = warning
+# VSTHRD003 awaiting foreign Task
+dotnet_diagnostic.VSTHRD003.severity = warning
+
+# CA rules off by default in .NET 10 — opt in
+# CA2007 missing ConfigureAwait(false): kept disabled (severity none, line 38) to match the
+# base repo convention — library code runs in contexts that capture no SynchronizationContext,
+# so ConfigureAwait is noise here. Do not re-elevate without auditing all ~540 call sites.
+# CA2012 ValueTask misuse
+dotnet_diagnostic.CA2012.severity = error
+# CA2016 CT not forwarded
+dotnet_diagnostic.CA2016.severity = error
+# CA1816 missing GC.SuppressFinalize
+dotnet_diagnostic.CA1816.severity = warning
+# === End Backend Audit elevations ===
+
+# The test-file override the root .editorconfig also carries. It has to be repeated here: EditorConfig
+# resolves by proximity, so this file's [*.cs] section outranks the root's [*Test{...}] one, and without
+# the repetition every test method in the group reports VSTHRD200 - which backend, where both sections
+# lived in one file and the later won, never did.
+[*Test{s.cs,.cs,sBase.cs,Base.cs}]
+dotnet_diagnostic.VSTHRD200.severity = none
+dotnet_diagnostic.CA1707.severity = none

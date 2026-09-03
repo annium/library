@@ -5,11 +5,11 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Core.DependencyInjection" />
-    <PackageReference Include="Annium.Execution.Background" />
-    <PackageReference Include="Annium.Logging.Console" />
-    <PackageReference Include="Annium.Net.Http" />
-    <PackageReference Include="Annium.Net.Servers.Web" />
-    <PackageReference Include="Annium.Serialization.Json" />
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
+    <ProjectReference Include="../../../../core/Execution/src/Annium.Execution.Background/Annium.Execution.Background.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj" />
+    <ProjectReference Include="../../../../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
+    <ProjectReference Include="../../../../core/Net/src/Annium.Net.Servers.Web/Annium.Net.Servers.Web.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
   </ItemGroup>
 </Project>

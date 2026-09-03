@@ -10,7 +10,7 @@
     <ProjectReference Include="../Annium.MessageBus.Abstractions/Annium.MessageBus.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Core.Runtime" />
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
     <PackageReference Include="NATS.Net" />
   </ItemGroup>
   <ItemGroup>

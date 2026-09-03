@@ -6,10 +6,10 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../shared/src/Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
+    <ProjectReference Include="../../../Components/src/Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Configuration.Abstractions" />
+    <ProjectReference Include="../../../../core/Configuration/src/Annium.Configuration.Abstractions/Annium.Configuration.Abstractions.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
   </ItemGroup>
 </Project>

@@ -9,10 +9,10 @@
     <ProjectReference Include="../../src/sources/Annium.XRest.Sources.AspNetCore/Annium.XRest.Sources.AspNetCore.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.AspNetCore.Extensions" />
-    <PackageReference Include="Annium.Configuration.Abstractions" />
-    <PackageReference Include="Annium.Infrastructure.Hosting" />
-    <PackageReference Include="Annium.Logging.Console" />
-    <PackageReference Include="Annium.Logging.Microsoft" />
+    <ProjectReference Include="../../../../integrations/AspNetCore/src/Annium.AspNetCore.Extensions/Annium.AspNetCore.Extensions.csproj" />
+    <ProjectReference Include="../../../../core/Configuration/src/Annium.Configuration.Abstractions/Annium.Configuration.Abstractions.csproj" />
+    <ProjectReference Include="../../../../server/Infrastructure/src/Annium.Infrastructure.Hosting/Annium.Infrastructure.Hosting.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Microsoft/Annium.Logging.Microsoft.csproj" />
   </ItemGroup>
 </Project>

@@ -10,8 +10,8 @@
     <ProjectReference Include="../../src/Annium.Blazor.State/Annium.Blazor.State.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Serialization.Json" />
-    <PackageReference Include="Annium.Testing" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>

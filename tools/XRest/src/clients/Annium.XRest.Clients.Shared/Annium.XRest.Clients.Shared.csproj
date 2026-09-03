@@ -9,8 +9,8 @@
     <ProjectReference Include="../../Annium.XRest.Core/Annium.XRest.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Extensions.Arguments" />
-    <PackageReference Include="Annium.Net.Http" />
+    <ProjectReference Include="../../../../../core/Extensions/src/Annium.Extensions.Arguments/Annium.Extensions.Arguments.csproj" />
+    <ProjectReference Include="../../../../../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
     <PackageReference Include="Scriban" />
   </ItemGroup>
 </Project>

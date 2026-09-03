@@ -10,7 +10,7 @@
     <ProjectReference Include="../../src/Annium.Blazor.Interop/Annium.Blazor.Interop.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Testing" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>

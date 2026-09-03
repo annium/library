@@ -1,0 +1,45 @@
+﻿<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <DebugType>portable</DebugType>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <NoWarn>AD0001</NoWarn>
+    <!-- The strict set, inherited from what was the base repository. Relaxations belong in the group
+         that needs them, not here: server/Directory.Build.props carries the ones backend arrived with,
+         and exists to be deleted once they are worked off. -->
+    <WarningsNotAsErrors>NU1901;NU1902;NU1903;NU1904;NU5104;IDE0370</WarningsNotAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Label="Analyzers">
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>Default</AnalysisMode>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageVersion>$(PackageVersion)</PackageVersion>
+  </PropertyGroup>
+  <PropertyGroup Label="Package metadata">
+    <Authors>Alex Kreskiyan</Authors>
+    <Copyright>Copyright (c) 2026 Alex Kreskiyan</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/annium/library</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/annium/library</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+  <ItemGroup Label="Package metadata">
+    <!-- one repo-level readme shipped in every package; nothing is added to non-packable projects -->
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

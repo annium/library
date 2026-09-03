@@ -9,7 +9,7 @@
     <ProjectReference Include="../../src/Annium.Integrations.AI.SemanticKernel/Annium.Integrations.AI.SemanticKernel.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Testing" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>

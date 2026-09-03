@@ -10,7 +10,7 @@
     <ProjectReference Include="../../src/Annium.Blazor.Charts/Annium.Blazor.Charts.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Testing" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
 </Project>

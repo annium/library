@@ -6,7 +6,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Annium" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium/Annium.csproj" />
     <PackageReference Include="System.Reactive" />
   </ItemGroup>
 </Project>

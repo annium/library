@@ -6,7 +6,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../base/Logging/src/Annium.Logging.Shared/Annium.Logging.Shared.csproj" />
-    <ProjectReference Include="../../../../base/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Shared/Annium.Logging.Shared.csproj" />
+    <ProjectReference Include="../../../../core/Net/src/Annium.Net.Http/Annium.Net.Http.csproj" />
   </ItemGroup>
 </Project>

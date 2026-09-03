@@ -6,7 +6,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Net.Types.Serialization.Json" />
-    <PackageReference Include="Annium.Serialization.Json" />
+    <ProjectReference Include="../../../../core/Net/src/Annium.Net.Types.Serialization.Json/Annium.Net.Types.Serialization.Json.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
   </ItemGroup>
 </Project>

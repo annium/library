@@ -14,11 +14,11 @@
     <ProjectReference Include="../../src/Annium.Blazor.State/Annium.Blazor.State.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Data.Operations.Serialization.Json" />
-    <PackageReference Include="Annium.Logging.Console" />
-    <PackageReference Include="Annium.Logging.Microsoft" />
-    <PackageReference Include="Annium.NodaTime.Serialization.Json" />
-    <PackageReference Include="Annium.Serialization.Json" />
+    <ProjectReference Include="../../../../core/Data/src/Annium.Data.Operations.Serialization.Json/Annium.Data.Operations.Serialization.Json.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Microsoft/Annium.Logging.Microsoft.csproj" />
+    <ProjectReference Include="../../../../integrations/NodaTime/src/Annium.NodaTime.Serialization.Json/Annium.NodaTime.Serialization.Json.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" />
   </ItemGroup>

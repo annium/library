@@ -1,0 +1,15 @@
+﻿<Project>
+  <ImportGroup>
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  </ImportGroup>
+  <PropertyGroup>
+    <!-- Suppressions this group arrived with from the backend repository. They are here rather than at the
+         root because the root set is the strict one: raising these repo-wide would quietly weaken core,
+         where VSTHRD* and CA* are errors today and the code already satisfies them.
+         This file exists to be deleted. Working the suppressions off, group by group, is its own task -
+         see the migration spec's final task - and when the list is empty the file goes with it. -->
+    <WarningsNotAsErrors>
+      $(WarningsNotAsErrors);VSTHRD100;VSTHRD103;VSTHRD110;VSTHRD200;VSTHRD002;VSTHRD003;CA2007;CA2012;CA2016;CA1816
+    </WarningsNotAsErrors>
+  </PropertyGroup>
+</Project>

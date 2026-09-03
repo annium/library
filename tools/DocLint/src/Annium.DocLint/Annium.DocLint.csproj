@@ -8,9 +8,9 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Core.Entrypoint" />
-    <PackageReference Include="Annium.Extensions.Arguments" />
-    <PackageReference Include="Annium.Logging.Console" />
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Entrypoint/Annium.Core.Entrypoint.csproj" />
+    <ProjectReference Include="../../../../core/Extensions/src/Annium.Extensions.Arguments/Annium.Extensions.Arguments.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
   </ItemGroup>

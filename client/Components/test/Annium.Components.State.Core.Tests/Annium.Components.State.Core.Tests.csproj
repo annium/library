@@ -10,7 +10,7 @@
     <ProjectReference Include="../../src/Annium.Components.State.Core/Annium.Components.State.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Testing" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
 </Project>

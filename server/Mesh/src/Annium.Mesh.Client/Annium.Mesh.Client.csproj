@@ -10,6 +10,6 @@
     <ProjectReference Include="../Annium.Mesh.Transport.Abstractions/Annium.Mesh.Transport.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Extensions.Reactive" />
+    <ProjectReference Include="../../../../core/Extensions/src/Annium.Extensions.Reactive/Annium.Extensions.Reactive.csproj" />
   </ItemGroup>
 </Project>

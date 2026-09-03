@@ -11,9 +11,9 @@
     <ProjectReference Include="../Annium.MessageBus.Tests.Load.Shared/Annium.MessageBus.Tests.Load.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Core.Runtime" />
-    <PackageReference Include="Annium.Logging.InMemory" />
-    <PackageReference Include="Annium.Serialization.Json" />
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.InMemory/Annium.Logging.InMemory.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
     <PackageReference Include="NATS.Net" />
     <PackageReference Include="Testcontainers.Nats" />
   </ItemGroup>

@@ -6,11 +6,11 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../../base/Mesh/src/Annium.Mesh.Server/Annium.Mesh.Server.csproj" />
-    <ProjectReference Include="../../../../base/Mesh/src/Annium.Mesh.Transport.WebSockets/Annium.Mesh.Transport.WebSockets.csproj" />
+    <ProjectReference Include="../../../../server/Mesh/src/Annium.Mesh.Server/Annium.Mesh.Server.csproj" />
+    <ProjectReference Include="../../../../server/Mesh/src/Annium.Mesh.Transport.WebSockets/Annium.Mesh.Transport.WebSockets.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Architecture.Http" />
-    <PackageReference Include="Annium.Serialization.Json" />
+    <ProjectReference Include="../../../../core/Architecture/src/Annium.Architecture.Http/Annium.Architecture.Http.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
   </ItemGroup>
 </Project>

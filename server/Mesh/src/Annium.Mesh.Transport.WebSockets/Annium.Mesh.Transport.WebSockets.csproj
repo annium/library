@@ -9,7 +9,7 @@
     <ProjectReference Include="../Annium.Mesh.Transport.Abstractions/Annium.Mesh.Transport.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Core.DependencyInjection" />
-    <PackageReference Include="Annium.Net.WebSockets" />
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.DependencyInjection/Annium.Core.DependencyInjection.csproj" />
+    <ProjectReference Include="../../../../core/Net/src/Annium.Net.WebSockets/Annium.Net.WebSockets.csproj" />
   </ItemGroup>
 </Project>

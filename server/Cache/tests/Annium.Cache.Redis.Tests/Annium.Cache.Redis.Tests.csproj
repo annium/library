@@ -13,8 +13,8 @@
     <ProjectReference Include="../Annium.Cache.Tests.Lib/Annium.Cache.Tests.Lib.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Serialization.Json" />
-    <PackageReference Include="Annium.Testing" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
+    <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
     <PackageReference Include="Testcontainers.Redis" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>

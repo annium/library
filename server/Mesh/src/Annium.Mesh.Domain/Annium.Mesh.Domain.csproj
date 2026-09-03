@@ -6,7 +6,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Architecture.Base" />
-    <PackageReference Include="Annium.Data.Operations" />
+    <ProjectReference Include="../../../../core/Architecture/src/Annium.Architecture.Base/Annium.Architecture.Base.csproj" />
+    <ProjectReference Include="../../../../core/Data/src/Annium.Data.Operations/Annium.Data.Operations.csproj" />
   </ItemGroup>
 </Project>

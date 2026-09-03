@@ -11,7 +11,7 @@
     <ProjectReference Include="../clients/Annium.XRest.Clients.Csharp/Annium.XRest.Clients.Csharp.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Core.Entrypoint" />
-    <PackageReference Include="Annium.Logging.Console" />
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Entrypoint/Annium.Core.Entrypoint.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Console/Annium.Logging.Console.csproj" />
   </ItemGroup>
 </Project>

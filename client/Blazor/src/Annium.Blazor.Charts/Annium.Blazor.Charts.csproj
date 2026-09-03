@@ -11,8 +11,8 @@
     <ProjectReference Include="../Annium.Blazor.Interop/Annium.Blazor.Interop.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Annium.Data.Models" />
-    <PackageReference Include="Annium.Extensions.Jobs" />
+    <ProjectReference Include="../../../../core/Data/src/Annium.Data.Models/Annium.Data.Models.csproj" />
+    <ProjectReference Include="../../../../core/Extensions/src/Annium.Extensions.Jobs/Annium.Extensions.Jobs.csproj" />
     <PackageReference Include="OneOf" />
   </ItemGroup>
 </Project>
