@@ -1,10 +1,10 @@
 using System;
 using System.IO;
+using Annium.Core.DependencyInjection;
 using Annium.Logging;
 using Annium.Net.Http;
 using Annium.Serialization.Abstractions;
 using Annium.Serialization.Json;
-using Annium.Social.Telegram;
 using Annium.Social.Telegram.Integration;
 using Annium.Social.Telegram.Integration.Messages;
 using Annium.Social.Telegram.Integration.Receivers;
@@ -13,8 +13,7 @@ using Annium.Social.Telegram.Internal.Integration;
 using Annium.Social.Telegram.Internal.Integration.Messages;
 using Constants = Annium.Social.Telegram.Internal.Constants;
 
-// ReSharper disable once CheckNamespace
-namespace Annium.Core.DependencyInjection;
+namespace Annium.Social.Telegram;
 
 /// <summary>
 /// Extension methods for registering a keyed Telegram bot instance (configuration, API client, receiver and host)
