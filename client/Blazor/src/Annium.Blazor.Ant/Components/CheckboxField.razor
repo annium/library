@@ -1,0 +1,8 @@
+﻿@namespace Annium.Blazor.Ant.Components
+
+<AntDesign.Checkbox
+    Checked="@InternalState.Value"
+    CheckedChanged="@(e => InternalState.Set(e))"
+    @attributes="Attributes">
+    @ChildContent
+</AntDesign.Checkbox>

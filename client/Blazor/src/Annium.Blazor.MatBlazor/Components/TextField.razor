@@ -1,0 +1,13 @@
+﻿@namespace Annium.Blazor.MatBlazor.Components
+
+@typeparam TValue
+
+<MatBlazor.MatTextField
+    Value="@State.Value"
+    OnInput="@SetValue"
+    Class="@ClassName"
+    HelperTextValidation="@true"
+    HelperText="@State.Message"
+    OnFocusOut="@(_ => StateHasChanged())"
+    @attributes="Attributes">
+</MatBlazor.MatTextField>

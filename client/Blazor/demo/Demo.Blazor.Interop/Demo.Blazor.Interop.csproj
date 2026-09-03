@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+  <PropertyGroup>
+    <Solutions>Annium.Frontend</Solutions>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Annium.Blazor.Core/Annium.Blazor.Core.csproj" />
+    <ProjectReference Include="../../src/Annium.Blazor.Css/Annium.Blazor.Css.csproj" />
+    <ProjectReference Include="../../src/Annium.Blazor.Interop/Annium.Blazor.Interop.csproj" />
+    <ProjectReference Include="../../src/Annium.Blazor.Routing/Annium.Blazor.Routing.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Logging.Console" />
+    <PackageReference Include="Annium.Logging.Microsoft" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="Pages\Dashboard\Page.razor" />
+  </ItemGroup>
+</Project>

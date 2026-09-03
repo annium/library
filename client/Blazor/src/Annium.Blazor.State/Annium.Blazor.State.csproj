@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Solutions>Annium.Frontend</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../shared/src/Annium.Components.State.Forms/Annium.Components.State.Forms.csproj" />
+    <ProjectReference Include="../../../shared/src/Annium.Components.State.Operations/Annium.Components.State.Operations.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Serialization.Abstractions" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+  </ItemGroup>
+</Project>

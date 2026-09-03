@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor" InitialTargets="CompileScripts">
+  <PropertyGroup>
+    <Solutions>Annium.Frontend</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Core.DependencyInjection" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+  </ItemGroup>
+  <ItemGroup>
+    <TsScript Include="scripts/**/*.ts" />
+  </ItemGroup>
+  <Target Name="InstallTsc" Condition="'$(NoBuild)' != 'true' And '$(DesignTimeBuild)' != 'true'" Inputs="package-lock.json" Outputs="node_modules/.package-lock.json" Returns="">
+    <Exec Command="npm ci" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+  <Target Name="CompileScripts" DependsOnTargets="InstallTsc" Condition="'$(NoBuild)' != 'true' And '$(DesignTimeBuild)' != 'true'" Inputs="@(TsScript);tsconfig.json;package-lock.json" Outputs="wwwroot/index.js" Returns="">
+    <Exec Command="npm run compile" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+</Project>

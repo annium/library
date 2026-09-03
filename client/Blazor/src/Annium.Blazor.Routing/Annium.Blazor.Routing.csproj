@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <Solutions>Annium.Frontend</Solutions>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Data.Models" />
+    <PackageReference Include="Annium.Net.Base" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" />
+  </ItemGroup>
+</Project>

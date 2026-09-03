@@ -1,0 +1,9 @@
+﻿@namespace Annium.Blazor.Ant.Components
+
+<AntDesign.DatePicker
+    TValue="DateTime"
+    Value="@InternalState.Value"
+    ValueChanged="@(e => InternalState.Set(e))"
+    @attributes="Attributes">
+    @ChildContent
+</AntDesign.DatePicker>

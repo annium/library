@@ -1,0 +1,11 @@
+﻿@namespace Annium.Blazor.Ant.Components
+@typeparam TValue
+
+<AntDesign.Input
+    TValue="TValue"
+    Value="@Value"
+    OnInput="@SetValue"
+    OnPressEnter="@OnPressEnter"
+    @attributes="Attributes">
+    @ChildContent
+</AntDesign.Input>

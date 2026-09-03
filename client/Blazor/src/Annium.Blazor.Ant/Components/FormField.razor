@@ -1,0 +1,12 @@
+@namespace Annium.Blazor.Ant.Components
+
+@typeparam TValue
+
+<div class="@ClassName">
+    <CascadingValue Value="this" TValue="IFormField<TValue>">
+        @ChildContent
+    </CascadingValue>
+    <div class="ant-form-item-explain">
+        @(State.HasBeenTouched ? State.Message : string.Empty)
+    </div>
+</div>

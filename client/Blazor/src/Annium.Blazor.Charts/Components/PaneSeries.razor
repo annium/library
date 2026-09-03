@@ -1,0 +1,10 @@
+﻿@using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts
+@namespace Annium.Blazor.Charts.Components
+
+<div @ref="_block" class="@Class">
+    <CascadingValue Value="SeriesContext" TValue="IManagedSeriesContext">
+        <canvas @ref="_canvas" class="@Styles.Canvas" width="10" height="10"></canvas>
+        <canvas @ref="_overlay" class="@Styles.Canvas" width="10" height="10"></canvas>
+        @ChildContent
+    </CascadingValue>
+</div>

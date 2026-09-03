@@ -1,0 +1,14 @@
+@namespace Demo.Blazor.Ant.Pages.Home
+@using System.Text.Json
+@using Annium.Blazor.Ant.Components
+@using Annium.Blazor.Core
+@using AntDesign
+@inherits BaseComponent
+
+<div>
+    <FormField TValue="bool" State="_state.AtAtomic(x => x.IsChecked)">
+        <CheckboxField>checkbox</CheckboxField>
+    </FormField>
+    <Button OnClick="@Toggle">toggle</Button>
+    <div>@(JsonSerializer.Serialize(_state.Value))</div>
+</div>

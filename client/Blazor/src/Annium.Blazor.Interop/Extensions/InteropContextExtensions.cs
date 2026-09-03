@@ -1,0 +1,81 @@
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using Microsoft.JSInterop;
+
+namespace Annium.Blazor.Interop.Extensions;
+
+/// <summary>
+/// Provides extension methods for IInteropContext to simplify JavaScript interop calls.
+/// </summary>
+public static class InteropContextExtensions
+{
+    /// <summary>
+    /// Calls a JavaScript function and returns the result of type T.
+    /// </summary>
+    /// <typeparam name="T">The expected return type.</typeparam>
+    /// <param name="ctx">The interop context.</param>
+    /// <param name="identifier">The JavaScript function identifier.</param>
+    /// <param name="args">Optional arguments to pass to the function.</param>
+    /// <returns>The result of the JavaScript function call.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T Invoke<T>(this IInteropContext ctx, string identifier, params object?[]? args) =>
+        ctx.InProcessRuntime.Invoke<T>(identifier, args);
+
+    /// <summary>
+    /// Calls a JavaScript function without expecting a return value.
+    /// </summary>
+    /// <param name="ctx">The interop context.</param>
+    /// <param name="identifier">The JavaScript function identifier.</param>
+    /// <param name="args">Optional arguments to pass to the function.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Invoke(this IInteropContext ctx, string identifier, params object?[]? args) =>
+        ctx.InProcessRuntime.InvokeVoid(identifier, args);
+
+    /// <summary>
+    /// Calls a JavaScript constructor and returns a reference to the created object.
+    /// </summary>
+    /// <param name="ctx">The interop context.</param>
+    /// <param name="identifier">The JavaScript constructor identifier.</param>
+    /// <param name="args">Optional arguments to pass to the constructor.</param>
+    /// <returns>A reference to the created JavaScript object.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IJSObjectReference Create(this IInteropContext ctx, string identifier, params object?[]? args) =>
+        ctx.InProcessRuntime.InvokeConstructor(identifier, args);
+
+    /// <summary>
+    /// Calls a JavaScript function and returns the result of type T.
+    /// </summary>
+    /// <typeparam name="T">The expected return type.</typeparam>
+    /// <param name="ctx">The interop context.</param>
+    /// <param name="identifier">The JavaScript function identifier.</param>
+    /// <param name="args">Optional arguments to pass to the function.</param>
+    /// <returns>The result of the JavaScript function call.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ValueTask<T> InvokeAsync<T>(this IInteropContext ctx, string identifier, params object?[]? args) =>
+        ctx.InProcessRuntime.InvokeAsync<T>(identifier, args);
+
+    /// <summary>
+    /// Calls a JavaScript function without expecting a return value.
+    /// </summary>
+    /// <param name="ctx">The interop context.</param>
+    /// <param name="identifier">The JavaScript function identifier.</param>
+    /// <param name="args">Optional arguments to pass to the function.</param>
+    /// <returns>A value task that completes when the JavaScript call finishes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ValueTask InvokeAsync(this IInteropContext ctx, string identifier, params object?[]? args) =>
+        ctx.InProcessRuntime.InvokeVoidAsync(identifier, args);
+
+    /// <summary>
+    /// Calls a JavaScript constructor and returns a reference to the created object.
+    /// </summary>
+    /// <param name="ctx">The interop context.</param>
+    /// <param name="identifier">The JavaScript constructor identifier.</param>
+    /// <param name="args">Optional arguments to pass to the constructor.</param>
+    /// <returns>A value task returning a reference to the created JavaScript object.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ValueTask<IJSObjectReference> CreateAsync(
+        this IInteropContext ctx,
+        string identifier,
+        params object?[]? args
+    ) => ctx.InProcessRuntime.InvokeConstructorAsync(identifier, args);
+}

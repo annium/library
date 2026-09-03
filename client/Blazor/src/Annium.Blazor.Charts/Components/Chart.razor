@@ -1,0 +1,8 @@
+﻿@using Annium.Blazor.Charts.Internal.Domain.Interfaces.Contexts
+@namespace Annium.Blazor.Charts.Components
+
+<div @ref="_container" class="@Class">
+    <CascadingValue Value="_chartContext" TValue="IManagedChartContext">
+        @ChildContent
+    </CascadingValue>
+</div>
