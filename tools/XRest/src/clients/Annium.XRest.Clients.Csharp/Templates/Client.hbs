@@ -1,0 +1,42 @@
+{{~ for ns in usages ~}}
+using {{ ns }};
+{{~ end ~}}
+
+namespace {{ namespace }};
+
+public class {{ type }}
+{
+    private readonly IHttpRequest _request;
+
+    internal {{ type }}(IHttpRequest request)
+    {
+        _request = request;
+    }
+    {{~ for action in actions ~}}
+
+    public async {{ if action.has_response }}Task<{{ action.response }}>{{ else }}Task{{ end }} {{ action.name }}Async(
+        {{~ for parameter in action.parameters ~}}
+        {{ parameter.type}} {{ parameter.argument }},
+        {{~ end ~}}
+        {{~ if action.has_response ~}}
+        {{ action.response }} defaultValue,
+        {{~ end ~}}
+        CancellationToken ct = default
+    )
+    {
+        {{~ if action.has_response ~}}
+        return await _request
+        {{~ else ~}}
+        await _request
+        {{~ end ~}}
+            .{{ action.method }}({{~ if action.path_parameters.size > 0 ~}}${{~ end ~}}"{{ action.path }}")
+            {{~ for parameter in action.query_parameters ~}}
+            .Param("{{ parameter.name }}", {{ parameter.argument }})
+            {{~ end ~}}
+            {{~ if action.has_body ~}}
+            .JsonContent({{ action.body_argument }})
+            {{~ end ~}}
+            .{{ if action.has_response }}AsAsync(defaultValue, ct){{ else }}RunAsync(ct){{ end }};
+    }
+    {{~ end ~}}
+}

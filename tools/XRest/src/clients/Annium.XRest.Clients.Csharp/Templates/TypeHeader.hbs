@@ -1,0 +1,7 @@
+{{~ if usages.size > 0 ~}}
+{{~ for ns in usages ~}}
+using {{ ns }};
+{{~ end ~}}
+
+{{~ end ~}}
+namespace {{ namespace }};

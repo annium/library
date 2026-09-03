@@ -1,0 +1,6 @@
+# build
+/bin/
+/obj/
+
+# test artifacts
+/TestResults/

@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Solutions>Annium.Tools</Solutions>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/clients/Annium.XRest.Clients.Csharp/Annium.XRest.Clients.Csharp.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Annium.Testing" />
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+</Project>
