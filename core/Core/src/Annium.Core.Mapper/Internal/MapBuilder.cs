@@ -128,13 +128,17 @@ internal class MapBuilder : IMapBuilder, ILogSubject
             this.Trace<string, string>("Resolve map for {src} -> {tgt}", src.FriendlyName(), tgt.FriendlyName());
             var param = Expression.Parameter(src);
             var result = Expression.Lambda(mapping(param), param);
-            var resultView = result.ToReadableString();
-            this.Trace<string, string, string>(
-                "Resolved map for {src} -> {tgt} to:\n{resultView}",
-                src.FriendlyName(),
-                tgt.FriendlyName(),
-                resultView
-            );
+            // ReadableExpressions renders the whole tree and is not thread-safe: two maps compiled at
+            // once can throw out of its internal caches, and that used to take the mapping down whether
+            // or not anyone was reading the trace. Rendering only when the level is on keeps the cost
+            // and the risk with the diagnostic that asked for them.
+            if (LogConfig.Level <= LogLevel.Trace)
+                this.Trace<string, string, string>(
+                    "Resolved map for {src} -> {tgt} to:\n{resultView}",
+                    src.FriendlyName(),
+                    tgt.FriendlyName(),
+                    result.ToReadableString()
+                );
 
             var compiled = result.Compile();
             entry.SetMap(compiled);
