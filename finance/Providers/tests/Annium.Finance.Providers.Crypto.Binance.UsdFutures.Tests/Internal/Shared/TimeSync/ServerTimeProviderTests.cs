@@ -45,10 +45,11 @@ public class ServerTimeProviderTests : ProvidersTestBase
     public async Task Works()
     {
         // arrange
+        // the source keeps a monitor of its own now, one per provider rather than one per connector, and
+        // that is what a connector mirrors in - so it is also what this test watches
         var source = GetKeyed<IServerTimeSource>(Settings.Market.GetProviderKey());
-        var monitor = Get<IStatusMonitor>();
-        var status = ConnectorStatus.Disconnected;
-        monitor.OnStatusChanged += s => status = s;
+        var status = source.Monitor.Status;
+        source.Monitor.OnStatusChanged += s => status = s;
 
         // assert
         await Expect.ToAsync(() => status.Is(ConnectorStatus.Connected));

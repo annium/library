@@ -2,9 +2,7 @@ using Annium.Core.DependencyInjection;
 using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Connectors.User;
 using Annium.Finance.Providers.Core.Internal.Market;
-using Annium.Finance.Providers.Core.Internal.Shared.Status;
 using Annium.Finance.Providers.Core.Internal.User;
-using Annium.Finance.Providers.Core.Shared.Status;
 
 namespace Annium.Finance.Providers.Core;
 
@@ -14,8 +12,8 @@ namespace Annium.Finance.Providers.Core;
 public static class ServiceContainerExtensions
 {
     /// <summary>
-    /// Registers the shared services every finance provider depends on (connector factories, status
-    /// monitoring/reporting), and returns a context for registering individual providers via
+    /// Registers the shared services every finance provider depends on (plain and pooling connector
+    /// factories), and returns a context for registering individual providers via
     /// <see cref="ProviderRegistrationContext.AddProvider{TMarketProviderFactory, TMarketConnectorFactory, TUserProviderFactory, TUserConnectorFactory, TFinanceService}"/>.
     /// </summary>
     /// <param name="container">The container to register services into.</param>
@@ -23,14 +21,12 @@ public static class ServiceContainerExtensions
     public static ProviderRegistrationContext AddFinanceProviders(this IServiceContainer container)
     {
         // market
-        container.Add<IMarketConnectorFactory, MarketConnectorFactory>().Singleton();
+        container.Add<IMarketConnectorFactory, MarketConnectorFactory>().Transient();
+        container.Add<IPooledMarketConnectorFactory, PooledMarketConnectorFactory>().Singleton();
 
         // user
-        container.Add<IUserConnectorFactory, UserConnectorFactory>().Singleton();
-
-        // status
-        container.Add<StatusMonitor>().AsSelf().As<IStatusMonitor>().Scoped();
-        container.Add<IStatusReporter, StatusReporter>().Transient();
+        container.Add<IUserConnectorFactory, UserConnectorFactory>().Transient();
+        container.Add<IPooledUserConnectorFactory, PooledUserConnectorFactory>().Singleton();
 
         var ctx = new ProviderRegistrationContext(container);
 

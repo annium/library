@@ -4,6 +4,7 @@ using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Domain.Market;
 using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Loaders;
+using Annium.Finance.Providers.Core.Shared.Status;
 
 namespace Annium.Finance.Providers.Core.Market;
 
@@ -34,17 +35,23 @@ public static class ServiceProviderExtensions
     /// </summary>
     /// <param name="sp">The service provider to resolve dependencies from.</param>
     /// <param name="config">The timing configuration for fetch retries, interval reloads, and debounced requests.</param>
+    /// <param name="monitor">The monitor the loader reports its connection status into.</param>
     /// <param name="provider">The market provider to load the context from.</param>
     /// <param name="disposable">The disposable box the loader is added to.</param>
     /// <returns>A new composite loader for the market context.</returns>
     public static ICompositeLoader<MarketContext> CreateMarketContextLoader(
         this IServiceProvider sp,
         CompositeLoaderConfig config,
+        IStatusMonitor monitor,
         IMarketProvider provider,
         ref AsyncDisposableBox disposable
     )
     {
-        var loader = sp.CreateCompositeLoader<MarketContext>(config, async _ => await provider.LoadContextAsync());
+        var loader = sp.CreateCompositeLoader<MarketContext>(
+            config,
+            monitor,
+            async _ => await provider.LoadContextAsync()
+        );
         disposable += loader;
 
         return loader;

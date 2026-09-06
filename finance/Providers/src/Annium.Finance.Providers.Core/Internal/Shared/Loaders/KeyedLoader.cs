@@ -28,8 +28,8 @@ internal sealed class KeyedLoader<TKey, TContext, TData> : IKeyedLoader<TKey, TC
     /// <summary>Raised with the key, its (pre-update) context, and the loaded data every time a load succeeds.</summary>
     public event Action<TKey, TContext, TData> OnData = delegate { };
 
-    /// <summary>The service provider used to resolve an <see cref="IStatusReporter"/> for each new entry.</summary>
-    private readonly IServiceProvider _sp;
+    /// <summary>The monitor a new entry takes its <see cref="IStatusReporter"/> from.</summary>
+    private readonly IStatusMonitor _monitor;
 
     /// <summary>The timing configuration passed to every entry's underlying loader.</summary>
     private readonly CompositeLoaderConfig _config;
@@ -45,7 +45,7 @@ internal sealed class KeyedLoader<TKey, TContext, TData> : IKeyedLoader<TKey, TC
 
     /// <summary>
     /// Guards <see cref="_entries"/> and <see cref="_isDisposed"/> together. Creating an entry is not free -
-    /// it resolves a status reporter, binds it, and starts the entry, meaning a network fetch and a pair of
+    /// it takes a status reporter, binds it, and starts the entry, meaning a network fetch and a pair of
     /// timers - and an entry that escapes this dictionary is unreachable and undisposable: its timers keep
     /// firing and its reporter stays bound for the life of the process. Two callers racing for a key it does
     /// not hold, and a caller racing disposal, are both that same escape.
@@ -61,14 +61,14 @@ internal sealed class KeyedLoader<TKey, TContext, TData> : IKeyedLoader<TKey, TC
     /// <summary>
     /// Initializes a new instance of the <see cref="KeyedLoader{TKey, TContext, TData}"/> class.
     /// </summary>
-    /// <param name="sp">The service provider used to resolve an <see cref="IStatusReporter"/> for each new entry.</param>
+    /// <param name="monitor">The monitor a new entry takes its <see cref="IStatusReporter"/> from.</param>
     /// <param name="config">The timing configuration passed to every entry's underlying loader.</param>
     /// <param name="initialContext">The context assigned to every newly created entry before its first load.</param>
     /// <param name="getLoad">The delegate that performs a single load for a key/context pair.</param>
     /// <param name="getContext">The delegate that derives an entry's updated context from its key, prior context, and loaded data.</param>
     /// <param name="logger">The logger instance.</param>
     public KeyedLoader(
-        IServiceProvider sp,
+        IStatusMonitor monitor,
         CompositeLoaderConfig config,
         TContext initialContext,
         Func<TKey, TContext, CancellationToken, Task<IBaseResult<TData?>>> getLoad,
@@ -77,7 +77,7 @@ internal sealed class KeyedLoader<TKey, TContext, TData> : IKeyedLoader<TKey, TC
     )
     {
         Logger = logger;
-        _sp = sp;
+        _monitor = monitor;
         _config = config;
         _initialContext = initialContext;
         _getLoad = getLoad;
@@ -163,7 +163,7 @@ internal sealed class KeyedLoader<TKey, TContext, TData> : IKeyedLoader<TKey, TC
             _initialContext,
             _config,
             _getLoad,
-            _sp.Resolve<IStatusReporter>(),
+            _monitor.CreateReporter(),
             Logger
         );
         entry.OnData += data =>

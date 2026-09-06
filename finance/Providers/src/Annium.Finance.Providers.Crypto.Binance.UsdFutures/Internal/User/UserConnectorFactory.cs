@@ -35,9 +35,10 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
     /// Creates a user connector for the given settings.
     /// </summary>
     /// <param name="settings">The user settings identifying the provider, environment and credentials.</param>
+    /// <param name="monitor">The monitor the connector and its components report their status into.</param>
     /// <param name="disposable">Accumulates cleanup actions for the connector's lifetime.</param>
     /// <returns>A new, ready-to-use user connector.</returns>
-    public IUserConnector Create(UserSettings settings, AsyncDisposableBox disposable)
+    public IUserConnector Create(UserSettings settings, IStatusMonitor monitor, AsyncDisposableBox disposable)
     {
         var config = sp.Resolve<IMapper>().Map<UserConfig>(settings);
         var providerKey = settings.GetProviderKey();
@@ -46,6 +47,7 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
         var provider = sp.CreateUserProvider(settings);
         var queryProcessor = sp.Resolve<QueryProcessor>();
         var signatureService = sp.CreateSignatureService(settings, providerKey);
+        sp.TrackServerTime(providerKey, monitor, ref disposable);
         var setLeverageRequestFactory = sp.ResolveHttpRequestFactory(SetLeverageKey);
         var initOrderRequestFactory = sp.ResolveHttpRequestFactory(InitOrderKey);
         var modifyOrderRequestFactory = sp.ResolveHttpRequestFactory(ModifyOrderKey);
@@ -55,17 +57,19 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
             config,
             "/fapi/v1/listenKey",
             ListenKeyKey,
-            signatureService
+            signatureService,
+            monitor
         );
-        var userStream = sp.CreateUserStream(config, listenKeyResolver);
+        var userStream = sp.CreateUserStream(config, listenKeyResolver, monitor);
         var orderUpdateEventSerializer = sp.ResolveSerializer<ReadOnlyMemory<byte>>(
             OrderUpdateKey,
             MediaTypeNames.Application.Json
         );
-        var contextLoder = sp.CreateUserContextLoader(config.ReloadContext, provider, ref disposable);
-        var ordersLoader = sp.CreateCompositeLoader(config.ReloadOrders, LoadOrdersAsync);
+        var contextLoder = sp.CreateUserContextLoader(config.ReloadContext, monitor, provider, ref disposable);
+        var ordersLoader = sp.CreateCompositeLoader(config.ReloadOrders, monitor, LoadOrdersAsync);
         var tradesLoader = sp.CreateKeyedLoader<string, long, IReadOnlyCollection<TradeModel>>(
             config.ReloadTrades,
+            monitor,
             timeProvider.Now.ToUnixTimeMilliseconds(),
             LoadTradesAsync,
             GetTradesContext
@@ -78,8 +82,7 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
         disposable += tradesLoader;
 
         var rateLimiter = sp.Resolve<IRateLimiter>();
-        var reporter = sp.Resolve<IStatusReporter>();
-        var monitor = sp.Resolve<IStatusMonitor>();
+        var reporter = monitor.CreateReporter();
         var logger = sp.Resolve<ILogger>();
 
         return new UserConnector(

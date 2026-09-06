@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
-using Annium.Finance.Providers.Core.Shared.Status;
+using Annium.Finance.Providers.Core.Internal.Shared.Status;
 using Annium.Linq;
 using Annium.Logging;
 
-namespace Annium.Finance.Providers.Core.Internal.Shared.Status;
+namespace Annium.Finance.Providers.Core.Shared.Status;
 
 /// <summary>
 /// Default <see cref="IStatusMonitor"/> implementation. Tracks each registered target's status in a dictionary
@@ -15,7 +15,7 @@ namespace Annium.Finance.Providers.Core.Internal.Shared.Status;
 /// disconnected only when every target is disconnected, connecting otherwise (including when there is a mix of
 /// connected and disconnected targets).
 /// </summary>
-internal class StatusMonitor : IStatusMonitor, ILogSubject
+public sealed class StatusMonitor : IStatusMonitor, ILogSubject
 {
     /// <summary>Gets the logger instance.</summary>
     public ILogger Logger { get; }
@@ -44,6 +44,12 @@ internal class StatusMonitor : IStatusMonitor, ILogSubject
         Logger = logger;
         this.Trace("created");
     }
+
+    /// <summary>
+    /// Creates a reporter through which one more component can join this monitor's aggregate status.
+    /// </summary>
+    /// <returns>A reporter bound to this monitor and to no component yet.</returns>
+    public IStatusReporter CreateReporter() => new StatusReporter(this, Logger);
 
     /// <summary>
     /// Registers a new target with an initial status and recomputes <see cref="Status"/>.

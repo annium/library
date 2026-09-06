@@ -5,17 +5,19 @@ using Annium.Core.DependencyInjection;
 using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.Market;
-using Annium.Finance.Providers.Abstractions.Domain.Shared;
+using Annium.Finance.Providers.Core.Market;
+using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Annium.Finance.Providers.Core.Tests.Market;
 
 /// <summary>
-/// Pins what the market connector factory hands back. Until now nothing exercised this path offline at all:
-/// its only callers are the connector test bases, and every test built on those talks to the live exchange
-/// and is skipped — so any change here, including dropping the scope pairing entirely, went unnoticed.
+/// Pins what the market connector factory hands to a provider's own instance factory. Until now nothing
+/// exercised this path offline at all: its only callers are the connector test bases, and every test built on
+/// those talks to the live exchange and is skipped.
 /// </summary>
 public class MarketConnectorFactoryTests : ProvidersTestBase
 {
@@ -29,82 +31,89 @@ public class MarketConnectorFactoryTests : ProvidersTestBase
     {
         Register(container =>
         {
-            container.Add<ScopeCapture>().AsSelf().Singleton();
-            container.Add<FakeInstanceFactory>().AsKeyed<IMarketConnectorInstanceFactory>("fake").Scoped();
+            container.Add<CreationLog>().AsSelf().Singleton();
+            container.Add<FakeInstanceFactory>().AsKeyed<IMarketConnectorInstanceFactory>("fake").Transient();
         });
     }
 
     /// <summary>
-    /// A connector built through the factory carries the scope it was resolved from, and disposing the
-    /// connector disposes that scope. The factory creates a scope per connector and resolves everything the
-    /// connector needs from it, so nothing else is in a position to release it.
+    /// Every connector gets a status monitor of its own. The monitor is the one thing that has to be
+    /// per-connector - it aggregates that connector and the components it is built from - and it used to be
+    /// per-connector only as a side effect of a DI scope each.
     /// </summary>
     /// <returns>A task representing the asynchronous test.</returns>
     [Fact]
-    public async Task CreatedConnector_DisposesTheScopeItWasBuiltFrom()
+    public async Task EachConnector_GetsItsOwnMonitor()
     {
         // arrange
-        var capture = Get<ScopeCapture>();
+        var log = Get<CreationLog>();
         var factory = Get<IMarketConnectorFactory>();
         var settings = new MarketSettings { Provider = "fake" };
 
         // act
-        var connector = factory.Create(settings);
+        await using var first = factory.Create(settings);
+        await using var second = factory.Create(settings);
 
-        // assert - the connector was built inside a live scope
-        var scope = capture.Scope.NotNull();
-        IsAlive(scope).IsTrue();
+        // assert
+        log.Creations.Has(2);
+        log.Creations[0].Monitor.IsNotDefault();
+        log.Creations[1].Monitor.IsNotDefault();
+        ReferenceEquals(log.Creations[0].Monitor, log.Creations[1].Monitor)
+            .IsFalse("two connectors sharing one monitor resolve each other's status as their own");
+    }
+
+    /// <summary>
+    /// The factory builds through whatever provider it was resolved from, rather than opening a scope of its
+    /// own. That is what lets a caller running work in its own scope - a backtest, say - have the connector's
+    /// components come from that scope.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task Factory_BuildsThroughTheProviderItWasResolvedFrom()
+    {
+        // arrange
+        var log = Get<CreationLog>();
+        var settings = new MarketSettings { Provider = "fake" };
+        await using var scope = Get<IServiceProvider>().CreateAsyncScope();
 
         // act
-        await connector.DisposeAsync();
+        var factory = scope.ServiceProvider.Resolve<IMarketConnectorFactory>();
+        await using var connector = factory.Create(settings);
 
-        // assert - and disposing it took that scope with it
-        IsAlive(scope).IsFalse("a connector built by the factory must carry its scope's lifetime");
+        // assert
+        log.Creations.Has(1);
+        log.Creations[0].Sp.Is(scope.ServiceProvider, "the connector was not built through the caller's scope");
+    }
+
+    /// <summary>What an instance factory was handed for one connector.</summary>
+    /// <param name="Sp">The provider the instance factory itself was resolved from.</param>
+    /// <param name="Monitor">The monitor the connector was told to report into.</param>
+    private sealed record Creation(IServiceProvider Sp, IStatusMonitor Monitor);
+
+    /// <summary>Collects what the instance factory saw, in creation order.</summary>
+    private sealed class CreationLog
+    {
+        /// <summary>Gets the creations recorded so far.</summary>
+        public List<Creation> Creations { get; } = new();
     }
 
     /// <summary>
-    /// Reports whether a service provider still serves resolutions, which is how disposal is observed.
+    /// Stands in for a provider's own connector factory, recording what it is handed.
     /// </summary>
-    /// <param name="sp">The provider to probe.</param>
-    /// <returns><see langword="true"/> while it can still resolve; otherwise <see langword="false"/>.</returns>
-    private static bool IsAlive(IServiceProvider sp)
-    {
-        try
-        {
-            sp.GetService(typeof(IServiceProvider));
-
-            return true;
-        }
-        catch (ObjectDisposedException)
-        {
-            return false;
-        }
-    }
-
-    /// <summary>Carries the scoped provider a connector was built from out to the test.</summary>
-    private sealed class ScopeCapture
-    {
-        /// <summary>Gets or sets the scoped provider the instance factory was resolved from.</summary>
-        public IServiceProvider? Scope { get; set; }
-    }
-
-    /// <summary>
-    /// Stands in for a provider's own connector factory, recording the scope it was resolved from.
-    /// </summary>
-    /// <param name="sp">The scoped provider this factory was resolved from.</param>
-    /// <param name="capture">The carrier the scope is reported through.</param>
-    private sealed class FakeInstanceFactory(IServiceProvider sp, ScopeCapture capture)
-        : IMarketConnectorInstanceFactory
+    /// <param name="sp">The provider this factory was resolved from.</param>
+    /// <param name="log">The log creations are recorded in.</param>
+    private sealed class FakeInstanceFactory(IServiceProvider sp, CreationLog log) : IMarketConnectorInstanceFactory
     {
         /// <summary>
-        /// Records the scope and returns a connector that owns nothing.
+        /// Records the call and returns a connector that owns nothing.
         /// </summary>
         /// <param name="settings">Ignored.</param>
+        /// <param name="monitor">The monitor the caller supplied, recorded.</param>
         /// <param name="disposable">Ignored.</param>
         /// <returns>A connector that does nothing.</returns>
-        public IMarketConnector Create(MarketSettings settings, AsyncDisposableBox disposable)
+        public IMarketConnector Create(MarketSettings settings, IStatusMonitor monitor, AsyncDisposableBox disposable)
         {
-            capture.Scope = sp;
+            log.Creations.Add(new Creation(sp, monitor));
 
             return new StubConnector();
         }
@@ -147,7 +156,7 @@ public class MarketConnectorFactoryTests : ProvidersTestBase
 
         /// <summary>Does nothing; unused by this test.</summary>
         /// <param name="symbols">Ignored.</param>
-        public void SubscribeTickers(IReadOnlyCollection<string> symbols) { }
+        public void SubscribeTickers(IReadOnlyCollection<string> symbols) => _ = OnSync(new MarketSettings(), [], []);
 
         /// <summary>Does nothing; unused by this test.</summary>
         /// <param name="symbols">Ignored.</param>

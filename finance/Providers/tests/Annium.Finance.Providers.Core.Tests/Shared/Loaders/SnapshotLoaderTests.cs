@@ -8,6 +8,7 @@ using Annium.Finance.Providers.Abstractions.Domain.Shared.Operations;
 using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Loaders;
 using Annium.Finance.Providers.Core.Shared.Status;
+using Annium.Logging;
 using Annium.Testing;
 using Xunit;
 using static Annium.Finance.Providers.Abstractions.Connectors.Shared.ConnectorStatus;
@@ -21,6 +22,12 @@ namespace Annium.Finance.Providers.Core.Tests.Shared.Loaders;
 /// </summary>
 public class SnapshotLoaderTests : TestBase
 {
+    /// <summary>
+    /// The monitor under test. Production creates one per connector rather than registering it, so a test
+    /// that needs one builds it the same way.
+    /// </summary>
+    private StatusMonitor Monitor => field ??= new StatusMonitor(Get<ILogger>());
+
     /// <summary>Records every connection status transition reported by the loader's status monitor, in order.</summary>
     private readonly ConcurrentQueue<ConnectorStatus> _statuses = new();
 
@@ -48,7 +55,7 @@ public class SnapshotLoaderTests : TestBase
     {
         await base.InitializeAsync();
 
-        var monitor = Get<IStatusMonitor>();
+        var monitor = Monitor;
         monitor.OnStatusChanged += _statuses.Enqueue;
     }
 
@@ -73,7 +80,7 @@ public class SnapshotLoaderTests : TestBase
                 ? MarketResult.New(MarketOperationStatus.NotFound, 0, $"No data at {attempt}")
                 : MarketResult.Ok(attempt++);
         }
-        using var loader = Provider.CreateSnapshotLoader<int>(cfg, async _ => await Load());
+        using var loader = Provider.CreateSnapshotLoader<int>(cfg, Monitor, async _ => await Load());
         loader.OnData += log.Add;
 
         loader.Start(true);
@@ -106,6 +113,7 @@ public class SnapshotLoaderTests : TestBase
         var attempts = 0;
         using var loader = Provider.CreateSnapshotLoader<int>(
             cfg,
+            Monitor,
             async _ =>
             {
                 Interlocked.Increment(ref attempts);
@@ -142,6 +150,7 @@ public class SnapshotLoaderTests : TestBase
         var attempts = 0;
         var loader = Provider.CreateSnapshotLoader<int>(
             cfg,
+            Monitor,
             async _ =>
             {
                 Interlocked.Increment(ref attempts);
@@ -179,6 +188,7 @@ public class SnapshotLoaderTests : TestBase
         var log = Get<TestLog<int>>();
         var loader = Provider.CreateSnapshotLoader<int>(
             cfg,
+            Monitor,
             async _ =>
             {
                 started.TrySetResult();
@@ -222,6 +232,7 @@ public class SnapshotLoaderTests : TestBase
         var log = Get<TestLog<int>>();
         var loader = Provider.CreateSnapshotLoader<int>(
             cfg,
+            Monitor,
             async _ =>
             {
                 if (Interlocked.Increment(ref calls) == 1)
@@ -265,13 +276,14 @@ public class SnapshotLoaderTests : TestBase
     public async Task DisposedLoader_StopsHoldingTheStatusDown()
     {
         // arrange - a second target that stays connected, so the monitor has something to be connected about
-        var monitor = Get<IStatusMonitor>();
-        var survivor = Get<IStatusReporter>();
+        var monitor = Monitor;
+        var survivor = Monitor.CreateReporter();
         survivor.Bind(this);
         survivor.Connected();
 
         var loader = Provider.CreateSnapshotLoader<int>(
             new SnapshotLoaderConfig(1, 2, 5),
+            monitor,
             _ => Task.FromResult<IBaseResult<int>>(MarketResult.Ok(1))
         );
         loader.Start(true);
@@ -294,7 +306,11 @@ public class SnapshotLoaderTests : TestBase
     {
         var cfg = new SnapshotLoaderConfig(1, 2, 5);
         var log = Get<TestLog<int>>();
-        var loader = Provider.CreateSnapshotLoader(cfg, _ => Task.FromResult<IBaseResult<int>>(MarketResult.Ok(7)));
+        var loader = Provider.CreateSnapshotLoader(
+            cfg,
+            Monitor,
+            _ => Task.FromResult<IBaseResult<int>>(MarketResult.Ok(7))
+        );
         loader.OnData += log.Add;
 
         loader.Start(false);

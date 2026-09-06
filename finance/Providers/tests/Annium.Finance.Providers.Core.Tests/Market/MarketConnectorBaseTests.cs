@@ -28,6 +28,12 @@ namespace Annium.Finance.Providers.Core.Tests.Market;
 public class MarketConnectorBaseTests : ProvidersTestBase
 {
     /// <summary>
+    /// The monitor the connector under test reports into. Production creates one per connector rather than
+    /// registering it, so a test that needs one builds it the same way.
+    /// </summary>
+    private StatusMonitor Monitor => field ??= new StatusMonitor(Get<ILogger>());
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="MarketConnectorBaseTests"/> class.
     /// </summary>
     /// <param name="outputHelper">The xUnit output helper used to capture test logs.</param>
@@ -162,7 +168,7 @@ public class MarketConnectorBaseTests : ProvidersTestBase
     public async Task ErrorReportedByAnotherComponent_ReachesTheConnector()
     {
         // arrange - a second component bound to the same monitor, as a provider's loaders are
-        var other = Get<IStatusReporter>();
+        var other = Monitor.CreateReporter();
         other.Bind("other", ConnectorStatus.Connected);
 
         var settings = new MarketSettings { Provider = "fake" };
@@ -233,7 +239,7 @@ public class MarketConnectorBaseTests : ProvidersTestBase
     public async Task DisposedConnector_StopsCountingTowardsItsMonitor()
     {
         // arrange
-        var monitor = Get<IStatusMonitor>();
+        var monitor = Monitor;
         var settings = new MarketSettings { Provider = "fake" };
         var market = CreateConnector(settings);
         monitor.Status.Is(ConnectorStatus.Connected, "the connector registers itself as a connected target");
@@ -266,8 +272,8 @@ public class MarketConnectorBaseTests : ProvidersTestBase
     public async Task DisposingConnector_StopsListeningBeforeItUnbinds()
     {
         // arrange - a second component on the same monitor, sitting at disconnected
-        var monitor = Get<IStatusMonitor>();
-        var other = Get<IStatusReporter>();
+        var monitor = Monitor;
+        var other = Monitor.CreateReporter();
         other.Bind("other", ConnectorStatus.Disconnected);
 
         var settings = new MarketSettings { Provider = "fake" };
@@ -297,8 +303,8 @@ public class MarketConnectorBaseTests : ProvidersTestBase
     private FakeMarketConnector CreateConnector(MarketSettings settings)
     {
         var provider = new FakeMarketProvider();
-        var reporter = Get<IStatusReporter>();
-        var monitor = Get<IStatusMonitor>();
+        var reporter = Monitor.CreateReporter();
+        var monitor = Monitor;
 
         return new FakeMarketConnector(settings, provider, reporter, monitor, Logger);
     }

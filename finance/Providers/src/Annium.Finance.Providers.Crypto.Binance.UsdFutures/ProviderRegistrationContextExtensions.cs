@@ -86,7 +86,10 @@ public static class ProviderRegistrationContextExtensions
 
         // services
         ctx.Container.Add<QueryProcessor>().AsSelf().Singleton();
-        ctx.Container.Add(RateLimiterFactory).AsSelf().Scoped();
+        // one limiter for the whole provider, not one per connector: the exchange counts request weight
+        // against the address and the account, so a limiter each let N connectors on one account spend the
+        // same budget N times over and walk straight into a ban
+        ctx.Container.Add(RateLimiterFactory).AsSelf().Singleton();
 
         var providerKey = ProviderKey.Create(Provider);
         ctx.Container.Add(ServerTimeProviderFactory).AsKeyed<IServerTimeProvider>(providerKey).Singleton();

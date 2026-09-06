@@ -27,6 +27,12 @@ namespace Annium.Finance.Providers.Core.Tests.User;
 public class UserConnectorBaseTests : ProvidersTestBase
 {
     /// <summary>
+    /// The monitor the connector under test reports into. Production creates one per connector rather than
+    /// registering it, so a test that needs one builds it the same way.
+    /// </summary>
+    private StatusMonitor Monitor => field ??= new StatusMonitor(Get<ILogger>());
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="UserConnectorBaseTests"/> class.
     /// </summary>
     /// <param name="outputHelper">The xUnit output helper used to capture test logs.</param>
@@ -195,7 +201,7 @@ public class UserConnectorBaseTests : ProvidersTestBase
     public async Task ErrorReportedByAnotherComponent_ReachesTheConnector()
     {
         // arrange - a second component bound to the same monitor, as a provider's services are
-        var other = Get<IStatusReporter>();
+        var other = Monitor.CreateReporter();
         other.Bind("other", ConnectorStatus.Connected);
 
         var settings = new UserSettings
@@ -226,8 +232,8 @@ public class UserConnectorBaseTests : ProvidersTestBase
     /// <returns>The constructed connector.</returns>
     private FakeUserConnector CreateConnector(UserSettings settings, IUserProvider provider)
     {
-        var reporter = Get<IStatusReporter>();
-        var monitor = Get<IStatusMonitor>();
+        var reporter = Monitor.CreateReporter();
+        var monitor = Monitor;
 
         return new FakeUserConnector(settings, provider, reporter, monitor, Logger);
     }

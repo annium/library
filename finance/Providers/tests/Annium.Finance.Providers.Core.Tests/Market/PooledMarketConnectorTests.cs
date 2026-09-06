@@ -5,7 +5,8 @@ using Annium.Core.DependencyInjection;
 using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.Market;
-using Annium.Finance.Providers.Abstractions.Domain.Shared;
+using Annium.Finance.Providers.Core.Market;
+using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Testing;
 using Xunit;
@@ -13,8 +14,8 @@ using Xunit;
 namespace Annium.Finance.Providers.Core.Tests.Market;
 
 /// <summary>
-/// Pins the sharing contract of <see cref="IMarketConnectorFactory.CreatePooled" />: one connector per
-/// settings, alive for as long as any lease on it is.
+/// Pins the sharing contract of <see cref="IPooledMarketConnectorFactory" />: one connector per settings,
+/// alive for as long as any lease on it is.
 /// </summary>
 public class PooledMarketConnectorTests : ProvidersTestBase
 {
@@ -28,31 +29,32 @@ public class PooledMarketConnectorTests : ProvidersTestBase
         Register(container =>
         {
             container.Add<ScopeCapture>().AsSelf().Singleton();
-            container.Add<FakeInstanceFactory>().AsKeyed<IMarketConnectorInstanceFactory>("fake").Scoped();
-            container.Add<FakeInstanceFactory>().AsKeyed<IMarketConnectorInstanceFactory>("other").Scoped();
+            container.Add<FakeInstanceFactory>().AsKeyed<IMarketConnectorInstanceFactory>("fake").Transient();
+            container.Add<FakeInstanceFactory>().AsKeyed<IMarketConnectorInstanceFactory>("other").Transient();
         });
     }
 
     /// <summary>
-    /// Tests that two leases on the same settings are served by one connector, while Create keeps
-    /// building its own.
+    /// Tests that two leases on the same settings are served by one connector, while the plain factory
+    /// keeps building its own.
     /// </summary>
     [Fact]
-    public void SameSettings_ShareOneConnector_WhileCreateDoesNot()
+    public void SameSettings_ShareOneConnector_WhilePlainFactoryDoesNot()
     {
         // arrange
-        var factory = Get<IMarketConnectorFactory>();
+        var pooled = Get<IPooledMarketConnectorFactory>();
+        var plain = Get<IMarketConnectorFactory>();
         var settings = new MarketSettings { Provider = "fake" };
 
         // act
-        var first = factory.CreatePooled(settings);
-        var second = factory.CreatePooled(settings);
-        var own = factory.Create(settings);
+        var first = pooled.Create(settings);
+        var second = pooled.Create(settings);
+        var own = plain.Create(settings);
 
         // assert - the leases resolve to one connector, and the directly created one is not it
         first.Instruments.IsEqual(second.Instruments);
         ReferenceEquals(first, second).IsFalse("each lease is its own handle onto the shared connector");
-        Get<ScopeCapture>().Created.Is(2, "one connector for the shared leases, one for Create");
+        Get<ScopeCapture>().Created.Is(2, "one connector for the shared leases, one for the plain factory");
         own.IsNotDefault();
     }
 
@@ -63,11 +65,11 @@ public class PooledMarketConnectorTests : ProvidersTestBase
     public void DifferentSettings_DoNotShare()
     {
         // arrange
-        var factory = Get<IMarketConnectorFactory>();
+        var factory = Get<IPooledMarketConnectorFactory>();
 
         // act
-        factory.CreatePooled(new MarketSettings { Provider = "fake" });
-        factory.CreatePooled(new MarketSettings { Provider = "other" });
+        factory.Create(new MarketSettings { Provider = "fake" });
+        factory.Create(new MarketSettings { Provider = "other" });
 
         // assert
         Get<ScopeCapture>().Created.Is(2, "settings are the sharing key");
@@ -83,10 +85,10 @@ public class PooledMarketConnectorTests : ProvidersTestBase
     {
         // arrange
         var capture = Get<ScopeCapture>();
-        var factory = Get<IMarketConnectorFactory>();
+        var factory = Get<IPooledMarketConnectorFactory>();
         var settings = new MarketSettings { Provider = "fake" };
-        var first = factory.CreatePooled(settings);
-        var second = factory.CreatePooled(settings);
+        var first = factory.Create(settings);
+        var second = factory.Create(settings);
 
         // act - one holder lets go, twice over
         await first.DisposeAsync();
@@ -112,12 +114,12 @@ public class PooledMarketConnectorTests : ProvidersTestBase
     {
         // arrange
         var capture = Get<ScopeCapture>();
-        var factory = Get<IMarketConnectorFactory>();
+        var factory = Get<IPooledMarketConnectorFactory>();
         var settings = new MarketSettings { Provider = "fake" };
 
         // act
-        await factory.CreatePooled(settings).DisposeAsync();
-        factory.CreatePooled(settings);
+        await factory.Create(settings).DisposeAsync();
+        factory.Create(settings);
 
         // assert
         capture.Created.Is(2, "the pool must not hand back a connector it has torn down");
@@ -149,9 +151,10 @@ public class PooledMarketConnectorTests : ProvidersTestBase
         /// Counts the call and returns a connector that owns nothing.
         /// </summary>
         /// <param name="settings">Ignored.</param>
+        /// <param name="monitor">Ignored.</param>
         /// <param name="disposable">Ignored.</param>
         /// <returns>A connector that does nothing but report its disposal.</returns>
-        public IMarketConnector Create(MarketSettings settings, AsyncDisposableBox disposable)
+        public IMarketConnector Create(MarketSettings settings, IStatusMonitor monitor, AsyncDisposableBox disposable)
         {
             capture.RecordCreated();
 

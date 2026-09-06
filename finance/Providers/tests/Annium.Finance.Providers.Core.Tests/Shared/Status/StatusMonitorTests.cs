@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Tests.Lib;
+using Annium.Logging;
 using Annium.Testing;
 using Xunit;
 using static Annium.Finance.Providers.Abstractions.Connectors.Shared.ConnectorStatus;
@@ -18,6 +19,12 @@ namespace Annium.Finance.Providers.Core.Tests.Shared.Status;
 /// </summary>
 public class StatusMonitorTests : ProvidersTestBase
 {
+    /// <summary>
+    /// The monitor under test. Production creates one per connector rather than registering it, so a test
+    /// that needs one builds it the same way.
+    /// </summary>
+    private StatusMonitor Monitor => field ??= new StatusMonitor(Get<ILogger>());
+
     /// <summary>Records every overall status transition reported by the monitor, in order.</summary>
     private readonly ConcurrentQueue<ConnectorStatus> _statuses = new();
 
@@ -37,7 +44,7 @@ public class StatusMonitorTests : ProvidersTestBase
     {
         await base.InitializeAsync();
 
-        var monitor = Get<IStatusMonitor>();
+        var monitor = Monitor;
         monitor.OnStatusChanged += _statuses.Enqueue;
     }
 
@@ -49,7 +56,7 @@ public class StatusMonitorTests : ProvidersTestBase
     [Fact]
     public void SingleReporter()
     {
-        var reporter = Get<IStatusReporter>();
+        var reporter = Monitor.CreateReporter();
         var target = new A();
 
         Wrap.It(() => reporter.Connecting()).Throws<InvalidOperationException>().Reports("not bound");
@@ -82,9 +89,9 @@ public class StatusMonitorTests : ProvidersTestBase
     {
         // arrange
         var errors = new ConcurrentQueue<ConnectorError>();
-        var monitor = Get<IStatusMonitor>();
+        var monitor = Monitor;
         monitor.OnError += errors.Enqueue;
-        var reporter = Get<IStatusReporter>();
+        var reporter = Monitor.CreateReporter();
         reporter.Bind(new A());
 
         // act
@@ -104,9 +111,9 @@ public class StatusMonitorTests : ProvidersTestBase
     [Fact]
     public void MultipleReporters()
     {
-        var reporterA = Get<IStatusReporter>();
+        var reporterA = Monitor.CreateReporter();
         reporterA.Bind(new A());
-        var reporterB = Get<IStatusReporter>();
+        var reporterB = Monitor.CreateReporter();
         reporterB.Bind(new B());
 
         _statuses.IsEmpty();
