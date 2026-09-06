@@ -1,8 +1,10 @@
 using System;
+using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Finance.Providers.Abstractions.Connectors.User;
 using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.User;
+using Annium.Finance.Providers.Core.Internal.Shared.Pooling;
 using Annium.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,16 +16,40 @@ namespace Annium.Finance.Providers.Core.Internal.User;
 /// </summary>
 /// <param name="sp">The root service provider used to create the connector's own DI scope.</param>
 /// <param name="logger">The logger instance.</param>
-internal class UserConnectorFactory(IServiceProvider sp, ILogger logger) : IUserConnectorFactory, ILogSubject
+internal class UserConnectorFactory(IServiceProvider sp, ILogger logger)
+    : IUserConnectorFactory,
+        ILogSubject,
+        IAsyncDisposable
 {
     /// <summary>Gets the logger instance.</summary>
     public ILogger Logger { get; } = logger;
+
+    /// <summary>The connectors shared through <see cref="CreatePooled" />, by settings.</summary>
+    private readonly ConnectorPool<UserSettings, IUserConnector> _pool = new();
 
     /// <summary>
     /// Creates a user connector configured with the given settings.
     /// </summary>
     /// <param name="settings">The user settings identifying the provider and account to connect to.</param>
     /// <returns>A new user connector instance.</returns>
+    public IUserConnector CreatePooled(UserSettings settings)
+    {
+        var (connector, release) = _pool.Acquire(settings, () => Create(settings));
+
+        return new PooledUserConnector(connector, release);
+    }
+
+    /// <summary>
+    /// Disposes every connector still held by the pool.
+    /// </summary>
+    /// <returns>A task that completes once they are all torn down.</returns>
+    public async ValueTask DisposeAsync() => await _pool.DisposeAsync();
+
+    /// <summary>
+    /// Creates a user connector configured with the given settings.
+    /// </summary>
+    /// <param name="settings">The user settings identifying the provider account to connect to.</param>
+    /// <returns>A new user connector instance the caller owns.</returns>
     public IUserConnector Create(UserSettings settings)
     {
         var providerKey = settings.GetProviderKey();
