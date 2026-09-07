@@ -8,6 +8,7 @@ using Annium.Finance.Providers.Abstractions.Domain.Shared.Operations;
 using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Loaders;
 using Annium.Finance.Providers.Core.Shared.Status;
+using Annium.Logging;
 using Annium.Testing;
 using Xunit;
 
@@ -19,6 +20,12 @@ namespace Annium.Finance.Providers.Core.Tests.Shared.Loaders;
 /// </summary>
 public class KeyedLoaderTests : TestBase
 {
+    /// <summary>
+    /// The monitor under test. Production creates one per connector rather than registering it, so a test
+    /// that needs one builds it the same way.
+    /// </summary>
+    private StatusMonitor Monitor => field ??= new StatusMonitor(Get<ILogger>());
+
     /// <summary>
     /// Initializes a new instance of the <see cref="KeyedLoaderTests"/> class, registering the finance providers
     /// services and test log used to observe loaded data.
@@ -51,6 +58,7 @@ public class KeyedLoaderTests : TestBase
         var log = new ConcurrentQueue<(string Key, int Context, int Data)>();
         var loader = Provider.CreateKeyedLoader<string, int, int>(
             cfg,
+            Monitor,
             0,
             (_, context, _) => Task.FromResult<IBaseResult<int>>(MarketResult.Ok(context + 1)),
             (_, _, data) => data
@@ -106,7 +114,7 @@ public class KeyedLoaderTests : TestBase
     public async Task NewKey_DoesNotReportItsOwnProgress()
     {
         // arrange - watch the shared monitor for the whole life of the loader
-        var monitor = Get<IStatusMonitor>();
+        var monitor = Monitor;
         var statuses = new ConcurrentQueue<ConnectorStatus>();
         monitor.OnStatusChanged += statuses.Enqueue;
 
@@ -114,6 +122,7 @@ public class KeyedLoaderTests : TestBase
         var log = new ConcurrentQueue<(string Key, int Context, int Data)>();
         var loader = Provider.CreateKeyedLoader<string, int, int>(
             cfg,
+            Monitor,
             0,
             (_, context, _) => Task.FromResult<IBaseResult<int>>(MarketResult.Ok(context + 1)),
             (_, _, data) => data
@@ -152,6 +161,7 @@ public class KeyedLoaderTests : TestBase
         var log = new ConcurrentQueue<(string Key, int Context, int Data)>();
         var loader = Provider.CreateKeyedLoader<string, int, int>(
             cfg,
+            Monitor,
             0,
             (_, context, _) => Task.FromResult<IBaseResult<int>>(MarketResult.Ok(context + 1)),
             (_, _, data) => data
@@ -204,6 +214,7 @@ public class KeyedLoaderTests : TestBase
         var loads = 0;
         var loader = Provider.CreateKeyedLoader<string, int, int>(
             cfg,
+            Monitor,
             0,
             (_, context, _) =>
             {
@@ -250,6 +261,7 @@ public class KeyedLoaderTests : TestBase
         var loads = 0;
         var loader = Provider.CreateKeyedLoader<string, int, int>(
             cfg,
+            Monitor,
             0,
             (_, context, _) =>
             {
@@ -288,6 +300,7 @@ public class KeyedLoaderTests : TestBase
         var loads = new ConcurrentQueue<string>();
         var loader = Provider.CreateKeyedLoader<string, int, int>(
             cfg,
+            Monitor,
             0,
             (key, context, _) =>
             {

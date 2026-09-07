@@ -4,8 +4,9 @@ using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Connectors.User;
 using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Core.Internal.Shared.TimeSync;
-using Annium.Finance.Providers.Core.Shared.Status;
+using Annium.Finance.Providers.Core.Market;
 using Annium.Finance.Providers.Core.Shared.TimeSync;
+using Annium.Finance.Providers.Core.User;
 using Annium.Logging;
 
 namespace Annium.Finance.Providers.Core;
@@ -55,20 +56,23 @@ public readonly struct ProviderRegistrationContext
     {
         var (provider, serverTimeConfig) = cfg;
 
-        // market
-        Container.Add<TMarketProviderFactory>().AsKeyed<IMarketProviderFactory>(provider).Scoped();
-        Container.Add<TMarketConnectorFactory>().AsKeyed<IMarketConnectorInstanceFactory>(provider).Scoped();
+        // market. The factories hold no state of their own and resolve what they need when asked, so they
+        // are transient: resolved from a scope, they build connectors wired to that scope's services, and
+        // resolved from the container they build against the container - neither is fixed at registration
+        Container.Add<TMarketProviderFactory>().AsKeyed<IMarketProviderFactory>(provider).Transient();
+        Container.Add<TMarketConnectorFactory>().AsKeyed<IMarketConnectorInstanceFactory>(provider).Transient();
 
         // user
-        Container.Add<TUserProviderFactory>().AsKeyed<IUserProviderFactory>(provider).Scoped();
-        Container.Add<TUserConnectorFactory>().AsKeyed<IUserConnectorInstanceFactory>(provider).Scoped();
-        Container.Add<TFinanceService>().AsKeyed<IFinanceService>(provider).Scoped();
+        Container.Add<TUserProviderFactory>().AsKeyed<IUserProviderFactory>(provider).Transient();
+        Container.Add<TUserConnectorFactory>().AsKeyed<IUserConnectorInstanceFactory>(provider).Transient();
+        Container.Add<TFinanceService>().AsKeyed<IFinanceService>(provider).Singleton();
 
-        // shared
+        // shared. One time source per provider, not per connector: it polls the provider's clock on a timer
+        // of its own, and a copy per connector multiplies that traffic by however many are open
         var providerKey = ProviderKey.Create(provider);
         Container.Add(providerKey).AsSelf().Singleton();
         Container.Add(serverTimeConfig).AsKeyed<ServerTimeProviderConfig>(providerKey).Singleton();
-        Container.Add(ServerTimeSourceFactory).AsKeyed<IServerTimeSource>(providerKey).Scoped();
+        Container.Add(ServerTimeSourceFactory).AsKeyed<IServerTimeSource>(providerKey).Singleton();
 
         return this;
     }
@@ -83,9 +87,8 @@ public readonly struct ProviderRegistrationContext
     {
         var provider = sp.ResolveKeyed<IServerTimeProvider>(key);
         var config = sp.ResolveKeyed<ServerTimeProviderConfig>(key);
-        var reporter = sp.Resolve<IStatusReporter>();
         var logger = sp.Resolve<ILogger>();
 
-        return new ServerTimeSource(provider, config, reporter, logger);
+        return new ServerTimeSource(provider, config, logger);
     }
 }

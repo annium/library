@@ -40,12 +40,7 @@ public class ServerTimeSourceTests : ProvidersTestBase
         // arrange - a load that ends only when its token says so
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var provider = new GatedServerTimeProvider(started);
-        var source = new ServerTimeSource(
-            provider,
-            new ServerTimeProviderConfig(1, 10_000),
-            Get<IStatusReporter>(),
-            Logger
-        );
+        var source = new ServerTimeSource(provider, new ServerTimeProviderConfig(1, 10_000), Logger);
 
         // act
         await started.Task;
@@ -73,16 +68,10 @@ public class ServerTimeSourceTests : ProvidersTestBase
         // arrange - a server time far from the local clock, so adopting it is unmistakable
         const long serverTime = 1_000_000L;
         var provider = new ScriptedServerTimeProvider(_ => serverTime);
-        var monitor = Get<IStatusMonitor>();
-        using var source = new ServerTimeSource(
-            provider,
-            new ServerTimeProviderConfig(1, 10_000),
-            Get<IStatusReporter>(),
-            Logger
-        );
+        using var source = new ServerTimeSource(provider, new ServerTimeProviderConfig(1, 10_000), Logger);
 
         // act / assert
-        await Expect.ToAsync(() => monitor.Status.Is(ConnectorStatus.Connected));
+        await Expect.ToAsync(() => source.Monitor.Status.Is(ConnectorStatus.Connected));
         (source.ServerTime >= serverTime).IsTrue($"server time {source.ServerTime} is before the loaded one");
         (source.ServerTime < serverTime + 60_000).IsTrue(
             $"server time {source.ServerTime} is still the local clock, not the loaded one"
@@ -102,12 +91,7 @@ public class ServerTimeSourceTests : ProvidersTestBase
         // work it drives, so the switch to confirming lands long before a second load-interval tick could:
         // measured any tighter, a tick queued before the switch takes effect makes the count off by one
         var provider = new ScriptedServerTimeProvider(_ => 1_000_000L);
-        using var source = new ServerTimeSource(
-            provider,
-            new ServerTimeProviderConfig(200, 60_000),
-            Get<IStatusReporter>(),
-            Logger
-        );
+        using var source = new ServerTimeSource(provider, new ServerTimeProviderConfig(200, 60_000), Logger);
 
         // act - ten load intervals' worth of waiting
         await Expect.ToAsync(() => provider.Calls.IsGreaterOrEqual(1));
@@ -130,12 +114,7 @@ public class ServerTimeSourceTests : ProvidersTestBase
     {
         // arrange - the first refresh succeeds and switches to confirming; every one after it fails
         var provider = new ScriptedServerTimeProvider(call => call == 1 ? 1_000_000L : null);
-        using var source = new ServerTimeSource(
-            provider,
-            new ServerTimeProviderConfig(10, 250),
-            Get<IStatusReporter>(),
-            Logger
-        );
+        using var source = new ServerTimeSource(provider, new ServerTimeProviderConfig(10, 250), Logger);
 
         // act - the second refresh is the confirm that fails
         await Expect.ToAsync(() => provider.Calls.IsGreaterOrEqual(2));

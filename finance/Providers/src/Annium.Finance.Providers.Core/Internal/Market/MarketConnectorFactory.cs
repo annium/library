@@ -3,16 +3,25 @@ using Annium.Core.DependencyInjection;
 using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Domain.Market;
 using Annium.Finance.Providers.Abstractions.Domain.Shared;
+using Annium.Finance.Providers.Core.Market;
+using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Logging;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Annium.Finance.Providers.Core.Internal.Market;
 
 /// <summary>
-/// Default <see cref="IMarketConnectorFactory"/> implementation. Builds a standalone market connector in its own
-/// DI scope, resolving the provider-specific instance factory registered for the settings' provider key.
+/// Default <see cref="IMarketConnectorFactory"/> implementation. Builds a standalone market connector with a
+/// status monitor of its own, through the provider-specific instance factory registered for the settings'
+/// provider key.
 /// </summary>
-/// <param name="sp">The root service provider used to create the connector's own DI scope.</param>
+/// <remarks>
+/// This used to open a DI scope per connector, for one reason: a fresh <see cref="StatusMonitor"/>, since
+/// every other service in the construction path is either stateless or shared across the process. The scope
+/// silently made those shared things per-connector too - a rate limiter each, a server time sync loop each -
+/// which is what a provider's limits are not counted by. The monitor is built here instead, and nothing in
+/// the path needs a scope, so the factory builds in whatever provider it was resolved through.
+/// </remarks>
+/// <param name="sp">The service provider the connector's dependencies are resolved from.</param>
 /// <param name="logger">The logger instance.</param>
 internal class MarketConnectorFactory(IServiceProvider sp, ILogger logger) : IMarketConnectorFactory, ILogSubject
 {
@@ -23,7 +32,7 @@ internal class MarketConnectorFactory(IServiceProvider sp, ILogger logger) : IMa
     /// Creates a market connector configured with the given settings.
     /// </summary>
     /// <param name="settings">The market settings identifying the provider and market to connect to.</param>
-    /// <returns>A new market connector instance.</returns>
+    /// <returns>A new market connector instance the caller owns.</returns>
     public IMarketConnector Create(MarketSettings settings)
     {
         var providerKey = settings.GetProviderKey();
@@ -31,11 +40,11 @@ internal class MarketConnectorFactory(IServiceProvider sp, ILogger logger) : IMa
         this.Trace("{key} - create disposable box for {settings}", providerKey, settings);
         var disposable = Disposable.AsyncBox(Logger);
 
-        this.Trace("{key} - create new scope for {settings}", providerKey, settings);
-        var scope = sp.CreateAsyncScope();
+        this.Trace("{key} - create status monitor for {settings}", providerKey, settings);
+        var monitor = new StatusMonitor(Logger);
 
         this.Trace("{key} - resolve factory for {settings}", providerKey, settings);
-        var factory = scope.ServiceProvider.ResolveKeyed<IMarketConnectorInstanceFactory>(settings.Provider);
+        var factory = sp.ResolveKeyed<IMarketConnectorInstanceFactory>(settings.Provider);
 
         this.Trace<ProviderKey, MarketSettings, string>(
             "{key} - create connector for {settings} with {factory}",
@@ -43,11 +52,7 @@ internal class MarketConnectorFactory(IServiceProvider sp, ILogger logger) : IMa
             settings,
             factory.GetFullId()
         );
-        var connector = factory.Create(settings, disposable);
 
-        // the scope is not put in the connector's own box: that box drains its asynchronous entries
-        // concurrently, so the scope would tear down alongside the executor rather than after it, and
-        // the executor may still be draining a sync cycle that is using what the scope owns
-        return new ScopedMarketConnector(connector, scope);
+        return factory.Create(settings, monitor, disposable);
     }
 }

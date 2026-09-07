@@ -17,21 +17,27 @@ internal class MarketConnectorFactory(IServiceProvider sp) : IMarketConnectorIns
 {
     /// <summary>Creates and starts a new Binance spot market connector for the given settings.</summary>
     /// <param name="settings">The market connection settings to configure the connector with.</param>
+    /// <param name="monitor">The monitor the connector and its components report their status into.</param>
     /// <param name="disposable">The disposable box the connector will register its cleanup actions on.</param>
     /// <returns>The created market connector.</returns>
-    public IMarketConnector Create(MarketSettings settings, AsyncDisposableBox disposable)
+    public IMarketConnector Create(MarketSettings settings, IStatusMonitor monitor, AsyncDisposableBox disposable)
     {
         var config = sp.Resolve<IMapper>().Map<MarketConfig>(settings);
 
         var provider = sp.CreateMarketProvider(settings);
         var marketContextLoader = sp.CreateMarketContextLoader(
             new CompositeLoaderConfig(3000, 5, 10000, 600_000, 0),
+            monitor,
             provider,
             ref disposable
         );
-        var bookTickerService = sp.CreateBookTickerService(config, Constants.InstrumentTickerKey, ref disposable);
-        var reporter = sp.Resolve<IStatusReporter>();
-        var monitor = sp.Resolve<IStatusMonitor>();
+        var bookTickerService = sp.CreateBookTickerService(
+            config,
+            Constants.InstrumentTickerKey,
+            monitor,
+            ref disposable
+        );
+        var reporter = monitor.CreateReporter();
         var logger = sp.Resolve<ILogger>();
 
         return new MarketConnector(

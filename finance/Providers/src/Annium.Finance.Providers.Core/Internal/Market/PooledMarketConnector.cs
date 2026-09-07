@@ -1,28 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.Market;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Annium.Finance.Providers.Core.Internal.Market;
 
 /// <summary>
-/// A market connector together with the DI scope it was built from, so the scope outlives it.
+/// A lease on a shared market connector: disposing it gives the lease back rather than tearing the
+/// connector down, which happens once the last holder lets go.
 /// </summary>
-/// <remarks>
-/// The connector's own resources are resolved from this scope — its provider above all, which its
-/// <c>OnSync</c> contract hands to handlers by design. Registering the scope in the same disposable box as
-/// the connector's executor left the two as unordered siblings: that box drains its asynchronous entries
-/// concurrently, so tearing the scope down could overtake the executor still draining a sync cycle that was
-/// using what the scope owns. Disposing the connector first and the scope after is the ordering the
-/// dependency actually has.
-/// </remarks>
-/// <param name="inner">The connector this wraps.</param>
-/// <param name="scope">The DI scope the connector was built from.</param>
-internal sealed class ScopedMarketConnector(IMarketConnector inner, AsyncServiceScope scope) : IMarketConnector
+/// <param name="inner">The shared connector.</param>
+/// <param name="release">Gives this lease back to the pool.</param>
+internal sealed class PooledMarketConnector(IMarketConnector inner, Func<ValueTask> release) : IMarketConnector
 {
+    /// <summary>Set on the first disposal, so a second one is a no-op rather than a second release.</summary>
+    private int _isReleased;
+
     /// <summary>Gets the current connection status of the connector.</summary>
     public ConnectorStatus Status => inner.Status;
 
@@ -73,12 +69,14 @@ internal sealed class ScopedMarketConnector(IMarketConnector inner, AsyncService
     public void UnsubscribeTickers(IReadOnlyCollection<string> symbols) => inner.UnsubscribeTickers(symbols);
 
     /// <summary>
-    /// Disposes the connector, then the scope it was built from.
+    /// Gives the lease back. The shared connector survives until the last lease is returned.
     /// </summary>
-    /// <returns>A task that completes once both have been disposed.</returns>
+    /// <returns>A task that completes once the release is recorded.</returns>
     public async ValueTask DisposeAsync()
     {
-        await inner.DisposeAsync();
-        await scope.DisposeAsync();
+        if (Interlocked.Exchange(ref _isReleased, 1) != 0)
+            return;
+
+        await release();
     }
 }

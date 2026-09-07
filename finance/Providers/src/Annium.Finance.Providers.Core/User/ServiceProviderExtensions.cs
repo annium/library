@@ -4,6 +4,7 @@ using Annium.Finance.Providers.Abstractions.Connectors.User;
 using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Loaders;
+using Annium.Finance.Providers.Core.Shared.Status;
 
 namespace Annium.Finance.Providers.Core.User;
 
@@ -34,17 +35,23 @@ public static class ServiceProviderExtensions
     /// </summary>
     /// <param name="sp">The service provider to resolve dependencies from.</param>
     /// <param name="config">The timing configuration for fetch retries, interval reloads, and debounced requests.</param>
+    /// <param name="monitor">The monitor the loader reports its connection status into.</param>
     /// <param name="provider">The user provider to load the context from.</param>
     /// <param name="disposable">The disposable box the loader is added to.</param>
     /// <returns>A new composite loader for the user context.</returns>
     public static ICompositeLoader<UserContext> CreateUserContextLoader(
         this IServiceProvider sp,
         CompositeLoaderConfig config,
+        IStatusMonitor monitor,
         IUserProvider provider,
         ref AsyncDisposableBox disposable
     )
     {
-        var loader = sp.CreateCompositeLoader<UserContext>(config, async _ => await provider.LoadContextAsync());
+        var loader = sp.CreateCompositeLoader<UserContext>(
+            config,
+            monitor,
+            async _ => await provider.LoadContextAsync()
+        );
         disposable += loader;
 
         return loader;

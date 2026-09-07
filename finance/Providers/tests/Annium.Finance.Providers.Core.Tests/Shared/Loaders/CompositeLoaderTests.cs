@@ -24,6 +24,12 @@ namespace Annium.Finance.Providers.Core.Tests.Shared.Loaders;
 /// </summary>
 public class CompositeLoaderTests : TestBase
 {
+    /// <summary>
+    /// The monitor under test. Production creates one per connector rather than registering it, so a test
+    /// that needs one builds it the same way.
+    /// </summary>
+    private StatusMonitor Monitor => field ??= new StatusMonitor(Get<ILogger>());
+
     /// <summary>Records every connection status transition reported by the loader's status monitor, in order.</summary>
     private readonly ConcurrentQueue<ConnectorStatus> _statuses = new();
 
@@ -51,7 +57,7 @@ public class CompositeLoaderTests : TestBase
     {
         await base.InitializeAsync();
 
-        var monitor = Get<IStatusMonitor>();
+        var monitor = Monitor;
         monitor.OnStatusChanged += _statuses.Enqueue;
     }
 
@@ -84,7 +90,7 @@ public class CompositeLoaderTests : TestBase
                 ? MarketResult.New(MarketOperationStatus.NotFound, 0, $"No data at {attempt}")
                 : MarketResult.Ok(attempt++);
         }
-        using var loader = Provider.CreateCompositeLoader<int>(cfg, async _ => await Load());
+        using var loader = Provider.CreateCompositeLoader<int>(cfg, Monitor, async _ => await Load());
         loader.OnData += log.Add;
 
         loader.Start(true);
@@ -117,6 +123,7 @@ public class CompositeLoaderTests : TestBase
         var attempts = 0;
         var loader = Provider.CreateCompositeLoader(
             cfg,
+            Monitor,
             _ =>
             {
                 attempts++;
@@ -154,6 +161,7 @@ public class CompositeLoaderTests : TestBase
         var attempts = 0;
         var loader = Provider.CreateCompositeLoader(
             cfg,
+            Monitor,
             _ =>
             {
                 Interlocked.Increment(ref attempts);
@@ -198,6 +206,7 @@ public class CompositeLoaderTests : TestBase
         var attempts = 0;
         var loader = Provider.CreateCompositeLoader(
             cfg,
+            Monitor,
             _ =>
             {
                 Interlocked.Increment(ref attempts);
@@ -241,6 +250,7 @@ public class CompositeLoaderTests : TestBase
         var log = Get<TestLog<int>>();
         var loader = Provider.CreateCompositeLoader(
             cfg,
+            Monitor,
             _ =>
             {
                 attempts++;
@@ -281,6 +291,7 @@ public class CompositeLoaderTests : TestBase
         var attempts = 0;
         var loader = Provider.CreateCompositeLoader(
             cfg,
+            Monitor,
             _ =>
             {
                 Interlocked.Increment(ref attempts);
@@ -323,6 +334,7 @@ public class CompositeLoaderTests : TestBase
         var attempts = 0;
         var loader = Provider.CreateCompositeLoader(
             cfg,
+            Monitor,
             _ =>
             {
                 Interlocked.Increment(ref attempts);

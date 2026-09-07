@@ -34,14 +34,16 @@ public static class ServiceProviderExtensions
     /// <param name="sp">The service provider to resolve dependencies from.</param>
     /// <param name="config">The user configuration providing the WebSocket API and listen key URI path.</param>
     /// <param name="listenKeyResolver">The resolver supplying and refreshing the listen key the stream connects with.</param>
+    /// <param name="monitor">The monitor the stream reports its connection status into.</param>
     /// <returns>The created user stream.</returns>
     public static IUserStream CreateUserStream(
         this IServiceProvider sp,
         UserConfigBase config,
-        IListenKeyResolver listenKeyResolver
+        IListenKeyResolver listenKeyResolver,
+        IStatusMonitor monitor
     )
     {
-        var statusReporter = sp.Resolve<IStatusReporter>();
+        var statusReporter = monitor.CreateReporter();
         var logger = sp.Resolve<ILogger>();
 
         return new UserStream(config, listenKeyResolver, statusReporter, logger);
@@ -53,17 +55,19 @@ public static class ServiceProviderExtensions
     /// <param name="endpoint">The relative path of the listen key endpoint.</param>
     /// <param name="listenKeyKey">The keyed HTTP request factory registration key to resolve the request factory with.</param>
     /// <param name="signatureService">The service used to sign the listen key request.</param>
+    /// <param name="monitor">The monitor the resolver reports its connection status into.</param>
     /// <returns>The created listen key resolver.</returns>
     public static IListenKeyResolver CreateListenKeyResolver(
         this IServiceProvider sp,
         UserConfigBase config,
         string endpoint,
         string listenKeyKey,
-        ISignatureService signatureService
+        ISignatureService signatureService,
+        IStatusMonitor monitor
     )
     {
         var httpRequestFactory = sp.ResolveHttpRequestFactory(listenKeyKey);
-        var statusReporter = sp.Resolve<IStatusReporter>();
+        var statusReporter = monitor.CreateReporter();
         var logger = sp.Resolve<ILogger>();
 
         return new ListenKeyResolver(config, endpoint, httpRequestFactory, signatureService, statusReporter, logger);

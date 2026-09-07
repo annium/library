@@ -33,6 +33,9 @@ internal class ServerTimeSource : IServerTimeSource, IDisposable, ILogSubject
         private set;
     } = SystemClock.Instance.GetCurrentInstant().ToUnixTimeMilliseconds();
 
+    /// <summary>Gets the monitor carrying this source's own connection status and errors.</summary>
+    public IStatusMonitor Monitor { get; }
+
     /// <summary>The underlying provider used to fetch server time.</summary>
     private readonly IServerTimeProvider _provider;
 
@@ -56,23 +59,22 @@ internal class ServerTimeSource : IServerTimeSource, IDisposable, ILogSubject
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ServerTimeSource"/> class, binds its connection status to
-    /// <paramref name="statusReporter"/>, and starts refreshing immediately.
+    /// its own monitor, and starts refreshing immediately.
     /// </summary>
     /// <param name="provider">The underlying provider used to fetch server time.</param>
     /// <param name="config">The timing configuration for refresh retries.</param>
-    /// <param name="statusReporter">The status reporter to bind this source's connection status to.</param>
     /// <param name="logger">The logger instance.</param>
-    public ServerTimeSource(
-        IServerTimeProvider provider,
-        ServerTimeProviderConfig config,
-        IStatusReporter statusReporter,
-        ILogger logger
-    )
+    public ServerTimeSource(IServerTimeProvider provider, ServerTimeProviderConfig config, ILogger logger)
     {
         Logger = logger;
         _provider = provider;
         _config = config;
-        _statusReporter = statusReporter;
+
+        // one source serves every connector on this provider, so it cannot report into any one of their
+        // monitors. It keeps a monitor of its own, holding itself as the single target, and each connector
+        // mirrors it into its own aggregate for as long as that connector lives
+        Monitor = new StatusMonitor(logger);
+        _statusReporter = Monitor.CreateReporter();
 
         _statusReporter.Bind(this);
         _statusReporter.Connecting();

@@ -16,12 +16,14 @@ public static class ServiceProviderExtensions
     /// <param name="sp">The service provider to resolve dependencies from.</param>
     /// <param name="config">The market configuration providing the WebSocket API endpoint.</param>
     /// <param name="instrumentTickerKey">The keyed serializer registration key to resolve the instrument ticker serializer with.</param>
+    /// <param name="monitor">The monitor the service reports its connection status into.</param>
     /// <param name="disposable">The disposable box the created service is registered into for teardown.</param>
     /// <returns>The created book ticker service.</returns>
     public static IBookTickerService CreateBookTickerService(
         this IServiceProvider sp,
         MarketConfigBase config,
         string instrumentTickerKey,
+        IStatusMonitor monitor,
         ref AsyncDisposableBox disposable
     )
     {
@@ -29,7 +31,7 @@ public static class ServiceProviderExtensions
             instrumentTickerKey,
             MediaTypeNames.Application.Json
         );
-        var statusReporter = sp.Resolve<IStatusReporter>();
+        var statusReporter = monitor.CreateReporter();
         var logger = sp.Resolve<ILogger>();
 
         var bookTickerService = new BookTickerService(config, serializer, statusReporter, logger);

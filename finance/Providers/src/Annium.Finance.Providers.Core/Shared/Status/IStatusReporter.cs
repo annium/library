@@ -3,9 +3,9 @@ using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 namespace Annium.Finance.Providers.Core.Shared.Status;
 
 /// <summary>
-/// Lets a single component report its connection status and errors to an
-/// <see cref="Annium.Finance.Providers.Core.Internal.Shared.Status.StatusMonitor"/>, once bound to it via
-/// <see cref="Bind{T}"/>.
+/// Lets a single component report its connection status and errors to an <see cref="IStatusMonitor"/>, once
+/// bound to it via <see cref="Bind{T}"/>. Take one from
+/// <see cref="IStatusMonitor.CreateReporter"/>.
 /// </summary>
 public interface IStatusReporter
 {
