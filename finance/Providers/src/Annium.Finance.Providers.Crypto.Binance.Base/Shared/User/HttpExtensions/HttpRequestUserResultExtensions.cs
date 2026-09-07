@@ -7,12 +7,18 @@ using Annium.Net.Http;
 using OneOf;
 using static Annium.Finance.Providers.Crypto.Binance.Base.Shared.HttpExtensions.HttpRequestHelper;
 
-namespace Annium.Finance.Providers.Crypto.Binance.Base.Internal.User.HttpExtensions;
+namespace Annium.Finance.Providers.Crypto.Binance.Base.Shared.User.HttpExtensions;
 
 /// <summary>
 /// Adapts raw Binance account/trading HTTP responses, that either deserialize to a payload or to an <see cref="OperationResult"/> error, into <see cref="UserResult{T}"/>.
 /// </summary>
-internal static class HttpRequestUserResultExtensions
+/// <remarks>
+/// One mapping for every Binance provider. Spot and USD-M futures each carried a copy of this, byte-similar
+/// down to the comments, so a fix to this one was a fix to this one alone: the status a rate limit is
+/// reported by was corrected here while the providers that actually serve traffic went on reporting the old
+/// one.
+/// </remarks>
+public static class HttpRequestUserResultExtensions
 {
     /// <summary>Sends the signed request and maps its response into a <see cref="UserResult{T}"/>, converting an unsuccessful Binance error response into the matching status.</summary>
     /// <typeparam name="T">The type of the expected success payload.</typeparam>
@@ -49,7 +55,15 @@ internal static class HttpRequestUserResultExtensions
         // if response mapped to error, OperationResult - use it to construct response
         {
             var error = response.Data.AsT1;
-            var status = MapOperationCode(error.Code);
+
+            // a synthetic error says only what stopped us from reading the body; where the server did answer
+            // with a status that means something specific, that is the better account of what happened. A
+            // rate limit answered with a page we have no serializer for is a rate limit, not a parse failure
+            var byStatus = MapStatusCode(response.StatusCode);
+            var status =
+                error.IsSynthetic && byStatus != UserOperationStatus.UnknownError
+                    ? byStatus
+                    : MapOperationCode(error.Code);
 
             return UserResult.New<T?>(status, default, error.Message);
         }
@@ -77,6 +91,9 @@ internal static class HttpRequestUserResultExtensions
             OperationResult.NetworkError => UserOperationStatus.NetworkError,
             OperationResult.Aborted => UserOperationStatus.Aborted,
             OperationResult.ParseError => UserOperationStatus.ParseError,
+            OperationResult.TooManyRequests => UserOperationStatus.TooManyRequests,
+            -2018 => UserOperationStatus.InsufficientBalance, // BALANCE_NOT_SUFFICIENT
+            -2019 => UserOperationStatus.InsufficientBalance, // MARGIN_NOT_SUFFICIENT
             < 0 => UserOperationStatus.BadRequest,
             _ => UserOperationStatus.UnknownError,
         };

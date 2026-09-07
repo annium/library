@@ -4,9 +4,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Domain.Market.Operations;
 using Annium.Finance.Providers.Core;
-using Annium.Finance.Providers.Crypto.Binance.Base.Internal.Market.HttpExtensions;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Converters;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Domain;
+using Annium.Finance.Providers.Crypto.Binance.Base.Shared.Market.HttpExtensions;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Finance.Providers.Tests.Lib.Infrastructure;
 using Annium.Net.Http;
@@ -85,18 +85,47 @@ public class HttpRequestMarketResultExtensionsTests : ProvidersTestBase
     }
 
     /// <summary>
-    /// An error response whose body doesn't parse as the expected Binance error payload maps to
-    /// <see cref="MarketOperationStatus.ParseError"/>, whether the body is not JSON at all or just an empty object.
+    /// A body that parses as neither shape of the response is reported by the status the server sent, when
+    /// that status means something specific. "Could not read the body" is the weaker of the two accounts:
+    /// a rate limit answered with a page we have no serializer for is a rate limit, and a caller that backs
+    /// off on one and gives up on the other needs to be told which it was.
     /// </summary>
+    /// <param name="code">The HTTP status code returned with the unparsable body.</param>
+    /// <param name="status">The status the response is expected to map to.</param>
     /// <param name="body">The unparsable response body.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Theory]
-    [InlineData("not json")]
-    [InlineData("{}")]
-    public async Task UnparsedErrorResponse(string body)
+    [InlineData(HttpStatusCode.BadRequest, MarketOperationStatus.BadRequest, "not json")]
+    [InlineData(HttpStatusCode.BadRequest, MarketOperationStatus.BadRequest, "{}")]
+    [InlineData((HttpStatusCode)418, MarketOperationStatus.TooManyRequests, "<html>banned</html>")]
+    [InlineData(HttpStatusCode.TooManyRequests, MarketOperationStatus.TooManyRequests, "not json")]
+    public async Task UnparsedErrorResponse_IsReportedByItsStatus(
+        HttpStatusCode code,
+        MarketOperationStatus status,
+        string body
+    )
     {
         // arrange
-        await using var server = this.RunHttpServerWithJsonResponse(HttpStatusCode.BadRequest, body);
+        await using var server = this.RunHttpServerWithJsonResponse(code, body);
+
+        // act
+        var result = await this.CreateHttpRequest(server).Get("/").AsMarketResultAsync<ServerTime>();
+
+        // assert
+        result.Status.Is(status);
+        result.Message.IsNotEmpty();
+    }
+
+    /// <summary>
+    /// A status that says nothing specific leaves the parse failure as the account of what happened - there
+    /// is nothing better to replace it with.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task UnparsedErrorResponse_WithAGenericStatus_StaysAParseError()
+    {
+        // arrange
+        await using var server = this.RunHttpServerWithJsonResponse(HttpStatusCode.InternalServerError, "not json");
 
         // act
         var result = await this.CreateHttpRequest(server).Get("/").AsMarketResultAsync<ServerTime>();
@@ -116,6 +145,7 @@ public class HttpRequestMarketResultExtensionsTests : ProvidersTestBase
     /// <returns>A task representing the asynchronous operation.</returns>
     [Theory]
     [InlineData(-1, MarketOperationStatus.BadRequest)]
+    [InlineData(-1003, MarketOperationStatus.TooManyRequests)]
     [InlineData(10, MarketOperationStatus.UnknownError)]
     public async Task OperationResultResponse(long code, MarketOperationStatus status)
     {

@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Domain.Market.Operations;
 using Annium.Finance.Providers.Core.Shared.TimeSync;
-using Annium.Finance.Providers.Crypto.Binance.Base.Internal.Market.HttpExtensions;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Domain;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.HttpExtensions;
+using Annium.Finance.Providers.Crypto.Binance.Base.Shared.Market.HttpExtensions;
 using Annium.Logging;
 using Annium.Net.Http;
 

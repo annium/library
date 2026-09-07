@@ -13,4 +13,14 @@ public sealed record OperationResult(long Code, string Message)
 
     /// <summary>Synthetic code used when the response could not be parsed.</summary>
     public const long ParseError = 3;
+
+    /// <summary>Binance's own code for a request rejected because too many were sent, including an IP ban.</summary>
+    public const long TooManyRequests = -1003;
+
+    /// <summary>Whether this result was made up locally rather than read from a Binance response.</summary>
+    /// <remarks>
+    /// A synthetic result says what stopped us from reading the body, which is a poorer answer than an HTTP
+    /// status the server did send - so where both exist, the status is the one to map from.
+    /// </remarks>
+    public bool IsSynthetic => Code is NetworkError or Aborted or ParseError;
 }
