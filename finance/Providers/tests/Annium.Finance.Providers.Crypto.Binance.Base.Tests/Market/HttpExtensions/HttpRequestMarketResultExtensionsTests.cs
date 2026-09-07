@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Domain.Market.Operations;
@@ -114,6 +115,31 @@ public class HttpRequestMarketResultExtensionsTests : ProvidersTestBase
         // assert
         result.Status.Is(status);
         result.Message.IsNotEmpty();
+    }
+
+    /// <summary>
+    /// A body in a media type nothing is registered to read - an edge server's HTML error page, in
+    /// practice - is still reported by its status, and says what it could not read rather than naming a
+    /// missing service. "No keyed service for ISerializer&lt;string&gt;" described our container, not the
+    /// exchange's answer, and it is what an IP ban looked like from the call site.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task UnreadableMediaType_IsReportedByItsStatus()
+    {
+        // arrange
+        await using var server = this.RunHttpServerWithResponse(
+            (HttpStatusCode)418,
+            MediaTypeNames.Text.Html,
+            "<html><body>banned</body></html>"
+        );
+
+        // act
+        var result = await this.CreateHttpRequest(server).Get("/").AsMarketResultAsync<ServerTime>();
+
+        // assert
+        result.Status.Is(MarketOperationStatus.TooManyRequests);
+        result.Message.Contains("serializer").IsTrue($"message does not say what it could not read: {result.Message}");
     }
 
     /// <summary>
