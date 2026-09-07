@@ -26,4 +26,16 @@ public interface IRateLimiter : IDisposable
     /// </summary>
     /// <param name="weight">The currently used weight.</param>
     void UsedWeight(int weight);
+
+    /// <summary>
+    /// Refuses every request for the given time, whatever the weight says.
+    /// </summary>
+    /// <remarks>
+    /// For when the provider has stopped answering on purpose - a rate-limit rejection, or an outright ban -
+    /// and has said for how long. Weight accounting cannot see that: a ban answers without the header the
+    /// weight is read from, so the limiter goes on believing there is budget, and every caller rediscovers
+    /// the ban with a request of its own. Those requests are what a ban is extended for.
+    /// </remarks>
+    /// <param name="duration">How long to refuse for; a duration that has already passed does nothing.</param>
+    void Block(TimeSpan duration);
 }

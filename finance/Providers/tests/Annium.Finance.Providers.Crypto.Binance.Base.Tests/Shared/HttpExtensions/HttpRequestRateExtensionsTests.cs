@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.HttpExtensions;
@@ -143,6 +145,115 @@ public class HttpRequestRateExtensionsTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// A refusal that states a deadline pauses the limiter until then. Every caller would otherwise
+    /// rediscover the ban with a request of its own, and those requests are what a ban is extended for.
+    /// </summary>
+    /// <param name="code">The status the provider refuses with.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Theory]
+    [InlineData(429)]
+    [InlineData(418)]
+    public async Task StatedBanDeadline_PausesTheLimiter(int code)
+    {
+        // arrange - banned for the next ten minutes, in Binance's own wording
+        var limiter = new FakeRateLimiter(true);
+        var until = DateTimeOffset.UtcNow.AddMinutes(10).ToUnixTimeMilliseconds();
+
+        var body = $$"""{"code":-1003,"msg":"Way too many requests; IP(1.2.3.4) banned until {{until}}."}""";
+        await using var server = this.RunHttpServerWithResponse(
+            (HttpStatusCode)code,
+            MediaTypeNames.Application.Json,
+            body
+        );
+
+        // act
+        await SendAsync(server, limiter);
+
+        // assert
+        limiter.Blocks.Has(1);
+        (limiter.Blocks[0] > TimeSpan.FromMinutes(9)).IsTrue($"paused for only {limiter.Blocks[0]}");
+        (limiter.Blocks[0] <= TimeSpan.FromMinutes(10)).IsTrue($"paused for {limiter.Blocks[0]}");
+    }
+
+    /// <summary>
+    /// A refusal carrying the standard Retry-After header is honoured by it, without reading the body.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task RetryAfterHeader_PausesTheLimiter()
+    {
+        // arrange
+        var limiter = new FakeRateLimiter(true);
+
+        await using var server = this.RunHttpServer(
+            (_, response) =>
+            {
+                response.StatusCode((HttpStatusCode)429);
+                response.Headers.Add("Retry-After", "30");
+
+                return Task.CompletedTask;
+            }
+        );
+
+        // act
+        await SendAsync(server, limiter);
+
+        // assert
+        limiter.Blocks.Has(1);
+        limiter.Blocks[0].Is(TimeSpan.FromSeconds(30));
+    }
+
+    /// <summary>
+    /// A refusal that says nothing about how long it lasts pauses nothing: guessing a duration is worse than
+    /// leaving the weight accounting to it.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task RefusalWithoutADeadline_PausesNothing()
+    {
+        // arrange
+        var limiter = new FakeRateLimiter(true);
+
+        await using var server = this.RunHttpServerWithResponse(
+            HttpStatusCode.TooManyRequests,
+            MediaTypeNames.Text.Html,
+            "<html>too many requests</html>"
+        );
+
+        // act
+        await SendAsync(server, limiter);
+
+        // assert
+        limiter.Blocks.IsEmpty();
+    }
+
+    /// <summary>
+    /// A response that is not a refusal is never read for a deadline, however it is worded.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task SuccessfulResponse_PausesNothing()
+    {
+        // arrange
+        var limiter = new FakeRateLimiter(true);
+
+        await using var server = this.RunHttpServer(
+            (_, response) =>
+            {
+                response.Ok();
+
+                return Task.CompletedTask;
+            }
+        );
+
+        // act
+        await SendAsync(server, limiter);
+
+        // assert
+        limiter.Blocks.IsEmpty();
+    }
+
+    /// <summary>
     /// Sends a GET request through the rate-limit extension against the given server and limiter.
     /// </summary>
     /// <param name="server">The server to send the request to.</param>
@@ -164,8 +275,14 @@ public class HttpRequestRateExtensionsTests : ProvidersTestBase
         /// <summary>Gets the weights recorded via <see cref="UsedWeight"/>, in call order.</summary>
         public IReadOnlyList<int> UsedWeights => _usedWeights;
 
+        /// <summary>Gets the pauses recorded via <see cref="Block"/>, in call order.</summary>
+        public IReadOnlyList<TimeSpan> Blocks => _blocks;
+
         /// <summary>Backing store for <see cref="UsedWeights"/>.</summary>
         private readonly List<int> _usedWeights = [];
+
+        /// <summary>Backing store for <see cref="Blocks"/>.</summary>
+        private readonly List<TimeSpan> _blocks = [];
 
         /// <summary>The fixed answer returned by <see cref="CanExecute"/>.</summary>
         private readonly bool _canExecute;
@@ -178,6 +295,10 @@ public class HttpRequestRateExtensionsTests : ProvidersTestBase
         {
             _canExecute = canExecute;
         }
+
+        /// <summary>Records a pause without enforcing it.</summary>
+        /// <param name="duration">The pause to record.</param>
+        public void Block(TimeSpan duration) => _blocks.Add(duration);
 
         /// <summary>Does nothing; no resources to release.</summary>
         public void Dispose() { }
