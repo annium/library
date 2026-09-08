@@ -16,6 +16,17 @@ namespace Annium.Extensions.Shell.Internal;
 internal sealed class ShellInstance : IShellInstance, ILogSubject
 {
     /// <summary>
+    /// How long the pipes are given to reach end-of-stream after the process has ended, before the result is
+    /// reported with whatever was captured.
+    /// </summary>
+    /// <remarks>
+    /// A pipe outlives the process only when something else inherited it - a backgrounded grandchild - which
+    /// is rare and not worth blocking a caller on indefinitely. Every ordinary run reaches end-of-stream in
+    /// microseconds.
+    /// </remarks>
+    private static readonly TimeSpan _drainGrace = TimeSpan.FromSeconds(10);
+
+    /// <summary>
     /// Gets the logger instance for shell operations
     /// </summary>
     public ILogger Logger { get; }
@@ -247,8 +258,8 @@ internal sealed class ShellInstance : IShellInstance, ILogSubject
 
         // capture the pipe tasks so HandleExit can await them before reporting the result: without that,
         // a process exiting while a drain is still in flight truncates what the caller is given
-        var stdoutTask = PipeOutAsync(process.StandardOutput, stdout, Console.Out, _print, ct);
-        var stderrTask = PipeOutAsync(process.StandardError, stderr, Console.Error, _print, ct);
+        var stdoutTask = PipeOutAsync(process.StandardOutput, stdout, Console.Out, _print);
+        var stderrTask = PipeOutAsync(process.StandardError, stderr, Console.Error, _print);
         input = process.StandardInput;
 
         CancellationTokenRegistration registration = default;
@@ -315,8 +326,12 @@ internal sealed class ShellInstance : IShellInstance, ILogSubject
             {
                 try
                 {
+                    // bounded rather than cancellable: a pipe outlives the process only when something else
+                    // inherited it, which is not worth blocking a result on forever - but every ordinary run
+                    // ends at end-of-stream long before this, and until it does the bytes still arriving are
+                    // the answer the caller asked for
 #pragma warning disable VSTHRD003
-                    await Task.WhenAll(stdoutTask, stderrTask);
+                    await Task.WhenAll(stdoutTask, stderrTask).WaitAsync(_drainGrace);
 #pragma warning restore VSTHRD003
                 }
                 catch
@@ -348,25 +363,24 @@ internal sealed class ShellInstance : IShellInstance, ILogSubject
             });
         }
 
-        static Task PipeOutAsync(
-            StreamReader src,
-            StringBuilder result,
-            TextWriter dst,
-            bool print,
-            CancellationToken ct
-        )
+        // Deliberately not cancellable. This used to stop on the caller's token, which is the deadline for
+        // the command - so a deadline falling just after the process had exited on its own left the run
+        // reported as the success it was, with its output abandoned in the pipe. The deadline is for the
+        // command, not for reading what the command already wrote; the pipe ends when the process does, and
+        // the grace period above is what bounds the reading instead
+        static Task PipeOutAsync(StreamReader src, StringBuilder result, TextWriter dst, bool print)
         {
             return Task.Run(() =>
             {
                 if (print)
-                    while (!src.EndOfStream && !ct.IsCancellationRequested)
+                    while (!src.EndOfStream)
                     {
                         var c = (char)src.Read();
                         result.Append(c);
                         dst.Write(c);
                     }
                 else
-                    while (!src.EndOfStream && !ct.IsCancellationRequested)
+                    while (!src.EndOfStream)
                         result.Append((char)src.Read());
             });
         }
