@@ -254,8 +254,10 @@ file class WebHookHandler : IHttpHandler, ILogSubject
         }
         finally
         {
-            ctx.Response.StatusCode = (int)statusCode;
-            ctx.Response.Close();
+            // CloseAsync rather than setting the status and closing by hand: a request refused on its token
+            // alone is answered without its body ever being read, and consuming it first is what the
+            // listener asks of every handler that does that
+            await ctx.CloseAsync(statusCode, ct);
         }
     }
 

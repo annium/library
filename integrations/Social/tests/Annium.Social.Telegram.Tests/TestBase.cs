@@ -118,7 +118,7 @@ file class ApiHandler : IHttpHandler, ILogSubject
         }
         finally
         {
-            ctx.Response.Close();
+            await ctx.CloseAsync(ct);
         }
     }
 }

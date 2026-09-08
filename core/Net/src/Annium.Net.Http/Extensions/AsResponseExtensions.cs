@@ -182,7 +182,15 @@ public static class AsResponseExtensions
         }
         catch (Exception e)
         {
-            request.Error(e);
+            // traced, not reported: the shapes are alternatives, and the one that does not fit failing is
+            // the ordinary case rather than a fault. Reported, every union response where the body was the
+            // other shape logged an error nobody could act on - one per request, against an upstream
+            // answering every request with an error
+            request.Trace<string, string>(
+                "failed to read the response as {type}: {error}",
+                typeof(T).FriendlyName(),
+                e.Message
+            );
 
             return (default!, false, e);
         }

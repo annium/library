@@ -274,6 +274,10 @@ public class MarketProviderReadPathTests : ProvidersTestBase
     /// <summary>A rate limiter that records what limits it was given, and permits everything.</summary>
     private sealed class RecordingRateLimiter : IRateLimiter
     {
+        /// <summary>Does nothing; this fake never refuses.</summary>
+        /// <param name="duration">Ignored.</param>
+        public void Block(TimeSpan duration) { }
+
         /// <summary>Gets every limit this limiter has been told to use, in order.</summary>
         public List<int> Limits { get; } = [];
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using Annium.Core.DependencyInjection;
 using Annium.Serialization.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Annium.Net.Http.Internal;
 
@@ -83,10 +84,15 @@ internal class Serializer
     private ISerializer<string> ResolveSerializer(string mediaType)
     {
         var serializerKey = SerializerKey.Create(_key, mediaType);
-        var serializer = _sp.ResolveKeyed<ISerializer<string>>(serializerKey);
+
+        // asked for rather than required: a response is free to arrive in a media type nobody registered a
+        // serializer for - an HTML error page from an edge server, say - and the caller needs to be told
+        // that in terms of the response. Resolving it as a requirement raised a dependency-injection error
+        // instead, and "no keyed service for ISerializer<string>" is not a description of what came back
+        var serializer = _sp.GetKeyedService<ISerializer<string>>(serializerKey);
 
         if (serializer is null)
-            throw new NotSupportedException($"Media type '{mediaType}' is not supported");
+            throw new NotSupportedException($"Media type '{mediaType}' has no serializer registered");
 
         return serializer;
     }

@@ -219,14 +219,15 @@ internal class Server : IServer, ILogSubject
         {
             // if operation canceled - close connection
             this.Trace("handle canceled: {e}. Server stopping: {serverStopping}", e, ct.IsCancellationRequested);
-            ctx.Response.StatusCode = ct.IsCancellationRequested ? 503 : 500;
-            ctx.Response.Close();
+            await ctx.CloseAsync(
+                ct.IsCancellationRequested ? HttpStatusCode.ServiceUnavailable : HttpStatusCode.InternalServerError,
+                CancellationToken.None
+            );
         }
         catch (Exception e)
         {
             this.Trace("handle failed: {e}", e);
-            ctx.Response.StatusCode = 500;
-            ctx.Response.Close();
+            await ctx.CloseAsync(HttpStatusCode.InternalServerError, CancellationToken.None);
         }
         finally
         {
@@ -289,15 +290,14 @@ internal class Server : IServer, ILogSubject
     /// </summary>
     /// <param name="ctx">The HTTP listener context to close.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns>A completed task.</returns>
-    private Task CloseConnectionAsync(HttpListenerContext ctx, CancellationToken ct)
+    /// <returns>A task that completes once the connection has been closed.</returns>
+    private async Task CloseConnectionAsync(HttpListenerContext ctx, CancellationToken ct)
     {
         this.Trace("start");
 
         try
         {
-            ctx.Response.StatusCode = 404;
-            ctx.Response.Close();
+            await ctx.CloseAsync(HttpStatusCode.NotFound, ct);
         }
         catch (Exception e)
         {
@@ -305,8 +305,6 @@ internal class Server : IServer, ILogSubject
         }
 
         this.Trace("done");
-
-        return Task.CompletedTask;
     }
 
     /// <summary>

@@ -51,6 +51,13 @@ internal class RateLimiter : IRateLimiter, ILogSubject
     private int _usedWeight;
 
     /// <summary>
+    /// The tick count until which every request is refused, or 0 when nothing is being refused. Read from
+    /// <see cref="Environment.TickCount64"/> rather than a clock, so a system time adjustment cannot turn a
+    /// minute of waiting into an hour of it, or end one early.
+    /// </summary>
+    private long _blockedUntil;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="RateLimiter"/> class.
     /// </summary>
     /// <param name="limit">The initial rate limit.</param>
@@ -106,6 +113,13 @@ internal class RateLimiter : IRateLimiter, ILogSubject
     {
         lock (_locker)
         {
+            if (_blockedUntil > Environment.TickCount64)
+            {
+                this.Trace("blocked for another {ms}ms", _blockedUntil - Environment.TickCount64);
+
+                return false;
+            }
+
             var canExecute = _usedWeight < _waterMark;
             this.Trace(
                 "water mark: {waterMark}, usedWeight: {usedWeight} => {canExecute}",
@@ -138,6 +152,29 @@ internal class RateLimiter : IRateLimiter, ILogSubject
             // then sat above the water mark with nothing left to bring it down
             _isLowerWeightRequested = true;
             _lowerWeight.Change(_lowerWeightDelay, _lowerWeightDelay);
+        }
+    }
+
+    /// <summary>
+    /// Refuses every request for the given time, whatever the weight says.
+    /// </summary>
+    /// <param name="duration">How long to refuse for; a duration that has already passed does nothing.</param>
+    public void Block(TimeSpan duration)
+    {
+        if (duration <= TimeSpan.Zero)
+            return;
+
+        lock (_locker)
+        {
+            var until = Environment.TickCount64 + (long)duration.TotalMilliseconds;
+
+            // a block already in place is never shortened: two callers can each be told about the same ban,
+            // and the second one hears about it later, with less of it left to wait out
+            if (until <= _blockedUntil)
+                return;
+
+            this.Debug("block for {ms}ms", (long)duration.TotalMilliseconds);
+            _blockedUntil = until;
         }
     }
 
