@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Annium.Linq;
 using Annium.Testing;
@@ -12,26 +13,61 @@ namespace Annium.Tests.Linq;
 public class SortedListExtensionsTest
 {
     /// <summary>
-    /// Verifies that AddRange works correctly for adding multiple items.
+    /// Verifies that Merge combines both sides in key order and refuses a key the source already holds.
     /// </summary>
     [Fact]
-    public void AddRange()
+    public void Merge()
     {
         // arrange
         var data = Enumerable.Range(1, 5).Reverse().ToSortedList(x => x);
 
         // act & assert - duplicate throws
-        Wrap.It(() => data.AddRange(Enumerable.Range(5, 7).ToDictionary(x => x)))
+        Wrap.It(() => data.Merge(Enumerable.Range(5, 7).ToDictionary(x => x)))
             .Throws<InvalidOperationException>()
             .Reports("duplicate key 5");
 
         // act
-        data.AddRange(Enumerable.Range(6, 2).ToDictionary(x => x, x => x - 2));
+        var merged = data.Merge(Enumerable.Range(6, 2).ToDictionary(x => x, x => x - 2));
+
+        // assert - the source is left as it was, and the result holds both
+        data.Count.Is(5);
+        merged.Count.Is(7);
+        merged.Keys.IsEqual(Enumerable.Range(1, 7));
+        merged.Values.IsEqual(new[] { 1, 2, 3, 4, 5, 4, 5 });
+    }
+
+    /// <summary>
+    /// Verifies that Merge orders a range that interleaves with, and runs below, what the source holds -
+    /// which is what a cache loading history behind what it already has asks for.
+    /// </summary>
+    [Fact]
+    public void Merge_RangeBelowAndBetweenTheSource()
+    {
+        // arrange
+        var data = new[] { 4, 8 }.ToSortedList(x => x);
+
+        // act
+        var merged = data.Merge(new[] { 6, 1, 2 }.ToDictionary(x => x, x => x * 10));
 
         // assert
-        data.Count.Is(7);
-        data.Keys.IsEqual(Enumerable.Range(1, 7));
-        data.Values.IsEqual(new[] { 1, 2, 3, 4, 5, 4, 5 });
+        merged.Keys.IsEqual(new[] { 1, 2, 4, 6, 8 });
+        merged.Values.IsEqual(new[] { 10, 20, 4, 60, 8 });
+    }
+
+    /// <summary>
+    /// Verifies that merging nothing is answered with the list itself.
+    /// </summary>
+    [Fact]
+    public void Merge_EmptyRange()
+    {
+        // arrange
+        var data = Enumerable.Range(1, 3).ToSortedList(x => x);
+
+        // act
+        var merged = data.Merge(new Dictionary<int, int>());
+
+        // assert
+        merged.Is(data);
     }
 
     /// <summary>
