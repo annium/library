@@ -38,10 +38,21 @@ Named here rather than left implied, with the reason each is not being done now.
   rebuilt yet: a live signed request settles it either way, so if the exchange stages pass, the
   implementation is right and only the test needs strengthening; if they fail with `-1022`, the fix is
   the implementation and the test is the second job, not the first.
-- **Rate-limit handling in the runtime** — 418 folded into the same status as 429, `Retry-After` read
-  nowhere, and a limiter that throttles only on its own accounting. Deliberately deferred until a live
-  read-only run shows whether we approach the limits at all, so the backoff is designed against
-  observation rather than documentation.
+- ~~**Rate-limit handling in the runtime**~~ — **done** (library 1.3.0-1.3.4, 2026-09-08). The live
+  read-only run this was waiting on happened, and it did approach the limits. 418 and 429 now both read
+  a pause — `Retry-After`, else the `banned until <epoch ms>` in Binance's `-1003` body — and hand it to
+  `IRateLimiter.Block`, so one refusal stops every caller sharing that limiter rather than each
+  rediscovering the ban with a request that extends it. A local refusal now answers in Binance's own
+  error shape instead of a synthetic one the status mapper read as `BadRequest`. Observed live:
+  `refused until further notice, pausing for 42s`, and no ban followed.
+- **Open question — `x-mbx-used-weight-1m header not present` is logged at `Error`**
+  (`Shared/HttpExtensions/HttpRequestRateExtensions.cs:75`). Every response missing the header produces
+  one, and Binance does not send it on every path — a refusal answers without it, and it is a futures /
+  spot REST header rather than a universal one. Either the absence is normal for the paths that hit it,
+  and the level is wrong; or it is not, and the limiter is silently running blind on those paths. Which
+  one it is needs a census of paths against the response headers each returns. **To be settled while
+  implementing the trading paths (step 5)**, where the order-count headers (`x-mbx-order-count-*`) come
+  into play and the same question has to be answered for them anyway.
 - **Two `vacuous` tests**, both of the same shape — the input chosen cannot exercise the property the
   test claims. The signing golden value, above; and the history paging tests, which request one day
   while claiming to protect a seven-day window and a three-month cap. Neither is fixed here: the first
