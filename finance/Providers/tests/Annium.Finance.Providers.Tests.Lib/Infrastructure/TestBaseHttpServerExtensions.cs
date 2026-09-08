@@ -126,7 +126,7 @@ public static class TestBaseHttpServerExtensions
             }
             finally
             {
-                ctx.Response.Close();
+                await ctx.CloseAsync(CancellationToken.None);
             }
 
             test.Trace("done");
