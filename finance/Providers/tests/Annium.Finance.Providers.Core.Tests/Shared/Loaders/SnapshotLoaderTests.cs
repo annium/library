@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
@@ -93,6 +94,52 @@ public class SnapshotLoaderTests : TestBase
         // reported yet - the same mistake as three other tests in this suite once had
         await Expect.ToAsync(() => _statuses.Count.IsGreaterOrEqual(2));
         _statuses.IsEqual(new[] { Connecting, Connected });
+    }
+
+    /// <summary>
+    /// A failure while the loader is still retrying fast is reported at debug, and only becomes an error once
+    /// it has given up on the fast interval. The loader is built expecting a few failures and carrying on, so
+    /// reporting each one as an error made its ordinary case read as a fault - at startup, a rate limiter
+    /// refusing a burst produced dozens of errors about requests that succeeded moments later.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task FailureWhileRetryingFast_IsNotReportedAsAnError()
+    {
+        // arrange - the debug half of this is only observable with the level turned down to it
+        OverrideLogLevel(LogLevel.Debug);
+
+        // three fast attempts, spaced widely enough that the assertions below land between them.
+        // The counter is incremented before the limit is read, so the third attempt is the one that reaches it
+        var cfg = new SnapshotLoaderConfig(300, 3, 300);
+        var attempts = 0;
+        using var loader = Provider.CreateSnapshotLoader<int>(
+            cfg,
+            Monitor,
+            _ =>
+            {
+                Interlocked.Increment(ref attempts);
+
+                return Task.FromResult<IBaseResult<int>>(
+                    MarketResult.New(MarketOperationStatus.TooManyRequests, 0, "rate limit reached")
+                );
+            }
+        );
+
+        // act - let the first attempt happen, and nothing more
+        loader.Start(true);
+        await Expect.ToAsync(() => Volatile.Read(ref attempts).IsGreaterOrEqual(1));
+
+        // assert - it is below the limit and stays out of the error log
+        Failures(LogLevel.Debug).IsGreater(0, "a failure that is about to be retried must not be silent");
+        Failures(LogLevel.Error).Is(0, "a failure the loader is still retrying fast must not be reported as an error");
+
+        // act - and now past the limit, onto the slow interval
+        await Expect.ToAsync(() => Failures(LogLevel.Error).IsGreater(0));
+
+        return;
+
+        int Failures(LogLevel level) => Logs.Count(x => x.Level == level && x.Message.Contains("snapshot load failed"));
     }
 
     /// <summary>

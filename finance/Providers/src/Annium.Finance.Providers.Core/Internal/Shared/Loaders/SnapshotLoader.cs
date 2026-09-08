@@ -250,11 +250,19 @@ internal class SnapshotLoader<T> : ISnapshotLoader<T>, ILogSubject
                 _statusReporter.Connecting();
 
                 // !aborted -> failed
-                if (!result.IsAborted)
+                if (!result.IsAborted && !result.Message.IsNullOrWhiteSpace())
                 {
                     this.Trace("write error");
-                    if (!result.Message.IsNullOrWhiteSpace())
+
+                    // a failure while the loader is still on its fast interval is an ordinary retry - it was
+                    // built expecting a few of them and keeps going. Reported as an error, the ordinary case
+                    // read as a fault: a rate limiter refusing a burst of requests at startup produced dozens
+                    // of them, each about a request that succeeded moments later. Once the loader has given up
+                    // on the fast interval it is no longer retrying around a hiccup, and that is worth saying
+                    if (_requestCounter >= _cfg.FastRequestsLimit)
                         this.Error<string>("snapshot load failed: {message}", result.Message);
+                    else
+                        this.Debug<string>("snapshot load failed, retrying: {message}", result.Message);
                 }
             }
         }

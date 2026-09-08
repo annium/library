@@ -60,6 +60,11 @@ internal class UserProvider(
     /// context. An asset's usable balance is the free balance, and its locked balance is the sum of initial and
     /// maintenance margin.
     /// </summary>
+    /// <remarks>
+    /// A failure is returned, not reported: every method here hands its result to a caller - a loader, a
+    /// connector - whose job is to decide what it means and say so once. Logging it as an error here as well
+    /// meant the same refusal was written twice, by the half of the pair that had decided nothing.
+    /// </remarks>
     /// <returns>A result carrying the resolved account context, or a failure status if it could not be loaded.</returns>
     public async Task<UserResult<UserContext?>> LoadContextAsync()
     {
@@ -76,7 +81,7 @@ internal class UserProvider(
         if (!result.IsSuccess)
         {
             if (result.IsFailure)
-                this.Error("failure: {result}", result);
+                this.Debug("failure: {result}", result);
 
             return UserResult.From(result, default(UserContext));
         }
@@ -111,7 +116,7 @@ internal class UserProvider(
         if (!result.IsSuccess)
         {
             if (result.IsFailure)
-                this.Error("failure: {result}", result);
+                this.Debug("failure: {result}", result);
 
             return UserResult.From(result, default(IReadOnlyCollection<OrderModel>));
         }
@@ -172,7 +177,7 @@ internal class UserProvider(
         if (!result.IsSuccess)
         {
             if (result.IsFailure)
-                this.Error("failure: {result}", result);
+                this.Debug("failure: {result}", result);
 
             return UserResult.From(result, default(IReadOnlyCollection<OrderModel>));
         }
@@ -218,7 +223,7 @@ internal class UserProvider(
             if (!chunkResult.IsSuccess)
             {
                 if (chunkResult.IsFailure)
-                    this.Error("failure: {result}", chunkResult);
+                    this.Debug("failure: {result}", chunkResult);
 
                 return chunkResult;
             }
@@ -255,7 +260,7 @@ internal class UserProvider(
             if (!chunkResult.IsSuccess)
             {
                 if (chunkResult.IsFailure)
-                    this.Error("failure: {result}", chunkResult);
+                    this.Debug("failure: {result}", chunkResult);
 
                 return chunkResult;
             }
@@ -298,7 +303,7 @@ internal class UserProvider(
         if (!result.IsSuccess)
         {
             if (result.IsFailure)
-                this.Error("failure: {result}", result);
+                this.Debug("failure: {result}", result);
 
             return UserResult.From(result, default(IReadOnlyCollection<TradeModel>));
         }
@@ -343,7 +348,7 @@ internal class UserProvider(
             if (!chunkResult.IsSuccess)
             {
                 if (chunkResult.IsFailure)
-                    this.Error("failure: {result}", chunkResult);
+                    this.Debug("failure: {result}", chunkResult);
 
                 return chunkResult;
             }
@@ -380,7 +385,7 @@ internal class UserProvider(
             if (!chunkResult.IsSuccess)
             {
                 if (chunkResult.IsFailure)
-                    this.Error("failure: {result}", chunkResult);
+                    this.Debug("failure: {result}", chunkResult);
 
                 return chunkResult;
             }
