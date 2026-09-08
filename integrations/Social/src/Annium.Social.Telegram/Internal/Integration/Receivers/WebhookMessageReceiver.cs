@@ -254,8 +254,36 @@ file class WebHookHandler : IHttpHandler, ILogSubject
         }
         finally
         {
+            // the body is consumed before the response is closed, on every path. A refused request is
+            // answered without reading it, and HttpListener asks that a request body be consumed before its
+            // response is closed - left undrained, what the connection does next is the listener
+            // implementation's business rather than something this handler has decided
+            await DrainAsync(ctx.Request, ct);
+
             ctx.Response.StatusCode = (int)statusCode;
             ctx.Response.Close();
+        }
+    }
+
+    /// <summary>
+    /// Reads whatever is left of the request body and discards it.
+    /// </summary>
+    /// <param name="request">The request whose body is drained.</param>
+    /// <param name="ct">The cancellation token for the request.</param>
+    /// <returns>A task that completes once the body has been consumed.</returns>
+    private async Task DrainAsync(HttpListenerRequest request, CancellationToken ct)
+    {
+        if (!request.HasEntityBody)
+            return;
+
+        try
+        {
+            await request.InputStream.CopyToAsync(Stream.Null, ct);
+        }
+        catch (Exception e)
+        {
+            // a body that cannot be drained is not worth failing an already-decided response over
+            this.Trace<string>("failed to drain the request body: {error}", e.Message);
         }
     }
 

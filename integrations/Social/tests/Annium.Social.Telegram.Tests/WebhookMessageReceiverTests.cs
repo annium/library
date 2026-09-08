@@ -77,6 +77,27 @@ public class WebhookMessageReceiverTests : TestBase
     }
 
     /// <summary>
+    /// A refused push is answered even when its body is too big to have arrived with the headers. The
+    /// handler decides on the token alone and never reads the body, so this is the case where the response
+    /// is closed with the request still being uploaded.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task Push_InvalidSecretToken_WithBodyLargerThanOneSegment_IsStillAnswered()
+    {
+        // arrange
+        await using var fixture = await WebhookFixture.StartAsync(this);
+        var padding = new string('x', 1024 * 1024);
+
+        // act
+        var status = await fixture.PushAsync("not-the-secret", $$"""{"update_id":7,"padding":"{{padding}}"}""");
+
+        // assert
+        status.Is(HttpStatusCode.Forbidden);
+        fixture.Receiver.Updates.TryRead(out _).IsFalse("a forged update must not reach the consumer");
+    }
+
+    /// <summary>
     /// A push with no secret token header at all is refused the same way.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -260,7 +281,8 @@ public class WebhookMessageReceiverTests : TestBase
 
             // the port is reserved by binding and releasing, so another listener can still take it in the
             // gap before the receiver binds. That race is in the fixture, not the code under test, so it is
-            // retried on a fresh port rather than reported as a failure of the receiver
+            // retried on a fresh port rather than reported as a failure of the receiver - which only works
+            // because the check below establishes that the answer came from the receiver and not a stranger
             for (var attempt = 1; ; attempt++)
             {
                 var port = ReserveFreePort();
@@ -271,7 +293,7 @@ public class WebhookMessageReceiverTests : TestBase
                     test.Logger
                 );
 
-                if (await IsListeningAsync(port, receiver))
+                if (await IsAnsweringAsync(port, receiver))
                     return new WebhookFixture(receiver, api, $"http://127.0.0.1:{port}/");
 
                 await receiver.DisposeAsync();
@@ -290,20 +312,7 @@ public class WebhookMessageReceiverTests : TestBase
         /// <param name="secretToken">The secret token to send, or null to omit the header entirely.</param>
         /// <param name="body">The raw request body.</param>
         /// <returns>The status code the receiver answered with.</returns>
-        public async Task<HttpStatusCode> PushAsync(string? secretToken, string body)
-        {
-            using var client = new HttpClient();
-            using var request = new HttpRequestMessage(HttpMethod.Post, _url)
-            {
-                Content = new StringContent(body, Encoding.UTF8, "application/json"),
-            };
-            if (secretToken is not null)
-                request.Headers.Add(SecretHeader, secretToken);
-
-            using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
-
-            return response.StatusCode;
-        }
+        public Task<HttpStatusCode> PushAsync(string? secretToken, string body) => SendAsync(_url, secretToken, body);
 
         /// <summary>
         /// Reads a single update, bounded in time so a missing one fails the test instead of hanging it.
@@ -328,12 +337,19 @@ public class WebhookMessageReceiverTests : TestBase
         }
 
         /// <summary>
-        /// Waits until the receiver's server accepts a connection, or gives up.
+        /// Waits until the receiver's own server is answering on the port, or gives up.
         /// </summary>
+        /// <remarks>
+        /// Answering, not merely accepting. The port is reserved by binding and releasing it, so anything
+        /// else on the machine can take it in the gap before the receiver binds - and a plain TCP connect
+        /// succeeds against whatever got there first. The test then pushed its update at a stranger and
+        /// waited out its own timeout. A push refused with 403 could only have come from the handler under
+        /// test, and it delivers nothing, so it leaves the channel alone.
+        /// </remarks>
         /// <param name="port">The port to wait for.</param>
         /// <param name="receiver">The receiver being waited on, watched for an early failure.</param>
-        /// <returns>Whether the server came up.</returns>
-        private static async Task<bool> IsListeningAsync(ushort port, WebhookMessageReceiver receiver)
+        /// <returns>Whether the receiver's server came up.</returns>
+        private static async Task<bool> IsAnsweringAsync(ushort port, WebhookMessageReceiver receiver)
         {
             var sw = Stopwatch.StartNew();
             while (sw.Elapsed < TimeSpan.FromSeconds(5))
@@ -349,18 +365,47 @@ public class WebhookMessageReceiverTests : TestBase
 
                 try
                 {
-                    using var probe = new TcpClient();
-                    await probe.ConnectAsync(IPAddress.Loopback, port, TestContext.Current.CancellationToken);
+                    var status = await SendAsync($"http://127.0.0.1:{port}/", null, UpdateJson(0));
+                    if (status == HttpStatusCode.Forbidden)
+                        return true;
 
-                    return true;
+                    // something answers here, and it is not the handler under test
+                    return false;
                 }
-                catch (SocketException)
+                catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
                 {
                     await Task.Delay(25, TestContext.Current.CancellationToken);
                 }
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Posts a raw body to a webhook address and reports the status it answered with.
+        /// </summary>
+        /// <remarks>
+        /// The client is given a timeout of its own: the default is 100 seconds, so a server that accepts a
+        /// connection and never answers turned a test failure into a minute and a half of waiting followed
+        /// by a timeout that says nothing about what went wrong.
+        /// </remarks>
+        /// <param name="url">The address to post to.</param>
+        /// <param name="secretToken">The secret token to send, or null to omit the header entirely.</param>
+        /// <param name="body">The raw request body.</param>
+        /// <returns>The status code the server answered with.</returns>
+        private static async Task<HttpStatusCode> SendAsync(string url, string? secretToken, string body)
+        {
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+            using var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/json"),
+            };
+            if (secretToken is not null)
+                request.Headers.Add(SecretHeader, secretToken);
+
+            using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+            return response.StatusCode;
         }
     }
 }
