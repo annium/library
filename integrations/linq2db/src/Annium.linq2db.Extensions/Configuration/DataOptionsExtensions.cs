@@ -31,8 +31,12 @@ public static class DataOptionsExtensions
 
                     switch (lvl)
                     {
+                        // linq2db traces a failed command and then throws it, so whoever issued the query
+                        // reports it with the context to say what was being done. Bridged at error level as
+                        // well, every failure was written twice - once by the caller, and once here as the
+                        // bare word "Error", which is what linq2db passes as the message
                         case TraceLevel.Error:
-                            logger.Error<string>("{message}", msg ?? string.Empty);
+                            logger.Debug<string>("{message}", msg ?? string.Empty);
                             break;
                         case TraceLevel.Warning:
                             logger.Warn<string>("{message}", msg ?? string.Empty);
