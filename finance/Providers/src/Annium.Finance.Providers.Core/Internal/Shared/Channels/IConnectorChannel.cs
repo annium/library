@@ -6,7 +6,7 @@ namespace Annium.Finance.Providers.Core.Internal.Shared.Channels;
 /// Fans values written by a connector out to the subscribers of one of its observables.
 /// </summary>
 /// <remarks>
-/// Two implementations, chosen by <see cref="Core.Shared.ConnectorDelivery"/>: <see cref="ChannelPair{T}"/>
+/// Two implementations, chosen by <see cref="Core.Shared.ConnectorDelivery"/>: <see cref="BufferedChannel{T}"/>
 /// hands values to a background pump, <see cref="InlineChannel{T}"/> delivers them on the writer's thread.
 /// Both hold values written before the first <see cref="Connect"/> and deliver them when it happens, so a
 /// connector can write during its own construction.

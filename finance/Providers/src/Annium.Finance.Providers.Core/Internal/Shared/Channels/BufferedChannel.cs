@@ -13,7 +13,7 @@ namespace Annium.Finance.Providers.Core.Internal.Shared.Channels;
 /// connects, without values being lost.
 /// </summary>
 /// <typeparam name="T">The type of value carried through the channel pair.</typeparam>
-internal class ChannelPair<T> : IConnectorChannel<T>
+internal class BufferedChannel<T> : IConnectorChannel<T>
 {
     /// <summary>
     /// An observable, multicast view of the target channel. Shared across subscribers (via <c>Publish().RefCount()</c>),
@@ -34,11 +34,11 @@ internal class ChannelPair<T> : IConnectorChannel<T>
     private readonly ILogger _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ChannelPair{T}"/> class, creating the underlying source and
+    /// Initializes a new instance of the <see cref="BufferedChannel{T}"/> class, creating the underlying source and
     /// target channels.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
-    public ChannelPair(ILogger logger)
+    public BufferedChannel(ILogger logger)
     {
         var source = Channel.CreateUnbounded<T>();
         _sourceWriter = source.Writer;

@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Core;
-using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Core.Shared.TimeSync;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Testing;

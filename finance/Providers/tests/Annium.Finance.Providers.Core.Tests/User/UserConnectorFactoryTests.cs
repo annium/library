@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Data.Tables;
@@ -136,19 +137,16 @@ public class UserConnectorFactoryTests : ProvidersTestBase
         public ConnectorStatus Status => ConnectorStatus.Connected;
 
         /// <summary>Gets the asset stream; unused by this test.</summary>
-        public IObservable<ChangeEvent<AssetModel>> Assets =>
-            System.Reactive.Linq.Observable.Empty<ChangeEvent<AssetModel>>();
+        public IObservable<ChangeEvent<AssetModel>> Assets => Observable.Empty<ChangeEvent<AssetModel>>();
 
         /// <summary>Gets the position stream; unused by this test.</summary>
-        public IObservable<ChangeEvent<PositionModel>> Positions =>
-            System.Reactive.Linq.Observable.Empty<ChangeEvent<PositionModel>>();
+        public IObservable<ChangeEvent<PositionModel>> Positions => Observable.Empty<ChangeEvent<PositionModel>>();
 
         /// <summary>Gets the order stream; unused by this test.</summary>
-        public IObservable<ChangeEvent<OrderModel>> Orders =>
-            System.Reactive.Linq.Observable.Empty<ChangeEvent<OrderModel>>();
+        public IObservable<ChangeEvent<OrderModel>> Orders => Observable.Empty<ChangeEvent<OrderModel>>();
 
         /// <summary>Gets the trade stream; unused by this test.</summary>
-        public IObservable<TradeModel> Trades => System.Reactive.Linq.Observable.Empty<TradeModel>();
+        public IObservable<TradeModel> Trades => Observable.Empty<TradeModel>();
 
         /// <summary>Raised on status change; unused by this test.</summary>
         public event Action<ConnectorStatus> OnStatusChanged = delegate { };

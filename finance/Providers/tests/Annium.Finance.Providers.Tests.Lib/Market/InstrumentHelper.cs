@@ -1,5 +1,3 @@
-using Annium.Finance.Providers.Abstractions.Domain.Shared;
-
 namespace Annium.Finance.Providers.Tests.Lib.Market;
 
 /// <summary>

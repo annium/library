@@ -1,5 +1,3 @@
-using System;
-
 namespace Annium.Finance.Providers.Abstractions.Domain.Shared;
 
 /// <summary>

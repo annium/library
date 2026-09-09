@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Annium.Core.DependencyInjection;
 using Annium.Finance.Providers.Abstractions.Domain.Shared.Operations;
 using Annium.Finance.Providers.Core.Shared.Loaders;
 using Annium.Finance.Providers.Core.Shared.Status;
@@ -12,7 +11,7 @@ using Annium.Logging;
 namespace Annium.Finance.Providers.Core.Internal.Shared.Loaders;
 
 /// <summary>
-/// Default <see cref="IKeyedLoader{TKey, TContext, TData}"/> implementation. Lazily creates and starts one
+/// Default <see cref="IKeyedLoader{TKey,TContext,TData}"/> implementation. Lazily creates and starts one
 /// <see cref="KeyedLoaderEntry{TKey, TContext, TData}"/> per key on first <see cref="Request"/>, and keeps every
 /// entry's context up to date as its loads succeed. Entries, once created, live for the lifetime of the loader.
 /// </summary>

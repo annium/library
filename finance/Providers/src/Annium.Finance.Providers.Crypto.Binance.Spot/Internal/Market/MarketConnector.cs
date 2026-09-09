@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Domain.Market;
 using Annium.Finance.Providers.Core.Market;
+using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Loaders;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Crypto.Binance.Base.Market;
@@ -41,7 +42,7 @@ internal class MarketConnector : MarketConnectorBase, IMarketConnector
         AsyncDisposableBox disposable,
         ILogger logger
     )
-        : base(config.GetSettings(), provider, reporter, monitor, disposable, logger)
+        : base(config.GetSettings(), provider, reporter, monitor, ConnectorDelivery.Buffered, disposable, logger)
     {
         marketContextLoader.OnData += HandleMarketContext;
         Disposable += () => marketContextLoader.OnData -= HandleMarketContext;

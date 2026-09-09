@@ -8,7 +8,6 @@ using Annium.Core.Runtime.Internal.Types;
 using Annium.Core.Runtime.Resources;
 using Annium.Core.Runtime.Time;
 using Annium.Core.Runtime.Types;
-using Annium.Logging;
 
 namespace Annium.Core.Runtime;
 

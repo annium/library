@@ -6,15 +6,14 @@ using System.Threading.Tasks;
 using Annium.Data.Tables;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Abstractions.Connectors.User;
-using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Abstractions.Domain.User.Operations;
+using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Core.User;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Logging;
 using Annium.Testing;
-using Annium.Threading.Tasks;
 using Xunit;
 
 namespace Annium.Finance.Providers.Core.Tests.User;
@@ -310,9 +309,9 @@ public class UserConnectorBaseTests : ProvidersTestBase
             IStatusMonitor monitor,
             ILogger logger
         )
-            : base(settings, provider, reporter, monitor, Annium.Disposable.AsyncBox(logger), logger) { }
+            : base(settings, provider, reporter, monitor, ConnectorDelivery.Buffered, Annium.Disposable.AsyncBox(logger), logger) { }
 
-        /// <summary>Writes an asset upsert to the connector's output, exposing the protected <see cref="UserConnectorBase.Write(ChangeEvent{AssetModel})"/> call.</summary>
+        /// <summary>Writes an asset upsert to the connector's output, exposing the protected <see cref="UserConnectorBase.Write(Annium.Data.Tables.ChangeEvent{Annium.Finance.Providers.Abstractions.Domain.User.AssetModel})"/> call.</summary>
         /// <param name="x">The asset to write.</param>
         public void Asset(AssetModel x)
         {

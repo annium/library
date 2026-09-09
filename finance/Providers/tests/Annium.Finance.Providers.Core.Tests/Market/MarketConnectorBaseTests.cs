@@ -8,14 +8,12 @@ using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.Market;
 using Annium.Finance.Providers.Abstractions.Domain.Market.Operations;
-using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Core.Market;
 using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Logging;
 using Annium.Testing;
-using Annium.Threading.Tasks;
 using NodaTime;
 using Xunit;
 
@@ -423,7 +421,7 @@ public class MarketConnectorBaseTests : ProvidersTestBase
             ILogger logger,
             ConnectorDelivery delivery
         )
-            : base(settings, provider, reporter, monitor, Annium.Disposable.AsyncBox(logger), logger, delivery) { }
+            : base(settings, provider, reporter, monitor, delivery, Annium.Disposable.AsyncBox(logger), logger) { }
 
         /// <summary>Triggers a sync with the given resources and instruments, exposing the protected <see cref="MarketConnectorBase.ScheduleSync"/> call.</summary>
         /// <param name="resources">The resources to sync.</param>

@@ -6,7 +6,6 @@ using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Abstractions.Connectors.User;
 using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Core.Internal.Shared.Channels;
-using Annium.Finance.Providers.Core.Market;
 using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Logging;
@@ -125,9 +124,9 @@ public abstract class UserConnectorBase : IAsyncDisposable, ILogSubject
         IUserProvider provider,
         IStatusReporter reporter,
         IStatusMonitor monitor,
+        ConnectorDelivery delivery,
         AsyncDisposableBox disposable,
-        ILogger logger,
-        ConnectorDelivery delivery = ConnectorDelivery.Buffered
+        ILogger logger
     )
     {
         Logger = logger;
@@ -160,31 +159,23 @@ public abstract class UserConnectorBase : IAsyncDisposable, ILogSubject
         // this phase has not reached yet
         Disposable += () => _reporter.Unbind();
 
-        var isInline = delivery is ConnectorDelivery.Inline;
-
         // assets
-        _assets = isInline
-            ? new InlineChannel<ChangeEvent<AssetModel>>()
-            : new ChannelPair<ChangeEvent<AssetModel>>(logger);
+        _assets = ConnectorChannel.Create<ChangeEvent<AssetModel>>(delivery, logger);
         Assets = _assets.Observable;
         Disposable += Assets.Subscribe();
 
         // positions
-        _positions = isInline
-            ? new InlineChannel<ChangeEvent<PositionModel>>()
-            : new ChannelPair<ChangeEvent<PositionModel>>(logger);
+        _positions = ConnectorChannel.Create<ChangeEvent<PositionModel>>(delivery, logger);
         Positions = _positions.Observable;
         Disposable += Positions.Subscribe();
 
         // orders
-        _orders = isInline
-            ? new InlineChannel<ChangeEvent<OrderModel>>()
-            : new ChannelPair<ChangeEvent<OrderModel>>(logger);
+        _orders = ConnectorChannel.Create<ChangeEvent<OrderModel>>(delivery, logger);
         Orders = _orders.Observable;
         Disposable += Orders.Subscribe();
 
         // trades
-        _trades = isInline ? new InlineChannel<TradeModel>() : new ChannelPair<TradeModel>(logger);
+        _trades = ConnectorChannel.Create<TradeModel>(delivery, logger);
         Trades = _trades.Observable;
         Disposable += Trades.Subscribe();
 

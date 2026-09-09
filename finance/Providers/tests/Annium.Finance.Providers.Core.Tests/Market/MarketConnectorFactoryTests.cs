@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Finance.Providers.Abstractions.Connectors.Market;
@@ -132,7 +133,7 @@ public class MarketConnectorFactoryTests : ProvidersTestBase
         public IReadOnlyCollection<InstrumentModel> Instruments => [];
 
         /// <summary>Gets the connector's ticker stream; unused by this test.</summary>
-        public IObservable<InstrumentTicker> Tickers => System.Reactive.Linq.Observable.Empty<InstrumentTicker>();
+        public IObservable<InstrumentTicker> Tickers => Observable.Empty<InstrumentTicker>();
 
         /// <summary>Raised on status change; unused by this test.</summary>
         public event Action<ConnectorStatus> OnStatusChanged = delegate { };

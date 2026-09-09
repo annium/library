@@ -1,5 +1,4 @@
 using Annium.Finance.Providers.Abstractions.Domain.Market;
-using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Tests.Lib.Market;
 using Annium.Testing;
 using Xunit;

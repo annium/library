@@ -34,7 +34,7 @@ public class OrderExtensionsTests
         var position = PositionHelper.CreatePosition(1);
         var isLimitPriced = type is OrderType.Limit or OrderType.StopLossLimit or OrderType.TakeProfitLimit;
         var isLeveled = type is not (OrderType.Limit or OrderType.Market);
-        var order = new Annium.Finance.Providers.Tests.Lib.User.Order(
+        var order = new Order(
             Guid.NewGuid(),
             position,
             OrderSide.Buy,
