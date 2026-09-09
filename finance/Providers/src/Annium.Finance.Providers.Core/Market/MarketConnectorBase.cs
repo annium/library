@@ -142,7 +142,9 @@ public abstract class MarketConnectorBase : IAsyncDisposable, ILogSubject
         Disposable += () => _reporter.Unbind();
 
         // tickers
-        _tickers = ConnectorChannel.Create<InstrumentTicker>(delivery, logger);
+        // a ticker is superseded by the next one, so a subscriber that falls behind wants the current
+        // price rather than a queue of stale ones
+        _tickers = ConnectorChannel.Create<InstrumentTicker>(delivery, ConnectorBuffer.Recent, logger);
         Tickers = _tickers.Observable;
 
         // executor

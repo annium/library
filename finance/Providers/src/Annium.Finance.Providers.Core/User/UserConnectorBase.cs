@@ -160,19 +160,21 @@ public abstract class UserConnectorBase : IAsyncDisposable, ILogSubject
         Disposable += () => _reporter.Unbind();
 
         // assets
-        _assets = ConnectorChannel.Create<ChangeEvent<AssetModel>>(delivery, logger);
+        // account state arrives as changes, and losing one leaves the consumer describing an account that
+        // never existed - these four keep everything
+        _assets = ConnectorChannel.Create<ChangeEvent<AssetModel>>(delivery, ConnectorBuffer.Complete, logger);
         Assets = _assets.Observable;
 
         // positions
-        _positions = ConnectorChannel.Create<ChangeEvent<PositionModel>>(delivery, logger);
+        _positions = ConnectorChannel.Create<ChangeEvent<PositionModel>>(delivery, ConnectorBuffer.Complete, logger);
         Positions = _positions.Observable;
 
         // orders
-        _orders = ConnectorChannel.Create<ChangeEvent<OrderModel>>(delivery, logger);
+        _orders = ConnectorChannel.Create<ChangeEvent<OrderModel>>(delivery, ConnectorBuffer.Complete, logger);
         Orders = _orders.Observable;
 
         // trades
-        _trades = ConnectorChannel.Create<TradeModel>(delivery, logger);
+        _trades = ConnectorChannel.Create<TradeModel>(delivery, ConnectorBuffer.Complete, logger);
         Trades = _trades.Observable;
 
         // executor
