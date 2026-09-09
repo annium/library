@@ -15,6 +15,9 @@ public class LogConfigTests
     /// <summary>
     /// Answers for exactly the levels the logger itself would let through — at or above the global level.
     /// </summary>
+    /// <param name="configured">The global level to set for the check.</param>
+    /// <param name="asked">The level a call site would be asking about.</param>
+    /// <param name="expected">Whether that level is expected to pass.</param>
     [Theory]
     [InlineData(LogLevel.Trace, LogLevel.Trace, true)]
     [InlineData(LogLevel.Trace, LogLevel.Error, true)]
