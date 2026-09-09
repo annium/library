@@ -1,5 +1,4 @@
 using System;
-using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Crypto.Binance.Base.User.Services;
 

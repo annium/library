@@ -13,7 +13,6 @@ using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.Market;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Finance.Providers.Tests.Lib.Infrastructure;
-using Annium.Logging;
 using Annium.Net.Http;
 using Annium.Net.Servers.Web;
 using Annium.Testing;

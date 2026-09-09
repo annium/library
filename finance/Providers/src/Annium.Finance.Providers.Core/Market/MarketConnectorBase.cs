@@ -106,9 +106,9 @@ public abstract class MarketConnectorBase : IAsyncDisposable, ILogSubject
         IMarketProvider provider,
         IStatusReporter reporter,
         IStatusMonitor monitor,
+        ConnectorDelivery delivery,
         AsyncDisposableBox disposable,
-        ILogger logger,
-        ConnectorDelivery delivery = ConnectorDelivery.Buffered
+        ILogger logger
     )
     {
         Logger = logger;
@@ -142,10 +142,7 @@ public abstract class MarketConnectorBase : IAsyncDisposable, ILogSubject
         Disposable += () => _reporter.Unbind();
 
         // tickers
-        _tickers =
-            delivery is ConnectorDelivery.Inline
-                ? new InlineChannel<InstrumentTicker>()
-                : new ChannelPair<InstrumentTicker>(logger);
+        _tickers = ConnectorChannel.Create<InstrumentTicker>(delivery, logger);
         Tickers = _tickers.Observable;
         Disposable += Tickers.Subscribe();
 

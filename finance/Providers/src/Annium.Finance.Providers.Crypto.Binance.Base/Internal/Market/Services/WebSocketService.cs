@@ -96,7 +96,9 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
             return;
         }
 
-        this.Trace<string>("subscribe to {topics}", targets.Join(","));
+        if (LogConfig.IsEnabled(LogLevel.Trace))
+            this.Trace<string>("subscribe to {topics}", targets.Join(","));
+
         var request = new Request { Method = "SUBSCRIBE", Params = targets };
         _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
 
@@ -116,7 +118,9 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
             return;
         }
 
-        this.Trace<string>("unsubscribe from {topics}", targets.Join(","));
+        if (LogConfig.IsEnabled(LogLevel.Trace))
+            this.Trace<string>("unsubscribe from {topics}", targets.Join(","));
+
         var request = new Request { Method = "UNSUBSCRIBE", Params = targets };
         _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
 
@@ -141,7 +145,9 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
             return;
         }
 
-        this.Trace<string>("subscribe to {topics}", _topics.Join(","));
+        if (LogConfig.IsEnabled(LogLevel.Trace))
+            this.Trace<string>("subscribe to {topics}", _topics.Join(","));
+
         var request = new Request { Method = "SUBSCRIBE", Params = _topics };
         _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
 

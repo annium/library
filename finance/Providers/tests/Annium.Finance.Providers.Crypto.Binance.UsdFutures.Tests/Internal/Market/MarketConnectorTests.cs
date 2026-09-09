@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Core;
-using Annium.Finance.Providers.Tests.Lib;
 using Annium.Finance.Providers.Tests.Lib.Market;
 using Xunit;
 

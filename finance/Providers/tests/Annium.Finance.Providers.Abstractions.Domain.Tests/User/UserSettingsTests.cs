@@ -1,4 +1,3 @@
-using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Testing;
 using Xunit;

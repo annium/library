@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
-using Annium;
 using Annium.Core.DependencyInjection;
 using Annium.Finance.Providers.Abstractions.Domain.User.Operations;
 using Annium.Finance.Providers.Core;

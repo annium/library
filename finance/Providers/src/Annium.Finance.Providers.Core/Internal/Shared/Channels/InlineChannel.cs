@@ -9,7 +9,7 @@ namespace Annium.Finance.Providers.Core.Internal.Shared.Channels;
 /// Delivers each written value to the subscribers on the thread that wrote it, before the write returns.
 /// </summary>
 /// <remarks>
-/// The counterpart of <see cref="ChannelPair{T}"/> for a connector that produces its own values on the
+/// The counterpart of <see cref="BufferedChannel{T}"/> for a connector that produces its own values on the
 /// caller's thread. Values written before <see cref="Connect"/> are held and delivered when it is called,
 /// matching what the channel pair does with its source channel - a connector writes during construction,
 /// and the sync cycle that connects it comes later.

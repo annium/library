@@ -8,6 +8,7 @@ using Annium.Finance.Providers.Abstractions.Connectors.User;
 using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Abstractions.Domain.User.Operations;
 using Annium.Finance.Providers.Abstractions.Domain.User.Requests;
+using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Loaders;
 using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Core.Shared.Status;
@@ -119,7 +120,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         AsyncDisposableBox disposable,
         ILogger logger
     )
-        : base(config.GetSettings(), provider, reporter, monitor, disposable, logger)
+        : base(config.GetSettings(), provider, reporter, monitor, ConnectorDelivery.Buffered, disposable, logger)
     {
         _config = config;
         _queryProcessor = queryProcessor;
@@ -434,7 +435,11 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <param name="data">The raw message payload.</param>
     private void HandleMessage(ReadOnlyMemory<byte> data)
     {
-        this.Trace<string, string>("{id} handle {msg}", Id, Encoding.UTF8.GetString(data.Span));
+        // guarded: decoding the payload to a string is the whole message, and arguments are evaluated
+        // before the level is looked at - this runs on every message the account stream delivers
+        if (LogConfig.IsEnabled(LogLevel.Trace))
+            this.Trace<string, string>("{id} handle {msg}", Id, Encoding.UTF8.GetString(data.Span));
+
         // account info in event is almost useless (and position info lacks leverage value), so request account reload
         _contextLoader.Request();
 

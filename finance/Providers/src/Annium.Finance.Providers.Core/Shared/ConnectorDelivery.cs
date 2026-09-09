@@ -21,9 +21,9 @@ public enum ConnectorDelivery
     /// For a connector that produces its values itself, on the caller's thread, from something it already
     /// holds - a replay of stored data. The handoff buys such a connector nothing and costs it a thread
     /// transition per value, plus the need to discover, somehow, when delivery has finished. Inline
-    /// delivery makes "it has been delivered" the same moment as "the write returned".
+    /// delivery makes "it has been delivered" the same moment as "write returned".
     ///
-    /// A subscriber that blocks blocks the writer. That is the point, and it is only safe because the
+    /// A subscriber that blocks holds up the writer. That is the point, and it is only safe because the
     /// writer is the one driving the run.
     /// </remarks>
     Inline = 1,

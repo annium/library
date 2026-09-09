@@ -97,8 +97,14 @@ public sealed class StatusMonitor : IStatusMonitor, ILogSubject
         lock (_locker)
         {
             this.Trace("{target} - {status}", target, status);
-            if (!_targets.ContainsKey(target))
+            if (!_targets.TryGetValue(target, out var current))
                 throw new InvalidOperationException($"Target {target} is not registered");
+
+            // a target reporting the status it already has changes nothing, and the aggregate cannot have
+            // moved. Loaders report their state on every poll, so this is the common case rather than the
+            // odd one, and recomputing for it costs a lock's worth of work and a discarded description
+            if (current == status)
+                return;
 
             _targets[target] = status;
 
@@ -127,7 +133,11 @@ public sealed class StatusMonitor : IStatusMonitor, ILogSubject
     /// </summary>
     private void UpdateStatus()
     {
-        this.Trace<string>("state: {statuses}", GetStateDescription(_targets));
+        // guarded: the description walks every target and builds a string, and arguments are evaluated
+        // before the level is looked at
+        if (LogConfig.IsEnabled(LogLevel.Trace))
+            this.Trace<string>("state: {statuses}", GetStateDescription(_targets));
+
         var newStatus = ResolveStatus(_targets.Values);
 
         if (newStatus == Status)

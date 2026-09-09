@@ -4,6 +4,7 @@ using Annium.Finance.Providers.Abstractions.Connectors.User;
 using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Abstractions.Domain.User.Operations;
 using Annium.Finance.Providers.Abstractions.Domain.User.Requests;
+using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Core.User;
 using Annium.Finance.Providers.Crypto.Binance.Base.User;
@@ -32,7 +33,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         AsyncDisposableBox disposable,
         ILogger logger
     )
-        : base(config.GetSettings(), provider, reporter, monitor, disposable, logger)
+        : base(config.GetSettings(), provider, reporter, monitor, ConnectorDelivery.Buffered, disposable, logger)
     {
         // init load
         // schedule sync on connected

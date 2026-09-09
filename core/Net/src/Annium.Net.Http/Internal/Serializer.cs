@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using Annium.Core.DependencyInjection;
 using Annium.Serialization.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
