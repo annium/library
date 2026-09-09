@@ -144,7 +144,6 @@ public abstract class MarketConnectorBase : IAsyncDisposable, ILogSubject
         // tickers
         _tickers = ConnectorChannel.Create<InstrumentTicker>(delivery, logger);
         Tickers = _tickers.Observable;
-        Disposable += Tickers.Subscribe();
 
         // executor
         // the executor and the sync cycle's subscriptions are disposed by DisposeAsync in a fixed

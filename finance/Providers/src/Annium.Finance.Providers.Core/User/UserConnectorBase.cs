@@ -162,22 +162,18 @@ public abstract class UserConnectorBase : IAsyncDisposable, ILogSubject
         // assets
         _assets = ConnectorChannel.Create<ChangeEvent<AssetModel>>(delivery, logger);
         Assets = _assets.Observable;
-        Disposable += Assets.Subscribe();
 
         // positions
         _positions = ConnectorChannel.Create<ChangeEvent<PositionModel>>(delivery, logger);
         Positions = _positions.Observable;
-        Disposable += Positions.Subscribe();
 
         // orders
         _orders = ConnectorChannel.Create<ChangeEvent<OrderModel>>(delivery, logger);
         Orders = _orders.Observable;
-        Disposable += Orders.Subscribe();
 
         // trades
         _trades = ConnectorChannel.Create<TradeModel>(delivery, logger);
         Trades = _trades.Observable;
-        Disposable += Trades.Subscribe();
 
         // executor
         // the executor and the sync cycle's subscriptions are disposed by DisposeAsync in a fixed
