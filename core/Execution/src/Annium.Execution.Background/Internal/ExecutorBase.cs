@@ -282,7 +282,13 @@ internal abstract class ExecutorBase : IExecutor, ILogSubject
     protected void CompleteTask(Delegate task)
     {
         var taskCounter = Interlocked.Decrement(ref _taskCounter);
-        this.Trace("complete task {id} ({num})", task.GetFullId(), taskCounter);
+
+        // guarded: GetFullId resolves a type name and builds a string, and arguments are evaluated before
+        // the level is looked at. This runs once per task, and a sequential executor backs every
+        // DoSequentialAsync, so "once per task" is once per value on some streams
+        if (LogConfig.IsEnabled(LogLevel.Trace))
+            this.Trace("complete task {id} ({num})", task.GetFullId(), taskCounter);
+
         TryFinish(taskCounter);
     }
 
@@ -303,11 +309,15 @@ internal abstract class ExecutorBase : IExecutor, ILogSubject
             }
         }
 
-        this.Trace<string>("schedule task {id}", task.GetFullId());
+        // guarded, as in CompleteTask: this is the per-task path
+        if (LogConfig.IsEnabled(LogLevel.Trace))
+            this.Trace<string>("schedule task {id}", task.GetFullId());
+
         if (_taskWriter.TryWrite(task))
             return true;
 
-        this.Trace<string>("schedule task {id} failed - writer is already complete", task.GetFullId());
+        if (LogConfig.IsEnabled(LogLevel.Trace))
+            this.Trace<string>("schedule task {id} failed - writer is already complete", task.GetFullId());
 
         return false;
     }
@@ -329,7 +339,12 @@ internal abstract class ExecutorBase : IExecutor, ILogSubject
                 this.Trace("await for task");
                 var task = await _taskReader.ReadAsync(Cts.Token);
 
-                this.Trace("run task {id} ({num})", task.GetFullId(), Interlocked.Increment(ref _taskCounter));
+                // the counter is state the executor runs on - TryFinish reads it - so it is incremented
+                // here rather than inside the log call, where a guard would stop it happening at all
+                var taskCounter = Interlocked.Increment(ref _taskCounter);
+                if (LogConfig.IsEnabled(LogLevel.Trace))
+                    this.Trace("run task {id} ({num})", task.GetFullId(), taskCounter);
+
                 await RunTaskAsync(task);
             }
             catch (ChannelClosedException)
@@ -365,7 +380,10 @@ internal abstract class ExecutorBase : IExecutor, ILogSubject
             if (!_taskReader.TryRead(out var task))
                 break;
 
-            this.Trace("run task {id} ({num})", task.GetFullId(), Interlocked.Increment(ref _taskCounter));
+            var taskCounter = Interlocked.Increment(ref _taskCounter);
+            if (LogConfig.IsEnabled(LogLevel.Trace))
+                this.Trace("run task {id} ({num})", task.GetFullId(), taskCounter);
+
             await RunTaskAsync(task);
         }
     }
