@@ -36,7 +36,22 @@ public static class ChannelReaderExtensions
     /// <param name="writer">The target channel writer.</param>
     /// <param name="logger">The logger to use for logging.</param>
     /// <returns>An asynchronous disposable that, when disposed, cancels the background pipe loop and awaits its completion.</returns>
-    public static IAsyncDisposable Pipe<T>(this ChannelReader<T> reader, ChannelWriter<T> writer, ILogger logger)
+    public static IAsyncDisposable Pipe<T>(this ChannelReader<T> reader, ChannelWriter<T> writer, ILogger logger) =>
+        reader.Pipe(writer.Write, logger);
+
+    /// <summary>
+    /// Pipes data from a channel reader into a handler with logging.
+    /// </summary>
+    /// <remarks>
+    /// The handler runs on the pipe's own loop, one item at a time and in order, so it is the point where a
+    /// channel's buffering ends and its consumer's thread begins. A handler that blocks stops the pipe.
+    /// </remarks>
+    /// <typeparam name="T">The type of items in the channel.</typeparam>
+    /// <param name="reader">The source channel reader.</param>
+    /// <param name="handle">The handler each item is passed to.</param>
+    /// <param name="logger">The logger to use for logging.</param>
+    /// <returns>An asynchronous disposable that, when disposed, cancels the background pipe loop and awaits its completion.</returns>
+    public static IAsyncDisposable Pipe<T>(this ChannelReader<T> reader, Action<T> handle, ILogger logger)
     {
         var bridge = new LogBridge(typeof(ChannelReader<T>).FriendlyName(), logger);
         var cts = new CancellationTokenSource();
@@ -48,7 +63,7 @@ public static class ChannelReaderExtensions
                     while (await reader.WaitToReadAsync(cts.Token).ConfigureAwait(false))
                     {
                         var data = await reader.ReadAsync(cts.Token).ConfigureAwait(false);
-                        writer.Write(data);
+                        handle(data);
                     }
                 }
                 catch (OperationCanceledException) { }

@@ -294,6 +294,44 @@ public class MarketConnectorBaseTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// The ticker buffer is bounded: written far past its capacity while nothing is draining it, it keeps
+    /// the most recent tickers and drops the oldest.
+    /// </summary>
+    /// <remarks>
+    /// A ticker is superseded by the next one, so a subscriber that has fallen behind wants the current
+    /// price, not the one from thousands of updates ago — and an unbounded queue of prices nobody will read
+    /// is a memory leak that looks like diligence. This pins the trade being made: the count that survives
+    /// is bounded, and what survives is the tail.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task TickerBuffer_KeepsTheRecentOnesAndDropsTheRest()
+    {
+        // arrange - never connected, so nothing drains the buffer while it fills
+        var settings = new MarketSettings { Provider = "fake" };
+        await using var market = CreateConnector(settings);
+
+        const int written = 20_000;
+        for (var i = 0; i < written; i++)
+            market.Ticker(new InstrumentTicker("BTCUSDT", i, i));
+
+        // TestLog rather than a List: the pump delivers on its own thread while the test reads
+        var seen = new TestLog<int>();
+        market.Tickers.Subscribe(x => seen.Add((int)x.BidPrice));
+
+        // act - connecting drains whatever survived, and the newest is the last thing out
+        market.Sync([], []);
+        await Expect.ToAsync(() => market.Status.Is(ConnectorStatus.Connected));
+        await Expect.ToAsync(() => seen.Count.IsGreaterOrEqual(1));
+        await Expect.ToAsync(() => seen[^1].Is(written - 1, "the newest ticker must survive"));
+
+        // assert - a bound was applied, and what it kept is the tail
+        var count = seen.Count;
+        (count < written).IsTrue($"the buffer must be bounded, saw {count} of {written}");
+        (seen[0] > 0).IsTrue($"the oldest tickers must be the ones dropped, first seen was {seen[0]}");
+    }
+
+    /// <summary>
     /// A connector built with <see cref="ConnectorDelivery.Inline"/> has delivered a ticker to its
     /// subscribers by the time the write returns, and holds one written before it is connected - the same
     /// two properties the buffered channel has, minus the wait.
