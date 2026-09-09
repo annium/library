@@ -13,7 +13,7 @@ namespace Annium.Finance.Providers.Core.Internal.Shared.Channels;
 /// connects, without values being lost.
 /// </summary>
 /// <typeparam name="T">The type of value carried through the channel pair.</typeparam>
-internal class ChannelPair<T>
+internal class ChannelPair<T> : IConnectorChannel<T>
 {
     /// <summary>
     /// An observable, multicast view of the target channel. Shared across subscribers (via <c>Publish().RefCount()</c>),
