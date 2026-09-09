@@ -435,7 +435,11 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <param name="data">The raw message payload.</param>
     private void HandleMessage(ReadOnlyMemory<byte> data)
     {
-        this.Trace<string, string>("{id} handle {msg}", Id, Encoding.UTF8.GetString(data.Span));
+        // guarded: decoding the payload to a string is the whole message, and arguments are evaluated
+        // before the level is looked at - this runs on every message the account stream delivers
+        if (LogConfig.IsEnabled(LogLevel.Trace))
+            this.Trace<string, string>("{id} handle {msg}", Id, Encoding.UTF8.GetString(data.Span));
+
         // account info in event is almost useless (and position info lacks leverage value), so request account reload
         _contextLoader.Request();
 

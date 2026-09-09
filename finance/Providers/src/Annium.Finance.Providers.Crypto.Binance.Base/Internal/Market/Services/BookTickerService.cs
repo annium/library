@@ -60,7 +60,10 @@ internal sealed class BookTickerService : WebSocketService, IBookTickerService
         var data = _serializer.Deserialize<StreamData<InstrumentTicker>?>(raw);
         if (data is null)
         {
-            this.Trace<string>("bypass: {data}", Encoding.UTF8.GetString(raw.ToArray()));
+            // guarded: copies the payload and decodes it, and arguments are evaluated before the level is
+            // looked at. Only bypassed messages reach here, but they arrive on the ticker stream's thread
+            if (LogConfig.IsEnabled(LogLevel.Trace))
+                this.Trace<string>("bypass: {data}", Encoding.UTF8.GetString(raw.Span));
             return;
         }
 

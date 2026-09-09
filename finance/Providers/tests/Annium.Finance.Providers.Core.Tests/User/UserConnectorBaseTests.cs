@@ -309,7 +309,15 @@ public class UserConnectorBaseTests : ProvidersTestBase
             IStatusMonitor monitor,
             ILogger logger
         )
-            : base(settings, provider, reporter, monitor, ConnectorDelivery.Buffered, Annium.Disposable.AsyncBox(logger), logger) { }
+            : base(
+                settings,
+                provider,
+                reporter,
+                monitor,
+                ConnectorDelivery.Buffered,
+                Annium.Disposable.AsyncBox(logger),
+                logger
+            ) { }
 
         /// <summary>Writes an asset upsert to the connector's output, exposing the protected <see cref="UserConnectorBase.Write(Annium.Data.Tables.ChangeEvent{Annium.Finance.Providers.Abstractions.Domain.User.AssetModel})"/> call.</summary>
         /// <param name="x">The asset to write.</param>

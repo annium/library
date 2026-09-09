@@ -54,6 +54,20 @@ public static class LogConfig
     }
 
     /// <summary>
+    /// Says whether a message at the given level would be logged at all.
+    /// </summary>
+    /// <remarks>
+    /// For call sites whose arguments cost something to produce. The <c>Trace</c> / <c>Debug</c> / … methods
+    /// check the level themselves, but C# evaluates their arguments first, so a call like
+    /// <c>this.Trace("state: {s}", Describe(everything))</c> pays for <c>Describe</c> even with logging off.
+    /// Guarding such a call with this makes the cost follow the level. A call whose arguments are fields or
+    /// locals needs no guard.
+    /// </remarks>
+    /// <param name="level">The level to check.</param>
+    /// <returns>Whether a message at that level passes the global level filter.</returns>
+    public static bool IsEnabled(LogLevel level) => Level <= level;
+
+    /// <summary>
     /// Sets the global log level.
     /// </summary>
     /// <param name="level">The log level to set.</param>

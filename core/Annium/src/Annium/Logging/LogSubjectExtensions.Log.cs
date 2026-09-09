@@ -12,7 +12,7 @@ public static partial class LogSubjectExtensions
     /// </summary>
     /// <param name="level">The log level to check.</param>
     /// <returns><c>true</c> if logging is enabled for the specified level; otherwise, <c>false</c>.</returns>
-    private static bool IsEnabled(LogLevel level) => LogConfig.Level <= level;
+    private static bool IsEnabled(LogLevel level) => LogConfig.IsEnabled(level);
 
     /// <summary>
     /// Logs a message at the specified log level.
