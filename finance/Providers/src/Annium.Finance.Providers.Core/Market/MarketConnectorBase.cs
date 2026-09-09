@@ -6,6 +6,7 @@ using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.Market;
 using Annium.Finance.Providers.Core.Internal.Shared.Channels;
+using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Logging;
 
@@ -75,8 +76,8 @@ public abstract class MarketConnectorBase : IAsyncDisposable, ILogSubject
     /// <summary>The settings this connector was created with.</summary>
     private readonly MarketSettings _settings;
 
-    /// <summary>The channel pair that fans ticker updates written by subclasses out through <see cref="Tickers"/>.</summary>
-    private readonly ChannelPair<InstrumentTicker> _tickers;
+    /// <summary>The channel that fans ticker updates written by subclasses out through <see cref="Tickers"/>.</summary>
+    private readonly IConnectorChannel<InstrumentTicker> _tickers;
 
     /// <summary>The sequential executor used to run resync cycles one at a time.</summary>
     private readonly IExecutor _executor;
@@ -98,13 +99,16 @@ public abstract class MarketConnectorBase : IAsyncDisposable, ILogSubject
     /// <param name="monitor">The shared status monitor this connector's initial status and status/error notifications come from.</param>
     /// <param name="disposable">The disposable box this connector adds its owned resources to.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="delivery">How written tickers reach the subscribers of <see cref="Tickers"/>. Defaults to
+    /// <see cref="ConnectorDelivery.Buffered"/>, which is what a connector fed by a socket needs.</param>
     protected MarketConnectorBase(
         MarketSettings settings,
         IMarketProvider provider,
         IStatusReporter reporter,
         IStatusMonitor monitor,
         AsyncDisposableBox disposable,
-        ILogger logger
+        ILogger logger,
+        ConnectorDelivery delivery = ConnectorDelivery.Buffered
     )
     {
         Logger = logger;
@@ -138,7 +142,10 @@ public abstract class MarketConnectorBase : IAsyncDisposable, ILogSubject
         Disposable += () => _reporter.Unbind();
 
         // tickers
-        _tickers = new ChannelPair<InstrumentTicker>(logger);
+        _tickers =
+            delivery is ConnectorDelivery.Inline
+                ? new InlineChannel<InstrumentTicker>()
+                : new ChannelPair<InstrumentTicker>(logger);
         Tickers = _tickers.Observable;
         Disposable += Tickers.Subscribe();
 

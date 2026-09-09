@@ -10,6 +10,7 @@ using Annium.Finance.Providers.Abstractions.Domain.Market;
 using Annium.Finance.Providers.Abstractions.Domain.Market.Operations;
 using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Core.Market;
+using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Logging;
@@ -295,18 +296,58 @@ public class MarketConnectorBaseTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// A connector built with <see cref="ConnectorDelivery.Inline"/> has delivered a ticker to its
+    /// subscribers by the time the write returns, and holds one written before it is connected - the same
+    /// two properties the buffered channel has, minus the wait.
+    /// </summary>
+    /// <remarks>
+    /// This is what lets a replay connector be driven rather than subscribed to: the caller that wrote the
+    /// value knows, on the next line, that everything downstream of it has seen it. Buffered delivery can
+    /// only be waited for, which is why the backtest used to count the deliveries it expected.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task InlineDelivery_DeliversBeforeTheWriteReturns()
+    {
+        // arrange
+        var settings = new MarketSettings { Provider = "fake" };
+        await using var market = CreateConnector(settings, ConnectorDelivery.Inline);
+
+        var seen = new List<decimal>();
+        market.Tickers.Subscribe(x => seen.Add(x.BidPrice));
+
+        // act & assert - written before the connector is connected, so held rather than dropped
+        market.Ticker(new InstrumentTicker("BTCUSDT", 1, 1));
+        seen.Count.Is(0, "a ticker written before the channel is connected must not be delivered yet");
+
+        // act & assert - connecting flushes what was held
+        market.Sync([], []);
+        await Expect.ToAsync(() => market.Status.Is(ConnectorStatus.Connected));
+        seen.Count.Is(1, "the held ticker is delivered once the channel connects");
+
+        // act & assert - and from then on, delivery happens inside the write
+        market.Ticker(new InstrumentTicker("BTCUSDT", 2, 2));
+        seen.Count.Is(2, "an inline write must have been delivered by the time it returns");
+        seen[1].Is(2m);
+    }
+
+    /// <summary>
     /// Builds a <see cref="FakeMarketConnector"/> wired to a fresh <see cref="FakeMarketProvider"/> and this
     /// test's status reporter and monitor.
     /// </summary>
     /// <param name="settings">The market settings to construct the connector with.</param>
+    /// <param name="delivery">How the connector hands written tickers to its subscribers.</param>
     /// <returns>The constructed connector.</returns>
-    private FakeMarketConnector CreateConnector(MarketSettings settings)
+    private FakeMarketConnector CreateConnector(
+        MarketSettings settings,
+        ConnectorDelivery delivery = ConnectorDelivery.Buffered
+    )
     {
         var provider = new FakeMarketProvider();
         var reporter = Monitor.CreateReporter();
         var monitor = Monitor;
 
-        return new FakeMarketConnector(settings, provider, reporter, monitor, Logger);
+        return new FakeMarketConnector(settings, provider, reporter, monitor, Logger, delivery);
     }
 
     /// <summary>
@@ -373,14 +414,16 @@ public class MarketConnectorBaseTests : ProvidersTestBase
         /// <param name="reporter">The status reporter to bind to.</param>
         /// <param name="monitor">The status monitor to observe.</param>
         /// <param name="logger">The logger to use.</param>
+        /// <param name="delivery">How the connector hands written tickers to its subscribers.</param>
         public FakeMarketConnector(
             MarketSettings settings,
             IMarketProvider provider,
             IStatusReporter reporter,
             IStatusMonitor monitor,
-            ILogger logger
+            ILogger logger,
+            ConnectorDelivery delivery
         )
-            : base(settings, provider, reporter, monitor, Annium.Disposable.AsyncBox(logger), logger) { }
+            : base(settings, provider, reporter, monitor, Annium.Disposable.AsyncBox(logger), logger, delivery) { }
 
         /// <summary>Triggers a sync with the given resources and instruments, exposing the protected <see cref="MarketConnectorBase.ScheduleSync"/> call.</summary>
         /// <param name="resources">The resources to sync.</param>

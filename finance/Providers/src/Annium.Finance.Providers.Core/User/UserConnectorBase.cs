@@ -7,6 +7,7 @@ using Annium.Finance.Providers.Abstractions.Connectors.User;
 using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Core.Internal.Shared.Channels;
 using Annium.Finance.Providers.Core.Market;
+using Annium.Finance.Providers.Core.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Logging;
 
@@ -84,17 +85,17 @@ public abstract class UserConnectorBase : IAsyncDisposable, ILogSubject
     /// <summary>The disposable box collecting every resource this connector owns, disposed together on <see cref="DisposeAsync"/>.</summary>
     protected AsyncDisposableBox Disposable;
 
-    /// <summary>The channel pair that fans asset updates written by subclasses out through <see cref="Assets"/>.</summary>
-    private readonly ChannelPair<ChangeEvent<AssetModel>> _assets;
+    /// <summary>The channel that fans asset updates written by subclasses out through <see cref="Assets"/>.</summary>
+    private readonly IConnectorChannel<ChangeEvent<AssetModel>> _assets;
 
-    /// <summary>The channel pair that fans position updates written by subclasses out through <see cref="Positions"/>.</summary>
-    private readonly ChannelPair<ChangeEvent<PositionModel>> _positions;
+    /// <summary>The channel that fans position updates written by subclasses out through <see cref="Positions"/>.</summary>
+    private readonly IConnectorChannel<ChangeEvent<PositionModel>> _positions;
 
-    /// <summary>The channel pair that fans order updates written by subclasses out through <see cref="Orders"/>.</summary>
-    private readonly ChannelPair<ChangeEvent<OrderModel>> _orders;
+    /// <summary>The channel that fans order updates written by subclasses out through <see cref="Orders"/>.</summary>
+    private readonly IConnectorChannel<ChangeEvent<OrderModel>> _orders;
 
-    /// <summary>The channel pair that fans trade updates written by subclasses out through <see cref="Trades"/>.</summary>
-    private readonly ChannelPair<TradeModel> _trades;
+    /// <summary>The channel that fans trade updates written by subclasses out through <see cref="Trades"/>.</summary>
+    private readonly IConnectorChannel<TradeModel> _trades;
 
     /// <summary>The sequential executor used to run resync cycles one at a time.</summary>
     private readonly IExecutor _executor;
@@ -116,13 +117,17 @@ public abstract class UserConnectorBase : IAsyncDisposable, ILogSubject
     /// <param name="monitor">The shared status monitor this connector's initial status and status/error notifications come from.</param>
     /// <param name="disposable">The disposable box this connector adds its owned resources to.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="delivery">How written account state reaches the subscribers of <see cref="Assets"/>,
+    /// <see cref="Positions"/>, <see cref="Orders"/> and <see cref="Trades"/>. Defaults to
+    /// <see cref="ConnectorDelivery.Buffered"/>, which is what a connector fed by a socket needs.</param>
     protected UserConnectorBase(
         UserSettings settings,
         IUserProvider provider,
         IStatusReporter reporter,
         IStatusMonitor monitor,
         AsyncDisposableBox disposable,
-        ILogger logger
+        ILogger logger,
+        ConnectorDelivery delivery = ConnectorDelivery.Buffered
     )
     {
         Logger = logger;
@@ -155,23 +160,31 @@ public abstract class UserConnectorBase : IAsyncDisposable, ILogSubject
         // this phase has not reached yet
         Disposable += () => _reporter.Unbind();
 
+        var isInline = delivery is ConnectorDelivery.Inline;
+
         // assets
-        _assets = new ChannelPair<ChangeEvent<AssetModel>>(logger);
+        _assets = isInline
+            ? new InlineChannel<ChangeEvent<AssetModel>>()
+            : new ChannelPair<ChangeEvent<AssetModel>>(logger);
         Assets = _assets.Observable;
         Disposable += Assets.Subscribe();
 
         // positions
-        _positions = new ChannelPair<ChangeEvent<PositionModel>>(logger);
+        _positions = isInline
+            ? new InlineChannel<ChangeEvent<PositionModel>>()
+            : new ChannelPair<ChangeEvent<PositionModel>>(logger);
         Positions = _positions.Observable;
         Disposable += Positions.Subscribe();
 
         // orders
-        _orders = new ChannelPair<ChangeEvent<OrderModel>>(logger);
+        _orders = isInline
+            ? new InlineChannel<ChangeEvent<OrderModel>>()
+            : new ChannelPair<ChangeEvent<OrderModel>>(logger);
         Orders = _orders.Observable;
         Disposable += Orders.Subscribe();
 
         // trades
-        _trades = new ChannelPair<TradeModel>(logger);
+        _trades = isInline ? new InlineChannel<TradeModel>() : new ChannelPair<TradeModel>(logger);
         Trades = _trades.Observable;
         Disposable += Trades.Subscribe();
 
