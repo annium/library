@@ -15,5 +15,10 @@ public record LogRouteConfiguration
     /// <summary>
     /// Gets the maximum number of log messages to buffer before flushing
     /// </summary>
-    public int BufferCount { get; init; } = 5;
+    /// <remarks>
+    /// A sink's per-batch overhead — a lock, a write, a round trip — is paid once per batch, so a batch of
+    /// five means paying it forty million times for forty million lines. The time bound is what keeps a
+    /// quiet process's lines from waiting; this one is what makes a busy one's batches worth batching.
+    /// </remarks>
+    public int BufferCount { get; init; } = 1000;
 }
