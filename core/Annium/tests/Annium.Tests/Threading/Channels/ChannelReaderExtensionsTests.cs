@@ -127,10 +127,13 @@ public class ChannelReaderExtensionsTests : TestBase
         // assert — task must NOT be complete while items remain
         whenEmpty.IsCompleted.IsFalse();
 
-        // drain items one by one
+        // drain items one by one. VSTHRD103 matches on the name: our Read is TryRead-or-throw and
+        // never blocks, so awaiting ReadAsync here would only hide what the test is checking.
+#pragma warning disable VSTHRD103
         channel.Reader.Read();
         channel.Reader.Read();
         channel.Reader.Read();
+#pragma warning restore VSTHRD103
 
         // wait for WhenEmptyAsync to notice the channel is empty
         await Wait.UntilAsync(() => whenEmpty.IsCompleted, TestContext.Current.CancellationToken);

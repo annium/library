@@ -14,6 +14,14 @@ setup:
     @echo "=== $0 ==="
     dotnet tool restore
 
+# reinstall the local tools at their latest versions, then bump every package reference. Same shape as
+# the recipe in xs and crypted - the umbrella's `just update` loop calls this name in every sub-project,
+# and library not having it was the one gap that made that loop fail.
+update:
+    @echo "=== $0 ==="
+    dotnet tool list --format json | jq -r '.data[] | "\(.packageId)"' | xargs -I% dotnet tool install %
+    dotnet tool run xs update all dotnet -sc -ic
+
 format:
     @echo "=== $0 ==="
     dotnet tool run csharpier format . --config-path $(pwd)/.editorconfig

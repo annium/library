@@ -81,7 +81,11 @@ public class BuildAsyncTests
         var jsonFile = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(jsonFile, "{\"plain\":42,\"section\":{\"value\":\"ok\"}}");
+            await File.WriteAllTextAsync(
+                jsonFile,
+                "{\"plain\":42,\"section\":{\"value\":\"ok\"}}",
+                TestContext.Current.CancellationToken
+            );
             var container = ConfigurationFactory.CreateContainer();
             container.AddJsonFile(jsonFile);
 
