@@ -117,7 +117,7 @@ public class YamlConfigurationProviderTest : TestBase
         var path = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(path, string.Empty);
+            await File.WriteAllTextAsync(path, string.Empty, TestContext.Current.CancellationToken);
             var container = ConfigurationFactory.CreateContainer();
             container.AddYamlFile(path, optional: false);
 
@@ -142,7 +142,7 @@ public class YamlConfigurationProviderTest : TestBase
         var path = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(path, "42");
+            await File.WriteAllTextAsync(path, "42", TestContext.Current.CancellationToken);
             var container = ConfigurationFactory.CreateContainer();
             container.AddYamlFile(path, optional: false);
 
@@ -170,7 +170,7 @@ public class YamlConfigurationProviderTest : TestBase
         try
         {
             // YAML 1.2 explicit-key form: "? mapping" makes the key itself a mapping node.
-            File.WriteAllText(path, "? { a: 1 }\n: value\n");
+            await File.WriteAllTextAsync(path, "? { a: 1 }\n: value\n", TestContext.Current.CancellationToken);
             var container = ConfigurationFactory.CreateContainer();
             container.AddYamlFile(path, optional: false);
 

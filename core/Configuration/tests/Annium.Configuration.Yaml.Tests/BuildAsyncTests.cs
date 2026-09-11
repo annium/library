@@ -69,7 +69,11 @@ public class BuildAsyncTests
         var yamlFile = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(yamlFile, "plain: 42\nsection:\n  value: ok\n");
+            await File.WriteAllTextAsync(
+                yamlFile,
+                "plain: 42\nsection:\n  value: ok\n",
+                TestContext.Current.CancellationToken
+            );
             var container = ConfigurationFactory.CreateContainer();
             container.AddYamlFile(yamlFile);
 

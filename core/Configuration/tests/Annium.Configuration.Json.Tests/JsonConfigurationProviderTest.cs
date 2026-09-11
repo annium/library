@@ -125,7 +125,7 @@ public class JsonConfigurationProviderTest : TestBase
         var bad = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(bad, "{bad json");
+            await File.WriteAllTextAsync(bad, "{bad json", TestContext.Current.CancellationToken);
             var container = ConfigurationFactory.CreateContainer();
             container.AddJsonFile(bad, optional: false);
 
@@ -152,7 +152,7 @@ public class JsonConfigurationProviderTest : TestBase
         var path = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(path, "{\"key\": null}");
+            await File.WriteAllTextAsync(path, "{\"key\": null}", TestContext.Current.CancellationToken);
             var container = ConfigurationFactory.CreateContainer();
             container.AddJsonFile(path, optional: false);
 
@@ -179,7 +179,11 @@ public class JsonConfigurationProviderTest : TestBase
         var path = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(path, "{\"flag\": true, \"off\": false}");
+            await File.WriteAllTextAsync(
+                path,
+                "{\"flag\": true, \"off\": false}",
+                TestContext.Current.CancellationToken
+            );
             var container = ConfigurationFactory.CreateContainer();
             container.AddJsonFile(path, optional: false);
 
