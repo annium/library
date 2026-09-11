@@ -80,7 +80,10 @@ internal sealed class GatedRedisStorage : IRedisStorage
             var released = _setReleased!;
             _setEntered = null;
             entered.TrySetResult();
+            // the gate is the point: this await is meant to park here until the test calls ReleaseSet
+#pragma warning disable VSTHRD003
             await released.Task;
+#pragma warning restore VSTHRD003
         }
 
         _data[key] = value;
@@ -101,12 +104,16 @@ internal sealed class GatedRedisStorage : IRedisStorage
     /// <see cref="ReleaseSet"/> is called.
     /// </summary>
     /// <returns>A task that completes when the next <see cref="SetAsync"/> has entered and paused.</returns>
+    // arming is synchronous — the returned task is the gate signal, not the result of an async operation,
+    // so the Async suffix would be a lie; and handing out a foreign task is what a gate handle IS.
+#pragma warning disable VSTHRD200, VSTHRD003
     public Task ArmSetGate()
     {
         _setEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _setReleased = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         return _setEntered.Task;
     }
+#pragma warning restore VSTHRD200, VSTHRD003
 
     /// <summary>
     /// Releases the armed <see cref="SetAsync"/> so it completes its write.
