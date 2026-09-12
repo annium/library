@@ -60,8 +60,12 @@ public abstract class S3StorageTestBase : StorageTestBase, IAsyncLifetime
             if (_container is null)
             {
                 // Testcontainers' default MinIO (RELEASE.2023-01-31) predates the request checksums
-                // AWSSDK v4 sends by default and rejects them; this release understands them
-                var container = new MinioBuilder("minio/minio:RELEASE.2025-09-07T16-13-09Z").Build();
+                // AWSSDK v4 sends by default and rejects them; this release understands them.
+                // Pulled from quay.io, not Docker Hub: MinIO took the `minio/minio` Docker Hub
+                // repository down entirely — every tag with it, not just the old ones — and an
+                // unqualified name resolves there, so the pull fails with "repository does not exist".
+                // quay.io is MinIO's own registry and carries this exact tag.
+                var container = new MinioBuilder("quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z").Build();
                 await container.StartAsync(ct);
                 _container = container;
             }
