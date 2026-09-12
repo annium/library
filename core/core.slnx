@@ -66,6 +66,7 @@
   </Folder>
   <Folder Name="/Data/tests/">
     <Project Path="Data/tests/Annium.Data.Models.Tests/Annium.Data.Models.Tests.csproj" />
+    <Project Path="Data/tests/Annium.Data.Operations.Benchmark/Annium.Data.Operations.Benchmark.csproj" />
     <Project Path="Data/tests/Annium.Data.Operations.Serialization.Json.Tests/Annium.Data.Operations.Serialization.Json.Tests.csproj" />
     <Project Path="Data/tests/Annium.Data.Operations.Serialization.MessagePack.Tests/Annium.Data.Operations.Serialization.MessagePack.Tests.csproj" />
     <Project Path="Data/tests/Annium.Data.Operations.Serialization.Tests.Base/Annium.Data.Operations.Serialization.Tests.Base.csproj" />
@@ -138,6 +139,7 @@
     <Project Path="Logging/tests/Annium.Logging.File.Tests/Annium.Logging.File.Tests.csproj" />
     <Project Path="Logging/tests/Annium.Logging.InMemory.Tests/Annium.Logging.InMemory.Tests.csproj" />
     <Project Path="Logging/tests/Annium.Logging.Microsoft.Tests/Annium.Logging.Microsoft.Tests.csproj" />
+    <Project Path="Logging/tests/Annium.Logging.Shared.Benchmark/Annium.Logging.Shared.Benchmark.csproj" />
     <Project Path="Logging/tests/Annium.Logging.Shared.Tests/Annium.Logging.Shared.Tests.csproj" />
   </Folder>
   <Folder Name="/Net/" />
