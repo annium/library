@@ -315,4 +315,75 @@ public class ResultTest
         output.LabeledErrors.At("a").At(0).Is("va");
         output.LabeledErrors.At("b").At(0).Is("vb");
     }
+
+    /// <summary>
+    /// Two results that never carried an error are equal.
+    /// </summary>
+    /// <remarks>
+    /// A deliberate change. The error collections and their lock used to be eagerly created fields, and
+    /// the record's synthesized equality compares fields — so two distinct results were <em>never</em>
+    /// equal, whatever they contained. With the collections deferred to the first error, a result that
+    /// has none carries a null field, and two of them compare equal. That is closer to what the type
+    /// means than "never equal" was.
+    /// </remarks>
+    [Fact]
+    public void WithoutErrors_ResultsAreEqual()
+    {
+        Result.Create().Is(Result.Create());
+        Result.Create(5).Is(Result.Create(5));
+        Result.Create().Error("x").Clear().Equals(Result.Create()).IsFalse();
+    }
+
+    /// <summary>
+    /// Results that carry errors are compared by the identity of the errors they carry, not by the
+    /// errors themselves — so two results with the same errors are still not equal.
+    /// </summary>
+    /// <remarks>
+    /// The other half of the change above, and the reason it is asymmetric: equality became "equal when
+    /// neither has errors", not "equal when the errors match". Pinned so that nobody reads the test
+    /// above as a promise of structural equality over errors.
+    /// </remarks>
+    [Fact]
+    public void WithErrors_ResultsAreNotEqual_EvenWithTheSameErrors()
+    {
+        var left = Result.Create().Error("same");
+        var right = Result.Create().Error("same");
+
+        left.Equals(right).IsFalse();
+        left.PlainErrors.Has(1);
+        right.PlainErrors.Has(1);
+    }
+
+    /// <summary>
+    /// A result that never carried an error reads as empty through every accessor, and clearing it is a
+    /// no-op that still returns the instance for chaining.
+    /// </summary>
+    [Fact]
+    public void WithoutErrors_ReadsEmpty_AndClearsToItself()
+    {
+        var result = Result.Create();
+
+        result.IsOk.IsTrue();
+        result.HasErrors.IsFalse();
+        result.PlainErrors.IsEmpty();
+        result.PlainError.Is(string.Empty);
+        result.LabeledErrors.IsEmpty();
+        result.ErrorState().Is(Result.Create().ErrorState());
+        result.Clear().Is(result);
+    }
+
+    /// <summary>
+    /// Copying a result that carries no errors produces another that carries none — the path the
+    /// deferral exists for, since <c>CloneTo</c> passes empty error collections through <c>Errors</c>.
+    /// </summary>
+    [Fact]
+    public void Copy_OfResultWithoutErrors_StaysWithoutErrors()
+    {
+        var copy = Result.Create(7).Copy();
+
+        copy.IsOk.IsTrue();
+        copy.Data.Is(7);
+        copy.PlainErrors.IsEmpty();
+        copy.LabeledErrors.IsEmpty();
+    }
 }
