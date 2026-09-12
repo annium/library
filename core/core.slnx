@@ -138,6 +138,7 @@
     <Project Path="Logging/tests/Annium.Logging.File.Tests/Annium.Logging.File.Tests.csproj" />
     <Project Path="Logging/tests/Annium.Logging.InMemory.Tests/Annium.Logging.InMemory.Tests.csproj" />
     <Project Path="Logging/tests/Annium.Logging.Microsoft.Tests/Annium.Logging.Microsoft.Tests.csproj" />
+    <Project Path="Logging/tests/Annium.Logging.Shared.Benchmark/Annium.Logging.Shared.Benchmark.csproj" />
     <Project Path="Logging/tests/Annium.Logging.Shared.Tests/Annium.Logging.Shared.Tests.csproj" />
   </Folder>
   <Folder Name="/Net/" />
