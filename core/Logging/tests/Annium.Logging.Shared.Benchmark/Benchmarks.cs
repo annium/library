@@ -61,6 +61,11 @@ public class Benchmarks
     private readonly ILogSentryBridge _immediate;
 
     /// <summary>
+    /// Bridge of the route whose sink reads each message's structured data.
+    /// </summary>
+    private readonly ILogSentryBridge _readingData;
+
+    /// <summary>
     /// Bridge of the route that accepts everything through the background scheduler.
     /// </summary>
     private readonly ILogSentryBridge _background;
@@ -102,11 +107,13 @@ public class Benchmarks
     {
         var rejecting = Routes.Rejecting();
         var immediate = Routes.Immediate();
+        var readingData = Routes.ReadingData();
         var background = Routes.Background();
-        _providers = [rejecting, immediate, background];
+        _providers = [rejecting, immediate, readingData, background];
 
         _rejecting = rejecting.Resolve<ILogSentryBridge>();
         _immediate = immediate.Resolve<ILogSentryBridge>();
+        _readingData = readingData.Resolve<ILogSentryBridge>();
         _background = background.Resolve<ILogSentryBridge>();
         _subject = immediate.Resolve<ILogBridgeFactory>().Get("benchmark");
 
@@ -183,6 +190,21 @@ public class Benchmarks
     [Benchmark]
     public void Dispatch_Immediate() =>
         _immediate.Register("bench", "1", File, Member, 42, LogLevel.Info, Template1, null, ["abc123"]);
+
+    /// <summary>
+    /// The same message again, dispatched to a sink that reads its structured data the way the Graylog
+    /// and Seq sinks do.
+    /// </summary>
+    /// <remarks>
+    /// While the dictionary is built for every message, the gap from <see cref="Dispatch_Immediate"/> is
+    /// only the enumerator the read itself boxes — the build is already paid on both sides. Once the
+    /// dictionary is built lazily, the pair separates the other way: this one keeps paying for it because
+    /// it asks, and <c>Dispatch_Immediate</c> stops. So the signal is not the gap widening but
+    /// <c>Dispatch_Immediate</c> falling while this one holds.
+    /// </remarks>
+    [Benchmark]
+    public void Dispatch_ReadingData() =>
+        _readingData.Register("bench", "1", File, Member, 42, LogLevel.Info, Template1, null, ["abc123"]);
 
     /// <summary>
     /// The same message queued for a background pump. The difference from

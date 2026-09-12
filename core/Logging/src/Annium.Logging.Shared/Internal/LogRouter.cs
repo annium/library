@@ -10,16 +10,17 @@ internal class LogRouter<TContext>
     where TContext : class
 {
     /// <summary>
-    /// The collection of log schedulers to route messages to
+    /// The schedulers to route messages to. Indexed rather than enumerated: this runs once per message
+    /// per route, and enumerating through the interface boxed an enumerator every time.
     /// </summary>
-    private readonly IEnumerable<ILogScheduler<TContext>> _schedulers;
+    private readonly IReadOnlyList<ILogScheduler<TContext>> _schedulers;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LogRouter{TContext}"/> class and subscribes it to the sentry.
     /// </summary>
     /// <param name="sentry">Sentry whose messages are routed.</param>
     /// <param name="schedulers">Schedulers a routed message is offered to.</param>
-    public LogRouter(ILogSentry<TContext> sentry, IReadOnlyCollection<ILogScheduler<TContext>> schedulers)
+    public LogRouter(ILogSentry<TContext> sentry, IReadOnlyList<ILogScheduler<TContext>> schedulers)
     {
         sentry.SetHandler(Send);
         _schedulers = schedulers;
@@ -31,8 +32,13 @@ internal class LogRouter<TContext>
     /// <param name="msg">The log message to send</param>
     private void Send(LogMessage<TContext> msg)
     {
-        foreach (var scheduler in _schedulers)
+        var schedulers = _schedulers;
+
+        for (var i = 0; i < schedulers.Count; i++)
+        {
+            var scheduler = schedulers[i];
             if (scheduler.Filter(msg))
                 scheduler.Handle(msg);
+        }
     }
 }

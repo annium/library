@@ -26,6 +26,14 @@ internal static class Routes
     public static IServiceProviderContainer Immediate() => Build(route => route.ForAll().Use(new NoOpSink()));
 
     /// <summary>
+    /// A provider whose only route accepts everything and reads each message's structured data, the way
+    /// the Graylog and Seq sinks do. Adds, over <see cref="Immediate"/>, only that read — so the gap
+    /// between the two is what the structured-data dictionary costs.
+    /// </summary>
+    /// <returns>The built provider.</returns>
+    public static IServiceProviderContainer ReadingData() => Build(route => route.ForAll().Use(new DataReadingSink()));
+
+    /// <summary>
     /// A provider whose only route accepts everything and queues through the background scheduler.
     /// Adds, over <see cref="Rejecting"/>, the per-message lock and channel write — the baseline for
     /// the question of whether that lock is worth removing.

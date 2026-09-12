@@ -45,7 +45,7 @@ public static class ServiceContainerExtensions
         container
             .Add(new List<ILogScheduler<TContext>>())
             .AsSelf()
-            .As<IReadOnlyCollection<ILogScheduler<TContext>>>()
+            .As<IReadOnlyList<ILogScheduler<TContext>>>()
             .Singleton();
 
         container.Add<TContext>().AsSelf().Scoped();
