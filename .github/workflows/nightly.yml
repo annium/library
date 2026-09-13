@@ -45,7 +45,9 @@ jobs:
     with:
       recipe: ci-test-${{ matrix.group }}-nightly
       artifact: test-results-${{ matrix.group }}
-      environment: finance-live-read
+      # finance-live-read is gone with the live-read block the nightly recipes no longer run - see the
+      # note above ci-test-framework-nightly in the justfile. Requesting an environment whose secrets
+      # nothing reads only widens what the job can reach. It comes back with the block.
     secrets: inherit
 
   report:
