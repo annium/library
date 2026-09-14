@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Logging.Shared.Benchmark.Internal;
 using BenchmarkDotNet.Attributes;
+using NodaTime;
+using NodaTime.Text;
 
 namespace Annium.Logging.Shared.Benchmark;
 
@@ -49,6 +51,21 @@ public class Benchmarks
 
     /// <summary>A template with two placeholders.</summary>
     private const string Template2 = "order {id} filled at {price}";
+
+    /// <summary>The time-only stamp format, as LogMessageExtensions holds it.</summary>
+    private const string StampFormat = "HH:mm:ss.fff";
+
+    /// <summary>The moment a stamp is taken of, built once.</summary>
+    private static readonly LocalDateTime _stamp = (
+        Instant.FromUtc(2026, 9, 13, 14, 5, 6) + Duration.FromMilliseconds(789)
+    )
+        .InUtc()
+        .LocalDateTime;
+
+    /// <summary>The stamp format, resolved once - as LogMessageExtensions now holds it.</summary>
+    private static readonly LocalDateTimePattern _stampPattern = LocalDateTimePattern.CreateWithInvariantCulture(
+        StampFormat
+    );
 
     /// <summary>
     /// Bridge of the route that rejects everything — the producer on its own.
@@ -233,4 +250,20 @@ public class Benchmarks
     /// <returns>Whether the route accepts <see cref="LogLevel.Info"/>.</returns>
     [Benchmark]
     public bool ProbeLevel() => _immediate.IsLevelEnabled(LogLevel.Info);
+
+    /// <summary>
+    /// The timestamp a written message carries, from a pattern resolved once - what
+    /// <see cref="LogMessageExtensions"/> now does.
+    /// </summary>
+    /// <returns>The formatted stamp.</returns>
+    [Benchmark]
+    public string Stamp_HeldPattern() => _stampPattern.Format(_stamp);
+
+    /// <summary>
+    /// What the same stamp cost before: a format-info lookup for the current culture and a pattern
+    /// lookup within it, on every message written.
+    /// </summary>
+    /// <returns>The formatted stamp.</returns>
+    [Benchmark]
+    public string Stamp_ToStringPerCall() => _stamp.ToString(StampFormat, null);
 }

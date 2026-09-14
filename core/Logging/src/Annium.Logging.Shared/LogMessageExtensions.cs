@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using NodaTime;
+using NodaTime.Text;
 
 namespace Annium.Logging.Shared;
 
@@ -19,6 +20,32 @@ public static class LogMessageExtensions
     /// Format for a time-only stamp.
     /// </summary>
     private const string TimeFormat = "HH:mm:ss.fff";
+
+    /// <summary>
+    /// The two stamp formats, resolved once.
+    /// </summary>
+    /// <remarks>
+    /// <c>LocalDateTime.ToString(format, null)</c> resolves the format info for the current culture and
+    /// then looks the pattern up in that culture's pattern cache, on every call - which is once per
+    /// message written. Holding the pattern skips both lookups.
+    ///
+    /// Invariant, and that is a deliberate change of behaviour rather than a detail of the refactor. In a
+    /// NodaTime pattern <c>:</c> is the time separator and the <c>.</c> before <c>fff</c> is the decimal
+    /// separator, so both follow the culture: the same message reads <c>14:05:06.789</c> on most machines
+    /// and <c>14.05.06.789</c> under fi-FI. A timestamp whose shape depends on where the process happens
+    /// to run is worse than one that does not, and for the fi-FI form the date and time separators
+    /// collide. Pinned to invariant so every host writes the same stamp.
+    /// </remarks>
+    private static readonly LocalDateTimePattern _dateTimePattern = LocalDateTimePattern.CreateWithInvariantCulture(
+        DateTimeFormat
+    );
+
+    /// <summary>
+    /// Time-only stamp format, resolved once - see <see cref="_dateTimePattern" />.
+    /// </summary>
+    private static readonly LocalDateTimePattern _timePattern = LocalDateTimePattern.CreateWithInvariantCulture(
+        TimeFormat
+    );
 
     /// <summary>
     /// The current system time zone
@@ -81,7 +108,7 @@ public static class LogMessageExtensions
     public static string LocalDateTime<TContext>(LogMessage<TContext> m)
         where TContext : class
     {
-        return m.Instant.InZone(_currentTz).LocalDateTime.ToString(DateTimeFormat, null);
+        return _dateTimePattern.Format(m.Instant.InZone(_currentTz).LocalDateTime);
     }
 
     /// <summary>
@@ -94,7 +121,7 @@ public static class LogMessageExtensions
     public static string LocalTime<TContext>(LogMessage<TContext> m)
         where TContext : class
     {
-        return m.Instant.InZone(_currentTz).LocalDateTime.ToString(TimeFormat, null);
+        return _timePattern.Format(m.Instant.InZone(_currentTz).LocalDateTime);
     }
 
     /// <summary>
@@ -107,7 +134,7 @@ public static class LogMessageExtensions
     public static string UtcDateTime<TContext>(LogMessage<TContext> m)
         where TContext : class
     {
-        return m.Instant.InZone(_utcTz).LocalDateTime.ToString(DateTimeFormat, null);
+        return _dateTimePattern.Format(m.Instant.InZone(_utcTz).LocalDateTime);
     }
 
     /// <summary>
@@ -120,6 +147,6 @@ public static class LogMessageExtensions
     public static string UtcTime<TContext>(LogMessage<TContext> m)
         where TContext : class
     {
-        return m.Instant.InZone(_utcTz).LocalDateTime.ToString(TimeFormat, null);
+        return _timePattern.Format(m.Instant.InZone(_utcTz).LocalDateTime);
     }
 }

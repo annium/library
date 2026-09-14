@@ -226,25 +226,25 @@ ci-test-adapters:
     just test-tools
     just test-finance
 
-# nightly variants: the same groups, with the finance read block no longer filtered out. They differ
-# from the day recipes in exactly that one line. There is no nightly variant of the write block.
+# nightly variants: currently identical to the day recipes in both groups.
+#
+# The point of them was to drop the filter on the finance read block, so that once a night the providers
+# were exercised against the real exchanges. That is off: the read block hangs. Three nightlies in a row
+# (2026-09-09, -10, -11) ended with `test (adapters)` cancelled at the 45-minute job timeout while
+# `test (framework)` finished in five minutes, and the manual run on 2026-09-13 did the same. A hanging
+# test does not fail - it cancels the job, and "cancelled" does not read as "broken", which is why this
+# went unnoticed for a week and why the MinIO failure on 2026-09-12 was the first thing in that time to
+# reach the tests at all.
+#
+# Restoring it means finding which live-read test does not return and giving it a deadline, so that an
+# unreachable exchange fails loudly instead of eating the run. Tracked in the umbrella's open-debts
+# backlog; until then the nightly is the day suite on a schedule, which at least gives a signal.
 
 # identical to ci-test-framework - no finance in this group
 ci-test-framework-nightly: ci-test-framework
 
-ci-test-adapters-nightly:
-    #!/usr/bin/env bash
-    set -e
-    echo "=== ci-test-adapters-nightly ==="
-    just setup
-    just build-integrations
-    just build-finance
-    just build-tools
-    just test-integrations
-    just test-tools
-    echo "=== test finance (offline + read) ==="
-    dotnet test --solution finance/finance.slnx -c Release --no-build --report-xunit-trx \
-        -- --filter-not-trait "block=write"
+# identical to ci-test-adapters until the live-read block is fit to run unattended - see above
+ci-test-adapters-nightly: ci-test-adapters
 
 # everything ci-release does except the two irreversible steps: no tag is created, nothing is
 # pushed. Same version either way - with no v1.2.x tag yet, get-version returns the same number
