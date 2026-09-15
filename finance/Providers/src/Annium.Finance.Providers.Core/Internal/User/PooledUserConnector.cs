@@ -64,29 +64,30 @@ internal sealed class PooledUserConnector(IUserConnector inner, Func<ValueTask> 
     /// <param name="position">The position to set leverage on.</param>
     /// <param name="leverage">The leverage to set.</param>
     /// <returns>The outcome of the operation.</returns>
-    public Task<UserResult> SetLeverageAsync(PositionModel position, decimal leverage) =>
+    public ValueTask<UserResult> SetLeverageAsync(PositionModel position, decimal leverage) =>
         inner.SetLeverageAsync(position, leverage);
 
     /// <summary>Places an order.</summary>
     /// <param name="request">The order to place.</param>
     /// <returns>The placed order, or the failure that prevented it.</returns>
-    public Task<UserResult<OrderModel?>> InitOrderAsync(IInitOrderRequest request) => inner.InitOrderAsync(request);
+    public ValueTask<UserResult<OrderModel?>> InitOrderAsync(IInitOrderRequest request) =>
+        inner.InitOrderAsync(request);
 
     /// <summary>Modifies an existing order.</summary>
     /// <param name="request">The modification to apply.</param>
     /// <returns>The modified order, or the failure that prevented it.</returns>
-    public Task<UserResult<OrderModel?>> ModifyOrderAsync(IModifyOrderRequest request) =>
+    public ValueTask<UserResult<OrderModel?>> ModifyOrderAsync(IModifyOrderRequest request) =>
         inner.ModifyOrderAsync(request);
 
     /// <summary>Cancels an order.</summary>
     /// <param name="request">The order to cancel.</param>
     /// <returns>The outcome of the operation.</returns>
-    public Task<UserResult> CancelOrderAsync(ICancelOrderRequest request) => inner.CancelOrderAsync(request);
+    public ValueTask<UserResult> CancelOrderAsync(ICancelOrderRequest request) => inner.CancelOrderAsync(request);
 
     /// <summary>Cancels every open order on a symbol.</summary>
     /// <param name="symbol">The symbol to cancel orders on.</param>
     /// <returns>The outcome of the operation.</returns>
-    public Task<UserResult> CancelAllOrdersAsync(string symbol) => inner.CancelAllOrdersAsync(symbol);
+    public ValueTask<UserResult> CancelAllOrdersAsync(string symbol) => inner.CancelAllOrdersAsync(symbol);
 
     /// <summary>
     /// Gives the lease back. The shared connector survives until the last lease is returned.

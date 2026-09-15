@@ -16,7 +16,7 @@ public static class UserResultTestExtensions
     /// <typeparam name="T">The type of the result's data.</typeparam>
     /// <param name="task">The pending user result.</param>
     /// <returns>The result's data.</returns>
-    public static async Task<T> UnwrapAsync<T>(this Task<UserResult<T?>> task)
+    public static async Task<T> UnwrapAsync<T>(this ValueTask<UserResult<T?>> task)
         where T : class
     {
 #pragma warning disable VSTHRD003
@@ -37,7 +37,7 @@ public static class UserResultTestExtensions
     /// </summary>
     /// <param name="task">The pending user result.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task UnwrapAsync(this Task<UserResult> task)
+    public static async Task UnwrapAsync(this ValueTask<UserResult> task)
     {
 #pragma warning disable VSTHRD003
         var result = await task;
@@ -81,7 +81,7 @@ public static class UserResultTestExtensions
     /// <typeparam name="T">The type of the result's data.</typeparam>
     /// <param name="task">The pending user result.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task EnsureFailedAsync<T>(this Task<UserResult<T>> task)
+    public static async Task EnsureFailedAsync<T>(this ValueTask<UserResult<T>> task)
     {
 #pragma warning disable VSTHRD003
         var result = await task;
@@ -96,7 +96,7 @@ public static class UserResultTestExtensions
     /// </summary>
     /// <param name="task">The pending user result.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task EnsureFailedAsync(this Task<UserResult> task)
+    public static async Task EnsureFailedAsync(this ValueTask<UserResult> task)
     {
 #pragma warning disable VSTHRD003
         var result = await task;

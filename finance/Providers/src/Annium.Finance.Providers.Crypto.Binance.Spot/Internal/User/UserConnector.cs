@@ -43,7 +43,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <param name="position">The position to change leverage for.</param>
     /// <param name="leverage">The leverage to set.</param>
     /// <returns>Does not return; always throws.</returns>
-    public Task<UserResult> SetLeverageAsync(PositionModel position, decimal leverage)
+    public ValueTask<UserResult> SetLeverageAsync(PositionModel position, decimal leverage)
     {
         throw new NotImplementedException();
     }
@@ -51,7 +51,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <summary>Not implemented yet.</summary>
     /// <param name="request">The order parameters.</param>
     /// <returns>Does not return; always throws.</returns>
-    public Task<UserResult<OrderModel?>> InitOrderAsync(IInitOrderRequest request)
+    public ValueTask<UserResult<OrderModel?>> InitOrderAsync(IInitOrderRequest request)
     {
         throw new NotImplementedException();
     }
@@ -59,7 +59,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <summary>Not implemented yet.</summary>
     /// <param name="request">The modification parameters, including the order being modified.</param>
     /// <returns>Does not return; always throws.</returns>
-    public Task<UserResult<OrderModel?>> ModifyOrderAsync(IModifyOrderRequest request)
+    public ValueTask<UserResult<OrderModel?>> ModifyOrderAsync(IModifyOrderRequest request)
     {
         throw new NotImplementedException();
     }
@@ -67,7 +67,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <summary>Not implemented yet.</summary>
     /// <param name="order">Identifies the order to cancel.</param>
     /// <returns>Does not return; always throws.</returns>
-    public Task<UserResult> CancelOrderAsync(ICancelOrderRequest order)
+    public ValueTask<UserResult> CancelOrderAsync(ICancelOrderRequest order)
     {
         throw new NotImplementedException();
     }
@@ -75,7 +75,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <summary>Not implemented yet.</summary>
     /// <param name="symbol">The instrument symbol to cancel orders for.</param>
     /// <returns>Does not return; always throws.</returns>
-    public Task<UserResult> CancelAllOrdersAsync(string symbol)
+    public ValueTask<UserResult> CancelAllOrdersAsync(string symbol)
     {
         throw new NotImplementedException();
     }

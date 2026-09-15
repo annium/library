@@ -167,36 +167,36 @@ public class UserConnectorFactoryTests : ProvidersTestBase
         /// <param name="position">Ignored.</param>
         /// <param name="leverage">Ignored.</param>
         /// <returns>An unsupported result.</returns>
-        public Task<UserResult> SetLeverageAsync(PositionModel position, decimal leverage)
+        public ValueTask<UserResult> SetLeverageAsync(PositionModel position, decimal leverage)
         {
             OnError(new ConnectorError("unused"));
 
-            return Task.FromResult(UserResult.New(UserOperationStatus.UnknownError, "unused"));
+            return ValueTask.FromResult(UserResult.New(UserOperationStatus.UnknownError, "unused"));
         }
 
         /// <summary>Not used by this test.</summary>
         /// <param name="request">Ignored.</param>
         /// <returns>An unsupported result.</returns>
-        public Task<UserResult<OrderModel?>> InitOrderAsync(IInitOrderRequest request) =>
-            Task.FromResult(UserResult.New<OrderModel?>(UserOperationStatus.UnknownError, null, "unused"));
+        public ValueTask<UserResult<OrderModel?>> InitOrderAsync(IInitOrderRequest request) =>
+            ValueTask.FromResult(UserResult.New<OrderModel?>(UserOperationStatus.UnknownError, null, "unused"));
 
         /// <summary>Not used by this test.</summary>
         /// <param name="request">Ignored.</param>
         /// <returns>An unsupported result.</returns>
-        public Task<UserResult<OrderModel?>> ModifyOrderAsync(IModifyOrderRequest request) =>
-            Task.FromResult(UserResult.New<OrderModel?>(UserOperationStatus.UnknownError, null, "unused"));
+        public ValueTask<UserResult<OrderModel?>> ModifyOrderAsync(IModifyOrderRequest request) =>
+            ValueTask.FromResult(UserResult.New<OrderModel?>(UserOperationStatus.UnknownError, null, "unused"));
 
         /// <summary>Not used by this test.</summary>
         /// <param name="request">Ignored.</param>
         /// <returns>An unsupported result.</returns>
-        public Task<UserResult> CancelOrderAsync(ICancelOrderRequest request) =>
-            Task.FromResult(UserResult.New(UserOperationStatus.UnknownError, "unused"));
+        public ValueTask<UserResult> CancelOrderAsync(ICancelOrderRequest request) =>
+            ValueTask.FromResult(UserResult.New(UserOperationStatus.UnknownError, "unused"));
 
         /// <summary>Not used by this test.</summary>
         /// <param name="symbol">Ignored.</param>
         /// <returns>An unsupported result.</returns>
-        public Task<UserResult> CancelAllOrdersAsync(string symbol) =>
-            Task.FromResult(UserResult.New(UserOperationStatus.UnknownError, "unused"));
+        public ValueTask<UserResult> CancelAllOrdersAsync(string symbol) =>
+            ValueTask.FromResult(UserResult.New(UserOperationStatus.UnknownError, "unused"));
 
         /// <summary>Does nothing.</summary>
         /// <returns>A completed task.</returns>

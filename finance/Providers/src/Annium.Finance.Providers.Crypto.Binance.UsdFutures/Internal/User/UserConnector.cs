@@ -168,7 +168,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <param name="position">The position to change leverage for.</param>
     /// <param name="leverage">The leverage to set.</param>
     /// <returns>An OK result, or a not-connected failure if the connector is currently disconnected.</returns>
-    public async Task<UserResult> SetLeverageAsync(PositionModel position, decimal leverage)
+    public async ValueTask<UserResult> SetLeverageAsync(PositionModel position, decimal leverage)
     {
         if (Status is not ConnectorStatus.Connected)
         {
@@ -197,7 +197,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// </summary>
     /// <param name="request">The order parameters.</param>
     /// <returns>A result carrying the placed order on success, or null data with a non-success status on failure.</returns>
-    public async Task<UserResult<OrderModel?>> InitOrderAsync(IInitOrderRequest request)
+    public async ValueTask<UserResult<OrderModel?>> InitOrderAsync(IInitOrderRequest request)
     {
         if (Status is not ConnectorStatus.Connected)
         {
@@ -233,7 +233,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// </summary>
     /// <param name="request">The modification parameters, including the order being modified.</param>
     /// <returns>A result carrying the resulting order on success, or null data with a non-success status on failure.</returns>
-    public async Task<UserResult<OrderModel?>> ModifyOrderAsync(IModifyOrderRequest request)
+    public async ValueTask<UserResult<OrderModel?>> ModifyOrderAsync(IModifyOrderRequest request)
     {
         if (Status is not ConnectorStatus.Connected)
         {
@@ -288,7 +288,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// </summary>
     /// <param name="request">Identifies the order to cancel.</param>
     /// <returns>A result indicating whether the cancellation succeeded.</returns>
-    public async Task<UserResult> CancelOrderAsync(ICancelOrderRequest request)
+    public async ValueTask<UserResult> CancelOrderAsync(ICancelOrderRequest request)
     {
         if (Status is not ConnectorStatus.Connected)
         {
@@ -323,7 +323,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// </summary>
     /// <param name="symbol">The instrument symbol to cancel orders for.</param>
     /// <returns>A result indicating whether the cancellation succeeded.</returns>
-    public async Task<UserResult> CancelAllOrdersAsync(string symbol)
+    public async ValueTask<UserResult> CancelAllOrdersAsync(string symbol)
     {
         if (Status is not ConnectorStatus.Connected)
         {
