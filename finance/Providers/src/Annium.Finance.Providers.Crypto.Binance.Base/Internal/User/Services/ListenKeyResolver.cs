@@ -119,7 +119,9 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
     /// <returns>A value task representing the asynchronous request.</returns>
     private async ValueTask GetListenKeyAsync()
     {
-        UserResult<ListenKey?>? result = null;
+        // default until the request answers, which the catch below tells apart by the status: an outcome
+        // nothing produced is None, and no operation ever returns that
+        var result = default(UserResult<ListenKey?>);
         try
         {
             this.Trace("start");
@@ -150,7 +152,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
 
             HandleFailure(
                 UserOperationStatus.UnknownError,
-                result is not null
+                result.Status is not UserOperationStatus.None
                     ? $"Listen key processing error for response '{result.Data}': {e}"
                     : $"Listen key processing error: {e}"
             );

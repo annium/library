@@ -24,6 +24,7 @@ public class ResultStateTests
     /// <param name="isAborted">Whether the caller abandoned the request.</param>
     /// <param name="isFailure">Whether the exchange answered, and refused.</param>
     [Theory]
+    [InlineData(MarketOperationStatus.None, false, false, false, true)]
     [InlineData(MarketOperationStatus.Ok, true, false, false, false)]
     [InlineData(MarketOperationStatus.NetworkError, false, true, false, false)]
     [InlineData(MarketOperationStatus.Aborted, false, false, true, false)]
@@ -128,6 +129,7 @@ public class ResultStateTests
     /// <param name="isAborted">Whether the caller abandoned the request.</param>
     /// <param name="isFailure">Whether the exchange answered, and refused.</param>
     [Theory]
+    [InlineData(UserOperationStatus.None, false, false, false, true)]
     [InlineData(UserOperationStatus.Ok, true, false, false, false)]
     [InlineData(UserOperationStatus.NetworkError, false, true, false, false)]
     [InlineData(UserOperationStatus.Aborted, false, false, true, false)]

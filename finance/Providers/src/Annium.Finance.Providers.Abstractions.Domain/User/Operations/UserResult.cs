@@ -6,7 +6,25 @@ namespace Annium.Finance.Providers.Abstractions.Domain.User.Operations;
 /// <summary>
 /// Represents the outcome of a user (account/trading) provider operation that returns no data.
 /// </summary>
-public sealed record UserResult : IBaseResult
+/// <remarks>
+/// <para>
+/// A value type: an outcome is a handful of fields describing what happened, and every operation produces
+/// one, so paying for an object to carry it is paying per operation for nothing. Measured at 40 bytes each
+/// as a record class; as a struct returned through a <c>ValueTask</c> that completes synchronously, an
+/// entire operation allocates nothing at all.
+/// </para>
+/// <para>
+/// The four flags are computed from <see cref="Status"/> rather than stored. They were stored while this
+/// was a class, which put the same fact in five places; the struct is the same size either way, because the
+/// enum and the flags share one alignment slot.
+/// </para>
+/// <para>
+/// Being a value type, this has an instance nothing constructed — <c>default</c> — which a class did not.
+/// <see cref="UserOperationStatus.None"/> is zero so that instance reads as a failure, and
+/// <see cref="Message"/> reads through a null check for the same reason.
+/// </para>
+/// </remarks>
+public readonly record struct UserResult : IBaseResult
 {
     /// <summary>Creates a successful result carrying no message.</summary>
     /// <returns>A <see cref="UserResult"/> with <see cref="UserOperationStatus.Ok"/> status.</returns>
@@ -67,34 +85,37 @@ public sealed record UserResult : IBaseResult
         new(result.Status, data, result.Message);
 
     /// <summary>Gets a value indicating whether the operation failed because of a network-level error.</summary>
-    public bool IsNetworkError { get; }
+    public bool IsNetworkError => Status is UserOperationStatus.NetworkError;
 
     /// <summary>Gets a value indicating whether the operation completed successfully.</summary>
-    public bool IsSuccess { get; }
+    public bool IsSuccess => Status is UserOperationStatus.Ok;
 
     /// <summary>Gets a value indicating whether the operation was aborted before it could complete.</summary>
-    public bool IsAborted { get; }
+    public bool IsAborted => Status is UserOperationStatus.Aborted;
 
     /// <summary>Gets a value indicating whether the operation failed for a reason other than a network error or abort.</summary>
-    public bool IsFailure { get; }
+    public bool IsFailure => !IsNetworkError && !IsAborted && !IsSuccess;
 
     /// <summary>Gets the outcome status of the operation.</summary>
     public UserOperationStatus Status { get; }
 
     /// <summary>Gets the message describing the outcome, typically an error detail; empty on success.</summary>
-    public string Message { get; }
+    /// <remarks>
+    /// Reads through a null check because this is a value type: on an instance nothing constructed the
+    /// backing field is null, and the declared type says it is not.
+    /// </remarks>
+    public string Message
+    {
+        get => field ?? string.Empty;
+    }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UserResult"/> class.
+    /// Initializes a new instance of the <see cref="UserResult"/> struct.
     /// </summary>
     /// <param name="status">The outcome status of the operation.</param>
     /// <param name="message">A message describing the outcome, typically an error detail.</param>
     private UserResult(UserOperationStatus status, string message)
     {
-        IsNetworkError = status is UserOperationStatus.NetworkError;
-        IsAborted = status is UserOperationStatus.Aborted;
-        IsSuccess = status is UserOperationStatus.Ok;
-        IsFailure = !IsNetworkError && !IsAborted && !IsSuccess;
         Status = status;
         Message = message;
     }
@@ -108,20 +129,21 @@ public sealed record UserResult : IBaseResult
 /// Represents the outcome of a user (account/trading) provider operation that returns data of type <typeparamref name="T"/>.
 /// </summary>
 /// <typeparam name="T">The type of data returned by the operation.</typeparam>
-public sealed record UserResult<T> : IBaseResult<T>
+/// <remarks>See <see cref="UserResult"/> for why this is a value type and what <c>default</c> reads as.</remarks>
+public readonly record struct UserResult<T> : IBaseResult<T>
 {
     /// <summary>Gets a value indicating whether the operation failed because of a network-level error.</summary>
-    public bool IsNetworkError { get; }
+    public bool IsNetworkError => Status is UserOperationStatus.NetworkError;
 
     /// <summary>Gets a value indicating whether the operation was aborted before it could complete.</summary>
-    public bool IsAborted { get; }
+    public bool IsAborted => Status is UserOperationStatus.Aborted;
 
     /// <summary>Gets a value indicating whether the operation completed successfully and <see cref="Data"/> is populated.</summary>
     [MemberNotNullWhen(true, nameof(Data))]
-    public bool IsSuccess { get; }
+    public bool IsSuccess => Status is UserOperationStatus.Ok;
 
     /// <summary>Gets a value indicating whether the operation failed for a reason other than a network error or abort.</summary>
-    public bool IsFailure { get; }
+    public bool IsFailure => !IsNetworkError && !IsAborted && !IsSuccess;
 
     /// <summary>Gets the outcome status of the operation.</summary>
     public UserOperationStatus Status { get; }
@@ -130,20 +152,23 @@ public sealed record UserResult<T> : IBaseResult<T>
     public T? Data { get; }
 
     /// <summary>Gets the message describing the outcome, typically an error detail; empty on success.</summary>
-    public string Message { get; }
+    /// <remarks>
+    /// Reads through a null check because this is a value type: on an instance nothing constructed the
+    /// backing field is null, and the declared type says it is not.
+    /// </remarks>
+    public string Message
+    {
+        get => field ?? string.Empty;
+    }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UserResult{T}"/> class.
+    /// Initializes a new instance of the <see cref="UserResult{T}"/> struct.
     /// </summary>
     /// <param name="status">The outcome status of the operation.</param>
     /// <param name="data">The data returned by the operation.</param>
     /// <param name="message">A message describing the outcome, typically an error detail.</param>
     internal UserResult(UserOperationStatus status, T? data, string message)
     {
-        IsNetworkError = status is UserOperationStatus.NetworkError;
-        IsAborted = status is UserOperationStatus.Aborted;
-        IsSuccess = status is UserOperationStatus.Ok;
-        IsFailure = !IsNetworkError && !IsAborted && !IsSuccess;
         Status = status;
         Data = data;
         Message = message;

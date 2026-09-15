@@ -6,7 +6,13 @@ namespace Annium.Finance.Providers.Abstractions.Domain.Market.Operations;
 /// <summary>
 /// Represents the outcome of a market data provider operation that returns no data.
 /// </summary>
-public sealed record MarketResult : IBaseResult
+/// <remarks>
+/// A value type, for the reasons written out on <c>UserResult</c> — the other half of this pair, which this
+/// one matches field for field. Notably this one is also yielded per page from
+/// <c>IMarketProvider.LoadCandlesAsync</c>, so a history fetch allocated one result per page and now
+/// allocates none.
+/// </remarks>
+public readonly record struct MarketResult : IBaseResult
 {
     /// <summary>Creates a successful result carrying no message.</summary>
     /// <returns>A <see cref="MarketResult"/> with <see cref="MarketOperationStatus.Ok"/> status.</returns>
@@ -68,34 +74,37 @@ public sealed record MarketResult : IBaseResult
         new(result.Status, data, result.Message);
 
     /// <summary>Gets a value indicating whether the operation failed because of a network-level error.</summary>
-    public bool IsNetworkError { get; }
+    public bool IsNetworkError => Status is MarketOperationStatus.NetworkError;
 
     /// <summary>Gets a value indicating whether the operation was aborted before it could complete.</summary>
-    public bool IsAborted { get; }
+    public bool IsAborted => Status is MarketOperationStatus.Aborted;
 
     /// <summary>Gets a value indicating whether the operation completed successfully.</summary>
-    public bool IsSuccess { get; }
+    public bool IsSuccess => Status is MarketOperationStatus.Ok;
 
     /// <summary>Gets a value indicating whether the operation failed for a reason other than a network error or abort.</summary>
-    public bool IsFailure { get; }
+    public bool IsFailure => !IsNetworkError && !IsAborted && !IsSuccess;
 
     /// <summary>Gets the outcome status of the operation.</summary>
     public MarketOperationStatus Status { get; }
 
     /// <summary>Gets the message describing the outcome, typically an error detail; empty on success.</summary>
-    public string Message { get; }
+    /// <remarks>
+    /// Reads through a null check because this is a value type: on an instance nothing constructed the
+    /// backing field is null, and the declared type says it is not.
+    /// </remarks>
+    public string Message
+    {
+        get => field ?? string.Empty;
+    }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MarketResult"/> class.
+    /// Initializes a new instance of the <see cref="MarketResult"/> struct.
     /// </summary>
     /// <param name="status">The outcome status of the operation.</param>
     /// <param name="message">A message describing the outcome, typically an error detail.</param>
     private MarketResult(MarketOperationStatus status, string message)
     {
-        IsNetworkError = status is MarketOperationStatus.NetworkError;
-        IsAborted = status is MarketOperationStatus.Aborted;
-        IsSuccess = status is MarketOperationStatus.Ok;
-        IsFailure = !IsNetworkError && !IsAborted && !IsSuccess;
         Status = status;
         Message = message;
     }
@@ -109,20 +118,21 @@ public sealed record MarketResult : IBaseResult
 /// Represents the outcome of a market data provider operation that returns data of type <typeparamref name="T"/>.
 /// </summary>
 /// <typeparam name="T">The type of data returned by the operation.</typeparam>
-public sealed record MarketResult<T> : IBaseResult<T>
+/// <remarks>See <see cref="MarketResult"/> for why this is a value type and what <c>default</c> reads as.</remarks>
+public readonly record struct MarketResult<T> : IBaseResult<T>
 {
     /// <summary>Gets a value indicating whether the operation failed because of a network-level error.</summary>
-    public bool IsNetworkError { get; }
+    public bool IsNetworkError => Status is MarketOperationStatus.NetworkError;
 
     /// <summary>Gets a value indicating whether the operation was aborted before it could complete.</summary>
-    public bool IsAborted { get; }
+    public bool IsAborted => Status is MarketOperationStatus.Aborted;
 
     /// <summary>Gets a value indicating whether the operation completed successfully and <see cref="Data"/> is populated.</summary>
     [MemberNotNullWhen(true, nameof(Data))]
-    public bool IsSuccess { get; }
+    public bool IsSuccess => Status is MarketOperationStatus.Ok;
 
     /// <summary>Gets a value indicating whether the operation failed for a reason other than a network error or abort.</summary>
-    public bool IsFailure { get; }
+    public bool IsFailure => !IsNetworkError && !IsAborted && !IsSuccess;
 
     /// <summary>Gets the outcome status of the operation.</summary>
     public MarketOperationStatus Status { get; }
@@ -131,20 +141,23 @@ public sealed record MarketResult<T> : IBaseResult<T>
     public T? Data { get; }
 
     /// <summary>Gets the message describing the outcome, typically an error detail; empty on success.</summary>
-    public string Message { get; }
+    /// <remarks>
+    /// Reads through a null check because this is a value type: on an instance nothing constructed the
+    /// backing field is null, and the declared type says it is not.
+    /// </remarks>
+    public string Message
+    {
+        get => field ?? string.Empty;
+    }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MarketResult{T}"/> class.
+    /// Initializes a new instance of the <see cref="MarketResult{T}"/> struct.
     /// </summary>
     /// <param name="status">The outcome status of the operation.</param>
     /// <param name="data">The data returned by the operation.</param>
     /// <param name="message">A message describing the outcome, typically an error detail.</param>
     internal MarketResult(MarketOperationStatus status, T? data, string message)
     {
-        IsNetworkError = status is MarketOperationStatus.NetworkError;
-        IsAborted = status is MarketOperationStatus.Aborted;
-        IsSuccess = status is MarketOperationStatus.Ok;
-        IsFailure = !IsNetworkError && !IsAborted && !IsSuccess;
         Status = status;
         Data = data;
         Message = message;

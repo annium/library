@@ -8,6 +8,16 @@ namespace Annium.Finance.Providers.Abstractions.Domain.Market.Operations;
 [AutoMapped]
 public enum MarketOperationStatus
 {
+    /// <summary>
+    /// No outcome was recorded. Never produced by an operation: it is what a <see cref="MarketResult"/> that
+    /// nothing initialized reads as.
+    /// </summary>
+    /// <remarks>
+    /// First, and therefore zero, on purpose — see <c>UserOperationStatus.None</c> for the reasoning, which
+    /// is the same on this half of the pair.
+    /// </remarks>
+    None,
+
     /// <summary>The operation completed successfully.</summary>
     Ok,
 

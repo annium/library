@@ -244,6 +244,7 @@
   </Folder>
   <Folder Name="/finance/Providers/tests/">
     <Project Path="finance/Providers/tests/Annium.Finance.Providers.Abstractions.Domain.Tests/Annium.Finance.Providers.Abstractions.Domain.Tests.csproj" />
+    <Project Path="finance/Providers/tests/Annium.Finance.Providers.Benchmark/Annium.Finance.Providers.Benchmark.csproj" />
     <Project Path="finance/Providers/tests/Annium.Finance.Providers.Core.Tests/Annium.Finance.Providers.Core.Tests.csproj" />
     <Project Path="finance/Providers/tests/Annium.Finance.Providers.Crypto.Binance.Base.Tests/Annium.Finance.Providers.Crypto.Binance.Base.Tests.csproj" />
     <Project Path="finance/Providers/tests/Annium.Finance.Providers.Crypto.Binance.Spot.Tests/Annium.Finance.Providers.Crypto.Binance.Spot.Tests.csproj" />

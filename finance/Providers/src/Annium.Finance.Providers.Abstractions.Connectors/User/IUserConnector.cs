@@ -58,14 +58,14 @@ public interface IUserConnector : IConnectorBase
     /// <param name="position">The position to change leverage for.</param>
     /// <param name="leverage">The leverage to set.</param>
     /// <returns>A result indicating whether the leverage change succeeded.</returns>
-    Task<UserResult> SetLeverageAsync(PositionModel position, decimal leverage);
+    ValueTask<UserResult> SetLeverageAsync(PositionModel position, decimal leverage);
 
     /// <summary>
     /// Places a new order.
     /// </summary>
     /// <param name="request">The order parameters.</param>
     /// <returns>A result carrying the placed order on success, or null data with a non-success status on failure.</returns>
-    Task<UserResult<OrderModel?>> InitOrderAsync(IInitOrderRequest request);
+    ValueTask<UserResult<OrderModel?>> InitOrderAsync(IInitOrderRequest request);
 
     /// <summary>
     /// Modifies an existing order. Depending on the order type and the provider, this may amend the order in
@@ -73,19 +73,19 @@ public interface IUserConnector : IConnectorBase
     /// </summary>
     /// <param name="request">The modification parameters, including the order being modified.</param>
     /// <returns>A result carrying the resulting order on success, or null data with a non-success status on failure.</returns>
-    Task<UserResult<OrderModel?>> ModifyOrderAsync(IModifyOrderRequest request);
+    ValueTask<UserResult<OrderModel?>> ModifyOrderAsync(IModifyOrderRequest request);
 
     /// <summary>
     /// Cancels an existing order.
     /// </summary>
     /// <param name="request">Identifies the order to cancel.</param>
     /// <returns>A result indicating whether the cancellation succeeded.</returns>
-    Task<UserResult> CancelOrderAsync(ICancelOrderRequest request);
+    ValueTask<UserResult> CancelOrderAsync(ICancelOrderRequest request);
 
     /// <summary>
     /// Cancels all open orders for the given symbol.
     /// </summary>
     /// <param name="symbol">The instrument symbol to cancel orders for.</param>
     /// <returns>A result indicating whether the cancellation succeeded.</returns>
-    Task<UserResult> CancelAllOrdersAsync(string symbol);
+    ValueTask<UserResult> CancelAllOrdersAsync(string symbol);
 }
