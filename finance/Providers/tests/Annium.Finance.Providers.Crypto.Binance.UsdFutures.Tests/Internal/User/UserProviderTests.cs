@@ -51,7 +51,7 @@ public class UserProviderTests : UserProviderTestBase
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
     )]
-    public Task LoadContextAsync() => LoadContextBaseAsync();
+    public Task LoadContextAsync() => LoadContextBaseAsync(TestContext.Current.CancellationToken);
 
     /// <summary>
     /// Loads the account's open orders from the live provider and asserts the call succeeds. Talks to the
@@ -63,7 +63,7 @@ public class UserProviderTests : UserProviderTestBase
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
     )]
-    public Task LoadOpenOrdersAsync() => LoadOpenOrdersBaseAsync();
+    public Task LoadOpenOrdersAsync() => LoadOpenOrdersBaseAsync(TestContext.Current.CancellationToken);
 
     /// <summary>
     /// Loads BTCUSDT's most recent orders (no time bound) from the live provider and asserts the call
@@ -75,7 +75,7 @@ public class UserProviderTests : UserProviderTestBase
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
     )]
-    public Task LoadLatestOrdersAsync() => LoadLatestOrdersBaseAsync();
+    public Task LoadLatestOrdersAsync() => LoadLatestOrdersBaseAsync(TestContext.Current.CancellationToken);
 
     /// <summary>
     /// Loads BTCUSDT's orders from the last day from the live provider and asserts the call succeeds. Talks
@@ -87,7 +87,7 @@ public class UserProviderTests : UserProviderTestBase
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
     )]
-    public Task LoadHistoryOrdersAsync() => LoadHistoryOrdersBaseAsync();
+    public Task LoadHistoryOrdersAsync() => LoadHistoryOrdersBaseAsync(TestContext.Current.CancellationToken);
 
     /// <summary>
     /// Loads BTCUSDT's most recent trades (no time bound) from the live provider and asserts the call
@@ -99,7 +99,7 @@ public class UserProviderTests : UserProviderTestBase
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
     )]
-    public Task LoadLatestTradesAsync() => LoadLatestTradesBaseAsync();
+    public Task LoadLatestTradesAsync() => LoadLatestTradesBaseAsync(TestContext.Current.CancellationToken);
 
     /// <summary>
     /// Loads BTCUSDT's trades from the last day from the live provider and asserts the call succeeds. Talks
@@ -111,5 +111,5 @@ public class UserProviderTests : UserProviderTestBase
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
     )]
-    public Task LoadHistoryTradesAsync() => LoadHistoryTradesBaseAsync();
+    public Task LoadHistoryTradesAsync() => LoadHistoryTradesBaseAsync(TestContext.Current.CancellationToken);
 }

@@ -36,6 +36,9 @@ public class SignatureServiceTests : ProvidersTestBase
     /// Signs a fixed order query string with the credentials from <c>test.env</c> and asserts it matches the
     /// signature pinned in <see cref="Settings.ExpectedSignature"/>.
     /// </summary>
+    // No Timeout: this test signs a string and compares it. Nothing in its body waits, so a deadline
+    // here would guard nothing - and xUnit1069 says as much, since there is no token to observe.
+    // What can hang on this path is the fixture around it, and that is bounded where it is built.
     [Fact(
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),

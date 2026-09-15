@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
@@ -59,7 +60,7 @@ public abstract class MarketConnectorTestBase : ProvidersTestBase
         market.OnError += errors.Enqueue;
 
         this.Trace("await market is connected");
-        await market.WhenConnectedAsync();
+        await market.WhenConnectedAsync(TestContext.Current.CancellationToken);
 
         this.Trace("subscribe to instrument tickers");
         market.SubscribeTickers([_symbol]);
@@ -118,7 +119,7 @@ public abstract class MarketConnectorTestBase : ProvidersTestBase
 
         // assert - tickers
         this.Trace("ensure tickers are loaded");
-        await market.Tickers.FirstAsync(x => x.Symbol == _symbol);
+        await market.Tickers.FirstAsync(x => x.Symbol == _symbol).ToTask(TestContext.Current.CancellationToken);
 
         // and it got there in a good state. Not "no errors reported": a first handshake that drops is an
         // ordinary event on a real network, and the socket answers it by raising OnError and reconnecting

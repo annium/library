@@ -1,19 +1,19 @@
 name: Nightly
 
-# The merge-request shape, with two differences: the jobs run inside the finance-live-read
-# environment, and they call the -nightly recipes, where the finance `read` block is no longer
-# filtered out. That block reaches real exchanges and real accounts and changes nothing there.
+# The merge-request suite on a schedule, and nothing more. It shares its recipes with the day pipeline
+# rather than having `-nightly` variants of its own, because there is no longer any difference to express.
 #
-# Its value is catching exchange API drift early: a read failure here says the exchange changed, not
-# that our code did. That is the question kb/providers/<provider>/manifest.md exists to answer.
+# There was: the nightly used to run the finance `read` block against the real exchanges, to catch API
+# drift early. That is gone for good - see the note above ci-test-framework in the justfile. Briefly: the
+# block hung and took the job's 45-minute timeout with it, and even with the deadlines that now stop that,
+# a hosted runner sits in a cloud range that exchanges refuse, so it would fail every night for a reason
+# that says nothing about our code. Drift is caught by a reconcile pass run from where the exchange
+# answers, which is a person's job.
 #
-# The `write` block has no counterpart anywhere in CI, deliberately. Its documented procedure -
-# check the position mode, that no position exists on the test symbol the fixture would close as
-# cleanup, and the available margin, then run it alone - is something a person does, and a cancelled
+# The `write` block has no counterpart anywhere in CI either, and for a stronger reason: its documented
+# procedure - check the position mode, that no position exists on the test symbol the fixture would close
+# as cleanup, and the available margin, then run it alone - is something a person does, and a cancelled
 # runner leaves that cleanup unrun and a real position open.
-#
-# Until the finance-live-read environment holds the six BINANCE_* secrets, this pipeline still runs
-# green: without credentials Exchange.HasCredentials is false and the gated tests skip themselves.
 
 on:
   schedule:
@@ -43,11 +43,10 @@ jobs:
         group: [ framework, adapters ]
     uses: annium/workflows/.github/workflows/dotnet-test.yml@v2
     with:
-      recipe: ci-test-${{ matrix.group }}-nightly
+      recipe: ci-test-${{ matrix.group }}
       artifact: test-results-${{ matrix.group }}
-      # finance-live-read is gone with the live-read block the nightly recipes no longer run - see the
-      # note above ci-test-framework-nightly in the justfile. Requesting an environment whose secrets
-      # nothing reads only widens what the job can reach. It comes back with the block.
+      # no environment: nothing here reads exchange credentials, and requesting an environment whose
+      # secrets nothing reads only widens what the job can reach
     secrets: inherit
 
   report:

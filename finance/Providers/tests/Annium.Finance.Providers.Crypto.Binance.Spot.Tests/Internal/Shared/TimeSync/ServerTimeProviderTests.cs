@@ -40,7 +40,7 @@ public class ServerTimeProviderTests : ProvidersTestBase
     /// in the read block.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    [Fact]
+    [Fact(Timeout = TestBlock.ReadTimeoutMs)]
     public async Task Works()
     {
         // arrange
@@ -51,7 +51,7 @@ public class ServerTimeProviderTests : ProvidersTestBase
         source.Monitor.OnStatusChanged += s => status = s;
 
         // assert
-        await Expect.ToAsync(() => status.Is(ConnectorStatus.Connected));
+        await Expect.ToAsync(() => status.Is(ConnectorStatus.Connected), TestContext.Current.CancellationToken);
         source.ServerTime.IsNotDefault();
     }
 }

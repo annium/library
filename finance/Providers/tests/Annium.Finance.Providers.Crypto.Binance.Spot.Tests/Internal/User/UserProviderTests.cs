@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Core.Shared.Loaders;
+using Annium.Finance.Providers.Tests.Lib;
 using Annium.Finance.Providers.Tests.Lib.User;
 using Xunit;
 
@@ -41,31 +42,31 @@ public class UserProviderTests : UserProviderTestBase
 
     /// <summary>Not implemented; skipped unconditionally.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    [Fact(Skip = "Not implemented")]
-    public Task LoadContextAsync() => LoadContextBaseAsync();
+    [Fact(Timeout = TestBlock.ReadTimeoutMs, Skip = "Not implemented")]
+    public Task LoadContextAsync() => LoadContextBaseAsync(TestContext.Current.CancellationToken);
 
     /// <summary>Not implemented; skipped unconditionally.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    [Fact(Skip = "Not implemented")]
-    public Task LoadOpenOrdersAsync() => LoadOpenOrdersBaseAsync();
+    [Fact(Timeout = TestBlock.ReadTimeoutMs, Skip = "Not implemented")]
+    public Task LoadOpenOrdersAsync() => LoadOpenOrdersBaseAsync(TestContext.Current.CancellationToken);
 
     /// <summary>Not implemented; skipped unconditionally.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    [Fact(Skip = "Not implemented")]
-    public Task LoadLatestOrdersAsync() => LoadLatestOrdersBaseAsync();
+    [Fact(Timeout = TestBlock.ReadTimeoutMs, Skip = "Not implemented")]
+    public Task LoadLatestOrdersAsync() => LoadLatestOrdersBaseAsync(TestContext.Current.CancellationToken);
 
     /// <summary>Not implemented; skipped unconditionally.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    [Fact(Skip = "Not implemented")]
-    public Task LoadHistoryOrdersAsync() => LoadHistoryOrdersBaseAsync();
+    [Fact(Timeout = TestBlock.ReadTimeoutMs, Skip = "Not implemented")]
+    public Task LoadHistoryOrdersAsync() => LoadHistoryOrdersBaseAsync(TestContext.Current.CancellationToken);
 
     /// <summary>Not implemented; skipped unconditionally.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    [Fact(Skip = "Not implemented")]
-    public Task LoadLatestTradesAsync() => LoadLatestTradesBaseAsync();
+    [Fact(Timeout = TestBlock.ReadTimeoutMs, Skip = "Not implemented")]
+    public Task LoadLatestTradesAsync() => LoadLatestTradesBaseAsync(TestContext.Current.CancellationToken);
 
     /// <summary>Not implemented; skipped unconditionally.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    [Fact(Skip = "Not implemented")]
-    public Task LoadHistoryTradesAsync() => LoadHistoryTradesBaseAsync();
+    [Fact(Timeout = TestBlock.ReadTimeoutMs, Skip = "Not implemented")]
+    public Task LoadHistoryTradesAsync() => LoadHistoryTradesBaseAsync(TestContext.Current.CancellationToken);
 }

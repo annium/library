@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.User;
 using Annium.Finance.Providers.Abstractions.Domain.Shared;
@@ -42,13 +43,14 @@ public abstract class UserProviderTestBase : ProvidersTestBase
     /// <summary>
     /// Loads the account's context and asserts it succeeded and reports at least one asset.
     /// </summary>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task LoadContextBaseAsync()
+    protected async Task LoadContextBaseAsync(CancellationToken ct)
     {
         this.Trace("start");
 
         var provider = ResolveProvider();
-        var context = await provider.LoadContextAsync();
+        var context = await provider.LoadContextAsync().WaitAsync(ct);
 
         context.Status.Is(UserOperationStatus.Ok);
         var ctx = context.Data.NotNull();
@@ -60,13 +62,14 @@ public abstract class UserProviderTestBase : ProvidersTestBase
     /// <summary>
     /// Loads the account's currently open orders and asserts the call succeeded.
     /// </summary>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task LoadOpenOrdersBaseAsync()
+    protected async Task LoadOpenOrdersBaseAsync(CancellationToken ct)
     {
         this.Trace("start");
 
         var provider = ResolveProvider();
-        var openOrders = await provider.LoadOpenOrdersAsync();
+        var openOrders = await provider.LoadOpenOrdersAsync().WaitAsync(ct);
 
         openOrders.Status.Is(UserOperationStatus.Ok);
         openOrders.Data.NotNull();
@@ -77,13 +80,14 @@ public abstract class UserProviderTestBase : ProvidersTestBase
     /// <summary>
     /// Loads the configured symbol's most recent orders (no time bound) and asserts the call succeeded.
     /// </summary>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task LoadLatestOrdersBaseAsync()
+    protected async Task LoadLatestOrdersBaseAsync(CancellationToken ct)
     {
         this.Trace("start");
 
         var provider = ResolveProvider();
-        var orders = await provider.LoadOrdersAsync(_symbol, null);
+        var orders = await provider.LoadOrdersAsync(_symbol, null).WaitAsync(ct);
 
         orders.Status.Is(UserOperationStatus.Ok);
         orders.Data.NotNull();
@@ -94,13 +98,14 @@ public abstract class UserProviderTestBase : ProvidersTestBase
     /// <summary>
     /// Loads the configured symbol's orders since <see cref="GetSince"/> and asserts the call succeeded.
     /// </summary>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task LoadHistoryOrdersBaseAsync()
+    protected async Task LoadHistoryOrdersBaseAsync(CancellationToken ct)
     {
         this.Trace("start");
 
         var provider = ResolveProvider();
-        var historicalOrders = await provider.LoadOrdersAsync(_symbol, GetSince());
+        var historicalOrders = await provider.LoadOrdersAsync(_symbol, GetSince()).WaitAsync(ct);
 
         historicalOrders.Status.Is(UserOperationStatus.Ok);
         historicalOrders.Data.NotNull();
@@ -111,13 +116,14 @@ public abstract class UserProviderTestBase : ProvidersTestBase
     /// <summary>
     /// Loads the configured symbol's most recent trades (no time bound) and asserts the call succeeded.
     /// </summary>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task LoadLatestTradesBaseAsync()
+    protected async Task LoadLatestTradesBaseAsync(CancellationToken ct)
     {
         this.Trace("start");
 
         var provider = ResolveProvider();
-        var trades = await provider.LoadTradesAsync(_symbol, null);
+        var trades = await provider.LoadTradesAsync(_symbol, null).WaitAsync(ct);
 
         trades.Status.Is(UserOperationStatus.Ok);
         trades.Data.NotNull();
@@ -128,13 +134,14 @@ public abstract class UserProviderTestBase : ProvidersTestBase
     /// <summary>
     /// Loads the configured symbol's trades since <see cref="GetSince"/> and asserts the call succeeded.
     /// </summary>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task LoadHistoryTradesBaseAsync()
+    protected async Task LoadHistoryTradesBaseAsync(CancellationToken ct)
     {
         this.Trace("start");
 
         var provider = ResolveProvider();
-        var historicalTrades = await provider.LoadTradesAsync(_symbol, GetSince());
+        var historicalTrades = await provider.LoadTradesAsync(_symbol, GetSince()).WaitAsync(ct);
 
         historicalTrades.Status.Is(UserOperationStatus.Ok);
         historicalTrades.Data.NotNull();
