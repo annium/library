@@ -8,6 +8,20 @@ namespace Annium.Finance.Providers.Abstractions.Domain.User.Operations;
 [AutoMapped]
 public enum UserOperationStatus
 {
+    /// <summary>
+    /// No outcome was recorded. Never produced by an operation: it is what a <see cref="UserResult"/> that
+    /// nothing initialized reads as.
+    /// </summary>
+    /// <remarks>
+    /// First, and therefore zero, on purpose. <see cref="UserResult"/> is a value type, so a field nobody
+    /// assigned, an element of a fresh array and the <c>out</c> of a <c>TryRead</c> that returned false are
+    /// all a valid instance rather than a null reference. With <see cref="Ok"/> at zero every one of those
+    /// would read as a success carrying no data — the shape this codebase has met repeatedly, where
+    /// something did not happen and the code carried on as though it had. Here they read as a failure,
+    /// which is the direction that fails safe.
+    /// </remarks>
+    None,
+
     /// <summary>The operation completed successfully.</summary>
     Ok,
 
