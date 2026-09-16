@@ -77,8 +77,14 @@ Named here rather than left implied, with the reason each is not being done now.
 - **Five components with no test file at all** — `WebSocketService`, `ListenKeyResolver`,
   `HttpRequestSignatureExtensions`, `HttpRequestLogExtensions`, and the filter converters. The first
   two carry the connection lifecycle of every stream this module runs.
-- **The read-side enumeration gaps** — most order-type and order-status wire strings are never parsed
-  by any test, only written. Work for the step that owns serialization.
+- ~~**The read-side enumeration gaps**~~ — **closed 2026-09-16.** `WireMappingTests` on each venue drives
+  every wire↔domain table both ways: each documented value parses to its member, each domain member
+  writes back out, the round trip holds, and each fold is asserted by name. Before it, coverage was
+  whatever the converter fixtures happened to contain — on the read side that meant `NEW`,
+  `PARTIALLY_FILLED` and `CANCELED`, and nothing else. Every status meaning *the order is finished* was
+  parsed by no test at all, which is the reading both connectors use to decide an order has left the
+  book. Mutation-checked three ways: a status parsing to the wrong member, a domain member left out of
+  the outbound table, and a fold removed as an apparent asymmetry — 3, 1 and 3 failures respectively.
 - **Failure statuses are coarser than the exchange's own.** `MapOperationCode` maps every negative
   Binance code to `BadRequest`, so an invalid API key, an expired timestamp and a malformed parameter
   are indistinguishable to a caller, and the HTTP status — which would have told `Forbidden` from
