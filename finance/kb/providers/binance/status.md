@@ -32,12 +32,29 @@ created: 2026-09-01
 
 Named here rather than left implied, with the reason each is not being done now.
 
-- **Rebuild the signing golden value.** The fixture's query — `symbol=LTCBTC&side=BUY&…` — contains no
-  character requiring percent-encoding, so it passes whether or not the implementation encodes before
-  signing, which Binance has required since 2026-01-15. The test is `vacuous` for that property. Not
-  rebuilt yet: a live signed request settles it either way, so if the exchange stages pass, the
-  implementation is right and only the test needs strengthening; if they fail with `-1022`, the fix is
-  the implementation and the test is the second job, not the first.
+- ~~**Rebuild the signing golden value.**~~ — **settled 2026-09-16, and not the way it was framed.** The
+  worry was that `Signature_IsValid` passes whether or not the implementation percent-encodes before
+  signing, so it was `vacuous` for that property. Both halves of that turned out to need correcting.
+
+  **There is no encoding defect.** `Signature` signs `req.Uri.Query` — the *composed* query — and
+  `UriQuery.ToString()` builds it with `Uri.EscapeDataString`. Measured, not assumed: for a space, `+`,
+  `&`, `=`, a JSON payload and Cyrillic, the signed string is byte-identical to what goes on the wire.
+  A signer that reconstructed its own string from the raw values would be the defect; this one cannot,
+  because it reads the query back off the URI.
+
+  **The golden value was never the instrument for it.** `Signature_IsValid` hands the signer a literal,
+  so no query is composed and nothing is encoded — no choice of query string could make it see the
+  property. What it does pin is narrow and real: our HMAC of a fixed input equals what Binance produced.
+  Its summary said something broader and now says that.
+
+  The property is pinned instead by `HttpRequestSignatureExtensionsTests` in the Base test project,
+  offline and needing no credentials: it sends real requests to a local server and asserts that what the
+  signer was asked to sign equals what arrived, minus the `signature` parameter appended afterwards.
+  Mutation-checked — signing the unescaped query kills 7 of its 8 cases.
+
+  Worth keeping from this: signing happens at **send** time, not when `Sign()` is called — `Signature`
+  registers a `Configure` action. A first attempt built a request, inspected it, and found the signer had
+  never been called at all.
 - ~~**Rate-limit handling in the runtime**~~ — **done** (library 1.3.0-1.3.4, 2026-09-08). The live
   read-only run this was waiting on happened, and it did approach the limits. 418 and 429 now both read
   a pause — `Retry-After`, else the `banned until <epoch ms>` in Binance's `-1003` body — and hand it to
@@ -53,10 +70,10 @@ Named here rather than left implied, with the reason each is not being done now.
   one it is needs a census of paths against the response headers each returns. **To be settled while
   implementing the trading paths (step 5)**, where the order-count headers (`x-mbx-order-count-*`) come
   into play and the same question has to be answered for them anyway.
-- **Two `vacuous` tests**, both of the same shape — the input chosen cannot exercise the property the
-  test claims. The signing golden value, above; and the history paging tests, which request one day
-  while claiming to protect a seven-day window and a three-month cap. Neither is fixed here: the first
-  waits on the live run, the second belongs to the step that owns the read paths.
+- **One `vacuous` test left**: the history paging tests, which request one day while claiming to protect
+  a seven-day window and a three-month cap. Belongs to the step that owns the read paths. The signing
+  golden value was the other one, and it is settled above — the fix was a test at the level where the
+  query is composed, not a different input to the one that could never see it.
 - **Five components with no test file at all** — `WebSocketService`, `ListenKeyResolver`,
   `HttpRequestSignatureExtensions`, `HttpRequestLogExtensions`, and the filter converters. The first
   two carry the connection lifecycle of every stream this module runs.
