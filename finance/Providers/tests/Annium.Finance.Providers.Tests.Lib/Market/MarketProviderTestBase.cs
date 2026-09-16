@@ -41,8 +41,9 @@ public abstract class MarketProviderTestBase : ProvidersTestBase
     /// the expected count and that the first/last candles carry real OHLC data.
     /// </summary>
     /// <param name="providerKey">The provider and environment to resolve the market provider for.</param>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task MarketProviderBaseAsync(ProviderKey providerKey)
+    protected async Task MarketProviderBaseAsync(ProviderKey providerKey, CancellationToken ct)
     {
         this.Trace("start");
 
@@ -57,7 +58,7 @@ public abstract class MarketProviderTestBase : ProvidersTestBase
         var provider = providerFactory.Create(settings);
 
         // act - load context
-        var context = await provider.LoadContextAsync();
+        var context = await provider.LoadContextAsync().WaitAsync(ct);
 
         // assert - context
         context.Status.Is(MarketOperationStatus.Ok);
@@ -71,7 +72,7 @@ public abstract class MarketProviderTestBase : ProvidersTestBase
         var start = end - Duration.FromDays(2);
         var candles = new List<CandleModel>();
         this.Trace("load candles in for {symbol} ({key}) in {start} - {end}", _symbol, providerKey, start, end);
-        await foreach (var chunkResult in provider.LoadCandlesAsync(_symbol, start, end, CancellationToken.None))
+        await foreach (var chunkResult in provider.LoadCandlesAsync(_symbol, start, end, ct))
         {
             chunkResult.IsSuccess.IsTrue();
             candles.AddRange(chunkResult.Data.NotNull());

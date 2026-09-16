@@ -47,6 +47,7 @@ public class UserProviderTests : UserProviderTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.ReadTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -59,6 +60,7 @@ public class UserProviderTests : UserProviderTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.ReadTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -71,6 +73,7 @@ public class UserProviderTests : UserProviderTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.ReadTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -83,6 +86,7 @@ public class UserProviderTests : UserProviderTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.ReadTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -95,6 +99,7 @@ public class UserProviderTests : UserProviderTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.ReadTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -107,6 +112,7 @@ public class UserProviderTests : UserProviderTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.ReadTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)

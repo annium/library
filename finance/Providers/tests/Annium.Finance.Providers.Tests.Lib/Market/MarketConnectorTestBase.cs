@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Threading;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Market;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
@@ -39,8 +40,9 @@ public abstract class MarketConnectorTestBase : ProvidersTestBase
     /// ticker and asserts that the instrument metadata and the ticker stream both come through populated.
     /// </summary>
     /// <param name="providerKey">The provider and environment to connect to.</param>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task MarketConnectorBaseAsync(ProviderKey providerKey)
+    protected async Task MarketConnectorBaseAsync(ProviderKey providerKey, CancellationToken ct)
     {
         this.Trace("start");
 
@@ -60,7 +62,7 @@ public abstract class MarketConnectorTestBase : ProvidersTestBase
         market.OnError += errors.Enqueue;
 
         this.Trace("await market is connected");
-        await market.WhenConnectedAsync(TestContext.Current.CancellationToken);
+        await market.WhenConnectedAsync(ct);
 
         this.Trace("subscribe to instrument tickers");
         market.SubscribeTickers([_symbol]);
@@ -119,7 +121,7 @@ public abstract class MarketConnectorTestBase : ProvidersTestBase
 
         // assert - tickers
         this.Trace("ensure tickers are loaded");
-        await market.Tickers.FirstAsync(x => x.Symbol == _symbol).ToTask(TestContext.Current.CancellationToken);
+        await market.Tickers.FirstAsync(x => x.Symbol == _symbol).ToTask(ct);
 
         // and it got there in a good state. Not "no errors reported": a first handshake that drops is an
         // ordinary event on a real network, and the socket answers it by raising OnError and reconnecting
