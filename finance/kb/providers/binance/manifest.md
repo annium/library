@@ -15,12 +15,26 @@ docs_revision_spot: a0057759f1cbcab812af44b75309d72866a57561
 
 Every entry is a fact owned by Binance, not by us, that this module depends on, anchored to
 `file:line`. Paths are relative to the repository root; `Base`, `Spot` and `UsdFutures` abbreviate
-`providers/crypto/binance/src/Annium.Finance.Providers.Crypto.Binance.<name>/`.
+`finance/Providers/src/Annium.Finance.Providers.Crypto.Binance.<name>/`.
+
+**The line numbers are stale and are not to be trusted until step 1 runs again.** The paths were, too:
+they named `providers/crypto/binance/src/…`, the layout from before these repositories merged into
+`library`, and nothing under that prefix exists any more. The prefixes are corrected above — that part
+is mechanical — but every `:line` here was recorded on 2026-09-01 and the files have moved under them
+since. Correcting the paths without saying this would be the worse outcome of the two: an anchor that
+resolves to a real file at the wrong line reads as checked, and a manifest that is trusted and wrong is
+what step 1's done-checklist exists to prevent.
 
 **`checked_against: 2026-09-01
-docs_revision_spot: a0057759f1cbcab812af44b75309d72866a57561`** — derived from our code, never yet compared against Binance's
-documentation. An inventory, not a baseline. `/implement-provider binance --only-layer=1` is what
-changes that.
+docs_revision_spot: a0057759f1cbcab812af44b75309d72866a57561`** — the documentation axis was closed on that
+date against the snapshots stored beside
+[`2026.09/2026.09.01-contract.md`](2026.09/2026.09.01-contract.md), with two accepted gaps recorded
+against their own entries. This line used to say the manifest had never been compared against Binance's
+documentation — which its own front matter and that report both contradict. It was written during the
+inventory pass and not updated when the comparison landed the same day.
+
+The **verification** axis moves independently of that date, and did most recently on 2026-09-16, when
+the read block ran with credentials for the first time.
 
 ## Where the documentation comes from
 
@@ -94,16 +108,16 @@ below, because a summary that reads as an annotation is the failure this model e
 
 | category | documentation | verification |
 |---|---|---|
-| 1 endpoints | `confirmed`, and this time **path by path** rather than as a set — the earlier pass checked base URLs and path shapes, which is how a wrong `v1` survived it | `pinned` for the websocket routes and both server time paths, `EndpointsTests` on each venue asserting the *composed* URL. The rest `gated` |
-| 2 request parameters | `confirmed` at tier 1 from the official Postman collections | futures order shapes are **`pinned`** offline, per order type, both init and modify, with `reduceOnly` branching asserted both ways. The signing scaffolding is `gated` as a whole; `recvWindow`'s value is `none` |
+| 1 endpoints | `confirmed`, and this time **path by path** rather than as a set — the earlier pass checked base URLs and path shapes, which is how a wrong `v1` survived it | `pinned` for the websocket routes and both server time paths, `EndpointsTests` on each venue asserting the *composed* URL. Every read path on USD-M is **`live` (2026-09-16)** — exchange info, candles, account, open / recent / historical orders and trades all answered. Spot's account read paths stay `gated`: its `UserProviderTests` are `Not implemented` and skip |
+| 2 request parameters | `confirmed` at tier 1 from the official Postman collections | futures order shapes are **`pinned`** offline, per order type, both init and modify, with `reduceOnly` branching asserted both ways. The signing scaffolding is **`live` (2026-09-16)** as a whole on USD-M: six signed account reads were accepted, which is the only thing that shows key, timestamp, query and signature compose into something Binance honours. `recvWindow`'s value is still `none` |
 | 3 response fields | spot `confirmed` at **tier 1** from `rest-api.md`; futures account / query-order / trade `confirmed` at **tier 3** (a reading, not the page); the user-data-stream nested payloads are `unretrievable` | `pinned` per converter, every one having its own test with real fixtures. Negative branches are `none`: a non-GUID cancel id, a non-`TRADING` status, a missing `SPOT` permission, an absent filter dropping the instrument |
 | 4 filters | `confirmed` — every type name and field on both venues, including that spot documents **both** `MIN_NOTIONAL` and `NOTIONAL` while futures documents only `MIN_NOTIONAL` | `pinned`, including the lot-size merge arithmetic — but entirely piggybacked on the exchange-info fixture; there is no filter test of its own |
 | 5 enumerations | `confirmed` on both venues against their documented lists | **not `pinned` as a category — corrected.** Only values that happen to appear in a fixture are covered. Sides and position sides are `pinned`; on the **read** side `MARKET`, `STOP_LOSS`/`STOP_MARKET`, `STOP_LOSS_LIMIT`/`STOP`, spot's `LIMIT_MAKER` fold, and every order status but `NEW` and `PARTIALLY_FILLED` are `none` |
 | 6 error and status codes | `confirmed` | HTTP mapping `pinned` in all three copies. The two Binance codes are `pinned` in Spot and UsdFutures and `none` in `Base` — the drifted copy is exactly the untested one |
 | 7 rate limiting | `confirmed` for the header; the decay arithmetic is `unchecked` | the mechanism is `pinned` — header casing, missing and malformed values, water mark, decay, post-dispose — and so is the **runtime `REQUEST_WEIGHT` overwrite**, now that a read-path test drives it. The production ceilings, the decay constants and the water-mark fraction remain `none` |
-| 8 auth and signing | `confirmed` | `gated`, and **`vacuous`** for the percent-encoding rule. What is signed, the exclusion of `signature` itself, and the use of synced rather than local time are each `none` |
-| 9 timing and lifecycle | `confirmed` | candle interval and page size `gated` against a real count. The order history window is **`pinned`**: an offline test drives twenty days through three chunks and the boundaries are observable. Trade history follows the same code and is `none` until driven. Sync cadence `none` |
-| 10 hard-coded facts | mixed — `confirmed` where they mirror a documented limit, `undocumented` where they are heuristics | mostly `none`. `"BTCUSDT"` liveness and the kline page size are `gated`; the futures asset-precision heuristic is now `pinned`, which matters because it is `undocumented` — the exchange promises nothing about it, so a test is the only thing that can notice it changing |
+| 8 auth and signing | `confirmed` | **`live` (2026-09-16)** on USD-M — signed reads accepted by the exchange. The percent-encoding rule is **no longer `vacuous`: it is `pinned`**, and so are what is signed and the exclusion of `signature` itself — `HttpRequestSignatureExtensionsTests` sends real requests to a local server and asserts that the string handed to the signer equals the one that arrived, minus the signature appended after. The use of synced rather than local time remains `none` |
+| 9 timing and lifecycle | `confirmed` | candle interval and page size **`live` (2026-09-16)**, driven against a real count by the USD-M market provider read. The order history window is **`pinned`**: an offline test drives twenty days through three chunks and the boundaries are observable. Trade history follows the same code and is `none` until driven. Sync cadence `none` |
+| 10 hard-coded facts | mixed — `confirmed` where they mirror a documented limit, `undocumented` where they are heuristics | mostly `none`. `"BTCUSDT"` liveness and the kline page size are **`live` (2026-09-16)**; the futures asset-precision heuristic is now `pinned`, which matters because it is `undocumented` — the exchange promises nothing about it, so a test is the only thing that can notice it changing |
 
 **One route decision worth keeping visible.** The futures route lives in the *path*, never in the base.
 Both call sites compose with `new Uri(base, path)`, which discards the base's path whenever the path
@@ -111,18 +125,28 @@ starts with a slash — so a route moved into the base is silently dropped and t
 from configuration that reads as correct. A mutation doing exactly that is killed by
 `MarketStream_ConnectsToThePublicRoute`.
 
-**Two `vacuous` entries, and both are the same shape: the input chosen cannot exercise the property.**
+**Both `vacuous` entries are closed**, and neither by changing the input the weak test uses. In both
+cases that test could not have been made to see the property at all, and a second test at the right
+level was what settled it.
 
-1. **The signing golden value** (§8). Its query — `symbol=LTCBTC&side=BUY&…` — contains no character
-   requiring percent-encoding, so it passes identically whether or not the implementation encodes
-   before signing, which Binance has required since 2026-01-15.
+1. ~~The signing golden value~~ (§8) — **closed 2026-09-16, and the framing was wrong twice over.** The
+   worry was that the fixture's query holds no character needing percent-encoding, so the test passes
+   whether or not the implementation encodes. But that test hands the signer a *literal*: no query is
+   composed and nothing is encoded, so no input could have made it see the rule. And there is no defect
+   to see — `Signature` signs `req.Uri.Query`, the composed query, which `UriQuery.ToString()` builds
+   with `Uri.EscapeDataString`. Measured across a space, `+`, `&`, `=`, a JSON payload and Cyrillic: the
+   signed bytes are the sent bytes. The rule is now `pinned` by an offline test that sends real requests
+   to a local server and compares what the signer was asked for against what arrived; signing the
+   unescaped query kills 7 of its 8 cases. What the golden value pins is narrower and still worth
+   having — that our HMAC of a fixed input matches Binance's.
 2. ~~The history paging windows~~ — **closed**. The gated fixture still asks for one day and still
    proves nothing, but an offline test now drives twenty days through three windows and asserts the
    boundaries, so the fact is `pinned` regardless of what the gated one does.
 
-**Five components have no test file at all:** `WebSocketService`, `ListenKeyResolver`,
-`HttpRequestSignatureExtensions`, `HttpRequestLogExtensions`, and the filter converters. The first two
-carry the connection lifecycle for every stream this module runs.
+**Four components have no test file at all:** `WebSocketService`, `ListenKeyResolver`,
+`HttpRequestLogExtensions`, and the filter converters. The first two carry the connection lifecycle for
+every stream this module runs, which places them in step 5 rather than here.
+`HttpRequestSignatureExtensions` left this list on 2026-09-16.
 
 **~~[DEFECT, upstream] An exchange error is discarded whenever the success type is a collection.~~ —
 closed.** `Annium.Net.Http`'s `AsResponseExtensions` parsed the success type first; when that threw — as
@@ -152,88 +176,6 @@ noticed. The precision heuristic has since been pinned; the rest have not.
 Structural markers stay separate from both axes: **[DIVERGES]** between spot and futures,
 **[DUPLICATED]** across files, **[DEAD]** for code unreachable in production, **[DRIFT]** where what we
 have no longer matches what Binance documents.
-
-# Contract manifest — binance
-
-> **Living. Changes when Binance changes.** Our own progress lives in `status.md`, deliberately apart:
-> keeping them in one file would mean every reconcile run edits this document for two unrelated
-> reasons, and `git log -p manifest.md` would stop answering "what did the exchange change".
-
-Every entry is a fact owned by Binance, not by us, that this module depends on, anchored to
-`file:line`. Paths are relative to the repository root; `Base`, `Spot` and `UsdFutures` abbreviate
-`providers/crypto/binance/src/Annium.Finance.Providers.Crypto.Binance.<name>/`.
-
-**`checked_against: 2026-09-01
-docs_revision_spot: a0057759f1cbcab812af44b75309d72866a57561`** — derived from our code, never yet compared against Binance's
-documentation. An inventory, not a baseline. `/implement-provider binance --only-layer=1` is what
-changes that.
-
-## Where the documentation comes from
-
-Binance publishes spot and USDⓈ-M futures separately, and they must be fetched separately: a rename on
-one venue and not the other produces a failure that looks venue-specific and therefore looks like ours.
-
-| venue | source | tier | how |
-|---|---|---|---|
-| spot | `github.com/binance/binance-spot-api-docs` | 1 — upstream git | `curl -sSL https://raw.githubusercontent.com/binance/binance-spot-api-docs/master/<path>`; pin the commit SHA |
-| usd-futures | `developers.binance.com` | 2 — site, markdown | `curl -sSL "https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/<page>.md"` |
-
-**Appending `.md` to a developers.binance.com page returns its markdown source.** Fetching the page
-itself gets an empty `202` — it is a protected single-page app — so the `.md` suffix is not a
-convenience, it is the only way to retrieve that documentation faithfully.
-
-### Page paths that work
-
-Discovering these cost most of the first run. Spot, under
-`raw.githubusercontent.com/binance/binance-spot-api-docs/<sha>/`: `CHANGELOG.md`, `enums.md`,
-`errors.md`, `filters.md`, `rest-api.md`, `user-data-stream.md`, `web-socket-streams.md`.
-
-Futures, under `developers.binance.com/en/docs/products/derivatives-trading-usds-futures/`, with `.md`
-appended: `change-log`, `general-info`, `error-code`, `user-data-streams`, and
-`websocket-market-streams/Important-WebSocket-Change-Notice`.
-
-**Not found, still a gap.** The per-endpoint futures reference pages — exchange information, klines,
-new / modify / cancel order, account, trade list. Every path tried returned the site's HTML shell.
-Until they are located, futures request and response schemas are verified only against `general-info`
-and the change log, never against their own pages. Tried and rejected:
-`market-data-endpoints/…`, `trade-endpoints/…`, `account-endpoints/…`,
-`user-data-streams-endpoints/…`, and `catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/…`.
-
-Known quirks, both learned the hard way:
-
-- The derivatives change log **is truncated** when read through a summarising fetch — it returned only
-  two months. Retrieve the `.md` and read it whole.
-- **An unknown path returns the HTML shell with a `200`**, body exactly 65475 bytes. Five endpoint
-  paths returned byte-identical responses before this was noticed. Reject anything beginning
-  `<!doctype html>`, and compare sizes across a batch.
-- **The change log is not the documentation.** The WebSocket migration notice — the largest finding of
-  the first run — is not a change-log entry; it sits on its own page, reachable only through a link
-  inside the change log. Follow the links out.
-- A search result claimed a 2026-04-23 WebSocket decommissioning and the change log did not contain
-  it. Held as **unresolved** rather than reported, and the separate notice settled it: the search was
-  right and the change log incomplete. Two sources disagreeing stay unresolved until a third decides.
-
-Snapshots of what was fetched live beside each run's report, so a report can be checked against the
-text it was written from rather than against a page that has since moved.
-
-## How to read the markers
-
-Only exceptions are marked. A fact confirmed at the last check needs nothing — `checked_against`
-covers it. The reader needs the list of what cannot be trusted, not a list of everything.
-
-- **[UNVERIFIED]** — derived from our code, never checked against Binance's documentation. Everything
-  below is currently this, by construction.
-- **[UNDOCUMENTED]** — we depend on it and the documentation does not state it. Inferred from observed
-  behaviour, so it changes with no changelog entry and **no drift check will catch it in advance**.
-  None identified yet: separating these from the merely unverified is what the first documentation
-  pass does.
-- **[LIVE]** — confirmed by an actual exchange response, with the date. Upgraded only by layer 6.
-- **[DIVERGES]** — spot and futures assume different things here.
-- **[DUPLICATED]** — encoded in more than one place, so a change must be made more than once.
-- **[DEAD]** — encoded but unreachable from production. Recorded anyway: reviving the path revives the
-  assumption.
-
----
 
 ## 1. Endpoints
 
@@ -370,7 +312,7 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
   `UsdFutures/.../GetAccountResponseBalanceConverter.cs:65-82`, `GetAccountResponsePositionConverter.cs:71-94`
 - **[UNVERIFIED]** A one-way account is assumed to report one `positions[]` row per symbol regardless of
   whether a position is open, always with `positionSide=BOTH`. The test fixture's position-mode
-  precondition depends on this — `providers/base/tests/Annium.Finance.Providers.Tests.Lib/User/UserConnectorTestBase.cs`
+  precondition depends on this — `finance/Providers/tests/Annium.Finance.Providers.Tests.Lib/User/UserConnectorTestBase.cs`
 
 ### Orders and trades
 
@@ -466,7 +408,7 @@ Spot has no concept of it and hard-codes `Both` throughout its converters.
 **HTTP** — `418` (a literal cast, no named enum member) and `429` both map to `TooManyRequests`; `400`
 to `BadRequest`; `401`/`403` to `Forbidden` and `404` to `NotFound` on user endpoints; everything else
 to `UnknownError`. **[DUPLICATED]** across `Base`, `Spot` and `UsdFutures` result extensions, e.g.
-`Base/Internal/Market/HttpExtensions/HttpRequestMarketResultExtensions.cs:64`.
+`Base/Shared/Market/HttpExtensions/HttpRequestMarketResultExtensions.cs:64`.
 
 **Binance codes**
 
@@ -476,11 +418,16 @@ to `UnknownError`. **[DUPLICATED]** across `Base`, `Spot` and `UsdFutures` resul
 | `-2019` | `MARGIN_NOT_SUFFICIENT` | `InsufficientBalance` |
 | any other negative | — | `BadRequest` |
 
-**[DUPLICATED] and already drifted:** the two special cases appear in
-`Spot/Internal/User/HttpExtensions/HttpRequestUserResultExtensions.cs:80-81` and
-`UsdFutures/.../HttpRequestUserResultExtensions.cs:93-94`, but **not** in
-`Base/Internal/User/HttpExtensions/HttpRequestUserResultExtensions.cs:74-81`, which has only the
-generic fallback. A new Binance code needs adding in two places, and the third copy is already behind.
+~~**[DUPLICATED] and already drifted**~~ — **no longer true, corrected 2026-09-16.** This said the two
+special cases lived in per-venue copies while `Base` had only the generic fallback, so a new Binance
+code needed adding twice and the third copy was already behind. There is one copy now:
+`Base/Shared/User/HttpExtensions/HttpRequestUserResultExtensions.cs`, and both `-2018` and `-2019` are
+in it. The per-venue files are gone — consolidated, and consolidated the right way round, keeping the
+special cases rather than the fallback. `HttpRequestUserResultExtensionsTests` pins both codes.
+
+Worth noting how this was found: not by reading the code, but because the anchors stopped resolving.
+A manifest whose paths are checked mechanically reports a file that no longer exists; a manifest read
+only by eye keeps describing a drift that somebody fixed a while ago.
 
 **Local, not Binance:** `NetworkError=1`, `Aborted=2`, `ParseError=3` —
 `Base/Shared/Contracts/Domain/OperationResult.cs:9-15`.
@@ -497,7 +444,7 @@ generic fallback. A new Binance code needs adding in two places, and the third c
 | Decay `300` every `3000`ms on **both** — i.e. 6000/min, which does not match the futures ceiling **[UNVERIFIED]** | same lines |
 | Binance also returns an `x-mbx-order-*` family of order-count limit headers; the code knows to mask both prefixes in logs but reads neither | `Base/Shared/HttpExtensions/HttpRequestLogExtensions.cs:10` |
 | Ceiling is overwritten at runtime from exchange-info's `REQUEST_WEIGHT` | `Spot/Internal/Market/MarketProvider.cs:63-65`, `UsdFutures/...:69-71` |
-| Local gate at 80% of the ceiling, before the request is sent | `providers/base/src/Annium.Finance.Providers.Core/Internal/Shared/RateLimits/RateLimiter.cs:17,88` |
+| Local gate at 80% of the ceiling, before the request is sent | `finance/Providers/src/Annium.Finance.Providers.Core/Internal/Shared/RateLimits/RateLimiter.cs:17,88` |
 | A locally-gated request is synthesized as `429` | `Base/Shared/HttpExtensions/HttpRequestRateExtensions.cs:26-39` |
 
 Nothing reads `Retry-After`, and 418 is not distinguished from 429 — see the queued rate-limit work in
