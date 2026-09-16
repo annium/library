@@ -21,7 +21,13 @@ Some of what this skill validates places **real orders on a real account**.
   trading one, so `just test-write` is the act, not a preliminary to it. The variable is set by the user, or by you only when the user has approved *that stage*
   in *that call*.
 - `test.env` files hold real credentials. Never read them for their values, never print them, never
-  commit them.
+  commit them. Needing a value computed from one — a signing golden value, say — is not an exception:
+  write the user a script and let them run it, so the secret stays on their side and only the result is
+  spoken aloud.
+- **Build after editing `test.env`.** Tests read it from the working directory, which is the copy under
+  `bin/`, kept in step with the source only by a build — and every test recipe runs `--no-build`. Edit and
+  run straight away and you test the previous contents, while a check against the source file confirms the
+  value is right, because it is: just not the one being read.
 - Steps 1-3 need no provider access at all. Steps 4 and 5 do, and stage themselves accordingly:
   step 4's live validation only reads, step 5's trades.
 
