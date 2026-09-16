@@ -16,7 +16,7 @@ created: 2026-09-01
 - docs revision: spot `a0057759f1cbcab812af44b75309d72866a57561`; futures fetched 2026-09-01 (no
   repository exists, so the date is the only anchor)
 - working branch: `main` where converged
-- last reconciled: 2026-09-01 — steps 1-2, incomplete; drift found
+- last reconciled: 2026-09-16 — step 4 re-validated live, now with credentials; steps 3 and 5 not started
 
 ## Convergence
 
@@ -25,7 +25,7 @@ created: 2026-09-01
 | 1 — derive existing state | **converged** | ~70 anchors verified and re-anchored after the environment removal; four missing entries added; both axes censused entry by entry against the test suites | none |
 | 2 — collect facts, compute drift | **converged, with two accepted gaps** | all 13 futures pages and 7 spot files snapshotted; request side closed at tier 1 from the official Postman collections; every category given a documentation outcome | **accepted, not open**: the nested user-data-stream payloads (~20 short field names) are `unretrievable` — no available technique reaches them, so waiting changes nothing; and the `avgPrice` question is `contested`, settleable only by a live order. Both are recorded against their entries rather than left as unfinished work |
 | 3 — wire types and serialization | not-started | — | — |
-| 4 — provider, read paths (+ registration, config, read-only live validation) | **converged** | every read path on both venues driven offline, failure paths included; endpoints pinned; **live read block green: 20 tests, 14 passed, 6 skipped, none failed** | none. The upstream defect found here — an exchange error discarded when the success type is a collection — was fixed in `Annium.Net.Http` 1.1.49 and taken up with the package bump; the test that pinned the loss now pins the reason |
+| 4 — provider, read paths (+ registration, config, read-only live validation) | **converged** | every read path on both venues driven offline, failure paths included; endpoints pinned; **live read block green on 2026-09-16: 20 tests, 14 passed, 6 skipped, none failed** — and this time with credentials present, so the two signature tests ran rather than skipping | none. The upstream defect found here — an exchange error discarded when the success type is a collection — was fixed in `Annium.Net.Http` 1.1.49 and taken up with the package bump; the test that pinned the loss now pins the reason. The six still skipped are Spot's `UserProviderTests`, marked `Not implemented`, which is about the tests and not about access |
 | 5 — connector, streams and orders (+ registration, config, trading live validation) | not-started | — | unblocked: the user stream now addresses `/private`. Still needs its own tests — `WebSocketService` and `ListenKeyResolver` have no test file at all |
 
 ## Queued work
@@ -86,6 +86,28 @@ Named here rather than left implied, with the reason each is not being done now.
   because the useful split is by what a caller would do differently (retry, re-sign, stop), and that is
   a decision about the runtime rather than a mapping table.
 
+## Running the read block: `test.env` is copied, not read from source
+
+Worth writing down because it cost a run and because the obvious check does not catch it.
+
+`TestEnv` reads `test.env` from the process's working directory, which for a test run is
+`bin/Release/net10.0/` — not the copy beside the `.csproj`. The project declares
+`<None Update="test.env" CopyToOutputDirectory="Always" />`, so the two are kept in step **by building**,
+and every `just test-*` recipe runs `--no-build`.
+
+So editing `test.env` and running the block straight away tests the previous contents. On 2026-09-16 that
+produced a signature mismatch whose expected value was the literal `test_expected_signature` — the
+placeholder from `test.env.example`, still sitting in a copy made before the file was filled in. The
+source file was correct the whole time, and a script that checked the source said so.
+
+**Run `just build-finance` after touching `test.env`.** This is the stale-binary trap the fix-code reports
+already record for `just test`, arriving through data rather than through code: the binary was current and
+the file beside it was not.
+
+The failure was at least legible — the assertion printed the literal, so the placeholder was recognisable
+on sight. Had the placeholder been a plausible-looking hex string, the same run would have read as "our
+HMAC disagrees with Binance" and sent someone into the signing code.
+
 ## Reconcile history
 
 One line per run. The report holds the findings; the snapshot beside it holds the documentation those
@@ -97,3 +119,5 @@ findings were read from.
 | 2026-09-01 | 1-2 — contract | [`2026.09/2026.09.01-contract.md`](2026.09/2026.09.01-contract.md) | **blocking drift**: futures WebSocket URLs decommissioned. Step 1 converged; step 2 complete but for the futures endpoint schemas. One unverified assumption settled in our favour; the sandbox environment removed from the code entirely |
 | 2026-09-02 | 4 — provider | *(no report; the work is in the branch)* | every read path driven offline on both venues, failure paths included; **first live read run**, which failed on spot's server time path — `v1` where the exchange documents `v3`, an oddity the manifest had marked and never checked. Fixed and pinned; the block is green. Step 4 was called converged once before it was, on the strength of the live run alone — the checklist had three items left |
 | 2026-09-02 | 4 — provider | *(no report; the work is in the branch)* | packages bumped to 1.1.49, closing the upstream union-parse defect this step found. The test that pinned the loss now asserts what the exchange actually said. `just update` could not be used: `.xs` points the tool at `api.pkg.annium.com`, which serves a certificate for `*.avito.ru` — versions were bumped by hand instead, and the registry is an infrastructure question outside this work |
+| 2026-09-16 | 4 — provider | *(no report; the work is in [library#19](https://github.com/annium/library/pull/19))* | **credentials supplied, so the read block ran whole for the first time**: 20 tests, 14 passed, 6 skipped, none failed. The two signature tests had skipped since the module existed and now pass, which moves `TEST_EXPECTED_SIGNATURE` from `unchecked` to `live`. The six still skipped are Spot's `UserProviderTests`, marked `Not implemented` |
+| 2026-09-16 | 4 — provider | *(same)* | the percent-encoding question closed by measurement rather than by rebuilding the golden value — see the settled item under queued work. A new offline test pins that a signed request signs the query it sends |
