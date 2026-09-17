@@ -36,21 +36,21 @@ public class StreamDataConverter<T> : JsonConverter<StreamData<T>?>
 
             if (reader.TokenType == JsonTokenType.PropertyName)
             {
-                var propertyName = reader.GetString();
-
-                reader.Read();
-
-                switch (propertyName)
+                // compared against the UTF-8 name in place - see InstrumentTickerConverter for why
+                if (reader.ValueTextEquals("stream"u8))
                 {
-                    case "stream":
-                        stream = reader.GetString();
-                        break;
-                    case "data":
-                        data = JsonSerializer.Deserialize<T>(ref reader, options);
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
+                    reader.Read();
+                    stream = reader.GetString();
+                }
+                else if (reader.ValueTextEquals("data"u8))
+                {
+                    reader.Read();
+                    data = JsonSerializer.Deserialize<T>(ref reader, options);
+                }
+                else
+                {
+                    reader.Read();
+                    reader.Skip();
                 }
             }
         }
