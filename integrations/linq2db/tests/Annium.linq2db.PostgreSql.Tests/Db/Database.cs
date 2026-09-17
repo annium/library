@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Annium.Testing.Containers;
@@ -58,7 +59,12 @@ public class Database : IAsyncDisposable
         // connection can fail mid-handshake ("Attempted to read past the end of the stream"). Retry the
         // upgrade — DbUp tracks executed scripts and the failure occurs at connection open before any
         // script runs, so a retry is idempotent.
-        const int maxAttempts = 10;
+        // bounded by time rather than by attempts. An attempt count is a budget only while every attempt
+        // is fast, and the failure above is: it fails the moment the handshake breaks. A connect that
+        // times out instead takes ten seconds, so the same ten attempts became a minute and a half - the
+        // budget grew twentyfold without a line changing
+        var deadline = TimeSpan.FromSeconds(30);
+        var watch = Stopwatch.StartNew();
         for (var attempt = 1; ; attempt++)
         {
             var result = DeployChanges
@@ -72,8 +78,11 @@ public class Database : IAsyncDisposable
             if (result.Successful)
                 return;
 
-            if (attempt >= maxAttempts)
-                throw new ApplicationException($"{result.ErrorScript}: {result.Error}");
+            if (watch.Elapsed > deadline)
+                throw new ApplicationException(
+                    $"database at {Config.Host}:{Config.Port} did not become usable within {deadline:g}, "
+                        + $"after {attempt} attempts. Last failure on script '{result.ErrorScript}': {result.Error}"
+                );
 
             await Task.Delay(500);
         }
