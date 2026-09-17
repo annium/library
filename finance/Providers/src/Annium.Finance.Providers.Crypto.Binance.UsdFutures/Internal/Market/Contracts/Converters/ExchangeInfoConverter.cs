@@ -59,7 +59,14 @@ internal class ExchangeInfoConverter : JsonConverter<ExchangeInfo?>
                         rateLimits = JsonSerializer.Deserialize<RateLimits?>(ref reader, options);
                         break;
                     case "assets":
-                        assets = JsonSerializer.Deserialize<IReadOnlyCollection<Asset>?>(ref reader, options);
+                        // element type nullable, then filtered - exactly as symbols below. AssetConverter
+                        // returns null for an asset the exchange will not take as margin, and read into a
+                        // collection of non-nullable elements that null was kept rather than dropped: the
+                        // drop rule was written and then discarded one line later. What reaches the caller
+                        // is a collection whose element type says it cannot be null and which contains one,
+                        // and the first thing MarketProvider does with it is read .Code off every entry
+                        var allAssets = JsonSerializer.Deserialize<IReadOnlyCollection<Asset?>>(ref reader, options);
+                        assets = allAssets?.OfType<Asset>().ToArray();
                         break;
                     case "symbols":
                         var allInstruments = JsonSerializer.Deserialize<IReadOnlyCollection<InstrumentModel?>>(

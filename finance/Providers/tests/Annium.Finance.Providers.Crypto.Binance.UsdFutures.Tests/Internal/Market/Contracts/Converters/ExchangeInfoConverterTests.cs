@@ -194,6 +194,81 @@ public class ExchangeInfoConverterTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// An asset the exchange will not take as margin is dropped, rather than offered as one that works.
+    /// </summary>
+    /// <remarks>
+    /// The rule is a filter, and a filter is only half-tested by a payload where everything passes: the
+    /// recorded fixture carries two assets and both are marginable, so nothing distinguished this
+    /// converter from one that returns every asset it reads. Offering a non-marginable asset is not a
+    /// display defect - it is an order sized against collateral the exchange will refuse.
+    /// </remarks>
+    [Fact]
+    public void AssetThatIsNotMarginable_IsDropped()
+    {
+        // arrange
+        var raw = Payload(
+            """
+                {
+                    "asset": "USDT",
+                    "marginAvailable": true,
+                    "autoAssetExchange": "-10000"
+                },
+                {
+                    "asset": "SHIB",
+                    "marginAvailable": false,
+                    "autoAssetExchange": "0"
+                }
+            """
+        );
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.ExchangeInfoKey);
+        var deserialized = serializer.Deserialize<ExchangeInfo?>(Encoding.UTF8.GetBytes(raw)).NotNull();
+
+        // assert
+        deserialized.Assets.Has(1);
+        deserialized.Assets.At(0).Code.Is("USDT");
+    }
+
+    /// <summary>
+    /// Exchange info with no <c>REQUEST_WEIGHT</c> limit is dropped whole, rather than read with no ceiling.
+    /// </summary>
+    /// <remarks>
+    /// The rate limiter's ceiling comes from this entry. Reading the payload without it would leave the
+    /// limiter on whatever it was built with while the exchange enforces something else - the failure
+    /// arriving later, as a ban, from code that looks like it is respecting a limit.
+    /// </remarks>
+    [Fact]
+    public void ExchangeInfoWithoutRequestWeightLimit_IsDropped()
+    {
+        // arrange - every limit the exchange sends except the one that is read
+        var raw = Payload(
+            """
+                {
+                    "asset": "USDT",
+                    "marginAvailable": true,
+                    "autoAssetExchange": "-10000"
+                }
+            """,
+            """
+                {
+                    "rateLimitType": "ORDERS",
+                    "interval": "MINUTE",
+                    "intervalNum": 1,
+                    "limit": 1200
+                }
+            """
+        );
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.ExchangeInfoKey);
+        var deserialized = serializer.Deserialize<ExchangeInfo?>(Encoding.UTF8.GetBytes(raw));
+
+        // assert
+        deserialized.IsDefault();
+    }
+
+    /// <summary>
     /// A payload missing the fields the converter needs deserializes to null instead of throwing.
     /// </summary>
     [Fact]
@@ -212,4 +287,41 @@ public class ExchangeInfoConverterTests : ProvidersTestBase
         // assert - deserialization
         deserialized.IsDefault();
     }
+
+    /// <summary>
+    /// Builds an exchange-info payload around the parts a test varies.
+    /// </summary>
+    /// <remarks>
+    /// The instrument list is left empty on purpose. These tests are about the asset and rate-limit
+    /// blocks, and an empty <c>symbols</c> array deserializes to an empty collection rather than to
+    /// nothing - so carrying a second copy of the recorded instrument would add a fixture to keep in
+    /// step with the exchange in exchange for nothing either test asserts.
+    /// </remarks>
+    /// <param name="assets">The <c>assets</c> entries, as JSON.</param>
+    /// <param name="rateLimits">The <c>rateLimits</c> entries; the documented REQUEST_WEIGHT when omitted.</param>
+    /// <returns>The payload.</returns>
+    private static string Payload(string assets, string? rateLimits = null) =>
+        $$"""
+        {
+            "timezone": "UTC",
+            "serverTime": 1690214411331,
+            "futuresType": "U_MARGINED",
+            "rateLimits": [
+        {{rateLimits
+            ?? """
+                {
+                    "rateLimitType": "REQUEST_WEIGHT",
+                    "interval": "MINUTE",
+                    "intervalNum": 1,
+                    "limit": 2400
+                }
+            """}}
+            ],
+            "exchangeFilters": [],
+            "assets": [
+        {{assets}}
+            ],
+            "symbols": []
+        }
+        """;
 }

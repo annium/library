@@ -110,7 +110,7 @@ below, because a summary that reads as an annotation is the failure this model e
 |---|---|---|
 | 1 endpoints | `confirmed`, and this time **path by path** rather than as a set — the earlier pass checked base URLs and path shapes, which is how a wrong `v1` survived it | `pinned` for the websocket routes and both server time paths, `EndpointsTests` on each venue asserting the *composed* URL. Every read path on USD-M is **`live` (2026-09-16)** — exchange info, candles, account, open / recent / historical orders and trades all answered. Spot's account read paths stay `gated`: its `UserProviderTests` are `Not implemented` and skip |
 | 2 request parameters | `confirmed` at tier 1 from the official Postman collections | futures order shapes are **`pinned`** offline, per order type, both init and modify, with `reduceOnly` branching asserted both ways. The signing scaffolding is **`live` (2026-09-16)** as a whole on USD-M: six signed account reads were accepted, which is the only thing that shows key, timestamp, query and signature compose into something Binance honours. `recvWindow` is **`pinned`**: 30000, asserted on the sent query, where the unit is the whole risk — Binance reads it as milliseconds and caps it at 60000, so a value meant as seconds is a 30 ms window and every request is stale |
-| 3 response fields | spot `confirmed` at **tier 1** from `rest-api.md`; futures account / query-order / trade `confirmed` at **tier 3** (a reading, not the page); the user-data-stream nested payloads are `unretrievable` | `pinned` per converter, every one having its own test with real fixtures. Negative branches are **`pinned`**, and three of the four already were when this said otherwise — `LoadContext_DropsASymbolThatIsNotTrading`, `…WithSpotTradingDisallowed` and `…WithoutSpotPermission` have covered the status, the trading flag and the permission for a while. The fourth is pinned as of 2026-09-16: a `clientOrderId` that is not a GUID drops the whole cancel response, which is what happens to every order Binance named itself (`web_…`, `autoclose-…`) |
+| 3 response fields | spot `confirmed` at **tier 1** from `rest-api.md`; futures account / query-order / trade `confirmed` at **tier 3** (a reading, not the page); the user-data-stream nested payloads are `unretrievable` | `pinned` per converter, every one having its own test with real fixtures — which says a converter is covered, not that every branch inside it is, and on 2026-09-17 that gap held two: the futures `createdAt` synthesis (now `pinned` both ways) and the asset drop rule, where the test found a defect rather than a gap (see §3 exchange info). Negative branches are **`pinned`**, and three of the four already were when this said otherwise — `LoadContext_DropsASymbolThatIsNotTrading`, `…WithSpotTradingDisallowed` and `…WithoutSpotPermission` have covered the status, the trading flag and the permission for a while. The fourth is pinned as of 2026-09-16: a `clientOrderId` that is not a GUID drops the whole cancel response, which is what happens to every order Binance named itself (`web_…`, `autoclose-…`) |
 | 4 filters | `confirmed` — every type name and field on both venues, including that spot documents **both** `MIN_NOTIONAL` and `NOTIONAL` while futures documents only `MIN_NOTIONAL` | `pinned`, including the lot-size merge arithmetic — but entirely piggybacked on the exchange-info fixture; there is no filter test of its own |
 | 5 enumerations | `confirmed` on both venues against their documented lists | **`pinned` as a category since 2026-09-16.** `WireMappingTests` on each venue drives every table both ways: each documented wire value parses to its member, each domain member writes back out, and the round trip holds. Until then coverage was incidental — a value counted only if some fixture happened to carry it, which on the read side left every terminal order status (`FILLED`, `REJECTED`, `EXPIRED`, `EXPIRED_IN_MATCH`, and spot's `PENDING_CANCEL`) parsed by nothing at all |
 | 6 error and status codes | `confirmed` | HTTP mapping `pinned` in all three copies. The two Binance codes are `pinned` in Spot and UsdFutures and `none` in `Base` — the drifted copy is exactly the untested one |
@@ -273,14 +273,22 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
 
 - Rate limits: entry with `rateLimitType`/`limit`; only `"REQUEST_WEIGHT"` is read, and its window is
   **assumed to already be one minute** — `Base/Market/Contracts/Converters/RateLimitsConverter.cs:37-44`, field names read at `:68,71`
-  **[UNVERIFIED]**
+  **[UNVERIFIED]**. A payload carrying limits but no `REQUEST_WEIGHT` entry **drops the whole exchange
+  info** rather than yielding one with no ceiling — `pinned` 2026-09-17 by
+  `ExchangeInfoWithoutRequestWeightLimit_IsDropped`, because the alternative failure is a ban arriving
+  later from code that reads as though it were respecting a limit
 - Spot instrument: `symbol`, `status` (must be `"TRADING"`), `baseAsset`, `baseAssetPrecision`,
   `quoteAsset`, `quoteAssetPrecision`, `isSpotTradingAllowed`, `filters`, `permissions[]` /
   `permissionSets[][]` must contain `"SPOT"` — `Spot/Internal/Market/Contracts/Converters/InstrumentConverter.cs:50-121`
 - Futures instrument: `symbol`, `contractType` (must be `"PERPETUAL"`; delivery contracts dropped),
   `status`, `baseAsset`, `baseAssetPrecision`, `quoteAsset`, **`quotePrecision`** — **[DIVERGES]**, spot
   spells the same idea `quoteAssetPrecision` — `UsdFutures/.../InstrumentConverter.cs:49-107`
-- Futures assets: `assets[]` with `asset`, `marginAvailable` — `UsdFutures/.../AssetConverter.cs:28-62`
+- Futures assets: `assets[]` with `asset`, `marginAvailable`; an asset that is **not marginable is dropped**
+  — `UsdFutures/.../AssetConverter.cs:28-62`, and the drop is only real because the envelope filters the
+  nulls it returns (`ExchangeInfoConverter.cs:61-70`). `pinned` 2026-09-17 by
+  `AssetThatIsNotMarginable_IsDropped`. Until that date the envelope read the array as a collection of
+  **non-nullable** elements and kept the null, so the rule was written and discarded one line later; the
+  first thing `MarketProvider.LoadContextAsync` does with the result is read `.Code` off every entry
 
 ### Exchange information envelope
 
@@ -334,7 +342,7 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
 |---|---|---|
 | Spot `executionReport` **[DEAD]** | `e`,`s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`P`,`X`,`z`,`Z`,`l`,`L`,`n`,`N`,`m`,`O`,`T` | `Spot/.../OrderUpdateEventConverter.cs:99-163` |
 | Spot `outboundAccountPosition` **[DEAD]** | `e`,`u`,`B[]` with `a`,`f`,`l` | `Spot/.../AccountUpdateEventConverter.cs:63-84` |
-| Futures `ORDER_TRADE_UPDATE` | top-level `e`, nested `o` with `s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`sp`,`R`,`X`,`z`,`ap`,`l`,`L`,`n`,`N`,`m`,`T`. Trigger price is `sp` where spot uses `P`; average price is `ap` where spot derives it. `createdAt` synthesized from `transactionTime` only when status is `New`, else `0` | `UsdFutures/.../OrderUpdateEventConverter.cs:83,104-185` |
+| Futures `ORDER_TRADE_UPDATE` | top-level `e`, nested `o` with `s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`sp`,`R`,`X`,`z`,`ap`,`l`,`L`,`n`,`N`,`m`,`T`. Trigger price is `sp` where spot uses `P`; average price is `ap` where spot derives it. `createdAt` synthesized from `transactionTime` only when status is `New`, else `0` (spot needs no synthesis: its event carries `O`) — both halves `pinned` 2026-09-17 | `UsdFutures/.../OrderUpdateEventConverter.cs:83,104-185` |
 | Futures `ACCOUNT_CONFIG_UPDATE` | `e`,`T`,`ai` (presence ⇒ multi-assets change), `ac` (presence ⇒ leverage change), `j`,`s`,`l` | `UsdFutures/.../AccountConfigUpdateEventConverter.cs:73-98` |
 | Futures `ACCOUNT_UPDATE` | `e`,`T`,`a`, `B[]` with `a`,`wb`,`cw`,`bc`, `P[]` with `s`,`ps`,`mt`,`iw`,`pa`,`ep`,`up` | `UsdFutures/.../BalanceAndPositionUpdateEventConverter.cs:67-89` |
 
