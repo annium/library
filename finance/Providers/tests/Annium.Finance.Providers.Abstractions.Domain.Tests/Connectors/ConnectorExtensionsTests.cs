@@ -25,7 +25,7 @@ public class ConnectorExtensionsTests
         var connector = new ConnectsWhileBeingAskedConnector();
 
         // act
-        var wait = connector.WhenConnectedAsync();
+        var wait = connector.WhenConnectedAsync(TestContext.Current.CancellationToken);
 
         // assert - bounded, because the failure being pinned is an unbounded wait
         var completed = await Task.WhenAny(

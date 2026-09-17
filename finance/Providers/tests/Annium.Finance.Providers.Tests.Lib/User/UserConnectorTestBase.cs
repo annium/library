@@ -2,8 +2,10 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Runtime.ExceptionServices;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.Mapper;
 using Annium.Data.Tables;
@@ -122,7 +124,7 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
         _disposable += market;
 
         this.Trace("await until market connector is ready");
-        await market.WhenConnectedAsync();
+        await market.WhenConnectedAsync(TestContext.Current.CancellationToken);
 
         this.Trace<string>("find instrument {symbol}", Symbol);
         Instrument = market.Instruments.Single(x => x.Symbol == Symbol);
@@ -131,7 +133,7 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
         this.Trace<string>("subscribe and wait for ticker for {symbol}", Symbol);
         market.SubscribeTickers([Symbol]);
         this.Trace<string>("find ticker for {symbol}", Symbol);
-        Ticker = await market.Tickers.FirstAsync(x => x.Symbol == Symbol);
+        Ticker = await market.Tickers.FirstAsync(x => x.Symbol == Symbol).ToTask(TestContext.Current.CancellationToken);
         this.Trace("found ticker for {instrument}", Instrument);
 
         // arrange - user
@@ -180,13 +182,13 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
         Connector.OnError += _errors.Enqueue;
 
         this.Trace("await until user connector is ready");
-        await Connector.WhenConnectedAsync();
+        await Connector.WhenConnectedAsync(TestContext.Current.CancellationToken);
 
         this.Trace("cancel open orders");
-        await CancelOpenOrders();
+        await CancelOpenOrders(TestContext.Current.CancellationToken);
 
         this.Trace("await for balances");
-        await AwaitForInitialBalances();
+        await AwaitForInitialBalances(TestContext.Current.CancellationToken);
 
         this.Trace("await for positions and leverages (before closing)");
         await AwaitForInitialPositionsAndLeverages();
@@ -279,7 +281,7 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
         }
 
         this.Trace("cancel open orders");
-        await CancelOpenOrders();
+        await CancelOpenOrders(TestContext.Current.CancellationToken);
 
         // the opening position snapshot arrives after the connector connects, and initialization can fail
         // between the two - it places real closing orders of its own before it is done. Cancelling above
@@ -305,7 +307,8 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
                     amount < 0 ? OrderSide.Buy : OrderSide.Sell,
                     Math.Abs(amount)
                 ),
-                OrderStatus.Filled
+                OrderStatus.Filled,
+                TestContext.Current.CancellationToken
             );
             await EnsureBalanceIsIncreased();
             // flattening moves the amount towards zero, which is downwards for a long and upwards for
@@ -390,12 +393,13 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     /// without placing an order.
     /// </summary>
     /// <param name="request">The order-init request expected to be rejected.</param>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task InitInvalidOrder(IInitOrderRequest request)
+    protected async Task InitInvalidOrder(IInitOrderRequest request, CancellationToken ct)
     {
         this.Trace("start");
 
-        await Connector.InitOrderAsync(request).EnsureFailedAsync();
+        await Connector.InitOrderAsync(request).EnsureFailedAsync().WaitAsync(ct);
 
         EnsureNoErrors();
 
@@ -408,8 +412,9 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     /// </summary>
     /// <param name="request">The order-init request to place.</param>
     /// <param name="status">The status the order is expected to be reported with.</param>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>The placed order as reported by the connector.</returns>
-    protected async Task<OrderModel> InitValidOrder(IInitOrderRequest request, OrderStatus status)
+    protected async Task<OrderModel> InitValidOrder(IInitOrderRequest request, OrderStatus status, CancellationToken ct)
     {
         this.Trace("start");
 
@@ -417,7 +422,7 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
 
         // act
         this.Trace("execute start");
-        var order = await Connector.InitOrderAsync(request).UnwrapAsync();
+        var order = await Connector.InitOrderAsync(request).UnwrapAsync().WaitAsync(ct);
         this.Trace("execute done");
 
         EnsureNoErrors();
@@ -438,13 +443,14 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     /// that it fails without canceling the order.
     /// </summary>
     /// <param name="order">The order the cancellation is expected to be rejected for.</param>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task CancelInvalidOrder(OrderModel order)
+    protected async Task CancelInvalidOrder(OrderModel order, CancellationToken ct)
     {
         this.Trace("start");
 
         var request = CancelOrder(order.Id, order.ClientOrderId, order.Symbol);
-        await Connector.CancelOrderAsync(request).EnsureFailedAsync();
+        await Connector.CancelOrderAsync(request).EnsureFailedAsync().WaitAsync(ct);
 
         EnsureNoErrors();
 
@@ -455,8 +461,9 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     /// Cancels the given real order on the account, and asserts it comes back reported as canceled.
     /// </summary>
     /// <param name="order">The order to cancel.</param>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task CancelValidOrder(OrderModel order)
+    protected async Task CancelValidOrder(OrderModel order, CancellationToken ct)
     {
         this.Trace("start");
 
@@ -465,7 +472,7 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
         // cleanup
         this.Trace("execute start");
         var request = CancelOrder(order.Id, order.ClientOrderId, order.Symbol);
-        await Connector.CancelOrderAsync(request).UnwrapAsync();
+        await Connector.CancelOrderAsync(request).UnwrapAsync().WaitAsync(ct);
         this.Trace("execute done");
 
         EnsureNoErrors();
@@ -483,12 +490,13 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     /// without modifying the order.
     /// </summary>
     /// <param name="request">The modify request expected to be rejected.</param>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task ModifyInvalidOrder(IModifyOrderRequest request)
+    protected async Task ModifyInvalidOrder(IModifyOrderRequest request, CancellationToken ct)
     {
         this.Trace("start");
 
-        await Connector.ModifyOrderAsync(request).EnsureFailedAsync();
+        await Connector.ModifyOrderAsync(request).EnsureFailedAsync().WaitAsync(ct);
 
         EnsureNoErrors();
 
@@ -501,8 +509,13 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     /// </summary>
     /// <param name="request">The modify request to send.</param>
     /// <param name="status">The status the order is expected to be reported with.</param>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>The modified order as reported by the connector.</returns>
-    protected async Task<OrderModel> ModifyValidOrder(IModifyOrderRequest request, OrderStatus status)
+    protected async Task<OrderModel> ModifyValidOrder(
+        IModifyOrderRequest request,
+        OrderStatus status,
+        CancellationToken ct
+    )
     {
         this.Trace("start");
 
@@ -510,7 +523,7 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
 
         // act
         this.Trace("execute start");
-        var order = await Connector.ModifyOrderAsync(request).UnwrapAsync();
+        var order = await Connector.ModifyOrderAsync(request).UnwrapAsync().WaitAsync(ct);
         this.Trace("execute done");
 
         EnsureNoErrors();
@@ -529,13 +542,14 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     /// <summary>
     /// Cancels every open order on <see cref="Symbol"/> on the real account.
     /// </summary>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task CancelOpenOrders()
+    protected async Task CancelOpenOrders(CancellationToken ct)
     {
         this.Trace("cancel all orders - start");
 
         // cancel existing orders
-        await Connector.CancelAllOrdersAsync(Symbol).UnwrapAsync();
+        await Connector.CancelAllOrdersAsync(Symbol).UnwrapAsync().WaitAsync(ct);
 
         EnsureNoErrors();
 
@@ -546,12 +560,13 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     /// Waits until the connector has reported at least one asset balance, plus a fixed grace period for
     /// further messages to settle.
     /// </summary>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected async Task AwaitForInitialBalances()
+    protected async Task AwaitForInitialBalances(CancellationToken ct)
     {
         // await until balances arrive and a second more before starting test
         this.Trace("await for balances");
-        await Expect.ToAsync(() => _assets.IsNotEmpty());
+        await Expect.ToAsync(() => _assets.IsNotEmpty(), ct);
         await WaitForMessages();
     }
 

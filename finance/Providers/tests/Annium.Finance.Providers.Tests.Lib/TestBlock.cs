@@ -24,4 +24,31 @@ public static class TestBlock
 
     /// <summary>Mutates the account: places orders, opens and closes positions.</summary>
     public const string Write = "write";
+
+    /// <summary>
+    /// How long a <see cref="Read"/> test may run before xUnit fails it, in milliseconds.
+    /// </summary>
+    /// <remarks>
+    /// Every exchange-facing test needs one, because none of what they wait on ends by itself: an exchange
+    /// unreachable from where the test runs answers nothing, and a wait with no deadline then lasts as long
+    /// as whoever is watching. A nightly run met exactly that and sat for 42 minutes until the runner killed
+    /// the job - which reports as <em>cancelled</em>, not failed, and so reads like somebody pressed a
+    /// button rather than like a test that never returned.
+    ///
+    /// Two minutes is far longer than these take - a read is a handful of requests, each already bounded at
+    /// 30 seconds by the HTTP layer - and far shorter than any runner's patience. The point is not to
+    /// measure anything by it; it is that the run ends, names the test, and fails.
+    /// </remarks>
+    public const int ReadTimeoutMs = 120_000;
+
+    /// <summary>
+    /// How long a <see cref="Write"/> test may run before xUnit fails it, in milliseconds.
+    /// </summary>
+    /// <remarks>
+    /// Longer than <see cref="ReadTimeoutMs"/> because these wait on an exchange to act rather than only to
+    /// answer: an order has to reach the book, fill or be cancelled, and a position has to close. Still a
+    /// deadline, and a generous one - a trading test that has not finished in five minutes is not being
+    /// slow, it is stuck, and it is holding a real account open while it is.
+    /// </remarks>
+    public const int WriteTimeoutMs = 300_000;
 }

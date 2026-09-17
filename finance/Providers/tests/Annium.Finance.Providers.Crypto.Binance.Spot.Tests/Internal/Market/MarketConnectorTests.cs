@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Core;
+using Annium.Finance.Providers.Tests.Lib;
 using Annium.Finance.Providers.Tests.Lib.Market;
 using Xunit;
 
@@ -36,9 +37,9 @@ public class MarketConnectorTests : MarketConnectorTestBase
     /// BTCUSDT. Talks to the real exchange; in the read block.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    [Fact]
+    [Fact(Timeout = TestBlock.ReadTimeoutMs)]
     public Task MarketConnectorAsync()
     {
-        return MarketConnectorBaseAsync(Settings.Market.GetProviderKey());
+        return MarketConnectorBaseAsync(Settings.Market.GetProviderKey(), TestContext.Current.CancellationToken);
     }
 }

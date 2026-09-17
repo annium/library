@@ -8,10 +8,23 @@ using Xunit;
 namespace Annium.Finance.Providers.Crypto.Binance.UsdFutures.Tests.Internal.User.Services;
 
 /// <summary>
-/// Verifies that the signature service signs a request query with HMAC-SHA256 over the API secret exactly
-/// the way Binance expects, by checking a fixed query string against a signature pinned in <c>test.env</c>
-/// rather than against a live account.
+/// Verifies that our HMAC-SHA256 of a fixed string under the account's secret equals a value Binance
+/// produced for the same input, pinned in <c>test.env</c> rather than checked against a live account.
 /// </summary>
+/// <remarks>
+/// <para>
+/// This is a conformance check on the hash and nothing more: same algorithm, same key material, same bytes
+/// in, same digest out. It is worth having — a signature that is subtly wrong fails every signed endpoint
+/// with one opaque code — but it is narrow, and it used to be described as if it were broader.
+/// </para>
+/// <para>
+/// In particular it says nothing about percent-encoding, and cannot: it hands the signer a literal, so no
+/// query is composed and nothing is encoded on the way. That property — that the string signed is the
+/// string sent — lives one level up, at <c>Signature</c>, and is pinned offline by
+/// <c>HttpRequestSignatureExtensionsTests</c>, which sends real requests to a local server and compares
+/// what the signer was asked for against what arrived.
+/// </para>
+/// </remarks>
 [Collection(ExchangeCollection.Name)]
 [Trait(TestBlock.Name, TestBlock.Read)]
 public class SignatureServiceTests : ProvidersTestBase
@@ -36,6 +49,9 @@ public class SignatureServiceTests : ProvidersTestBase
     /// Signs a fixed order query string with the credentials from <c>test.env</c> and asserts it matches the
     /// signature pinned in <see cref="Settings.ExpectedSignature"/>.
     /// </summary>
+    // No Timeout: this test signs a string and compares it. Nothing in its body waits, so a deadline
+    // here would guard nothing - and xUnit1069 says as much, since there is no token to observe.
+    // What can hang on this path is the fixture around it, and that is bounded where it is built.
     [Fact(
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),

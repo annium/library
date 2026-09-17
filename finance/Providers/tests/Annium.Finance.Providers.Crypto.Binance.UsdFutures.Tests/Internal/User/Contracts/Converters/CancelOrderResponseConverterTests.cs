@@ -77,4 +77,44 @@ public class CancelOrderResponseConverterTests : ProvidersTestBase
         deserialized.Id.Is(Guid.Parse("498cd707-dcce-4521-88ec-4ebded37f2ec"));
         deserialized.OrderId.Is("283194212");
     }
+
+    /// <summary>
+    /// A client order id the exchange did not get from us is not a GUID, and the whole response is dropped.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The converter reads <c>clientOrderId</c> as a GUID and returns <c>default</c> when it is not one, so
+    /// the caller is told the cancel produced nothing rather than that it produced an order it cannot name.
+    /// </para>
+    /// <para>
+    /// This is not a hypothetical shape. Binance assigns its own ids to anything placed outside this
+    /// client — the web interface uses <c>web_…</c>, liquidations and auto-closes get <c>autoclose-…</c> —
+    /// and every one of them lands here. Cancelling such an order succeeds at the exchange and reads as
+    /// nothing at all on this side. Pinned because it is a deliberate narrowing and reads like an oversight:
+    /// the fix, whenever it comes, should be a decision about what to return, not a surprise.
+    /// </para>
+    /// </remarks>
+    /// <param name="clientOrderId">A client order id Binance really does assign.</param>
+    [Theory]
+    [InlineData("web_kR8Xq2v1")]
+    [InlineData("autoclose-1700000000000")]
+    [InlineData("")]
+    public void ClientOrderIdThatIsNotAGuid_DropsTheResponse(string clientOrderId)
+    {
+        // arrange
+        var raw =
+            $@"{{
+            ""clientOrderId"": ""{clientOrderId}"",
+            ""orderId"": 283194212,
+            ""status"": ""CANCELED"",
+            ""symbol"": ""BTCUSDT""
+        }}";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.CancelOrderKey);
+        var deserialized = serializer.Deserialize<CancelOrderResponse>(Encoding.UTF8.GetBytes(raw));
+
+        // assert
+        deserialized.IsDefault($"'{clientOrderId}' produced a response instead of being dropped");
+    }
 }

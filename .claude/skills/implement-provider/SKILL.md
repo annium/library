@@ -21,7 +21,13 @@ Some of what this skill validates places **real orders on a real account**.
   trading one, so `just test-write` is the act, not a preliminary to it. The variable is set by the user, or by you only when the user has approved *that stage*
   in *that call*.
 - `test.env` files hold real credentials. Never read them for their values, never print them, never
-  commit them.
+  commit them. Needing a value computed from one — a signing golden value, say — is not an exception:
+  write the user a script and let them run it, so the secret stays on their side and only the result is
+  spoken aloud.
+- **Build after editing `test.env`.** Tests read it from the working directory, which is the copy under
+  `bin/`, kept in step with the source only by a build — and every test recipe runs `--no-build`. Edit and
+  run straight away and you test the previous contents, while a check against the source file confirms the
+  value is right, because it is: just not the one being read.
 - Steps 1-3 need no provider access at all. Steps 4 and 5 do, and stage themselves accordingly:
   step 4's live validation only reads, step 5's trades.
 
@@ -45,6 +51,42 @@ always runs rather than the one that never does.
 A test written in step 4 belongs to `read` or to no block at all; one written in step 5 that trades
 belongs to `write`. Marking it is part of writing it, not a later tidy-up: an unmarked live test runs
 in the default block, where its gate will skip it and its absence will look like coverage.
+
+### Every live test carries a deadline, and the waits under it take its token
+
+A live test waits on something that may never arrive: an exchange unreachable from where the test runs
+answers nothing, and a handshake that drops is an ordinary event on a real network. A wait with no end
+then lasts as long as whoever is watching — and unattended, that is the job's timeout.
+
+**A hanging test does not fail. It cancels the job**, and *cancelled* reads like somebody pressed a button
+rather than like something broken. That is not hypothetical: three nightlies in a row and a manual run
+ended that way, the two venue assemblies silent for 42 minutes, and nobody noticed for a week because the
+result did not look like a failure. It is the same shape this codebase keeps meeting — something did not
+happen, and everything downstream carried on as though it had.
+
+Two halves, and one without the other is worse than neither:
+
+- **`[Fact(Timeout = …)]` on every exchange-facing test.** It is the net: xUnit ends the test, names it,
+  and the run finishes. Pick it far longer than the work and far shorter than any runner's patience.
+- **The token threaded into every wait beneath it.** A deadline whose waits ignore `TestContext.Current.CancellationToken`
+  reports late and says only that time ran out. With the token, the test ends where it was actually stuck.
+  xUnit's own analyzer enforces this pairing, and it is right to.
+
+Where a call takes no token — a provider method that never had one — bound the *test's* wait with
+`WaitAsync(ct)`: the test ends on time and the orphaned call dies with the process.
+
+Two rules that are easy to get wrong:
+
+- **Take the token as a parameter in a shared base, rather than reaching for `TestContext` inside it.** A
+  base that reads the ambient token looks correct from the derived test, which is exactly how four
+  exchange tests kept a bare `[Fact]` while their base had already been taught to honour a token nothing
+  signalled.
+- **A synchronous test gets no deadline.** If nothing in the body waits, a deadline there guards nothing
+  and there is no token to observe. Say so in a comment where someone will look for it.
+
+**Check by enumeration, not by memory.** List every `[Fact]` in a class that carries a block trait or
+derives from a base that does, and report the ones without a `Timeout`. Listing the tests you believe are
+exchange-facing finds the ones you already knew about.
 
 ## The load-bearing idea: one contract, ported into every step
 
@@ -333,7 +375,8 @@ half of validation — and the reason it comes before step 5 rather than after i
 **Done.** Facts this step exercises offline become `pinned`; facts a read-only live stage observed
 become `live`, dated. Every endpoint called with exactly the contract's parameters. Paging and windows match the
 documented caps. Failure paths return something the caller can act on rather than an empty success.
-Tests green offline; the read-only live stages pass.
+Tests green offline; the read-only live stages pass. Every test this step writes carries a deadline and
+threads the token — see the section above, and check it by enumeration rather than by memory.
 
 ### Step 5 — connector: streams and the order lifecycle ⬜ no child skill yet
 

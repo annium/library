@@ -16,7 +16,7 @@ created: 2026-09-01
 - docs revision: spot `a0057759f1cbcab812af44b75309d72866a57561`; futures fetched 2026-09-01 (no
   repository exists, so the date is the only anchor)
 - working branch: `main` where converged
-- last reconciled: 2026-09-01 — steps 1-2, incomplete; drift found
+- last reconciled: 2026-09-16 — step 4 re-validated live, now with credentials; steps 3 and 5 not started
 
 ## Convergence
 
@@ -25,19 +25,36 @@ created: 2026-09-01
 | 1 — derive existing state | **converged** | ~70 anchors verified and re-anchored after the environment removal; four missing entries added; both axes censused entry by entry against the test suites | none |
 | 2 — collect facts, compute drift | **converged, with two accepted gaps** | all 13 futures pages and 7 spot files snapshotted; request side closed at tier 1 from the official Postman collections; every category given a documentation outcome | **accepted, not open**: the nested user-data-stream payloads (~20 short field names) are `unretrievable` — no available technique reaches them, so waiting changes nothing; and the `avgPrice` question is `contested`, settleable only by a live order. Both are recorded against their entries rather than left as unfinished work |
 | 3 — wire types and serialization | not-started | — | — |
-| 4 — provider, read paths (+ registration, config, read-only live validation) | **converged** | every read path on both venues driven offline, failure paths included; endpoints pinned; **live read block green: 20 tests, 14 passed, 6 skipped, none failed** | none. The upstream defect found here — an exchange error discarded when the success type is a collection — was fixed in `Annium.Net.Http` 1.1.49 and taken up with the package bump; the test that pinned the loss now pins the reason |
+| 4 — provider, read paths (+ registration, config, read-only live validation) | **converged** | every read path on both venues driven offline, failure paths included; endpoints pinned; **live read block green on 2026-09-16: 20 tests, 14 passed, 6 skipped, none failed** — and this time with credentials present, so the two signature tests ran rather than skipping | none. The upstream defect found here — an exchange error discarded when the success type is a collection — was fixed in `Annium.Net.Http` 1.1.49 and taken up with the package bump; the test that pinned the loss now pins the reason. The six still skipped are Spot's `UserProviderTests`, marked `Not implemented`, which is about the tests and not about access |
 | 5 — connector, streams and orders (+ registration, config, trading live validation) | not-started | — | unblocked: the user stream now addresses `/private`. Still needs its own tests — `WebSocketService` and `ListenKeyResolver` have no test file at all |
 
 ## Queued work
 
 Named here rather than left implied, with the reason each is not being done now.
 
-- **Rebuild the signing golden value.** The fixture's query — `symbol=LTCBTC&side=BUY&…` — contains no
-  character requiring percent-encoding, so it passes whether or not the implementation encodes before
-  signing, which Binance has required since 2026-01-15. The test is `vacuous` for that property. Not
-  rebuilt yet: a live signed request settles it either way, so if the exchange stages pass, the
-  implementation is right and only the test needs strengthening; if they fail with `-1022`, the fix is
-  the implementation and the test is the second job, not the first.
+- ~~**Rebuild the signing golden value.**~~ — **settled 2026-09-16, and not the way it was framed.** The
+  worry was that `Signature_IsValid` passes whether or not the implementation percent-encodes before
+  signing, so it was `vacuous` for that property. Both halves of that turned out to need correcting.
+
+  **There is no encoding defect.** `Signature` signs `req.Uri.Query` — the *composed* query — and
+  `UriQuery.ToString()` builds it with `Uri.EscapeDataString`. Measured, not assumed: for a space, `+`,
+  `&`, `=`, a JSON payload and Cyrillic, the signed string is byte-identical to what goes on the wire.
+  A signer that reconstructed its own string from the raw values would be the defect; this one cannot,
+  because it reads the query back off the URI.
+
+  **The golden value was never the instrument for it.** `Signature_IsValid` hands the signer a literal,
+  so no query is composed and nothing is encoded — no choice of query string could make it see the
+  property. What it does pin is narrow and real: our HMAC of a fixed input equals what Binance produced.
+  Its summary said something broader and now says that.
+
+  The property is pinned instead by `HttpRequestSignatureExtensionsTests` in the Base test project,
+  offline and needing no credentials: it sends real requests to a local server and asserts that what the
+  signer was asked to sign equals what arrived, minus the `signature` parameter appended afterwards.
+  Mutation-checked — signing the unescaped query kills 7 of its 8 cases.
+
+  Worth keeping from this: signing happens at **send** time, not when `Sign()` is called — `Signature`
+  registers a `Configure` action. A first attempt built a request, inspected it, and found the signer had
+  never been called at all.
 - ~~**Rate-limit handling in the runtime**~~ — **done** (library 1.3.0-1.3.4, 2026-09-08). The live
   read-only run this was waiting on happened, and it did approach the limits. 418 and 429 now both read
   a pause — `Retry-After`, else the `banned until <epoch ms>` in Binance's `-1003` body — and hand it to
@@ -53,21 +70,67 @@ Named here rather than left implied, with the reason each is not being done now.
   one it is needs a census of paths against the response headers each returns. **To be settled while
   implementing the trading paths (step 5)**, where the order-count headers (`x-mbx-order-count-*`) come
   into play and the same question has to be answered for them anyway.
-- **Two `vacuous` tests**, both of the same shape — the input chosen cannot exercise the property the
-  test claims. The signing golden value, above; and the history paging tests, which request one day
-  while claiming to protect a seven-day window and a three-month cap. Neither is fixed here: the first
-  waits on the live run, the second belongs to the step that owns the read paths.
-- **Five components with no test file at all** — `WebSocketService`, `ListenKeyResolver`,
-  `HttpRequestSignatureExtensions`, `HttpRequestLogExtensions`, and the filter converters. The first
-  two carry the connection lifecycle of every stream this module runs.
-- **The read-side enumeration gaps** — most order-type and order-status wire strings are never parsed
-  by any test, only written. Work for the step that owns serialization.
+- **One `vacuous` test left**: the history paging tests, which request one day while claiming to protect
+  a seven-day window and a three-month cap. Belongs to the step that owns the read paths. The signing
+  golden value was the other one, and it is settled above — the fix was a test at the level where the
+  query is composed, not a different input to the one that could never see it.
+- **Four components with no test file at all** — `WebSocketService`, `ListenKeyResolver`,
+  `HttpRequestLogExtensions`, and the filter converters. The first two carry the connection lifecycle of
+  every stream this module runs, which makes them step 5's work rather than step 4's.
+  `HttpRequestSignatureExtensions` left this list on 2026-09-16.
+- ~~**The read-side enumeration gaps**~~ — **closed 2026-09-16.** `WireMappingTests` on each venue drives
+  every wire↔domain table both ways: each documented value parses to its member, each domain member
+  writes back out, the round trip holds, and each fold is asserted by name. Before it, coverage was
+  whatever the converter fixtures happened to contain — on the read side that meant `NEW`,
+  `PARTIALLY_FILLED` and `CANCELED`, and nothing else. Every status meaning *the order is finished* was
+  parsed by no test at all, which is the reading both connectors use to decide an order has left the
+  book. Mutation-checked three ways: a status parsing to the wrong member, a domain member left out of
+  the outbound table, and a fold removed as an apparent asymmetry — 3, 1 and 3 failures respectively.
 - **Failure statuses are coarser than the exchange's own.** `MapOperationCode` maps every negative
   Binance code to `BadRequest`, so an invalid API key, an expired timestamp and a malformed parameter
   are indistinguishable to a caller, and the HTTP status — which would have told `Forbidden` from
   `BadRequest` — is consulted only on the branch where the error body parsed as success. Not done now
   because the useful split is by what a caller would do differently (retry, re-sign, stop), and that is
   a decision about the runtime rather than a mapping table.
+
+## Where step 4 stands, and what is left in it
+
+Converged, and as of 2026-09-16 converged with the live block actually run rather than skipped. What that
+left behind, in the order it is worth picking up:
+
+| left | why it is still open |
+|---|---|
+| the history paging fixture is `vacuous` | it asks for one day while claiming a seven-day window and a three-month cap. The *fact* is `pinned` regardless — an offline test drives twenty days through three windows — so this is a misleading test rather than an unguarded fact. Deleting it may be the right fix |
+| `x-mbx-used-weight-1m header not present` at `Error` | every response without the header logs one, and Binance does not send it everywhere. Either the absence is normal on those paths and the level is wrong, or the limiter is running blind there. Needs a census of paths against their response headers — and step 5 has to answer the same question for `x-mbx-order-count-*`, so it is cheaper done there |
+| `MapOperationCode` folds every negative code to `BadRequest` | an invalid key, an expired timestamp and a malformed parameter are indistinguishable to a caller. The useful split is by what a caller would do differently — retry, re-sign, stop — which is a decision about the runtime rather than a mapping table |
+| decay constants `none` | the ceiling and the water-mark fraction are pinned through the number they compose to; the decay rate and interval are not |
+| three `[UNVERIFIED]` markers | leftovers from the marker vocabulary this manifest replaced. Two are substantive: the rate-limit window is *assumed* to be one minute, and a one-way account is *assumed* to report one `positions[]` row per symbol with `positionSide=BOTH` — the write fixture's precondition rests on the second. Both belong to the documentation axis, so step 2 assigns them, not step 4 |
+
+**Steps 3 and 5 are the work, not this list.** Step 3 has never been started; step 5 is unblocked and
+needs its own tests before anything it validates can be trusted — `WebSocketService` and
+`ListenKeyResolver` still have no test file, and they carry the connection lifecycle of every stream.
+
+## Running the read block: `test.env` is copied, not read from source
+
+Worth writing down because it cost a run and because the obvious check does not catch it.
+
+`TestEnv` reads `test.env` from the process's working directory, which for a test run is
+`bin/Release/net10.0/` — not the copy beside the `.csproj`. The project declares
+`<None Update="test.env" CopyToOutputDirectory="Always" />`, so the two are kept in step **by building**,
+and every `just test-*` recipe runs `--no-build`.
+
+So editing `test.env` and running the block straight away tests the previous contents. On 2026-09-16 that
+produced a signature mismatch whose expected value was the literal `test_expected_signature` — the
+placeholder from `test.env.example`, still sitting in a copy made before the file was filled in. The
+source file was correct the whole time, and a script that checked the source said so.
+
+**Run `just build-finance` after touching `test.env`.** This is the stale-binary trap the fix-code reports
+already record for `just test`, arriving through data rather than through code: the binary was current and
+the file beside it was not.
+
+The failure was at least legible — the assertion printed the literal, so the placeholder was recognisable
+on sight. Had the placeholder been a plausible-looking hex string, the same run would have read as "our
+HMAC disagrees with Binance" and sent someone into the signing code.
 
 ## Reconcile history
 
@@ -80,3 +143,5 @@ findings were read from.
 | 2026-09-01 | 1-2 — contract | [`2026.09/2026.09.01-contract.md`](2026.09/2026.09.01-contract.md) | **blocking drift**: futures WebSocket URLs decommissioned. Step 1 converged; step 2 complete but for the futures endpoint schemas. One unverified assumption settled in our favour; the sandbox environment removed from the code entirely |
 | 2026-09-02 | 4 — provider | *(no report; the work is in the branch)* | every read path driven offline on both venues, failure paths included; **first live read run**, which failed on spot's server time path — `v1` where the exchange documents `v3`, an oddity the manifest had marked and never checked. Fixed and pinned; the block is green. Step 4 was called converged once before it was, on the strength of the live run alone — the checklist had three items left |
 | 2026-09-02 | 4 — provider | *(no report; the work is in the branch)* | packages bumped to 1.1.49, closing the upstream union-parse defect this step found. The test that pinned the loss now asserts what the exchange actually said. `just update` could not be used: `.xs` points the tool at `api.pkg.annium.com`, which serves a certificate for `*.avito.ru` — versions were bumped by hand instead, and the registry is an infrastructure question outside this work |
+| 2026-09-16 | 4 — provider | *(no report; the work is in [library#19](https://github.com/annium/library/pull/19))* | **credentials supplied, so the read block ran whole for the first time**: 20 tests, 14 passed, 6 skipped, none failed. The two signature tests had skipped since the module existed and now pass, which moves `TEST_EXPECTED_SIGNATURE` from `unchecked` to `live`. The six still skipped are Spot's `UserProviderTests`, marked `Not implemented` |
+| 2026-09-16 | 4 — provider | *(same)* | the percent-encoding question closed by measurement rather than by rebuilding the golden value — see the settled item under queued work. A new offline test pins that a signed request signs the query it sends |

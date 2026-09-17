@@ -75,6 +75,7 @@ public class UserConnectorTests : UserConnectorTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.WriteTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -91,7 +92,7 @@ public class UserConnectorTests : UserConnectorTestBase
             ExtremeHighQty,
             LowPrice
         );
-        await InitInvalidOrder(request);
+        await InitInvalidOrder(request, TestContext.Current.CancellationToken);
 
         this.Trace("done");
     }
@@ -103,6 +104,7 @@ public class UserConnectorTests : UserConnectorTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.WriteTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -116,14 +118,14 @@ public class UserConnectorTests : UserConnectorTestBase
 
         // act
         this.Trace("init order");
-        var order = await InitValidOrder(request, OrderStatus.New);
+        var order = await InitValidOrder(request, OrderStatus.New, TestContext.Current.CancellationToken);
 
         this.Trace("ensure balance is locked");
         await EnsureBalanceIsLocked();
 
         // cleanup
         this.Trace("cancel order");
-        await CancelValidOrder(order);
+        await CancelValidOrder(order, TestContext.Current.CancellationToken);
 
         this.Trace("ensure balance is released");
         await EnsureBalanceIsReleased();
@@ -137,6 +139,7 @@ public class UserConnectorTests : UserConnectorTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.WriteTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -146,7 +149,7 @@ public class UserConnectorTests : UserConnectorTestBase
         this.Trace("start");
 
         var request = InitMarketOrder(ClientOrderId(), Range(), Symbol, OrderSide.Buy, ExtremeHighQty);
-        await InitInvalidOrder(request);
+        await InitInvalidOrder(request, TestContext.Current.CancellationToken);
 
         this.Trace("done");
     }
@@ -160,6 +163,7 @@ public class UserConnectorTests : UserConnectorTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.WriteTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -172,12 +176,12 @@ public class UserConnectorTests : UserConnectorTestBase
         var request = InitMarketOrder(ClientOrderId(), Range(), Symbol, OrderSide.Buy, MinQty);
 
         // open position
-        var order = await InitValidOrder(request, OrderStatus.Filled);
+        var order = await InitValidOrder(request, OrderStatus.Filled, TestContext.Current.CancellationToken);
         await EnsureBalanceIsDecreased();
         await EnsurePositionIsIncreased();
 
         // try cleanup
-        await CancelInvalidOrder(order);
+        await CancelInvalidOrder(order, TestContext.Current.CancellationToken);
 
         // TP & SL invalid orders
         await TestOrder(
@@ -241,7 +245,7 @@ public class UserConnectorTests : UserConnectorTestBase
 
         // cleanup
         request = InitMarketOrder(ClientOrderId(), Range(), Symbol, OrderSide.Sell, GetPositionAmount());
-        await InitValidOrder(request, OrderStatus.Filled);
+        await InitValidOrder(request, OrderStatus.Filled, TestContext.Current.CancellationToken);
         await EnsureBalanceIsIncreased();
         await EnsurePositionIsDecreased();
 
@@ -261,13 +265,13 @@ public class UserConnectorTests : UserConnectorTestBase
         this.Trace("start {0} order tet", invalidRequest.Type);
 
         this.Trace("init invalid {0} order", invalidRequest.Type);
-        await InitInvalidOrder(invalidRequest);
+        await InitInvalidOrder(invalidRequest, TestContext.Current.CancellationToken);
 
         this.Trace("init valid {0} order", validRequest.Type);
-        var order = await InitValidOrder(validRequest, OrderStatus.New);
+        var order = await InitValidOrder(validRequest, OrderStatus.New, TestContext.Current.CancellationToken);
 
         this.Trace("cancel valid {0} order", validRequest.Type);
-        await CancelValidOrder(order);
+        await CancelValidOrder(order, TestContext.Current.CancellationToken);
     }
 
     /// <summary>
@@ -277,6 +281,7 @@ public class UserConnectorTests : UserConnectorTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.WriteTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -288,12 +293,12 @@ public class UserConnectorTests : UserConnectorTestBase
         // arrange
         this.Trace("init order");
         var initRequest = InitLimitOrder(ClientOrderId(), Range(), Symbol, OrderSide.Buy, MinQty, LowPrice);
-        var initOrder = await InitValidOrder(initRequest, OrderStatus.New);
+        var initOrder = await InitValidOrder(initRequest, OrderStatus.New, TestContext.Current.CancellationToken);
         var modifyRequest = ModifyToLimitOrder(initOrder, initOrder.Side, ExtremeHighQty, initOrder.Price);
 
         // act
         this.Trace("modify invalid order");
-        await ModifyInvalidOrder(modifyRequest);
+        await ModifyInvalidOrder(modifyRequest, TestContext.Current.CancellationToken);
 
         this.Trace("done");
     }
@@ -306,6 +311,7 @@ public class UserConnectorTests : UserConnectorTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.WriteTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -317,7 +323,7 @@ public class UserConnectorTests : UserConnectorTestBase
         // arrange
         this.Trace("init order");
         var initRequest = InitLimitOrder(ClientOrderId(), Range(), Symbol, OrderSide.Buy, MinQty, LowPrice);
-        var initialOrder = await InitValidOrder(initRequest, OrderStatus.New);
+        var initialOrder = await InitValidOrder(initRequest, OrderStatus.New, TestContext.Current.CancellationToken);
         var modifyRequest = ModifyToLimitOrder(
             initialOrder,
             initialOrder.Side,
@@ -327,14 +333,18 @@ public class UserConnectorTests : UserConnectorTestBase
 
         // act
         this.Trace("modify invalid order");
-        var modifiedOrder = await ModifyValidOrder(modifyRequest, OrderStatus.New);
+        var modifiedOrder = await ModifyValidOrder(
+            modifyRequest,
+            OrderStatus.New,
+            TestContext.Current.CancellationToken
+        );
 
         this.Trace("ensure balance is locked");
         await EnsureBalanceIsLocked();
 
         // cleanup
         this.Trace("cancel valid order");
-        await CancelValidOrder(modifiedOrder);
+        await CancelValidOrder(modifiedOrder, TestContext.Current.CancellationToken);
 
         this.Trace("ensure balance is released");
         await EnsureBalanceIsReleased();
@@ -350,6 +360,7 @@ public class UserConnectorTests : UserConnectorTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.WriteTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -363,21 +374,21 @@ public class UserConnectorTests : UserConnectorTestBase
 
         // act
         this.Trace("init order");
-        var order = await InitValidOrder(request, OrderStatus.New);
+        var order = await InitValidOrder(request, OrderStatus.New, TestContext.Current.CancellationToken);
 
         this.Trace("ensure balance is locked");
         await EnsureBalanceIsLocked();
 
         // cleanup
         this.Trace("cancel valid order");
-        await CancelValidOrder(order);
+        await CancelValidOrder(order, TestContext.Current.CancellationToken);
 
         this.Trace("ensure balance is released");
         await EnsureBalanceIsReleased();
 
         // assert
         this.Trace("cancel invalid order");
-        await CancelInvalidOrder(order);
+        await CancelInvalidOrder(order, TestContext.Current.CancellationToken);
 
         this.Trace("done");
     }
@@ -388,6 +399,7 @@ public class UserConnectorTests : UserConnectorTestBase
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(
+        Timeout = TestBlock.WriteTimeoutMs,
         Skip = "needs exchange credentials in test.env",
         SkipUnless = nameof(Exchange.HasCredentials),
         SkipType = typeof(Exchange)
@@ -396,7 +408,7 @@ public class UserConnectorTests : UserConnectorTestBase
     {
         this.Trace("start");
 
-        await CancelOpenOrders();
+        await CancelOpenOrders(TestContext.Current.CancellationToken);
 
         this.Trace("done");
     }

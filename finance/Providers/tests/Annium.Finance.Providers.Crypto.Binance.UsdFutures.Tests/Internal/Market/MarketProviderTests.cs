@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Core;
+using Annium.Finance.Providers.Tests.Lib;
 using Annium.Finance.Providers.Tests.Lib.Market;
 using Xunit;
 
@@ -37,9 +38,9 @@ public class MarketProviderTests : MarketProviderTestBase
     /// the read block is asked for.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    [Fact]
+    [Fact(Timeout = TestBlock.ReadTimeoutMs)]
     public Task MarketProviderAsync()
     {
-        return MarketProviderBaseAsync(Settings.Market.GetProviderKey());
+        return MarketProviderBaseAsync(Settings.Market.GetProviderKey(), TestContext.Current.CancellationToken);
     }
 }

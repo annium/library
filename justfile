@@ -226,25 +226,22 @@ ci-test-adapters:
     just test-tools
     just test-finance
 
-# nightly variants: currently identical to the day recipes in both groups.
+# The nightly has no exchange in it, and that is settled rather than pending.
 #
-# The point of them was to drop the filter on the finance read block, so that once a night the providers
-# were exercised against the real exchanges. That is off: the read block hangs. Three nightlies in a row
-# (2026-09-09, -10, -11) ended with `test (adapters)` cancelled at the 45-minute job timeout while
-# `test (framework)` finished in five minutes, and the manual run on 2026-09-13 did the same. A hanging
-# test does not fail - it cancels the job, and "cancelled" does not read as "broken", which is why this
-# went unnoticed for a week and why the MinIO failure on 2026-09-12 was the first thing in that time to
-# reach the tests at all.
+# It used to call `-nightly` recipes that dropped the filter on the finance read block, so that once a
+# night the providers were exercised against the real exchanges. That hung: three nightlies in a row
+# (2026-09-09, -10, -11) and a manual run on 2026-09-13 ended with `test (adapters)` cancelled at the
+# 45-minute job timeout, while `test (framework)` finished in five. The runner named the two processes it
+# had to kill - the Spot and USD-M test assemblies - and their last output was 42 minutes earlier.
 #
-# Restoring it means finding which live-read test does not return and giving it a deadline, so that an
-# unreachable exchange fails loudly instead of eating the run. Tracked in the umbrella's open-debts
-# backlog; until then the nightly is the day suite on a schedule, which at least gives a signal.
-
-# identical to ci-test-framework - no finance in this group
-ci-test-framework-nightly: ci-test-framework
-
-# identical to ci-test-adapters until the live-read block is fit to run unattended - see above
-ci-test-adapters-nightly: ci-test-adapters
+# The deadlines that stop a test hanging are in place now (see TestBlock.ReadTimeoutMs), so the block
+# would fail rather than stall. It still does not belong here, and the reason is not the hang: a hosted
+# runner sits in a cloud range, which is what exchanges refuse first, so the block would fail nightly for
+# a reason that is about where CI runs and not about our code or the exchange's. A red nightly that is
+# always red stops being read - the same way "cancelled" did not read as "broken" for a week.
+#
+# API drift is caught by a reconcile pass under the implement-provider skill, run from somewhere the
+# exchange answers. That is a person's job, and it was never this pipeline's.
 
 # everything ci-release does except the two irreversible steps: no tag is created, nothing is
 # pushed. Same version either way - with no v1.2.x tag yet, get-version returns the same number
