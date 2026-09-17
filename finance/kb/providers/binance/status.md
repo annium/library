@@ -74,9 +74,10 @@ Named here rather than left implied, with the reason each is not being done now.
   a seven-day window and a three-month cap. Belongs to the step that owns the read paths. The signing
   golden value was the other one, and it is settled above — the fix was a test at the level where the
   query is composed, not a different input to the one that could never see it.
-- **Five components with no test file at all** — `WebSocketService`, `ListenKeyResolver`,
-  `HttpRequestSignatureExtensions`, `HttpRequestLogExtensions`, and the filter converters. The first
-  two carry the connection lifecycle of every stream this module runs.
+- **Four components with no test file at all** — `WebSocketService`, `ListenKeyResolver`,
+  `HttpRequestLogExtensions`, and the filter converters. The first two carry the connection lifecycle of
+  every stream this module runs, which makes them step 5's work rather than step 4's.
+  `HttpRequestSignatureExtensions` left this list on 2026-09-16.
 - ~~**The read-side enumeration gaps**~~ — **closed 2026-09-16.** `WireMappingTests` on each venue drives
   every wire↔domain table both ways: each documented value parses to its member, each domain member
   writes back out, the round trip holds, and each fold is asserted by name. Before it, coverage was
@@ -91,6 +92,23 @@ Named here rather than left implied, with the reason each is not being done now.
   `BadRequest` — is consulted only on the branch where the error body parsed as success. Not done now
   because the useful split is by what a caller would do differently (retry, re-sign, stop), and that is
   a decision about the runtime rather than a mapping table.
+
+## Where step 4 stands, and what is left in it
+
+Converged, and as of 2026-09-16 converged with the live block actually run rather than skipped. What that
+left behind, in the order it is worth picking up:
+
+| left | why it is still open |
+|---|---|
+| the history paging fixture is `vacuous` | it asks for one day while claiming a seven-day window and a three-month cap. The *fact* is `pinned` regardless — an offline test drives twenty days through three windows — so this is a misleading test rather than an unguarded fact. Deleting it may be the right fix |
+| `x-mbx-used-weight-1m header not present` at `Error` | every response without the header logs one, and Binance does not send it everywhere. Either the absence is normal on those paths and the level is wrong, or the limiter is running blind there. Needs a census of paths against their response headers — and step 5 has to answer the same question for `x-mbx-order-count-*`, so it is cheaper done there |
+| `MapOperationCode` folds every negative code to `BadRequest` | an invalid key, an expired timestamp and a malformed parameter are indistinguishable to a caller. The useful split is by what a caller would do differently — retry, re-sign, stop — which is a decision about the runtime rather than a mapping table |
+| decay constants `none` | the ceiling and the water-mark fraction are pinned through the number they compose to; the decay rate and interval are not |
+| three `[UNVERIFIED]` markers | leftovers from the marker vocabulary this manifest replaced. Two are substantive: the rate-limit window is *assumed* to be one minute, and a one-way account is *assumed* to report one `positions[]` row per symbol with `positionSide=BOTH` — the write fixture's precondition rests on the second. Both belong to the documentation axis, so step 2 assigns them, not step 4 |
+
+**Steps 3 and 5 are the work, not this list.** Step 3 has never been started; step 5 is unblocked and
+needs its own tests before anything it validates can be trusted — `WebSocketService` and
+`ListenKeyResolver` still have no test file, and they carry the connection lifecycle of every stream.
 
 ## Running the read block: `test.env` is copied, not read from source
 
