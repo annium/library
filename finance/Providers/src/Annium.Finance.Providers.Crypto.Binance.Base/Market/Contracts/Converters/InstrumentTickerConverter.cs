@@ -11,6 +11,11 @@ namespace Annium.Finance.Providers.Crypto.Binance.Base.Market.Contracts.Converte
 /// </summary>
 public class InstrumentTickerConverter : JsonConverter<InstrumentTicker>
 {
+    /// <summary>
+    /// The symbols seen so far. A ticker stream repeats the same subscribed symbols on every message.
+    /// </summary>
+    private readonly Utf8StringCache _symbols = new();
+
     /// <summary>Reads a Binance book ticker object into an <see cref="InstrumentTicker"/>.</summary>
     /// <param name="reader">The reader positioned at the start of the ticker object.</param>
     /// <param name="typeToConvert">The type being converted.</param>
@@ -48,7 +53,7 @@ public class InstrumentTickerConverter : JsonConverter<InstrumentTicker>
                 if (reader.ValueTextEquals("s"u8))
                 {
                     reader.Read();
-                    symbol = reader.GetString();
+                    symbol = _symbols.GetString(ref reader);
                 }
                 else if (reader.ValueTextEquals("a"u8))
                 {
