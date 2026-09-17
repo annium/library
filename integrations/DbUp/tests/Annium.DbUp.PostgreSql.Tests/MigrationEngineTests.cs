@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Annium.DbUp.Core;
 using Annium.Testing;
+using Annium.Testing.Containers;
 using Npgsql;
 using Testcontainers.PostgreSql;
 using Xunit;
@@ -43,7 +45,7 @@ public class MigrationEngineTests : IAsyncLifetime
     /// <returns>A task that completes once the database is ready.</returns>
     public async ValueTask InitializeAsync()
     {
-        await _db.StartAsync();
+        await _db.StartWithDeadlineAsync();
         await WaitForReadyAsync();
     }
 
@@ -226,6 +228,12 @@ public class MigrationEngineTests : IAsyncLifetime
     /// <returns>A task that completes once a connection succeeds.</returns>
     private async Task WaitForReadyAsync()
     {
+        // bounded by time rather than by attempts, and the distinction matters: the readiness probe can
+        // pass while PostgreSQL is still finishing its first boot, and that failure is immediate - while a
+        // host that cannot reach the mapped port at all fails by timing out, ten seconds at a time. Ten
+        // attempts is five seconds of the first and a minute and a half of the second
+        var deadline = TimeSpan.FromSeconds(30);
+        var watch = Stopwatch.StartNew();
         for (var attempt = 1; ; attempt++)
         {
             try
@@ -233,8 +241,16 @@ public class MigrationEngineTests : IAsyncLifetime
                 await using var connection = await OpenConnectionAsync();
                 return;
             }
-            catch when (attempt < 10)
+            catch (Exception e)
             {
+                if (watch.Elapsed > deadline)
+                {
+                    throw new InvalidOperationException(
+                        $"database did not accept a connection within {deadline:g}, after {attempt} attempts",
+                        e
+                    );
+                }
+
                 await Task.Delay(500);
             }
         }
