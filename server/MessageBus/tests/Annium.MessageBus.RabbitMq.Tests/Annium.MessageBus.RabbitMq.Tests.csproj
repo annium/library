@@ -9,6 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../../../core/Annium/src/Annium.Testing/Annium.Testing.csproj" />
+    <ProjectReference Include="../../../../core/Annium/tests/Annium.Testing.Containers/Annium.Testing.Containers.csproj" />
     <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
     <ProjectReference Include="../../src/Annium.MessageBus.RabbitMq/Annium.MessageBus.RabbitMq.csproj" />
     <ProjectReference Include="../Annium.MessageBus.Tests.Load.Shared/Annium.MessageBus.Tests.Load.Shared.csproj" />

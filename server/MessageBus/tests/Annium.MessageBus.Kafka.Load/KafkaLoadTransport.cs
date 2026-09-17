@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.MessageBus.Tests.Load.Shared;
+using Annium.Testing.Containers;
 using Testcontainers.Kafka;
 
 namespace Annium.MessageBus.Kafka.Load;
@@ -32,7 +33,7 @@ public sealed class KafkaLoadTransport : ILoadTransport
     public async Task StartAsync()
     {
         var container = new KafkaBuilder("confluentinc/cp-kafka:7.6.1").Build();
-        await container.StartAsync();
+        await container.StartWithDeadlineAsync();
         _container = container;
         _bootstrapServers = container.GetBootstrapAddress();
     }

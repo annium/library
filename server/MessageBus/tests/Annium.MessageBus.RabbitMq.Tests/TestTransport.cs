@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.MessageBus.Tests.Shared;
+using Annium.Testing.Containers;
 using Testcontainers.RabbitMq;
 
 namespace Annium.MessageBus.RabbitMq.Tests;
@@ -47,7 +48,7 @@ public sealed class TestTransport : IMessageBusTestTransport
             if (_container is null)
             {
                 var container = new RabbitMqBuilder("rabbitmq:3.13").Build();
-                await container.StartAsync();
+                await container.StartWithDeadlineAsync();
                 _container = container;
             }
         }

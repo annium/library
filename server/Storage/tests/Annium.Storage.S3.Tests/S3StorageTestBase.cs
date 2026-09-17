@@ -9,6 +9,7 @@ using Amazon.S3.Model;
 using Annium.Storage.Abstractions;
 using Annium.Storage.Tests.Lib;
 using Annium.Testing;
+using Annium.Testing.Containers;
 using Testcontainers.Minio;
 using Xunit;
 
@@ -66,7 +67,7 @@ public abstract class S3StorageTestBase : StorageTestBase, IAsyncLifetime
                 // unqualified name resolves there, so the pull fails with "repository does not exist".
                 // quay.io is MinIO's own registry and carries this exact tag.
                 var container = new MinioBuilder("quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z").Build();
-                await container.StartAsync(ct);
+                await container.StartWithDeadlineAsync(ct);
                 _container = container;
             }
         }

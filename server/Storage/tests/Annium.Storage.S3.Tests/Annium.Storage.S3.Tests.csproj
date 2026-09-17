@@ -7,6 +7,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Annium/tests/Annium.Testing.Containers/Annium.Testing.Containers.csproj" />
     <ProjectReference Include="../../src/Annium.Storage.S3/Annium.Storage.S3.csproj" />
     <ProjectReference Include="../Annium.Storage.Tests.Lib/Annium.Storage.Tests.Lib.csproj" />
   </ItemGroup>
