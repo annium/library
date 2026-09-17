@@ -2,6 +2,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Domain;
+using Annium.Serialization.Json;
 
 namespace Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Converters;
 
@@ -12,6 +13,12 @@ namespace Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Converte
 public class StreamDataConverter<T> : JsonConverter<StreamData<T>?>
     where T : class
 {
+    /// <summary>
+    /// The stream names seen so far. A combined stream sends the same handful of names on every message,
+    /// so this answers from the bytes instead of allocating a fresh string per message.
+    /// </summary>
+    private readonly Utf8StringCache _names = new();
+
     /// <summary>Reads a Binance combined-stream envelope into a <see cref="StreamData{T}"/>, deserializing <c>data</c> as <typeparamref name="T"/>.</summary>
     /// <param name="reader">The reader positioned at the start of the envelope object.</param>
     /// <param name="typeToConvert">The type being converted.</param>
@@ -36,21 +43,21 @@ public class StreamDataConverter<T> : JsonConverter<StreamData<T>?>
 
             if (reader.TokenType == JsonTokenType.PropertyName)
             {
-                var propertyName = reader.GetString();
-
-                reader.Read();
-
-                switch (propertyName)
+                // compared against the UTF-8 name in place - see InstrumentTickerConverter for why
+                if (reader.ValueTextEquals("stream"u8))
                 {
-                    case "stream":
-                        stream = reader.GetString();
-                        break;
-                    case "data":
-                        data = JsonSerializer.Deserialize<T>(ref reader, options);
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
+                    reader.Read();
+                    stream = _names.GetString(ref reader);
+                }
+                else if (reader.ValueTextEquals("data"u8))
+                {
+                    reader.Read();
+                    data = JsonSerializer.Deserialize<T>(ref reader, options);
+                }
+                else
+                {
+                    reader.Read();
+                    reader.Skip();
                 }
             }
         }
