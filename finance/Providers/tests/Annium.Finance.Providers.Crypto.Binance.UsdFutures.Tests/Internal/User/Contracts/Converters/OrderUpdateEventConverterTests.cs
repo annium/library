@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.User.Contracts.Domain;
@@ -36,11 +37,22 @@ public class OrderUpdateEventConverterTests : ProvidersTestBase
     /// <summary>
     /// A captured <c>ORDER_TRADE_UPDATE</c> event for a partially filled reduce-only trailing-stop order is
     /// parsed into the order's identifiers, cumulative executed quantity/price, the last individual fill,
-    /// and commission; the event carries no order-creation time, so <see cref="OrderUpdateEvent.CreatedAt"/>
-    /// comes back as zero.
+    /// and commission.
     /// </summary>
-    [Fact]
-    public void Works()
+    /// <remarks>
+    /// Both status cases are here because <see cref="OrderUpdateEvent.CreatedAt"/> is not a field on this
+    /// event - futures do not send one - but a value this converter synthesizes: the transaction time when
+    /// the status is <c>NEW</c>, and zero otherwise, on the reasoning that the first event about an order
+    /// is the moment it was created. Only the zero half used to be covered, so collapsing that condition in
+    /// either direction went unnoticed. Spot needs none of this: its event carries <c>O</c>.
+    /// </remarks>
+    /// <param name="wireStatus">The <c>X</c> value to put in the payload.</param>
+    /// <param name="status">The status it must parse to.</param>
+    /// <param name="createdAt">The creation time the converter must synthesize for that status.</param>
+    [Theory]
+    [InlineData("PARTIALLY_FILLED", OrderStatus.PartiallyFilled, 0L)]
+    [InlineData("NEW", OrderStatus.New, 1499405658657L)]
+    public void Works(string wireStatus, OrderStatus status, long createdAt)
     {
         // arrange
         var raw =
@@ -59,7 +71,7 @@ public class OrderUpdateEventConverterTests : ProvidersTestBase
                 ""ap"": ""12305.6"",
                 ""sp"": ""7103.04"",
                 ""x"": ""NEW"",
-                ""X"": ""PARTIALLY_FILLED"",
+                ""X"": ""__STATUS__"",
                 ""i"": 8886774,
                 ""l"": ""2.4"",
                 ""z"": ""10.5"",
@@ -87,7 +99,9 @@ public class OrderUpdateEventConverterTests : ProvidersTestBase
 
         // act - deserialize
         var serializer = this.GetJsonSerializer(Constants.OrderUpdateKey);
-        var deserialized = serializer.Deserialize<OrderUpdateEvent>(Encoding.UTF8.GetBytes(raw));
+        var deserialized = serializer.Deserialize<OrderUpdateEvent>(
+            Encoding.UTF8.GetBytes(raw.Replace("__STATUS__", wireStatus, StringComparison.Ordinal))
+        );
 
         // assert - deserialization
         deserialized.Symbol.Is("BTCUSDT");
@@ -100,7 +114,7 @@ public class OrderUpdateEventConverterTests : ProvidersTestBase
         deserialized.Price.Is(10264.410m);
         deserialized.LevelPrice.Is(7103.04m);
         deserialized.ReduceOnly.IsTrue();
-        deserialized.Status.Is(OrderStatus.PartiallyFilled);
+        deserialized.Status.Is(status);
         deserialized.ExecutedQty.Is(10.5m);
         deserialized.ExecutedPrice.Is(12305.6m);
         deserialized.LastExecutedQty.Is(2.4m);
@@ -108,7 +122,7 @@ public class OrderUpdateEventConverterTests : ProvidersTestBase
         deserialized.CommissionAsset.Is("USDT");
         deserialized.CommissionAmount.Is(3.6m);
         deserialized.IsMaker.IsTrue();
-        deserialized.CreatedAt.Is(0);
+        deserialized.CreatedAt.Is(createdAt);
         deserialized.UpdatedAt.Is(1499405658657);
     }
 
