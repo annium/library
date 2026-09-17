@@ -56,7 +56,7 @@ public class StreamDataTests : ProvidersTestBase
 
         // act - deserialize
         var serializer = this.GetJsonSerializer(Constants.InstrumentTickerKey);
-        var deserialized = serializer.Deserialize<StreamData<InstrumentTicker>>(Encoding.UTF8.GetBytes(raw)).NotNull();
+        var deserialized = serializer.Deserialize<StreamData<InstrumentTicker>?>(Encoding.UTF8.GetBytes(raw)).NotNull();
 
         // assert - deserialization
         deserialized.Name.Is("btcusdt@bookTicker");
@@ -87,7 +87,7 @@ public class StreamDataTests : ProvidersTestBase
 
         // act - deserialize
         var serializer = this.GetJsonSerializer(Constants.InstrumentTickerKey);
-        var deserialized = serializer.Deserialize<StreamData<InstrumentTicker>>(Encoding.UTF8.GetBytes(raw));
+        var deserialized = serializer.Deserialize<StreamData<InstrumentTicker>?>(Encoding.UTF8.GetBytes(raw));
 
         // assert - deserialization
         deserialized.IsDefault();

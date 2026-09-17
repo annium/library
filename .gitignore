@@ -17,3 +17,6 @@ lcov.info
 # xs ignore patterns
 .xs.ignore
 .xs.credentials
+
+# benchmark output, written into whatever directory the run was started from
+BenchmarkDotNet.Artifacts/

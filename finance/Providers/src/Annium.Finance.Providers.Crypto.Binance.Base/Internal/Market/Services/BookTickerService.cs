@@ -57,8 +57,9 @@ internal sealed class BookTickerService : WebSocketService, IBookTickerService
     /// <param name="raw">The raw UTF-8 text payload received over the WebSocket.</param>
     protected override void HandleData(ReadOnlyMemory<byte> raw)
     {
-        var data = _serializer.Deserialize<StreamData<InstrumentTicker>?>(raw);
-        if (data is null)
+        // pattern rather than a null check: the envelope is a value type, so what comes back is a
+        // Nullable<T> and `data.Data` would have to go through `.Value`
+        if (_serializer.Deserialize<StreamData<InstrumentTicker>?>(raw) is not { } data)
         {
             // guarded: copies the payload and decodes it, and arguments are evaluated before the level is
             // looked at. Only bypassed messages reach here, but they arrive on the ticker stream's thread
