@@ -11,7 +11,6 @@ namespace Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Converte
 /// </summary>
 /// <typeparam name="T">The type of the payload carried in the <c>data</c> field.</typeparam>
 public class StreamDataConverter<T> : JsonConverter<StreamData<T>?>
-    where T : class
 {
     /// <summary>
     /// The stream names seen so far. A combined stream sends the same handful of names on every message,

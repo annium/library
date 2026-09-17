@@ -9,5 +9,4 @@ namespace Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Domain;
 /// on every message of a stream. Allocating an object to carry a payload one line further is a cost paid
 /// per message for a wrapper nothing keeps.
 /// </remarks>
-public readonly record struct StreamData<T>(string Name, T Data)
-    where T : class;
+public readonly record struct StreamData<T>(string Name, T Data);

@@ -30,7 +30,7 @@ internal static class MarketContracts
             .ResetConverters()
             .AddConverter<CommandResultConverter>()
             .AddConverter<InstrumentTickerConverter>()
-            .AddConverter<StreamDataConverter<InstrumentTicker>>()
+            .AddConverter<StreamDataConverter<InstrumentTicker?>>()
             .AddConverter<OperationResultConverter>();
 
     /// <summary>Serializer options for the historical klines/candles endpoint.</summary>
