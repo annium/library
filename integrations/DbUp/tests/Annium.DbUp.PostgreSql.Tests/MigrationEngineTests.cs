@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Annium.DbUp.Core;
 using Annium.Testing;
+using Annium.Testing.Containers;
 using Npgsql;
 using Testcontainers.PostgreSql;
 using Xunit;
@@ -43,7 +44,7 @@ public class MigrationEngineTests : IAsyncLifetime
     /// <returns>A task that completes once the database is ready.</returns>
     public async ValueTask InitializeAsync()
     {
-        await _db.StartAsync();
+        await _db.StartWithDeadlineAsync();
         await WaitForReadyAsync();
     }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Annium.Testing.Containers;
 using DbUp;
 using Testcontainers.PostgreSql;
 
@@ -48,7 +49,7 @@ public class Database : IAsyncDisposable
     /// <exception cref="ApplicationException">Thrown when database migration fails</exception>
     public async Task InitAsync()
     {
-        await _db.StartAsync();
+        await _db.StartWithDeadlineAsync();
         Config.Host = _db.Hostname;
         Config.Port = _db.GetMappedPublicPort(PostgreSqlBuilder.PostgreSqlPort);
 
