@@ -50,7 +50,7 @@ public class InstrumentTickerConverterTests : ProvidersTestBase
 
         // act
         var serializer = this.GetJsonSerializer(Constants.InstrumentTickerKey);
-        var deserialized = serializer.Deserialize<InstrumentTicker>(Encoding.UTF8.GetBytes(raw)).NotNull();
+        var deserialized = serializer.Deserialize<InstrumentTicker?>(Encoding.UTF8.GetBytes(raw)).NotNull();
 
         // assert
         deserialized.Symbol.Is("BTCUSDT");
@@ -72,7 +72,7 @@ public class InstrumentTickerConverterTests : ProvidersTestBase
 
         // act - deserialize
         var serializer = this.GetJsonSerializer(Constants.InstrumentTickerKey);
-        var deserialized = serializer.Deserialize<InstrumentTicker>(Encoding.UTF8.GetBytes(raw));
+        var deserialized = serializer.Deserialize<InstrumentTicker?>(Encoding.UTF8.GetBytes(raw));
 
         // assert - deserialization
         deserialized.IsDefault();

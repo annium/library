@@ -9,7 +9,7 @@ namespace Annium.Finance.Providers.Crypto.Binance.Base.Market.Contracts.Converte
 /// <summary>
 /// Converts a Binance book ticker payload (<c>s</c>/<c>b</c>/<c>a</c> for symbol/bid price/ask price) into an <see cref="InstrumentTicker"/>.
 /// </summary>
-public class InstrumentTickerConverter : JsonConverter<InstrumentTicker>
+public class InstrumentTickerConverter : JsonConverter<InstrumentTicker?>
 {
     /// <summary>
     /// The symbols seen so far. A ticker stream repeats the same subscribed symbols on every message.
@@ -80,7 +80,7 @@ public class InstrumentTickerConverter : JsonConverter<InstrumentTicker>
     /// <param name="writer">The writer to write to.</param>
     /// <param name="value">The ticker to write.</param>
     /// <param name="options">The active serializer options.</param>
-    public override void Write(Utf8JsonWriter writer, InstrumentTicker value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InstrumentTicker? value, JsonSerializerOptions options)
     {
         throw new NotImplementedException();
     }

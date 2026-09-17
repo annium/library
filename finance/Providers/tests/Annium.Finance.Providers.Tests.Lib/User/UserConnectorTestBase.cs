@@ -49,7 +49,7 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     protected string Symbol { get; }
 
     /// <summary>Gets the latest ticker resolved for <see cref="Symbol"/> from the market connector.</summary>
-    protected InstrumentTicker Ticker { get; private set; } = null!;
+    protected InstrumentTicker Ticker { get; private set; }
 
     /// <summary>Gets the live user connector under test.</summary>
     private IUserConnector Connector { get; set; } = null!;

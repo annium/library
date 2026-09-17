@@ -73,7 +73,7 @@ public class MessagePathBenchmarks
     private ISerializer<ReadOnlyMemory<byte>> _serializer = null!;
 
     /// <summary>A ticker built once, so the delivery rows measure delivery and not construction.</summary>
-    private InstrumentTicker _ticker = null!;
+    private InstrumentTicker _ticker;
 
     /// <summary>A connector delivering through the channel and pump, as a live connector does.</summary>
     private BenchmarkConnector _buffered = null!;

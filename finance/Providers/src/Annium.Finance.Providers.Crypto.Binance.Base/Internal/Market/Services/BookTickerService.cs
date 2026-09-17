@@ -57,9 +57,10 @@ internal sealed class BookTickerService : WebSocketService, IBookTickerService
     /// <param name="raw">The raw UTF-8 text payload received over the WebSocket.</param>
     protected override void HandleData(ReadOnlyMemory<byte> raw)
     {
-        // pattern rather than a null check: the envelope is a value type, so what comes back is a
-        // Nullable<T> and `data.Data` would have to go through `.Value`
-        if (_serializer.Deserialize<StreamData<InstrumentTicker>?>(raw) is not { } data)
+        // one pattern for both ways a message is dropped: an envelope that did not parse at all, and an
+        // envelope whose `data` did not. Both are now Nullable - the envelope and the ticker are value
+        // types - so neither can be checked by asking whether an object is there
+        if (_serializer.Deserialize<StreamData<InstrumentTicker?>?>(raw) is not { Data: { } ticker })
         {
             // guarded: copies the payload and decodes it, and arguments are evaluated before the level is
             // looked at. Only bypassed messages reach here, but they arrive on the ticker stream's thread
@@ -68,8 +69,7 @@ internal sealed class BookTickerService : WebSocketService, IBookTickerService
             return;
         }
 
-        // this.Trace("send: {data}", data.Data);
-        OnData(data.Data);
+        OnData(ticker);
     }
 
     /// <summary>Builds the Binance <c>bookTicker</c> topic name for each given symbol.</summary>

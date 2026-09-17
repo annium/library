@@ -56,13 +56,15 @@ public class StreamDataTests : ProvidersTestBase
 
         // act - deserialize
         var serializer = this.GetJsonSerializer(Constants.InstrumentTickerKey);
-        var deserialized = serializer.Deserialize<StreamData<InstrumentTicker>?>(Encoding.UTF8.GetBytes(raw)).NotNull();
+        var deserialized = serializer
+            .Deserialize<StreamData<InstrumentTicker?>?>(Encoding.UTF8.GetBytes(raw))
+            .NotNull();
 
         // assert - deserialization
         deserialized.Name.Is("btcusdt@bookTicker");
-        deserialized.Data.Symbol.Is("BTCUSDT");
-        deserialized.Data.BidPrice.Is(9548.1m);
-        deserialized.Data.AskPrice.Is(9548.5m);
+        deserialized.Data.NotNull().Symbol.Is("BTCUSDT");
+        deserialized.Data.NotNull().BidPrice.Is(9548.1m);
+        deserialized.Data.NotNull().AskPrice.Is(9548.5m);
     }
 
     /// <summary>
@@ -87,7 +89,7 @@ public class StreamDataTests : ProvidersTestBase
 
         // act - deserialize
         var serializer = this.GetJsonSerializer(Constants.InstrumentTickerKey);
-        var deserialized = serializer.Deserialize<StreamData<InstrumentTicker>?>(Encoding.UTF8.GetBytes(raw));
+        var deserialized = serializer.Deserialize<StreamData<InstrumentTicker?>?>(Encoding.UTF8.GetBytes(raw));
 
         // assert - deserialization
         deserialized.IsDefault();
