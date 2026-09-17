@@ -6,7 +6,14 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Mapper/Annium.Core.Mapper.csproj" />
+    <ProjectReference Include="../../../../core/Core/src/Annium.Core.Runtime/Annium.Core.Runtime.csproj" />
+    <ProjectReference Include="../../../../core/Logging/src/Annium.Logging.Shared/Annium.Logging.Shared.csproj" />
+    <ProjectReference Include="../../../../core/Serialization/src/Annium.Serialization.Json/Annium.Serialization.Json.csproj" />
     <ProjectReference Include="../../src/Annium.Finance.Providers.Abstractions.Domain/Annium.Finance.Providers.Abstractions.Domain.csproj" />
+    <ProjectReference Include="../../src/Annium.Finance.Providers.Core/Annium.Finance.Providers.Core.csproj" />
+    <ProjectReference Include="../../src/Annium.Finance.Providers.Crypto.Binance.Base/Annium.Finance.Providers.Crypto.Binance.Base.csproj" />
+    <ProjectReference Include="../../src/Annium.Finance.Providers.Crypto.Binance.UsdFutures/Annium.Finance.Providers.Crypto.Binance.UsdFutures.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" />
