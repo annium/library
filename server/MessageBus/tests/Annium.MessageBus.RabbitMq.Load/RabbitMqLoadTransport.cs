@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.MessageBus.Tests.Load.Shared;
+using Annium.Testing.Containers;
 using Testcontainers.RabbitMq;
 
 namespace Annium.MessageBus.RabbitMq.Load;
@@ -39,7 +40,7 @@ public sealed class RabbitMqLoadTransport : ILoadTransport
     public async Task StartAsync()
     {
         var container = new RabbitMqBuilder("rabbitmq:3.13").Build();
-        await container.StartAsync();
+        await container.StartWithDeadlineAsync();
         _container = container;
         _connectionString = container.GetConnectionString();
     }

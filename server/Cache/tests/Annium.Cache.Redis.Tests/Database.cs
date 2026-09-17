@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Annium.Redis;
+using Annium.Testing.Containers;
 using Testcontainers.Redis;
 
 namespace Annium.Cache.Redis.Tests;
@@ -36,7 +37,7 @@ public class Database : IAsyncDisposable
     /// <returns>A task that represents the asynchronous initialization operation.</returns>
     public async Task InitAsync()
     {
-        await _db.StartAsync();
+        await _db.StartWithDeadlineAsync();
         Config.Hosts = [new RedisHost(_db.Hostname, _db.GetMappedPublicPort(RedisBuilder.RedisPort))];
     }
 

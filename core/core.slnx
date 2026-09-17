@@ -7,6 +7,8 @@
   </Folder>
   <Folder Name="/Annium/tests/">
     <Project Path="Annium/tests/Annium.Analyzers.Tests/Annium.Analyzers.Tests.csproj" />
+    <Project Path="Annium/tests/Annium.Testing.Containers/Annium.Testing.Containers.csproj" />
+    <Project Path="Annium/tests/Annium.Testing.Containers.Tests/Annium.Testing.Containers.Tests.csproj" />
     <Project Path="Annium/tests/Annium.Testing.Tests/Annium.Testing.Tests.csproj" />
     <Project Path="Annium/tests/Annium.Tests/Annium.Tests.csproj" />
   </Folder>

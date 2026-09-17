@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.MessageBus.Tests.Load.Shared;
+using Annium.Testing.Containers;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
 using NATS.Client.JetStream.Models;
@@ -41,7 +42,7 @@ public sealed class NatsLoadTransport : ILoadTransport
     public async Task StartAsync()
     {
         var container = new NatsBuilder("nats:2.11").WithCommand("-js").Build();
-        await container.StartAsync();
+        await container.StartWithDeadlineAsync();
         _container = container;
         _connectionString = container.GetConnectionString();
 
