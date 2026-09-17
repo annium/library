@@ -64,7 +64,7 @@ public class ClientServerSocketTests : TestBase
     /// </summary>
     /// <param name="streamType">The type of stream to test</param>
     /// <returns>A task representing the test operation</returns>
-    [Theory]
+    [Theory(Timeout = TestTimeout.Ms)]
     [InlineData(StreamType.Plain)]
     [InlineData(StreamType.Ssl)]
     public async Task Send_NotConnected(StreamType streamType)
@@ -92,7 +92,7 @@ public class ClientServerSocketTests : TestBase
     /// </summary>
     /// <param name="streamType">The type of stream to test</param>
     /// <returns>A task representing the test operation</returns>
-    [Theory]
+    [Theory(Timeout = TestTimeout.Ms)]
     [InlineData(StreamType.Plain)]
     [InlineData(StreamType.Ssl)]
     public async Task Send_Canceled(StreamType streamType)
@@ -108,7 +108,7 @@ public class ClientServerSocketTests : TestBase
         await using var server = _runServer(async (serverSocket, ct) => await serverSocket.WhenDisconnectedAsync(ct));
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // act
         this.Trace("send text");
@@ -126,7 +126,7 @@ public class ClientServerSocketTests : TestBase
     /// </summary>
     /// <param name="streamType">The type of stream to test</param>
     /// <returns>A task representing the test operation</returns>
-    [Theory]
+    [Theory(Timeout = TestTimeout.Ms)]
     [InlineData(StreamType.Plain)]
     [InlineData(StreamType.Ssl)]
     public async Task Send_ClientClosed(StreamType streamType)
@@ -151,14 +151,14 @@ public class ClientServerSocketTests : TestBase
         );
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("server connected");
         await serverConnectionTcs.Task;
 
         // act
         this.Trace("disconnect");
-        await DisconnectAsync();
+        await DisconnectAsync(TestContext.Current.CancellationToken);
 
         this.Trace("send text");
         var result = await SendAsync(message, TestContext.Current.CancellationToken);
@@ -175,7 +175,7 @@ public class ClientServerSocketTests : TestBase
     /// </summary>
     /// <param name="streamType">The type of stream to test</param>
     /// <returns>A task representing the test operation</returns>
-    [Theory]
+    [Theory(Timeout = TestTimeout.Ms)]
     [InlineData(StreamType.Plain)]
     [InlineData(StreamType.Ssl)]
     public async Task Send_ServerClosed(StreamType streamType)
@@ -204,7 +204,7 @@ public class ClientServerSocketTests : TestBase
 
         this.Trace("connect");
         var disconnectionTask = ClientSocket.WhenDisconnectedAsync(ct: TestContext.Current.CancellationToken);
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("set client connection tcs");
         clientConnectionTcs.SetResult();
@@ -228,7 +228,7 @@ public class ClientServerSocketTests : TestBase
     /// </summary>
     /// <param name="streamType">The type of stream to test</param>
     /// <returns>A task representing the test operation</returns>
-    [Theory]
+    [Theory(Timeout = TestTimeout.Ms)]
     [InlineData(StreamType.Plain)]
     [InlineData(StreamType.Ssl)]
     public async Task Send_Normal(StreamType streamType)
@@ -259,7 +259,7 @@ public class ClientServerSocketTests : TestBase
         );
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("server connected");
         await serverConnectionTcs.Task;
@@ -285,7 +285,7 @@ public class ClientServerSocketTests : TestBase
     /// </summary>
     /// <param name="streamType">The type of stream to test</param>
     /// <returns>A task representing the test operation</returns>
-    [Theory]
+    [Theory(Timeout = TestTimeout.Ms)]
     [InlineData(StreamType.Plain)]
     [InlineData(StreamType.Ssl)]
     public async Task Send_Reconnect(StreamType streamType)
@@ -317,7 +317,7 @@ public class ClientServerSocketTests : TestBase
 
         // act - send text
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("server connected");
         await serverConnectionTcs.Task;
@@ -335,13 +335,13 @@ public class ClientServerSocketTests : TestBase
         _messages.At(0).IsEqual(message);
 
         this.Trace("disconnect");
-        await DisconnectAsync();
+        await DisconnectAsync(TestContext.Current.CancellationToken);
 
         // act - send text
         _messages.Clear();
         this.Trace("connect");
         serverConnectionTcs = new TaskCompletionSource();
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("server connected");
         await serverConnectionTcs.Task;
@@ -359,7 +359,7 @@ public class ClientServerSocketTests : TestBase
         _messages.At(0).IsEqual(message);
 
         this.Trace("disconnect");
-        await DisconnectAsync();
+        await DisconnectAsync(TestContext.Current.CancellationToken);
 
         this.Trace("done");
     }
@@ -369,7 +369,7 @@ public class ClientServerSocketTests : TestBase
     /// </summary>
     /// <param name="streamType">The type of stream to test</param>
     /// <returns>A task representing the test operation</returns>
-    [Theory]
+    [Theory(Timeout = TestTimeout.Ms)]
     [InlineData(StreamType.Plain)]
     [InlineData(StreamType.Ssl)]
     public async Task Listen_Normal(StreamType streamType)
@@ -407,7 +407,7 @@ public class ClientServerSocketTests : TestBase
 
         // act
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // assert
         this.Trace("assert data arrived");
@@ -427,7 +427,7 @@ public class ClientServerSocketTests : TestBase
     /// </summary>
     /// <param name="streamType">The type of stream to test</param>
     /// <returns>A task representing the test operation</returns>
-    [Theory]
+    [Theory(Timeout = TestTimeout.Ms)]
     [InlineData(StreamType.Plain)]
     [InlineData(StreamType.Ssl)]
     public async Task Listen_SmallBuffer(StreamType streamType)
@@ -465,7 +465,7 @@ public class ClientServerSocketTests : TestBase
         // act
         this.Trace("connect");
         var disconnectionTask = ClientSocket.WhenDisconnectedAsync(ct: TestContext.Current.CancellationToken);
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // assert
         this.Trace("assert data arrived");
@@ -489,7 +489,7 @@ public class ClientServerSocketTests : TestBase
     /// </summary>
     /// <param name="streamType">The type of stream to test</param>
     /// <returns>A task representing the test operation</returns>
-    [Theory]
+    [Theory(Timeout = TestTimeout.Ms)]
     [InlineData(StreamType.Plain)]
     [InlineData(StreamType.Ssl)]
     public async Task Listen_Reconnect(StreamType streamType)
@@ -563,7 +563,7 @@ public class ClientServerSocketTests : TestBase
         };
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // assert
         this.Trace("assert data arrived");
@@ -576,7 +576,7 @@ public class ClientServerSocketTests : TestBase
         clientTcs.SetResult();
 
         this.Trace("disconnect");
-        await DisconnectAsync();
+        await DisconnectAsync(TestContext.Current.CancellationToken);
 
         this.Trace("done");
     }
@@ -586,7 +586,7 @@ public class ClientServerSocketTests : TestBase
     /// </summary>
     /// <param name="streamType">The type of stream to test</param>
     /// <returns>A task representing the test operation</returns>
-    [Theory]
+    [Theory(Timeout = TestTimeout.Ms)]
     [InlineData(StreamType.Plain)]
     [InlineData(StreamType.Ssl)]
     public async Task Listen_ConnectionLost(StreamType streamType)
@@ -631,7 +631,7 @@ public class ClientServerSocketTests : TestBase
         };
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // assert — the client connection monitor (PingInterval=100/MaxPingDelay=500) gets no pong
         // from the server (whose monitor is effectively disabled at 60s/300s) and fires
@@ -650,7 +650,7 @@ public class ClientServerSocketTests : TestBase
     /// (await-then-event) made explicit through the public API.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Disconnect_OnDisconnectedFires_HandlerObservesIsConnectedFalse()
     {
         this.Trace("start");
@@ -664,7 +664,7 @@ public class ClientServerSocketTests : TestBase
         ClientSocket.OnDisconnected += _ => capturedIsConnected.TrySetResult(ClientSocket.IsConnected);
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // sanity — confirm IsConnected is true while connected.
         ClientSocket.IsConnected.IsTrue();
@@ -844,8 +844,9 @@ public class ClientServerSocketTests : TestBase
     /// Connects the client socket asynchronously
     /// </summary>
     /// <param name="server">Server, to connect to</param>
+    /// <param name="ct">The test's cancellation token, so a connection that never lands ends with the test</param>
     /// <returns>A task representing the connection operation</returns>
-    private async Task ConnectAsync(IServer server)
+    private async Task ConnectAsync(IServer server, CancellationToken ct)
     {
         this.Trace("start");
 
@@ -864,7 +865,7 @@ public class ClientServerSocketTests : TestBase
 
         _handleConnect(ClientSocket, server);
 
-        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(30));
+        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(30), ct);
 
         this.Trace("done");
     }
@@ -872,8 +873,9 @@ public class ClientServerSocketTests : TestBase
     /// <summary>
     /// Disconnects the client socket asynchronously
     /// </summary>
+    /// <param name="ct">The test's cancellation token, so a disconnection that never lands ends with the test</param>
     /// <returns>A task representing the disconnection operation</returns>
-    private async Task DisconnectAsync()
+    private async Task DisconnectAsync(CancellationToken ct)
     {
         this.Trace("start");
 
@@ -892,7 +894,7 @@ public class ClientServerSocketTests : TestBase
 
         ClientSocket.Disconnect();
 
-        await tcs.Task;
+        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(30), ct);
 
         this.Trace("done");
     }

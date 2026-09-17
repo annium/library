@@ -51,7 +51,7 @@ public class ClientServerWebSocketTests : TestBase
     /// Tests sending a message when WebSocket is not connected
     /// </summary>
     /// <returns>Task representing the test operation</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Send_NotConnected()
     {
         this.Trace("start");
@@ -74,7 +74,7 @@ public class ClientServerWebSocketTests : TestBase
     /// Tests sending a message with a canceled cancellation token
     /// </summary>
     /// <returns>Task representing the test operation</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Send_Canceled()
     {
         this.Trace("start");
@@ -86,7 +86,7 @@ public class ClientServerWebSocketTests : TestBase
         await using var server = RunServer(async serverSocket => await serverSocket.WhenDisconnectedAsync());
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // act
         this.Trace("send text");
@@ -103,7 +103,7 @@ public class ClientServerWebSocketTests : TestBase
     /// Tests sending a message after client WebSocket is closed
     /// </summary>
     /// <returns>Task representing the test operation</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Send_ClientClosed()
     {
         this.Trace("start");
@@ -122,14 +122,14 @@ public class ClientServerWebSocketTests : TestBase
         });
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("server connected");
         await serverConnectionTcs.Task;
 
         // act
         this.Trace("disconnect");
-        await DisconnectAsync();
+        await DisconnectAsync(TestContext.Current.CancellationToken);
 
         this.Trace("send text");
         var result = await SendTextAsync(message, TestContext.Current.CancellationToken);
@@ -145,7 +145,7 @@ public class ClientServerWebSocketTests : TestBase
     /// Tests sending a message after server closes the connection
     /// </summary>
     /// <returns>Task representing the test operation</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Send_ServerClosed()
     {
         this.Trace("start");
@@ -163,7 +163,7 @@ public class ClientServerWebSocketTests : TestBase
 
         this.Trace("connect");
         var disconnectionTask = ClientSocket.WhenDisconnectedAsync(ct: TestContext.Current.CancellationToken);
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("await until disconnected");
         await disconnectionTask;
@@ -183,7 +183,7 @@ public class ClientServerWebSocketTests : TestBase
     /// Tests normal message sending and echo behavior
     /// </summary>
     /// <returns>Task representing the test operation</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Send_Normal()
     {
         this.Trace("start");
@@ -214,7 +214,7 @@ public class ClientServerWebSocketTests : TestBase
         });
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("server connected");
         await serverConnectionTcs.Task;
@@ -245,7 +245,7 @@ public class ClientServerWebSocketTests : TestBase
     /// Tests sending messages with client reconnection
     /// </summary>
     /// <returns>Task representing the test operation</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Send_Reconnect()
     {
         this.Trace("start");
@@ -276,7 +276,7 @@ public class ClientServerWebSocketTests : TestBase
         });
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("server connected");
         await serverConnectionTcs.Task;
@@ -292,12 +292,12 @@ public class ClientServerWebSocketTests : TestBase
         await Expect.ToAsync(() => _texts.IsEqual(expectedMessages));
 
         this.Trace("disconnect");
-        await DisconnectAsync();
+        await DisconnectAsync(TestContext.Current.CancellationToken);
 
         // act - send binary
         this.Trace("connect");
         serverConnectionTcs = new TaskCompletionSource();
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("server connected");
         await serverConnectionTcs.Task;
@@ -312,7 +312,7 @@ public class ClientServerWebSocketTests : TestBase
         await Expect.ToAsync(() => _binaries.IsEqual(expectedMessages));
 
         this.Trace("disconnect");
-        await DisconnectAsync();
+        await DisconnectAsync(TestContext.Current.CancellationToken);
 
         this.Trace("done");
     }
@@ -321,7 +321,7 @@ public class ClientServerWebSocketTests : TestBase
     /// Tests normal message listening behavior
     /// </summary>
     /// <returns>Task representing the test operation</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Listen_Normal()
     {
         this.Trace("start");
@@ -351,7 +351,7 @@ public class ClientServerWebSocketTests : TestBase
 
         // act
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // assert
         this.Trace("assert text message arrived");
@@ -365,7 +365,7 @@ public class ClientServerWebSocketTests : TestBase
     /// Tests message listening with large messages that exceed buffer size
     /// </summary>
     /// <returns>Task representing the test operation</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Listen_SmallBuffer()
     {
         this.Trace("start");
@@ -396,7 +396,7 @@ public class ClientServerWebSocketTests : TestBase
         // act
         this.Trace("connect");
         var disconnectionTask = ClientSocket.WhenDisconnectedAsync(ct: TestContext.Current.CancellationToken);
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // assert
         this.Trace("assert text message arrived");
@@ -416,7 +416,7 @@ public class ClientServerWebSocketTests : TestBase
     /// Tests listening to both text and binary message types
     /// </summary>
     /// <returns>Task representing the test operation</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Listen_BothTypes()
     {
         this.Trace("start");
@@ -453,7 +453,7 @@ public class ClientServerWebSocketTests : TestBase
         // act
         this.Trace("connect");
         var disconnectionTask = ClientSocket.WhenDisconnectedAsync(ct: TestContext.Current.CancellationToken);
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // assert
         this.Trace("assert text messages arrived");
@@ -476,7 +476,7 @@ public class ClientServerWebSocketTests : TestBase
     /// Tests message listening with automatic reconnection
     /// </summary>
     /// <returns>Task representing the test operation</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Listen_Reconnect()
     {
         this.Trace("start");
@@ -543,7 +543,7 @@ public class ClientServerWebSocketTests : TestBase
         };
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // assert
         this.Trace("wait for {messagesCount} messages", messages.Length);
@@ -553,7 +553,7 @@ public class ClientServerWebSocketTests : TestBase
         serverStopTcs.SetResult();
 
         this.Trace("disconnect");
-        await DisconnectAsync();
+        await DisconnectAsync(TestContext.Current.CancellationToken);
 
         this.Trace("done");
     }
@@ -564,7 +564,7 @@ public class ClientServerWebSocketTests : TestBase
     /// <see cref="IClientWebSocket.IsConnected"/> surface reports false. Spec test for AC#2 of T8.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Disconnect_OnDisconnectedFires_HandlerObservesIsConnectedFalse()
     {
         this.Trace("start");
@@ -575,7 +575,7 @@ public class ClientServerWebSocketTests : TestBase
         ClientSocket.OnDisconnected += _ => capturedIsConnected.TrySetResult(ClientSocket.IsConnected);
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         ClientSocket.IsConnected.IsTrue();
 
@@ -600,7 +600,7 @@ public class ClientServerWebSocketTests : TestBase
     /// second time.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task ConnectionMonitor_NoPongWithinMaxDelay_ReconnectsClient()
     {
         this.Trace("start");
@@ -659,7 +659,7 @@ public class ClientServerWebSocketTests : TestBase
     /// handler via <c>ProtocolFrames.IsPingFrame</c>), while a normal binary message IS delivered.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Receive_PingFrame_NotDeliveredToOnBinaryReceived()
     {
         this.Trace("start");
@@ -687,7 +687,7 @@ public class ClientServerWebSocketTests : TestBase
         });
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
         serverConnectedTcs.TrySetResult();
 
         // Assert: the normal message arrives and no additional (ping) messages appear.
@@ -704,7 +704,7 @@ public class ClientServerWebSocketTests : TestBase
     /// returns (before <c>OnDisconnected</c> fires from the background teardown).
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task IsConnected_TransitionsThroughLifecycle()
     {
         this.Trace("start");
@@ -715,7 +715,7 @@ public class ClientServerWebSocketTests : TestBase
         await using var server = RunServer(async serverSocket => await serverSocket.WhenDisconnectedAsync());
 
         // 2. After ConnectAsync (OnConnected fired) the socket is connected.
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
         ClientSocket.IsConnected.IsTrue();
 
         // 3. Disconnect() is synchronous: IsConnected goes false immediately even though the
@@ -733,7 +733,7 @@ public class ClientServerWebSocketTests : TestBase
     /// the background teardown).
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task ServerWebSocket_IsConnected_TransitionsThroughLifecycle()
     {
         this.Trace("start");
@@ -756,7 +756,7 @@ public class ClientServerWebSocketTests : TestBase
         });
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // Guard: 5 s is more than enough for the server callback to run.
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -778,7 +778,7 @@ public class ClientServerWebSocketTests : TestBase
     /// via <c>ProtocolFrames.IsPingFrame</c>), while a normal binary message IS delivered.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task ServerWebSocket_Receive_PingFrame_NotDeliveredToOnBinaryReceived()
     {
         this.Trace("start");
@@ -804,7 +804,7 @@ public class ClientServerWebSocketTests : TestBase
         });
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         this.Trace("await server subscribed");
         await serverReadyTcs.Task;
@@ -828,7 +828,7 @@ public class ClientServerWebSocketTests : TestBase
     /// further delivery.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task ObserveText_DeliversTextMessages()
     {
         this.Trace("start");
@@ -848,7 +848,7 @@ public class ClientServerWebSocketTests : TestBase
         });
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // TestLog is thread-safe: the Rx subscriber writes from the receive-loop thread while
         // Expect.ToAsync polls from the test thread.
@@ -875,7 +875,7 @@ public class ClientServerWebSocketTests : TestBase
     /// further delivery.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task ObserveBinary_DeliversBinaryMessages()
     {
         this.Trace("start");
@@ -895,7 +895,7 @@ public class ClientServerWebSocketTests : TestBase
         });
 
         this.Trace("connect");
-        await ConnectAsync(server);
+        await ConnectAsync(server, TestContext.Current.CancellationToken);
 
         // TestLog is thread-safe: the Rx subscriber writes from the receive-loop thread while
         // Expect.ToAsync polls from the test thread.
@@ -992,8 +992,9 @@ public class ClientServerWebSocketTests : TestBase
     /// Connects the client WebSocket to the test server
     /// </summary>
     /// <param name="server">Server to connect to</param>
+    /// <param name="ct">The test's cancellation token, so a connection that never lands ends with the test</param>
     /// <returns>Task representing the connection operation</returns>
-    private async Task ConnectAsync(IServer server)
+    private async Task ConnectAsync(IServer server, CancellationToken ct)
     {
         this.Trace("start");
 
@@ -1015,7 +1016,7 @@ public class ClientServerWebSocketTests : TestBase
         // generous on purpose: the bound is here so a dropped OnConnected fails the test instead of
         // hanging the run, not to measure how long connecting takes. A dozen test hosts share this
         // machine in a full run, and a bound tight enough to catch a slow connect catches a busy one too
-        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(30));
+        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(30), ct);
 
         this.Trace("done");
     }
@@ -1023,8 +1024,9 @@ public class ClientServerWebSocketTests : TestBase
     /// <summary>
     /// Disconnects the client WebSocket from the server
     /// </summary>
+    /// <param name="ct">The test's cancellation token, so a disconnection that never lands ends with the test</param>
     /// <returns>Task representing the disconnection operation</returns>
-    private async Task DisconnectAsync()
+    private async Task DisconnectAsync(CancellationToken ct)
     {
         this.Trace("start");
 
@@ -1044,7 +1046,7 @@ public class ClientServerWebSocketTests : TestBase
         ClientSocket.Disconnect();
 
         // bound the wait so a dropped OnDisconnected fails fast instead of hanging the test (mirrors ConnectAsync).
-        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(30));
+        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(30), ct);
 
         this.Trace("done");
     }

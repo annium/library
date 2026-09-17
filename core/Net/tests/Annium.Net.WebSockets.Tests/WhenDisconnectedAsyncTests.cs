@@ -21,7 +21,7 @@ public class WhenDisconnectedAsyncTests
     /// first fire, but a racing second fire before unsubscribe is observable and must be tolerated.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Client_WhenDisconnectedAsync_EventFiresTwice_NoThrow()
     {
         var socket = new FakeClientWebSocket();
@@ -41,7 +41,7 @@ public class WhenDisconnectedAsyncTests
     /// client extension.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Server_WhenDisconnectedAsync_EventFiresTwice_NoThrow()
     {
         var socket = new FakeServerWebSocket();
@@ -60,7 +60,7 @@ public class WhenDisconnectedAsyncTests
     /// Firing <c>OnConnected</c> twice on a client socket must not throw.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Client_WhenConnectedAsync_EventFiresTwice_NoThrow()
     {
         var socket = new FakeClientWebSocket();
@@ -81,6 +81,8 @@ public class WhenDisconnectedAsyncTests
     /// any side-effect from the leaked handler.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
+    // no deadline: the token is cancelled before the wait begins, so this cannot hang - and
+    // xUnit1069 would demand a reference to a token that has nothing to do with what is tested
     [Fact]
     public async Task WhenDisconnectedAsync_CtCancelledBeforeEvent_ThrowsAndUnsubscribes()
     {
@@ -119,6 +121,8 @@ public class WhenDisconnectedAsyncTests
     /// any side-effect from the leaked handler.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
+    // no deadline: the token is cancelled before the wait begins, so this cannot hang - and
+    // xUnit1069 would demand a reference to a token that has nothing to do with what is tested
     [Fact]
     public async Task WhenConnectedAsync_CtCancelledBeforeEvent_ThrowsAndUnsubscribes()
     {
@@ -157,6 +161,8 @@ public class WhenDisconnectedAsyncTests
     /// any side-effect from the leaked handler.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
+    // no deadline: the token is cancelled before the wait begins, so this cannot hang - and
+    // xUnit1069 would demand a reference to a token that has nothing to do with what is tested
     [Fact]
     public async Task Server_WhenDisconnectedAsync_CtCancelledBeforeEvent_ThrowsAndUnsubscribes()
     {
