@@ -61,11 +61,11 @@ public class ClientSocketExtensionsTests
     /// <see cref="OperationCanceledException"/> and the handler is unsubscribed.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task WhenConnectedAsync_TokenCancelledBeforeConnected_ThrowsAndUnsubscribes()
     {
         var fake = new FakeClientSocket();
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
 
         var waitTask = fake.WhenConnectedAsync(cts.Token);
 
@@ -97,11 +97,11 @@ public class ClientSocketExtensionsTests
     /// without leaking the subscription.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task WhenConnectedAsync_PreCancelledToken_ThrowsImmediatelyAndUnsubscribes()
     {
         var fake = new FakeClientSocket();
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         await cts.CancelAsync();
 
         await Wrap.It(async () => await fake.WhenConnectedAsync(cts.Token)).ThrowsAsync<OperationCanceledException>();
@@ -114,11 +114,11 @@ public class ClientSocketExtensionsTests
     /// handler on the socket's multicast list.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task WhenConnectedAsync_AfterCancellation_RaisingConnectedHasNoEffect()
     {
         var fake = new FakeClientSocket();
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
 
         var waitTask = fake.WhenConnectedAsync(cts.Token);
         await cts.CancelAsync();
@@ -147,11 +147,11 @@ public class ClientSocketExtensionsTests
     /// <see cref="OperationCanceledException"/> and the handler is unsubscribed.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task WhenDisconnectedAsync_TokenCancelledBeforeDisconnected_ThrowsAndUnsubscribes()
     {
         var fake = new FakeClientSocketWithDisconnect();
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
 
         var waitTask = fake.WhenDisconnectedAsync(cts.Token);
 
@@ -182,11 +182,11 @@ public class ClientSocketExtensionsTests
     /// without leaking the subscription.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task WhenDisconnectedAsync_PreCancelledToken_ThrowsImmediatelyAndUnsubscribes()
     {
         var fake = new FakeClientSocketWithDisconnect();
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         await cts.CancelAsync();
 
         await Wrap.It(async () => await fake.WhenDisconnectedAsync(cts.Token))
@@ -199,11 +199,11 @@ public class ClientSocketExtensionsTests
     /// was cleaned up and no dangling handler remains.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task WhenDisconnectedAsync_AfterCancellation_RaisingDisconnectedHasNoEffect()
     {
         var fake = new FakeClientSocketWithDisconnect();
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
 
         var waitTask = fake.WhenDisconnectedAsync(cts.Token);
         await cts.CancelAsync();

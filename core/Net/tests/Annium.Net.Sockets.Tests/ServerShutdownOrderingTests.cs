@@ -29,7 +29,7 @@ public class ServerShutdownOrderingTests : TestBase
     /// in-flight handler observe cancellation and exit promptly.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task DisposeAsync_WithInfiniteLoopHandler_CompletesWithoutHanging()
     {
         this.Trace("start");

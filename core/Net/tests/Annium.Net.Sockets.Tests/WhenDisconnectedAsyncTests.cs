@@ -21,7 +21,7 @@ public class WhenDisconnectedAsyncTests
     /// Firing <c>OnDisconnected</c> twice on a client socket must not throw.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Client_WhenDisconnectedAsync_EventFiresTwice_NoThrow()
     {
         var socket = new FakeClientSocket();
@@ -40,7 +40,7 @@ public class WhenDisconnectedAsyncTests
     /// Firing <c>OnDisconnected</c> twice on a server socket must not throw.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Server_WhenDisconnectedAsync_EventFiresTwice_NoThrow()
     {
         var socket = new FakeServerSocket();
@@ -59,7 +59,7 @@ public class WhenDisconnectedAsyncTests
     /// Firing <c>OnConnected</c> twice on a client socket must not throw.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task Client_WhenConnectedAsync_EventFiresTwice_NoThrow()
     {
         var socket = new FakeClientSocket();

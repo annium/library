@@ -22,11 +22,11 @@ public class ServerSocketExtensionsTests
     /// <see cref="OperationCanceledException"/> and the handler is unsubscribed.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task WhenDisconnectedAsync_TokenCancelledBeforeDisconnected_ThrowsAndUnsubscribes()
     {
         var fake = new FakeServerSocket();
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
 
         var waitTask = fake.WhenDisconnectedAsync(cts.Token);
 
@@ -57,11 +57,11 @@ public class ServerSocketExtensionsTests
     /// without leaking the subscription.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task WhenDisconnectedAsync_PreCancelledToken_ThrowsImmediatelyAndUnsubscribes()
     {
         var fake = new FakeServerSocket();
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         await cts.CancelAsync();
 
         await Wrap.It(async () => await fake.WhenDisconnectedAsync(cts.Token))
@@ -74,11 +74,11 @@ public class ServerSocketExtensionsTests
     /// was cleaned up and no dangling handler remains.
     /// </summary>
     /// <returns>A task that represents the asynchronous test.</returns>
-    [Fact]
+    [Fact(Timeout = TestTimeout.Ms)]
     public async Task WhenDisconnectedAsync_AfterCancellation_RaisingDisconnectedHasNoEffect()
     {
         var fake = new FakeServerSocket();
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
 
         var waitTask = fake.WhenDisconnectedAsync(cts.Token);
         await cts.CancelAsync();
