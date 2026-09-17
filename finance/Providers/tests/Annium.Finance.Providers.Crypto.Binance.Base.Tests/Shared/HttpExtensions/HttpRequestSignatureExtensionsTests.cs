@@ -135,6 +135,75 @@ public class HttpRequestSignatureExtensionsTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// The timestamp comes from the signature service's synced server time, not from this machine's clock.
+    /// </summary>
+    /// <remarks>
+    /// Binance rejects a request whose timestamp is outside <c>recvWindow</c> of its own clock, so signing
+    /// with local time works exactly as long as the two agree and fails as soon as they drift — the kind of
+    /// failure that arrives on someone else's machine, intermittently, as <c>-1021</c>. The fake reports a
+    /// 2017 timestamp, so a value taken from the clock is not a near miss here; it is nine years out.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task Timestamp_ComesFromTheServerTimeSource()
+    {
+        // arrange
+        var signer = new RecordingSignatureService();
+        var received = string.Empty;
+        await using var server = this.RunHttpServer(
+            (request, response) =>
+            {
+                received = request.Url?.Query.TrimStart('?') ?? string.Empty;
+                response.Ok();
+
+                return Task.CompletedTask;
+            }
+        );
+
+        // act
+        await this.CreateHttpRequest(server).Get("order").Sign(signer).RunAsync(TestContext.Current.CancellationToken);
+
+        // assert
+        received
+            .Contains($"timestamp={RecordingSignatureService.ServerTimeValue}")
+            .IsTrue($"timestamp did not come from the server time source: {received}");
+    }
+
+    /// <summary>
+    /// The receive window is the documented 30 seconds, and it is sent in milliseconds.
+    /// </summary>
+    /// <remarks>
+    /// The unit is the whole risk: Binance reads this as milliseconds and caps it at 60000, so a value
+    /// meant as seconds is a window of 30 milliseconds — every request rejected as stale — and one meant
+    /// as minutes exceeds the cap outright.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task ReceiveWindow_IsThirtySecondsInMilliseconds()
+    {
+        // arrange
+        var received = string.Empty;
+        await using var server = this.RunHttpServer(
+            (request, response) =>
+            {
+                received = request.Url?.Query.TrimStart('?') ?? string.Empty;
+                response.Ok();
+
+                return Task.CompletedTask;
+            }
+        );
+
+        // act
+        await this.CreateHttpRequest(server)
+            .Get("order")
+            .ReceiveWindow()
+            .RunAsync(TestContext.Current.CancellationToken);
+
+        // assert
+        received.Contains("recvWindow=30000").IsTrue($"unexpected receive window: {received}");
+    }
+
+    /// <summary>
     /// A signature service that records what it was asked to sign and answers with a fixed value.
     /// </summary>
     private sealed class RecordingSignatureService : ISignatureService
@@ -145,8 +214,11 @@ public class HttpRequestSignatureExtensionsTests : ProvidersTestBase
         /// <summary>Gets the strings this signer was asked to sign, in call order.</summary>
         public IReadOnlyList<string> Signed => _signed;
 
+        /// <summary>The fixed server time this signer reports — 2017, so a value read off the clock is unmistakable.</summary>
+        public const long ServerTimeValue = 1_499_827_319_559;
+
         /// <summary>Gets a fixed server time, so the timestamp the signer adds does not vary between runs.</summary>
-        public long ServerTime => 1_499_827_319_559;
+        public long ServerTime => ServerTimeValue;
 
         /// <summary>The recorded strings.</summary>
         private readonly List<string> _signed = new();
