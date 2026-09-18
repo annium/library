@@ -320,6 +320,9 @@ public class WhenDisconnectedAsyncTests
         /// <param name="status">The close status to deliver to subscribers.</param>
         public void RaiseDisconnected(WebSocketCloseStatus status) => OnDisconnected?.Invoke(status);
 
+        /// <summary>Not implemented — tests do not exercise the receive path.</summary>
+        public void Start() => throw new NotImplementedException();
+
         /// <summary>Not implemented — tests do not exercise the disconnect path.</summary>
         public void Disconnect() => throw new NotImplementedException();
 

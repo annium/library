@@ -123,8 +123,29 @@ public class ServerWebSocket : IServerWebSocket
         this.Trace("subscribe to OnConnectionLost");
         _connectionMonitor.OnConnectionLost += Disconnect;
 
+        this.Trace("done");
+    }
+
+    /// <summary>
+    /// Begins receiving and starts the connection monitor. Call it once handlers are attached.
+    /// </summary>
+    /// <remarks>
+    /// Separate from construction on purpose. While this ran in the constructor, every owner had a window
+    /// between the socket being built and its own handlers being attached, and a frame arriving in that
+    /// window was dispatched to nobody. It is the first frame that is most at risk, which on a server
+    /// socket is the one a reconnecting client sends immediately.
+    /// </remarks>
+    public void Start()
+    {
+        this.Trace("start");
+
         this.Trace("start monitor");
         _connectionMonitor.Start();
+
+        this.Trace("start socket");
+        _socket.Start();
+
+        this.Trace("done");
     }
 
     /// <summary>

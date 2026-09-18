@@ -43,6 +43,17 @@ internal class ServerManagedWebSocket : IServerManagedWebSocket, ILogSubject
     private readonly ManagedWebSocket _managedSocket;
 
     /// <summary>
+    /// Signals that the owner has finished wiring and listening may begin.
+    /// </summary>
+    /// <remarks>
+    /// Listening used to start in the constructor, which left every owner a window: the receive loop was
+    /// already running while the owner was still attaching its handlers, and a frame that arrived in
+    /// between was dispatched to nobody and lost. On a server socket the first frame is exactly the one
+    /// most likely to arrive immediately - a client that reconnects and resubscribes sends it at once.
+    /// </remarks>
+    private readonly TaskCompletionSource _started = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    /// <summary>
     /// Once-only teardown guard (1 = teardown ran). Set via <see cref="Interlocked"/>.CompareExchange
     /// so the unbind/close sequence runs at most once across <see cref="Dispose"/>,
     /// <see cref="DisconnectAsync"/>, and <see cref="HandleClosed"/>.
@@ -69,15 +80,38 @@ internal class ServerManagedWebSocket : IServerManagedWebSocket, ILogSubject
         _managedSocket.OnTextReceived += HandleOnTextReceived;
         _managedSocket.OnBinaryReceived += HandleOnBinaryReceived;
 
-        this.Trace("start listen");
-        IsClosed = _managedSocket
-            .ListenAsync(ct)
+        this.Trace("arm listen");
+        IsClosed = ListenWhenStartedAsync(ct)
             .ContinueWith(
                 HandleClosed,
                 CancellationToken.None,
                 TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default
             );
+    }
+
+    /// <summary>
+    /// Begins receiving. Call it once the owner has attached its handlers.
+    /// </summary>
+    public void Start()
+    {
+        this.Trace("start listen");
+        _started.TrySetResult();
+    }
+
+    /// <summary>
+    /// Waits for <see cref="Start"/> and then listens until the socket closes.
+    /// </summary>
+    /// <param name="ct">Cancellation token for the connection.</param>
+    /// <returns>The close result the listen loop ended with.</returns>
+    private async Task<WebSocketCloseResult> ListenWhenStartedAsync(CancellationToken ct)
+    {
+        // VSTHRD003: this is our own gate, completed by Start on this instance.
+#pragma warning disable VSTHRD003
+        await _started.Task.WaitAsync(ct);
+#pragma warning restore VSTHRD003
+
+        return await _managedSocket.ListenAsync(ct);
     }
 
     /// <summary>

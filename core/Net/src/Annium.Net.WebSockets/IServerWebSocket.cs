@@ -26,6 +26,12 @@ public interface IServerWebSocket : ISendingReceivingWebSocket, IDisposable, ILo
     event Action<Exception> OnError;
 
     /// <summary>
+    /// Begins receiving and starts the connection monitor. Call it once handlers are attached: until it is
+    /// called nothing is read, which is what lets an owner wire itself up without racing the first frame.
+    /// </summary>
+    void Start();
+
+    /// <summary>
     /// Closes the WebSocket connection.
     /// </summary>
     void Disconnect();

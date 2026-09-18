@@ -63,6 +63,9 @@ internal sealed class ClientConnectionFactory : IClientConnectionFactory, IClien
 
         var connection = new ManagedConnection(serverSocket, _logger);
 
+        // after the connection has attached its handlers, never before - see ServerConnectionFactory
+        serverSocket.Start();
+
         return Task.FromResult<IManagedConnection>(connection);
     }
 }
