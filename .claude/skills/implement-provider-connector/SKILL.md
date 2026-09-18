@@ -49,10 +49,10 @@ Read the parent skill's safety section first; it governs. What follows is specif
   - **margin is sufficient** for the sizes the fixture uses.
 - **Run the trading suite alone.** Nothing else against the same account concurrently — not a live read
   block, not a second venue, not a host.
-- **A rejection test proves less than it looks.** `MapOperationCode` folds every negative Binance code to
-  `BadRequest`, so "the exchange refused" is all a test can assert — an invalid key, an expired timestamp
-  and a malformed parameter are indistinguishable at that level. Do not write a live test whose meaning
-  depends on *which* refusal came back until that mapping is split.
+- **A rejection test proves less than it looks.** Where the module folds every venue error code into one
+  status - and that is the usual shape - "the exchange refused" is all a test can assert: an invalid key, an
+  expired timestamp and a malformed parameter are indistinguishable at that level. Check the module's
+  mapping before writing a live test whose meaning depends on *which* refusal came back.
 - **Deadlines and tokens** are the parent's rule and apply here in full: every exchange-facing test
   carries `[Fact(Timeout = …)]`, every wait under it takes the test's token. A live test that hangs does
   not fail — it cancels the job, and *cancelled* does not read as broken.
@@ -132,8 +132,8 @@ Two more things to look at rather than assume, both visible in the source at the
   cleared the key and raised reset **without switching back** — while the failure branch beside it did
   switch back. **Decided: a changed key leaves the resolver in exactly the state it was in before its first
   key, timer included.** Anything else means the stream is closed by the reset and the replacement key is
-  not asked for until a full confirm interval later, which on Binance is the keep-alive period rather than
-  the retry period. A test catches it only if the two intervals differ — with both set to the same value
+  not asked for until a full confirm interval later - the keep-alive period rather than the retry period,
+  which on a real venue is minutes to half an hour. A test catches it only if the two intervals differ — with both set to the same value
   the bug is invisible, which is why the first version of the test passed.
 
 For the listen key specifically: fetch, confirm, change, failure-before-first-success, failure-after,
@@ -180,15 +180,15 @@ endpoints.
 Two checks that have caught real defects in this module and cost nothing to repeat:
 
 - **Every disposable the factory creates is in the box.** Both checks below found something on the first
-  run, which is why they are worth repeating rather than reading past. In USD-M futures the listen key
-  resolver and the user stream were built by the factory and never added: the connector only unhooks their
+  run, which is why they are worth repeating rather than reading past. On the first venue through this step
+  the listen key resolver and the user stream were built by the factory and never added: the connector only unhooks their
   *events*, so after its teardown the socket kept reconnecting, the resolver kept POSTing a keep-alive
   forever, and both stayed bound to the monitor — which then never reads clean again. Fixed. Note the
   ordering: the stream is disposed before the resolver it listens to.
 - **Endpoints live in one place per venue.** One venue keeping a URI path as a literal inside a mapping
-  profile while its twin keeps it in `Endpoints` is the asymmetry that hides a drift — and it was there:
-  spot had `/ws/` and `/stream` inline in its profiles while futures had both in `Endpoints`, and futures
-  in turn had `/fapi/v1/listenKey` inline in its factory. All three moved into `Endpoints`.
+  profile while its twin keeps it in `Endpoints` is the asymmetry that hides a drift - and it was there on
+  the first pair of venues through this step, in both directions: one kept its websocket paths inline while
+  its twin kept them in `Endpoints`, and that twin kept its listen key path inline in the factory instead.
 
 Neither check has an offline test behind it, and that is not an oversight: the factory resolves real
 endpoints from `Endpoints`, so building a connector through it reaches the exchange. What defends these is
@@ -227,10 +227,28 @@ trade.
 - Tests green; each live stage passed and approved in turn.
 - `status.md` says where the step stands, and the run report says how it went.
 
+## When the exchange refuses the contract
+
+Expect this shape, because it has already happened: a stage fails not because the connector is wrong but
+because the venue no longer accepts what the manifest records as `confirmed` - an order type refused on the
+endpoint the contract names, and with it the whole family of order types that share it.
+
+What to do, in order:
+
+1. **Check the account first.** A stage that failed part-way may have left a position open. Verify it -
+   a throwaway read-only connection reporting positions and orders is enough - rather than trusting the
+   fixture's teardown to have run.
+2. **Record it where the contract lives**, with the refusal quoted and dated: the documentation axis moves
+   to `contested`, the verification axis to `live` *negatively* - what is observed is the refusal.
+3. **Hand it back to steps 1-2 and stop.** Which endpoint accepts it, what it takes and what it answers is
+   a documentation question. Guessing an API from one error message is how a manifest fills with fiction.
+4. **Say what the stage still proved.** A stage that fails at its third action has validated the first two,
+   and that is worth recording rather than losing in the failure.
+
 ## What this step does not do
 
 - It does not decide whether a dead venue path is revived. If a provider's user connector is a stub —
-  as spot's is, with every command throwing — that is a **decision to put to the user**, not a gap to
+  as one venue's is in this module, with every command throwing — that is a **decision to put to the user**, not a gap to
   fill silently. Reviving it is a step-5 run of its own.
 - It does not change the contract. A disagreement with the exchange found here goes back to steps 1-2;
   this step ports the contract, it does not amend it.
