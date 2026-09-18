@@ -16,8 +16,9 @@ created: 2026-09-01
 - docs revision: spot `a0057759f1cbcab812af44b75309d72866a57561`; futures fetched 2026-09-01 (no
   repository exists, so the date is the only anchor)
 - working branch: `main` where converged
-- last reconciled: 2026-09-18 — step 5 under way on `skill/provider-connector`: 5a and 5b done, four
-  defects in the stream services found and fixed
+- last reconciled: 2026-09-18 — step 5 under way on `skill/provider-connector`: 5a through 5d done, six
+  defects found and fixed (four in the stream services, one leak in the futures connector factory, one
+  endpoint drift across both venues)
 
 ## Convergence
 
@@ -27,7 +28,7 @@ created: 2026-09-01
 | 2 — collect facts, compute drift | **converged, with two accepted gaps** | all 13 futures pages and 7 spot files snapshotted; request side closed at tier 1 from the official Postman collections; every category given a documentation outcome | **accepted, not open**: the nested user-data-stream payloads (~20 short field names) are `unretrievable` — no available technique reaches them, so waiting changes nothing; and the `avgPrice` question is `contested`, settleable only by a live order. Both are recorded against their entries rather than left as unfinished work |
 | 3 — wire types and serialization | **converged** | assessed 2026-09-17 against the manifest by a fresh verifier: field coverage holds in both directions (every documented field read, no field read that is not documented), all five enumeration tables map both ways, the kline indices are pinned by six distinct values. Two branch gaps and one defect remediated the same day — see the run report | none |
 | 4 — provider, read paths (+ registration, config, read-only live validation) | **converged** | every read path on both venues driven offline, failure paths included; endpoints pinned; **live read block green on 2026-09-16: 20 tests, 14 passed, 6 skipped, none failed** — and this time with credentials present, so the two signature tests ran rather than skipping | none. The upstream defect found here — an exchange error discarded when the success type is a collection — was fixed in `Annium.Net.Http` 1.1.49 and taken up with the package bump; the test that pinned the loss now pins the reason. The six still skipped are Spot's `UserProviderTests`, marked `Not implemented`, which is about the tests and not about access |
-| 5 — connector, streams and orders (+ registration, config, trading live validation) | **in progress — 5a and 5b done** | the test lib gained a websocket server (`TestBaseWebSocketServerExtensions`), and the streams are pinned offline by 20 tests across `BookTickerServiceTests`, `ListenKeyResolverTests` and `UserStreamTests`. Four defects found and fixed in the process — see the [run report](2026.09/2026.09.18-step-5.md) | 5c (order lifecycle offline), 5d (registration and config), 5e (live read-only), 5f (live trading, staged) |
+| 5 — connector, streams and orders (+ registration, config, trading live validation) | **in progress — 5a through 5d done** | the test lib gained a websocket server; the streams are pinned by 20 offline tests, the order lifecycle by 13 more, and every registration key by two. Six defects found and fixed in the process — see the [run report](2026.09/2026.09.18-step-5.md) | 5e (live read-only), 5f (live trading, staged). Two behaviours are pinned as they stand and need a decision rather than a test: `SetLeverageAsync` reporting Ok on a refusal, and a limit order refused when asked to become a market order |
 ## Queued work
 
 Open items only. Two things that used to live here are settled and their reasoning is where it belongs
@@ -45,8 +46,8 @@ manifest carries what each of them now defends; the run reports beside this file
 | three `[UNVERIFIED]` markers in the manifest | leftovers from the vocabulary this manifest replaced. Two are substantive: the rate-limit window is *assumed* to be one minute, and a one-way account is *assumed* to report one `positions[]` row per symbol with `positionSide=BOTH` — the write fixture's precondition rests on the second. Both belong to the documentation axis, so step 2 assigns them |
 | no test file at all: `HttpRequestLogExtensions`, the filter converters | the filter converters are covered through the exchange-info fixture, which the manifest says plainly — a missing file, not a missing fact. `WebSocketService` and `ListenKeyResolver` left this list on 2026-09-18: both are pinned offline now |
 
-**Step 5 is the work, not this list.** Its offline stream half is done as of 2026-09-18; the order
-lifecycle, registration and the live stages are what remains.
+**Step 5 is the work, not this list.** Everything offline is done as of 2026-09-18; the live stages are
+what remains, and each is approved on its own.
 
 Step 3 was the other half of that sentence until 2026-09-17, when it was assessed and found already
 written: the code and its tests existed while this document called the step not started. That error is
