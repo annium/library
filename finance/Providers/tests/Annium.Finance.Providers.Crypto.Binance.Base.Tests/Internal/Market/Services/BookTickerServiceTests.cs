@@ -82,7 +82,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitConnectedAsync(monitor, ct);
+        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
 
         // act
         service.Subscribe(["BTCUSDT", "ETHUSDT"]);
@@ -106,7 +106,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitConnectedAsync(monitor, ct);
+        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
         service.Subscribe(["BTCUSDT"]);
         await ReadRequestAsync(connection, ct);
 
@@ -132,7 +132,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitConnectedAsync(monitor, ct);
+        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
         service.Subscribe(["BTCUSDT"]);
         await ReadRequestAsync(connection, ct);
 
@@ -164,7 +164,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitConnectedAsync(monitor, ct);
+        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
         service.Subscribe(["BTCUSDT", "ETHUSDT"]);
         await ReadRequestAsync(connection, ct);
 
@@ -191,7 +191,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitConnectedAsync(monitor, ct);
+        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
         var tickers = Listen(service);
 
         // act
@@ -215,7 +215,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitConnectedAsync(monitor, ct);
+        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
         var tickers = Listen(service);
 
         // act
@@ -228,6 +228,68 @@ public class BookTickerServiceTests : ProvidersTestBase
         // assert
         var ticker = await tickers.Reader.ReadAsync(ct);
         ticker.Is(new InstrumentTicker("BTCUSDT", 1.5m, 2.5m));
+    }
+
+    /// <summary>
+    /// A dropped connection puts the connector back into connecting, so a consumer sees the gap.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TimeoutMs)]
+    public async Task Drop_ReportsConnectingAgain()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        await using var server = this.RunWebSocketServer();
+        var monitor = new StatusMonitor(Get<ILogger>());
+        using var service = CreateService(server, monitor);
+        var connection = await server.WaitConnectionAsync(ct);
+        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+
+        // act
+        var connecting = WaitStatusAsync(monitor, ConnectorStatus.Connecting, ct);
+        connection.Drop();
+
+        // assert
+        await connecting;
+    }
+
+    /// <summary>
+    /// Disposing closes the connection and unregisters the service from the monitor, rather than leaving it
+    /// there as a disconnected target.
+    /// </summary>
+    /// <remarks>
+    /// The failure this pins is not an error but a state nothing recovers from: a disposed service left
+    /// registered drags the aggregate down forever, and the connector it belongs to can never report itself
+    /// connected again for as long as it lives.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TimeoutMs)]
+    public async Task Dispose_ClosesConnectionAndLeavesTheMonitor()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        await using var server = this.RunWebSocketServer();
+        var monitor = new StatusMonitor(Get<ILogger>());
+
+        // a second target, so that the monitor still has one after the service leaves - with none at all
+        // it reports disconnected by definition, and the assertion would hold for the wrong reason
+        var peer = monitor.CreateReporter();
+        peer.Bind(new object(), ConnectorStatus.Connected);
+
+        var service = CreateService(server, monitor);
+        var connection = await server.WaitConnectionAsync(ct);
+        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+
+        // act
+        // VSTHRD103: the service's teardown is synchronous - the warning fires only because a DisposeAsync
+        // extension exists for IDisposable - and disposing it is the act under test
+#pragma warning disable VSTHRD103
+        service.Dispose();
+#pragma warning restore VSTHRD103
+
+        // assert
+        await connection.WhenClosed.WaitAsync(ct);
+        monitor.Status.Is(ConnectorStatus.Connected);
     }
 
     /// <summary>
@@ -255,7 +317,7 @@ public class BookTickerServiceTests : ProvidersTestBase
     }
 
     /// <summary>
-    /// Waits until the service reports itself connected.
+    /// Waits until the service reports the given status.
     /// </summary>
     /// <remarks>
     /// The server accepting the socket is not the moment to act on: the client finishes its handshake after
@@ -264,25 +326,29 @@ public class BookTickerServiceTests : ProvidersTestBase
     /// that re-send precisely so that waiting for it removes the window.
     /// </remarks>
     /// <param name="monitor">The monitor the service reports into.</param>
+    /// <param name="target">The status to wait for.</param>
     /// <param name="ct">The test's cancellation token.</param>
-    /// <returns>A task that completes once the service is connected.</returns>
-    private static async Task WaitConnectedAsync(StatusMonitor monitor, CancellationToken ct)
+    /// <returns>A task that completes once the service reports the status.</returns>
+    private static async Task WaitStatusAsync(StatusMonitor monitor, ConnectorStatus target, CancellationToken ct)
     {
-        var connected = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var reached = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
         void Handle(ConnectorStatus status)
         {
-            if (status is ConnectorStatus.Connected)
-                connected.TrySetResult();
+            if (status == target)
+                reached.TrySetResult();
         }
 
+        // subscribed before the current status is read, and the method is called before the act rather
+        // than after it: a status the service passes through - connecting, on its way back to connected
+        // after a drop - is gone by the time anything polls for it
         monitor.OnStatusChanged += Handle;
         try
         {
-            if (monitor.Status is ConnectorStatus.Connected)
-                connected.TrySetResult();
+            if (monitor.Status == target)
+                reached.TrySetResult();
 
-            await connected.Task.WaitAsync(ct);
+            await reached.Task.WaitAsync(ct);
         }
         finally
         {
