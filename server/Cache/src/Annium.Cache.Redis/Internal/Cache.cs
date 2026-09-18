@@ -158,17 +158,23 @@ internal class Cache<TKey, TValue> : ICache<TKey, TValue>, ILogSubject
     {
         try
         {
-            tcs.TrySetResult(await CreateAsync(k, key, factory, context, options, flight));
+            var value = await CreateAsync(k, key, factory, context, options, flight);
+
+            // the slot is dropped BEFORE the shared task is settled, and that order is the whole point:
+            // continuations run asynchronously, so a caller resuming on the settled task can be inside its
+            // next GetOrCreateAsync while this method is still in its finally. Removing afterwards left a
+            // window in which that call joined a flight that was already over - taking its value without a
+            // read, and so without seeing a RemoveAsync that landed in between.
+            _inflight.TryRemove(new KeyValuePair<string, Flight>(k, flight));
+            tcs.TrySetResult(value);
         }
         catch (Exception ex)
         {
             this.Trace("Factory failed for {key}", key);
             this.Error(ex);
-            tcs.TrySetException(ex);
-        }
-        finally
-        {
+
             _inflight.TryRemove(new KeyValuePair<string, Flight>(k, flight));
+            tcs.TrySetException(ex);
         }
     }
 
