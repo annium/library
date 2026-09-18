@@ -124,6 +124,11 @@ public sealed class TestWebSocketServer : IAsyncDisposable, ILogSubject
 
         var socket = new ServerWebSocket(ctx.WebSocket, Logger, ct);
         var connection = new TestWebSocketConnection(socket, ctx.RequestUri, Logger);
+
+        // only now: the connection has attached its handler, so the frame a reconnecting client sends
+        // immediately cannot be read before there is anyone to read it to
+        socket.Start();
+
         Interlocked.Increment(ref _acceptedConnections);
         _connections.Writer.TryWrite(connection);
 

@@ -978,7 +978,14 @@ public class ClientServerWebSocketTests : TestBase
                 var socket = new ServerWebSocket(ctx.WebSocket, sp.Resolve<ILogger>(), ct);
 
                 this.Trace<string>("handle {socket}", socket.GetFullId());
-                await handleWebSocket(socket);
+
+                // the handler is invoked first and awaited after, with Start in between, and the order is
+                // load-bearing: an async lambda runs synchronously up to its first await, so by the time
+                // control returns here it has attached its handlers - and only then does the socket begin
+                // to read. Starting before this line is what used to lose a frame that arrived at once
+                var handling = handleWebSocket(socket);
+                socket.Start();
+                await handling;
 
                 this.Trace<string>("disconnect {socket}", socket.GetFullId());
                 socket.Disconnect();

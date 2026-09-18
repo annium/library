@@ -18,4 +18,9 @@ internal interface IServerManagedWebSocket : ISendingReceivingWebSocket, IDispos
     /// </summary>
     /// <returns>A task that completes when the disconnection is finished.</returns>
     Task DisconnectAsync();
+
+    /// <summary>
+    /// Begins receiving. Called once the owner has attached its handlers.
+    /// </summary>
+    void Start();
 }

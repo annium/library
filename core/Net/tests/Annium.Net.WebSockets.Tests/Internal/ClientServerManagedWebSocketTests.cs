@@ -724,7 +724,15 @@ public class ClientServerManagedWebSocketTests : TestBase
                 var socket = new ServerManagedWebSocket(ctx.WebSocket, sp.Resolve<ILogger>(), ct);
 
                 this.Trace<string>("handle {socket}", socket.GetFullId());
-                await handleWebSocket(socket);
+
+                // invoke, start, then await - and the order is what these tests are about. An async lambda
+                // runs synchronously up to its first await, so the handler has attached its subscriptions
+                // by the time control returns here, and only then does the socket begin to read. Starting
+                // in the constructor, as it used to, lost whatever arrived in between - which is why these
+                // very tests flaked with an empty message list on a loaded machine
+                var handling = handleWebSocket(socket);
+                socket.Start();
+                await handling;
 
                 this.Trace<string>("disconnect {socket}", socket.GetFullId());
                 await socket.DisconnectAsync();

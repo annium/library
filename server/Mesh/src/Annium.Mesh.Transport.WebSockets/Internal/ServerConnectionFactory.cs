@@ -45,6 +45,10 @@ internal sealed class ServerConnectionFactory : IServerConnectionFactory<WebSock
         var serverSocket = new ServerWebSocket(socket, serverSocketOptions, _logger);
         var connection = new ServerConnection(serverSocket, _logger);
 
+        // after the connection has attached its handlers, never before: the socket reads nothing until
+        // this call, which is what keeps the first frame from arriving while nobody is listening
+        serverSocket.Start();
+
         return Task.FromResult<IServerConnection>(connection);
     }
 }

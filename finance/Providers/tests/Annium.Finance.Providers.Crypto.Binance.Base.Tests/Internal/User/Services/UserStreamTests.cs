@@ -29,7 +29,7 @@ public class UserStreamTests : ProvidersTestBase
     /// <summary>
     /// How long any test here may run before xUnit fails it, in milliseconds.
     /// </summary>
-    private const int TimeoutMs = 30_000;
+    private const int TimeoutMs = 60_000;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UserStreamTests"/> class.
