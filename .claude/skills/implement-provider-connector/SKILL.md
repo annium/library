@@ -157,6 +157,21 @@ Then the ingestion side, which is the connector's other half: what a stream mess
 positions, assets and trades; which status transitions write a change and which write a delete; what a
 snapshot does to accumulated state.
 
+**A command reports what happened, and "nothing happened" is not success.** Two decisions from the first
+run, both about a caller being told OK and acting on it:
+
+- `SetLeverageAsync` returned `UserResult.Ok()` whatever the exchange answered, documented as
+  fire-and-forget over the context reload. It does not any more: a refusal reaches the caller. And where
+  the exchange *accepts* a leverage change without applying it, the connector compares what came back
+  against what was asked and **refuses on its own** — a venue that answers OK and leaves the leverage
+  where it was is indistinguishable from success to anything that only reads the status. Check every
+  command of every venue for this shape: an answer that carries the resulting state is an answer worth
+  comparing against the request.
+- a modify of a Limit order into a Market order **stays refused**. The cancel-and-reinit path keys on the
+  type of the order that exists, the query builder on the type being asked for, and such a request falls
+  between them. Turning it into a silent cancel-and-replace would mean a caller asking to amend and
+  getting a new order at a new place in the queue instead. The refusal is the contract.
+
 ## Phase 5d — registration and configuration
 
 Done here, as part of building, not deferred: the factory wiring, the keys, the configuration shapes, the

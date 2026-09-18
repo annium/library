@@ -98,18 +98,18 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
     }
 
     /// <summary>
-    /// Setting leverage reports success even when the exchange refused it.
+    /// A refused leverage change reaches the caller.
     /// </summary>
     /// <remarks>
-    /// Documented behaviour rather than an accident - the method says so in its own summary - and pinned
-    /// here as it stands. It is worth questioning separately: a caller told OK about a leverage the
-    /// exchange rejected goes on to size positions against a leverage it does not have.
+    /// It used to report Ok whatever came back, which left a caller sizing positions against a leverage
+    /// the account does not have.
     /// </remarks>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(Timeout = Timeout)]
-    public async Task SetLeverage_ReportsOkEvenWhenRefused()
+    public async Task SetLeverage_RefusalReachesTheCaller()
     {
         // arrange
+        var ct = TestContext.Current.CancellationToken;
         var log = new RequestLog();
         await using var server = RunServer(log, _ => (HttpStatusCode.BadRequest, """{"code":-4028,"msg":"bad"}"""));
         await using var connector = CreateConnector(server, out var parts);
@@ -118,12 +118,64 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
         var result = await connector.SetLeverageAsync(Position(), 5m);
 
         // assert
-        result.Status.Is(UserOperationStatus.Ok);
+        result.Status.Is(UserOperationStatus.BadRequest);
 
-        // the refusal is not lost entirely: it reaches the reload path, which is the connector's way of
-        // finding out what the account actually looks like now
-        await parts.ContextLoader.Requests.Reader.ReadAsync(TestContext.Current.CancellationToken);
-        await parts.OrdersLoader.Requests.Reader.ReadAsync(TestContext.Current.CancellationToken);
+        // and the account is re-read either way, which is how the connector finds out what it looks like now
+        await parts.ContextLoader.Requests.Reader.ReadAsync(ct);
+        await parts.OrdersLoader.Requests.Reader.ReadAsync(ct);
+    }
+
+    /// <summary>
+    /// A leverage change the exchange accepts without applying is refused by the connector itself.
+    /// </summary>
+    /// <remarks>
+    /// The response carries the leverage the account ended up with, and that is the only place the
+    /// difference shows: to a caller reading the status alone, "accepted and ignored" looks exactly like
+    /// success. The synthetic refusal is what makes the two distinguishable.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = Timeout)]
+    public async Task SetLeverage_AcceptedButNotAppliedIsRefusedByTheConnector()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        var log = new RequestLog();
+        await using var server = RunServer(log, _ => (HttpStatusCode.OK, """{"leverage":3,"symbol":"BTCUSDT"}"""));
+        await using var connector = CreateConnector(server, out var parts);
+
+        // act
+        var result = await connector.SetLeverageAsync(Position(), 5m);
+
+        // assert
+        result.Status.Is(UserOperationStatus.UnknownError);
+        result.Message.Contains("5").IsTrue();
+        result.Message.Contains("3").IsTrue();
+
+        // the exchange accepted it, so the reload is the success one: context only
+        await parts.ContextLoader.Requests.Reader.ReadAsync(ct);
+        parts.OrdersLoader.Requests.Reader.Count.Is(0);
+    }
+
+    /// <summary>
+    /// A leverage change the account applied is reported as success.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = Timeout)]
+    public async Task SetLeverage_AppliedIsOk()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        var log = new RequestLog();
+        await using var server = RunServer(log, _ => (HttpStatusCode.OK, """{"leverage":5,"symbol":"BTCUSDT"}"""));
+        await using var connector = CreateConnector(server, out var parts);
+
+        // act
+        // 5.9 floored to 5, which is what the account reports back
+        var result = await connector.SetLeverageAsync(Position(), 5.9m);
+
+        // assert
+        result.Status.Is(UserOperationStatus.Ok);
+        await parts.ContextLoader.Requests.Reader.ReadAsync(ct);
     }
 
     /// <summary>
@@ -199,9 +251,9 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
     /// <remarks>
     /// The cancel-and-reinit path keys on the type of the order that <em>exists</em>, while the query
     /// builder keys on the type being asked for - so a limit order asked to become a market order takes
-    /// neither route and is refused with "Only limit orders are supported". Pinned as it stands; whether a
-    /// caller should instead get the cancel-and-reinit treatment is a contract question, not a defect to
-    /// fix under a test.
+    /// neither route and is refused with "Only limit orders are supported". Decided: the refusal is the
+    /// contract. Routing it to cancel-and-reinit would mean a caller asking to amend an order and silently
+    /// getting a new one instead - at a new place in the queue, and at whatever the market has moved to.
     /// </remarks>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(Timeout = Timeout)]

@@ -163,11 +163,19 @@ internal class UserConnector : UserConnectorBase, IUserConnector
 
     /// <summary>
     /// Sets the leverage used for a position, flooring the leverage to a whole number as required by the
-    /// exchange. Always reports success to the caller (fire-and-forget over the account context reload).
+    /// exchange, and reports whether the account ended up with it.
     /// </summary>
+    /// <remarks>
+    /// It used to report success whatever came back, which left a caller sizing positions against a
+    /// leverage the account does not have. Two things are reported now: the exchange's own refusal, and -
+    /// where the exchange accepts the change without applying it - a refusal of the connector's own, from
+    /// comparing the leverage that came back with the one asked for. An answer that carries the resulting
+    /// state is worth comparing against the request; without that comparison, "accepted but unchanged" is
+    /// indistinguishable from success.
+    /// </remarks>
     /// <param name="position">The position to change leverage for.</param>
     /// <param name="leverage">The leverage to set.</param>
-    /// <returns>An OK result, or a not-connected failure if the connector is currently disconnected.</returns>
+    /// <returns>An OK result once the account reports the requested leverage; a failure otherwise.</returns>
     public async ValueTask<UserResult> SetLeverageAsync(PositionModel position, decimal leverage)
     {
         if (Status is not ConnectorStatus.Connected)
@@ -176,11 +184,13 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             return UserResult.New(UserOperationStatus.NotConnected);
         }
 
+        var target = leverage.FloorInt32();
+
         var result = await _setLeverageRequestFactory
             .New(_config.HttpApi)
             .Post("/fapi/v1/leverage")
             .Param("symbol", position.Symbol)
-            .Param("leverage", leverage.FloorInt32())
+            .Param("leverage", target)
             .ReceiveWindow()
             .Sign(_signatureService)
             .WithRateDelay1M(_rateLimiter)
@@ -188,6 +198,38 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             .AsUserResultAsync<LeverageResponse>();
 
         HandleTradeResult(result.IsSuccess);
+
+        if (result.IsFailure)
+        {
+            this.Warn<string, string, int>(
+                "{id} leverage of {position} -> {leverage} refused",
+                Id,
+                position.Symbol,
+                target
+            );
+
+            return UserResult.From(result);
+        }
+
+        // the response carries the leverage the account ended up with, so an acceptance that changed
+        // nothing is visible here and nowhere else: to a caller reading only the status it looks exactly
+        // like the change having been applied
+        if (result.Data is not { } data || data.Leverage != target)
+        {
+            var applied = result.Data is { } current ? current.Leverage.ToString() : "nothing";
+            this.Warn<string, string, int, string>(
+                "{id} leverage of {position} -> {leverage} not applied, account reports {applied}",
+                Id,
+                position.Symbol,
+                target,
+                applied
+            );
+
+            return UserResult.New(
+                UserOperationStatus.UnknownError,
+                $"Leverage was accepted but not applied: asked for {target}, account reports {applied}"
+            );
+        }
 
         return UserResult.Ok();
     }
