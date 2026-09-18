@@ -123,7 +123,7 @@ public sealed class TestWebSocketServer : IAsyncDisposable, ILogSubject
         this.Trace("start");
 
         var socket = new ServerWebSocket(ctx.WebSocket, Logger, ct);
-        var connection = new TestWebSocketConnection(socket, Logger);
+        var connection = new TestWebSocketConnection(socket, ctx.RequestUri, Logger);
         Interlocked.Increment(ref _acceptedConnections);
         _connections.Writer.TryWrite(connection);
 
@@ -162,6 +162,15 @@ public sealed class TestWebSocketConnection : ILogSubject
     public Task WhenClosed => _closed.Task;
 
     /// <summary>
+    /// Gets the URI the client connected to.
+    /// </summary>
+    /// <remarks>
+    /// What a stream service puts in the URL is part of its contract - a Binance user stream carries its
+    /// listen key there, and nothing else the test can observe says which key it connected with.
+    /// </remarks>
+    public Uri RequestUri { get; }
+
+    /// <summary>
     /// The server side of the socket.
     /// </summary>
     private readonly IServerWebSocket _socket;
@@ -190,10 +199,12 @@ public sealed class TestWebSocketConnection : ILogSubject
     /// Initializes a new instance of the <see cref="TestWebSocketConnection"/> class.
     /// </summary>
     /// <param name="socket">The server side of the accepted socket.</param>
+    /// <param name="requestUri">The URI the client connected to.</param>
     /// <param name="logger">The logger to trace through.</param>
-    internal TestWebSocketConnection(IServerWebSocket socket, ILogger logger)
+    internal TestWebSocketConnection(IServerWebSocket socket, Uri requestUri, ILogger logger)
     {
         Logger = logger;
+        RequestUri = requestUri;
         _socket = socket;
         _socket.OnTextReceived += HandleTextReceived;
     }
