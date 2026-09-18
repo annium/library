@@ -18,8 +18,8 @@ Some of what this skill validates places **real orders on a real account**.
 
 - **Never run the read or write block on your own.** Steps 4 and 5 carry the live runs and each stage is
   a human gate. In this repository nothing but the block's trait stands between a routine run and a
-  trading one, so `just test-write` is the act, not a preliminary to it. The variable is set by the user, or by you only when the user has approved *that stage*
-  in *that call*.
+  trading one, so `just test-finance-write` is the act, not a preliminary to it. Run it only when the user
+  has approved *that stage* in *that call*.
 - `test.env` files hold real credentials. Never read them for their values, never print them, never
   commit them. Needing a value computed from one — a signing golden value, say — is not an exception:
   write the user a script and let them run it, so the secret stays on their side and only the result is
@@ -38,9 +38,13 @@ marking a fixture base carries every suite built on it:
 
 | recipe | block | touches |
 |---|---|---|
-| `just test` → `test-offline` | unmarked | nothing outside the process |
-| `just test-read` | `block=read` | real providers and real accounts, mutating nothing |
-| `just test-write` | `block=write` | places and cancels real orders, opens and closes positions |
+| `just test-finance` | unmarked | nothing outside the process |
+| `just test-finance-read` | `block=read` | real providers and real accounts, mutating nothing |
+| `just test-finance-write` | `block=write` | places and cancels real orders, opens and closes positions |
+
+`just test` runs the offline block of every group, finance included. The three names above are the finance
+ones, and they are the names in the justfile — check them there rather than here if they ever look wrong,
+because a recipe name that has drifted in this table is a wrong command pointed at a trading block.
 
 **The trait is the only thing separating a routine run from one that trades.** A second gate — an
 environment variable each exchange test was checked against — was dropped deliberately: it protected
@@ -49,8 +53,11 @@ offline, the safe default in the direction that matters, since a test nobody mar
 always runs rather than the one that never does.
 
 A test written in step 4 belongs to `read` or to no block at all; one written in step 5 that trades
-belongs to `write`. Marking it is part of writing it, not a later tidy-up: an unmarked live test runs
-in the default block, where its gate will skip it and its absence will look like coverage.
+belongs to `write`. Marking it is part of writing it, not a later tidy-up: **an unmarked live test runs in
+the default block, and since credentials are present it will reach the exchange there.** `Exchange`'s gate
+is a condition of possibility, not a permission — it says so itself — so it skips only while the
+credentials are missing. Until 2026-09-16 they were, and the consequence of forgetting a trait was false
+coverage; now it is a live call on the routine run.
 
 ### Every live test carries a deadline, and the waits under it take its token
 
@@ -70,7 +77,10 @@ Two halves, and one without the other is worse than neither:
   and the run finishes. Pick it far longer than the work and far shorter than any runner's patience.
 - **The token threaded into every wait beneath it.** A deadline whose waits ignore `TestContext.Current.CancellationToken`
   reports late and says only that time ran out. With the token, the test ends where it was actually stuck.
-  xUnit's own analyzer enforces this pairing, and it is right to.
+  xUnit's own analyzer enforces this pairing **inside test methods** — `xUnit1069` refuses a `Timeout`
+  without a reference to the token — and that is exactly its limit: `xUnit1051` does not see a call that
+  sits in a helper or a fixture, so eleven container starts went years without a deadline and seven of
+  them took no token at all. The rule below about shared bases cannot be delegated to the analyzer.
 
 Where a call takes no token — a provider method that never had one — bound the *test's* wait with
 `WaitAsync(ct)`: the test ends on time and the orphaned call dies with the process.
@@ -83,10 +93,27 @@ Two rules that are easy to get wrong:
   signalled.
 - **A synchronous test gets no deadline.** If nothing in the body waits, a deadline there guards nothing
   and there is no token to observe. Say so in a comment where someone will look for it.
+- **A retry loop counts attempts; a deadline counts time, and only one of those is a budget.** "Ten
+  attempts, 500 ms apart" is five seconds only while every attempt fails fast. When the same call starts
+  timing out instead of refusing — an exchange that stopped answering rather than saying no — ten attempts
+  became ninety-five seconds, and the outer deadline was blown by a loop written to protect it. Bound the
+  loop with a `Stopwatch` against a deadline, and say in the failure how long it waited and against what.
+  Steps 4 and 5 are where "retry until the exchange answers" gets written.
 
 **Check by enumeration, not by memory.** List every `[Fact]` in a class that carries a block trait or
 derives from a base that does, and report the ones without a `Timeout`. Listing the tests you believe are
 exchange-facing finds the ones you already knew about.
+
+**And enumerate over the dependency, not over a name.** A sweep for container starts searched for
+`container.StartAsync`, reported eight sites and missed three — their receiver was called `_db`. The unit
+that cannot lie is the reference: for every project that declares the package, list every call of the
+method. Same for the deadline check above: the trait, not the file name you expect. A pattern over
+identifiers finds the sites written by whoever wrote the pattern.
+
+**The thing that needs a deadline is not only the `[Fact]`.** Anything it awaits can wedge — a fixture
+starting a container, a helper waiting for a socket. `Annium.Testing.Containers.StartWithDeadlineAsync`
+exists because Testcontainers waits an hour by default, and an hour is not a number anyone picked for a
+test suite.
 
 ## The load-bearing idea: one contract, ported into every step
 
@@ -346,6 +373,25 @@ Every field in the contract is read; every field read is in the contract — the
 direction is what catches the fields we invented. Enumerations map every documented value in both
 directions. Positional payloads have their indices pinned, because there the index *is* the contract
 and nothing else protects it. Tests green.
+
+**A converter with a test is not a converter whose branches run.** "`pinned` per converter, every one
+having its own test with real fixtures" was true of this manifest and still hid two gaps, because a
+fixture exercises the branch it happens to contain. A value the code *synthesizes* under a condition is
+pinned only when both arms are driven: the futures `createdAt` is `transactionTime` when the status is
+`NEW` and zero otherwise, and only the zero half had ever run — collapsing that condition either way was
+invisible. Where the contract records a conditional, the test carries both cases.
+
+**A drop rule is a fact, not a field.** "This field is read" does not state "an asset the exchange will
+not take as margin is dropped", and a field list will never ask for it. Write the absence and drop
+behaviour into the manifest as its own entry, then pin it.
+
+**Expect a negative branch to be unpinned and broken at the same time.** The two are not alternatives:
+nothing ran it, so nothing told anyone it was wrong. Pinning the asset drop rule failed on the first
+attempt because the envelope read the array into a collection of non-nullable elements and kept the
+converter's honest `null` — the rule was written and discarded one line later, and the first thing the
+provider does with the result is read a field off every entry. Budget for a fix inside this step, the way
+step 4 does: a fact at `none` that turns out to be wrong was found by review, and review is not
+repeatable.
 
 ### Step 4 — provider: the read paths ⬜ no child skill yet
 

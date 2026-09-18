@@ -16,7 +16,8 @@ created: 2026-09-01
 - docs revision: spot `a0057759f1cbcab812af44b75309d72866a57561`; futures fetched 2026-09-01 (no
   repository exists, so the date is the only anchor)
 - working branch: `main` where converged
-- last reconciled: 2026-09-16 — step 4 re-validated live, now with credentials; steps 3 and 5 not started
+- last reconciled: 2026-09-17 — step 3 assessed and converged; step 4 re-validated live on 09-16, now
+  with credentials; step 5 not started
 
 ## Convergence
 
@@ -106,9 +107,14 @@ left behind, in the order it is worth picking up:
 | decay constants `none` | the ceiling and the water-mark fraction are pinned through the number they compose to; the decay rate and interval are not |
 | three `[UNVERIFIED]` markers | leftovers from the marker vocabulary this manifest replaced. Two are substantive: the rate-limit window is *assumed* to be one minute, and a one-way account is *assumed* to report one `positions[]` row per symbol with `positionSide=BOTH` — the write fixture's precondition rests on the second. Both belong to the documentation axis, so step 2 assigns them, not step 4 |
 
-**Steps 3 and 5 are the work, not this list.** Step 3 has never been started; step 5 is unblocked and
-needs its own tests before anything it validates can be trusted — `WebSocketService` and
-`ListenKeyResolver` still have no test file, and they carry the connection lifecycle of every stream.
+**Step 5 is the work, not this list.** It is unblocked and needs its own tests before anything it
+validates can be trusted — `WebSocketService` and `ListenKeyResolver` still have no test file, and they
+carry the connection lifecycle of every stream.
+
+Step 3 was the other half of this sentence until 2026-09-17, when it was assessed and found already
+written: the code and its tests existed while this document called the step not started. The run report
+sits beside this file. That error is the expensive direction — it invites rewriting what is already
+there, and losing tests that exist nowhere else.
 
 ## Running the read block: `test.env` is copied, not read from source
 

@@ -34,8 +34,10 @@ Run it *before* validating against the exchange, not after things start failing.
 
 ## Safety
 
-- **NEVER set `FINANCE_EXCHANGE_TESTS`.** Nothing here runs a test or calls the exchange. This layer
-  reads code and reads documentation.
+- **Never run a test block here.** Nothing in these two steps calls the exchange: this layer reads code
+  and reads documentation. There is no environment variable to set or avoid — the gate that existed was
+  removed deliberately, and the block's trait is now the only thing separating a routine run from a
+  trading one.
 - `test.env` holds real credentials. Never read them for their values, never print them.
 
 ## The documents
@@ -60,9 +62,14 @@ report the actual state and ask. Never stash, never force, never hard-reset.
 ## Step 1 — derive the existing state from the code
 
 **On a first run** there is no manifest. Derive the manifest from the code: sweep the provider's tree and
-record every fact that belongs to the exchange, anchored to `file:line`, in the categories below. Mark
-everything `[UNVERIFIED]` — derived from our code, not yet checked against anything. Set
+record every fact that belongs to the exchange, anchored to `file:line`, in the categories below.
+Everything derived here is `unchecked` on the documentation axis — it comes from our code and has been
+compared to nothing — and whatever the code's own tests already defend on the verification axis. Set
 `checked_against: never`. This is an inventory, not yet a baseline.
+
+The two axes are the parent skill's; a manifest written with `[UNVERIFIED]` markers instead would be
+speaking a vocabulary this one replaced, and the three such markers still left in binance's manifest are
+leftovers, not examples.
 
 **On every later run**, verify the manifest still describes *this* code before comparing it to anything
 external:
@@ -261,8 +268,8 @@ three are invisible from any single file.
 
 ## What these steps do not do
 
-- They do not call the provider. Provenance is upgraded to `[LIVE]` in steps 4 and 5, from an actual
-  response.
+- They do not call the provider. A fact reaches the `live` verification state in steps 4 and 5, from an
+  actual response, and carries the date it was seen.
 - It does not resolve a disagreement between two sources by picking one. Two sources that contradict
   each other are **unresolved**, recorded as such, until a third settles it — a search summary claiming
   a change the changelog does not contain is not a finding.
