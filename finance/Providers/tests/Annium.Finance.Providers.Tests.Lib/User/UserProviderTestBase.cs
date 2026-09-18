@@ -96,7 +96,7 @@ public abstract class UserProviderTestBase : ProvidersTestBase
     }
 
     /// <summary>
-    /// Loads the configured symbol's orders since <see cref="GetSince"/> and asserts the call succeeded.
+    /// Loads the configured symbol's orders across several paging windows and asserts the call succeeded.
     /// </summary>
     /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -132,7 +132,7 @@ public abstract class UserProviderTestBase : ProvidersTestBase
     }
 
     /// <summary>
-    /// Loads the configured symbol's trades since <see cref="GetSince"/> and asserts the call succeeded.
+    /// Loads the configured symbol's trades across several paging windows and asserts the call succeeded.
     /// </summary>
     /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -171,6 +171,11 @@ public abstract class UserProviderTestBase : ProvidersTestBase
     {
         var now = Get<ITimeProvider>().Now;
 
-        return (now - Duration.FromDays(1)).ToUnixTimeMilliseconds();
+        // twenty days, not one. A provider pages history in seven-day windows, so a single day fits inside
+        // one window and the loop runs once: the test then claimed to exercise paging and exercised nothing
+        // but a single request. Twenty days spans three windows, which is what the offline test drives too -
+        // and what this one adds is that the exchange accepts them, three in a row, rather than refusing a
+        // start time or a span we composed ourselves
+        return (now - Duration.FromDays(20)).ToUnixTimeMilliseconds();
     }
 }

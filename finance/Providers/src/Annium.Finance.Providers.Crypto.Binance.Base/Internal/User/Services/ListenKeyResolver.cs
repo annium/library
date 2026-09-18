@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.User.Operations;
+using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.HttpExtensions;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.User.HttpExtensions;
@@ -41,6 +42,15 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
     /// <summary>The service used to sign the listen key request.</summary>
     private readonly ISignatureService _signatureService;
 
+    /// <summary>The limiter this resolver's requests are counted against.</summary>
+    /// <remarks>
+    /// The keep-alive is cheap and easy to forget, and it was: this request went out through no limiter at
+    /// all, so its weight was spent and counted nowhere. That is harmless while the key is healthy and
+    /// exactly wrong when it is not - a failing resolver retries on the fetch interval, which is the moment
+    /// the account can least afford uncounted traffic.
+    /// </remarks>
+    private readonly IRateLimiter _rateLimiter;
+
     /// <summary>The reporter used to publish connection status changes.</summary>
     private readonly IStatusReporter _statusReporter;
 
@@ -58,6 +68,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
     /// <param name="endpoint">The relative path of the listen key endpoint.</param>
     /// <param name="httpRequestFactory">The factory used to build listen key HTTP requests.</param>
     /// <param name="signatureService">The service used to sign the listen key request.</param>
+    /// <param name="rateLimiter">The limiter this resolver's requests are counted against.</param>
     /// <param name="statusReporter">The reporter used to publish connection status changes.</param>
     /// <param name="logger">The logger to trace listen key activity with.</param>
     public ListenKeyResolver(
@@ -65,6 +76,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
         string endpoint,
         IHttpRequestFactory httpRequestFactory,
         ISignatureService signatureService,
+        IRateLimiter rateLimiter,
         IStatusReporter statusReporter,
         ILogger logger
     )
@@ -74,6 +86,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
         _endpoint = endpoint;
         _httpRequestFactory = httpRequestFactory;
         _signatureService = signatureService;
+        _rateLimiter = rateLimiter;
 
         _statusReporter = statusReporter;
         _statusReporter.Bind(this);
@@ -131,6 +144,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
                 .New(_config.HttpApi)
                 .Post(_endpoint)
                 .Key(_signatureService)
+                .WithRateDelay1M(_rateLimiter)
                 .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
                 .AsUserResultAsync<ListenKey>();
 

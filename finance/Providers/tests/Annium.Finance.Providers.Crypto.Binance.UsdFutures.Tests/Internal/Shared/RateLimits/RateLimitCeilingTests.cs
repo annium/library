@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Tests.Lib;
@@ -61,4 +62,50 @@ public class RateLimitCeilingTests : ProvidersTestBase
         limiter.UsedWeight(WaterMark);
         limiter.CanExecute().IsFalse($"allowed at {WaterMark}, which is the water mark itself");
     }
+
+    /// <summary>
+    /// The registered decay lowers used weight by 300 every 3 seconds, and nothing observed that before.
+    /// </summary>
+    /// <remarks>
+    /// The two numbers are registered beside the ceiling and were pinned by nothing: the decay test in the
+    /// core suite builds its own limiter with its own values, so it pins the mechanism and not these. A rate
+    /// too small leaves the connector throttled long after the exchange has forgiven it; too large and it
+    /// resumes while the exchange still counts the weight - which is how an account earns a ban from code
+    /// that believes it is being careful.
+    ///
+    /// Written as two observations that differ only in how far above the water mark they start, because a
+    /// single one cannot tell 300 from any larger number. The first drops under the mark in one tick; the
+    /// second cannot, and needs a second tick.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = 60_000)]
+    public async Task Decay_LowersTheRegisteredAmountOnTheRegisteredInterval()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        var limiter = Get<IRateLimiter>();
+
+        // act - 250 above the mark: one decay of 300 takes it under
+        limiter.UsedWeight(WaterMark + 250);
+        limiter.CanExecute().IsFalse($"allowed at {WaterMark + 250}, above the water mark");
+
+        // assert
+        await Expect.ToAsync(
+            () => limiter.CanExecute().IsTrue("still refused after a decay that should have cleared it"),
+            20_000
+        );
+
+        // act - 350 above the mark: one decay of 300 leaves it at 50 above, so it stays refused
+        limiter.UsedWeight(WaterMark + 350);
+
+        // assert - a decay of 400 or more would have cleared it here, and this is what tells them apart
+        await Task.Delay(DecayInterval + DecayInterval / 2, ct);
+        limiter.CanExecute().IsFalse("cleared after one decay, so the step is larger than the registered 300");
+
+        // and the next decay does clear it
+        await Expect.ToAsync(() => limiter.CanExecute().IsTrue("still refused after a second decay"), 20_000);
+    }
+
+    /// <summary>The decay interval the venue registers, in milliseconds.</summary>
+    private const int DecayInterval = 3_000;
 }

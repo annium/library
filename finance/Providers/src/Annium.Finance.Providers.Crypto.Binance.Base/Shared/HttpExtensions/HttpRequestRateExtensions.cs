@@ -54,7 +54,8 @@ public static partial class HttpRequestRateExtensions
             // a provider that has stopped answering on purpose says for how long. Weight accounting cannot
             // see that - a ban answers without the header weight is read from - so without this every caller
             // rediscovers the ban with a request of its own, and those requests are what it gets extended for
-            if (response.StatusCode is HttpStatusCode.TooManyRequests or (HttpStatusCode)418)
+            var isRefusal = response.StatusCode is HttpStatusCode.TooManyRequests or (HttpStatusCode)418;
+            if (isRefusal)
             {
                 var pause = await ReadPauseAsync(response);
                 if (pause > TimeSpan.Zero)
@@ -71,8 +72,18 @@ public static partial class HttpRequestRateExtensions
             var usedHeaderValue = usedHeader.Value?.ToArray() ?? [];
             if (usedHeaderValue.Length == 0)
             {
-                // if failed to fetch header - don't set any weight used, but log as error
-                request.Error<string>("{headerName} header not present", headerName);
+                // no weight to set either way; what differs is whether the absence is news. A refusal answers
+                // without the header - the comment above says so, and the code counts on it - so on that path
+                // an Error is noise printed at exactly the moment the log matters most. Anywhere else the
+                // absence means the limiter is running blind, which is worth saying loudly
+                if (isRefusal)
+                    request.Trace<string>(
+                        "{headerName} header not present, as a refusal does not carry it",
+                        headerName
+                    );
+                else
+                    request.Error<string>("{headerName} header not present", headerName);
+
                 return response;
             }
 
