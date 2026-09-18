@@ -24,3 +24,13 @@ check in the merge, so the reader knows what was and was not verified: `just bui
 and, for anything on the backtest path, a run of **both** configs compared against the recorded reference
 in the umbrella's `kb/plans/2026.09/2026.09.12-backtest-optimization-remaining.md`.
 
+## Language
+
+**Everything written in this repository is in English.** It is public: code, comments, XML docs, commit
+messages, skill files, and every document under `finance/kb/` — including run reports, which are the most
+tempting exception because they read like notes to oneself. Conversations with the user happen in whatever
+language they choose; what lands in the tree does not follow.
+
+The one exception is text that exists *as data*: a `ru` locale fixture, a Cyrillic string in a test of
+UTF-8 handling or of a signature over non-ASCII input. Those are inputs a test exercises, not prose, and
+translating them would remove the coverage they exist for.

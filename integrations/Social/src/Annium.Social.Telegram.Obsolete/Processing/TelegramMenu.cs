@@ -63,7 +63,7 @@ public class TelegramMenu : ITelegramMenu
         do
         {
             var choices = GetChoices(options);
-            var choice = await processor.PromptAsync("Выберите действие", choices, token, choices.First());
+            var choice = await processor.PromptAsync("Select an action", choices, token, choices.First());
             options = FilterOptions(options, choice);
         } while (options.Count > 1);
 

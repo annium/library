@@ -1,6 +1,6 @@
 ---
 name: implement-provider-contract
-description: Establish an exchange provider's wire contract in two gated steps — first derive what the code currently assumes, then collect the provider's actual API facts and compute the drift between them. Step two must be complete before anything is built on it. This is the drift check. Use as steps 1 and 2 of implement-provider, or standalone when the user says "сверь контракт", "проверь дрейф API", "check the provider contract", or when an exchange test fails for a reason that might not be our defect.
+description: Establish an exchange provider's wire contract in two gated steps — first derive what the code currently assumes, then collect the provider's actual API facts and compute the drift between them. Step two must be complete before anything is built on it. This is the drift check. Use as steps 1 and 2 of implement-provider, or standalone when the user says "check the provider contract", "check the API for drift", or asks to reconcile a provider against the exchange documentation - in any language - or when an exchange test fails for a reason that might not be our defect.
 user-invocable: true
 ---
 

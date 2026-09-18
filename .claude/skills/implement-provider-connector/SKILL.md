@@ -1,6 +1,6 @@
 ---
 name: implement-provider-connector
-description: Step 5 of implement-provider — the connector: streams, the order lifecycle, registration and configuration, ending in live validation that places real orders on a real account. Runs in gated stages, each approved separately. Use as step 5 of implement-provider, or standalone when the user says "доведи коннектор <exchange>", "ступень 5", "implement the <exchange> connector", or asks for the streams or the order lifecycle to be finished.
+description: Step 5 of implement-provider — the connector: streams, the order lifecycle, registration and configuration, ending in live validation that places real orders on a real account. Runs in gated stages, each approved separately. Use as step 5 of implement-provider, or standalone when the user says "implement the <exchange> connector", "finish the <exchange> connector", "step 5", or asks for the streams or the order lifecycle to be finished - in any language.
 user-invocable: true
 ---
 

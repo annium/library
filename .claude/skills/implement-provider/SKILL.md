@@ -1,6 +1,6 @@
 ---
 name: implement-provider
-description: Drive an exchange provider module to a target state, step by step — derive what the code assumes, collect the provider's actual API facts and the drift between them, then wire types, provider and connector, each with its tests and its own live validation — assessing every step against the contract, remediating only the drift, and stopping at a human gate between steps. Use when onboarding a new exchange, when reconciling an existing one after the exchange changed its API, when the user says "реализуй провайдера <exchange>", "сверь провайдера с документацией", "implement the <exchange> provider", "check the provider for drift", or when an exchange test fails for a reason that might not be our defect.
+description: Drive an exchange provider module to a target state, step by step — derive what the code assumes, collect the provider's actual API facts and the drift between them, then wire types, provider and connector, each with its tests and its own live validation — assessing every step against the contract, remediating only the drift, and stopping at a human gate between steps. Use when onboarding a new exchange, when reconciling an existing one after the exchange changed its API, when the user says "implement the <exchange> provider", "check the provider for drift", "reconcile the provider against the docs" - in any language - or when an exchange test fails for a reason that might not be our defect.
 user-invocable: true
 ---
 

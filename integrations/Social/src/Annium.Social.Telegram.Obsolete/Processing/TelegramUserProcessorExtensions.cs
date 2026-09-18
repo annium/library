@@ -8,6 +8,12 @@ namespace Annium.Social.Telegram.Obsolete.Processing;
 
 public static class TelegramUserProcessorExtensions
 {
+    /// <summary>The affirmative answer offered by <see cref="ConfirmAsync" />.</summary>
+    private const string Yes = "Yes";
+
+    /// <summary>The negative answer offered by <see cref="ConfirmAsync" />.</summary>
+    private const string No = "No";
+
     public static async Task<bool> ConfirmAsync(
         this ITelegramUserProcessor processor,
         string question,
@@ -17,12 +23,12 @@ public static class TelegramUserProcessorExtensions
     {
         var choice = await processor.PromptAsync(
             question,
-            ["Да", "Нет"],
+            [Yes, No],
             token,
-            defaultValue.HasValue ? (defaultValue.Value ? "Да" : "Нет") : string.Empty
+            defaultValue.HasValue ? (defaultValue.Value ? Yes : No) : string.Empty
         );
 
-        return choice == "Да";
+        return choice == Yes;
     }
 
     public static async Task<T> PromptAsync<T>(
