@@ -68,8 +68,8 @@ compared to nothing — and whatever the code's own tests already defend on the 
 `checked_against: never`. This is an inventory, not yet a baseline.
 
 The two axes are the parent skill's; a manifest written with `[UNVERIFIED]` markers instead would be
-speaking a vocabulary this one replaced, and the three such markers still left in binance's manifest are
-leftovers, not examples.
+speaking a vocabulary this one replaced. Where such markers survive in an existing manifest they are
+leftovers, not examples - re-express each on the two axes as you meet it.
 
 **On every later run**, verify the manifest still describes *this* code before comparing it to anything
 external:
@@ -141,8 +141,8 @@ about things we do not use, and volume nobody diffs is volume that hides the dif
 
 **A `200` with a body is not proof you got the page you asked for.** A documentation site backed by a
 single-page app answers an unknown path with its HTML shell, status `200`, and a plausible-looking
-body. On the first run against Binance's futures docs, five different endpoint paths returned
-**byte-identical** responses of exactly 65475 bytes before anyone noticed.
+body. On the first run through this skill, five different endpoint paths came back **byte-identical** -
+the same 65 KB shell each time - before anyone noticed.
 
 Two checks, both cheap, and neither optional:
 
@@ -156,9 +156,9 @@ is worse than one openly skipped, because it will be counted as verified.
 
 #### Follow the links out of the changelog
 
-**The changelog is not the documentation.** On the first Binance run, the single most consequential
-finding — a WebSocket migration whose deadline had already passed — was not a changelog entry at all.
-It lived on its own page, reachable only through one link inside the changelog.
+**The changelog is not the documentation.** On the first run through this skill, the single most
+consequential finding - a WebSocket migration whose deadline had already passed - was not a changelog
+entry at all. It lived on its own page, reachable only through one link inside the changelog.
 
 So: read the changelog, then extract its internal links and fetch those too. A vendor announcing
 something large tends to write it up separately and link to it, which is exactly the shape a
@@ -189,10 +189,10 @@ websocket route was correct in both the base and the path and wrong once joined.
 
 **Every date in the documentation is read against today's date.** An announced removal is only
 `deprecated` while its date is ahead of us. Once that date has passed the entry is `changed`, and
-almost certainly blocking: the thing was withdrawn and we did not move. The first Binance run found a
-WebSocket migration deadline four months in the past, still described in the notice in the future
-tense, because the notice was written before it. Documentation states dates; only the reader supplies
-the present.
+almost certainly blocking: the thing was withdrawn and we did not move. The first run through this skill
+found a migration deadline four months in the past, still described in the notice in the future tense,
+because the notice was written before it. Documentation states dates; only the reader supplies the
+present.
 
 Each outcome sets the fact's **documentation** state. Do not touch its verification state here: this
 step compares us against the provider, and nothing it learns changes what our tests defend.

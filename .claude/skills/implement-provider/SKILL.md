@@ -497,8 +497,8 @@ skill has carried — recipes renamed, a gate that stopped skipping, a marker vo
 there that way, written once from a finished run and never touched again.
 
 What makes the order load-bearing here rather than a preference: **these skills are how the next exchange
-gets implemented.** Binance spot and whatever follows are ports of this document, not of this code. A
-skill that lags its own provider by one run is a skill that teaches the next provider the previous
+gets implemented.** The next venue, and the one after it, are ports of this document rather than of this
+code. A skill that lags its own provider by one run is a skill that teaches the next provider the previous
 provider's mistakes.
 
 The first draft being incomplete is expected and is not an argument for writing it later. Draft it from
