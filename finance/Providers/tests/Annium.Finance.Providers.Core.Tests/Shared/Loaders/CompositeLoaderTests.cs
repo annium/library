@@ -24,6 +24,16 @@ namespace Annium.Finance.Providers.Core.Tests.Shared.Loaders;
 public class CompositeLoaderTests : TestBase
 {
     /// <summary>
+    /// A fetch interval long enough that the loader's own retry never fires inside a test, in milliseconds.
+    /// </summary>
+    /// <remarks>
+    /// For tests that assert an exact number of fetches. The first fetch of a <c>Start</c> is immediate
+    /// whatever this is, so nothing waits on it; what it removes is the retry the loader is entitled to
+    /// make until a fetch succeeds.
+    /// </remarks>
+    private const int OneShotInterval = 60_000;
+
+    /// <summary>
     /// The monitor under test. Production creates one per connector rather than registering it, so a test
     /// that needs one builds it the same way.
     /// </summary>
@@ -241,16 +251,6 @@ public class CompositeLoaderTests : TestBase
     /// connecting, connected, disconnected status sequence.
     /// </summary>
     /// <returns>A task representing the asynchronous test.</returns>
-    /// <summary>
-    /// A fetch interval long enough that the loader's own retry never fires inside a test, in milliseconds.
-    /// </summary>
-    /// <remarks>
-    /// For tests that assert an exact number of fetches. The first fetch of a <c>Start</c> is immediate
-    /// whatever this is, so nothing waits on it; what it removes is the retry the loader is entitled to
-    /// make until a fetch succeeds.
-    /// </remarks>
-    private const int OneShotInterval = 60_000;
-
     [Fact]
     public async Task StopPreventsFurtherRequests()
     {

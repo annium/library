@@ -13,6 +13,12 @@ internal static class Endpoints
     /// <summary>Gets the base URL of the spot websocket API.</summary>
     public static Uri WsApi { get; } = new("wss://stream.binance.com");
 
+    /// <summary>The relative path appended to <see cref="WsApi"/> when opening a market data connection.</summary>
+    public const string MarketWsUriPath = "/stream";
+
+    /// <summary>The relative path appended to <see cref="WsApi"/>, followed by the listen key, when opening a user data connection.</summary>
+    public const string UserWsUriPath = "/ws/";
+
     /// <summary>
     /// The server time path, appended to <see cref="HttpApi"/>.
     /// </summary>
@@ -21,11 +27,5 @@ internal static class Endpoints
     /// thing: the contract manifest recorded the oddity as a divergence and never checked it against the
     /// documented endpoint list, so a curiosity stood in for a verified fact until a live run failed on it.
     /// </remarks>
-    /// <summary>The relative path appended to <see cref="WsApi"/> when opening a market data connection.</summary>
-    public const string MarketWsUriPath = "/stream";
-
-    /// <summary>The relative path appended to <see cref="WsApi"/>, followed by the listen key, when opening a user data connection.</summary>
-    public const string UserWsUriPath = "/ws/";
-
     public const string ServerTimeUriPath = "/api/v3/time";
 }
