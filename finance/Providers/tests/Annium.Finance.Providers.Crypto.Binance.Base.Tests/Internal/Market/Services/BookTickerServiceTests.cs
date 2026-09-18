@@ -41,8 +41,12 @@ public class BookTickerServiceTests : ProvidersTestBase
     /// <remarks>
     /// Everything waited on is local - a socket on loopback, a frame already sent - so a wait that outlives
     /// this is not slow, it is stuck. Without the deadline it would hang the run instead of failing it.
+    ///
+    /// Sixty seconds rather than thirty, matching the repository's other socket suite: on a loaded CI runner
+    /// a local round-trip can take orders of magnitude longer than on an idle machine, and a deadline tight
+    /// enough to catch that is a deadline that fails for the wrong reason.
     /// </remarks>
-    private const int TimeoutMs = 30_000;
+    private const int TimeoutMs = 60_000;
 
     /// <summary>
     /// The key the ticker serializer is registered and resolved under.

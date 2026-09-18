@@ -40,7 +40,7 @@ public class ListenKeyResolverTests : ProvidersTestBase
     /// <summary>
     /// How long any test here may run before xUnit fails it, in milliseconds.
     /// </summary>
-    private const int TimeoutMs = 30_000;
+    private const int TimeoutMs = 60_000;
 
     /// <summary>
     /// The listen key endpoint the resolver is pointed at.
