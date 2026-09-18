@@ -427,7 +427,7 @@ documented caps. Failure paths return something the caller can act on rather tha
 Tests green offline; the read-only live stages pass. Every test this step writes carries a deadline and
 threads the token — see the section above, and check it by enumeration rather than by memory.
 
-### Step 5 — connector: streams and the order lifecycle ⬜ no child skill yet
+### Step 5 — connector: streams and the order lifecycle ✅ `implement-provider-connector`
 
 **Target.** Subscriptions, the sync cycle, status reporting, place / modify / cancel — with their
 tests, and with their registration and configuration done here as they are built.
