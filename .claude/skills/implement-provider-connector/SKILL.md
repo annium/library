@@ -227,6 +227,25 @@ trade.
 - Tests green; each live stage passed and approved in turn.
 - `status.md` says where the step stands, and the run report says how it went.
 
+## When the exchange refuses the contract
+
+It happened on the first run of 5f, and it is the shape to expect: a stage fails not because the connector
+is wrong but because the venue no longer accepts what the manifest records as `confirmed`. Binance refused
+a `STOP_MARKET` on `POST /fapi/v1/order` with *"Please use the Algo Order API endpoints instead"*, and the
+whole trigger-order family went with it.
+
+What to do, in order:
+
+1. **Check the account first.** A stage that failed part-way may have left a position open. Verify it -
+   a throwaway read-only connection reporting positions and orders is enough - rather than trusting the
+   fixture's teardown to have run.
+2. **Record it where the contract lives**, with the refusal quoted and dated: the documentation axis moves
+   to `contested`, the verification axis to `live` *negatively* - what is observed is the refusal.
+3. **Hand it back to steps 1-2 and stop.** Which endpoint accepts it, what it takes and what it answers is
+   a documentation question. Guessing an API from one error message is how a manifest fills with fiction.
+4. **Say what the stage still proved.** The stage that found this had already opened and closed a real
+   position; that half is validated and should be recorded as such, not lost in the failure.
+
 ## What this step does not do
 
 - It does not decide whether a dead venue path is revived. If a provider's user connector is a stub —
