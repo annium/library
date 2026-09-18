@@ -293,6 +293,44 @@ public class BookTickerServiceTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// A control frame that cannot go out is reported on the connector's error channel.
+    /// </summary>
+    /// <remarks>
+    /// The send is fire-and-forget by necessity - subscribing is synchronous, and on reconnect it runs on
+    /// the socket's thread - so the error channel is the only place its failure can surface. Dropped, a
+    /// subscribe that never reached the exchange left a connector that looked subscribed and delivered
+    /// nothing.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TimeoutMs)]
+    public async Task Subscribe_FailedSendReachesTheErrorChannel()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        var server = this.RunWebSocketServer();
+        var monitor = new StatusMonitor(Get<ILogger>());
+        using var service = CreateService(server, monitor);
+        await server.WaitConnectionAsync(ct);
+        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+
+        var errors = Channel.CreateUnbounded<ConnectorError>();
+        monitor.OnError += error => errors.Writer.TryWrite(error);
+
+        // the server goes away for good, so the client cannot reconnect and the send has nowhere to go -
+        // dropping one connection would not do, since the client reconnects immediately and the send
+        // would race the new socket
+        await server.DisposeAsync();
+        await WaitStatusAsync(monitor, ConnectorStatus.Connecting, ct);
+
+        // act
+        service.Subscribe(["BTCUSDT"]);
+
+        // assert
+        var error = await errors.Reader.ReadAsync(ct);
+        error.Message.Contains("SUBSCRIBE").IsTrue();
+    }
+
+    /// <summary>
     /// Builds a service pointed at the given local server.
     /// </summary>
     /// <param name="server">The local server the service connects to.</param>

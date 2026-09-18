@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Crypto.Binance.Base.Market;
@@ -40,6 +41,14 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
     /// <summary>The reporter used to publish connection status changes.</summary>
     private readonly IStatusReporter _statusReporter;
 
+    /// <summary>Whether teardown has begun.</summary>
+    /// <remarks>
+    /// Read by the send path, which reports a failed control frame as an error - except during teardown,
+    /// where the socket is gone by design and the reporter is unbound, so reporting would throw on a
+    /// background task rather than tell anyone anything.
+    /// </remarks>
+    private volatile bool _isDisposed;
+
     /// <summary>Initializes a new instance of the <see cref="WebSocketService"/> class and starts connecting to the market WebSocket API.</summary>
     /// <param name="config">The market configuration providing the WebSocket API endpoint.</param>
     /// <param name="statusReporter">The reporter used to publish connection status changes.</param>
@@ -68,6 +77,8 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
     public void Dispose()
     {
         this.Trace("start");
+
+        _isDisposed = true;
 
         // stop listening before unbinding, not after: a close or an error already in flight lands on
         // these handlers, and reporting against a reporter that has been unbound throws. Handlers left
@@ -111,8 +122,7 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
         if (LogConfig.IsEnabled(LogLevel.Trace))
             this.Trace<string>("subscribe to {topics}", targets.Join(","));
 
-        var request = new Request { Method = "SUBSCRIBE", Params = targets };
-        _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
+        Send("SUBSCRIBE", targets);
 
         this.Trace("done");
     }
@@ -136,10 +146,57 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
         if (LogConfig.IsEnabled(LogLevel.Trace))
             this.Trace<string>("unsubscribe from {topics}", targets.Join(","));
 
-        var request = new Request { Method = "UNSUBSCRIBE", Params = targets };
-        _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
+        Send("UNSUBSCRIBE", targets);
 
         this.Trace("done");
+    }
+
+    /// <summary>Sends a control request and reports it on the error channel if it did not go out.</summary>
+    /// <remarks>
+    /// The send is not awaited by the caller - subscribing is a synchronous call on a hot path - but its
+    /// result is observed. Dropped, a subscribe that never reached the exchange left a connector that
+    /// looked subscribed and delivered nothing, which is indistinguishable from a quiet symbol.
+    /// </remarks>
+    /// <param name="method">The control method being sent, named in the error if it fails.</param>
+    /// <param name="topics">The topic names the request applies to.</param>
+    private void Send(string method, IReadOnlyCollection<string> topics)
+    {
+        var request = new Request { Method = method, Params = topics };
+        var payload = JsonSerializer.SerializeToUtf8Bytes(request);
+
+        // not awaited: subscribing is a synchronous call, and on reconnect this runs on the socket's own
+        // thread, which must not be blocked waiting for a frame to go out. The result is observed inside
+        _ = SendAsync(method, payload);
+    }
+
+    /// <summary>Awaits a control request's send and reports a failure on the error channel.</summary>
+    /// <param name="method">The control method being sent, named in the error if it fails.</param>
+    /// <param name="payload">The serialized request.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private async Task SendAsync(string method, ReadOnlyMemory<byte> payload)
+    {
+        try
+        {
+            var status = await _socket.SendTextAsync(payload);
+            if (status is WebSocketSendStatus.Ok)
+                return;
+
+            // a teardown makes every in-flight send fail, by design, and the reporter is already unbound
+            if (_isDisposed)
+            {
+                this.Trace("skip {method} send failure: {status} - disposed", method, status);
+                return;
+            }
+
+            this.Trace("{method} send failed: {status}", method, status);
+            _statusReporter.Error(new ConnectorError($"failed to send {method}: {status}"));
+        }
+        catch (Exception ex)
+        {
+            // nothing awaits this task, so an exception escaping it is lost entirely - including the
+            // InvalidOperationException a report against an unbound reporter throws if teardown wins a race
+            this.Error(ex);
+        }
     }
 
     /// <summary>Handles a raw text message received over the WebSocket, deserializing and dispatching it to derived-class subscribers.</summary>
@@ -160,8 +217,7 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
             if (LogConfig.IsEnabled(LogLevel.Trace))
                 this.Trace<string>("subscribe to {topics}", targets.Join(","));
 
-            var request = new Request { Method = "SUBSCRIBE", Params = targets };
-            _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
+            Send("SUBSCRIBE", targets);
         }
         else
             this.Trace("skip - no topics to subscribe");

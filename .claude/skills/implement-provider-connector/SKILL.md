@@ -121,9 +121,13 @@ shape in every venue's stream service and check it before writing the first test
 
 Two more things to look at rather than assume, both visible in the source at the time of this draft:
 
-- the control-frame sends are **fire-and-forget** (`SendTextAsync(...).GetAwaiter()`, result never
-  observed). A subscribe that fails is invisible. Decide whether that is the intended contract, and pin
-  whichever answer you reach.
+- the control-frame sends were **fire-and-forget** (`SendTextAsync(...).GetAwaiter()`, result never
+  observed), so a subscribe that failed to go out was invisible — and a connector subscribed to nothing
+  looks exactly like one whose symbol is quiet. **Decided: a control frame that does not send is reported
+  on the error channel**, because that channel is the only place a consumer can see it. The one exception
+  is teardown, where a failed send is the expected consequence of the socket being gone — and where
+  reporting is not merely noisy but throws, the reporter having been unbound. Whatever venue you are on,
+  check the send's result *and* check what the teardown path does with it.
 - the listen-key resolver **switches timer cadence** on the first confirmed key, and on a *changed* key
   it clears the key and raises reset without switching back. Whether that is right is a question for the
   contract, not for taste.
