@@ -402,6 +402,23 @@ was halted.
 Spot `Spot/.../OrderTypes.cs:23-40` also folds `LIMIT_MAKER` → `Limit` on read; futures
 `UsdFutures/.../OrderTypes.cs:22-41` folds `TRAILING_STOP_MARKET` → `StopLossMarket`.
 
+> **[CONTESTED] — the four futures trigger types are refused on the order endpoint, observed live
+> 2026-09-18.** Placing a real `STOP_MARKET` through `POST /fapi/v1/order` on a live account answered:
+>
+> > `Order type not supported for this endpoint. Please use the Algo Order API endpoints instead.`
+>
+> Documentation axis for the four futures trigger rows above (`STOP_MARKET`, `TAKE_PROFIT_MARKET`,
+> `STOP`, `TAKE_PROFIT`) moves from `confirmed` to **`contested`**: the mapping is what the snapshotted
+> documentation says, and the exchange refuses it. Verification moves to **`live`, negatively dated
+> 2026-09-18** — the refusal is what is now observed, not the placement.
+>
+> The name mapping itself is not what is contested; the **endpoint** is. Which endpoint accepts them, what
+> it takes and what it answers is a documentation question, and belongs to steps 1-2 rather than to the
+> step that found it. Nothing here is amended in code until that is re-derived: guessing an API from one
+> error message is how a manifest fills with fiction.
+>
+> Spot is not implicated — it was not exercised, and its four spot names are untouched by this.
+
 **Margin type** (futures) — `"isolated"` / `"cross"`, lowercase, `UsdFutures/.../MarginTypes.cs:24-25`.
 Note the same concept arrives as a **boolean** `isolated` over REST and as the string `mt` over the
 stream — `GetAccountResponsePositionConverter.cs:78` vs `BalanceAndPositionUpdateEventPositionConverter.cs:77`.
