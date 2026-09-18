@@ -82,7 +82,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
 
         // act
         service.Subscribe(["BTCUSDT", "ETHUSDT"]);
@@ -106,7 +106,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
         service.Subscribe(["BTCUSDT"]);
         await ReadRequestAsync(connection, ct);
 
@@ -132,7 +132,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
         service.Subscribe(["BTCUSDT"]);
         await ReadRequestAsync(connection, ct);
 
@@ -164,7 +164,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
         service.Subscribe(["BTCUSDT", "ETHUSDT"]);
         await ReadRequestAsync(connection, ct);
 
@@ -191,7 +191,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
         var tickers = Listen(service);
 
         // act
@@ -215,7 +215,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
         var tickers = Listen(service);
 
         // act
@@ -243,10 +243,10 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
 
         // act
-        var connecting = WaitStatusAsync(monitor, ConnectorStatus.Connecting, ct);
+        var connecting = monitor.WaitStatusAsync(ConnectorStatus.Connecting, ct);
         connection.Drop();
 
         // assert
@@ -278,7 +278,7 @@ public class BookTickerServiceTests : ProvidersTestBase
 
         var service = CreateService(server, monitor);
         var connection = await server.WaitConnectionAsync(ct);
-        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
 
         // act
         // VSTHRD103: the service's teardown is synchronous - the warning fires only because a DisposeAsync
@@ -311,7 +311,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         var monitor = new StatusMonitor(Get<ILogger>());
         using var service = CreateService(server, monitor);
         await server.WaitConnectionAsync(ct);
-        await WaitStatusAsync(monitor, ConnectorStatus.Connected, ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
 
         var errors = Channel.CreateUnbounded<ConnectorError>();
         monitor.OnError += error => errors.Writer.TryWrite(error);
@@ -320,7 +320,7 @@ public class BookTickerServiceTests : ProvidersTestBase
         // dropping one connection would not do, since the client reconnects immediately and the send
         // would race the new socket
         await server.DisposeAsync();
-        await WaitStatusAsync(monitor, ConnectorStatus.Connecting, ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connecting, ct);
 
         // act
         service.Subscribe(["BTCUSDT"]);
@@ -352,46 +352,6 @@ public class BookTickerServiceTests : ProvidersTestBase
             monitor.CreateReporter(),
             Get<ILogger>()
         );
-    }
-
-    /// <summary>
-    /// Waits until the service reports the given status.
-    /// </summary>
-    /// <remarks>
-    /// The server accepting the socket is not the moment to act on: the client finishes its handshake after
-    /// that, and the service re-sends its tracked topics when it does. A subscribe issued in between goes
-    /// out twice - once by the caller and once by the reconnect - and the connected signal is raised after
-    /// that re-send precisely so that waiting for it removes the window.
-    /// </remarks>
-    /// <param name="monitor">The monitor the service reports into.</param>
-    /// <param name="target">The status to wait for.</param>
-    /// <param name="ct">The test's cancellation token.</param>
-    /// <returns>A task that completes once the service reports the status.</returns>
-    private static async Task WaitStatusAsync(StatusMonitor monitor, ConnectorStatus target, CancellationToken ct)
-    {
-        var reached = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        void Handle(ConnectorStatus status)
-        {
-            if (status == target)
-                reached.TrySetResult();
-        }
-
-        // subscribed before the current status is read, and the method is called before the act rather
-        // than after it: a status the service passes through - connecting, on its way back to connected
-        // after a drop - is gone by the time anything polls for it
-        monitor.OnStatusChanged += Handle;
-        try
-        {
-            if (monitor.Status == target)
-                reached.TrySetResult();
-
-            await reached.Task.WaitAsync(ct);
-        }
-        finally
-        {
-            monitor.OnStatusChanged -= Handle;
-        }
     }
 
     /// <summary>
