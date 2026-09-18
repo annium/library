@@ -24,6 +24,16 @@ namespace Annium.Finance.Providers.Core.Tests.Shared.Loaders;
 public class CompositeLoaderTests : TestBase
 {
     /// <summary>
+    /// A fetch interval long enough that the loader's own retry never fires inside a test, in milliseconds.
+    /// </summary>
+    /// <remarks>
+    /// For tests that assert an exact number of fetches. The first fetch of a <c>Start</c> is immediate
+    /// whatever this is, so nothing waits on it; what it removes is the retry the loader is entitled to
+    /// make until a fetch succeeds.
+    /// </remarks>
+    private const int OneShotInterval = 60_000;
+
+    /// <summary>
     /// The monitor under test. Production creates one per connector rather than registering it, so a test
     /// that needs one builds it the same way.
     /// </summary>
@@ -244,7 +254,11 @@ public class CompositeLoaderTests : TestBase
     [Fact]
     public async Task StopPreventsFurtherRequests()
     {
-        var cfg = new CompositeLoaderConfig(1, 2, 5, 0, 0);
+        // the fast interval is the retry period, not a delay before the first fetch: Start fetches at once
+        // and then re-fetches on it until a fetch succeeds, and the timer is only stopped once one has. At
+        // 1ms the retry fired before the success was observed, and the count below read 2 - a flake in
+        // Release that says nothing about Stop. Long enough that no retry can land inside this test
+        var cfg = new CompositeLoaderConfig(OneShotInterval, 2, OneShotInterval, 0, 0);
         var attempts = 0;
         var log = Get<TestLog<int>>();
         var loader = Provider.CreateCompositeLoader(
@@ -285,8 +299,10 @@ public class CompositeLoaderTests : TestBase
     [Fact]
     public async Task StoppedLoader_StartsAgain()
     {
-        // arrange - neither timer runs, so every fetch is one Start asked for
-        var cfg = new CompositeLoaderConfig(1, 2, 5, 0, 0);
+        // arrange - neither timer runs, so every fetch is one Start asked for. That holds only if the fast
+        // interval cannot retry inside the test: it is the retry period, and at 1ms it could raise the count
+        // on its own, which is what the exact assertions below would then be reading
+        var cfg = new CompositeLoaderConfig(OneShotInterval, 2, OneShotInterval, 0, 0);
         var attempts = 0;
         var loader = Provider.CreateCompositeLoader(
             cfg,

@@ -200,6 +200,12 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
 
         OnListenKeyReset();
 
+        // and back to fetch cadence, as the failure branch below does: the reset has just closed the
+        // stream, and this state is the one before the first key rather than a keep-alive. Left in
+        // confirm mode, the replacement key was not asked for until a keep-alive period had passed -
+        // half an hour on Binance - with nothing connected in the meantime
+        _timer.Change(_config.ListenKey.FetchInterval, _config.ListenKey.FetchInterval);
+
         this.Trace("done");
     }
 

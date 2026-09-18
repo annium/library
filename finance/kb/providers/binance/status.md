@@ -16,8 +16,9 @@ created: 2026-09-01
 - docs revision: spot `a0057759f1cbcab812af44b75309d72866a57561`; futures fetched 2026-09-01 (no
   repository exists, so the date is the only anchor)
 - working branch: `main` where converged
-- last reconciled: 2026-09-17 — step 3 assessed and converged; step 4 re-validated live on 09-16, now
-  with credentials; step 5 not started
+- last reconciled: 2026-09-18 — step 5 under way on `skill/provider-connector`: 5a through 5d done, six
+  defects found and fixed (four in the stream services, one leak in the futures connector factory, one
+  endpoint drift across both venues)
 
 ## Convergence
 
@@ -27,7 +28,7 @@ created: 2026-09-01
 | 2 — collect facts, compute drift | **converged, with two accepted gaps** | all 13 futures pages and 7 spot files snapshotted; request side closed at tier 1 from the official Postman collections; every category given a documentation outcome | **accepted, not open**: the nested user-data-stream payloads (~20 short field names) are `unretrievable` — no available technique reaches them, so waiting changes nothing; and the `avgPrice` question is `contested`, settleable only by a live order. Both are recorded against their entries rather than left as unfinished work |
 | 3 — wire types and serialization | **converged** | assessed 2026-09-17 against the manifest by a fresh verifier: field coverage holds in both directions (every documented field read, no field read that is not documented), all five enumeration tables map both ways, the kline indices are pinned by six distinct values. Two branch gaps and one defect remediated the same day — see the run report | none |
 | 4 — provider, read paths (+ registration, config, read-only live validation) | **converged** | every read path on both venues driven offline, failure paths included; endpoints pinned; **live read block green on 2026-09-16: 20 tests, 14 passed, 6 skipped, none failed** — and this time with credentials present, so the two signature tests ran rather than skipping | none. The upstream defect found here — an exchange error discarded when the success type is a collection — was fixed in `Annium.Net.Http` 1.1.49 and taken up with the package bump; the test that pinned the loss now pins the reason. The six still skipped are Spot's `UserProviderTests`, marked `Not implemented`, which is about the tests and not about access |
-| 5 — connector, streams and orders (+ registration, config, trading live validation) | not-started | — | unblocked: the user stream now addresses `/private`. Still needs its own tests — `WebSocketService` and `ListenKeyResolver` have no test file at all |
+| 5 — connector, streams and orders (+ registration, config, trading live validation) | **in progress — 5a through 5d done** | the test lib gained a websocket server; the streams are pinned by 20 offline tests, the order lifecycle by 13 more, and every registration key by two. Six defects found and fixed in the process — see the [run report](2026.09/2026.09.18-step-5.md) | 5e (live read-only), 5f (live trading, staged). The two behaviours that needed a decision have one: a refused leverage change now reaches the caller, and one the exchange accepts without applying is refused by the connector itself; a limit order asked to become a market order stays refused |
 ## Queued work
 
 Open items only. Two things that used to live here are settled and their reasoning is where it belongs
@@ -43,10 +44,10 @@ manifest carries what each of them now defends; the run reports beside this file
 | `MapOperationCode` folds every negative code to `BadRequest` | an invalid key, an expired timestamp and a malformed parameter are indistinguishable to a caller, and the HTTP status — which would have told `Forbidden` from `BadRequest` — is consulted only where the error body parsed as success. The useful split is by what a caller would do differently — retry, re-sign, stop — which is a decision about the runtime rather than a mapping table |
 | decay constants `none` | the ceiling and the water-mark fraction are pinned through the number they compose to; the decay rate and interval are not |
 | three `[UNVERIFIED]` markers in the manifest | leftovers from the vocabulary this manifest replaced. Two are substantive: the rate-limit window is *assumed* to be one minute, and a one-way account is *assumed* to report one `positions[]` row per symbol with `positionSide=BOTH` — the write fixture's precondition rests on the second. Both belong to the documentation axis, so step 2 assigns them |
-| no test file at all: `WebSocketService`, `ListenKeyResolver`, `HttpRequestLogExtensions`, the filter converters | the first two carry the connection lifecycle of every stream and are step 5's work. The filter converters are covered through the exchange-info fixture, which the manifest says plainly — a missing file, not a missing fact |
+| no test file at all: `HttpRequestLogExtensions`, the filter converters | the filter converters are covered through the exchange-info fixture, which the manifest says plainly — a missing file, not a missing fact. `WebSocketService` and `ListenKeyResolver` left this list on 2026-09-18: both are pinned offline now |
 
-**Step 5 is the work, not this list.** It is unblocked and needs its own tests before anything it
-validates can be trusted.
+**Step 5 is the work, not this list.** Everything offline is done as of 2026-09-18; the live stages are
+what remains, and each is approved on its own.
 
 Step 3 was the other half of that sentence until 2026-09-17, when it was assessed and found already
 written: the code and its tests existed while this document called the step not started. That error is

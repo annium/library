@@ -15,6 +15,7 @@ using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Core.User;
 using Annium.Finance.Providers.Crypto.Binance.Base.User;
+using Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.Shared;
 using Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.User.Services;
 using Annium.Logging;
 using Annium.Net.Http;
@@ -55,7 +56,7 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
         var cancelAllOrdersRequestFactory = sp.ResolveHttpRequestFactory(CancelAllOrdersKey);
         var listenKeyResolver = sp.CreateListenKeyResolver(
             config,
-            "/fapi/v1/listenKey",
+            Endpoints.ListenKeyUriPath,
             ListenKeyKey,
             signatureService,
             monitor
@@ -80,6 +81,13 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
         // still fetching, status reporters still bound, and the keyed one still holding an entry per symbol
         disposable += ordersLoader;
         disposable += tradesLoader;
+
+        // and the same for the stream and the key it runs on, for the same reason: the connector unhooks
+        // their events and nothing disposed them, so a torn-down connector left a socket reconnecting, a
+        // keep-alive still going to the exchange, and two targets bound to a monitor that could then never
+        // read connected again. The stream goes in first, so it is torn down before the resolver it listens to
+        disposable += userStream;
+        disposable += listenKeyResolver;
 
         var rateLimiter = sp.Resolve<IRateLimiter>();
         var reporter = monitor.CreateReporter();

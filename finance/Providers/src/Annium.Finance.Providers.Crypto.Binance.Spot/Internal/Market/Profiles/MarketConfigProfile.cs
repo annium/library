@@ -26,7 +26,7 @@ internal class MarketConfigProfile : Profile
             Provider = settings.Provider,
             HttpApi = httpApi,
             WsApi = wsApi,
-            WsUriPath = "/stream",
+            WsUriPath = Endpoints.MarketWsUriPath,
         };
     }
 }

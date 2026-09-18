@@ -13,6 +13,12 @@ internal static class Endpoints
     /// <summary>Gets the base URL of the spot websocket API.</summary>
     public static Uri WsApi { get; } = new("wss://stream.binance.com");
 
+    /// <summary>The relative path appended to <see cref="WsApi"/> when opening a market data connection.</summary>
+    public const string MarketWsUriPath = "/stream";
+
+    /// <summary>The relative path appended to <see cref="WsApi"/>, followed by the listen key, when opening a user data connection.</summary>
+    public const string UserWsUriPath = "/ws/";
+
     /// <summary>
     /// The server time path, appended to <see cref="HttpApi"/>.
     /// </summary>

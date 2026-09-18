@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Crypto.Binance.Base.Market;
@@ -28,8 +29,25 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
     /// <summary>The set of topics currently subscribed to, re-sent on reconnect.</summary>
     private readonly HashSet<string> _topics = new();
 
+    /// <summary>Guards <see cref="_topics"/>.</summary>
+    /// <remarks>
+    /// The set is written from two threads that have nothing in common: the caller's, on every subscribe
+    /// and unsubscribe, and the socket's, on every reconnect. Unguarded that is a torn <see cref="HashSet{T}"/>,
+    /// and the failure it produces - a lost or duplicated topic - is indistinguishable from an exchange
+    /// that did not apply a subscription.
+    /// </remarks>
+    private readonly Lock _gate = new();
+
     /// <summary>The reporter used to publish connection status changes.</summary>
     private readonly IStatusReporter _statusReporter;
+
+    /// <summary>Whether teardown has begun.</summary>
+    /// <remarks>
+    /// Read by the send path, which reports a failed control frame as an error - except during teardown,
+    /// where the socket is gone by design and the reporter is unbound, so reporting would throw on a
+    /// background task rather than tell anyone anything.
+    /// </remarks>
+    private volatile bool _isDisposed;
 
     /// <summary>Initializes a new instance of the <see cref="WebSocketService"/> class and starts connecting to the market WebSocket API.</summary>
     /// <param name="config">The market configuration providing the WebSocket API endpoint.</param>
@@ -60,6 +78,8 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
     {
         this.Trace("start");
 
+        _isDisposed = true;
+
         // stop listening before unbinding, not after: a close or an error already in flight lands on
         // these handlers, and reporting against a reporter that has been unbound throws. Handlers left
         // attached across the unbind turned an ordinary teardown into an error in the log
@@ -89,7 +109,10 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
     {
         this.Trace("start");
 
-        var targets = new List<string>(topics.Where(topic => _topics.Add(topic)));
+        List<string> targets;
+        lock (_gate)
+            targets = [.. topics.Where(topic => _topics.Add(topic))];
+
         if (targets.Count == 0)
         {
             this.Trace("skip - no topics to subscribe");
@@ -99,8 +122,7 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
         if (LogConfig.IsEnabled(LogLevel.Trace))
             this.Trace<string>("subscribe to {topics}", targets.Join(","));
 
-        var request = new Request { Method = "SUBSCRIBE", Params = targets };
-        _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
+        Send("SUBSCRIBE", targets);
 
         this.Trace("done");
     }
@@ -111,7 +133,10 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
     {
         this.Trace("start");
 
-        var targets = new List<string>(topics.Where(topic => _topics.Remove(topic)));
+        List<string> targets;
+        lock (_gate)
+            targets = [.. topics.Where(topic => _topics.Remove(topic))];
+
         if (targets.Count == 0)
         {
             this.Trace("skip - no topics to unsubscribe");
@@ -121,35 +146,87 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
         if (LogConfig.IsEnabled(LogLevel.Trace))
             this.Trace<string>("unsubscribe from {topics}", targets.Join(","));
 
-        var request = new Request { Method = "UNSUBSCRIBE", Params = targets };
-        _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
+        Send("UNSUBSCRIBE", targets);
 
         this.Trace("done");
+    }
+
+    /// <summary>Sends a control request and reports it on the error channel if it did not go out.</summary>
+    /// <remarks>
+    /// The send is not awaited by the caller - subscribing is a synchronous call on a hot path - but its
+    /// result is observed. Dropped, a subscribe that never reached the exchange left a connector that
+    /// looked subscribed and delivered nothing, which is indistinguishable from a quiet symbol.
+    /// </remarks>
+    /// <param name="method">The control method being sent, named in the error if it fails.</param>
+    /// <param name="topics">The topic names the request applies to.</param>
+    private void Send(string method, IReadOnlyCollection<string> topics)
+    {
+        var request = new Request { Method = method, Params = topics };
+        var payload = JsonSerializer.SerializeToUtf8Bytes(request);
+
+        // not awaited: subscribing is a synchronous call, and on reconnect this runs on the socket's own
+        // thread, which must not be blocked waiting for a frame to go out. The result is observed inside
+        _ = SendAsync(method, payload);
+    }
+
+    /// <summary>Awaits a control request's send and reports a failure on the error channel.</summary>
+    /// <param name="method">The control method being sent, named in the error if it fails.</param>
+    /// <param name="payload">The serialized request.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private async Task SendAsync(string method, ReadOnlyMemory<byte> payload)
+    {
+        try
+        {
+            var status = await _socket.SendTextAsync(payload);
+            if (status is WebSocketSendStatus.Ok)
+                return;
+
+            // a teardown makes every in-flight send fail, by design, and the reporter is already unbound
+            if (_isDisposed)
+            {
+                this.Trace("skip {method} send failure: {status} - disposed", method, status);
+                return;
+            }
+
+            this.Trace("{method} send failed: {status}", method, status);
+            _statusReporter.Error(new ConnectorError($"failed to send {method}: {status}"));
+        }
+        catch (Exception ex)
+        {
+            // nothing awaits this task, so an exception escaping it is lost entirely - including the
+            // InvalidOperationException a report against an unbound reporter throws if teardown wins a race
+            this.Error(ex);
+        }
     }
 
     /// <summary>Handles a raw text message received over the WebSocket, deserializing and dispatching it to derived-class subscribers.</summary>
     /// <param name="raw">The raw UTF-8 text payload received over the WebSocket.</param>
     protected abstract void HandleData(ReadOnlyMemory<byte> raw);
 
-    /// <summary>Reports the connector as connected and re-sends a <c>SUBSCRIBE</c> request for all currently tracked topics.</summary>
+    /// <summary>Re-sends a <c>SUBSCRIBE</c> request for all currently tracked topics, then reports the connector as connected.</summary>
     private void HandleConnected()
     {
         this.Trace("start");
 
+        string[] targets;
+        lock (_gate)
+            targets = _topics.ToArray();
+
+        if (targets.Length > 0)
+        {
+            if (LogConfig.IsEnabled(LogLevel.Trace))
+                this.Trace<string>("subscribe to {topics}", targets.Join(","));
+
+            Send("SUBSCRIBE", targets);
+        }
+        else
+            this.Trace("skip - no topics to subscribe");
+
+        // reported last, so that connected means connected and resubscribed. Reported first, it named a
+        // moment at which the tracked set had not been re-sent yet, and a subscribe issued on that signal
+        // raced this one - both sides sending the same topic, which is how the same subscribe went out twice
         this.Trace("signal connected");
         _statusReporter.Connected();
-
-        if (_topics.Count == 0)
-        {
-            this.Trace("skip - no topics to subscribe");
-            return;
-        }
-
-        if (LogConfig.IsEnabled(LogLevel.Trace))
-            this.Trace<string>("subscribe to {topics}", _topics.Join(","));
-
-        var request = new Request { Method = "SUBSCRIBE", Params = _topics };
-        _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
 
         this.Trace("done");
     }
