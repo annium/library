@@ -28,93 +28,30 @@ created: 2026-09-01
 | 3 — wire types and serialization | **converged** | assessed 2026-09-17 against the manifest by a fresh verifier: field coverage holds in both directions (every documented field read, no field read that is not documented), all five enumeration tables map both ways, the kline indices are pinned by six distinct values. Two branch gaps and one defect remediated the same day — see the run report | none |
 | 4 — provider, read paths (+ registration, config, read-only live validation) | **converged** | every read path on both venues driven offline, failure paths included; endpoints pinned; **live read block green on 2026-09-16: 20 tests, 14 passed, 6 skipped, none failed** — and this time with credentials present, so the two signature tests ran rather than skipping | none. The upstream defect found here — an exchange error discarded when the success type is a collection — was fixed in `Annium.Net.Http` 1.1.49 and taken up with the package bump; the test that pinned the loss now pins the reason. The six still skipped are Spot's `UserProviderTests`, marked `Not implemented`, which is about the tests and not about access |
 | 5 — connector, streams and orders (+ registration, config, trading live validation) | not-started | — | unblocked: the user stream now addresses `/private`. Still needs its own tests — `WebSocketService` and `ListenKeyResolver` have no test file at all |
-
 ## Queued work
 
-Named here rather than left implied, with the reason each is not being done now.
-
-- ~~**Rebuild the signing golden value.**~~ — **settled 2026-09-16, and not the way it was framed.** The
-  worry was that `Signature_IsValid` passes whether or not the implementation percent-encodes before
-  signing, so it was `vacuous` for that property. Both halves of that turned out to need correcting.
-
-  **There is no encoding defect.** `Signature` signs `req.Uri.Query` — the *composed* query — and
-  `UriQuery.ToString()` builds it with `Uri.EscapeDataString`. Measured, not assumed: for a space, `+`,
-  `&`, `=`, a JSON payload and Cyrillic, the signed string is byte-identical to what goes on the wire.
-  A signer that reconstructed its own string from the raw values would be the defect; this one cannot,
-  because it reads the query back off the URI.
-
-  **The golden value was never the instrument for it.** `Signature_IsValid` hands the signer a literal,
-  so no query is composed and nothing is encoded — no choice of query string could make it see the
-  property. What it does pin is narrow and real: our HMAC of a fixed input equals what Binance produced.
-  Its summary said something broader and now says that.
-
-  The property is pinned instead by `HttpRequestSignatureExtensionsTests` in the Base test project,
-  offline and needing no credentials: it sends real requests to a local server and asserts that what the
-  signer was asked to sign equals what arrived, minus the `signature` parameter appended afterwards.
-  Mutation-checked — signing the unescaped query kills 7 of its 8 cases.
-
-  Worth keeping from this: signing happens at **send** time, not when `Sign()` is called — `Signature`
-  registers a `Configure` action. A first attempt built a request, inspected it, and found the signer had
-  never been called at all.
-- ~~**Rate-limit handling in the runtime**~~ — **done** (library 1.3.0-1.3.4, 2026-09-08). The live
-  read-only run this was waiting on happened, and it did approach the limits. 418 and 429 now both read
-  a pause — `Retry-After`, else the `banned until <epoch ms>` in Binance's `-1003` body — and hand it to
-  `IRateLimiter.Block`, so one refusal stops every caller sharing that limiter rather than each
-  rediscovering the ban with a request that extends it. A local refusal now answers in Binance's own
-  error shape instead of a synthetic one the status mapper read as `BadRequest`. Observed live:
-  `refused until further notice, pausing for 42s`, and no ban followed.
-- **Open question — `x-mbx-used-weight-1m header not present` is logged at `Error`**
-  (`Shared/HttpExtensions/HttpRequestRateExtensions.cs:75`). Every response missing the header produces
-  one, and Binance does not send it on every path — a refusal answers without it, and it is a futures /
-  spot REST header rather than a universal one. Either the absence is normal for the paths that hit it,
-  and the level is wrong; or it is not, and the limiter is silently running blind on those paths. Which
-  one it is needs a census of paths against the response headers each returns. **To be settled while
-  implementing the trading paths (step 5)**, where the order-count headers (`x-mbx-order-count-*`) come
-  into play and the same question has to be answered for them anyway.
-- **One `vacuous` test left**: the history paging tests, which request one day while claiming to protect
-  a seven-day window and a three-month cap. Belongs to the step that owns the read paths. The signing
-  golden value was the other one, and it is settled above — the fix was a test at the level where the
-  query is composed, not a different input to the one that could never see it.
-- **Four components with no test file at all** — `WebSocketService`, `ListenKeyResolver`,
-  `HttpRequestLogExtensions`, and the filter converters. The first two carry the connection lifecycle of
-  every stream this module runs, which makes them step 5's work rather than step 4's.
-  `HttpRequestSignatureExtensions` left this list on 2026-09-16.
-- ~~**The read-side enumeration gaps**~~ — **closed 2026-09-16.** `WireMappingTests` on each venue drives
-  every wire↔domain table both ways: each documented value parses to its member, each domain member
-  writes back out, the round trip holds, and each fold is asserted by name. Before it, coverage was
-  whatever the converter fixtures happened to contain — on the read side that meant `NEW`,
-  `PARTIALLY_FILLED` and `CANCELED`, and nothing else. Every status meaning *the order is finished* was
-  parsed by no test at all, which is the reading both connectors use to decide an order has left the
-  book. Mutation-checked three ways: a status parsing to the wrong member, a domain member left out of
-  the outbound table, and a fold removed as an apparent asymmetry — 3, 1 and 3 failures respectively.
-- **Failure statuses are coarser than the exchange's own.** `MapOperationCode` maps every negative
-  Binance code to `BadRequest`, so an invalid API key, an expired timestamp and a malformed parameter
-  are indistinguishable to a caller, and the HTTP status — which would have told `Forbidden` from
-  `BadRequest` — is consulted only on the branch where the error body parsed as success. Not done now
-  because the useful split is by what a caller would do differently (retry, re-sign, stop), and that is
-  a decision about the runtime rather than a mapping table.
-
-## Where step 4 stands, and what is left in it
-
-Converged, and as of 2026-09-16 converged with the live block actually run rather than skipped. What that
-left behind, in the order it is worth picking up:
+Open items only. Two things that used to live here are settled and their reasoning is where it belongs
+now: the signing property is pinned by `HttpRequestSignatureExtensionsTests` (the golden value could never
+have seen it — it signs a literal, so no query is composed), and the read-side enumeration gaps are closed
+by `WireMappingTests` on both venues. Rate-limit handling in the runtime shipped in 1.3.0–1.3.4. The
+manifest carries what each of them now defends; the run reports beside this file carry how it went.
 
 | left | why it is still open |
 |---|---|
 | the history paging fixture is `vacuous` | it asks for one day while claiming a seven-day window and a three-month cap. The *fact* is `pinned` regardless — an offline test drives twenty days through three windows — so this is a misleading test rather than an unguarded fact. Deleting it may be the right fix |
-| `x-mbx-used-weight-1m header not present` at `Error` | every response without the header logs one, and Binance does not send it everywhere. Either the absence is normal on those paths and the level is wrong, or the limiter is running blind there. Needs a census of paths against their response headers — and step 5 has to answer the same question for `x-mbx-order-count-*`, so it is cheaper done there |
-| `MapOperationCode` folds every negative code to `BadRequest` | an invalid key, an expired timestamp and a malformed parameter are indistinguishable to a caller. The useful split is by what a caller would do differently — retry, re-sign, stop — which is a decision about the runtime rather than a mapping table |
+| `x-mbx-used-weight-1m header not present` at `Error` (`Shared/HttpExtensions/HttpRequestRateExtensions.cs:75`) | every response without the header logs one, and Binance does not send it everywhere — a refusal answers without it. Either the absence is normal on those paths and the level is wrong, or the limiter is running blind there. Needs a census of paths against their response headers, and step 5 has to answer the same question for `x-mbx-order-count-*`, so it is cheaper done there |
+| `MapOperationCode` folds every negative code to `BadRequest` | an invalid key, an expired timestamp and a malformed parameter are indistinguishable to a caller, and the HTTP status — which would have told `Forbidden` from `BadRequest` — is consulted only where the error body parsed as success. The useful split is by what a caller would do differently — retry, re-sign, stop — which is a decision about the runtime rather than a mapping table |
 | decay constants `none` | the ceiling and the water-mark fraction are pinned through the number they compose to; the decay rate and interval are not |
-| three `[UNVERIFIED]` markers | leftovers from the marker vocabulary this manifest replaced. Two are substantive: the rate-limit window is *assumed* to be one minute, and a one-way account is *assumed* to report one `positions[]` row per symbol with `positionSide=BOTH` — the write fixture's precondition rests on the second. Both belong to the documentation axis, so step 2 assigns them, not step 4 |
+| three `[UNVERIFIED]` markers in the manifest | leftovers from the vocabulary this manifest replaced. Two are substantive: the rate-limit window is *assumed* to be one minute, and a one-way account is *assumed* to report one `positions[]` row per symbol with `positionSide=BOTH` — the write fixture's precondition rests on the second. Both belong to the documentation axis, so step 2 assigns them |
+| no test file at all: `WebSocketService`, `ListenKeyResolver`, `HttpRequestLogExtensions`, the filter converters | the first two carry the connection lifecycle of every stream and are step 5's work. The filter converters are covered through the exchange-info fixture, which the manifest says plainly — a missing file, not a missing fact |
 
 **Step 5 is the work, not this list.** It is unblocked and needs its own tests before anything it
-validates can be trusted — `WebSocketService` and `ListenKeyResolver` still have no test file, and they
-carry the connection lifecycle of every stream.
+validates can be trusted.
 
-Step 3 was the other half of this sentence until 2026-09-17, when it was assessed and found already
-written: the code and its tests existed while this document called the step not started. The run report
-sits beside this file. That error is the expensive direction — it invites rewriting what is already
-there, and losing tests that exist nowhere else.
+Step 3 was the other half of that sentence until 2026-09-17, when it was assessed and found already
+written: the code and its tests existed while this document called the step not started. That error is
+the expensive direction — it invites rewriting what is already there, and losing tests that exist
+nowhere else.
 
 ## Running the read block: `test.env` is copied, not read from source
 
