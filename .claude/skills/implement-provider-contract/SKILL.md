@@ -205,10 +205,10 @@ repositories, and the path that worked last run is exactly the one nobody re-che
 
 **This is the part that failed, twice, on the same provider.** Both times the finding was in a file the
 run had already fetched and stored, and both times it was missed by reading that file looking for what
-seemed important. The second one — a migration of every conditional order type to a different endpoint
-family, with its deadline nine months in the past — sat in the changelog as an ordinary bullet list
-among hundreds. It was eventually found by placing a real order and being refused by the exchange,
-which is the most expensive way a contract question can be answered.
+seemed important. The second one — a whole family of order types moved to a different endpoint, its
+deadline months in the past — sat in the changelog as an ordinary bullet list among hundreds. It was
+eventually found by placing a real order and being refused by the exchange, which is the most expensive
+way a contract question can be answered.
 
 The lesson is not "read more carefully". Reading someone else's corpus and asking *what here matters to
 us* is an unbounded judgment over tens of thousands of lines, it cannot be audited, and what it finds
@@ -221,10 +221,14 @@ judgment.
 
 **1. Grep the snapshot for every wire literal in the manifest.** Order type strings, status spellings,
 endpoint paths, header names, filter type names, JSON property names. For each literal, read every hit
-and its surrounding entry. The counts are small enough to be honest about: on the run that introduced
-this rule, `STOP_MARKET` had **nine** hits in a 107 KB changelog, one of which was the migration that a
-whole-file read had missed. A literal found nowhere in the snapshot is `undocumented` — and now
-*measured* as such rather than assigned by someone's impression.
+and its surrounding entry. The counts stay small enough to be honest about: on the run that introduced
+this rule, the literal that mattered had **nine** hits in a changelog of more than a hundred kilobytes,
+one of them the announcement a whole-file read had missed. A literal found nowhere in the snapshot is
+`undocumented` — and now *measured* as such rather than assigned by someone's impression.
+
+Watch the case: a header or field spelled one way in code and another in the documentation reads as
+zero hits, which is a far stronger claim than "spelled differently". Re-grep case-insensitively before
+recording anything as absent.
 
 **2. Sweep the changelogs by date.** Extract every line carrying a date together with one of
 *effective*, *deprecated*, *retired*, *migrated*, *removed*, *no longer*; sort; read everything dated

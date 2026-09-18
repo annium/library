@@ -467,7 +467,7 @@ and only when the step is verified converged.
 /implement-provider <provider> [--from-step=N] [--only-step=N] [--docs=<url or path>]
 ```
 
-- `<provider>` — the module name as it appears under `providers/`, e.g. `binance`. Ask if missing.
+- `<provider>` — the module name as it appears under `providers/`. Ask if missing.
 - `--from-step=N` — start at step N. Still refuses to advance past an earlier step `status.md` marks
   unconverged; use `--only-step` to override deliberately.
 - `--only-step=N` — reconcile just that step.
