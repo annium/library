@@ -201,6 +201,9 @@ side manufactures drift instead of finding it.
 Idempotence here means **convergence, not abort**. There is no "already exists → skip". Each step
 runs the same loop on every call:
 
+0. **Have the skill first.** A step with no child skill is not started by hand: its skill is drafted from
+   the contract and the step's target, and the work runs through it. When the work contradicts the draft,
+   the draft is corrected before the work continues — see *Writing the remaining child skills*.
 1. **Assess.** Measure the step's current implementation against its target — the contract for steps
    3–5, the provider's documentation for steps 1–2. Delegate the judgement to a **fresh verifier
    subagent** given the contract, the step's files, and the step's done-checklist. A fresh
@@ -482,10 +485,26 @@ and only when the step is verified converged.
 
 ## Writing the remaining child skills
 
-Steps 3-5 have no child skill yet, and that is deliberate. **Drive a step by hand once, then write
-its skill.** A checklist written from reading the code is always missing the items that only appear on
-contact; the parent's degraded hand-off is good enough until then, and an incomplete child skill is
-worse than none because it looks authoritative.
+**The skill is written first, and the work is done through it.** Not after, not alongside. When the work
+goes somewhere the skill did not anticipate, the skill is corrected *first* and the work resumes from the
+corrected version — so what is left behind is a document that describes what was actually done, rather
+than one written from memory afterwards.
+
+This reverses what this section used to say. "Drive a step by hand once, then write its skill" is the
+better-sounding rule and the wrong one: a step driven by hand produces a working module and a skill that
+never gets written, because by the time it would be the knowledge is already spent. Every stale line this
+skill has carried — recipes renamed, a gate that stopped skipping, a marker vocabulary replaced — got
+there that way, written once from a finished run and never touched again.
+
+What makes the order load-bearing here rather than a preference: **these skills are how the next exchange
+gets implemented.** Binance spot and whatever follows are ports of this document, not of this code. A
+skill that lags its own provider by one run is a skill that teaches the next provider the previous
+provider's mistakes.
+
+The first draft being incomplete is expected and is not an argument for writing it later. Draft it from
+the contract and the step's target, run the step against it, and correct it the moment it misleads —
+that correction *is* the step's finding, and it is cheaper to make while the contact is fresh than to
+reconstruct from a merged branch.
 
 ## Where a provider actually stands
 
