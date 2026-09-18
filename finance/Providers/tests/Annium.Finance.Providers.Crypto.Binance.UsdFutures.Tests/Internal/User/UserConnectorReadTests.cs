@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Finance.Providers.Tests.Lib.User;
 using Xunit;
@@ -22,6 +23,15 @@ public class UserConnectorReadTests : UserConnectorReadTestBase
     /// <param name="outputHelper">The xUnit output helper to route trace logging to.</param>
     public UserConnectorReadTests(ITestOutputHelper outputHelper)
         : base(outputHelper) { }
+
+    /// <summary>
+    /// Registers the USD-M futures provider, whose connector factory this test resolves.
+    /// </summary>
+    /// <param name="ctx">The fluent context to register providers into.</param>
+    protected override void RegisterProvider(ProviderRegistrationContext ctx)
+    {
+        ctx.WithBinanceUsdFutures();
+    }
 
     /// <summary>
     /// The connector connects to the live account and reports its snapshot.
