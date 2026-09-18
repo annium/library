@@ -672,6 +672,14 @@ public class CacheTestsBase : TestBase
     /// Verifies RemoveAsync during an in-flight factory: the awaiting caller still receives the produced value,
     /// and because the entry was purged, a subsequent call re-invokes the factory.
     /// </summary>
+    /// <remarks>
+    /// Run as a loop rather than once. The second call is made from a continuation of the first, so it races
+    /// whatever the cache does after settling the shared task: a cache that drops its in-flight slot
+    /// afterwards leaves a window in which this call joins a flight that is already over, takes its value
+    /// without a read, and so never sees the removal. That is what CI caught once, as _factoryCounter (0) !=
+    /// 1. The loop raises the odds of catching it again rather than guaranteeing it - twenty rounds against
+    /// the unfixed cache reproduced nothing on a developer machine, where the window is narrower still.
+    /// </remarks>
     /// <returns>A task that represents the asynchronous test operation</returns>
     protected async Task RemoveAsync_WhileFactoryInFlight_CallerGetsValueThenReinvokes_Base()
     {
@@ -679,24 +687,28 @@ public class CacheTestsBase : TestBase
         Get<ITimeProviderSwitcher>().UseManagedTime();
         var cache = Get<ICache<Guid, Page>>();
         Get<ITimeManager>().SetNow(SystemClock.Instance.GetCurrentInstant());
-        var key = Guid.NewGuid();
         var ct = TestContext.Current.CancellationToken;
         var options = CacheOptions.WithSlidingExpiration(Duration.FromMinutes(1));
 
-        var gate = new TaskCompletionSource<Page>(TaskCreationOptions.RunContinuationsAsynchronously);
-        ValueTask<Page> GatedFactory(Guid k, CancellationToken token) => new(gate.Task);
+        const int rounds = 20;
+        for (var round = 1; round <= rounds; round++)
+        {
+            var key = Guid.NewGuid();
+            var gate = new TaskCompletionSource<Page>(TaskCreationOptions.RunContinuationsAsynchronously);
+            ValueTask<Page> GatedFactory(Guid k, CancellationToken token) => new(gate.Task);
 
-        // act: start the gated factory, remove the key while it is in-flight, then release the factory
-        var call1 = cache.GetOrCreateAsync(key, GatedFactory, options, ct).AsTask();
-        await cache.RemoveAsync(key, ct);
-        gate.TrySetResult(new Page(key));
-        var result1 = await call1.WaitAsync(TimeSpan.FromSeconds(5), ct);
-        result1.Is(new Page(key));
+            // act: start the gated factory, remove the key while it is in-flight, then release the factory
+            var call1 = cache.GetOrCreateAsync(key, GatedFactory, options, ct).AsTask();
+            await cache.RemoveAsync(key, ct);
+            gate.TrySetResult(new Page(key));
+            var result1 = await call1.WaitAsync(TimeSpan.FromSeconds(5), ct);
+            result1.Is(new Page(key));
 
-        // assert: the entry was purged mid-flight → a subsequent call re-invokes the factory
-        var result2 = await cache.GetOrCreateAsync(key, GetPageAsync, options, ct);
-        result2.Is(new Page(key));
-        _factoryCounter.Is(1);
+            // assert: the entry was purged mid-flight → a subsequent call re-invokes the factory
+            var result2 = await cache.GetOrCreateAsync(key, GetPageAsync, options, ct);
+            result2.Is(new Page(key));
+            _factoryCounter.Is(round);
+        }
     }
 
     /// <summary>
