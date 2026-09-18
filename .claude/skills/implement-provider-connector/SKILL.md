@@ -79,12 +79,13 @@ there and the gap is in what pins it.
 Two are missing, and both are prerequisites rather than nice-to-haves. Build them first; without them
 the offline phases below cannot be written at all.
 
-**An offline websocket server for the test lib.** `Annium.Net.Servers.Web` already exposes
-`IServerBuilder.WithWebSocketHandler<THandler>()` and is already referenced by
-`Annium.Finance.Providers.Tests.Lib`, which has `TestBaseHttpServerExtensions` and no websocket
-equivalent. Build the missing half in the same shape: a handler the test controls, so a test can accept a
-connection, observe the frames the service sends, send frames back, and drop the connection on purpose.
-Everything in 5b depends on it.
+**An offline websocket server for the test lib.** ✅ Built: `Infrastructure/TestBaseWebSocketServerExtensions`
+— `this.RunWebSocketServer()` returns a `TestWebSocketServer` whose `WaitConnectionAsync` hands out each
+accepted connection in turn, and a `TestWebSocketConnection` that reads the frames the service sent
+(`WaitMessageAsync`, `Received`), sends frames back (`SendAsync`) and drops the connection on purpose
+(`Drop`). Connections are queued rather than passed to a callback, because the properties worth pinning are
+about the *sequence* of them: a client that reconnects produces a second connection, and the assertion is
+about what arrives on it. Everything in 5b depends on it.
 
 **An offline HTTP fixture for the commands.** This one exists in pattern — `UserProviderReadPathTests`
 drives the read paths against a local server through `TestBaseHttpServerExtensions`. The same pattern
@@ -103,7 +104,22 @@ Each of these is a property of the connection lifecycle, and each is unpinned as
   indistinguishable from one that is merely reconnecting.
 - **A payload that does not parse is dropped and the stream survives.**
 
-Two things to look at rather than assume, both visible in the source at the time of this draft:
+**What the fixture found on its first run, recorded here because the next venue will meet it too.** The
+market `WebSocketService` reported itself *connected* before re-sending its tracked topics, and kept the
+tracked set in a bare `HashSet`. Two consequences, both of which a test hits immediately and a live run
+hides:
+
+- a subscribe issued on the connected signal raced the connect-time resubscribe, and the same topic went
+  out twice. The exchange tolerates that, so nothing ever complained;
+- the set is written from the caller's thread on every subscribe and from the socket's thread on every
+  reconnect, with no lock at all.
+
+Both are fixed: the set is guarded, and **connected is reported last**, so that the signal means *connected
+and resubscribed*. That ordering is what makes a stream test deterministic — waiting on the server having
+accepted the socket is not enough, because the client finishes its handshake after that. Expect the same
+shape in every venue's stream service and check it before writing the first test against one.
+
+Two more things to look at rather than assume, both visible in the source at the time of this draft:
 
 - the control-frame sends are **fire-and-forget** (`SendTextAsync(...).GetAwaiter()`, result never
   observed). A subscribe that fails is invisible. Decide whether that is the intended contract, and pin

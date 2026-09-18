@@ -28,6 +28,15 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
     /// <summary>The set of topics currently subscribed to, re-sent on reconnect.</summary>
     private readonly HashSet<string> _topics = new();
 
+    /// <summary>Guards <see cref="_topics"/>.</summary>
+    /// <remarks>
+    /// The set is written from two threads that have nothing in common: the caller's, on every subscribe
+    /// and unsubscribe, and the socket's, on every reconnect. Unguarded that is a torn <see cref="HashSet{T}"/>,
+    /// and the failure it produces - a lost or duplicated topic - is indistinguishable from an exchange
+    /// that did not apply a subscription.
+    /// </remarks>
+    private readonly Lock _gate = new();
+
     /// <summary>The reporter used to publish connection status changes.</summary>
     private readonly IStatusReporter _statusReporter;
 
@@ -89,7 +98,10 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
     {
         this.Trace("start");
 
-        var targets = new List<string>(topics.Where(topic => _topics.Add(topic)));
+        List<string> targets;
+        lock (_gate)
+            targets = [.. topics.Where(topic => _topics.Add(topic))];
+
         if (targets.Count == 0)
         {
             this.Trace("skip - no topics to subscribe");
@@ -111,7 +123,10 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
     {
         this.Trace("start");
 
-        var targets = new List<string>(topics.Where(topic => _topics.Remove(topic)));
+        List<string> targets;
+        lock (_gate)
+            targets = [.. topics.Where(topic => _topics.Remove(topic))];
+
         if (targets.Count == 0)
         {
             this.Trace("skip - no topics to unsubscribe");
@@ -131,25 +146,31 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
     /// <param name="raw">The raw UTF-8 text payload received over the WebSocket.</param>
     protected abstract void HandleData(ReadOnlyMemory<byte> raw);
 
-    /// <summary>Reports the connector as connected and re-sends a <c>SUBSCRIBE</c> request for all currently tracked topics.</summary>
+    /// <summary>Re-sends a <c>SUBSCRIBE</c> request for all currently tracked topics, then reports the connector as connected.</summary>
     private void HandleConnected()
     {
         this.Trace("start");
 
+        string[] targets;
+        lock (_gate)
+            targets = _topics.ToArray();
+
+        if (targets.Length > 0)
+        {
+            if (LogConfig.IsEnabled(LogLevel.Trace))
+                this.Trace<string>("subscribe to {topics}", targets.Join(","));
+
+            var request = new Request { Method = "SUBSCRIBE", Params = targets };
+            _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
+        }
+        else
+            this.Trace("skip - no topics to subscribe");
+
+        // reported last, so that connected means connected and resubscribed. Reported first, it named a
+        // moment at which the tracked set had not been re-sent yet, and a subscribe issued on that signal
+        // raced this one - both sides sending the same topic, which is how the same subscribe went out twice
         this.Trace("signal connected");
         _statusReporter.Connected();
-
-        if (_topics.Count == 0)
-        {
-            this.Trace("skip - no topics to subscribe");
-            return;
-        }
-
-        if (LogConfig.IsEnabled(LogLevel.Trace))
-            this.Trace<string>("subscribe to {topics}", _topics.Join(","));
-
-        var request = new Request { Method = "SUBSCRIBE", Params = _topics };
-        _socket.SendTextAsync(JsonSerializer.SerializeToUtf8Bytes(request)).GetAwaiter();
 
         this.Trace("done");
     }
