@@ -2,6 +2,7 @@ using System;
 using Annium.Core.DependencyInjection;
 using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Abstractions.Domain.User;
+using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Core.Shared.TimeSync;
 using Annium.Finance.Providers.Crypto.Binance.Base.Internal.User.Services;
@@ -67,9 +68,18 @@ public static class ServiceProviderExtensions
     )
     {
         var httpRequestFactory = sp.ResolveHttpRequestFactory(listenKeyKey);
+        var rateLimiter = sp.Resolve<IRateLimiter>();
         var statusReporter = monitor.CreateReporter();
         var logger = sp.Resolve<ILogger>();
 
-        return new ListenKeyResolver(config, endpoint, httpRequestFactory, signatureService, statusReporter, logger);
+        return new ListenKeyResolver(
+            config,
+            endpoint,
+            httpRequestFactory,
+            signatureService,
+            rateLimiter,
+            statusReporter,
+            logger
+        );
     }
 }

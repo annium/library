@@ -8,6 +8,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Core;
+using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Crypto.Binance.Base.Internal.User.Services;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Converters;
@@ -286,6 +287,7 @@ public class ListenKeyResolverTests : ProvidersTestBase
             Endpoint,
             GetKeyed<IHttpRequestFactory>(string.Empty),
             new TestSignatureService(),
+            new TestRateLimiter(),
             monitor.CreateReporter(),
             Get<ILogger>()
         );
@@ -349,6 +351,31 @@ public class ListenKeyResolverTests : ProvidersTestBase
     /// <param name="body">The body to answer with.</param>
     /// <returns>The response.</returns>
     private static (HttpStatusCode Code, string Body) Response(HttpStatusCode code, string body) => (code, body);
+
+    /// <summary>
+    /// A rate limiter that allows everything, so the test measures the resolver rather than the limiter.
+    /// </summary>
+    private sealed class TestRateLimiter : IRateLimiter
+    {
+        /// <summary>Allows every request.</summary>
+        /// <returns>Always true.</returns>
+        public bool CanExecute() => true;
+
+        /// <summary>Ignores the reported limit.</summary>
+        /// <param name="limit">The limit reported.</param>
+        public void UpdateLimit(int limit) { }
+
+        /// <summary>Ignores the reported weight.</summary>
+        /// <param name="weight">The weight reported.</param>
+        public void UsedWeight(int weight) { }
+
+        /// <summary>Ignores the block.</summary>
+        /// <param name="duration">The duration to block for.</param>
+        public void Block(TimeSpan duration) { }
+
+        /// <summary>Does nothing; the limiter holds no resources here.</summary>
+        public void Dispose() { }
+    }
 
     /// <summary>
     /// A signature service that signs nothing, since no exchange checks what the local server is told.

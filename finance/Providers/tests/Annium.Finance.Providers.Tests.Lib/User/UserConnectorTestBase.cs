@@ -431,6 +431,16 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
         order.ShouldMatch(request);
         await EnsureOrderReported(order, status);
 
+        // a filled order that answers with an executed price of zero is the contested reading the manifest
+        // carries: the catalog lists avgPrice on the query-order response and not on the new-order one, and
+        // only a live order can say which is right. Asserted here rather than in one test, so every filled
+        // order settles it - and so a venue that starts answering with zero is caught by the next run
+        if (status is OrderStatus.Filled)
+            order.ExecutedPrice.IsGreater(
+                0m,
+                "a filled order came back with an executed price of zero - the new-order response did not carry avgPrice"
+            );
+
         EnsureNoErrors();
 
         this.Trace("done");
@@ -531,6 +541,16 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
         // assert
         order.ShouldMatch(request);
         await EnsureOrderReported(order, status);
+
+        // a filled order that answers with an executed price of zero is the contested reading the manifest
+        // carries: the catalog lists avgPrice on the query-order response and not on the new-order one, and
+        // only a live order can say which is right. Asserted here rather than in one test, so every filled
+        // order settles it - and so a venue that starts answering with zero is caught by the next run
+        if (status is OrderStatus.Filled)
+            order.ExecutedPrice.IsGreater(
+                0m,
+                "a filled order came back with an executed price of zero - the new-order response did not carry avgPrice"
+            );
 
         EnsureNoErrors();
 

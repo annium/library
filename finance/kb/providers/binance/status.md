@@ -16,9 +16,9 @@ created: 2026-09-01
 - docs revision: spot `a0057759f1cbcab812af44b75309d72866a57561`; futures fetched 2026-09-01 (no
   repository exists, so the date is the only anchor)
 - working branch: `main` where converged
-- last reconciled: 2026-09-18 — steps 5a through 5e merged; 5f run live in staged gates on
-  `provider/binance-step-5f`: three stages of four green, the fourth stopped by an exchange refusal that
-  is contract drift rather than a defect
+- last reconciled: 2026-09-18 — steps 5a through 5e merged; 5f run live in staged gates, three stages of
+  four green, the fourth stopped by contract drift; step 4's residue worked through on
+  `provider/binance-step-4-residue`, four of its six items closed
 
 ## Convergence
 
@@ -40,17 +40,19 @@ manifest carries what each of them now defends; the run reports beside this file
 | left | where it stands, verified 2026-09-18 |
 |---|---|
 | **futures trigger orders are refused on the order endpoint** | observed live 2026-09-18, placing a real `STOP_MARKET` through `POST /fapi/v1/order`: *"Order type not supported for this endpoint. Please use the Algo Order API endpoints instead."* The four futures trigger types are now `contested` in the manifest. **This is steps 1-2 work, not step 5's**: which endpoint accepts them, what it takes and what it answers has to be re-derived from documentation, and nothing is amended in code until it is. It blocks 5f's fourth stage and nothing else - the position open/close path itself was proven live the same day |
-| the `avgPrice` question is now cheap to settle | the manifest's other `contested` row (`manifest.md:333`) says only the first live order can settle whether a placed order returns an executed price of zero. Live orders now run in staged gates, so settling it costs an assertion on a filled market order's `ExecutedPrice` rather than a new capability |
-| the history paging fixture is `vacuous` | confirmed, and one claim in the old wording was wrong: there is **no three-month cap in the code at all** - it is a Binance-side limit recorded only in `manifest.md:488`, so the fixture cannot be said to claim it, and nothing exercises it. What the fixture does is ask for one day (`Tests.Lib/User/UserProviderTestBase.cs:170-175`) against a seven-day window (`UsdFutures/.../UserProvider.cs:50,53`), so the paging loop runs once and both tests assert only `Ok` and `NotNull`. It is worse on spot, where the same two base methods run against provider methods that are stubs returning empty arrays (`Spot/.../UserProvider.cs:42-49,56-63`). The *fact* is `pinned` elsewhere and genuinely: `UserProviderReadPathTests` drives 20 days and asserts three contiguous windows, the last one short. **So: a misleading test, not an unguarded fact. Deleting it is the fix, and the spot half of it is the clearer case** |
-| `x-mbx-used-weight-1m header not present` at `Error` (`Shared/HttpExtensions/HttpRequestRateExtensions.cs:75`) | the census this was waiting for is done. 17 production call sites, all Binance REST, and two things came out of it. **The refusal path is inside the census**: the 429/418 branch pauses the limiter and then falls through to the header read, so every real ban logs this `Error` - on precisely the path the code's own comment says answers without the header. A locally synthesized 429 returns earlier and does not. **The listen key request does not go through the limiter at all** (`ListenKeyResolver.cs:132`), so its weight is not counted anywhere. This is no longer an investigation: it is a decision about the level on a known path, plus a question about the uncounted listen key |
-| `x-mbx-order-count-*` is masked but never read | the answer step 5 was meant to produce: the order-count headers appear exactly once in the tree, in the log mask (`HttpRequestLogExtensions.cs:10`). Nothing reads them, so the order-rate limit is not tracked at all - the connector finds out by being refused |
+| the `avgPrice` question waits on one live run | the assertion is in place since 2026-09-18 - every filled order now checks its executed price is above zero (`Tests.Lib/User/UserConnectorTestBase.cs`) - and it has not been through a live trading stage yet. The next approved stage 4 settles the manifest's `contested` row either way |
 | `MapOperationCode` folds negative codes to `BadRequest` | **partly true now.** The user variant carves out `-2018`/`-2019` as `InsufficientBalance` (`HttpRequestUserResultExtensions.cs:95-96`); the market variant is unchanged. The HTTP status is consulted only for *synthetic* errors (network, abort, parse) - a body that parsed as a Binance error still ignores it, so `-2015` (invalid key) reaches a caller as `BadRequest` rather than `Forbidden`. The useful split is still by what a caller would do differently: retry, re-sign, stop |
-| decay constants `none` | confirmed unpinned. The ceiling and the water-mark fraction are pinned through their product only (`RateLimitCeilingTests`, `WaterMark` 4800 / 1920); the decay *mechanism* has a test that builds its own limiter with its own values (`RateLimiterTests:119`, `100, 10, 10`). Nothing observes the registered `300` every `3000`ms |
-| three `[UNVERIFIED]` markers in the manifest | confirmed, at `manifest.md:276`, `:321`, `:452`. The first sits on the rate-limit window being assumed one minute, the second on a one-way account reporting one `positions[]` row per symbol with `positionSide=BOTH` - which the write fixture's precondition rests on - and the third on the arithmetic that the shared decay implies 6000/min and so contradicts the futures ceiling of 2400. The third is the same pair of constants as the row above, seen from the documentation side |
+| three `[UNVERIFIED]` markers in the manifest | confirmed, at `manifest.md:276`, `:321`, `:452`. The first sits on the rate-limit window being assumed one minute, the second on a one-way account reporting one `positions[]` row per symbol with `positionSide=BOTH` - which the write fixture's precondition rests on - and the third on the arithmetic that the shared decay implies 6000/min and so contradicts the futures ceiling of 2400. All three are documentation-axis questions and belong with the Algo Order API pass, which reopens the documentation anyway. The third's *verification* half is closed as of 2026-09-18 - the registered decay is pinned now - which leaves only the question of whether those numbers are the right ones |
 | no test file at all: `HttpRequestLogExtensions`, the filter converters | the filter converters are covered through the exchange-info fixture, which the manifest says plainly - a missing file, not a missing fact. `WebSocketService` and `ListenKeyResolver` left this list on 2026-09-18: both are pinned offline now |
 
 **Step 5 is the work, not this list.** Everything offline is done as of 2026-09-18; the live stages are
 what remains, and each is approved on its own.
+
+Step 4's residue was worked through on 2026-09-18. Four of its six items are closed and left this table:
+the paging fixture now spans three windows instead of one, the registered decay constants are pinned, the
+missing-header error is silenced on the one path that answers without the header, the listen key request
+is counted against the limiter, and the order-count headers are recorded as deliberately not tracked. What
+remains needs either a live run or the documentation reopened.
 
 The list above was a list of investigations and is now mostly a list of decisions: the header census is
 done, the paging fixture's defect is named, the order-count answer exists. What is left to decide is

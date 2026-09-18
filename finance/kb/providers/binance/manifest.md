@@ -465,9 +465,11 @@ only by eye keeps describing a drift that somebody fixed a while ago.
 |---|---|
 | Weight header `x-mbx-used-weight-1m`, matched case-insensitively | `Base/Shared/HttpExtensions/HttpRequestRateExtensions.cs:43` |
 | A missing or unparseable header leaves the weight unchanged; the response is still returned | same, 48-64 |
+| A missing header is logged at `Error`, except on a refusal - which does not carry one - where it is `Trace` | `Base/Shared/HttpExtensions/HttpRequestRateExtensions.cs:57,76-85` |
+| The listen key request is counted against the same limiter as everything else | `Base/Internal/User/Services/ListenKeyResolver.cs:141` |
 | Initial ceilings: spot `6000`/min, futures `2400`/min | `Spot/ProviderRegistrationContextExtensions.cs:106`, `UsdFutures/...:118` |
-| Decay `300` every `3000`ms on **both** — i.e. 6000/min, which does not match the futures ceiling **[UNVERIFIED]** | same lines |
-| Binance also returns an `x-mbx-order-*` family of order-count limit headers; the code knows to mask both prefixes in logs but reads neither | `Base/Shared/HttpExtensions/HttpRequestLogExtensions.cs:10` |
+| Decay `300` every `3000`ms on **both** — i.e. 6000/min, which does not match the futures ceiling **[UNVERIFIED]** on the documentation axis; `pinned` on the verification axis since 2026-09-18 by `RateLimitCeilingTests.Decay_LowersTheRegisteredAmountOnTheRegisteredInterval`, which tells the registered step from any larger one | same lines |
+| Binance also returns an `x-mbx-order-*` family of order-count limit headers; the code knows to mask both prefixes in logs but reads neither. **Decided 2026-09-18: the order-rate limit is deliberately not tracked** - the connector learns of it by being refused, and the refusal path already pauses the limiter. Recorded as a fact rather than left as a gap, because "nobody read these headers" and "we chose not to" look identical in code | `Base/Shared/HttpExtensions/HttpRequestLogExtensions.cs:10` |
 | Ceiling is overwritten at runtime from exchange-info's `REQUEST_WEIGHT` | `Spot/Internal/Market/MarketProvider.cs:63-65`, `UsdFutures/...:69-71` |
 | Local gate at 80% of the ceiling, before the request is sent | `finance/Providers/src/Annium.Finance.Providers.Core/Internal/Shared/RateLimits/RateLimiter.cs:17,88` |
 | A locally-gated request is synthesized as `429` | `Base/Shared/HttpExtensions/HttpRequestRateExtensions.cs:26-39` |

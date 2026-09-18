@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.HttpExtensions;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Finance.Providers.Tests.Lib.Infrastructure;
+using Annium.Logging;
 using Annium.Net.Http;
 using Annium.Net.Servers.Web;
 using Annium.Testing;
@@ -116,6 +118,63 @@ public class HttpRequestRateExtensionsTests : ProvidersTestBase
 
         // assert
         limiter.UsedWeights.IsEmpty();
+    }
+
+    /// <summary>
+    /// A missing header is an error anywhere except on a refusal, which does not carry one.
+    /// </summary>
+    /// <remarks>
+    /// The census that found this counted 17 call sites and one path that answers without the header by
+    /// design: a ban. The branch that handles a ban falls through to the header read, so every real refusal
+    /// logged an error about a header nobody expected it to send - noise at the one moment the log is read.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task MissingHeader_IsNotAnErrorOnARefusal()
+    {
+        // arrange
+        var limiter = new FakeRateLimiter(true);
+
+        await using var server = this.RunHttpServer(
+            (_, response) =>
+            {
+                response.StatusCode(HttpStatusCode.TooManyRequests);
+                return Task.CompletedTask;
+            }
+        );
+
+        // act
+        await SendAsync(server, limiter);
+
+        // assert
+        Logs.Any(x => x.Level is LogLevel.Error && x.Message.Contains("header not present"))
+            .IsFalse("a refusal logged an error about a header a refusal does not carry");
+    }
+
+    /// <summary>
+    /// A missing header on an ordinary response is still an error: the limiter is running blind.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task MissingHeader_IsAnErrorOnAnOrdinaryResponse()
+    {
+        // arrange
+        var limiter = new FakeRateLimiter(true);
+
+        await using var server = this.RunHttpServer(
+            (_, response) =>
+            {
+                response.Ok();
+                return Task.CompletedTask;
+            }
+        );
+
+        // act
+        await SendAsync(server, limiter);
+
+        // assert
+        Logs.Any(x => x.Level is LogLevel.Error && x.Message.Contains("header not present"))
+            .IsTrue("a response with no weight header left the limiter blind and said nothing about it");
     }
 
     /// <summary>
