@@ -164,10 +164,20 @@ endpoints.
 
 Two checks that have caught real defects in this module and cost nothing to repeat:
 
-- **Every disposable the factory creates is in the box.** At the time of this draft two are added with an
-  explicit comment and two are not; verify rather than read.
+- **Every disposable the factory creates is in the box.** Both checks below found something on the first
+  run, which is why they are worth repeating rather than reading past. In USD-M futures the listen key
+  resolver and the user stream were built by the factory and never added: the connector only unhooks their
+  *events*, so after its teardown the socket kept reconnecting, the resolver kept POSTing a keep-alive
+  forever, and both stayed bound to the monitor — which then never reads clean again. Fixed. Note the
+  ordering: the stream is disposed before the resolver it listens to.
 - **Endpoints live in one place per venue.** One venue keeping a URI path as a literal inside a mapping
-  profile while its twin keeps it in `Endpoints` is the asymmetry that hides a drift.
+  profile while its twin keeps it in `Endpoints` is the asymmetry that hides a drift — and it was there:
+  spot had `/ws/` and `/stream` inline in its profiles while futures had both in `Endpoints`, and futures
+  in turn had `/fapi/v1/listenKey` inline in its factory. All three moved into `Endpoints`.
+
+Neither check has an offline test behind it, and that is not an oversight: the factory resolves real
+endpoints from `Endpoints`, so building a connector through it reaches the exchange. What defends these is
+reading them again, here, on every venue — the point of listing them as checks rather than as tests.
 
 ## Phase 5e — live, read-only
 

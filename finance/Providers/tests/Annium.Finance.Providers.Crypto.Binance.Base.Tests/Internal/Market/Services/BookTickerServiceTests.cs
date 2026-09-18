@@ -326,8 +326,32 @@ public class BookTickerServiceTests : ProvidersTestBase
         service.Subscribe(["BTCUSDT"]);
 
         // assert
-        var error = await errors.Reader.ReadAsync(ct);
-        error.Message.Contains("SUBSCRIBE").IsTrue();
+        // read until the send failure, rather than asserting on the first error: the socket keeps trying
+        // to reconnect to a server that is gone, and each refusal is an error of its own on the same
+        // channel. Taking the first one made this test depend on which of the two lost the race
+        var error = await ReadErrorAsync(errors, x => x.Message.Contains("SUBSCRIBE"), ct);
+        error.Message.Contains("failed to send").IsTrue();
+    }
+
+    /// <summary>
+    /// Reads errors until one matches, so errors raised for other reasons do not decide the assertion.
+    /// </summary>
+    /// <param name="errors">The channel errors are written into.</param>
+    /// <param name="match">What the awaited error looks like.</param>
+    /// <param name="ct">The test's cancellation token, so an error that never arrives ends with the test.</param>
+    /// <returns>The first matching error.</returns>
+    private static async Task<ConnectorError> ReadErrorAsync(
+        Channel<ConnectorError> errors,
+        Func<ConnectorError, bool> match,
+        CancellationToken ct
+    )
+    {
+        while (true)
+        {
+            var error = await errors.Reader.ReadAsync(ct);
+            if (match(error))
+                return error;
+        }
     }
 
     /// <summary>

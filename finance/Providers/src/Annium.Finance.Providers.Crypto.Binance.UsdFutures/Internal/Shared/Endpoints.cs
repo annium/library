@@ -36,5 +36,8 @@ internal static class Endpoints
     public const string UserWsUriPath = "/private/ws/";
 
     /// <summary>The server time path, appended to <see cref="HttpApi"/>.</summary>
+    /// <summary>The relative path of the listen key endpoint, which opens and keeps alive a user data stream.</summary>
+    public const string ListenKeyUriPath = "/fapi/v1/listenKey";
+
     public const string ServerTimeUriPath = "/fapi/v1/time";
 }
