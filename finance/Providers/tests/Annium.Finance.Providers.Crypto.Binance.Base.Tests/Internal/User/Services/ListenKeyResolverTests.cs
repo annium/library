@@ -129,7 +129,12 @@ public class ListenKeyResolverTests : ProvidersTestBase
         var ct = TestContext.Current.CancellationToken;
         await using var server = RunListenKeyServer(attempt => Key(attempt == 0 ? "abc" : "xyz"));
         var monitor = new StatusMonitor(Get<ILogger>());
-        await using var resolver = CreateResolver(server, monitor, out var keys, out var resets);
+
+        // the keep-alive interval is far longer than the fetch one, as it is on the exchange. The change
+        // itself is only noticed at the next keep-alive, so the test pays that once; what it then measures
+        // is the cadence the resolver returns to. With both intervals equal the bug is invisible
+        const int confirmInterval = 3_000;
+        await using var resolver = CreateResolver(server, monitor, out var keys, out var resets, confirmInterval);
         (await keys.Reader.ReadAsync(ct)).Is("abc");
 
         // act
@@ -137,8 +142,14 @@ public class ListenKeyResolverTests : ProvidersTestBase
 
         // assert
         // the key that replaced it is fetched anew rather than adopted in place, so the consumer reopens
-        // its socket instead of keeping one bound to a key the exchange no longer knows
-        (await keys.Reader.ReadAsync(ct)).Is("xyz");
+        // its socket instead of keeping one bound to a key the exchange no longer knows - and it is asked
+        // for at fetch cadence, since the reset has already closed the stream. Left in keep-alive mode the
+        // resolver answers here a whole confirm interval later, which is the wait this window excludes
+        var replacement = await keys
+            .Reader.ReadAsync(ct)
+            .AsTask()
+            .WaitAsync(TimeSpan.FromMilliseconds(confirmInterval / 4), ct);
+        replacement.Is("xyz");
     }
 
     /// <summary>
@@ -242,12 +253,14 @@ public class ListenKeyResolverTests : ProvidersTestBase
     /// <param name="monitor">The monitor the resolver reports into.</param>
     /// <param name="keys">The channel every fetched key is written into.</param>
     /// <param name="resets">The channel every reset is written into.</param>
+    /// <param name="confirmInterval">The keep-alive interval, in milliseconds, once a key is held.</param>
     /// <returns>The resolver under test.</returns>
     private ListenKeyResolver CreateResolver(
         IServer server,
         StatusMonitor monitor,
         out Channel<string> keys,
-        out Channel<int> resets
+        out Channel<int> resets,
+        int confirmInterval = 50
     )
     {
         var config = new TestUserConfig
@@ -260,7 +273,7 @@ public class ListenKeyResolverTests : ProvidersTestBase
             ListenKeyUriPath = "/ws/",
             // short enough that a test does not wait on a clock, long enough that a retry loop does not
             // drown the local server in requests while an assertion is being made
-            ListenKey = new ListenKeyConfiguration(50, 50),
+            ListenKey = new ListenKeyConfiguration(50, confirmInterval),
         };
 
         var fetched = Channel.CreateUnbounded<string>();

@@ -128,9 +128,13 @@ Two more things to look at rather than assume, both visible in the source at the
   is teardown, where a failed send is the expected consequence of the socket being gone — and where
   reporting is not merely noisy but throws, the reporter having been unbound. Whatever venue you are on,
   check the send's result *and* check what the teardown path does with it.
-- the listen-key resolver **switches timer cadence** on the first confirmed key, and on a *changed* key
-  it clears the key and raises reset without switching back. Whether that is right is a question for the
-  contract, not for taste.
+- the listen-key resolver **switches timer cadence** on the first confirmed key, and on a *changed* key it
+  cleared the key and raised reset **without switching back** — while the failure branch beside it did
+  switch back. **Decided: a changed key leaves the resolver in exactly the state it was in before its first
+  key, timer included.** Anything else means the stream is closed by the reset and the replacement key is
+  not asked for until a full confirm interval later, which on Binance is the keep-alive period rather than
+  the retry period. A test catches it only if the two intervals differ — with both set to the same value
+  the bug is invisible, which is why the first version of the test passed.
 
 For the listen key specifically: fetch, confirm, change, failure-before-first-success, failure-after,
 and disposal mid-flight. The resolver reports status on every one of those transitions, and the status is
