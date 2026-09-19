@@ -402,13 +402,30 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
 
 ### Orders and trades
 
+> **[NEW, unread] `TRADE_LITE`** — a user-stream event this module does not handle, captured 2026-09-19.
+> It arrives **before** `ORDER_TRADE_UPDATE` and carries the fill: `L` last price, `l` last quantity, `t`
+> trade id, `i` order id, `c` client order id, `s`, `S`, `q`, `m`, plus `E`/`T`. The earliest notice of a
+> fill the exchange gives, and nothing reads it.
+>
+> **[DEFECT, ours] `limit` means opposite things on `userTrades` and `allOrders`.** Measured 2026-09-19:
+> `GET /fapi/v1/userTrades?limit=5` returns the **five oldest** trades of the account, while
+> `GET /fapi/v1/allOrders?limit=3` returns the **three newest**. So on the trade endpoint `limit` truncates
+> from the start of the window and on the order endpoint from the end.
+>
+> `LoadLatestTradesAsync` asks for the latest page with `limit=1000`, so it is safe only while an account
+> has fewer than a thousand trades in the window. Past that it receives the *earliest* thousand and cannot
+> tell - a full page of real trades is exactly what it expected. The history path is unaffected: it walks
+> windows by `startTime` and takes `.Last()` as the cursor, which the ascending order this endpoint returns
+> makes correct.
+
+
 | Fact | Where |
 |---|---|
 | Spot order: `orderId`, `clientOrderId`, `symbol`, `type`, `side`, `origQty`, `price`, `stopPrice`, `status`, `executedQty`, `cummulativeQuoteQty` (executed price **derived** as sum ÷ qty), `time`, `updateTime` | `Spot/.../GetOrderResponseConverter.cs:79-121` |
 | Futures order: same core plus `positionSide`, `reduceOnly`, and `avgPrice` used **directly** — **[DIVERGES]** | `UsdFutures/.../GetOrderResponseConverter.cs:87-135` |
 | Spot init-order uses `workingTime` for created and `transactTime` for updated — **[DIVERGES]** from its own get-order, which uses `time`/`updateTime` | `Spot/.../InitOrderResponseConverter.cs:115-120` |
 | Futures init-order has **no creation timestamp**; `updateTime` serves as both | `UsdFutures/.../InitOrderResponseConverter.cs:126-128` |
-| **~~[CONTESTED]~~ → [CHANGED]. Settled from documentation 2026-09-18, and the tier-3 reading was right.** `avgPrice` and `cumQuote` are **removed from the immediate response of order placement, modification and cancellation** on `/fapi/` — and the notice adds the part no schema would have shown: *"These fields were always `0` in the placement ack (fills happen asynchronously); the actual fill price is still available via the order query / userTrades endpoints."* So this converter has been reading a field that was zero before it was absent. Read endpoints are explicitly **not** affected and still carry `avgPrice` | `UsdFutures/.../InitOrderResponseConverter.cs:123`; docs `…/usd-futures/coin-futures_Important-CM-UM-Integration-Notice.md:80-106` |
+| **~~[CONTESTED]~~ → [CHANGED], and measured 2026-09-19.** `avgPrice` and `cumQuote` are **absent from the placement acknowledgement under any name** - the question was whether we were reading a renamed field, and there is no field to read. The same order queried back seconds later carries `avgPrice` and `cumQuote`; the placement carries neither, plus a **new `cumQty`** that repeats `executedQty` and is not a price. So the placement says how much filled and refuses to say at what. Raw evidence: [`2026.09/2026.09.19-raw-exchange/`](2026.09/2026.09.19-raw-exchange/). **The price does arrive**, on the stream, in the same second: `ORDER_TRADE_UPDATE` with `X: FILLED` carries `ap`, which this module's order-update converter already reads | `UsdFutures/.../InitOrderResponseConverter.cs:123`; docs `…/usd-futures/coin-futures_Important-CM-UM-Integration-Notice.md:80-106` |
 | Trade: `id`, `orderId`, `symbol`, `qty`, `price`, `commission`, `commissionAsset`, `time` | both `GetTradeResponseConverter.cs` |
 | Maker flag is `isMaker` on spot, `maker` on futures — **[DIVERGES]** | `Spot/.../GetTradeResponseConverter.cs:91`, `UsdFutures/.../GetTradeResponseConverter.cs:97` |
 | Cancel response `clientOrderId` is parsed **as a GUID**; a non-GUID id makes the whole response read as missing | `Spot/.../CancelOrderResponseConverter.cs:50-55`, `UsdFutures/.../CancelOrderResponseConverter.cs:54-59` |

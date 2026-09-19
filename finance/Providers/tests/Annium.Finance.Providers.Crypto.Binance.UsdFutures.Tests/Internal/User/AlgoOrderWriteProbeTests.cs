@@ -140,6 +140,229 @@ public class AlgoOrderWriteProbeTests : ProvidersTestBase
         algoId.IsNotEmpty("the placement answered without an algoId, so nothing could be cancelled");
     }
 
+    /// <summary>
+    /// Closes any open position on the probe symbol, reduce-only, and asserts the account is left flat.
+    /// </summary>
+    /// <remarks>
+    /// A tool, not a test of anything. A live stage that fails part-way leaves its teardown unrun, and the
+    /// position it opened outlives the run - the one outcome the write block's own instructions single out.
+    /// Reduce-only, so it can only ever close: if nothing is open the exchange refuses it, which is the
+    /// right answer rather than an opposite position.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TestBlock.ReadTimeoutMs)]
+    public async Task CloseAnyOpenPosition()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        var account = await SendAsync(HttpMethod.Get, "/fapi/v2/account", new(), true, "close.account-before", ct);
+        using var doc = System.Text.Json.JsonDocument.Parse(account);
+        var amount = 0m;
+        foreach (var p in doc.RootElement.GetProperty("positions").EnumerateArray())
+        {
+            if (p.GetProperty("symbol").GetString() != Symbol)
+                continue;
+
+            decimal.TryParse(
+                p.GetProperty("positionAmt").GetString(),
+                NumberStyles.Any,
+                CultureInfo.InvariantCulture,
+                out amount
+            );
+        }
+
+        if (amount == 0m)
+            return;
+
+        await SendAsync(
+            HttpMethod.Post,
+            "/fapi/v1/order",
+            new()
+            {
+                ["symbol"] = Symbol,
+                ["side"] = amount > 0 ? "SELL" : "BUY",
+                ["positionSide"] = "BOTH",
+                ["type"] = "MARKET",
+                ["quantity"] = Math.Abs(amount).ToString(CultureInfo.InvariantCulture),
+                ["reduceOnly"] = "true",
+                ["newClientOrderId"] = Guid.NewGuid().ToString(),
+                ["newOrderRespType"] = "RESULT",
+            },
+            true,
+            "close.order",
+            ct
+        );
+
+        var after = await SendAsync(HttpMethod.Get, "/fapi/v2/account", new(), true, "close.account-after", ct);
+        after.Contains($"\"symbol\":\"{Symbol}\"", StringComparison.Ordinal).IsTrue();
+    }
+
+    /// <summary>
+    /// Places one market order and records every raw answer the exchange gives about it: the placement, the
+    /// order queried back, the trades it produced, and the stream events it raised.
+    /// </summary>
+    /// <remarks>
+    /// Opened because a filled market order came back with an executed price of zero, and "the field was
+    /// removed" is a reading of a document rather than a measurement. This records what the exchange
+    /// actually sends, so the question - is the price absent, or is it under a name we do not read - is
+    /// answered from bytes.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = 180_000)]
+    public async Task MarketOrder_RecordsEveryAnswerAboutIt()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var sp = Get<IServiceProvider>();
+        var messages = new System.Collections.Concurrent.ConcurrentQueue<string>();
+
+        var signatureService = sp.CreateSignatureService(Settings.User, ProviderKey.Create(Constants.Provider));
+        var monitor = new Annium.Finance.Providers.Core.Shared.Status.StatusMonitor(Logger);
+        var config = new Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.User.UserConfig
+        {
+            Provider = Constants.Provider,
+            Key = Settings.User.Key,
+            Secret = Settings.User.Secret,
+            HttpApi = Endpoints.HttpApi,
+            WsApi = Endpoints.WsApi,
+            ListenKeyUriPath = Endpoints.UserWsUriPath,
+            ListenKey = new Annium.Finance.Providers.Crypto.Binance.Base.User.Services.ListenKeyConfiguration(
+                60_000,
+                5_000
+            ),
+            ReloadContext = new Annium.Finance.Providers.Core.Shared.Loaders.CompositeLoaderConfig(
+                1000,
+                5,
+                5000,
+                1000,
+                100
+            ),
+            ReloadOrders = new Annium.Finance.Providers.Core.Shared.Loaders.CompositeLoaderConfig(
+                1000,
+                5,
+                5000,
+                1000,
+                100
+            ),
+            ReloadTrades = new Annium.Finance.Providers.Core.Shared.Loaders.CompositeLoaderConfig(
+                1000,
+                5,
+                5000,
+                1000,
+                100
+            ),
+        };
+
+        var resolver = sp.CreateListenKeyResolver(
+            config,
+            Endpoints.ListenKeyUriPath,
+            Constants.ListenKeyKey,
+            signatureService,
+            monitor
+        );
+        using var stream = sp.CreateUserStream(config, resolver, monitor);
+        stream.OnMessage += data => messages.Enqueue(System.Text.Encoding.UTF8.GetString(data.Span));
+
+        await Task.Delay(10_000, ct);
+
+        var price = ReadDecimal(
+            await SendAsync(HttpMethod.Get, "/fapi/v1/ticker/price", Q(("symbol", Symbol)), false, "cap.ticker", ct),
+            "price"
+        );
+        var qty = decimal.Ceiling(5.5m / price * 10m) / 10m;
+        var clientOrderId = Guid.NewGuid().ToString();
+
+        var placed = await SendAsync(
+            HttpMethod.Post,
+            "/fapi/v1/order",
+            Q(
+                ("symbol", Symbol),
+                ("side", "BUY"),
+                ("positionSide", "BOTH"),
+                ("type", "MARKET"),
+                ("quantity", qty.ToString(CultureInfo.InvariantCulture)),
+                ("newClientOrderId", clientOrderId),
+                ("newOrderRespType", "RESULT")
+            ),
+            true,
+            "cap.place-RESULT",
+            ct
+        );
+        var orderId = ReadString(placed, "orderId");
+
+        try
+        {
+            await Task.Delay(3000, ct);
+            await SendAsync(
+                HttpMethod.Get,
+                "/fapi/v1/order",
+                Q(("symbol", Symbol), ("orderId", orderId)),
+                true,
+                "cap.query",
+                ct
+            );
+            await SendAsync(
+                HttpMethod.Get,
+                "/fapi/v1/userTrades",
+                Q(("symbol", Symbol), ("limit", "5")),
+                true,
+                "cap.trades",
+                ct
+            );
+            await SendAsync(
+                HttpMethod.Get,
+                "/fapi/v1/allOrders",
+                Q(("symbol", Symbol), ("limit", "3")),
+                true,
+                "cap.allOrders",
+                ct
+            );
+        }
+        finally
+        {
+            await SendAsync(
+                HttpMethod.Post,
+                "/fapi/v1/order",
+                Q(
+                    ("symbol", Symbol),
+                    ("side", "SELL"),
+                    ("positionSide", "BOTH"),
+                    ("type", "MARKET"),
+                    ("quantity", qty.ToString(CultureInfo.InvariantCulture)),
+                    ("reduceOnly", "true"),
+                    ("newClientOrderId", Guid.NewGuid().ToString()),
+                    ("newOrderRespType", "RESULT")
+                ),
+                true,
+                "cap.close",
+                ct
+            );
+            await Task.Delay(4000, ct);
+
+            var dir = Environment.GetEnvironmentVariable("PROBE_OUT");
+            if (!string.IsNullOrEmpty(dir))
+            {
+                Directory.CreateDirectory(dir);
+                var i = 0;
+                foreach (var m in messages)
+                    await File.WriteAllTextAsync(Path.Combine(dir, $"cap.stream.{i++:00}.json"), m, ct);
+            }
+        }
+
+        orderId.IsNotEmpty($"the placement was refused: {placed}");
+    }
+
+    /// <summary>Builds a query dictionary from name/value pairs.</summary>
+    /// <param name="pairs">The parameters to send.</param>
+    /// <returns>The dictionary.</returns>
+    private static Dictionary<string, string> Q(params (string Key, string Value)[] pairs)
+    {
+        var result = new Dictionary<string, string>();
+        foreach (var (key, value) in pairs)
+            result[key] = value;
+
+        return result;
+    }
+
     /// <summary>Sends one request to the live exchange, saves the answer, and returns its body.</summary>
     /// <param name="method">The HTTP method to use.</param>
     /// <param name="path">The endpoint path to call.</param>

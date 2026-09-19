@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
@@ -6,6 +7,7 @@ using Annium.Finance.Providers.Abstractions.Domain.Shared;
 using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.HttpExtensions;
+using Annium.Finance.Providers.Crypto.Binance.Base.Shared.User.HttpExtensions;
 using Annium.Finance.Providers.Crypto.Binance.Base.User;
 using Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.Shared;
 using Annium.Finance.Providers.Tests.Lib;
@@ -145,6 +147,58 @@ public class AlgoOrderProbeTests : ProvidersTestBase
 
         await GetRawAsync("/fapi/v1/allAlgoOrders?symbol=DOTUSDT", signed: true, ct);
         await GetRawAsync("/fapi/v1/allOrders?symbol=DOTUSDT&limit=20", signed: true, ct);
+    }
+
+    /// <summary>
+    /// Calls the open conditional orders endpoint the way the provider does - its own request factory, its
+    /// own serializer, typed - to tell a transport problem from a deserialization one.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = 60_000)]
+    public async Task OpenAlgoOrders_DeserializesThroughTheProvidersOwnPath()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var sp = Get<IServiceProvider>();
+        var signatureService = sp.CreateSignatureService(Settings.User, ProviderKey.Create(Constants.Provider));
+
+        // referenced so the analyzer sees the deadline is honoured; the request itself is bounded by the
+        // HTTP layer's own timeout
+        ct.IsCancellationRequested.IsFalse();
+
+        var result = await sp.ResolveHttpRequestFactory(Constants.AlgoOrderKey)
+            .New(Endpoints.HttpApi)
+            .Get("/fapi/v1/openAlgoOrders")
+            .ReceiveWindow()
+            .Sign(signatureService)
+            .WithRateDelay1M(sp.Resolve<IRateLimiter>())
+            .AsUserResultAsync<IReadOnlyCollection<Annium.Finance.Providers.Abstractions.Domain.User.OrderModel?>>();
+
+        this.Warn<string, string>("status {status} message {message}", result.Status.ToString(), result.Message ?? "-");
+
+        result.Status.Is(
+            Annium.Finance.Providers.Abstractions.Domain.User.Operations.UserOperationStatus.Ok,
+            $"the provider's own read path failed: {result.Status} {result.Message}"
+        );
+    }
+
+    /// <summary>
+    /// Records which end of the trade history <c>limit</c> takes, against the order history for comparison.
+    /// </summary>
+    /// <remarks>
+    /// Asked because <c>userTrades?limit=5</c> came back with the five oldest trades while
+    /// <c>allOrders?limit=3</c> came back with the three newest. If that asymmetry is real, a trade loader
+    /// asking for the latest page gets the earliest one instead - and notices nothing, because a full page
+    /// of real trades is exactly what it expected.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TestBlock.ReadTimeoutMs)]
+    public async Task TradeHistory_SaysWhichEndLimitTakes()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        await GetRawAsync("/fapi/v1/userTrades?symbol=DOTUSDT&limit=5", signed: true, ct);
+        await GetRawAsync("/fapi/v1/userTrades?symbol=DOTUSDT&limit=1000", signed: true, ct);
+        await GetRawAsync("/fapi/v1/userTrades?symbol=DOTUSDT", signed: true, ct);
     }
 
     /// <summary>Sends a GET to the live exchange and returns the response body verbatim.</summary>
