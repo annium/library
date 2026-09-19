@@ -65,4 +65,48 @@ public class OperationResultConverterTests : ProvidersTestBase
         // assert - deserialization
         deserialized.IsDefault();
     }
+
+    /// <summary>
+    /// A <c>code</c> the exchange sends as a JSON string is read as the number it spells.
+    /// </summary>
+    /// <remarks>
+    /// The algo endpoints answer a successful cancellation with
+    /// <c>{"algoId":…,"clientAlgoId":…,"code":"200","msg":"success"}</c> - quoted, where every error
+    /// payload sends a bare number. Reading only the number threw, and the throw surfaced as a parse
+    /// failure on a response the exchange considered a success: a cancellation that had happened, reported
+    /// as unreadable. Captured live on 2026-09-19.
+    /// </remarks>
+    [Fact]
+    public void StringCodeIsRead()
+    {
+        // arrange - a real cancellation answer, verbatim
+        var raw =
+            @"{""algoId"":4000001910058351,""clientAlgoId"":""d0a897fb-5b04-4ac7-b678-2189ad628150"",""code"":""200"",""msg"":""success""}";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.InitOrderKey);
+        var deserialized = serializer.Deserialize<OperationResult>(Encoding.UTF8.GetBytes(raw)).NotNull();
+
+        // assert
+        deserialized.Code.Is(200);
+        deserialized.Message.Is("success");
+    }
+
+    /// <summary>
+    /// A <c>code</c> that is neither a number nor a numeric string leaves the result unread rather than
+    /// throwing, so one malformed field cannot turn a whole response into an exception.
+    /// </summary>
+    [Fact]
+    public void UnreadableCodeReturnsEmpty()
+    {
+        // arrange
+        var raw = @"{""code"":""not a number"",""msg"":""smth bad""}";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.InitOrderKey);
+        var deserialized = serializer.Deserialize<OperationResult>(Encoding.UTF8.GetBytes(raw));
+
+        // assert
+        deserialized.IsDefault();
+    }
 }

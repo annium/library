@@ -25,6 +25,22 @@ public static class TestBlock
     /// <summary>Mutates the account: places orders, opens and closes positions.</summary>
     public const string Write = "write";
 
+    /// <summary>An investigation tool kept in the tree, run by hand and by no recipe.</summary>
+    /// <remarks>
+    /// A probe answers a question about the exchange rather than asserting anything about this code: it
+    /// places whatever it needs to place, writes what came back into the knowledge base, and is read
+    /// afterwards by a person. That makes it the opposite of a test in the one way that matters here -
+    /// running it twice is not supposed to produce the same thing, and running it as part of a suite
+    /// corrupts both: it trades in the middle of another test's account state, and it overwrites the
+    /// recorded answers that were committed as evidence.
+    ///
+    /// So it gets a block of its own rather than the <see cref="Write"/> block it would otherwise sit in,
+    /// and every recipe excludes it. What is worth keeping from a probe is not the probe: it is the
+    /// capture it produced, which is committed, and the test written against that capture, which runs
+    /// offline forever after.
+    /// </remarks>
+    public const string Probe = "probe";
+
     /// <summary>
     /// How long a <see cref="Read"/> test may run before xUnit fails it, in milliseconds.
     /// </summary>

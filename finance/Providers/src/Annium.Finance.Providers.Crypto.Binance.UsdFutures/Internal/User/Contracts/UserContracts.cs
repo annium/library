@@ -28,6 +28,21 @@ internal static class UserContracts
             .AddConverter<GetOrderResponseConverter>()
             .AddConverter<OperationResultConverter>();
 
+    /// <summary>Serializer options for the user data stream's <c>TRADE_LITE</c> event.</summary>
+    public static JsonSerializerOptions TradeLite { get; } =
+        new JsonSerializerOptions().ResetConverters().AddConverter<TradeLiteEventConverter>();
+
+    /// <summary>Serializer options for the user data stream's <c>ALGO_UPDATE</c> event.</summary>
+    public static JsonSerializerOptions AlgoUpdate { get; } =
+        new JsonSerializerOptions().ResetConverters().AddConverter<AlgoUpdateEventConverter>();
+
+    /// <summary>Serializer options for the conditional order endpoints (<c>/fapi/v1/algoOrder</c> and its lists).</summary>
+    public static JsonSerializerOptions AlgoOrder { get; } =
+        new JsonSerializerOptions()
+            .ResetConverters()
+            .AddConverter<AlgoOrderResponseConverter>()
+            .AddConverter<OperationResultConverter>();
+
     /// <summary>Serializer options for the trade (user fills) lookup endpoint (<c>GET /fapi/v1/userTrades</c>).</summary>
     public static JsonSerializerOptions GetTrade { get; } =
         new JsonSerializerOptions()

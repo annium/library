@@ -302,6 +302,29 @@ to break silently.
 Read categories in this order, most consequential first: endpoints and auth, then request parameters,
 then enumerations and error codes, then response fields, then filters, then rate limits, then timing.
 
+#### What documentation cannot close, and who closes it
+
+A vendor's documentation is authoritative about what it *intends*. It is not evidence about what a
+response body contains, and the difference has cost a run: a field recorded as removed, on a document's
+say-so, was later confirmed removed — but the confirmation came from bytes, and until it did, "removed"
+and "renamed to something we do not read" were the same finding wearing different words.
+
+So, whenever a category resolves to **a claim about a response body that no snapshot shows**:
+
+- record it as the reading it is, naming the document;
+- state the alternative it cannot rule out — a renamed field is the common one, an absent field the
+  other;
+- and **hand it to the next layer as its first task, not its last**.
+
+That sequencing is the part that gets it wrong. A response shape the documentation does not describe
+looks like something to resolve when the code is written; it is the opposite. A converter written from a
+guess compiles, passes the tests its author wrote for it, and is discovered wrong only by a live run —
+by which time the tests defend the mistake. A logged probe that costs one request answers it first.
+
+Where the documentation publishes **no response schema at all** for a family, say so as a *task* rather
+than a gap: the next layer opens with a capture, and the captured answers become both the source the
+converters are written from and the fixtures their tests use.
+
 ### Phase 2c — report
 
 Write `kb/providers/<provider>/<YYYY.MM>/<YYYY.MM.DD>-contract.md`, beside the snapshot it was written from. Immutable once written.

@@ -58,6 +58,13 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <summary>Factory for requests against the cancel-all-orders endpoint.</summary>
     private readonly IHttpRequestFactory _cancelAllOrdersRequestFactory;
 
+    /// <summary>The request factory for the conditional ("algo") order endpoints.</summary>
+    /// <remarks>
+    /// Separate from the ordinary order factory because it carries a different serializer: the algo
+    /// endpoints answer under their own field names, which one converter cannot share with the other.
+    /// </remarks>
+    private readonly IHttpRequestFactory _algoOrderRequestFactory;
+
     /// <summary>Limits request weight against the exchange's rate limits.</summary>
     private readonly IRateLimiter _rateLimiter;
 
@@ -76,6 +83,12 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <summary>Deserializes <c>ORDER_TRADE_UPDATE</c> user data stream messages.</summary>
     private readonly ISerializer<ReadOnlyMemory<byte>> _orderUpdateEventSerializer;
 
+    /// <summary>Reads the user data stream's conditional order update event.</summary>
+    private readonly ISerializer<ReadOnlyMemory<byte>> _algoUpdateEventSerializer;
+
+    /// <summary>Reads the user data stream's earliest fill notice.</summary>
+    private readonly ISerializer<ReadOnlyMemory<byte>> _tradeLiteEventSerializer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UserConnector"/> class, wiring the context/orders/trades
     /// loaders and the user data stream into the connector's lifecycle.
@@ -88,12 +101,15 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <param name="initOrderRequestFactory">Factory for requests against the place-order endpoint.</param>
     /// <param name="modifyOrderRequestFactory">Factory for requests against the modify-order endpoint.</param>
     /// <param name="cancelOrderRequestFactory">Factory for requests against the cancel-order endpoint.</param>
+    /// <param name="algoOrderRequestFactory">The request factory for the conditional order endpoints.</param>
     /// <param name="cancelAllOrdersRequestFactory">Factory for requests against the cancel-all-orders endpoint.</param>
     /// <param name="rateLimiter">Limits request weight against the exchange's rate limits.</param>
     /// <param name="contextLoader">Loader that reloads the account context (assets and positions).</param>
     /// <param name="ordersLoader">Loader that reloads the currently open orders.</param>
     /// <param name="tradesLoader">Loader that reloads trades for a symbol.</param>
     /// <param name="userStream">The user data websocket stream.</param>
+    /// <param name="algoUpdateEventSerializer">Reads the user data stream's conditional order update event.</param>
+    /// <param name="tradeLiteEventSerializer">Reads the user data stream's earliest fill notice.</param>
     /// <param name="orderUpdateEventSerializer">Deserializes <c>ORDER_TRADE_UPDATE</c> user data stream messages.</param>
     /// <param name="reporter">Reports connector status transitions.</param>
     /// <param name="monitor">Monitors connector status.</param>
@@ -109,12 +125,15 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         IHttpRequestFactory modifyOrderRequestFactory,
         IHttpRequestFactory cancelOrderRequestFactory,
         IHttpRequestFactory cancelAllOrdersRequestFactory,
+        IHttpRequestFactory algoOrderRequestFactory,
         IRateLimiter rateLimiter,
         ICompositeLoader<UserContext> contextLoader,
         ICompositeLoader<IReadOnlyCollection<OrderModel>> ordersLoader,
         IKeyedLoader<string, long, IReadOnlyCollection<TradeModel>> tradesLoader,
         IUserStream userStream,
         ISerializer<ReadOnlyMemory<byte>> orderUpdateEventSerializer,
+        ISerializer<ReadOnlyMemory<byte>> algoUpdateEventSerializer,
+        ISerializer<ReadOnlyMemory<byte>> tradeLiteEventSerializer,
         IStatusReporter reporter,
         IStatusMonitor monitor,
         AsyncDisposableBox disposable,
@@ -130,6 +149,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         _modifyOrderRequestFactory = modifyOrderRequestFactory;
         _cancelOrderRequestFactory = cancelOrderRequestFactory;
         _cancelAllOrdersRequestFactory = cancelAllOrdersRequestFactory;
+        _algoOrderRequestFactory = algoOrderRequestFactory;
         _rateLimiter = rateLimiter;
 
         // context
@@ -159,6 +179,8 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         Disposable += () => _userStream.OnMessage -= HandleMessage;
 
         _orderUpdateEventSerializer = orderUpdateEventSerializer;
+        _algoUpdateEventSerializer = algoUpdateEventSerializer;
+        _tradeLiteEventSerializer = tradeLiteEventSerializer;
     }
 
     /// <summary>
@@ -247,6 +269,11 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             return UserResult.New(UserOperationStatus.NotConnected, default(OrderModel));
         }
 
+        // the four conditional types left the ordinary endpoint on 2025-12-09 and are refused there with
+        // -4120. Routing is decided here, once, from the order's own type
+        if (QueryProcessor.IsConditional(request.Type))
+            return await InitAlgoOrderAsync(request);
+
         var queryResult = _queryProcessor.BuildInitOrderQuery(request);
         if (!queryResult.IsSuccess)
         {
@@ -257,6 +284,40 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         var result = await _initOrderRequestFactory
             .New(_config.HttpApi)
             .Post("/fapi/v1/order")
+            .Params(queryResult.Data)
+            .ReceiveWindow()
+            .Sign(_signatureService)
+            .WithRateDelay1M(_rateLimiter)
+            .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
+            .AsUserResultAsync<OrderModel>();
+
+        HandleTradeResult(result.IsSuccess);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Places a conditional order through <c>POST /fapi/v1/algoOrder</c>.
+    /// </summary>
+    /// <remarks>
+    /// The connector is already connected and the request already routed here by type, so this repeats
+    /// neither check. What it does not share with the ordinary placement is the query - four parameter names
+    /// differ - and the serializer, since the answer comes back under the algo field names.
+    /// </remarks>
+    /// <param name="request">The order parameters.</param>
+    /// <returns>A result carrying the placed order, or a non-success status.</returns>
+    private async ValueTask<UserResult<OrderModel?>> InitAlgoOrderAsync(IInitOrderRequest request)
+    {
+        var queryResult = _queryProcessor.BuildInitAlgoOrderQuery(request);
+        if (!queryResult.IsSuccess)
+        {
+            this.Warn("{id} algo query processing failed: {result}", Id, queryResult);
+            return UserResult.From(queryResult, default(OrderModel));
+        }
+
+        var result = await _algoOrderRequestFactory
+            .New(_config.HttpApi)
+            .Post("/fapi/v1/algoOrder")
             .Params(queryResult.Data)
             .ReceiveWindow()
             .Sign(_signatureService)
@@ -288,7 +349,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         {
             // try cancel order
             var order = request.Order;
-            var cancelRequest = RequestBuilder.CancelOrder(order.Id, order.ClientOrderId, order.Symbol);
+            var cancelRequest = RequestBuilder.CancelOrder(order);
             var cancelResult = await CancelOrderAsync(cancelRequest);
             if (cancelResult.IsFailure)
             {
@@ -338,6 +399,11 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             return UserResult.New(UserOperationStatus.NotConnected);
         }
 
+        // the store an order lives in decides the endpoint that can cancel it, and the request carries its
+        // type for exactly this reason
+        if (QueryProcessor.IsConditional(request.Type))
+            return await CancelAlgoOrderAsync(request);
+
         var queryResult = _queryProcessor.BuildCancelOrderQuery(request);
         if (!queryResult.IsSuccess)
         {
@@ -354,6 +420,40 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             .WithRateDelay1M(_rateLimiter)
             .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
             .AsUserResultAsync<CancelOrderResponse>();
+
+        HandleTradeResult(result.IsSuccess);
+
+        return UserResult.From(result);
+    }
+
+    /// <summary>
+    /// Cancels a conditional order through <c>DELETE /fapi/v1/algoOrder</c>.
+    /// </summary>
+    /// <remarks>
+    /// The answer is the <c>{code, msg}</c> envelope rather than the cancelled order, and it spells the code
+    /// as the string <c>"200"</c> on success - which is why the shared result converter reads that field in
+    /// either form.
+    /// </remarks>
+    /// <param name="request">The order to cancel.</param>
+    /// <returns>A result indicating whether the cancellation succeeded.</returns>
+    private async ValueTask<UserResult> CancelAlgoOrderAsync(ICancelOrderRequest request)
+    {
+        var queryResult = _queryProcessor.BuildCancelAlgoOrderQuery(request);
+        if (!queryResult.IsSuccess)
+        {
+            this.Warn("{id} algo cancel query processing failed: {result}", Id, queryResult);
+            return UserResult.From(queryResult);
+        }
+
+        var result = await _algoOrderRequestFactory
+            .New(_config.HttpApi)
+            .Delete("/fapi/v1/algoOrder")
+            .Params(queryResult.Data)
+            .ReceiveWindow()
+            .Sign(_signatureService)
+            .WithRateDelay1M(_rateLimiter)
+            .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
+            .AsUserResultAsync<OperationResult>();
 
         HandleTradeResult(result.IsSuccess);
 
@@ -485,10 +585,67 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         // account info in event is almost useless (and position info lacks leverage value), so request account reload
         _contextLoader.Request();
 
+        // the earliest notice of a fill this venue gives - it precedes the order update reporting the
+        // same fill. Nothing is published from it: it carries no commission and no realised PnL, so a
+        // trade built from it would have a zero fee, which is not missing data a caller can see but wrong
+        // data it cannot. What it buys is starting the reload sooner
+        var tradeLite = _tradeLiteEventSerializer.Deserialize<TradeLiteEvent?>(data);
+        if (tradeLite is not null)
+        {
+            _tradesLoader.Request(tradeLite.Symbol);
+            return;
+        }
+
         // handle order update
         var orderUpdate = _orderUpdateEventSerializer.Deserialize<OrderUpdateEvent?>(data);
         if (orderUpdate is not null)
+        {
             HandleOrderUpdate(orderUpdate);
+            return;
+        }
+
+        // conditional orders are announced on their own event and never by ORDER_TRADE_UPDATE until their
+        // trigger fires, so without this a stop loss appears only when the orders loader next polls
+        var algoUpdate = _algoUpdateEventSerializer.Deserialize<AlgoUpdateEvent?>(data);
+        if (algoUpdate is not null)
+            HandleAlgoUpdate(algoUpdate);
+    }
+
+    /// <summary>
+    /// Publishes an <c>ALGO_UPDATE</c> event on <see cref="IUserConnector.Orders"/>: a <c>Set</c> while the
+    /// conditional order is still waiting, a <c>Delete</c> once it is over.
+    /// </summary>
+    /// <remarks>
+    /// A triggered conditional order is deleted rather than updated. The exchange creates an ordinary order
+    /// carrying the same client id, and that order announces itself on its own event - so leaving the
+    /// conditional record in place would show the caller the order twice, once with its real fill and once
+    /// with a record that cannot say whether the book filled or cancelled it.
+    /// </remarks>
+    /// <param name="e">The conditional order update event.</param>
+    private void HandleAlgoUpdate(AlgoUpdateEvent e)
+    {
+        var order = new OrderModel(
+            e.AlgoId,
+            e.ClientAlgoId,
+            e.Range,
+            e.Symbol,
+            e.Side,
+            e.Type,
+            e.TotalQty,
+            e.Price,
+            e.LevelPrice,
+            e.ReduceOnly,
+            e.UpdatedAt,
+            e.Status,
+            0m,
+            0m,
+            e.UpdatedAt
+        );
+
+        if (e.IsSuperseded || e.Status is not (OrderStatus.New or OrderStatus.PartiallyFilled))
+            Write(ChangeEvent.Delete(order));
+        else
+            Write(ChangeEvent.Set(order));
     }
 
     /// <summary>
