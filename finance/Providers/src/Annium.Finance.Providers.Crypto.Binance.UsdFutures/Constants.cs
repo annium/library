@@ -32,6 +32,13 @@ public static class Constants
     /// <summary>Registration key for the trade (user fills) lookup endpoint.</summary>
     internal const string GetTradeKey = $"{Provider}_{nameof(GetTradeKey)}";
 
+    /// <summary>Registration key for the conditional ("algo") order endpoints.</summary>
+    /// <remarks>
+    /// One key for placement, the open list and the history alike: the three answers differ in which extra
+    /// fields they carry, not in shape, and one converter reads all of them.
+    /// </remarks>
+    internal const string AlgoOrderKey = $"{Provider}_{nameof(AlgoOrderKey)}";
+
     // user data trade
     /// <summary>Registration key for the change-leverage endpoint.</summary>
     internal const string SetLeverageKey = $"{Provider}_{nameof(SetLeverageKey)}";
