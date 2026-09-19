@@ -198,6 +198,66 @@ public class AlgoOrderWriteProbeTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// Reads what each endpoint the connector polls actually costs, from the venue's own counter.
+    /// </summary>
+    /// <remarks>
+    /// Opened because a trading run exhausted the account's weight budget from a standing start, and the
+    /// documented weights of the endpoints it calls do not add up to anywhere near what the venue counted.
+    /// Arithmetic over a live run cannot settle it - requests overlap, so a rise in the counter cannot be
+    /// attributed to the request that happened to finish first.
+    ///
+    /// So they are issued one at a time, alone, with the counter read after each. The first call establishes
+    /// the baseline and the difference is that endpoint's weight. Run it on a rested budget, or the numbers
+    /// are differences between two saturated readings.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TestBlock.ReadTimeoutMs)]
+    public async Task WeightOfEachPolledEndpoint()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var sp = Get<IServiceProvider>();
+
+        var endpoints = new (string Path, Dictionary<string, string> Params, bool Signed)[]
+        {
+            ("/fapi/v1/time", new(), false),
+            ("/fapi/v1/exchangeInfo", new(), false),
+            ("/fapi/v2/account", new(), true),
+            ("/fapi/v1/openOrders", new(), true),
+            ("/fapi/v1/openOrders", new() { ["symbol"] = Symbol }, true),
+            ("/fapi/v1/openAlgoOrders", new(), true),
+        };
+
+        var previous = 0;
+        foreach (var (path, parameters, signed) in endpoints)
+        {
+            var factory = sp.ResolveHttpRequestFactory(Constants.GetAccountKey);
+            var request = factory.New(Endpoints.HttpApi).With(HttpMethod.Get, path).Params(parameters);
+            if (signed)
+            {
+                var signatureService = sp.CreateSignatureService(
+                    Settings.User,
+                    ProviderKey.Create(Constants.Provider)
+                );
+                request = request.ReceiveWindow().Sign(signatureService);
+            }
+
+            var response = await request.RunAsync(ct);
+            var used = -1;
+            if (response.Headers.TryGetValues("x-mbx-used-weight-1m", out var values))
+                foreach (var value in values)
+                    if (int.TryParse(value, out var parsed))
+                        used = parsed;
+
+            var scoped = parameters.Count > 0 ? "?symbol" : string.Empty;
+            OutputHelper.WriteLine($"WEIGHT {path}{scoped}: counter {used}, cost {used - previous}");
+            previous = used;
+
+            // the counter is a rolling minute, so back-to-back calls are what keeps the readings comparable
+            await Task.Delay(500, ct);
+        }
+    }
+
+    /// <summary>
     /// Cancels every order left open on the test symbol, ordinary and conditional alike.
     /// </summary>
     /// <remarks>
