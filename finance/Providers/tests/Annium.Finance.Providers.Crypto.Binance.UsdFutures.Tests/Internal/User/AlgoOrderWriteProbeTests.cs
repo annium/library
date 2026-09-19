@@ -224,14 +224,7 @@ public class AlgoOrderWriteProbeTests : ProvidersTestBase
             ct
         );
 
-        var open = await SendAsync(
-            HttpMethod.Get,
-            "/fapi/v1/openAlgoOrders",
-            new(),
-            true,
-            "cleanup.algo-before",
-            ct
-        );
+        var open = await SendAsync(HttpMethod.Get, "/fapi/v1/openAlgoOrders", new(), true, "cleanup.algo-before", ct);
 
         using var doc = System.Text.Json.JsonDocument.Parse(open);
         foreach (var order in doc.RootElement.EnumerateArray())
