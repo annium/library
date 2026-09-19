@@ -127,17 +127,19 @@ public class RequestBuilderTests
     }
 
     /// <summary>
-    /// Verifies that a cancellation carries both identifiers an exchange may key on, plus the symbol.
+    /// Verifies that a cancellation carries both identifiers an exchange may key on, the symbol, and the
+    /// type that decides which endpoint it is cancelled through.
     /// </summary>
     [Fact]
     public void CancelRequest_CarriesBothIdentifiers()
     {
         // act
-        var request = CancelOrder("id", "client-id", "BTCUSDT");
+        var request = CancelOrder("id", "client-id", "BTCUSDT", OrderType.StopLossMarket);
 
         // assert
         request.Id.Is("id");
         request.ClientOrderId.Is("client-id");
         request.Symbol.Is("BTCUSDT");
+        request.Type.Is(OrderType.StopLossMarket);
     }
 }

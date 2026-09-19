@@ -225,21 +225,26 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
         await using var server = RunServer(
             log,
             request =>
-                request.Method == "DELETE" ? (HttpStatusCode.OK, CancelResponse) : (HttpStatusCode.OK, OrderResponse)
+                request.Method == "DELETE"
+                    ? (HttpStatusCode.OK, AlgoCancelResponse)
+                    : (HttpStatusCode.OK, OrderResponse)
         );
         await using var connector = CreateConnector(server, out _);
 
         // act
         await connector.ModifyOrderAsync(ModifyNonLimitRequest());
 
-        // assert
+        // assert - the two legs go to different stores, because they are about different orders: the one
+        // being cancelled is conditional and lives on the algo endpoint, the one being placed is a limit
+        // and lives on the ordinary one. A modify that changes an order's type moves it between stores,
+        // and routing each leg by its own order's type is what makes that work
         var cancel = await log.Answered.Reader.ReadAsync(ct);
         cancel.Method.Is("DELETE");
-        cancel.Path.Is("/fapi/v1/order");
+        cancel.Path.Is("/fapi/v1/algoOrder", "the conditional order was cancelled in the wrong store");
 
         var init = await log.Answered.Reader.ReadAsync(ct);
         init.Method.Is("POST");
-        init.Path.Is("/fapi/v1/order");
+        init.Path.Is("/fapi/v1/order", "the replacement limit order was placed on the conditional endpoint");
 
         // and never the amend endpoint, which is what a limit would have taken
         log.Requests.Count.Is(2);
@@ -354,6 +359,12 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
         }
         """;
 
+    /// <summary>A real cancellation answer from the algo endpoint, captured live on 2026-09-19.</summary>
+    /// <remarks>Note the code: a JSON string, where every error payload sends a bare number.</remarks>
+    private const string AlgoCancelResponse = """
+        {"algoId":4000001910058351,"clientAlgoId":"c1","code":"200","msg":"success"}
+        """;
+
     /// <summary>
     /// A canned successful order response, in the shape the exchange sends one.
     /// </summary>
@@ -396,6 +407,45 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
     /// </summary>
     /// <returns>The position.</returns>
     private static PositionModel Position() => new("BTCUSDT", OrientationRange.Both, MarginType.Cross, 1m, 0m);
+
+    /// <summary>
+    /// Cancelling routes by the order's type too: a conditional order is cancelled on the algo endpoint,
+    /// an ordinary one on the ordinary endpoint.
+    /// </summary>
+    /// <remarks>
+    /// The two stores are disjoint, so a cancellation sent to the wrong one does not fail loudly - it
+    /// reports that no such order exists, which reads exactly like an order that was already gone. That is
+    /// why the request carries the order's type rather than the connector inferring it from a cache.
+    /// </remarks>
+    /// <param name="type">The type of the order being cancelled.</param>
+    /// <param name="path">The endpoint that type must be cancelled through.</param>
+    /// <param name="response">The answer that endpoint gives.</param>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Theory]
+    [InlineData(OrderType.Limit, "/fapi/v1/order", CancelResponse)]
+    [InlineData(OrderType.Market, "/fapi/v1/order", CancelResponse)]
+    [InlineData(OrderType.StopLossMarket, "/fapi/v1/algoOrder", AlgoCancelResponse)]
+    [InlineData(OrderType.TakeProfitMarket, "/fapi/v1/algoOrder", AlgoCancelResponse)]
+    [InlineData(OrderType.StopLossLimit, "/fapi/v1/algoOrder", AlgoCancelResponse)]
+    [InlineData(OrderType.TakeProfitLimit, "/fapi/v1/algoOrder", AlgoCancelResponse)]
+    public async Task CancelOrder_RoutesByType(OrderType type, string path, string response)
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        var log = new RequestLog();
+        await using var server = RunServer(log, _ => (HttpStatusCode.OK, response));
+        await using var connector = CreateConnector(server, out _);
+
+        // act
+        var result = await connector.CancelOrderAsync(CancelRequest("1", type));
+
+        // assert
+        result.Status.Is(UserOperationStatus.Ok, $"the cancellation failed: {result.Message}");
+
+        var sent = await log.Answered.Reader.ReadAsync(ct);
+        sent.Method.Is("DELETE");
+        sent.Path.Is(path, $"a {type} cancellation went to the wrong store");
+    }
 
     /// <summary>
     /// A conditional order goes to the algo endpoint, under the algo parameter names.
@@ -493,9 +543,10 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
     /// A cancel request naming the given id.
     /// </summary>
     /// <param name="id">The order id to cancel; empty for a request that cannot build a query.</param>
+    /// <param name="type">The type of the order to cancel, which decides the endpoint it goes to.</param>
     /// <returns>The request.</returns>
-    private static ICancelOrderRequest CancelRequest(string id) =>
-        RequestBuilder.CancelOrder(id, string.Empty, "BTCUSDT");
+    private static ICancelOrderRequest CancelRequest(string id, OrderType type = OrderType.Limit) =>
+        RequestBuilder.CancelOrder(id, string.Empty, "BTCUSDT", type);
 
     /// <summary>
     /// An order to modify.

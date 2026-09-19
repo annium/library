@@ -337,7 +337,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         {
             // try cancel order
             var order = request.Order;
-            var cancelRequest = RequestBuilder.CancelOrder(order.Id, order.ClientOrderId, order.Symbol);
+            var cancelRequest = RequestBuilder.CancelOrder(order);
             var cancelResult = await CancelOrderAsync(cancelRequest);
             if (cancelResult.IsFailure)
             {
@@ -387,6 +387,11 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             return UserResult.New(UserOperationStatus.NotConnected);
         }
 
+        // the store an order lives in decides the endpoint that can cancel it, and the request carries its
+        // type for exactly this reason
+        if (QueryProcessor.IsConditional(request.Type))
+            return await CancelAlgoOrderAsync(request);
+
         var queryResult = _queryProcessor.BuildCancelOrderQuery(request);
         if (!queryResult.IsSuccess)
         {
@@ -403,6 +408,40 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             .WithRateDelay1M(_rateLimiter)
             .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
             .AsUserResultAsync<CancelOrderResponse>();
+
+        HandleTradeResult(result.IsSuccess);
+
+        return UserResult.From(result);
+    }
+
+    /// <summary>
+    /// Cancels a conditional order through <c>DELETE /fapi/v1/algoOrder</c>.
+    /// </summary>
+    /// <remarks>
+    /// The answer is the <c>{code, msg}</c> envelope rather than the cancelled order, and it spells the code
+    /// as the string <c>"200"</c> on success - which is why the shared result converter reads that field in
+    /// either form.
+    /// </remarks>
+    /// <param name="request">The order to cancel.</param>
+    /// <returns>A result indicating whether the cancellation succeeded.</returns>
+    private async ValueTask<UserResult> CancelAlgoOrderAsync(ICancelOrderRequest request)
+    {
+        var queryResult = _queryProcessor.BuildCancelAlgoOrderQuery(request);
+        if (!queryResult.IsSuccess)
+        {
+            this.Warn("{id} algo cancel query processing failed: {result}", Id, queryResult);
+            return UserResult.From(queryResult);
+        }
+
+        var result = await _algoOrderRequestFactory
+            .New(_config.HttpApi)
+            .Delete("/fapi/v1/algoOrder")
+            .Params(queryResult.Data)
+            .ReceiveWindow()
+            .Sign(_signatureService)
+            .WithRateDelay1M(_rateLimiter)
+            .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
+            .AsUserResultAsync<OperationResult>();
 
         HandleTradeResult(result.IsSuccess);
 

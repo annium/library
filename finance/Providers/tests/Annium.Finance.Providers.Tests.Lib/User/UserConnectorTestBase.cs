@@ -459,7 +459,7 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     {
         this.Trace("start");
 
-        var request = CancelOrder(order.Id, order.ClientOrderId, order.Symbol);
+        var request = CancelOrder(order);
         await Connector.CancelOrderAsync(request).EnsureFailedAsync().WaitAsync(ct);
 
         EnsureNoErrors();
@@ -481,7 +481,7 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
 
         // cleanup
         this.Trace("execute start");
-        var request = CancelOrder(order.Id, order.ClientOrderId, order.Symbol);
+        var request = CancelOrder(order);
         await Connector.CancelOrderAsync(request).UnwrapAsync().WaitAsync(ct);
         this.Trace("execute done");
 

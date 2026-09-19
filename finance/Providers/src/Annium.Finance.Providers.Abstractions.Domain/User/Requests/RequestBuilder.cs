@@ -354,14 +354,26 @@ public static class RequestBuilder
     /// <param name="id">The provider-assigned identifier of the order to cancel.</param>
     /// <param name="clientOrderId">The client-assigned identifier of the order to cancel.</param>
     /// <param name="symbol">The instrument symbol the order to cancel belongs to.</param>
+    /// <param name="type">The type of the order to cancel, which decides the endpoint it is cancelled through.</param>
     /// <returns>An <see cref="ICancelOrderRequest"/> describing the cancellation.</returns>
-    public static ICancelOrderRequest CancelOrder(string id, string clientOrderId, string symbol)
+    public static ICancelOrderRequest CancelOrder(string id, string clientOrderId, string symbol, OrderType type)
     {
         return new CancelOrderRequest
         {
             Id = id,
             ClientOrderId = clientOrderId,
             Symbol = symbol,
+            Type = type,
         };
     }
+
+    /// <summary>Builds a request to cancel an order, taking its identifiers and type from the order itself.</summary>
+    /// <param name="order">The order to cancel.</param>
+    /// <returns>An <see cref="ICancelOrderRequest"/> describing the cancellation.</returns>
+    /// <remarks>
+    /// The overload to prefer. Every field a cancellation needs is on the order already, and passing them
+    /// one by one is where a caller can pair one order's id with another's type.
+    /// </remarks>
+    public static ICancelOrderRequest CancelOrder(OrderModel order) =>
+        CancelOrder(order.Id, order.ClientOrderId, order.Symbol, order.Type);
 }

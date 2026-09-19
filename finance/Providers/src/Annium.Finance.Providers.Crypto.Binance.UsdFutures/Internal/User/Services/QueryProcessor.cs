@@ -212,6 +212,34 @@ internal class QueryProcessor
     }
 
     /// <summary>
+    /// Builds the query for cancelling a conditional order through <c>DELETE /fapi/v1/algoOrder</c>.
+    /// </summary>
+    /// <remarks>
+    /// Two differences from the ordinary cancellation, both silent if got wrong: the identifiers are
+    /// <c>algoId</c> and <c>clientAlgoId</c>, and <strong>no symbol is sent at all</strong> - the algo
+    /// endpoint does not take one, where the ordinary one requires it.
+    /// </remarks>
+    /// <param name="request">The order to cancel.</param>
+    /// <returns>A result carrying the query parameters, or a bad-request failure when no identifier is usable.</returns>
+    public UserResult<Dictionary<string, string>> BuildCancelAlgoOrderQuery(ICancelOrderRequest request)
+    {
+        var result = new Dictionary<string, string>();
+
+        if (!request.Id.IsNullOrWhiteSpace())
+            result["algoId"] = request.Id;
+        else if (!request.ClientOrderId.IsNullOrWhiteSpace())
+            result["clientAlgoId"] = request.ClientOrderId;
+        else
+            return UserResult.New(
+                UserOperationStatus.BadRequest,
+                result,
+                "cancellation carries neither an algo id nor a client algo id"
+            );
+
+        return UserResult.Ok(result);
+    }
+
+    /// <summary>
     /// Builds the query for canceling all open orders on a symbol.
     /// </summary>
     /// <param name="symbol">The instrument symbol to cancel orders for.</param>
