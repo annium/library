@@ -27,6 +27,7 @@ namespace Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.User;
 /// <param name="getAccountRequestFactory">Factory for requests against the account info endpoint.</param>
 /// <param name="getOrderRequestFactory">Factory for requests against the order lookup endpoints.</param>
 /// <param name="getTradeRequestFactory">Factory for requests against the trade lookup endpoint.</param>
+/// <param name="algoOrderRequestFactory">Factory for requests against the conditional ("algo") order endpoints.</param>
 /// <param name="rateLimiter">Limits request weight against the exchange's rate limits.</param>
 /// <param name="logger">The logger.</param>
 internal class UserProvider(
@@ -36,6 +37,7 @@ internal class UserProvider(
     IHttpRequestFactory getAccountRequestFactory,
     IHttpRequestFactory getOrderRequestFactory,
     IHttpRequestFactory getTradeRequestFactory,
+    IHttpRequestFactory algoOrderRequestFactory,
     IRateLimiter rateLimiter,
     ILogger logger
 ) : IUserProvider, ILogSubject
@@ -121,9 +123,53 @@ internal class UserProvider(
             return UserResult.From(result, default(IReadOnlyCollection<OrderModel>));
         }
 
-        this.Trace("done, {count} orders loaded", result.Data.Count);
+        // conditional orders are not in this answer and never will be: until one triggers it exists only in
+        // the algo store, so a connector reading open orders from here alone reports an account with no
+        // stop losses on it - silently, as an empty list rather than an error
+        var algoResult = await LoadOpenAlgoOrdersAsync();
+        if (!algoResult.IsSuccess)
+            return UserResult.From(algoResult, default(IReadOnlyCollection<OrderModel>));
 
-        return UserResult.Ok<IReadOnlyCollection<OrderModel>?>(result.Data);
+        var orders = result.Data.Concat(algoResult.Data).ToArray();
+
+        this.Trace("done, {count} orders loaded", orders.Length);
+
+        return UserResult.Ok<IReadOnlyCollection<OrderModel>?>(orders);
+    }
+
+    /// <summary>
+    /// Loads the open conditional orders, across all symbols.
+    /// </summary>
+    /// <remarks>
+    /// A separate endpoint because a conditional order is kept in a separate store until it triggers, which
+    /// is not a detail of this provider but of the exchange: an order placed through the algo endpoint is
+    /// absent from the ordinary open-orders answer entirely, and appears among ordinary orders only once the
+    /// trigger has fired and created one.
+    /// </remarks>
+    /// <returns>A result carrying the open conditional orders.</returns>
+    private async Task<UserResult<IReadOnlyCollection<OrderModel>>> LoadOpenAlgoOrdersAsync()
+    {
+        var result = await algoOrderRequestFactory
+            .New(config.HttpApi)
+            .Get("/fapi/v1/openAlgoOrders")
+            .ReceiveWindow()
+            .Sign(signatureService)
+            .WithRateDelay1M(rateLimiter)
+            .WithLogFromWithHeaders(this, LogData.Headers)
+            .AsUserResultAsync<IReadOnlyCollection<OrderModel?>>();
+
+        if (!result.IsSuccess)
+        {
+            if (result.IsFailure)
+                this.Debug("algo failure: {result}", result);
+
+            return UserResult.From(result, (IReadOnlyCollection<OrderModel>)[]);
+        }
+
+        // the converter returns null for a record an ordinary order already accounts for, and the element
+        // type has to be nullable for that to survive the read - a collection of non-nullable elements keeps
+        // the null and hands a caller an entry with nothing in it
+        return UserResult.Ok<IReadOnlyCollection<OrderModel>>(result.Data.OfType<OrderModel>().ToArray());
     }
 
     /// <summary>

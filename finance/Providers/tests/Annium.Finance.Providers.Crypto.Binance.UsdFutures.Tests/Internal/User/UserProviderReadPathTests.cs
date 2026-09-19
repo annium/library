@@ -7,6 +7,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
+using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Abstractions.Domain.User.Operations;
 using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Core.Shared.Loaders;
@@ -239,9 +240,68 @@ public class UserProviderReadPathTests : ProvidersTestBase
 
         // assert
         result.Status.Is(UserOperationStatus.Ok);
-        paths.IsEqual(new[] { "/fapi/v1/openOrders" });
+        // two stores, so two requests. A conditional order is absent from the ordinary answer until it
+        // triggers, so reading only the first endpoint reports an account with no stop losses on it -
+        // silently, as a shorter list rather than as an error
+        paths.IsEqual(new[] { "/fapi/v1/openOrders", "/fapi/v1/openAlgoOrders" });
         bounded.Is(0, "open orders are a snapshot, not a range");
         symbolScoped.Is(0, "open orders are asked for across every symbol, not one at a time");
+    }
+
+    /// <summary>
+    /// Open orders come back from both stores merged, with the conditional records an ordinary order already
+    /// accounts for left out.
+    /// </summary>
+    /// <remarks>
+    /// The path test above proves both endpoints are asked; this proves the answers are joined, which is the
+    /// part a caller sees. The triggered record carries the same client id as an ordinary order - the
+    /// exchange keeps the identity across a trigger - so surfacing it would show one order twice, once with
+    /// its real fill and once with a conditional record that cannot say whether the book filled or cancelled
+    /// it. Both payloads are real answers captured live on 2026-09-19.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadOpenOrders_MergesBothStoresAndDropsSupersededRecords()
+    {
+        // arrange
+        var ordinary = """
+            [{"orderId":1,"clientOrderId":"11111111-1111-1111-1111-111111111111","symbol":"BTCUSDT",
+              "type":"LIMIT","side":"BUY","origQty":"1","price":"100","stopPrice":"0","status":"NEW",
+              "executedQty":"0","avgPrice":"0","time":1,"updateTime":2,"positionSide":"BOTH","reduceOnly":false}]
+            """;
+        var algo = """
+            [{"algoId":4000001910058351,"clientAlgoId":"22222222-2222-2222-2222-222222222222",
+              "orderType":"STOP_MARKET","symbol":"DOTUSDT","side":"BUY","positionSide":"BOTH","quantity":"4.9",
+              "algoStatus":"NEW","triggerPrice":"1.1837","price":"0","reduceOnly":false,
+              "createTime":1789819033056,"updateTime":1789819033056},
+             {"algoId":4000001910368571,"clientAlgoId":"33333333-3333-3333-3333-333333333333",
+              "orderType":"STOP_MARKET","symbol":"DOTUSDT","side":"BUY","positionSide":"BOTH","quantity":"4.9",
+              "algoStatus":"FINISHED","actualOrderId":"33877541028","actualPrice":"1.1325","actualQty":"4.9",
+              "triggerPrice":"1.1322","price":"0","reduceOnly":false,
+              "createTime":1789826233630,"updateTime":1789826323611}]
+            """;
+
+        await using var server = this.RunHttpServer(
+            async (request, response) =>
+            {
+                var isAlgo = (request.Url?.AbsolutePath ?? string.Empty).Contains("Algo", StringComparison.Ordinal);
+                await WriteJsonAsync(response, isAlgo ? algo : ordinary);
+            }
+        );
+        var provider = CreateProvider(server);
+
+        // act
+        var result = await provider.LoadOpenOrdersAsync();
+
+        // assert
+        result.Status.Is(UserOperationStatus.Ok);
+        var orders = result.Data.NotNull();
+        orders.Count.Is(2, "the two stores were not merged, or a superseded record was kept");
+        orders.Count(x => x.Symbol == "BTCUSDT").Is(1, "the ordinary order is missing");
+        var conditional = orders.Single(x => x.Symbol == "DOTUSDT");
+        conditional.ClientOrderId.Is("22222222-2222-2222-2222-222222222222");
+        conditional.Type.Is(OrderType.StopLossMarket);
+        conditional.LevelPrice.Is(1.1837m, "the trigger price was not read from triggerPrice");
     }
 
     /// <summary>
@@ -350,6 +410,7 @@ public class UserProviderReadPathTests : ProvidersTestBase
             sp.ResolveHttpRequestFactory(Constants.GetAccountKey),
             sp.ResolveHttpRequestFactory(Constants.GetOrderKey),
             sp.ResolveHttpRequestFactory(Constants.GetTradeKey),
+            sp.ResolveHttpRequestFactory(Constants.AlgoOrderKey),
             sp.Resolve<IRateLimiter>(),
             Logger
         );
