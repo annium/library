@@ -77,8 +77,17 @@ public class ClientWebSocket : IClientWebSocket
     private readonly int _reconnectDelay;
 
     /// <summary>
-    /// Cancellation token source for connection operations.
+    /// Lifetime of the current connection: cancelled when somebody stops wanting this socket, which is
+    /// <see cref="Disconnect"/> and <see cref="Dispose"/> and nothing else.
     /// </summary>
+    /// <remarks>
+    /// It used to carry the per-attempt connect deadline as well, and the two meanings do not survive
+    /// together. A handshake that overran the deadline cancelled this source, the scheduled reconnect
+    /// waited out its delay on this very token, and so the retry that the timeout exists to trigger was
+    /// the one thing the timeout prevented: the socket stayed <c>Connecting</c> for good, silently,
+    /// because the cancellation was swallowed as an expected shutdown. One slow handshake against a live
+    /// venue was enough, and it cost a five-minute test timeout to see it.
+    /// </remarks>
     private CancellationTokenSource _connectionCts = new();
 
     /// <summary>
@@ -148,6 +157,13 @@ public class ClientWebSocket : IClientWebSocket
                 this.Trace("skip - already {status}", _status);
                 return;
             }
+
+            // a previous Disconnect left _connectionCts pointing at an already-cancelled instance, so
+            // this connection gets a fresh lifetime. Replace before disposing, keeping the invariant
+            // that the field never points at a disposed source.
+            var oldCts = _connectionCts;
+            _connectionCts = new CancellationTokenSource();
+            oldCts.Dispose();
 
             SetStatus(Status.Connecting);
         }
@@ -304,7 +320,7 @@ public class ClientWebSocket : IClientWebSocket
     {
         this.Trace("start");
 
-        CancellationTokenSource cts;
+        CancellationTokenSource attemptCts;
         lock (_locker)
         {
             if (_status is Status.Disconnected)
@@ -314,12 +330,11 @@ public class ClientWebSocket : IClientWebSocket
             }
 
             Uri = uri;
-            // rotate _connectionCts under lock so a racing Disconnect can't double-dispose
-            // the CTS between our Interlocked.Exchange and Dispose
-            cts = new CancellationTokenSource(_connectTimeout);
-            var oldCts = _connectionCts;
-            _connectionCts = cts;
-            oldCts.Dispose();
+            // the deadline belongs to this attempt, not to the connection. _connectionCts says whether
+            // anyone still wants this socket, and only Disconnect/Dispose cancels it; linking means a
+            // Disconnect landing mid-handshake still aborts the attempt.
+            attemptCts = CancellationTokenSource.CreateLinkedTokenSource(_connectionCts.Token);
+            attemptCts.CancelAfter(_connectTimeout);
         }
 
         this.Trace("connect to {uri}", uri);
@@ -327,15 +342,22 @@ public class ClientWebSocket : IClientWebSocket
         {
             try
             {
-                var task = _socket.ConnectAsync(uri, cts.Token);
+                var task = _socket.ConnectAsync(uri, attemptCts.Token);
                 await task.ContinueWith(HandleConnected, uri, CancellationToken.None);
             }
             catch (OperationCanceledException) { }
-            // ODE: a concurrent Disconnect()/Dispose() rotated and disposed cts before we read cts.Token
+            // ODE: a concurrent Disconnect()/Dispose() disposed the source we linked to
             catch (ObjectDisposedException) { }
             catch (Exception ex)
             {
                 this.Error("ConnectPrivate background connect failed: {exception}", ex);
+            }
+            finally
+            {
+                // VSTHRD103: CancellationTokenSource.Dispose() is synchronous (no async variant).
+#pragma warning disable VSTHRD103
+                attemptCts.Dispose();
+#pragma warning restore VSTHRD103
             }
         });
 

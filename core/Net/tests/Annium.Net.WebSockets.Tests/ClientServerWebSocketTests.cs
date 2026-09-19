@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
@@ -649,6 +652,81 @@ public class ClientServerWebSocketTests : TestBase
 
         this.Trace("assert reconnected");
         (connectCount >= 2).IsTrue();
+
+        this.Trace("done");
+    }
+
+    /// <summary>
+    /// A connect attempt that runs out of time must not be the socket's last one.
+    /// </summary>
+    /// <remarks>
+    /// The deadline and the connection's lifetime were once the same cancellation source, so the
+    /// timeout cancelled the very token the scheduled reconnect waited on, the cancellation read as an
+    /// ordinary shutdown, and the socket sat in <c>Connecting</c> forever. It took one slow handshake
+    /// against a live venue to happen, and it was only visible as a test that stopped after five minutes.
+    ///
+    /// The listener here accepts the TCP connection and then answers nothing at all, which is what makes
+    /// this deterministic: the upgrade request can end no way other than on its own deadline. Nothing
+    /// ever connects, and nothing is supposed to - the assertion is only that the socket tried twice.
+    /// </remarks>
+    /// <returns>A task that represents the asynchronous test.</returns>
+    [Fact(Timeout = TestTimeout.Ms)]
+    public async Task ConnectTimeout_LeavesTheSocketStillTrying()
+    {
+        this.Trace("start");
+
+        // arrange
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        var silent = new ConcurrentBag<TcpClient>();
+        var ct = TestContext.Current.CancellationToken;
+        var accepting = Task.Run(async () =>
+        {
+            try
+            {
+                while (true)
+                    silent.Add(await listener.AcceptTcpClientAsync(TestContext.Current.CancellationToken));
+            }
+            catch (Exception e)
+            {
+                this.Trace<string>("listener stopped: {error}", e.GetType().Name);
+            }
+        }, ct);
+
+        var options = ClientWebSocketOptions.Default with { ConnectTimeout = 200, ReconnectDelay = 1 };
+        using var socket = new ClientWebSocket(options, Logger);
+
+        var attempts = 0;
+        var triedTwice = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        socket.OnError += _ =>
+        {
+            var count = Interlocked.Increment(ref attempts);
+            this.Trace("failed attempt #{count}", count);
+            if (count >= 2)
+                triedTwice.TrySetResult();
+        };
+
+        // act
+        socket.Connect(new Uri($"ws://{IPAddress.Loopback}:{port}"));
+
+        // assert - the bound is here so the test fails instead of hanging, not to measure anything
+        this.Trace("await a second attempt");
+        await triedTwice.Task.WaitAsync(TimeSpan.FromSeconds(20), ct).ContinueWith(_ => { }, TaskScheduler.Default);
+        (attempts >= 2).IsTrue("a connect attempt that timed out was the socket's last one");
+
+        // cleanup
+        socket.Disconnect();
+        listener.Stop();
+        foreach (var client in silent)
+        {
+            // VSTHRD103: TcpClient.Dispose() is synchronous (no async variant).
+#pragma warning disable VSTHRD103
+            client.Dispose();
+#pragma warning restore VSTHRD103
+        }
+
+        await accepting;
 
         this.Trace("done");
     }
