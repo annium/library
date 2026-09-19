@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
 using Annium.Finance.Providers.Abstractions.Domain.User;
@@ -247,6 +248,70 @@ public class UserProviderReadPathTests : ProvidersTestBase
         paths.IsEqual(new[] { "/fapi/v1/openOrders", "/fapi/v1/openAlgoOrders" });
         bounded.Is(0, "open orders are a snapshot, not a range");
         symbolScoped.Is(0, "open orders are asked for across every symbol, not one at a time");
+    }
+
+    /// <summary>
+    /// The history cursor is the highest id in a page, not its last element, so an unsorted page does not
+    /// silently skip records.
+    /// </summary>
+    /// <remarks>
+    /// The venue documents no ordering for this endpoint and the module took one on faith - a source
+    /// comment said as much. The failure it invited is the quiet kind: an unsorted page does not error, it
+    /// advances the cursor to whatever happened to land last and everything above that id is never read
+    /// again. Here the page is deliberately returned out of order, and the cursor must still continue from
+    /// the highest id it contained.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadOrders_CursorTakesTheHighestIdNotTheLastRow()
+    {
+        // arrange - a full page, deliberately unsorted, with the highest id in the middle
+        var cursors = new List<string?>();
+        var served = 0;
+        await using var server = this.RunHttpServer(
+            async (request, response) =>
+            {
+                if ((request.Url?.AbsolutePath ?? string.Empty).Contains("Algo", StringComparison.Ordinal))
+                {
+                    await WriteJsonAsync(response, "[]");
+                    return;
+                }
+
+                cursors.Add(request.QueryString["orderId"]);
+
+                // the first page fills the limit, which is what switches the walk to a cursor; the next
+                // one is short, which ends it
+                if (Interlocked.Increment(ref served) > 1)
+                {
+                    await WriteJsonAsync(response, "[]");
+                    return;
+                }
+
+                // the highest id sits in the middle of the page and the last row is far below it,
+                // so a cursor taken from the last row is visibly wrong
+                var ids = new List<long> { 5, 99999, 12 };
+                while (ids.Count < 1000)
+                    ids.Add(ids.Count);
+
+                var rows = ids.Select(id =>
+                    $$"""
+                        {"orderId":{{id}},"clientOrderId":"{{Guid.NewGuid()}}","symbol":"BTCUSDT","type":"LIMIT",
+                         "side":"BUY","origQty":"1","price":"1","stopPrice":"0","status":"NEW","executedQty":"0",
+                         "avgPrice":"0","time":1,"updateTime":2,"positionSide":"BOTH","reduceOnly":false}
+                        """
+                );
+
+                await WriteJsonAsync(response, $"[{string.Join(",", rows)}]");
+            }
+        );
+        var provider = CreateProvider(server);
+
+        // act
+        await provider.LoadOrdersAsync("BTCUSDT", 1);
+
+        // assert - the cursor used for the follow-up read is the highest id served, not the last row's
+        var used = cursors.FirstOrDefault(x => x is not null);
+        used.Is("99999", $"the cursor continued from {used ?? "nothing"}, so records above it were skipped");
     }
 
     /// <summary>

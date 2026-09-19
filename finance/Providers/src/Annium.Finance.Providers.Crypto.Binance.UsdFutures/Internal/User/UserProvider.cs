@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.User;
@@ -204,6 +205,33 @@ internal class UserProvider(
         return UserResult.Ok<IReadOnlyCollection<OrderModel>?>(ordinary.Data.NotNull().Concat(algo.Data).ToArray());
     }
 
+    /// <summary>Returns the highest order id in a page, as the cursor to continue a forward walk from.</summary>
+    /// <param name="orders">The page just read.</param>
+    /// <returns>The highest id, or null when the page carries no id that parses.</returns>
+    /// <remarks>
+    /// Ids are carried as strings and compared as numbers, because that is what they are: comparing them
+    /// as text makes "9" larger than "10" and stalls the walk on the wrong record.
+    /// </remarks>
+    private static string? HighestOrderId(IEnumerable<OrderModel> orders)
+    {
+        string? highest = null;
+        var highestValue = long.MinValue;
+
+        foreach (var order in orders)
+        {
+            if (!long.TryParse(order.Id, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+                continue;
+
+            if (value <= highestValue)
+                continue;
+
+            highestValue = value;
+            highest = order.Id;
+        }
+
+        return highest;
+    }
+
     /// <summary>
     /// Loads the conditional orders for a symbol, which the ordinary history does not contain.
     /// </summary>
@@ -357,8 +385,12 @@ internal class UserProvider(
 
             if (chunkResult.Data.Count == OrderQueryLimit)
             {
-                // this assumes, that orders are sorted!
-                fromOrder = chunkResult.Data.Last().Id;
+                // the highest id in the page, not its last element. Taking the last one assumed the venue
+                // returns a page sorted ascending, which it documents nowhere and which this module could
+                // not have noticed being wrong: an unsorted page does not fail, it advances the cursor to
+                // whatever happened to land last and silently skips everything above it. The maximum is
+                // the same value on a sorted page and the correct one on any other.
+                fromOrder = HighestOrderId(chunkResult.Data);
                 this.Trace<string?>("chunk limit reached, switch to cursor based load from {orderId}", fromOrder);
                 break;
             }
