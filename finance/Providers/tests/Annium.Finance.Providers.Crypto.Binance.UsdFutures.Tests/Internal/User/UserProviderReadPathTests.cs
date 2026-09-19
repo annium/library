@@ -129,8 +129,9 @@ public class UserProviderReadPathTests : ProvidersTestBase
         // act
         await provider.LoadOrdersAsync("BTCUSDT", null);
 
-        // assert
-        calls.Is(1);
+        // assert - one call per store: the ordinary history and the conditional one, which the ordinary
+        // endpoint does not contain at all
+        calls.Is(2);
         boundedCalls.Is(0, "the latest page is not a time range and must carry no window bounds");
     }
 
@@ -246,6 +247,60 @@ public class UserProviderReadPathTests : ProvidersTestBase
         paths.IsEqual(new[] { "/fapi/v1/openOrders", "/fapi/v1/openAlgoOrders" });
         bounded.Is(0, "open orders are a snapshot, not a range");
         symbolScoped.Is(0, "open orders are asked for across every symbol, not one at a time");
+    }
+
+    /// <summary>
+    /// Order history comes from both stores, and a conditional order that triggered is counted once - as the
+    /// ordinary order it became.
+    /// </summary>
+    /// <remarks>
+    /// The two stores overlap in exactly one way: a triggered conditional order exists in both, as a
+    /// <c>FINISHED</c> algo record and as the ordinary order it produced, under the same client id. The
+    /// ordinary one carries the fill; the algo one cannot say whether the book filled or cancelled it. So
+    /// history that merged them naively would double-count every stop loss that ever fired - and would do it
+    /// with one of the two copies carrying a made-up outcome.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadOrders_CountsATriggeredConditionalOrderOnce()
+    {
+        // arrange - the ordinary order a real trigger produced on 2026-09-19, and the algo record of the
+        // same order, carrying the same client id
+        var ordinary = """
+            [{"orderId":33877541028,"clientOrderId":"60d0f110-7316-4073-a41f-5c5c699a83ed","symbol":"DOTUSDT",
+              "type":"MARKET","side":"BUY","origQty":"4.9","price":"0","stopPrice":"0","status":"FILLED",
+              "executedQty":"4.9","avgPrice":"1.1325","time":1789826323607,"updateTime":1789826323607,
+              "positionSide":"BOTH","reduceOnly":false}]
+            """;
+        var algo = """
+            [{"algoId":4000001910368571,"clientAlgoId":"60d0f110-7316-4073-a41f-5c5c699a83ed",
+              "orderType":"STOP_MARKET","symbol":"DOTUSDT","side":"BUY","positionSide":"BOTH","quantity":"4.9",
+              "algoStatus":"FINISHED","actualOrderId":"33877541028","actualPrice":"1.1325","actualQty":"4.9",
+              "triggerPrice":"1.1322","price":"0","reduceOnly":false,
+              "createTime":1789826233630,"updateTime":1789826323611}]
+            """;
+
+        await using var server = this.RunHttpServer(
+            async (request, response) =>
+            {
+                var isAlgo = (request.Url?.AbsolutePath ?? string.Empty).Contains("Algo", StringComparison.Ordinal);
+                await WriteJsonAsync(response, isAlgo ? algo : ordinary);
+            }
+        );
+        var provider = CreateProvider(server);
+
+        // act
+        var result = await provider.LoadOrdersAsync("DOTUSDT", null);
+
+        // assert
+        result.Status.Is(UserOperationStatus.Ok);
+        var orders = result.Data.NotNull();
+        orders.Count.Is(1, "the triggered conditional order was counted twice");
+
+        var order = orders.Single();
+        order.Id.Is("33877541028", "the algo record won over the ordinary order it became");
+        order.Status.Is(OrderStatus.Filled);
+        order.ExecutedPrice.Is(1.1325m, "the surviving copy is the one that knows the fill");
     }
 
     /// <summary>

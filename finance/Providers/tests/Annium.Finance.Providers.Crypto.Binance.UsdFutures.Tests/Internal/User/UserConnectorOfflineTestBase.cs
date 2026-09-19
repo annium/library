@@ -117,6 +117,7 @@ public abstract class UserConnectorOfflineTestBase : ProvidersTestBase
             built.TradesLoader,
             built.Stream,
             sp.ResolveSerializer<ReadOnlyMemory<byte>>(Constants.OrderUpdateKey, MediaTypeNames.Application.Json),
+            sp.ResolveSerializer<ReadOnlyMemory<byte>>(Constants.AlgoUpdateKey, MediaTypeNames.Application.Json),
             statusMonitor.CreateReporter(),
             statusMonitor,
             Disposable.AsyncBox(logger),

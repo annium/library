@@ -83,6 +83,9 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <summary>Deserializes <c>ORDER_TRADE_UPDATE</c> user data stream messages.</summary>
     private readonly ISerializer<ReadOnlyMemory<byte>> _orderUpdateEventSerializer;
 
+    /// <summary>Reads the user data stream's conditional order update event.</summary>
+    private readonly ISerializer<ReadOnlyMemory<byte>> _algoUpdateEventSerializer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UserConnector"/> class, wiring the context/orders/trades
     /// loaders and the user data stream into the connector's lifecycle.
@@ -102,6 +105,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <param name="ordersLoader">Loader that reloads the currently open orders.</param>
     /// <param name="tradesLoader">Loader that reloads trades for a symbol.</param>
     /// <param name="userStream">The user data websocket stream.</param>
+    /// <param name="algoUpdateEventSerializer">Reads the user data stream's conditional order update event.</param>
     /// <param name="orderUpdateEventSerializer">Deserializes <c>ORDER_TRADE_UPDATE</c> user data stream messages.</param>
     /// <param name="reporter">Reports connector status transitions.</param>
     /// <param name="monitor">Monitors connector status.</param>
@@ -124,6 +128,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         IKeyedLoader<string, long, IReadOnlyCollection<TradeModel>> tradesLoader,
         IUserStream userStream,
         ISerializer<ReadOnlyMemory<byte>> orderUpdateEventSerializer,
+        ISerializer<ReadOnlyMemory<byte>> algoUpdateEventSerializer,
         IStatusReporter reporter,
         IStatusMonitor monitor,
         AsyncDisposableBox disposable,
@@ -169,6 +174,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         Disposable += () => _userStream.OnMessage -= HandleMessage;
 
         _orderUpdateEventSerializer = orderUpdateEventSerializer;
+        _algoUpdateEventSerializer = algoUpdateEventSerializer;
     }
 
     /// <summary>
@@ -576,7 +582,53 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         // handle order update
         var orderUpdate = _orderUpdateEventSerializer.Deserialize<OrderUpdateEvent?>(data);
         if (orderUpdate is not null)
+        {
             HandleOrderUpdate(orderUpdate);
+            return;
+        }
+
+        // conditional orders are announced on their own event and never by ORDER_TRADE_UPDATE until their
+        // trigger fires, so without this a stop loss appears only when the orders loader next polls
+        var algoUpdate = _algoUpdateEventSerializer.Deserialize<AlgoUpdateEvent?>(data);
+        if (algoUpdate is not null)
+            HandleAlgoUpdate(algoUpdate);
+    }
+
+    /// <summary>
+    /// Publishes an <c>ALGO_UPDATE</c> event on <see cref="IUserConnector.Orders"/>: a <c>Set</c> while the
+    /// conditional order is still waiting, a <c>Delete</c> once it is over.
+    /// </summary>
+    /// <remarks>
+    /// A triggered conditional order is deleted rather than updated. The exchange creates an ordinary order
+    /// carrying the same client id, and that order announces itself on its own event - so leaving the
+    /// conditional record in place would show the caller the order twice, once with its real fill and once
+    /// with a record that cannot say whether the book filled or cancelled it.
+    /// </remarks>
+    /// <param name="e">The conditional order update event.</param>
+    private void HandleAlgoUpdate(AlgoUpdateEvent e)
+    {
+        var order = new OrderModel(
+            e.AlgoId,
+            e.ClientAlgoId,
+            e.Range,
+            e.Symbol,
+            e.Side,
+            e.Type,
+            e.TotalQty,
+            e.Price,
+            e.LevelPrice,
+            e.ReduceOnly,
+            e.UpdatedAt,
+            e.Status,
+            0m,
+            0m,
+            e.UpdatedAt
+        );
+
+        if (e.IsSuperseded || e.Status is not (OrderStatus.New or OrderStatus.PartiallyFilled))
+            Write(ChangeEvent.Delete(order));
+        else
+            Write(ChangeEvent.Set(order));
     }
 
     /// <summary>

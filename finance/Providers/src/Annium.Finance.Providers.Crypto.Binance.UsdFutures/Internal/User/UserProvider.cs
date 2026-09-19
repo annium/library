@@ -181,10 +181,81 @@ internal class UserProvider(
     /// <returns>A result carrying the orders, or a failure status if they could not be loaded.</returns>
     public async Task<UserResult<IReadOnlyCollection<OrderModel>?>> LoadOrdersAsync(string symbol, long? since)
     {
-        if (since is null)
-            return await LoadLatestOrdersAsync(symbol);
+        var ordinary = since is null
+            ? await LoadLatestOrdersAsync(symbol)
+            : await LoadOrderHistoryAsync(symbol, since.Value);
 
-        return await LoadOrderHistoryAsync(symbol, since.Value);
+        if (!ordinary.IsSuccess)
+            return ordinary;
+
+        // merged here rather than inside either branch, so the two entry points cannot drift apart on
+        // whether conditional orders are included
+        var algo = await LoadAlgoOrderHistoryAsync(symbol, since);
+        if (!algo.IsSuccess)
+            return UserResult.From(algo, default(IReadOnlyCollection<OrderModel>));
+
+        return UserResult.Ok<IReadOnlyCollection<OrderModel>?>(ordinary.Data.NotNull().Concat(algo.Data).ToArray());
+    }
+
+    /// <summary>
+    /// Loads the conditional orders for a symbol, which the ordinary history does not contain.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Only the ones an ordinary order does not already account for survive the read: a conditional order
+    /// that triggered became an ordinary order under the same client id, and the converter drops the
+    /// record. So this adds exactly the history the other endpoint cannot have - conditional orders that
+    /// were cancelled, rejected or expired without ever firing, and the ones still waiting.
+    /// </para>
+    /// <para>
+    /// One request, not a windowed walk. The ordinary history is paged through seven-day windows because it
+    /// can run to thousands of orders; the conditional store holds what an account has open and what it
+    /// recently closed, and the exchange documents no window limit on it. If that assumption ever fails it
+    /// fails visibly - as a page filled to <see cref="OrderQueryLimit"/> - rather than as silence.
+    /// </para>
+    /// </remarks>
+    /// <param name="symbol">The instrument symbol to load conditional orders for.</param>
+    /// <param name="since">The timestamp to load from, in Unix milliseconds, or null for the latest page.</param>
+    /// <returns>A result carrying the conditional orders.</returns>
+    private async Task<UserResult<IReadOnlyCollection<OrderModel>>> LoadAlgoOrderHistoryAsync(
+        string symbol,
+        long? since
+    )
+    {
+        var request = algoOrderRequestFactory
+            .New(config.HttpApi)
+            .Get("/fapi/v1/allAlgoOrders")
+            .Param("symbol", symbol)
+            .Param("limit", OrderQueryLimit);
+
+        if (since is not null)
+            request = request.Param("startTime", since.Value);
+
+        var result = await request
+            .ReceiveWindow()
+            .Sign(signatureService)
+            .WithRateDelay1M(rateLimiter)
+            .WithLogFromWithHeaders(this, LogData.Headers)
+            .AsUserResultAsync<IReadOnlyCollection<OrderModel?>>();
+
+        if (!result.IsSuccess)
+        {
+            if (result.IsFailure)
+                this.Debug("algo history failure: {result}", result);
+
+            return UserResult.From(result, (IReadOnlyCollection<OrderModel>)[]);
+        }
+
+        var orders = result.Data.OfType<OrderModel>().ToArray();
+
+        if (result.Data.Count >= OrderQueryLimit)
+            this.Warn<string, int>(
+                "{symbol} conditional history filled the page at {limit}, so older ones were not read",
+                symbol,
+                OrderQueryLimit
+            );
+
+        return UserResult.Ok<IReadOnlyCollection<OrderModel>>(orders);
     }
 
     /// <summary>

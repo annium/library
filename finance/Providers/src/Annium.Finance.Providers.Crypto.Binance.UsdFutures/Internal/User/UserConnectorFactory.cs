@@ -67,6 +67,10 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
             OrderUpdateKey,
             MediaTypeNames.Application.Json
         );
+        var algoUpdateEventSerializer = sp.ResolveSerializer<ReadOnlyMemory<byte>>(
+            AlgoUpdateKey,
+            MediaTypeNames.Application.Json
+        );
         var contextLoder = sp.CreateUserContextLoader(config.ReloadContext, monitor, provider, ref disposable);
         var ordersLoader = sp.CreateCompositeLoader(config.ReloadOrders, monitor, LoadOrdersAsync);
         var tradesLoader = sp.CreateKeyedLoader<string, long, IReadOnlyCollection<TradeModel>>(
@@ -111,6 +115,7 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
             tradesLoader,
             userStream,
             orderUpdateEventSerializer,
+            algoUpdateEventSerializer,
             reporter,
             monitor,
             disposable,

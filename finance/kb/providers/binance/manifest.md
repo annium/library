@@ -682,6 +682,21 @@ could be checked, and is now checked.
 > conditional order that would fire immediately cannot be placed at all** — `-2021 Order would immediately
 > trigger`. A test that wants a trigger has to wait for the market to reach it.
 >
+> **The `ALGO_UPDATE` payload, captured live 2026-09-19** by placing and cancelling one conditional order
+> with the user data stream open. Stored at
+> [`2026.09/2026.09.19-algo-probe/ALGO_UPDATE.new.json`](2026.09/2026.09.19-algo-probe/ALGO_UPDATE.new.json)
+> and its `CANCELED` twin; the exchange documents this event only through a schema component that cannot
+> be fetched.
+>
+> Top level `e` (`ALGO_UPDATE`), `T`, `E`, and the order under `o`. Inside `o`: `caid` clientAlgoId,
+> `aid` algoId (a number), `at` algoType, **`o` orderType**, `s`, `S`, `ps`, `f`, `q`, `X` algoStatus,
+> `ai` actualOrderId, `tp` triggerPrice, `p`, `V`, `wt`, `pm`, `cp`, `pP`, `R`, `tt`, `gtd`, `ia`.
+>
+> **The event nests a field under its own name.** The order object is `o` and the order *type* inside it
+> is `o` as well. A reader matching on property name without tracking depth reads one as the other, and
+> does it silently. Worth stating here rather than only in the converter, because it is the sort of thing
+> a second implementation repeats.
+>
 > Remediation belongs to steps 3-5, specified in `status.md`, not performed here.
 >
 > Spot is not implicated — it was not exercised, and its four spot names are untouched by this.

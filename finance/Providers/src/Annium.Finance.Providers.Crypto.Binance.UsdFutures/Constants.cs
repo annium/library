@@ -39,6 +39,9 @@ public static class Constants
     /// </remarks>
     internal const string AlgoOrderKey = $"{Provider}_{nameof(AlgoOrderKey)}";
 
+    /// <summary>Registration key for the user data stream's conditional order update event.</summary>
+    internal const string AlgoUpdateKey = $"{Provider}_{nameof(AlgoUpdateKey)}";
+
     // user data trade
     /// <summary>Registration key for the change-leverage endpoint.</summary>
     internal const string SetLeverageKey = $"{Provider}_{nameof(SetLeverageKey)}";
