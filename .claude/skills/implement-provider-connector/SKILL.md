@@ -49,10 +49,22 @@ Read the parent skill's safety section first; it governs. What follows is specif
   - **margin is sufficient** for the sizes the fixture uses.
 - **Run the trading suite alone.** Nothing else against the same account concurrently — not a live read
   block, not a second venue, not a host.
+- **A stage that fails does not clean up after itself.** The fixture's teardown runs at the end of a
+  passing test; an assertion that throws part-way, or a runner that cancels the job, leaves whatever the
+  stage opened in place. So: **verify the account after every failed stage, and keep a standalone tool
+  that closes anything open** — a reduce-only market order for the position, a cancellation for each
+  store that holds orders. Write that tool before the first trading stage, not after the first time it
+  is needed.
 - **A rejection test proves less than it looks.** Where the module folds every venue error code into one
   status - and that is the usual shape - "the exchange refused" is all a test can assert: an invalid key, an
   expired timestamp and a malformed parameter are indistinguishable at that level. Check the module's
   mapping before writing a live test whose meaning depends on *which* refusal came back.
+- **A command that printed nothing may not have run.** Diagnosing a live stage means reading test output,
+  and output arrives filtered through whatever wrapped the command. A wrapper that is absent, a pipe that
+  buffers, a runner that caps the whole execution and kills it before it writes its log — each produces an
+  empty result that reads exactly like a hang. Check the exit code before concluding anything about the
+  code under test, and prefer a runner's own deadline over an external one, so a timeout comes back as a
+  named failing test rather than as silence.
 - **Deadlines and tokens** are the parent's rule and apply here in full: every exchange-facing test
   carries `[Fact(Timeout = …)]`, every wait under it takes the test's token. A live test that hangs does
   not fail — it cancels the job, and *cancelled* does not read as broken.
@@ -90,6 +102,38 @@ about what arrives on it. Everything in 5b depends on it.
 **An offline HTTP fixture for the commands.** This one exists in pattern — `UserProviderReadPathTests`
 drives the read paths against a local server through `TestBaseHttpServerExtensions`. The same pattern
 transfers to the five commands, and it reaches two branches the live block structurally cannot.
+
+## Phase 5a2 — capture what the venue answers, before writing anything that reads it
+
+**Run this the moment step 2 hands over a response shape it could not retrieve, and run it first.** The
+instinct is to leave live work until the end; when the documentation has no response schema, that
+sequencing is wrong and expensive. A converter written from an imagined shape compiles, passes the tests
+its author wrote for it, and is discovered to be wrong only by a live run — at which point the tests
+defend the mistake.
+
+So: **the first task of a family the documentation does not describe is a logged probe, not the last.**
+
+What a probe is: a small test in the read block — or the write block, approved as its own stage, when a
+state has to be created to be observed — that performs the calls and **stores every raw answer as a
+file**, then asserts only that the calls succeeded. It is an instrument, not a regression test.
+
+- Store the answers **in the provider KB, beside the manifest**, with a note saying what each is. They
+  become the source the converters are written from and the fixtures the tests use, and a reader can
+  check both against bytes the exchange really sent.
+- **Assert the status, not just that a body came back.** An error body is not empty either, so a probe
+  that only checks for non-emptiness will report findings drawn from a refusal.
+- Log levels below warning frequently do not reach a test log. Write the answers to files rather than
+  logging them, or the probe runs, passes, and tells you nothing.
+- Capture **the same object from every endpoint that returns it**. Answers to a placement, a listing and
+  a history query are routinely *not* the same shape, and the differences are what the ingestion turns
+  on.
+- Where a state change is what you need to see, create the smallest one that produces it and undo it in
+  a `finally`. A conditional order placed far from the market, a minimum-notional position opened and
+  closed — these cost fees and answer questions no document can.
+
+**Then write the converters from the captured files**, and use those same files as the test fixtures. A
+fixture that is a real answer asserts what the venue does; an invented one asserts what its author
+imagined.
 
 ## Phase 5b — the streams, offline
 
@@ -171,6 +215,38 @@ run, both about a caller being told OK and acting on it:
   type of the order that exists, the query builder on the type being asked for, and such a request falls
   between them. Turning it into a silent cancel-and-replace would mean a caller asking to amend and
   getting a new order at a new place in the queue instead. The refusal is the contract.
+
+## Checks that pay for themselves on every venue
+
+Five questions to put to any venue, because each has produced a silent defect. Silent is the word that
+matters: none of these announce themselves, and every one looks like correct behaviour from the inside.
+
+**1. Is there more than one store?** A venue may keep a family of orders somewhere the ordinary
+list does not reach — conditional orders are the usual case, but any family the venue treats specially
+is a candidate. Ask the account for its open orders through every endpoint that has one and compare.
+A connector reading a single store reports an account with none of that family on it, **as a shorter
+list rather than as an error**.
+
+**2. Does identity survive a state change?** When an order in one store becomes an order in another, ask
+whether the venue carries the client id across. If it does, the two are one order and must be counted
+once — and the record that knows the outcome is the one to keep. If it does not, the connector needs a
+correspondence of its own, and that is a design decision rather than a detail.
+
+**3. Which end does `limit` truncate?** Two endpoints of one venue can disagree. Measure it: ask for a
+small page and look at the timestamps. An endpoint that returns the *oldest* n to a loader asking for
+the latest page hands back a full page of real records, and nothing downstream can tell.
+
+**4. Does the answer to a command carry what the caller needs?** A command's acknowledgement may report
+that something happened without reporting its result — a fill without its price is the recurring case.
+Where it does not, find where the value does arrive (a query, a stream event) and **assert it there**.
+Moving an assertion to where the venue answers is not weakening it: a venue that stops reporting the
+value at all still fails, and the property asserted becomes the stronger one — that the value *reached a
+caller*, rather than that one particular response carried it.
+
+**5. Does a converter that drops records have a nullable element type to drop into?** A converter
+returning null for a record to omit is only as good as the collection reading it. Read into a collection
+of *nullable* elements and filter; a non-nullable element type keeps the null and hands a caller an entry
+with nothing in it. This has now been the same defect twice in one module.
 
 ## Phase 5d — registration and configuration
 
