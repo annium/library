@@ -33,6 +33,33 @@ directly above an existing one puts the new code between that member and its doc
 silently loses its documentation - three members in one branch, none of them visible in a green build or a
 green test run.
 
+## Skills carry procedure; the provider KB carries the venue
+
+**No skill file names a venue, an endpoint, a field, a wire literal or an error code.** Not as an
+example, not as an aside, not in a sentence recording where a lesson came from. Those belong in
+`finance/kb/providers/<provider>/` — the manifest for the fact, the run report for the incident — and a
+skill that repeats them has quietly become a second, unversioned copy of the contract.
+
+Three reasons, in order of how much they cost:
+
+1. **A skill is read while working on a different venue.** Whoever reads it next is implementing
+   somewhere else, and a concrete example is the part of a document people pattern-match on. A named
+   order type in a general procedure gets carried into a venue that spells it otherwise.
+2. **The venue's facts change and the skill does not.** The manifest is re-derived on every contract
+   pass and has a `checked_against` date; a skill has neither. Anything venue-specific in it is
+   unmaintained by construction, and it will keep asserting something after the manifest has corrected
+   it.
+3. **It hides how general the lesson is.** A rule that says "check this literal" reads as being about
+   that literal. The same rule stated abstractly is obviously about every literal.
+
+**Keep the lesson, drop the instance.** Findings are what make a skill worth reading, so do not
+sanitise them into platitudes — write the shape, the cost and the number, and leave out the name. "The
+literal that mattered had nine hits in a changelog of more than a hundred kilobytes" carries the entire
+point of the rule it justifies; naming it would add nothing and bind the document to one exchange.
+
+This has needed correcting twice. If a sentence in a skill would stop being true when the venue
+changes, it is in the wrong file.
+
 ## Language
 
 **Everything written in this repository is in English.** It is public: code, comments, XML docs, commit

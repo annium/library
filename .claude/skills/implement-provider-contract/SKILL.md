@@ -156,20 +156,99 @@ is worse than one openly skipped, because it will be counted as verified.
 
 #### Follow the links out of the changelog
 
-**The changelog is not the documentation.** On the first run through this skill, the single most
-consequential finding - a WebSocket migration whose deadline had already passed - was not a changelog
-entry at all. It lived on its own page, reachable only through one link inside the changelog.
+**The changelog is not the documentation.** On the first run through this skill a WebSocket migration
+whose deadline had already passed was not a changelog entry at all: it lived on its own page, reachable
+only through one link inside the changelog.
 
 So: read the changelog, then extract its internal links and fetch those too. A vendor announcing
 something large tends to write it up separately and link to it, which is exactly the shape a
 changelog-only check misses.
 
+**And do not let that lesson displace its opposite.** The same run followed the link, found the notice,
+reported it — and missed a second migration of comparable weight sitting in the changelog itself as an
+ordinary bullet list. Having learned that the important things hide outside the changelog is not a
+reason to read the changelog less closely. Both are now covered mechanically by the sweeps in 2b, which
+is the only reliable answer to "which of these did I skim".
+
+#### Look for the machine-readable index before reading anything by hand
+
+Before treating a documentation site as prose to be read, check whether it publishes itself as data.
+The conventional paths are `<site>/llms.txt` — a page index — and `<site>/llms-full.txt`, the whole
+documentation set as one file. Both are worth one `curl` each.
+
+On the second run through this skill these turned out to exist for a vendor the first run had recorded
+as having an unreachable API reference, after that run tried five catalog URL shapes and correctly
+concluded none of them served markdown. The index had been fetched by that same run and read as a list
+of page paths; the chapter listing **every endpoint by method and path** was four hundred lines further
+down the same file.
+
+So: fetch the index, and read *all* of it, including the parts that do not look like page paths. An
+endpoint inventory is the cheapest drift check that exists — **store it and diff it across runs**,
+because an endpoint appearing or disappearing there is a contract change that needs no changelog entry
+to happen.
+
+A full-text dump is usually too large to store whole, and storing it would defeat the scoping rule
+above. Store the **extract** the manifest needs, with the source file's byte count, hash and line
+range, which is enough to reproduce.
+
 Write `SOURCES.md` beside the files: for each, the URL, the tier, the fetch date, the size, and the
-pinned revision where there is one. Then diff against the previous run's snapshot directory and read
-what moved. On a first run there is nothing to diff against — read the changelogs whole, and say in the
-report that this run established the baseline rather than measured a change.
+pinned revision where there is one.
+
+**A 404 from a raw-content host is a small successful file, not an error.** `curl -sSL` writes
+`404: Not Found` — 14 bytes — to the output and exits 0. Vendors restructure documentation
+repositories, and the path that worked last run is exactly the one nobody re-checks. The size column in
+`SOURCES.md` is what catches this; nothing else will.
 
 ### Phase 2b — diff, category by category
+
+#### Read the corpus through our facts, not the other way round
+
+**This is the part that failed, twice, on the same provider.** Both times the finding was in a file the
+run had already fetched and stored, and both times it was missed by reading that file looking for what
+seemed important. The second one — a whole family of order types moved to a different endpoint, its
+deadline months in the past — sat in the changelog as an ordinary bullet list among hundreds. It was
+eventually found by placing a real order and being refused by the exchange, which is the most expensive
+way a contract question can be answered.
+
+The lesson is not "read more carefully". Reading someone else's corpus and asking *what here matters to
+us* is an unbounded judgment over tens of thousands of lines, it cannot be audited, and what it finds
+depends on what happened to look dramatic. Our facts, by contrast, are a **bounded, enumerable set** —
+that is what the manifest is. So invert the direction: for each fact of ours, go and find where their
+documentation confirms it.
+
+Three sweeps produce that, and all three are mechanical. Run them **before** reading anything by
+judgment.
+
+**1. Grep the snapshot for every wire literal in the manifest.** Order type strings, status spellings,
+endpoint paths, header names, filter type names, JSON property names. For each literal, read every hit
+and its surrounding entry. The counts stay small enough to be honest about: on the run that introduced
+this rule, the literal that mattered had **nine** hits in a changelog of more than a hundred kilobytes,
+one of them the announcement a whole-file read had missed. A literal found nowhere in the snapshot is
+`undocumented` — and now *measured* as such rather than assigned by someone's impression.
+
+Watch the case: a header or field spelled one way in code and another in the documentation reads as
+zero hits, which is a far stronger claim than "spelled differently". Re-grep case-insensitively before
+recording anything as absent.
+
+**2. Sweep the changelogs by date.** Extract every line carrying a date together with one of
+*effective*, *deprecated*, *retired*, *migrated*, *removed*, *no longer*; sort; read everything dated
+after the previous `checked_against`, and on a first run everything within the lifetime of our code.
+This catches what sweep 1 cannot: an announcement phrased without naming any literal we hold. It is
+also small — 44 lines on the run that introduced it.
+
+**3. Diff the endpoint inventory**, where the vendor publishes one (see 2a). Catches an endpoint added
+or withdrawn with no changelog entry at all.
+
+**Then, and only then, diff the snapshot against the previous run's and read what moved.** That diff is
+the weakest of the four nets and must not be mistaken for the strong one: it sees only what changed
+since we last looked, so it is blind to everything the *baseline* got wrong — and a baseline is read
+once and trusted forever. The finding described above was not in the diff. It was already in the
+baseline, correctly fetched and never read.
+
+On a first run there is no diff at all. Say so in the report: this run established the baseline rather
+than measured a change, which makes sweeps 1 and 2 the entire check rather than a supplement to it.
+
+#### Every outcome carries its evidence
 
 Walk the manifest in order. Every entry gets exactly one outcome:
 
@@ -182,6 +261,19 @@ Walk the manifest in order. Every entry gets exactly one outcome:
 | **undocumented** | we depend on something the documentation does not state |
 | **contested** | two sources disagree — record both readings and what would settle it, and pick neither |
 
+**An entry may only be `unchanged`, `changed`, `deprecated` or `new` if it carries a citation into the
+stored snapshot** — `<snapshot-file>:<line>`, naming the text the outcome was read from. Without one
+the entry is `unchecked`, whatever the reader believes. This is the rule that makes a skipped fact
+visible: today a fact nobody looked at and a fact confirmed line by line look identical in the
+manifest, and that is exactly how a whole category gets counted as verified.
+
+It is the documentation-axis twin of `vacuous` on the verification axis, and deserves the same
+suspicion for the same reason — **the effort looks spent**. A `confirmed` with no citation behind it
+is worse than an honest `unchecked`, because nothing will ever question it again.
+
+The citations are a by-product of sweep 1, not extra work: the grep that finds the literal is already
+standing on the line that proves it.
+
 An entry whose value is **assembled** from parts — a base and a path, a template and a substitution —
 is one fact, not two, and it is the assembled value that must be recorded and checked. Recording the
 parts separately hides the composition, and composition is where these go wrong: this provider's
@@ -189,10 +281,14 @@ websocket route was correct in both the base and the path and wrong once joined.
 
 **Every date in the documentation is read against today's date.** An announced removal is only
 `deprecated` while its date is ahead of us. Once that date has passed the entry is `changed`, and
-almost certainly blocking: the thing was withdrawn and we did not move. The first run through this skill
-found a migration deadline four months in the past, still described in the notice in the future tense,
-because the notice was written before it. Documentation states dates; only the reader supplies the
-present.
+almost certainly blocking: the thing was withdrawn and we did not move.
+
+This has now happened twice on one provider — deadlines four and nine months in the past — and both
+notices read in the future tense, because both were written before the date they announced. **A vendor
+never rewrites an announcement once it takes effect.** "Will migrate on <date>" stays on the page
+forever, and a reader supplying no present date will parse it as upcoming work indefinitely.
+Documentation states dates; only the reader supplies the present. That is what sweep 2 mechanises, and
+why it is a sweep rather than an instruction to be careful.
 
 Each outcome sets the fact's **documentation** state. Do not touch its verification state here: this
 step compares us against the provider, and nothing it learns changes what our tests defend.
