@@ -90,6 +90,7 @@ public static class HttpRequestMarketResultExtensions
             OperationResult.Aborted => MarketOperationStatus.Aborted,
             OperationResult.ParseError => MarketOperationStatus.ParseError,
             OperationResult.TooManyRequests => MarketOperationStatus.TooManyRequests,
+            OperationResult.RequestThrottled => MarketOperationStatus.TooManyRequests,
             < 0 => MarketOperationStatus.BadRequest,
             _ => MarketOperationStatus.UnknownError,
         };

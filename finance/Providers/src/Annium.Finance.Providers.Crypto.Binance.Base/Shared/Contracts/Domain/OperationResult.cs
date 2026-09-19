@@ -17,6 +17,16 @@ public sealed record OperationResult(long Code, string Message)
     /// <summary>Binance's own code for a request rejected because too many were sent, including an IP ban.</summary>
     public const long TooManyRequests = -1003;
 
+    /// <summary>Binance's own code for a request throttled by system-level protection.</summary>
+    /// <remarks>
+    /// A throttle, not a bad request - which is what it used to be classified as, because it fell into the
+    /// "any other negative code" branch. That mattered beyond the label: the rate limiter pauses on
+    /// <see cref="TooManyRequests"/> and on HTTP 418/429, so a throttle read as a bad request took no pause
+    /// and the retry went straight back into it. The message carries no deadline either, so there is nothing
+    /// for the ban-message parser to read.
+    /// </remarks>
+    public const long RequestThrottled = -1008;
+
     /// <summary>Whether this result was made up locally rather than read from a Binance response.</summary>
     /// <remarks>
     /// A synthetic result says what stopped us from reading the body, which is a poorer answer than an HTTP

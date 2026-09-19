@@ -631,17 +631,20 @@ parsed.
 | `-2019` | `MARGIN_NOT_SUFFICIENT` | `InsufficientBalance` |
 | any other negative | — | `BadRequest` |
 
-**[DEFECT] `-1008` is a throttle and we classify it as a bad request.** Found 2026-09-18 by the
-changelog sweep. `error-code.md:52-56` defines `-1008 Request Throttled` with two messages, the second
+**~~[DEFECT] `-1008` is a throttle and we classify it as a bad request.~~ Fixed 2026-09-19**, on both
+mappings, `pinned` on both. Found 2026-09-18 by the changelog sweep. `error-code.md:52-56` defines `-1008 Request Throttled` with two messages, the second
 added 2025-10-23: *"Request throttled by system-level protection. Reduce-only/close-position orders are
 exempt. Please try again."*
 
-It falls into "any other negative" above, so it arrives at a caller as `BadRequest`. The consequence is
-not cosmetic: **the rate limiter takes no pause**, because pausing is driven by HTTP `418`/`429` and by
-`-1003`, and the retry goes straight back into the throttle. The ban-message regex (§7) cannot rescue
-it either — that text carries no deadline and no `banned until`. This is the sharpest argument yet for
-the `MapOperationCode` split queued in `status.md`: the taxonomy is not a matter of tidiness, it decides
-whether a control path runs.
+It fell into "any other negative" above and arrived at a caller as `BadRequest` — a request the caller
+might have malformed, rather than a rate it must slow down. **And the investigation found the deeper
+half**: the limiter took no pause, and not because of the status mapping. `Block` was only called for a
+positive pause, while both deadline readers returned zero for a response that stated none — so no
+refusal without a deadline ever paused anything, whatever its code. Both halves are fixed; the second
+is in §7.
+
+The argument for the `MapOperationCode` split queued in `status.md` stands and is sharper for it: the
+taxonomy is not tidiness, it decides whether a control path runs.
 
 **The real code list, for that split.** `error-code.md` carries **206 codes** in five documented
 families, which is the input the decision was waiting for and removes the reason it was deferred:
@@ -691,7 +694,7 @@ only by eye keeps describing a drift that somebody fixed a while ago.
 | `418` and `429` are treated alike in a second respect beyond status mapping: both are read as a refusal that states a deadline and carries no weight header | `Base/Shared/HttpExtensions/HttpRequestRateExtensions.cs:57` |
 | The listen key request is counted against the same limiter as everything else | `Base/Internal/User/Services/ListenKeyResolver.cs:147` |
 | Initial ceilings: spot `6000`/min, futures `2400`/min. Both `confirmed` 2026-09-18 | `Spot/ProviderRegistrationContextExtensions.cs:109`, `UsdFutures/...:121`; docs `…/spot/enums.md:142` and `…/usd-futures/common-definition.md:135` |
-| Decay `300` every `3000`ms on **both** — i.e. 6000/min. **[DEFECT, ours] The futures value is spot's, copied.** Settled 2026-09-18: the ceilings above are both `confirmed`, so 300/3000ms is exactly right for spot's 6000/min allowance and 2.5× too fast for futures' 2400/min, which wants `120` every 3000ms. The XML doc on the futures factory asserts the constant is "matching Binance USD-M futures' default request weight limit" — a claimed match that the arithmetic refuses. This entry was `[UNVERIFIED]` and the question was never whether Binance was consistent; it was whether we had copied a number. We had | same lines |
+| Decay: spot `300`, futures **`120`**, both every `3000`ms — each draining exactly what its ceiling allows. **~~[DEFECT, ours]~~ fixed 2026-09-19.** Futures carried spot's `300` against a 2400/min ceiling, handing budget back 2.5× faster than the exchange, while its own XML doc claimed the two matched. `pinned` on both venues now, bracketed from both sides on step and bounded on interval — the previous test could only tell the step from a larger one and passed against the wrong value by construction; spot had no decay test at all | same lines |
 | Binance also returns an `x-mbx-order-*` family of order-count limit headers; the code knows to mask both prefixes in logs but reads neither. **Decided 2026-09-18: the order-rate limit is deliberately not tracked** - the connector learns of it by being refused, and the refusal path already pauses the limiter. Recorded as a fact rather than left as a gap, because "nobody read these headers" and "we chose not to" look identical in code | `Base/Shared/HttpExtensions/HttpRequestLogExtensions.cs:10` |
 | Ceiling is overwritten at runtime from exchange-info's `REQUEST_WEIGHT` | `Spot/Internal/Market/MarketProvider.cs:63-65`, `UsdFutures/...:69-71` |
 | Local gate at 80% of the ceiling, before the request is sent | `finance/Providers/src/Annium.Finance.Providers.Core/Internal/Shared/RateLimits/RateLimiter.cs:17`, computed at `:95`, gated at `:112,123` |
@@ -708,7 +711,8 @@ prevent, and it survived a full contract pass.
 |---|---|
 | Binance sends `Retry-After` on a refusal, in **whole seconds**, matched case-insensitively; a value that parses and is positive wins outright | `:121-125` |
 | Failing that, the deadline is read out of the **prose of the error body**: `banned until (\d+)`, case-insensitive, the capture taken as **Unix milliseconds** | `:141` (the `[GeneratedRegex]`), consumed at `:128-133` |
-| Neither source is honoured beyond **one hour** — ours, not Binance's. **[DEFECT, ours] The documented ban runs from 2 minutes to 3 days** (`…/usd-futures/general-info.md:152`), so our cap is below the documented maximum by a factor of 72: on a long ban we resume after an hour and resume straight into it, which is the behaviour the same page calls "failing to back off" and gives as the cause of longer bans. Found 2026-09-18 | `:119` |
+| Neither source is honoured beyond **3 days**, matching the longest ban documented (`…/usd-futures/general-info.md:152`). **~~[DEFECT, ours]~~ fixed 2026-09-19**: the cap was one hour, below the documented maximum by a factor of 72, so a long ban was resumed into — the behaviour that same page names as the cause of longer bans | `_maxPause` |
+| **A refusal that states no deadline still pauses, for one minute** — the weight window it guards. **~~[DEFECT, ours]~~ fixed 2026-09-19**, and the graver of the two: `Block` was called only for a positive pause and both deadline readers returned zero when the response said nothing, so the commonest refusal of all cost nothing at all. A test asserted this as correct (`RefusalWithoutADeadline_PausesNothing`) and now asserts the opposite | `_defaultPause` |
 
 The regex is the entry worth staring at. **It is a contract over an exchange's human-readable text**,
 which carries none of the stability of a field name: Binance can reword that message in a release note

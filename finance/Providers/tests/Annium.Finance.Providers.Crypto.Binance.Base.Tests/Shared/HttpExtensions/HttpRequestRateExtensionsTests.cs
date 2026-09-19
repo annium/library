@@ -263,12 +263,22 @@ public class HttpRequestRateExtensionsTests : ProvidersTestBase
     }
 
     /// <summary>
-    /// A refusal that says nothing about how long it lasts pauses nothing: guessing a duration is worse than
-    /// leaving the weight accounting to it.
+    /// A refusal that says nothing about how long it lasts still pauses, for the weight window it guards.
     /// </summary>
+    /// <remarks>
+    /// This test asserted the opposite until 2026-09-19, and its own summary argued for it: "guessing a
+    /// duration is worse than leaving the weight accounting to it." The argument does not survive being
+    /// stated plainly - the weight accounting is what has just been proven wrong, since the exchange refused
+    /// a request our gate let through. Carrying on at full rate is not neutral, it is the behaviour Binance
+    /// documents as the cause of longer bans.
+    /// <para>
+    /// It is not a rare branch either. A system-level throttle says only "please try again", and a plain 429
+    /// carries no deadline - so before this change the commonest refusal of all cost nothing.
+    /// </para>
+    /// </remarks>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact]
-    public async Task RefusalWithoutADeadline_PausesNothing()
+    public async Task RefusalWithoutADeadline_PausesForTheWeightWindow()
     {
         // arrange
         var limiter = new FakeRateLimiter(true);
@@ -283,7 +293,8 @@ public class HttpRequestRateExtensionsTests : ProvidersTestBase
         await SendAsync(server, limiter);
 
         // assert
-        limiter.Blocks.IsEmpty();
+        limiter.Blocks.Has(1);
+        limiter.Blocks[0].Is(TimeSpan.FromMinutes(1));
     }
 
     /// <summary>

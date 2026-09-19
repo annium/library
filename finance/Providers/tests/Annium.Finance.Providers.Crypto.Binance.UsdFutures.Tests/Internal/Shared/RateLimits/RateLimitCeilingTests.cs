@@ -64,18 +64,28 @@ public class RateLimitCeilingTests : ProvidersTestBase
     }
 
     /// <summary>
-    /// The registered decay lowers used weight by 300 every 3 seconds, and nothing observed that before.
+    /// The registered decay lowers used weight by 120 every 3 seconds - the rate the documented ceiling
+    /// implies, and not the neighbouring venue's.
     /// </summary>
     /// <remarks>
-    /// The two numbers are registered beside the ceiling and were pinned by nothing: the decay test in the
-    /// core suite builds its own limiter with its own values, so it pins the mechanism and not these. A rate
-    /// too small leaves the connector throttled long after the exchange has forgiven it; too large and it
-    /// resumes while the exchange still counts the weight - which is how an account earns a ban from code
-    /// that believes it is being careful.
-    ///
-    /// Written as two observations that differ only in how far above the water mark they start, because a
-    /// single one cannot tell 300 from any larger number. The first drops under the mark in one tick; the
-    /// second cannot, and needs a second tick.
+    /// <para>
+    /// 2400 a minute is 120 every three seconds. This venue registered 300, which is spot's figure because
+    /// spot allows 6000 a minute, so the limiter returned budget two and a half times faster than the
+    /// exchange did. A rate too small leaves the connector throttled long after the exchange has forgiven it;
+    /// too large and it resumes while the exchange still counts the weight - which is how an account earns a
+    /// ban from code that believes it is being careful.
+    /// </para>
+    /// <para>
+    /// Bracketed from both sides, because the previous version of this test could only tell the step from a
+    /// larger one and passed against 300 by construction. The first observation starts 100 above the mark and
+    /// must clear in one tick, which fails for any step below 100; the second starts 150 above and must
+    /// <em>not</em> clear in one tick, which fails for any step above 150. Together they admit only a step
+    /// between 100 and 150.
+    /// </para>
+    /// <para>
+    /// The interval is bracketed too, by bounding the waits rather than allowing twenty seconds for a three
+    /// second tick: an interval much longer than the registered one no longer passes unnoticed.
+    /// </para>
     /// </remarks>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(Timeout = 60_000)]
@@ -85,25 +95,28 @@ public class RateLimitCeilingTests : ProvidersTestBase
         var ct = TestContext.Current.CancellationToken;
         var limiter = Get<IRateLimiter>();
 
-        // act - 250 above the mark: one decay of 300 takes it under
-        limiter.UsedWeight(WaterMark + 250);
-        limiter.CanExecute().IsFalse($"allowed at {WaterMark + 250}, above the water mark");
+        // act - 100 above the mark: one decay of 120 takes it under, one of 80 would not
+        limiter.UsedWeight(WaterMark + 100);
+        limiter.CanExecute().IsFalse($"allowed at {WaterMark + 100}, above the water mark");
 
-        // assert
+        // assert - bounded to two intervals, so a decay that ticks far slower fails here
         await Expect.ToAsync(
             () => limiter.CanExecute().IsTrue("still refused after a decay that should have cleared it"),
-            20_000
+            2 * DecayInterval
         );
 
-        // act - 350 above the mark: one decay of 300 leaves it at 50 above, so it stays refused
-        limiter.UsedWeight(WaterMark + 350);
+        // act - 150 above the mark: one decay of 120 leaves it 30 above, so it stays refused
+        limiter.UsedWeight(WaterMark + 150);
 
-        // assert - a decay of 400 or more would have cleared it here, and this is what tells them apart
+        // assert - a step of 150 or more would have cleared it here, and this is what bounds it from above
         await Task.Delay(DecayInterval + DecayInterval / 2, ct);
-        limiter.CanExecute().IsFalse("cleared after one decay, so the step is larger than the registered 300");
+        limiter.CanExecute().IsFalse("cleared after one decay, so the step is larger than the registered 120");
 
         // and the next decay does clear it
-        await Expect.ToAsync(() => limiter.CanExecute().IsTrue("still refused after a second decay"), 20_000);
+        await Expect.ToAsync(
+            () => limiter.CanExecute().IsTrue("still refused after a second decay"),
+            2 * DecayInterval
+        );
     }
 
     /// <summary>The decay interval the venue registers, in milliseconds.</summary>

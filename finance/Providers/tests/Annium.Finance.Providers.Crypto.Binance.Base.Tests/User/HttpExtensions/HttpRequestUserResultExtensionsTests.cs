@@ -146,6 +146,9 @@ public class HttpRequestUserResultExtensionsTests : ProvidersTestBase
     [Theory]
     [InlineData(-1, UserOperationStatus.BadRequest)]
     [InlineData(-1003, UserOperationStatus.TooManyRequests)]
+    // -1008 is a throttle, not a malformed request. It reached callers as BadRequest until 2026-09-19,
+    // because it fell into the "any other negative" branch below -1003
+    [InlineData(-1008, UserOperationStatus.TooManyRequests)]
     [InlineData(-2018, UserOperationStatus.InsufficientBalance)]
     [InlineData(-2019, UserOperationStatus.InsufficientBalance)]
     [InlineData(10, UserOperationStatus.UnknownError)]

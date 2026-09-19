@@ -92,6 +92,7 @@ public static class HttpRequestUserResultExtensions
             OperationResult.Aborted => UserOperationStatus.Aborted,
             OperationResult.ParseError => UserOperationStatus.ParseError,
             OperationResult.TooManyRequests => UserOperationStatus.TooManyRequests,
+            OperationResult.RequestThrottled => UserOperationStatus.TooManyRequests,
             -2018 => UserOperationStatus.InsufficientBalance, // BALANCE_NOT_SUFFICIENT
             -2019 => UserOperationStatus.InsufficientBalance, // MARGIN_NOT_SUFFICIENT
             < 0 => UserOperationStatus.BadRequest,

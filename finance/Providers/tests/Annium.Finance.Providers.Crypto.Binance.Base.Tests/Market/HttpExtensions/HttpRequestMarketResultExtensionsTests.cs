@@ -172,6 +172,9 @@ public class HttpRequestMarketResultExtensionsTests : ProvidersTestBase
     [Theory]
     [InlineData(-1, MarketOperationStatus.BadRequest)]
     [InlineData(-1003, MarketOperationStatus.TooManyRequests)]
+    // -1008 is a throttle, not a malformed request. Asserted separately from the user mapping because these
+    // are two copies of one idea, and the last time they diverged nobody noticed for months
+    [InlineData(-1008, MarketOperationStatus.TooManyRequests)]
     [InlineData(10, MarketOperationStatus.UnknownError)]
     public async Task OperationResultResponse(long code, MarketOperationStatus status)
     {

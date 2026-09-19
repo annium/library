@@ -112,12 +112,20 @@ public static class ProviderRegistrationContextExtensions
 
     /// <summary>
     /// Creates the rate limiter shared across the provider's HTTP requests: a 2400-weight limit that decays by
-    /// 300 every 3000 milliseconds, matching Binance USD-M futures' default request weight limit.
+    /// 120 every 3000 milliseconds, matching Binance USD-M futures' documented request weight limit.
     /// </summary>
+    /// <remarks>
+    /// The decay has to match the ceiling it drains: 2400 per minute is 120 per three seconds. It was 300 -
+    /// the spot venue's figure, which is right there because spot allows 6000 a minute - so this limiter
+    /// handed budget back two and a half times faster than the exchange did, while its own documentation
+    /// claimed the two matched. The used weight is overwritten from the response header on every reply, so the
+    /// error only accumulated between replies; the decay is the fallback for when replies stop, which is
+    /// exactly when being optimistic is worst.
+    /// </remarks>
     /// <param name="sp">The service provider used to resolve dependencies.</param>
     /// <returns>A new rate limiter configured for the provider's request weight limit.</returns>
     private static IRateLimiter RateLimiterFactory(IServiceProvider sp)
     {
-        return sp.CreateRateLimiter(2400, 300, 3_000);
+        return sp.CreateRateLimiter(2400, 120, 3_000);
     }
 }
