@@ -330,6 +330,26 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
     /// The client order id has to be a GUID: the cancel response converter reads it as one and returns no
     /// response at all when it is not, which reads back as a failed cancel.
     /// </remarks>
+    /// <summary>A real placement answer from the algo endpoint, captured live on 2026-09-19.</summary>
+    private const string AlgoOrderResponse = """
+        {
+          "algoId": 4000001910058351,
+          "clientAlgoId": "order-1",
+          "algoType": "CONDITIONAL",
+          "orderType": "STOP_MARKET",
+          "symbol": "BTCUSDT",
+          "side": "SELL",
+          "positionSide": "BOTH",
+          "quantity": "1",
+          "algoStatus": "NEW",
+          "triggerPrice": "90",
+          "price": "0",
+          "reduceOnly": false,
+          "createTime": 1789819033056,
+          "updateTime": 1789819033056
+        }
+        """;
+
     private const string CancelResponse = """
         {"orderId":1,"clientOrderId":"2f1d4e6a-8b3c-4d5e-9f01-23456789abcd","symbol":"BTCUSDT","status":"CANCELED"}
         """;
@@ -376,6 +396,70 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
     /// </summary>
     /// <returns>The position.</returns>
     private static PositionModel Position() => new("BTCUSDT", OrientationRange.Both, MarginType.Cross, 1m, 0m);
+
+    /// <summary>
+    /// A conditional order goes to the algo endpoint, under the algo parameter names.
+    /// </summary>
+    /// <remarks>
+    /// The four conditional types were refused on the ordinary endpoint from 2025-12-09 with <c>-4120</c>,
+    /// which is how this was discovered - by a live order being turned down rather than by anything in the
+    /// tree. The path is the assertion, and the parameter names with it: the client id is
+    /// <c>clientAlgoId</c>, the trigger is <c>triggerPrice</c>, and <c>algoType</c> is required and has no
+    /// counterpart on the ordinary endpoint at all.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task InitOrder_Conditional_GoesToTheAlgoEndpoint()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        var log = new RequestLog();
+        await using var server = RunServer(log, _ => (HttpStatusCode.OK, AlgoOrderResponse));
+        await using var connector = CreateConnector(server, out _);
+
+        // act
+        await connector.InitOrderAsync(StopLossMarketOrderRequest());
+
+        // assert
+        var sent = await log.Answered.Reader.ReadAsync(ct);
+        sent.Method.Is("POST");
+        sent.Path.Is("/fapi/v1/algoOrder", "a conditional order went to the endpoint that refuses it");
+        sent.Query.Contains("algoType=CONDITIONAL").IsTrue($"algoType was not sent: {sent.Query}");
+        sent.Query.Contains("clientAlgoId=order-1").IsTrue($"the client id was not sent as clientAlgoId: {sent.Query}");
+        sent.Query.Contains("triggerPrice=").IsTrue($"the trigger was not sent as triggerPrice: {sent.Query}");
+        sent.Query.Contains("stopPrice=").IsFalse($"the ordinary endpoint's stopPrice was sent: {sent.Query}");
+        sent.Query.Contains("newClientOrderId=")
+            .IsFalse($"the ordinary endpoint's newClientOrderId was sent: {sent.Query}");
+    }
+
+    /// <summary>
+    /// A market order still goes to the ordinary endpoint, which is the half of the routing that would
+    /// break silently.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task InitOrder_NonConditional_StaysOnTheOrdinaryEndpoint()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        var log = new RequestLog();
+        await using var server = RunServer(log, _ => (HttpStatusCode.OK, OrderResponse));
+        await using var connector = CreateConnector(server, out _);
+
+        // act
+        await connector.InitOrderAsync(LimitOrderRequest());
+
+        // assert
+        var sent = await log.Answered.Reader.ReadAsync(ct);
+        sent.Path.Is("/fapi/v1/order", "an ordinary order was routed to the conditional endpoint");
+    }
+
+    /// <summary>
+    /// A conditional order request.
+    /// </summary>
+    /// <returns>The request.</returns>
+    private static IInitOrderRequest StopLossMarketOrderRequest() =>
+        RequestBuilder.InitStopLossMarketOrder("order-1", OrientationRange.Both, "BTCUSDT", OrderSide.Sell, 1m, 90m);
 
     /// <summary>
     /// A limit order request.

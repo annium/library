@@ -84,6 +84,80 @@ internal class QueryProcessor
     }
 
     /// <summary>
+    /// Whether an order type is a conditional one, and so belongs to the algo endpoints rather than the
+    /// ordinary order endpoint.
+    /// </summary>
+    /// <remarks>
+    /// The single place that answers this question. It decides which endpoint a placement goes to, which
+    /// endpoint a cancellation goes to, and which store a history load has to read - and if those three ever
+    /// disagreed, an order would be placed in one store and looked for in another. The four types moved on
+    /// 2025-12-09; the ordinary endpoint refuses them with <c>-4120</c>.
+    /// </remarks>
+    /// <param name="type">The order type.</param>
+    /// <returns><see langword="true"/> when the type is conditional.</returns>
+    public static bool IsConditional(OrderType type) =>
+        type
+            is OrderType.StopLossMarket
+                or OrderType.TakeProfitMarket
+                or OrderType.StopLossLimit
+                or OrderType.TakeProfitLimit;
+
+    /// <summary>
+    /// Builds the query for placing a conditional order through <c>POST /fapi/v1/algoOrder</c>.
+    /// </summary>
+    /// <remarks>
+    /// Not the ordinary placement query with a different path: four parameter names differ. The client id is
+    /// <c>clientAlgoId</c>, the trigger is <c>triggerPrice</c> rather than <c>stopPrice</c>, and
+    /// <c>algoType</c> has no counterpart at all and is required. Sending the ordinary names here is
+    /// accepted by nothing and refused unhelpfully, which is why these are built rather than translated.
+    /// </remarks>
+    /// <param name="request">The order to place.</param>
+    /// <returns>A result carrying the query parameters, or the validation failure that stopped it.</returns>
+    public UserResult<Dictionary<string, string>> BuildInitAlgoOrderQuery(IInitOrderRequest request)
+    {
+        var validationResult = request.Validate();
+        if (validationResult.IsFailure)
+        {
+            return UserResult.From(validationResult, new Dictionary<string, string>());
+        }
+
+        if (!IsConditional(request.Type))
+        {
+            return UserResult.New(
+                UserOperationStatus.BadRequest,
+                new Dictionary<string, string>(),
+                $"{request.Type} is not a conditional order type and does not belong on the algo endpoint"
+            );
+        }
+
+        var result = new Dictionary<string, string>
+        {
+            ["algoType"] = "CONDITIONAL",
+            ["clientAlgoId"] = request.Id,
+            ["symbol"] = request.Symbol,
+            ["side"] = OrderSides.ValueToString[request.Side],
+            ["positionSide"] = OrientationRanges.ValueToString[request.Range],
+            ["type"] = OrderTypes.ValueToString[request.Type],
+            ["quantity"] = request.Qty.ToGeneralInvariantString(),
+            ["triggerPrice"] = request.LevelPrice.ToGeneralInvariantString(),
+            ["newOrderRespType"] = "RESULT",
+        };
+
+        // the limit-flavoured conditionals carry the price the order takes once it triggers; the market ones
+        // have none, and sending a price with them is how a STOP_MARKET quietly becomes a STOP
+        if (request.Type is OrderType.StopLossLimit or OrderType.TakeProfitLimit)
+        {
+            result["timeInForce"] = "GTC";
+            result["price"] = request.Price.ToGeneralInvariantString();
+        }
+
+        if (request.ReduceOnly && request.Range is OrientationRange.Both)
+            result["reduceOnly"] = "true";
+
+        return UserResult.Ok(result);
+    }
+
+    /// <summary>
     /// Builds the query for modifying an existing order. Binance's amend endpoint only supports limit orders, so
     /// any other order type is rejected up front.
     /// </summary>

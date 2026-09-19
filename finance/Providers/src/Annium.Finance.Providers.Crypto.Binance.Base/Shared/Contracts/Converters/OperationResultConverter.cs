@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Domain;
@@ -40,8 +41,24 @@ public class OperationResultConverter : JsonConverter<OperationResult?>
 
                 switch (propertyName)
                 {
+                    // Binance spells this field both ways. Errors answer with a JSON number; the algo
+                    // endpoints answer a successful cancellation with the string "200". Reading only the
+                    // number threw on the string, and the throw surfaced as a parse failure on a response
+                    // the exchange considered a success - so the tolerance is not politeness, it is the
+                    // difference between a cancellation reported as done and one reported as unreadable
                     case "code":
-                        code = reader.GetInt64();
+                        code = reader.TokenType switch
+                        {
+                            JsonTokenType.Number => reader.GetInt64(),
+                            JsonTokenType.String
+                                when long.TryParse(
+                                    reader.GetString(),
+                                    NumberStyles.Integer,
+                                    CultureInfo.InvariantCulture,
+                                    out var parsed
+                                ) => parsed,
+                            _ => code,
+                        };
                         break;
                     case "msg":
                         message = reader.GetString() ?? string.Empty;

@@ -58,6 +58,13 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <summary>Factory for requests against the cancel-all-orders endpoint.</summary>
     private readonly IHttpRequestFactory _cancelAllOrdersRequestFactory;
 
+    /// <summary>The request factory for the conditional ("algo") order endpoints.</summary>
+    /// <remarks>
+    /// Separate from the ordinary order factory because it carries a different serializer: the algo
+    /// endpoints answer under their own field names, which one converter cannot share with the other.
+    /// </remarks>
+    private readonly IHttpRequestFactory _algoOrderRequestFactory;
+
     /// <summary>Limits request weight against the exchange's rate limits.</summary>
     private readonly IRateLimiter _rateLimiter;
 
@@ -88,6 +95,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <param name="initOrderRequestFactory">Factory for requests against the place-order endpoint.</param>
     /// <param name="modifyOrderRequestFactory">Factory for requests against the modify-order endpoint.</param>
     /// <param name="cancelOrderRequestFactory">Factory for requests against the cancel-order endpoint.</param>
+    /// <param name="algoOrderRequestFactory">The request factory for the conditional order endpoints.</param>
     /// <param name="cancelAllOrdersRequestFactory">Factory for requests against the cancel-all-orders endpoint.</param>
     /// <param name="rateLimiter">Limits request weight against the exchange's rate limits.</param>
     /// <param name="contextLoader">Loader that reloads the account context (assets and positions).</param>
@@ -109,6 +117,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         IHttpRequestFactory modifyOrderRequestFactory,
         IHttpRequestFactory cancelOrderRequestFactory,
         IHttpRequestFactory cancelAllOrdersRequestFactory,
+        IHttpRequestFactory algoOrderRequestFactory,
         IRateLimiter rateLimiter,
         ICompositeLoader<UserContext> contextLoader,
         ICompositeLoader<IReadOnlyCollection<OrderModel>> ordersLoader,
@@ -130,6 +139,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         _modifyOrderRequestFactory = modifyOrderRequestFactory;
         _cancelOrderRequestFactory = cancelOrderRequestFactory;
         _cancelAllOrdersRequestFactory = cancelAllOrdersRequestFactory;
+        _algoOrderRequestFactory = algoOrderRequestFactory;
         _rateLimiter = rateLimiter;
 
         // context
@@ -247,6 +257,11 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             return UserResult.New(UserOperationStatus.NotConnected, default(OrderModel));
         }
 
+        // the four conditional types left the ordinary endpoint on 2025-12-09 and are refused there with
+        // -4120. Routing is decided here, once, from the order's own type
+        if (QueryProcessor.IsConditional(request.Type))
+            return await InitAlgoOrderAsync(request);
+
         var queryResult = _queryProcessor.BuildInitOrderQuery(request);
         if (!queryResult.IsSuccess)
         {
@@ -257,6 +272,40 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         var result = await _initOrderRequestFactory
             .New(_config.HttpApi)
             .Post("/fapi/v1/order")
+            .Params(queryResult.Data)
+            .ReceiveWindow()
+            .Sign(_signatureService)
+            .WithRateDelay1M(_rateLimiter)
+            .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
+            .AsUserResultAsync<OrderModel>();
+
+        HandleTradeResult(result.IsSuccess);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Places a conditional order through <c>POST /fapi/v1/algoOrder</c>.
+    /// </summary>
+    /// <remarks>
+    /// The connector is already connected and the request already routed here by type, so this repeats
+    /// neither check. What it does not share with the ordinary placement is the query - four parameter names
+    /// differ - and the serializer, since the answer comes back under the algo field names.
+    /// </remarks>
+    /// <param name="request">The order parameters.</param>
+    /// <returns>A result carrying the placed order, or a non-success status.</returns>
+    private async ValueTask<UserResult<OrderModel?>> InitAlgoOrderAsync(IInitOrderRequest request)
+    {
+        var queryResult = _queryProcessor.BuildInitAlgoOrderQuery(request);
+        if (!queryResult.IsSuccess)
+        {
+            this.Warn("{id} algo query processing failed: {result}", Id, queryResult);
+            return UserResult.From(queryResult, default(OrderModel));
+        }
+
+        var result = await _algoOrderRequestFactory
+            .New(_config.HttpApi)
+            .Post("/fapi/v1/algoOrder")
             .Params(queryResult.Data)
             .ReceiveWindow()
             .Sign(_signatureService)

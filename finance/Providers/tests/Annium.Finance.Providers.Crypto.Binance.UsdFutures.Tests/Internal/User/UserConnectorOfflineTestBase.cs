@@ -110,6 +110,7 @@ public abstract class UserConnectorOfflineTestBase : ProvidersTestBase
             sp.ResolveHttpRequestFactory(Constants.ModifyOrderKey),
             sp.ResolveHttpRequestFactory(Constants.CancelOrderKey),
             sp.ResolveHttpRequestFactory(Constants.CancelAllOrdersKey),
+            sp.ResolveHttpRequestFactory(Constants.AlgoOrderKey),
             new StubRateLimiter(),
             built.ContextLoader,
             built.OrdersLoader,

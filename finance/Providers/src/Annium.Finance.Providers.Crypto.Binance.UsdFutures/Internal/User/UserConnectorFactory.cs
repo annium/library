@@ -54,6 +54,7 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
         var modifyOrderRequestFactory = sp.ResolveHttpRequestFactory(ModifyOrderKey);
         var cancelOrderRequestFactory = sp.ResolveHttpRequestFactory(CancelOrderKey);
         var cancelAllOrdersRequestFactory = sp.ResolveHttpRequestFactory(CancelAllOrdersKey);
+        var algoOrderRequestFactory = sp.ResolveHttpRequestFactory(AlgoOrderKey);
         var listenKeyResolver = sp.CreateListenKeyResolver(
             config,
             Endpoints.ListenKeyUriPath,
@@ -103,6 +104,7 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
             modifyOrderRequestFactory,
             cancelOrderRequestFactory,
             cancelAllOrdersRequestFactory,
+            algoOrderRequestFactory,
             rateLimiter,
             contextLoder,
             ordersLoader,
