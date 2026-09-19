@@ -178,11 +178,16 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
         });
         _disposable += Connector.Trades.Subscribe(_trades.Enqueue);
 
-        this.Trace("subscribe to connector errors");
-        Connector.OnError += _errors.Enqueue;
-
         this.Trace("await until user connector is ready");
         await Connector.WhenConnectedAsync(TestContext.Current.CancellationToken);
+
+        // counted from here, not from before the wait above. Getting connected is allowed to take more than
+        // one attempt: a handshake against a live venue over the public internet sometimes overruns the
+        // socket's connect deadline, and each failed attempt raises an error the socket then recovers from
+        // by trying again. Those belong to reaching the venue, not to anything this test does - and a run
+        // has already been failed by two of them, ten seconds before the connector came up healthy.
+        this.Trace("subscribe to connector errors");
+        Connector.OnError += _errors.Enqueue;
 
         this.Trace("cancel open orders");
         await CancelOpenOrders(TestContext.Current.CancellationToken);
@@ -327,7 +332,9 @@ public abstract class UserConnectorTestBase : ProvidersTestBase, IAsyncLifetime
     /// </summary>
     protected void EnsureNoErrors()
     {
-        _errors.IsEmpty();
+        // named, because "expected to be empty, but has 4 items" sends the reader to the log to find out
+        // what the four were - and the log of a live run is tens of thousands of lines
+        _errors.IsEmpty($"connector reported: {string.Join("; ", _errors.Select(x => x.Message))}");
     }
 
     /// <summary>

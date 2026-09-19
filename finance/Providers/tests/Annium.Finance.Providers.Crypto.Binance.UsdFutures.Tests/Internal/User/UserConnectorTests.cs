@@ -63,7 +63,16 @@ public class UserConnectorTests : UserConnectorTestBase
             new ProviderConfiguration
             {
                 ReloadContext = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
-                ReloadOrders = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
+                // the orders reload is the one that costs: measured against the venue, the unscoped open-order
+                // list is 40 weight and the conditional-order list another 40, so a one-second interval spends
+                // 4800 of a 2400-per-minute budget. The block ran at 2000 and two runs in a row could not both
+                // fit, which fails as a connector that reports itself not connected while the exchange is fine.
+                //
+                // Fifteen seconds here is a fallback, not the mechanism: an order's arrival is learnt from the
+                // user stream, which requests a reload and debounces it at 100ms. If raising this interval
+                // makes the tests slow, that is worth knowing - it would mean they were passing on the poll
+                // rather than on the stream. Production sets it to a minute.
+                ReloadOrders = new CompositeLoaderConfig(200, 5, 1000, 15_000, 100),
                 ReloadTrades = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
             }
         );
