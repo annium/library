@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -681,18 +681,21 @@ public class ClientServerWebSocketTests : TestBase
         var port = ((IPEndPoint)listener.LocalEndpoint).Port;
         var silent = new ConcurrentBag<TcpClient>();
         var ct = TestContext.Current.CancellationToken;
-        var accepting = Task.Run(async () =>
-        {
-            try
+        var accepting = Task.Run(
+            async () =>
             {
-                while (true)
-                    silent.Add(await listener.AcceptTcpClientAsync(TestContext.Current.CancellationToken));
-            }
-            catch (Exception e)
-            {
-                this.Trace<string>("listener stopped: {error}", e.GetType().Name);
-            }
-        }, ct);
+                try
+                {
+                    while (true)
+                        silent.Add(await listener.AcceptTcpClientAsync(TestContext.Current.CancellationToken));
+                }
+                catch (Exception e)
+                {
+                    this.Trace<string>("listener stopped: {error}", e.GetType().Name);
+                }
+            },
+            ct
+        );
 
         var options = ClientWebSocketOptions.Default with { ConnectTimeout = 200, ReconnectDelay = 1 };
         using var socket = new ClientWebSocket(options, Logger);
