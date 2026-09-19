@@ -44,4 +44,15 @@ public enum MarketOperationStatus
 
     /// <summary>The operation failed for a reason not covered by the other statuses.</summary>
     UnknownError,
+
+    // appended rather than placed beside its neighbours, so no existing member changes ordinal
+    /// <summary>The operation was rejected because the caller is not authorized to perform it.</summary>
+    /// <remarks>
+    /// Market endpoints are usually public, which is why this half of the pair went without the member for so
+    /// long - and why its absence was easy to miss rather than harmless. An address the exchange has
+    /// blacklisted, or a key it has locked, refuses market data too, and until this existed such a refusal
+    /// arrived as <see cref="UnknownError"/>: the one status that tells a caller nothing at all, for a cause
+    /// it could have acted on.
+    /// </remarks>
+    Forbidden,
 }

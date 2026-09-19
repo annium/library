@@ -102,6 +102,12 @@ public static class ProviderRegistrationContextExtensions
     }
 
     /// <summary>Creates the rate limiter shared across all Binance spot requests, matching Binance's request weight limit.</summary>
+    /// <remarks>
+    /// 6000 a minute is 300 every three seconds, so the decay drains exactly what the ceiling allows. The
+    /// arithmetic is spelled out because these three numbers travel together and the venues disagree on the
+    /// first of them: copying a decay across without recomputing it is how the futures limiter came to hand
+    /// budget back two and a half times too fast.
+    /// </remarks>
     /// <param name="sp">The service provider used to resolve dependencies.</param>
     /// <returns>The created rate limiter.</returns>
     private static IRateLimiter RateLimiterFactory(IServiceProvider sp)

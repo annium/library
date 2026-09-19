@@ -256,9 +256,11 @@ public class UserProviderReadPathTests : ProvidersTestBase
     /// why. Fixed upstream in <c>Annium.Net.Http</c> 1.1.49 (<c>AsResponseExtensions</c>, which now tries
     /// the failure shape after the success shape throws); this asserts the reason we depend on.
     ///
-    /// The status is <c>BadRequest</c> rather than <c>Forbidden</c> because the code wins over the HTTP
-    /// status: every negative Binance code maps to <c>BadRequest</c>, auth codes included. Recorded as it
-    /// is — the mapping is a separate question from whether the reason arrives at all.
+    /// The status was <c>BadRequest</c> until 2026-09-19, and this remark said why: the Binance code wins
+    /// over the HTTP status, and every negative code mapped to <c>BadRequest</c>, auth codes included. It
+    /// was recorded as a separate question from whether the reason arrives at all. That question is now
+    /// answered — <c>-2015 REJECTED_MBX_KEY</c> is classified as an access failure — so an invalid key
+    /// reads as <c>Forbidden</c> from the code and from the 401 alike, which is what it always meant.
     /// </remarks>
     /// <returns>A task representing the asynchronous test.</returns>
     [Fact]
@@ -281,7 +283,7 @@ public class UserProviderReadPathTests : ProvidersTestBase
         var result = await provider.LoadOpenOrdersAsync();
 
         // assert
-        result.Status.Is(UserOperationStatus.BadRequest, "a refusal must not read as success");
+        result.Status.Is(UserOperationStatus.Forbidden, "an invalid key is an access failure, not a malformed request");
         result.Message.Is("Invalid API-key.", "the exchange's own reason is what makes the failure actionable");
         result.Data.IsDefault("a failed load must carry no data, so it cannot be mistaken for an empty one");
     }

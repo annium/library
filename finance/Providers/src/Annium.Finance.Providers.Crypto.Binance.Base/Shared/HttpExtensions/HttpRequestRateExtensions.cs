@@ -57,12 +57,10 @@ public static partial class HttpRequestRateExtensions
             var isRefusal = response.StatusCode is HttpStatusCode.TooManyRequests or (HttpStatusCode)418;
             if (isRefusal)
             {
+                // every refusal costs a pause, including one that names no deadline - see ReadPauseAsync
                 var pause = await ReadPauseAsync(response);
-                if (pause > TimeSpan.Zero)
-                {
-                    request.Warn<double>("refused until further notice, pausing for {seconds}s", pause.TotalSeconds);
-                    rateLimiter.Block(pause);
-                }
+                request.Warn<double>("refused until further notice, pausing for {seconds}s", pause.TotalSeconds);
+                rateLimiter.Block(pause);
             }
 
             var headerName = "x-mbx-used-weight-1m";
@@ -103,35 +101,62 @@ public static partial class HttpRequestRateExtensions
             return response;
         });
 
+    /// <summary>The longest pause a stated deadline can buy, matching the longest ban Binance documents.</summary>
+    /// <remarks>
+    /// Binance documents IP bans as scaling "from 2 minutes to 3 days" for repeat offenders. This used to be
+    /// one hour, which is below the documented maximum by a factor of 72: on a long ban the client resumed
+    /// after an hour and resumed straight into it - which the same page names as the cause of longer bans. The
+    /// cap exists so a garbled or hostile value costs a pause rather than the rest of the process's life, so
+    /// it stays; it is the value that was wrong, not the idea.
+    /// </remarks>
+    private static readonly TimeSpan _maxPause = TimeSpan.FromDays(3);
+
+    /// <summary>How long to stand down after a refusal that states no deadline at all.</summary>
+    /// <remarks>
+    /// A refusal without a deadline used to produce no pause whatsoever: the deadline readers returned zero
+    /// and the caller only blocked on a positive value, so the limiter carried on as though nothing had
+    /// happened. That is the worst moment to keep going, and it is not rare - a system-level throttle says
+    /// only "please try again", and a plain 429 carries no deadline either.
+    /// <para>
+    /// One minute, because the weight budget these refusals guard is a per-minute window: waiting for it to
+    /// roll is the shortest pause that can actually clear the condition. A 418 ban outlasts it, but the ban
+    /// message states its own deadline and so never reaches this fallback.
+    /// </para>
+    /// </remarks>
+    private static readonly TimeSpan _defaultPause = TimeSpan.FromMinutes(1);
+
     /// <summary>
     /// Reads how long the provider wants to be left alone for, from the standard <c>Retry-After</c> header or,
-    /// failing that, from the deadline Binance states in a ban message.
+    /// failing that, from the deadline Binance states in a ban message - and falls back to a fixed pause when
+    /// the refusal states nothing at all.
     /// </summary>
     /// <remarks>
     /// The deadline is the provider's own clock, compared against ours - good enough when the wait is tens of
-    /// minutes and the two are seconds apart. It is capped because a garbled or hostile value should cost a
-    /// pause, not the rest of the process's life.
+    /// minutes and the two are seconds apart.
     /// </remarks>
     /// <param name="response">The refusing response.</param>
-    /// <returns>How long to pause for, or zero if the response does not say.</returns>
+    /// <returns>How long to pause for, never zero: a refusal always costs a pause.</returns>
     private static async Task<TimeSpan> ReadPauseAsync(IHttpResponse response)
     {
-        var maxPause = TimeSpan.FromHours(1);
-
         var retryAfter = response
             .Headers.FirstOrDefault(x => x.Key.Equals("Retry-After", StringComparison.InvariantCultureIgnoreCase))
             .Value?.FirstOrDefault();
         if (int.TryParse(retryAfter, out var seconds) && seconds > 0)
-            return TimeSpan.FromSeconds(Math.Min(seconds, maxPause.TotalSeconds));
+            return TimeSpan.FromSeconds(Math.Min(seconds, _maxPause.TotalSeconds));
 
         var content = await response.Content.ReadAsStringAsync();
         var match = BannedUntil().Match(content);
         if (!match.Success || !long.TryParse(match.Groups[1].Value, out var until))
-            return TimeSpan.Zero;
+            return _defaultPause;
 
         var pause = DateTimeOffset.FromUnixTimeMilliseconds(until) - DateTimeOffset.UtcNow;
 
-        return pause > maxPause ? maxPause : pause;
+        // a deadline already in the past says the ban has lapsed, not that we may resume instantly - the
+        // clocks differ, and the cheapest way to be wrong here is to be first through the door
+        if (pause < _defaultPause)
+            return _defaultPause;
+
+        return pause > _maxPause ? _maxPause : pause;
     }
 
     /// <summary>

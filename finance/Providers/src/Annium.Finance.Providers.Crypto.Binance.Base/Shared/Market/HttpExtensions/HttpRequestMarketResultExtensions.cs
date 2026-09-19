@@ -77,20 +77,33 @@ public static class HttpRequestMarketResultExtensions
         {
             (HttpStatusCode)418 or HttpStatusCode.TooManyRequests => MarketOperationStatus.TooManyRequests,
             HttpStatusCode.BadRequest => MarketOperationStatus.BadRequest,
+            // 401/403/404 fell through to UnknownError here while the user mapping named all three. The
+            // asymmetry was not a decision - this half simply had no Forbidden to map to until now
+            HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => MarketOperationStatus.Forbidden,
+            HttpStatusCode.NotFound => MarketOperationStatus.NotFound,
             _ => MarketOperationStatus.UnknownError,
         };
 
     /// <summary>Maps a Binance <see cref="OperationResult"/> error code into a market operation status.</summary>
     /// <param name="code">The error code returned by Binance in the operation result.</param>
     /// <returns>The equivalent market operation status.</returns>
+    /// <remarks>
+    /// The code list lives in <see cref="BinanceErrors"/> and is shared with the user mapping - these two
+    /// were separate code lists once and drifted, which is the divergence sharing them makes impossible.
+    /// <see cref="BinanceErrorClass.InsufficientFunds"/> has no vocabulary on this half and needs none:
+    /// market endpoints do not spend anything. It is folded into the refusal case rather than given a
+    /// meaningless status of its own.
+    /// </remarks>
     private static MarketOperationStatus MapOperationCode(long code) =>
-        code switch
+        BinanceErrors.Classify(code) switch
         {
-            OperationResult.NetworkError => MarketOperationStatus.NetworkError,
-            OperationResult.Aborted => MarketOperationStatus.Aborted,
-            OperationResult.ParseError => MarketOperationStatus.ParseError,
-            OperationResult.TooManyRequests => MarketOperationStatus.TooManyRequests,
-            < 0 => MarketOperationStatus.BadRequest,
+            BinanceErrorClass.Transport => MarketOperationStatus.NetworkError,
+            BinanceErrorClass.Aborted => MarketOperationStatus.Aborted,
+            BinanceErrorClass.Unparsed => MarketOperationStatus.ParseError,
+            BinanceErrorClass.RateLimited => MarketOperationStatus.TooManyRequests,
+            BinanceErrorClass.Access => MarketOperationStatus.Forbidden,
+            BinanceErrorClass.NotFound => MarketOperationStatus.NotFound,
+            BinanceErrorClass.Refused or BinanceErrorClass.InsufficientFunds => MarketOperationStatus.BadRequest,
             _ => MarketOperationStatus.UnknownError,
         };
 }

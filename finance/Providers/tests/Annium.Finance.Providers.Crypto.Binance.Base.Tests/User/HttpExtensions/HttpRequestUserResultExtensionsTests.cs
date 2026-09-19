@@ -144,10 +144,33 @@ public class HttpRequestUserResultExtensionsTests : ProvidersTestBase
     /// <param name="status">The status the code is expected to map to.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Theory]
+    // a negative code nobody classified is a refusal: the exchange read the request and declined it
     [InlineData(-1, UserOperationStatus.BadRequest)]
+    // rate: volume, not content. -1008 is a throttle and -1015 the order-count limit; both reached callers
+    // as BadRequest until 2026-09-19, because they fell into the "any other negative" branch below -1003
     [InlineData(-1003, UserOperationStatus.TooManyRequests)]
+    [InlineData(-1008, UserOperationStatus.TooManyRequests)]
+    [InlineData(-1015, UserOperationStatus.TooManyRequests)]
+    // transport, the exchange's own: retryable exactly as it stands
+    [InlineData(-1001, UserOperationStatus.NetworkError)]
+    [InlineData(-1007, UserOperationStatus.NetworkError)]
+    [InlineData(-1016, UserOperationStatus.NetworkError)]
+    // credentials. An expired key used to be indistinguishable from a malformed price, and the two want
+    // opposite responses - one is fixed by editing configuration, the other by retrying with better input
+    [InlineData(-1002, UserOperationStatus.Forbidden)]
+    [InlineData(-1011, UserOperationStatus.Forbidden)]
+    [InlineData(-2014, UserOperationStatus.Forbidden)]
+    [InlineData(-2015, UserOperationStatus.Forbidden)]
+    [InlineData(-2017, UserOperationStatus.Forbidden)]
+    // absent, not wrong: cancelling an order that is already gone is not a malformed cancel
+    [InlineData(-1099, UserOperationStatus.NotFound)]
+    [InlineData(-1121, UserOperationStatus.NotFound)]
+    [InlineData(-2013, UserOperationStatus.NotFound)]
     [InlineData(-2018, UserOperationStatus.InsufficientBalance)]
     [InlineData(-2019, UserOperationStatus.InsufficientBalance)]
+    // a refusal on the merits stays a refusal - this is the class the others were wrongly sharing
+    [InlineData(-2021, UserOperationStatus.BadRequest)]
+    [InlineData(-4120, UserOperationStatus.BadRequest)]
     [InlineData(10, UserOperationStatus.UnknownError)]
     public async Task OperationResultResponse(long code, UserOperationStatus status)
     {
