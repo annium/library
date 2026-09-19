@@ -98,6 +98,13 @@ public class MarketProviderReadPathTests : ProvidersTestBase
         eth.Precision.Is((byte)8, "an asset without USD in its code is guessed at eight digits");
         var usdt = context.Resources.Single(x => x.Code == "USDT");
         usdt.Precision.Is((byte)8, "USDT is described by the symbol, so its own precision wins over the guess");
+
+        // the branch that makes this a heuristic at all, and which nothing reached until 2026-09-19: an
+        // asset no instrument describes, whose code contains USD. The only USD-bearing asset in the fixture
+        // used to be the symbol's own quote asset, so its precision came from the instrument and the guess
+        // was never exercised - two assertions of eight, and a summary claiming to cover two
+        var busd = context.Resources.Single(x => x.Code == "BUSD");
+        busd.Precision.Is((byte)2, "an undescribed asset with USD in its code is guessed at two digits");
     }
 
     /// <summary>
@@ -251,7 +258,7 @@ public class MarketProviderReadPathTests : ProvidersTestBase
 
         return $@"{{
             ""rateLimits"": [ {{ ""rateLimitType"": ""REQUEST_WEIGHT"", ""interval"": ""MINUTE"", ""intervalNum"": 1, ""limit"": {weightLimit} }} ],
-            ""assets"": [ {{ ""asset"": ""USDT"", ""marginAvailable"": true }}, {{ ""asset"": ""ETH"", ""marginAvailable"": true }} ],
+            ""assets"": [ {{ ""asset"": ""USDT"", ""marginAvailable"": true }}, {{ ""asset"": ""ETH"", ""marginAvailable"": true }}, {{ ""asset"": ""BUSD"", ""marginAvailable"": true }} ],
             ""symbols"": [ {{
                 ""symbol"": ""BTCUSDT"",
                 ""contractType"": ""PERPETUAL"",

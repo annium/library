@@ -76,10 +76,17 @@ public abstract class UserConnectorReadTestBase : ProvidersTestBase
             this.Trace("await for the account snapshot");
             await Expect.ToAsync(() => assets.Count.IsGreaterOrEqual(1), 30_000);
 
-            // an account with no open position reports no rows at all on some venues, so positions are not
-            // asserted as non-empty - what is asserted is that the stream that carries them is up
             connector.Status.Is(ConnectorStatus.Connected);
-            positions.Count.IsGreaterOrEqual(0);
+
+            // positions used to be "asserted" here by a count compared against zero, which a count can
+            // never fail - assertion-shaped and incapable of noticing anything. What is asserted instead is
+            // the property the write fixture's precondition actually rests on: every position row the
+            // venue reports names a symbol, so a caller can tell which instrument it is about.
+            //
+            // Deliberately not asserted as non-empty: a venue that reports no rows for an account holding
+            // no position is behaving reasonably, and this base runs against whatever account it is given.
+            foreach (var position in positions)
+                position.Symbol.IsNotEmpty("a position was reported without a symbol, so it names nothing");
 
             this.Trace("assert nothing was reported on the error channel");
             errors.Count.Is(0, string.Join("; ", errors.Select(x => x.Message)));

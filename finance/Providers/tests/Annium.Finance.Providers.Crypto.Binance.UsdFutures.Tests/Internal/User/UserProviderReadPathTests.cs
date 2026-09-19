@@ -250,6 +250,42 @@ public class UserProviderReadPathTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// The latest-trades read is bounded by time, because this endpoint's page cap selects the oldest
+    /// trades rather than the newest.
+    /// </summary>
+    /// <remarks>
+    /// Measured against the live venue on 2026-09-19: asking it for five trades returns the five
+    /// <em>oldest</em> on the account, while the order endpoint's limit returns the newest. So a page cap
+    /// cannot select recency here - and a loader asking for the latest page with a limit alone gets the
+    /// earliest one on any account busy enough to fill it, as a full page of real trades that nothing
+    /// downstream can tell from the right one. The window is what selects recency, so the window is what
+    /// this asserts.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadTrades_WithoutASince_IsBoundedByTimeNotByPageSize()
+    {
+        // arrange
+        var bounded = 0;
+        await using var server = this.RunHttpServer(
+            async (request, response) =>
+            {
+                if (request.QueryString["startTime"] is not null)
+                    bounded++;
+
+                await WriteJsonAsync(response, "[]");
+            }
+        );
+        var provider = CreateProvider(server);
+
+        // act
+        await provider.LoadTradesAsync("BTCUSDT", null);
+
+        // assert
+        bounded.Is(1, "the latest trades were asked for with a page cap and no window, which selects the oldest");
+    }
+
+    /// <summary>
     /// Order history comes from both stores, and a conditional order that triggered is counted once - as the
     /// ordinary order it became.
     /// </summary>

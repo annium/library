@@ -45,6 +45,13 @@ internal class UserProvider(
     /// <summary>The maximum number of orders returned by a single order history request.</summary>
     private const int OrderQueryLimit = 1000;
 
+    /// <summary>How far back the latest-trades read looks, in milliseconds.</summary>
+    /// <remarks>
+    /// One hour. See <c>LoadLatestTradesAsync</c> for why this endpoint is bounded by time rather than by
+    /// page size - a limit on it selects the oldest trades, not the newest.
+    /// </remarks>
+    private const long LatestTradesWindow = 60L * 60 * 1000;
+
     /// <summary>The maximum number of trades returned by a single trade history request.</summary>
     private const int TradeQueryLimit = 1000;
 
@@ -406,10 +413,22 @@ internal class UserProvider(
     /// <returns>A result carrying the trades, or a failure status if they could not be loaded.</returns>
     private async Task<UserResult<IReadOnlyCollection<TradeModel>?>> LoadLatestTradesAsync(string symbol)
     {
+        // bounded by time, not by limit. This endpoint truncates a page from the *start* of the window,
+        // measured 2026-09-19: asking for five trades returns the five oldest, where the order endpoint's
+        // limit returns the newest. So a page cap cannot select recency here, and asking for "the latest
+        // page" with a limit alone returns the earliest one on any account busy enough to fill it - a full
+        // page of real trades, which nothing downstream can tell from the right one.
+        //
+        // The window is what selects recency instead. An hour is far more than this path needs: it exists
+        // to attach realised PnL to a fill that has just happened, and a fill older than that has already
+        // been loaded by the history path.
+        var since = timeProvider.Now.ToUnixTimeMilliseconds() - LatestTradesWindow;
+
         var result = await getTradeRequestFactory
             .New(config.HttpApi)
             .Get("/fapi/v1/userTrades")
             .Param("symbol", symbol)
+            .Param("startTime", since)
             .Param("limit", TradeQueryLimit)
             .ReceiveWindow()
             .Sign(signatureService)
