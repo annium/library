@@ -651,6 +651,37 @@ could be checked, and is now checked.
 > | `GET /fapi/v1/openAlgoOrders` | `actualOrderId`, `actualQty`, `isActivated` |
 > | `GET /fapi/v1/allAlgoOrders` | `actualOrderId`, `actualPrice`, `tpOrderType` — **no** `actualQty`, **no** `isActivated` |
 >
+> **What a trigger does, measured live 2026-09-19** by letting one conditional order fire and closing the
+> position it opened. This is what settles the status mapping, which no reading of the documentation could:
+>
+> | observed | value |
+> |---|---|
+> | the conditional order becomes an **ordinary order** | `allOrders` gains `orderId 33877541028`, `type MARKET`, `status FILLED`, `origQty 4.9`, `avgPrice 1.1325` |
+> | **its `clientOrderId` is our `clientAlgoId`** | `60d0f110-…`, the same GUID we sent to `algoOrder` |
+> | the algo record settles at | `algoStatus: FINISHED`, `actualOrderId` equal to that `orderId`, `actualPrice`, `actualQty`, and **`actualType`** — a field absent from every untriggered shape |
+> | `openAlgoOrders` | empty: a triggered order leaves it |
+> | cancelling a finished one | `-2011 Unknown order sent.` — not the `-2013` an unknown id gives |
+> | `isActivated` | **`false` even on the triggered order**, so it does not mean "triggered". Unexplained; do not read it |
+>
+> **The identity is preserved across the trigger**, and that is the fact the whole migration rests on. Our
+> domain keys an order by the GUID it sent as the client id; the exchange carries that same GUID from the
+> conditional order onto the ordinary order it becomes. So a conditional order does not change identity
+> when it fires — it changes *store*.
+>
+> Which decides the status mapping without guessing at `FINISHED`:
+>
+> | `algoStatus` | domain | why |
+> |---|---|---|
+> | `NEW`, `TRIGGERING` | `New` | open and untriggered; the algo store is the only place it exists |
+> | `TRIGGERED`, `FINISHED` | **not mapped — the record is dropped** | an ordinary order with the same id exists and carries the real outcome. Mapping `FINISHED` to `Filled` would have been wrong whenever the triggered order was cancelled in the book, which the documentation says plainly and which no reading could have resolved |
+> | `CANCELED` | `Canceled` | terminal, never triggered |
+> | `REJECTED` | `Rejected` | refused by the matching engine |
+> | `EXPIRED` | `Expired` | cancelled by the system |
+>
+> One more thing the trigger established, recorded because it shapes the tests rather than the code: **a
+> conditional order that would fire immediately cannot be placed at all** — `-2021 Order would immediately
+> trigger`. A test that wants a trigger has to wait for the market to reach it.
+>
 > Remediation belongs to steps 3-5, specified in `status.md`, not performed here.
 >
 > Spot is not implicated — it was not exercised, and its four spot names are untouched by this.
