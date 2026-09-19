@@ -646,8 +646,29 @@ is in §7.
 The argument for the `MapOperationCode` split queued in `status.md` stands and is sharper for it: the
 taxonomy is not tidiness, it decides whether a control path runs.
 
-**The real code list, for that split.** `error-code.md` carries **206 codes** in five documented
-families, which is the input the decision was waiting for and removes the reason it was deferred:
+**The split was made 2026-09-19**, from the real list rather than from a guess. Codes are classified by
+**what a caller would do differently** — `BinanceErrors.Classify`, one table shared by both mappings, so
+the two can no longer drift apart as they did before:
+
+| class | codes | user status | market status |
+|---|---|---|---|
+| transport, retryable as-is | `-1001` DISCONNECTED, `-1007` TIMEOUT, `-1016` SERVICE_SHUTTING_DOWN | `NetworkError` | `NetworkError` |
+| rate | `-1003`, `-1008`, `-1015` TOO_MANY_ORDERS | `TooManyRequests` | `TooManyRequests` |
+| access | `-1002`, `-1011` NON_WHITE_LIST, `-2014`, `-2015`, `-2017` API_KEYS_LOCKED | `Forbidden` | `Forbidden` |
+| absent | `-1099`, `-1121` BAD_SYMBOL, `-2013` NO_SUCH_ORDER | `NotFound` | `NotFound` |
+| funds | `-2018`, `-2019` | `InsufficientBalance` | folds to `BadRequest` — market endpoints spend nothing |
+| refused on the merits | every other negative code | `BadRequest` | `BadRequest` |
+
+**`MarketOperationStatus` gained `Forbidden`** to make this expressible; it had none, which is why its
+HTTP map sent `401`/`403`/`404` to `UnknownError` while the user map named all three. That asymmetry was
+never a decision.
+
+The gain is not tidiness. An expired key, an order already cancelled and a malformed price were one
+status, and they want three different responses — fix configuration, look elsewhere, correct the input.
+Every class above is `pinned`, on both mappings, by codes named after the documented constant so the
+table can be checked against `error-code.md` without guessing what a number meant.
+
+**The real code list behind it.** `error-code.md` carries **206 codes** in five documented families:
 
 | family | line | what a caller would do |
 |---|---|---|

@@ -85,17 +85,24 @@ public static class HttpRequestUserResultExtensions
     /// <summary>Maps a Binance <see cref="OperationResult"/> error code into a user operation status.</summary>
     /// <param name="code">The error code returned by Binance in the operation result.</param>
     /// <returns>The equivalent user operation status.</returns>
+    /// <remarks>
+    /// The code list lives in <see cref="BinanceErrors"/> and is shared with the market mapping; what differs
+    /// here is only the vocabulary this half has to say it in. <see cref="BinanceErrorClass.Refused"/> is
+    /// <see cref="UserOperationStatus.BadRequest"/> because that status reads "rejected because the request
+    /// was malformed or violated provider constraints" - and a refusal on the merits is the second half of
+    /// that sentence. What changed is everything that is *not* a refusal and used to land here anyway.
+    /// </remarks>
     private static UserOperationStatus MapOperationCode(long code) =>
-        code switch
+        BinanceErrors.Classify(code) switch
         {
-            OperationResult.NetworkError => UserOperationStatus.NetworkError,
-            OperationResult.Aborted => UserOperationStatus.Aborted,
-            OperationResult.ParseError => UserOperationStatus.ParseError,
-            OperationResult.TooManyRequests => UserOperationStatus.TooManyRequests,
-            OperationResult.RequestThrottled => UserOperationStatus.TooManyRequests,
-            -2018 => UserOperationStatus.InsufficientBalance, // BALANCE_NOT_SUFFICIENT
-            -2019 => UserOperationStatus.InsufficientBalance, // MARGIN_NOT_SUFFICIENT
-            < 0 => UserOperationStatus.BadRequest,
+            BinanceErrorClass.Transport => UserOperationStatus.NetworkError,
+            BinanceErrorClass.Aborted => UserOperationStatus.Aborted,
+            BinanceErrorClass.Unparsed => UserOperationStatus.ParseError,
+            BinanceErrorClass.RateLimited => UserOperationStatus.TooManyRequests,
+            BinanceErrorClass.Access => UserOperationStatus.Forbidden,
+            BinanceErrorClass.NotFound => UserOperationStatus.NotFound,
+            BinanceErrorClass.InsufficientFunds => UserOperationStatus.InsufficientBalance,
+            BinanceErrorClass.Refused => UserOperationStatus.BadRequest,
             _ => UserOperationStatus.UnknownError,
         };
 }

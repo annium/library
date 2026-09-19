@@ -171,10 +171,20 @@ public class HttpRequestMarketResultExtensionsTests : ProvidersTestBase
     /// <returns>A task representing the asynchronous operation.</returns>
     [Theory]
     [InlineData(-1, MarketOperationStatus.BadRequest)]
+    // the same classes as the user mapping, asserted separately because these are two spellings of one
+    // table and the last time they were two tables they diverged for months without anyone noticing
     [InlineData(-1003, MarketOperationStatus.TooManyRequests)]
-    // -1008 is a throttle, not a malformed request. Asserted separately from the user mapping because these
-    // are two copies of one idea, and the last time they diverged nobody noticed for months
     [InlineData(-1008, MarketOperationStatus.TooManyRequests)]
+    [InlineData(-1015, MarketOperationStatus.TooManyRequests)]
+    [InlineData(-1001, MarketOperationStatus.NetworkError)]
+    [InlineData(-1016, MarketOperationStatus.NetworkError)]
+    // this half had no Forbidden to map to until 2026-09-19, so a blacklisted address asking for market
+    // data was told UnknownError - the one status that says nothing, for a cause the caller could act on
+    [InlineData(-1011, MarketOperationStatus.Forbidden)]
+    [InlineData(-2015, MarketOperationStatus.Forbidden)]
+    [InlineData(-1121, MarketOperationStatus.NotFound)]
+    // market endpoints spend nothing, so the funds class has no vocabulary here and folds into the refusal
+    [InlineData(-2018, MarketOperationStatus.BadRequest)]
     [InlineData(10, MarketOperationStatus.UnknownError)]
     public async Task OperationResultResponse(long code, MarketOperationStatus status)
     {
