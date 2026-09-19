@@ -632,6 +632,25 @@ could be checked, and is now checked.
 > undocumented, or it reads a different store than the open-orders endpoint. **Not resolved**, and worth
 > resolving before the migration relies on it: `openAlgoOrders` is the endpoint proven to work.
 >
+> **[BLOCKING for ingestion] A conditional order never enters the ordinary order store.** Measured
+> 2026-09-19, after the probe's order could not be found in the account's order history. The same order,
+> by `algoId` and `clientAlgoId`, is present in `GET /fapi/v1/allAlgoOrders?symbol=…` with
+> `algoStatus: CANCELED`; `GET /fapi/v1/allOrders?symbol=…` returns only orders from the previous day's
+> run and nothing from the probe at all.
+>
+> So the two stores are disjoint until a trigger fires. `UserProvider.LoadOrdersAsync` reads `allOrders`,
+> which means that after the migration **a connector rebuilding state from order history alone loses every
+> conditional order the account holds** — and loses them silently, as an empty history rather than an
+> error. Conditional orders need `allAlgoOrders` as a second source, per symbol.
+>
+> **And there are three response shapes, not one**, which a single converter cannot serve:
+>
+> | endpoint | fields beyond the common set |
+> |---|---|
+> | `POST /fapi/v1/algoOrder` | none |
+> | `GET /fapi/v1/openAlgoOrders` | `actualOrderId`, `actualQty`, `isActivated` |
+> | `GET /fapi/v1/allAlgoOrders` | `actualOrderId`, `actualPrice`, `tpOrderType` — **no** `actualQty`, **no** `isActivated` |
+>
 > Remediation belongs to steps 3-5, specified in `status.md`, not performed here.
 >
 > Spot is not implicated — it was not exercised, and its four spot names are untouched by this.

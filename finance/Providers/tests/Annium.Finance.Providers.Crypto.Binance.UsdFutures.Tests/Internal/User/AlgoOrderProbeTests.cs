@@ -126,6 +126,27 @@ public class AlgoOrderProbeTests : ProvidersTestBase
         body.IsNotEmpty("openAlgoOrders answered with nothing, so its envelope is still unknown");
     }
 
+    /// <summary>
+    /// Records where a conditional order shows up in history once it is over: the algo history, the ordinary
+    /// order history, or neither.
+    /// </summary>
+    /// <remarks>
+    /// Asked because a conditional order placed and cancelled on 2026-09-19 could not be found in the
+    /// account's order history afterwards. If an untriggered algo order never becomes an order, it will not
+    /// appear among orders - but that is a guess until measured, and reconciliation depends on which store
+    /// holds it: a connector that rebuilds state from order history alone would silently lose every
+    /// conditional order the account ever had.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TestBlock.ReadTimeoutMs)]
+    public async Task History_SaysWhereAFinishedAlgoOrderIsKept()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        await GetRawAsync("/fapi/v1/allAlgoOrders?symbol=DOTUSDT", signed: true, ct);
+        await GetRawAsync("/fapi/v1/allOrders?symbol=DOTUSDT&limit=20", signed: true, ct);
+    }
+
     /// <summary>Sends a GET to the live exchange and returns the response body verbatim.</summary>
     /// <param name="path">The endpoint path to call.</param>
     /// <param name="signed">Whether to append the receive window, timestamp and signature.</param>
