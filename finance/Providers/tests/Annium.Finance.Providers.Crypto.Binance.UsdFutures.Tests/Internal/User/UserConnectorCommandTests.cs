@@ -330,6 +330,10 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
     /// The client order id has to be a GUID: the cancel response converter reads it as one and returns no
     /// response at all when it is not, which reads back as a failed cancel.
     /// </remarks>
+    private const string CancelResponse = """
+        {"orderId":1,"clientOrderId":"2f1d4e6a-8b3c-4d5e-9f01-23456789abcd","symbol":"BTCUSDT","status":"CANCELED"}
+        """;
+
     /// <summary>A real placement answer from the algo endpoint, captured live on 2026-09-19.</summary>
     private const string AlgoOrderResponse = """
         {
@@ -348,10 +352,6 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
           "createTime": 1789819033056,
           "updateTime": 1789819033056
         }
-        """;
-
-    private const string CancelResponse = """
-        {"orderId":1,"clientOrderId":"2f1d4e6a-8b3c-4d5e-9f01-23456789abcd","symbol":"BTCUSDT","status":"CANCELED"}
         """;
 
     /// <summary>
