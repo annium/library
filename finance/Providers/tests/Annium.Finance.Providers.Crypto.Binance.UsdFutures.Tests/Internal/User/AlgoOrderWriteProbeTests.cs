@@ -198,6 +198,57 @@ public class AlgoOrderWriteProbeTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// Cancels every order left open on the test symbol, ordinary and conditional alike.
+    /// </summary>
+    /// <remarks>
+    /// The companion to <see cref="CloseAnyOpenPosition"/>, and written for the same reason: a live stage
+    /// that fails part-way leaves its teardown unrun. A trading run has already ended with its last order
+    /// accepted by the exchange and its cancel refused locally, which leaves a resting order behind that
+    /// nothing in the suite is going to notice.
+    ///
+    /// The two kinds live in separate stores and neither endpoint touches the other's, so both are asked.
+    /// Cancelling nothing is a normal outcome here, not a failure.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TestBlock.ReadTimeoutMs)]
+    public async Task CancelAnyOpenOrders()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        await SendAsync(
+            HttpMethod.Delete,
+            "/fapi/v1/allOpenOrders",
+            new() { ["symbol"] = Symbol },
+            true,
+            "cleanup.orders",
+            ct
+        );
+
+        var open = await SendAsync(
+            HttpMethod.Get,
+            "/fapi/v1/openAlgoOrders",
+            new(),
+            true,
+            "cleanup.algo-before",
+            ct
+        );
+
+        using var doc = System.Text.Json.JsonDocument.Parse(open);
+        foreach (var order in doc.RootElement.EnumerateArray())
+        {
+            var algoId = order.GetProperty("algoId").ToString();
+            await SendAsync(
+                HttpMethod.Delete,
+                "/fapi/v1/algoOrder",
+                new() { ["algoId"] = algoId },
+                true,
+                $"cleanup.algo-{algoId}",
+                ct
+            );
+        }
+    }
+
+    /// <summary>
     /// Places one market order and records every raw answer the exchange gives about it: the placement, the
     /// order queried back, the trades it produced, and the stream events it raised.
     /// </summary>
