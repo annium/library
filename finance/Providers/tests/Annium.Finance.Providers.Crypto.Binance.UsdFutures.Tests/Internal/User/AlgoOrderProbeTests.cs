@@ -42,7 +42,7 @@ namespace Annium.Finance.Providers.Crypto.Binance.UsdFutures.Tests.Internal.User
 /// </para>
 /// </remarks>
 [Collection(ExchangeCollection.Name)]
-[Trait(TestBlock.Name, TestBlock.Read)]
+[Trait(TestBlock.Name, TestBlock.Probe)]
 public class AlgoOrderProbeTests : ProvidersTestBase
 {
     /// <summary>

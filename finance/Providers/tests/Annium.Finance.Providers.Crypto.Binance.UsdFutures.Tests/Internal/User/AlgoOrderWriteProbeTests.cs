@@ -42,7 +42,7 @@ namespace Annium.Finance.Providers.Crypto.Binance.UsdFutures.Tests.Internal.User
 /// </para>
 /// </remarks>
 [Collection(ExchangeCollection.Name)]
-[Trait(TestBlock.Name, TestBlock.Write)]
+[Trait(TestBlock.Name, TestBlock.Probe)]
 public class AlgoOrderWriteProbeTests : ProvidersTestBase
 {
     /// <summary>The symbol the probe trades, chosen for the lowest notional the venue allows.</summary>

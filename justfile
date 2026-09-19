@@ -105,7 +105,8 @@ test-tools:
 test-finance:
     @echo "=== test finance (offline) ==="
     dotnet test --solution finance/finance.slnx -c Release --no-build --report-xunit-trx \
-        -- --filter-not-trait "block=read" --filter-not-trait "block=write"
+        -- --filter-not-trait "block=read" --filter-not-trait "block=write" \
+        --filter-not-trait "block=probe"
 
 # --ignore-exit-code 8 because most projects hold none of these tests, and a project that matched
 # nothing otherwise fails the whole run with "zero tests ran" - a green run reporting failure.
@@ -128,6 +129,22 @@ test-finance-write:
     @echo "=== test finance (write) ==="
     dotnet test --solution finance/finance.slnx -c Release --no-build --report-xunit-trx \
         -- --filter-trait "block=write" --ignore-exit-code 8
+
+# finance, probes - investigation tools, named one at a time. No recipe runs them as a group, which is
+# the point: a probe trades to answer a question and overwrites the captures it wrote last time.
+#
+#   dotnet test --solution finance/finance.slnx -c Release --no-build \
+#       -- --filter-class "*<the one you mean>"
+#
+# To read what a live test actually said to the exchange, run the test assembly itself rather than going
+# through `dotnet test`: request and response bodies are logged at trace level, and neither half of that
+# is reachable from here. The level comes from ANNIUM_LOG, and per-test output is only printed with the
+# runner's own -showLiveOutput, which the `dotnet test` wrapper rejects as an unknown option.
+#
+#   ANNIUM_LOG=trace <path to test assembly> -trait "block=read" -showLiveOutput -noColor
+#
+# The runner's own CLI takes -class / -trait, not the --filter-* options above. Logs from a live run hold
+# a listen key in clear text, so they stay out of the repository.
 
 # package
 
