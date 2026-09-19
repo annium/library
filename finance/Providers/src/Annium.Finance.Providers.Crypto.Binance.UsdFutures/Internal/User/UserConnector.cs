@@ -86,6 +86,9 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <summary>Reads the user data stream's conditional order update event.</summary>
     private readonly ISerializer<ReadOnlyMemory<byte>> _algoUpdateEventSerializer;
 
+    /// <summary>Reads the user data stream's earliest fill notice.</summary>
+    private readonly ISerializer<ReadOnlyMemory<byte>> _tradeLiteEventSerializer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UserConnector"/> class, wiring the context/orders/trades
     /// loaders and the user data stream into the connector's lifecycle.
@@ -106,6 +109,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// <param name="tradesLoader">Loader that reloads trades for a symbol.</param>
     /// <param name="userStream">The user data websocket stream.</param>
     /// <param name="algoUpdateEventSerializer">Reads the user data stream's conditional order update event.</param>
+    /// <param name="tradeLiteEventSerializer">Reads the user data stream's earliest fill notice.</param>
     /// <param name="orderUpdateEventSerializer">Deserializes <c>ORDER_TRADE_UPDATE</c> user data stream messages.</param>
     /// <param name="reporter">Reports connector status transitions.</param>
     /// <param name="monitor">Monitors connector status.</param>
@@ -129,6 +133,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         IUserStream userStream,
         ISerializer<ReadOnlyMemory<byte>> orderUpdateEventSerializer,
         ISerializer<ReadOnlyMemory<byte>> algoUpdateEventSerializer,
+        ISerializer<ReadOnlyMemory<byte>> tradeLiteEventSerializer,
         IStatusReporter reporter,
         IStatusMonitor monitor,
         AsyncDisposableBox disposable,
@@ -175,6 +180,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
 
         _orderUpdateEventSerializer = orderUpdateEventSerializer;
         _algoUpdateEventSerializer = algoUpdateEventSerializer;
+        _tradeLiteEventSerializer = tradeLiteEventSerializer;
     }
 
     /// <summary>
@@ -578,6 +584,17 @@ internal class UserConnector : UserConnectorBase, IUserConnector
 
         // account info in event is almost useless (and position info lacks leverage value), so request account reload
         _contextLoader.Request();
+
+        // the earliest notice of a fill this venue gives - it precedes the order update reporting the
+        // same fill. Nothing is published from it: it carries no commission and no realised PnL, so a
+        // trade built from it would have a zero fee, which is not missing data a caller can see but wrong
+        // data it cannot. What it buys is starting the reload sooner
+        var tradeLite = _tradeLiteEventSerializer.Deserialize<TradeLiteEvent?>(data);
+        if (tradeLite is not null)
+        {
+            _tradesLoader.Request(tradeLite.Symbol);
+            return;
+        }
 
         // handle order update
         var orderUpdate = _orderUpdateEventSerializer.Deserialize<OrderUpdateEvent?>(data);

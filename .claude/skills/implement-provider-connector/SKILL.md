@@ -248,6 +248,27 @@ returning null for a record to omit is only as good as the collection reading it
 of *nullable* elements and filter; a non-nullable element type keeps the null and hands a caller an entry
 with nothing in it. This has now been the same defect twice in one module.
 
+## Mutation-checking, and the two ways it lies
+
+Every fix gets a mutation check: break the thing again, watch the test fail, put it back. It is the only
+evidence that a test defends anything. Both failure modes below produced a *passing* mutant run — the
+worst possible outcome, since it certifies a test that guards nothing.
+
+**1. Check that the mutant built.** Removing a line often makes a field, a method or a parameter unused,
+and a repository with analysers as errors then fails the build. The test runner, given `--no-build`,
+happily runs the *previous* binary and reports green. Read the build result before the test result; a
+mutation that does not compile has not been tested, it has been skipped. Where the mutant cannot compile
+as written, change the value rather than deleting the use — invert a constant, return the wrong field,
+swap two names.
+
+**2. Restore by reversing the edit, never by reverting the file** — unless the fix is already committed.
+`git checkout <file>` returns it to the last commit, which on uncommitted work throws away the fix along
+with the mutation, silently. The next run then tests unfixed code and passes, because the test was
+written against the unfixed behaviour a moment earlier. Commit first, or undo the exact edit.
+
+Both of these are the same shape as the rule about a command that printed nothing: **the instrument
+failed, and its failure looked like a result.**
+
 ## Phase 5d — registration and configuration
 
 Done here, as part of building, not deferred: the factory wiring, the keys, the configuration shapes, the

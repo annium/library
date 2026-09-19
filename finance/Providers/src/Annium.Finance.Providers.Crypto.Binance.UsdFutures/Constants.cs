@@ -42,6 +42,9 @@ public static class Constants
     /// <summary>Registration key for the user data stream's conditional order update event.</summary>
     internal const string AlgoUpdateKey = $"{Provider}_{nameof(AlgoUpdateKey)}";
 
+    /// <summary>Registration key for the user data stream's earliest fill notice.</summary>
+    internal const string TradeLiteKey = $"{Provider}_{nameof(TradeLiteKey)}";
+
     // user data trade
     /// <summary>Registration key for the change-leverage endpoint.</summary>
     internal const string SetLeverageKey = $"{Provider}_{nameof(SetLeverageKey)}";

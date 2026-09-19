@@ -85,6 +85,7 @@ public static class ProviderRegistrationContextExtensions
         ctx.AddJsonSerializer(BalanceAndPositionUpdateKey, UserContracts.BalanceAndPositionUpdate);
         ctx.AddJsonSerializer(OrderUpdateKey, UserContracts.OrderUpdate);
         ctx.AddJsonSerializer(AlgoUpdateKey, UserContracts.AlgoUpdate);
+        ctx.AddJsonSerializer(TradeLiteKey, UserContracts.TradeLite);
 
         // services
         ctx.Container.Add<QueryProcessor>().AsSelf().Singleton();
