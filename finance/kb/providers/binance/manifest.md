@@ -384,9 +384,17 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
   `maxWithdrawAmount` and locked balance is `initialMargin + maintMargin` —
   `UsdFutures/Internal/User/UserProvider.cs:90`. The fields were listed above from the first pass; the
   arithmetic over them was not, and it is the part that decides what a caller sees as available
-- **[UNVERIFIED]** A one-way account is assumed to report one `positions[]` row per symbol regardless of
-  whether a position is open, always with `positionSide=BOTH`. The test fixture's position-mode
-  precondition depends on this — `finance/Providers/tests/Annium.Finance.Providers.Tests.Lib/User/UserConnectorTestBase.cs:614-627`
+- **~~[UNVERIFIED]~~ → `live` 2026-09-19. Confirmed exactly as assumed.** A one-way account reports one
+  `positions[]` row **per symbol**, whether or not a position is open, always `positionSide=BOTH`: the
+  probe read **905 rows, 905 distinct symbols, every one `BOTH`, every one with `positionAmt` zero** on a
+  flat account. Evidence: [`2026.09/2026.09.19-algo-probe/account.positions-row.json`](2026.09/2026.09.19-algo-probe/account.positions-row.json).
+  The last of the three `[UNVERIFIED]` markers, and the one the documentation never stated.
+  Two consequences the assumption alone did not carry: **a context load is ~340 KB** and grows with the
+  venue's listing count, on a loader that runs every second by configuration; and a row carries more
+  than §3 records — `breakEvenPrice`, `notional`, `maxNotional`, `askNotional`, `bidNotional`,
+  `isolatedWallet`, `openOrderInitialMargin`, `positionInitialMargin` are all present and unread.
+- The assumption above is what the test fixture's position-mode precondition depends on —
+  `finance/Providers/tests/Annium.Finance.Providers.Tests.Lib/User/UserConnectorTestBase.cs:614-627`
   (`EnsureOneWayPositionMode`), which is in the **Write** block, so the assumption is `gated`. The read
   suite looks as though it also covers it and does not: `UserConnectorReadTestBase.cs:82` asserts
   `positions.Count.IsGreaterOrEqual(0)`, which a count can never fail — `vacuous`, found 2026-09-18,
@@ -455,28 +463,27 @@ with its single field `notional` and the example value `"5.0"`. Futures document
 filter — grepped, zero hits — so the `[DIVERGES]` against spot's spelling is measured rather than
 assumed.
 
-**[CONTESTED] `MAX_NUM_ALGO_ORDERS` — two pages of the same snapshot disagree, 2026-09-18.**
+**~~[CONTESTED]~~ `MAX_NUM_ALGO_ORDERS` — settled live 2026-09-19, in the changelog's favour.**
 
-- `common-definition.md:265-273` documents it as an `exchangeInfo` filter, `{"filterType":
-  "MAX_NUM_ALGO_ORDERS", "limit": 100}`, "the maximum number of all kinds of algo orders an account is
-  allowed to have open on a symbol", covering exactly the five conditional types.
-- `change-log.md:632-633`, dated **2025-12-29**: *"The parameter `"filterType": "MAX_NUM_ALGO_ORDERS"`
-  has been removed from the endpoint `GET /fapi/v1/exchangeInfo`. The condtional order limits is 200
-  across all symbols."*
+Two pages of the 2026-09-18 snapshot disagreed: `common-definition.md:265-273` documents it as an
+`exchangeInfo` filter with `limit: 100`, while `change-log.md:632-633`, dated 2025-12-29, says it was
+removed from that endpoint and the limit is a flat 200 across all symbols. Neither was picked, and the
+manifest said the payload would decide.
 
-So: is the bound a per-symbol filter of 100 that we should read, or a flat account-wide 200 that no
-response carries? Neither is picked here. The changelog is dated and specific and the reference page
-carries no date, which makes staleness the likelier explanation — but "likelier" is not a finding, and
-this manifest has been wrong before by preferring the more plausible reading.
+It did. A live `GET /fapi/v1/exchangeInfo` on 2026-09-19 carries **no `MAX_NUM_ALGO_ORDERS` at all** —
+grepped, zero hits across 1.1 MB. The reference page is stale; the conditional-order bound is not a
+filter we can read and is not per-symbol. **Nothing to implement**, which is the opposite of what the
+first draft of this entry concluded from the reference page alone.
 
-**What settles it costs nothing:** this module already calls `GET /fapi/v1/exchangeInfo` on both
-venues, every 600 seconds. The filter is either in that payload or it is not. A single logged response
-from the next live read run decides it, which puts this in step 4 rather than here.
+The filter types the live payload does carry, on `DOTUSDT`: `PRICE_FILTER`, `LOT_SIZE`,
+`MARKET_LOT_SIZE`, `MAX_NUM_ORDERS`, `MIN_NOTIONAL`, `PERCENT_PRICE`, **`POSITION_RISK_CONTROL`**. The
+last is `[NEW]` — undocumented in the snapshot and unread by us; it arrived as
+`{"filterType":"POSITION_RISK_CONTROL","positionControlSide":"NONE"}`. Unread is safe here, since
+`InstrumentFiltersConverter` ignores unknown types, but it is a fact about the payload we did not have.
 
-Recorded as a caution about method as much as about the filter: the first draft of this entry took the
-reference page alone and wrote the 100 down as fact. It was the changelog sweep, run afterwards, that
-contradicted it. One source read confidently is how a manifest fills with fiction — which is the same
-sentence this document already uses about the algo endpoint, arrived at from the opposite direction.
+Recorded as a caution about method as much as about the filter: the first draft took the reference page
+alone and wrote the 100 down as fact. The changelog sweep contradicted it within the hour, and the live
+payload confirmed the sweep. One source read confidently is how a manifest fills with fiction.
 
 **Absence behaviour:** if the price, lot-size, notional or max-orders filter is missing, the filters
 object reads as `null` and `InstrumentConverter` drops **the entire instrument**. An unenforced bound
@@ -584,6 +591,46 @@ could be checked, and is now checked.
 > descriptions, not schemas, and the Postman collections carry no response examples. So the placement
 > and query responses of `/fapi/v1/algoOrder`, and the payload of `ALGO_UPDATE`, are `unretrievable`
 > from this snapshot — the same gap that leaves `avgPrice` contested below.
+>
+> **Response shapes, `live` 2026-09-19** — read from a real conditional order placed, listed and
+> cancelled on a live account. Raw answers stored in
+> [`2026.09/2026.09.19-algo-probe/`](2026.09/2026.09.19-algo-probe/); the documentation publishes none of
+> this, so these files are the only source the converters can be written from.
+>
+> **Placement — `POST /fapi/v1/algoOrder`.** The field names are not the order endpoint's:
+>
+> | field | note |
+> |---|---|
+> | `algoId` | **a JSON number**, e.g. `4000001910058351` — not the string `orderId` of the order endpoint |
+> | `clientAlgoId` | the GUID we sent, echoed |
+> | `algoType` | `CONDITIONAL` |
+> | **`orderType`** | `STOP_MARKET` — the order endpoint spells this field `type` **[DIVERGES]** |
+> | **`algoStatus`** | `NEW` — the order endpoint spells it `status` **[DIVERGES]** |
+> | `triggerPrice` | what `stopPrice` is called here |
+> | `quantity`, `price`, `side`, `positionSide`, `timeInForce`, `workingType`, `priceMatch`, `closePosition`, `priceProtect`, `reduceOnly`, `selfTradePreventionMode`, `goodTillDate`, `icebergQuantity` | present; `timeInForce=GTC`, `workingType=CONTRACT_PRICE` and `selfTradePreventionMode=EXPIRE_MAKER` came back as defaults we never sent |
+> | `createTime`, `updateTime`, `triggerTime` | `triggerTime` is `0` until the order triggers |
+>
+> **No `avgPrice`, no `executedQty`, no `cumQuote`** on the placement answer — consistent with their
+> removal from order placement responses recorded in §3, and a second confirmation of it.
+>
+> **Listing — `GET /fapi/v1/openAlgoOrders`.** A **bare JSON array**, `[]` when empty; not an object
+> wrapping one. Each element carries every placement field **plus three the placement answer lacks**:
+> `actualOrderId` (empty string until triggered), `actualQty` (`"0.0"`), `isActivated` (`false`). Those
+> three are the link from a conditional order to the real order it becomes, so they are the fields that
+> matter for ingestion.
+>
+> **Cancellation — `DELETE /fapi/v1/algoOrder`.** Answers
+> `{"algoId":…, "clientAlgoId":…, "code":"200", "msg":"success"}`. **`code` is a JSON *string* here**,
+> where the error envelope this module already parses (`OperationResult`) reads `code` as a number. A
+> converter reusing that type on this response fails on a success. Recorded because it is the kind of
+> thing that is found at runtime and read as our defect.
+>
+> **[UNDOCUMENTED] `GET /fapi/v1/algoOrder?algoId=…` answered `-2013 Order does not exist.`** for an order
+> that demonstrably existed — `openAlgoOrders` had listed it moments earlier, and the cancel that followed
+> succeeded on the same `algoId`. The parameter set matches what the official Postman collection
+> documents (`algoId` or `clientAlgoId`, nothing else required). So either the query needs something
+> undocumented, or it reads a different store than the open-orders endpoint. **Not resolved**, and worth
+> resolving before the migration relies on it: `openAlgoOrders` is the endpoint proven to work.
 >
 > Remediation belongs to steps 3-5, specified in `status.md`, not performed here.
 >
