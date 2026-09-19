@@ -234,10 +234,7 @@ public class AlgoOrderWriteProbeTests : ProvidersTestBase
             var request = factory.New(Endpoints.HttpApi).With(HttpMethod.Get, path).Params(parameters);
             if (signed)
             {
-                var signatureService = sp.CreateSignatureService(
-                    Settings.User,
-                    ProviderKey.Create(Constants.Provider)
-                );
+                var signatureService = sp.CreateSignatureService(Settings.User, ProviderKey.Create(Constants.Provider));
                 request = request.ReceiveWindow().Sign(signatureService);
             }
 

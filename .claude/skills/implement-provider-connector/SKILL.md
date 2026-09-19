@@ -313,6 +313,48 @@ After each stage, before the next: check the account is as the fixture believes 
 failed part-way can leave an order open, and the next stage's fixture will "clean up" — which is to say,
 trade.
 
+## Phase 5g — run it three times, and read the logs between runs
+
+One green trading run says the code can work. Three consecutive ones, each read before the next starts,
+say it works *the same way* — which is the property a caller actually depends on. Keep the full trace of
+each (the request and response bodies are usually behind a log level and a runner flag, and a recipe
+wrapper often cannot pass either, so run the test binary directly), and compare the runs on what they
+did: how many orders of each kind, how many requests, how long. Those numbers should be identical but
+for the ones tied to the clock. A figure that moves between runs is either a defect or something you did
+not know the suite was doing.
+
+**Budget the run against the venue's rate allowance, and leave room.** Measure it rather than reading
+it: issue one request of each polled endpoint, alone, on a rested budget, and read the counter the venue
+reports after each. Arithmetic over a live run cannot produce those numbers — requests overlap, so a
+rise in the counter cannot be attributed to whichever finished first; a naive attribution charged one
+endpoint 218 for something that costs 1.
+
+What the table is for: a suite at 83% of the allowance passes once and then fails the next run, and the
+failure does not mention rate limits. It arrives as commands refused with the connector calling itself
+disconnected while the venue answers normally — so it reads as a broken connector, and the hours go into
+the wrong place. Two habits follow. Scope a listed query to the instrument when the endpoint allows it:
+the same list can cost forty times more unscoped. And check what the *tests* configure against what
+production configures — a suite reloading state every second where production reloads once a minute is
+not testing production's cost, and the cheap fallback poll may be hiding that the event stream was
+carrying the tests all along. Raise the interval and see whether anything gets slower; if nothing does,
+the stream was doing the work.
+
+**A hang is not idle — it keeps billing.** A component stuck waiting goes on polling, and a five-minute
+stall spends five minutes of the account's allowance. The test that fails from it is usually not the
+test that hung; it is the next one, which now cannot send anything.
+
+**Transport retries are not connector errors.** Reaching a venue over the public internet is allowed to
+take more than one attempt, and every failed attempt raises an error the socket recovers from by trying
+again. An assertion that tolerates none of them fails runs where the connector came up healthy and did
+everything asked of it. Count errors from the moment the connector reports itself ready, and make the
+assertion name what it found — "expected to be empty, but has 4 items" sends the reader into a log of
+tens of thousands of lines to learn what the four were.
+
+**Keep the probes out of the blocks the recipes run.** A probe trades to answer a question and
+overwrites the captures it wrote last time; a test asserts and is meant to be repeatable. Run in a suite,
+a probe trades in the middle of another test's account state and destroys committed evidence. Give it a
+block of its own that no recipe runs.
+
 ## Done
 
 - Every fact this step exercises is `pinned`, and every one an approved live stage observed is `live`,
