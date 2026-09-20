@@ -393,7 +393,7 @@ public class QueryProcessorTests : ProvidersTestBase
         var processor = Get<QueryProcessor>();
         var order = InitTakeProfitLimitOrder(_clientOrderId, _range, Symbol, OrderSide.Sell, 10.5m, 9.4m, 9.2m)
             .ToOrder();
-        var request = RequestBuilder.CancelOrder(order.Id, order.ClientOrderId, order.Symbol);
+        var request = RequestBuilder.CancelOrder(order);
 
         // act
         var data = processor.BuildCancelOrderQuery(request).Unwrap().As<IReadOnlyDictionary<string, string>>();

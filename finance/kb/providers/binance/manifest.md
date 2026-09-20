@@ -384,9 +384,17 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
   `maxWithdrawAmount` and locked balance is `initialMargin + maintMargin` —
   `UsdFutures/Internal/User/UserProvider.cs:90`. The fields were listed above from the first pass; the
   arithmetic over them was not, and it is the part that decides what a caller sees as available
-- **[UNVERIFIED]** A one-way account is assumed to report one `positions[]` row per symbol regardless of
-  whether a position is open, always with `positionSide=BOTH`. The test fixture's position-mode
-  precondition depends on this — `finance/Providers/tests/Annium.Finance.Providers.Tests.Lib/User/UserConnectorTestBase.cs:614-627`
+- **~~[UNVERIFIED]~~ → `live` 2026-09-19. Confirmed exactly as assumed.** A one-way account reports one
+  `positions[]` row **per symbol**, whether or not a position is open, always `positionSide=BOTH`: the
+  probe read **905 rows, 905 distinct symbols, every one `BOTH`, every one with `positionAmt` zero** on a
+  flat account. Evidence: [`2026.09/2026.09.19-algo-probe/account.positions-row.json`](2026.09/2026.09.19-algo-probe/account.positions-row.json).
+  The last of the three `[UNVERIFIED]` markers, and the one the documentation never stated.
+  Two consequences the assumption alone did not carry: **a context load is ~340 KB** and grows with the
+  venue's listing count, on a loader that runs every second by configuration; and a row carries more
+  than §3 records — `breakEvenPrice`, `notional`, `maxNotional`, `askNotional`, `bidNotional`,
+  `isolatedWallet`, `openOrderInitialMargin`, `positionInitialMargin` are all present and unread.
+- The assumption above is what the test fixture's position-mode precondition depends on —
+  `finance/Providers/tests/Annium.Finance.Providers.Tests.Lib/User/UserConnectorTestBase.cs:614-627`
   (`EnsureOneWayPositionMode`), which is in the **Write** block, so the assumption is `gated`. The read
   suite looks as though it also covers it and does not: `UserConnectorReadTestBase.cs:82` asserts
   `positions.Count.IsGreaterOrEqual(0)`, which a count can never fail — `vacuous`, found 2026-09-18,
@@ -394,13 +402,30 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
 
 ### Orders and trades
 
+> **[NEW, unread] `TRADE_LITE`** — a user-stream event this module does not handle, captured 2026-09-19.
+> It arrives **before** `ORDER_TRADE_UPDATE` and carries the fill: `L` last price, `l` last quantity, `t`
+> trade id, `i` order id, `c` client order id, `s`, `S`, `q`, `m`, plus `E`/`T`. The earliest notice of a
+> fill the exchange gives, and nothing reads it.
+>
+> **[DEFECT, ours] `limit` means opposite things on `userTrades` and `allOrders`.** Measured 2026-09-19:
+> `GET /fapi/v1/userTrades?limit=5` returns the **five oldest** trades of the account, while
+> `GET /fapi/v1/allOrders?limit=3` returns the **three newest**. So on the trade endpoint `limit` truncates
+> from the start of the window and on the order endpoint from the end.
+>
+> `LoadLatestTradesAsync` asks for the latest page with `limit=1000`, so it is safe only while an account
+> has fewer than a thousand trades in the window. Past that it receives the *earliest* thousand and cannot
+> tell - a full page of real trades is exactly what it expected. The history path is unaffected: it walks
+> windows by `startTime` and takes `.Last()` as the cursor, which the ascending order this endpoint returns
+> makes correct.
+
+
 | Fact | Where |
 |---|---|
 | Spot order: `orderId`, `clientOrderId`, `symbol`, `type`, `side`, `origQty`, `price`, `stopPrice`, `status`, `executedQty`, `cummulativeQuoteQty` (executed price **derived** as sum ÷ qty), `time`, `updateTime` | `Spot/.../GetOrderResponseConverter.cs:79-121` |
 | Futures order: same core plus `positionSide`, `reduceOnly`, and `avgPrice` used **directly** — **[DIVERGES]** | `UsdFutures/.../GetOrderResponseConverter.cs:87-135` |
 | Spot init-order uses `workingTime` for created and `transactTime` for updated — **[DIVERGES]** from its own get-order, which uses `time`/`updateTime` | `Spot/.../InitOrderResponseConverter.cs:115-120` |
 | Futures init-order has **no creation timestamp**; `updateTime` serves as both | `UsdFutures/.../InitOrderResponseConverter.cs:126-128` |
-| **~~[CONTESTED]~~ → [CHANGED]. Settled from documentation 2026-09-18, and the tier-3 reading was right.** `avgPrice` and `cumQuote` are **removed from the immediate response of order placement, modification and cancellation** on `/fapi/` — and the notice adds the part no schema would have shown: *"These fields were always `0` in the placement ack (fills happen asynchronously); the actual fill price is still available via the order query / userTrades endpoints."* So this converter has been reading a field that was zero before it was absent. Read endpoints are explicitly **not** affected and still carry `avgPrice` | `UsdFutures/.../InitOrderResponseConverter.cs:123`; docs `…/usd-futures/coin-futures_Important-CM-UM-Integration-Notice.md:80-106` |
+| **~~[CONTESTED]~~ → [CHANGED], and measured 2026-09-19.** `avgPrice` and `cumQuote` are **absent from the placement acknowledgement under any name** - the question was whether we were reading a renamed field, and there is no field to read. The same order queried back seconds later carries `avgPrice` and `cumQuote`; the placement carries neither, plus a **new `cumQty`** that repeats `executedQty` and is not a price. So the placement says how much filled and refuses to say at what. Raw evidence: [`2026.09/2026.09.19-raw-exchange/`](2026.09/2026.09.19-raw-exchange/). **The price does arrive**, on the stream, in the same second: `ORDER_TRADE_UPDATE` with `X: FILLED` carries `ap`, which this module's order-update converter already reads | `UsdFutures/.../InitOrderResponseConverter.cs:123`; docs `…/usd-futures/coin-futures_Important-CM-UM-Integration-Notice.md:80-106` |
 | Trade: `id`, `orderId`, `symbol`, `qty`, `price`, `commission`, `commissionAsset`, `time` | both `GetTradeResponseConverter.cs` |
 | Maker flag is `isMaker` on spot, `maker` on futures — **[DIVERGES]** | `Spot/.../GetTradeResponseConverter.cs:91`, `UsdFutures/.../GetTradeResponseConverter.cs:97` |
 | Cancel response `clientOrderId` is parsed **as a GUID**; a non-GUID id makes the whole response read as missing | `Spot/.../CancelOrderResponseConverter.cs:50-55`, `UsdFutures/.../CancelOrderResponseConverter.cs:54-59` |
@@ -455,28 +480,27 @@ with its single field `notional` and the example value `"5.0"`. Futures document
 filter — grepped, zero hits — so the `[DIVERGES]` against spot's spelling is measured rather than
 assumed.
 
-**[CONTESTED] `MAX_NUM_ALGO_ORDERS` — two pages of the same snapshot disagree, 2026-09-18.**
+**~~[CONTESTED]~~ `MAX_NUM_ALGO_ORDERS` — settled live 2026-09-19, in the changelog's favour.**
 
-- `common-definition.md:265-273` documents it as an `exchangeInfo` filter, `{"filterType":
-  "MAX_NUM_ALGO_ORDERS", "limit": 100}`, "the maximum number of all kinds of algo orders an account is
-  allowed to have open on a symbol", covering exactly the five conditional types.
-- `change-log.md:632-633`, dated **2025-12-29**: *"The parameter `"filterType": "MAX_NUM_ALGO_ORDERS"`
-  has been removed from the endpoint `GET /fapi/v1/exchangeInfo`. The condtional order limits is 200
-  across all symbols."*
+Two pages of the 2026-09-18 snapshot disagreed: `common-definition.md:265-273` documents it as an
+`exchangeInfo` filter with `limit: 100`, while `change-log.md:632-633`, dated 2025-12-29, says it was
+removed from that endpoint and the limit is a flat 200 across all symbols. Neither was picked, and the
+manifest said the payload would decide.
 
-So: is the bound a per-symbol filter of 100 that we should read, or a flat account-wide 200 that no
-response carries? Neither is picked here. The changelog is dated and specific and the reference page
-carries no date, which makes staleness the likelier explanation — but "likelier" is not a finding, and
-this manifest has been wrong before by preferring the more plausible reading.
+It did. A live `GET /fapi/v1/exchangeInfo` on 2026-09-19 carries **no `MAX_NUM_ALGO_ORDERS` at all** —
+grepped, zero hits across 1.1 MB. The reference page is stale; the conditional-order bound is not a
+filter we can read and is not per-symbol. **Nothing to implement**, which is the opposite of what the
+first draft of this entry concluded from the reference page alone.
 
-**What settles it costs nothing:** this module already calls `GET /fapi/v1/exchangeInfo` on both
-venues, every 600 seconds. The filter is either in that payload or it is not. A single logged response
-from the next live read run decides it, which puts this in step 4 rather than here.
+The filter types the live payload does carry, on `DOTUSDT`: `PRICE_FILTER`, `LOT_SIZE`,
+`MARKET_LOT_SIZE`, `MAX_NUM_ORDERS`, `MIN_NOTIONAL`, `PERCENT_PRICE`, **`POSITION_RISK_CONTROL`**. The
+last is `[NEW]` — undocumented in the snapshot and unread by us; it arrived as
+`{"filterType":"POSITION_RISK_CONTROL","positionControlSide":"NONE"}`. Unread is safe here, since
+`InstrumentFiltersConverter` ignores unknown types, but it is a fact about the payload we did not have.
 
-Recorded as a caution about method as much as about the filter: the first draft of this entry took the
-reference page alone and wrote the 100 down as fact. It was the changelog sweep, run afterwards, that
-contradicted it. One source read confidently is how a manifest fills with fiction — which is the same
-sentence this document already uses about the algo endpoint, arrived at from the opposite direction.
+Recorded as a caution about method as much as about the filter: the first draft took the reference page
+alone and wrote the 100 down as fact. The changelog sweep contradicted it within the hour, and the live
+payload confirmed the sweep. One source read confidently is how a manifest fills with fiction.
 
 **Absence behaviour:** if the price, lot-size, notional or max-orders filter is missing, the filters
 object reads as `null` and `InstrumentConverter` drops **the entire instrument**. An unenforced bound
@@ -584,6 +608,111 @@ could be checked, and is now checked.
 > descriptions, not schemas, and the Postman collections carry no response examples. So the placement
 > and query responses of `/fapi/v1/algoOrder`, and the payload of `ALGO_UPDATE`, are `unretrievable`
 > from this snapshot — the same gap that leaves `avgPrice` contested below.
+>
+> **Response shapes, `live` 2026-09-19** — read from a real conditional order placed, listed and
+> cancelled on a live account. Raw answers stored in
+> [`2026.09/2026.09.19-algo-probe/`](2026.09/2026.09.19-algo-probe/); the documentation publishes none of
+> this, so these files are the only source the converters can be written from.
+>
+> **Placement — `POST /fapi/v1/algoOrder`.** The field names are not the order endpoint's:
+>
+> | field | note |
+> |---|---|
+> | `algoId` | **a JSON number**, e.g. `4000001910058351` — not the string `orderId` of the order endpoint |
+> | `clientAlgoId` | the GUID we sent, echoed |
+> | `algoType` | `CONDITIONAL` |
+> | **`orderType`** | `STOP_MARKET` — the order endpoint spells this field `type` **[DIVERGES]** |
+> | **`algoStatus`** | `NEW` — the order endpoint spells it `status` **[DIVERGES]** |
+> | `triggerPrice` | what `stopPrice` is called here |
+> | `quantity`, `price`, `side`, `positionSide`, `timeInForce`, `workingType`, `priceMatch`, `closePosition`, `priceProtect`, `reduceOnly`, `selfTradePreventionMode`, `goodTillDate`, `icebergQuantity` | present; `timeInForce=GTC`, `workingType=CONTRACT_PRICE` and `selfTradePreventionMode=EXPIRE_MAKER` came back as defaults we never sent |
+> | `createTime`, `updateTime`, `triggerTime` | `triggerTime` is `0` until the order triggers |
+>
+> **No `avgPrice`, no `executedQty`, no `cumQuote`** on the placement answer — consistent with their
+> removal from order placement responses recorded in §3, and a second confirmation of it.
+>
+> **Listing — `GET /fapi/v1/openAlgoOrders`.** A **bare JSON array**, `[]` when empty; not an object
+> wrapping one. Each element carries every placement field **plus three the placement answer lacks**:
+> `actualOrderId` (empty string until triggered), `actualQty` (`"0.0"`), `isActivated` (`false`). Those
+> three are the link from a conditional order to the real order it becomes, so they are the fields that
+> matter for ingestion.
+>
+> **Cancellation — `DELETE /fapi/v1/algoOrder`.** Answers
+> `{"algoId":…, "clientAlgoId":…, "code":"200", "msg":"success"}`. **`code` is a JSON *string* here**,
+> where the error envelope this module already parses (`OperationResult`) reads `code` as a number. A
+> converter reusing that type on this response fails on a success. Recorded because it is the kind of
+> thing that is found at runtime and read as our defect.
+>
+> **[UNDOCUMENTED] `GET /fapi/v1/algoOrder?algoId=…` answered `-2013 Order does not exist.`** for an order
+> that demonstrably existed — `openAlgoOrders` had listed it moments earlier, and the cancel that followed
+> succeeded on the same `algoId`. The parameter set matches what the official Postman collection
+> documents (`algoId` or `clientAlgoId`, nothing else required). So either the query needs something
+> undocumented, or it reads a different store than the open-orders endpoint. **Not resolved**, and worth
+> resolving before the migration relies on it: `openAlgoOrders` is the endpoint proven to work.
+>
+> **[BLOCKING for ingestion] A conditional order never enters the ordinary order store.** Measured
+> 2026-09-19, after the probe's order could not be found in the account's order history. The same order,
+> by `algoId` and `clientAlgoId`, is present in `GET /fapi/v1/allAlgoOrders?symbol=…` with
+> `algoStatus: CANCELED`; `GET /fapi/v1/allOrders?symbol=…` returns only orders from the previous day's
+> run and nothing from the probe at all.
+>
+> So the two stores are disjoint until a trigger fires. `UserProvider.LoadOrdersAsync` reads `allOrders`,
+> which means that after the migration **a connector rebuilding state from order history alone loses every
+> conditional order the account holds** — and loses them silently, as an empty history rather than an
+> error. Conditional orders need `allAlgoOrders` as a second source, per symbol.
+>
+> **And there are three response shapes, not one**, which a single converter cannot serve:
+>
+> | endpoint | fields beyond the common set |
+> |---|---|
+> | `POST /fapi/v1/algoOrder` | none |
+> | `GET /fapi/v1/openAlgoOrders` | `actualOrderId`, `actualQty`, `isActivated` |
+> | `GET /fapi/v1/allAlgoOrders` | `actualOrderId`, `actualPrice`, `tpOrderType` — **no** `actualQty`, **no** `isActivated` |
+>
+> **What a trigger does, measured live 2026-09-19** by letting one conditional order fire and closing the
+> position it opened. This is what settles the status mapping, which no reading of the documentation could:
+>
+> | observed | value |
+> |---|---|
+> | the conditional order becomes an **ordinary order** | `allOrders` gains `orderId 33877541028`, `type MARKET`, `status FILLED`, `origQty 4.9`, `avgPrice 1.1325` |
+> | **its `clientOrderId` is our `clientAlgoId`** | `60d0f110-…`, the same GUID we sent to `algoOrder` |
+> | the algo record settles at | `algoStatus: FINISHED`, `actualOrderId` equal to that `orderId`, `actualPrice`, `actualQty`, and **`actualType`** — a field absent from every untriggered shape |
+> | `openAlgoOrders` | empty: a triggered order leaves it |
+> | cancelling a finished one | `-2011 Unknown order sent.` — not the `-2013` an unknown id gives |
+> | `isActivated` | **`false` even on the triggered order**, so it does not mean "triggered". Unexplained; do not read it |
+>
+> **The identity is preserved across the trigger**, and that is the fact the whole migration rests on. Our
+> domain keys an order by the GUID it sent as the client id; the exchange carries that same GUID from the
+> conditional order onto the ordinary order it becomes. So a conditional order does not change identity
+> when it fires — it changes *store*.
+>
+> Which decides the status mapping without guessing at `FINISHED`:
+>
+> | `algoStatus` | domain | why |
+> |---|---|---|
+> | `NEW`, `TRIGGERING` | `New` | open and untriggered; the algo store is the only place it exists |
+> | `TRIGGERED`, `FINISHED` | **not mapped — the record is dropped** | an ordinary order with the same id exists and carries the real outcome. Mapping `FINISHED` to `Filled` would have been wrong whenever the triggered order was cancelled in the book, which the documentation says plainly and which no reading could have resolved |
+> | `CANCELED` | `Canceled` | terminal, never triggered |
+> | `REJECTED` | `Rejected` | refused by the matching engine |
+> | `EXPIRED` | `Expired` | cancelled by the system |
+>
+> One more thing the trigger established, recorded because it shapes the tests rather than the code: **a
+> conditional order that would fire immediately cannot be placed at all** — `-2021 Order would immediately
+> trigger`. A test that wants a trigger has to wait for the market to reach it.
+>
+> **The `ALGO_UPDATE` payload, captured live 2026-09-19** by placing and cancelling one conditional order
+> with the user data stream open. Stored at
+> [`2026.09/2026.09.19-algo-probe/ALGO_UPDATE.new.json`](2026.09/2026.09.19-algo-probe/ALGO_UPDATE.new.json)
+> and its `CANCELED` twin; the exchange documents this event only through a schema component that cannot
+> be fetched.
+>
+> Top level `e` (`ALGO_UPDATE`), `T`, `E`, and the order under `o`. Inside `o`: `caid` clientAlgoId,
+> `aid` algoId (a number), `at` algoType, **`o` orderType**, `s`, `S`, `ps`, `f`, `q`, `X` algoStatus,
+> `ai` actualOrderId, `tp` triggerPrice, `p`, `V`, `wt`, `pm`, `cp`, `pP`, `R`, `tt`, `gtd`, `ia`.
+>
+> **The event nests a field under its own name.** The order object is `o` and the order *type* inside it
+> is `o` as well. A reader matching on property name without tracking depth reads one as the other, and
+> does it silently. Worth stating here rather than only in the converter, because it is the sort of thing
+> a second implementation repeats.
 >
 > Remediation belongs to steps 3-5, specified in `status.md`, not performed here.
 >

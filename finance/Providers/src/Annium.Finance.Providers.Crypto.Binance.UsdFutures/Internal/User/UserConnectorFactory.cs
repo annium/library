@@ -54,6 +54,7 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
         var modifyOrderRequestFactory = sp.ResolveHttpRequestFactory(ModifyOrderKey);
         var cancelOrderRequestFactory = sp.ResolveHttpRequestFactory(CancelOrderKey);
         var cancelAllOrdersRequestFactory = sp.ResolveHttpRequestFactory(CancelAllOrdersKey);
+        var algoOrderRequestFactory = sp.ResolveHttpRequestFactory(AlgoOrderKey);
         var listenKeyResolver = sp.CreateListenKeyResolver(
             config,
             Endpoints.ListenKeyUriPath,
@@ -64,6 +65,14 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
         var userStream = sp.CreateUserStream(config, listenKeyResolver, monitor);
         var orderUpdateEventSerializer = sp.ResolveSerializer<ReadOnlyMemory<byte>>(
             OrderUpdateKey,
+            MediaTypeNames.Application.Json
+        );
+        var algoUpdateEventSerializer = sp.ResolveSerializer<ReadOnlyMemory<byte>>(
+            AlgoUpdateKey,
+            MediaTypeNames.Application.Json
+        );
+        var tradeLiteEventSerializer = sp.ResolveSerializer<ReadOnlyMemory<byte>>(
+            TradeLiteKey,
             MediaTypeNames.Application.Json
         );
         var contextLoder = sp.CreateUserContextLoader(config.ReloadContext, monitor, provider, ref disposable);
@@ -103,12 +112,15 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
             modifyOrderRequestFactory,
             cancelOrderRequestFactory,
             cancelAllOrdersRequestFactory,
+            algoOrderRequestFactory,
             rateLimiter,
             contextLoder,
             ordersLoader,
             tradesLoader,
             userStream,
             orderUpdateEventSerializer,
+            algoUpdateEventSerializer,
+            tradeLiteEventSerializer,
             reporter,
             monitor,
             disposable,

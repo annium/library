@@ -33,6 +33,7 @@ internal class UserProviderFactory(IServiceProvider sp) : IUserProviderFactory
         var getAccountRequestFactory = sp.ResolveHttpRequestFactory(Constants.GetAccountKey);
         var getOrderRequestFactory = sp.ResolveHttpRequestFactory(Constants.GetOrderKey);
         var getTradeRequestFactory = sp.ResolveHttpRequestFactory(Constants.GetTradeKey);
+        var algoOrderRequestFactory = sp.ResolveHttpRequestFactory(Constants.AlgoOrderKey);
         var rateLimiter = sp.Resolve<IRateLimiter>();
         var logger = sp.Resolve<ILogger>();
 
@@ -43,6 +44,7 @@ internal class UserProviderFactory(IServiceProvider sp) : IUserProviderFactory
             getAccountRequestFactory,
             getOrderRequestFactory,
             getTradeRequestFactory,
+            algoOrderRequestFactory,
             rateLimiter,
             logger
         );

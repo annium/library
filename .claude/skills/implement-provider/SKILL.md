@@ -33,18 +33,23 @@ Some of what this skill validates places **real orders on a real account**.
 
 ### The three blocks
 
-Tests are sorted into three blocks by an xunit trait on the class or a base of it — traits inherit, so
+Tests are sorted into blocks by an xunit trait on the class or a base of it — traits inherit, so
 marking a fixture base carries every suite built on it:
 
 | recipe | block | touches |
 |---|---|---|
-| `just test-finance` | unmarked | nothing outside the process |
+| `just test-finance-offline` | unmarked | nothing outside the process |
 | `just test-finance-read` | `block=read` | real providers and real accounts, mutating nothing |
 | `just test-finance-write` | `block=write` | places and cancels real orders, opens and closes positions |
+| `just test-finance-all` | the three above, in that order | everything the trading block touches |
+| *(no recipe)* | `block=probe` | an investigation tool, named one at a time by hand |
 
-`just test` runs the offline block of every group, finance included. The three names above are the finance
-ones, and they are the names in the justfile — check them there rather than here if they ever look wrong,
-because a recipe name that has drifted in this table is a wrong command pointed at a trading block.
+`just test` runs the offline block of every group, finance included. `test-finance-all` is a convenience
+for running the three in order locally; it is not a softer way to reach the trading block, and everything
+said about `test-finance-write` applies to it unchanged.
+
+These are the names in the justfile — check them there rather than here if they ever look wrong, because
+a recipe name that has drifted in this table is a wrong command pointed at a trading block.
 
 **The trait is the only thing separating a routine run from one that trades.** A second gate — an
 environment variable each exchange test was checked against — was dropped deliberately: it protected
@@ -359,7 +364,7 @@ Report the counts, because a list nobody totals is a list nobody acts on: how ma
 **→ GATE.** Present the drift and the gaps. The user confirms the picture is complete enough to build
 on — which, given the paragraph above, normally means there are no gaps left.
 
-### Step 3 — wire types and serialization ⬜ no child skill yet
+### Step 3 — wire types and serialization ✅ `implement-provider-types`
 
 **Target.** The types that carry the wire format, and the code that reads and writes it, **with their
 tests**, built from what steps 1 and 2 established.
@@ -372,31 +377,16 @@ contract, never against a sibling implementation.
 code — a test written and not recorded leaves the manifest understating what we defend, which is the
 same defect as overstating it, pointed the other way.
 
-Every field in the contract is read; every field read is in the contract — the second
-direction is what catches the fields we invented. Enumerations map every documented value in both
-directions. Positional payloads have their indices pinned, because there the index *is* the contract
-and nothing else protects it. Tests green.
+Every field in the contract is read; every field read is in the contract — the second direction is
+what catches the fields we invented. Enumerations map every documented value in both directions.
+Positional payloads have their indices pinned, because there the index *is* the contract and nothing
+else protects it. Every conditional has both arms driven, and every drop rule is an entry rather than
+an implication. Tests green.
 
-**A converter with a test is not a converter whose branches run.** "`pinned` per converter, every one
-having its own test with real fixtures" was true of this manifest and still hid two gaps, because a
-fixture exercises the branch it happens to contain. A value the code *synthesizes* under a condition is
-pinned only when both arms are driven: the futures `createdAt` is `transactionTime` when the status is
-`NEW` and zero otherwise, and only the zero half had ever run — collapsing that condition either way was
-invisible. Where the contract records a conditional, the test carries both cases.
+The child skill carries the rest: why a converter with a test is not a converter whose branches run,
+why a negative branch is routinely unpinned and broken at the same time, and what to write back.
 
-**A drop rule is a fact, not a field.** "This field is read" does not state "an asset the exchange will
-not take as margin is dropped", and a field list will never ask for it. Write the absence and drop
-behaviour into the manifest as its own entry, then pin it.
-
-**Expect a negative branch to be unpinned and broken at the same time.** The two are not alternatives:
-nothing ran it, so nothing told anyone it was wrong. Pinning the asset drop rule failed on the first
-attempt because the envelope read the array into a collection of non-nullable elements and kept the
-converter's honest `null` — the rule was written and discarded one line later, and the first thing the
-provider does with the result is read a field off every entry. Budget for a fix inside this step, the way
-step 4 does: a fact at `none` that turns out to be wrong was found by review, and review is not
-repeatable.
-
-### Step 4 — provider: the read paths ⬜ no child skill yet
+### Step 4 — provider: the read paths ✅ `implement-provider-reads`
 
 **Target.** Exchange information, candles, account, orders, trades — with their tests. **If the test
 project does not exist, it is created as part of this step**, not deferred.
@@ -405,27 +395,20 @@ Registration, endpoints and configuration for everything this step touches are d
 built. A read path whose endpoint is configured in a later step is a read path that cannot be tested
 in this one.
 
-**Fix what the census says nothing watches, and pin it in the same change.** A fact at `none` that turns
-out to be wrong was found by review, and review is not repeatable. Repairing it without a test returns
-it to the state it was found in — the next drift is invisible again, and the repair is the only reason
-anyone believes otherwise.
-
-**Assert the composed value, not the configured parts.** Configuration that reads as correct can compose
-into something else: on this provider the websocket route had to live in the path rather than the base,
-because `new Uri(base, path)` discards the base's path whenever the path begins with a slash — so a
-route held in the base is dropped at composition and the decommissioned URL comes back from settings
-that look right. A test on the parts passes; a test on the composed URL catches it. Where a value is
-assembled before use, the assembled value is the fact.
-
 **Live validation belongs to this step too, and it reads only.** Signing, server time, public market
 data, then authenticated account reads. Nothing here places an order, which is what makes it the safe
 half of validation — and the reason it comes before step 5 rather than after it.
 
 **Done.** Facts this step exercises offline become `pinned`; facts a read-only live stage observed
-become `live`, dated. Every endpoint called with exactly the contract's parameters. Paging and windows match the
-documented caps. Failure paths return something the caller can act on rather than an empty success.
-Tests green offline; the read-only live stages pass. Every test this step writes carries a deadline and
-threads the token — see the section above, and check it by enumeration rather than by memory.
+become `live`, dated. Every endpoint called with exactly the contract's parameters. Paging and windows
+match the documented caps. Failure paths return something the caller can act on rather than an empty
+success, and an empty success is distinguishable from a failure. Tests green offline; the read-only
+live stages pass, and the two are reported as separate claims — a green live run is not convergence.
+Every test this step writes carries a deadline and threads the token — see the section above, and
+check it by enumeration rather than by memory.
+
+The child skill carries the rest: asserting a composed value rather than the configured parts, what
+the four questions per path are, and why the fixture has to span several windows.
 
 ### Step 5 — connector: streams and the order lifecycle ✅ `implement-provider-connector`
 
@@ -483,28 +466,44 @@ and only when the step is verified converged.
    order — read the account instead.
 5. A failed preflight stops the pass. Report the actual state and ask.
 
-## Writing the remaining child skills
+## Writing the child skills
 
-**The skill is written first, and the work is done through it.** Not after, not alongside. When the work
-goes somewhere the skill did not anticipate, the skill is corrected *first* and the work resumes from the
-corrected version — so what is left behind is a document that describes what was actually done, rather
-than one written from memory afterwards.
+Every step has one now: steps 1-2 `implement-provider-contract`, step 3 `implement-provider-types`,
+step 4 `implement-provider-reads`, step 5 `implement-provider-connector`. What follows is the rule for
+keeping them, and for the next one this family grows.
+
+**The skill is written first, and the work is done through it.** Not after, not alongside. When the
+work goes somewhere the skill did not anticipate, the skill is corrected *first* and the work resumes
+from the corrected version — so what is left behind is a document that describes what was actually
+done, rather than one written from memory afterwards.
 
 This reverses what this section used to say. "Drive a step by hand once, then write its skill" is the
-better-sounding rule and the wrong one: a step driven by hand produces a working module and a skill that
-never gets written, because by the time it would be the knowledge is already spent. Every stale line this
-skill has carried — recipes renamed, a gate that stopped skipping, a marker vocabulary replaced — got
-there that way, written once from a finished run and never touched again.
+better-sounding rule and the wrong one: a step driven by hand produces a working module and a skill
+that never gets written, because by the time it would be, the knowledge is already spent. Every stale
+line this skill has carried — recipes renamed, a gate that stopped skipping, a marker vocabulary
+replaced — got there that way, written once from a finished run and never touched again.
 
-What makes the order load-bearing here rather than a preference: **these skills are how the next exchange
-gets implemented.** The next venue, and the one after it, are ports of this document rather than of this
-code. A skill that lags its own provider by one run is a skill that teaches the next provider the previous
-provider's mistakes.
+**Steps 3 and 4 are the evidence, and their skills say so.** Both were driven by hand, and both skills
+were written afterwards — a year's worth of the rule's consequences in one place. What made it
+recoverable was not memory: it was that step 3 left a run report naming each check and what it found,
+and that step 4's findings had been written into `status.md` as they happened. Where a step leaves
+neither, the knowledge is gone and the skill written from it is a plausible reconstruction, which is
+worse than an empty one because it reads the same.
 
-The first draft being incomplete is expected and is not an argument for writing it later. Draft it from
-the contract and the step's target, run the step against it, and correct it the moment it misleads —
-that correction *is* the step's finding, and it is cheaper to make while the contact is fresh than to
-reconstruct from a merged branch.
+What makes the order load-bearing rather than a preference: **these skills are how the next exchange
+gets implemented.** The next venue, and the one after it, are ports of this document rather than of
+this code. A skill that lags its own provider by one run is a skill that teaches the next provider the
+previous provider's mistakes.
+
+The first draft being incomplete is expected and is not an argument for writing it later. Draft it
+from the contract and the step's target, run the step against it, and correct it the moment it
+misleads — that correction *is* the step's finding, and it is cheaper to make while the contact is
+fresh than to reconstruct from a merged branch.
+
+**No skill in this family names a venue, an endpoint, a field, a wire literal or an error code.** The
+lesson is kept and the instance dropped: a finding stated with its shape, its cost and its number
+carries the whole point without binding the document to one exchange. The instances belong in the
+provider's own knowledge base, which has a date on it and is re-derived every pass.
 
 ## Where a provider actually stands
 

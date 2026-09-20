@@ -157,6 +157,10 @@ public class WireMappingTests
     {
         AssertEveryMemberMapped(OrderSides.ValueToString);
         AssertRoundTrips(OrderSides.ValueToString, OrderSides.StringToValue);
+        AssertWritesExactly(
+            new Dictionary<OrderSide, string> { [OrderSide.Buy] = "BUY", [OrderSide.Sell] = "SELL" },
+            OrderSides.ValueToString
+        );
     }
 
     /// <summary>
@@ -189,6 +193,33 @@ public class WireMappingTests
             stringToValue.ContainsKey(wire).IsTrue($"{typeof(T).Name}.{value} writes '{wire}', which does not parse");
             stringToValue[wire]
                 .Is(value, $"{typeof(T).Name}.{value} writes '{wire}', which parses back as something else");
+        }
+    }
+
+    /// <summary>
+    /// Asserts a table writes exactly the wire values given, member for member.
+    /// </summary>
+    /// <remarks>
+    /// The round trip above cannot do this, and a verification census caught it saying otherwise. Every
+    /// table here builds its reverse map by inverting the forward one, so the round trip holds <em>by
+    /// construction</em> whatever the strings are: rename a value and the test still passes in full. What a
+    /// wire mapping is for is the strings themselves, so the strings are what this names.
+    /// </remarks>
+    /// <typeparam name="T">The domain enum.</typeparam>
+    /// <param name="valueToString">The table under test.</param>
+    /// <param name="expected">Each member and the wire value it must write.</param>
+    private static void AssertWritesExactly<T>(
+        IReadOnlyDictionary<T, string> expected,
+        IReadOnlyDictionary<T, string> valueToString
+    )
+        where T : struct, Enum
+    {
+        valueToString.Count.Is(expected.Count, $"{typeof(T).Name} has a different number of members than expected");
+
+        foreach (var (value, wire) in expected)
+        {
+            valueToString.ContainsKey(value).IsTrue($"{typeof(T).Name}.{value} is not mapped at all");
+            valueToString[value].Is(wire, $"{typeof(T).Name}.{value} writes something other than '{wire}'");
         }
     }
 }

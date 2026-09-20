@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.User;
@@ -27,6 +28,7 @@ namespace Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.User;
 /// <param name="getAccountRequestFactory">Factory for requests against the account info endpoint.</param>
 /// <param name="getOrderRequestFactory">Factory for requests against the order lookup endpoints.</param>
 /// <param name="getTradeRequestFactory">Factory for requests against the trade lookup endpoint.</param>
+/// <param name="algoOrderRequestFactory">Factory for requests against the conditional ("algo") order endpoints.</param>
 /// <param name="rateLimiter">Limits request weight against the exchange's rate limits.</param>
 /// <param name="logger">The logger.</param>
 internal class UserProvider(
@@ -36,12 +38,20 @@ internal class UserProvider(
     IHttpRequestFactory getAccountRequestFactory,
     IHttpRequestFactory getOrderRequestFactory,
     IHttpRequestFactory getTradeRequestFactory,
+    IHttpRequestFactory algoOrderRequestFactory,
     IRateLimiter rateLimiter,
     ILogger logger
 ) : IUserProvider, ILogSubject
 {
     /// <summary>The maximum number of orders returned by a single order history request.</summary>
     private const int OrderQueryLimit = 1000;
+
+    /// <summary>How far back the latest-trades read looks, in milliseconds.</summary>
+    /// <remarks>
+    /// One hour. See <c>LoadLatestTradesAsync</c> for why this endpoint is bounded by time rather than by
+    /// page size - a limit on it selects the oldest trades, not the newest.
+    /// </remarks>
+    private const long LatestTradesWindow = 60L * 60 * 1000;
 
     /// <summary>The maximum number of trades returned by a single trade history request.</summary>
     private const int TradeQueryLimit = 1000;
@@ -121,9 +131,53 @@ internal class UserProvider(
             return UserResult.From(result, default(IReadOnlyCollection<OrderModel>));
         }
 
-        this.Trace("done, {count} orders loaded", result.Data.Count);
+        // conditional orders are not in this answer and never will be: until one triggers it exists only in
+        // the algo store, so a connector reading open orders from here alone reports an account with no
+        // stop losses on it - silently, as an empty list rather than an error
+        var algoResult = await LoadOpenAlgoOrdersAsync();
+        if (!algoResult.IsSuccess)
+            return UserResult.From(algoResult, default(IReadOnlyCollection<OrderModel>));
 
-        return UserResult.Ok<IReadOnlyCollection<OrderModel>?>(result.Data);
+        var orders = result.Data.Concat(algoResult.Data).ToArray();
+
+        this.Trace("done, {count} orders loaded", orders.Length);
+
+        return UserResult.Ok<IReadOnlyCollection<OrderModel>?>(orders);
+    }
+
+    /// <summary>
+    /// Loads the open conditional orders, across all symbols.
+    /// </summary>
+    /// <remarks>
+    /// A separate endpoint because a conditional order is kept in a separate store until it triggers, which
+    /// is not a detail of this provider but of the exchange: an order placed through the algo endpoint is
+    /// absent from the ordinary open-orders answer entirely, and appears among ordinary orders only once the
+    /// trigger has fired and created one.
+    /// </remarks>
+    /// <returns>A result carrying the open conditional orders.</returns>
+    private async Task<UserResult<IReadOnlyCollection<OrderModel>>> LoadOpenAlgoOrdersAsync()
+    {
+        var result = await algoOrderRequestFactory
+            .New(config.HttpApi)
+            .Get("/fapi/v1/openAlgoOrders")
+            .ReceiveWindow()
+            .Sign(signatureService)
+            .WithRateDelay1M(rateLimiter)
+            .WithLogFromWithHeaders(this, LogData.Headers)
+            .AsUserResultAsync<IReadOnlyCollection<OrderModel?>>();
+
+        if (!result.IsSuccess)
+        {
+            if (result.IsFailure)
+                this.Debug("algo failure: {result}", result);
+
+            return UserResult.From(result, (IReadOnlyCollection<OrderModel>)[]);
+        }
+
+        // the converter returns null for a record an ordinary order already accounts for, and the element
+        // type has to be nullable for that to survive the read - a collection of non-nullable elements keeps
+        // the null and hands a caller an entry with nothing in it
+        return UserResult.Ok<IReadOnlyCollection<OrderModel>>(result.Data.OfType<OrderModel>().ToArray());
     }
 
     /// <summary>
@@ -135,10 +189,108 @@ internal class UserProvider(
     /// <returns>A result carrying the orders, or a failure status if they could not be loaded.</returns>
     public async Task<UserResult<IReadOnlyCollection<OrderModel>?>> LoadOrdersAsync(string symbol, long? since)
     {
-        if (since is null)
-            return await LoadLatestOrdersAsync(symbol);
+        var ordinary = since is null
+            ? await LoadLatestOrdersAsync(symbol)
+            : await LoadOrderHistoryAsync(symbol, since.Value);
 
-        return await LoadOrderHistoryAsync(symbol, since.Value);
+        if (!ordinary.IsSuccess)
+            return ordinary;
+
+        // merged here rather than inside either branch, so the two entry points cannot drift apart on
+        // whether conditional orders are included
+        var algo = await LoadAlgoOrderHistoryAsync(symbol, since);
+        if (!algo.IsSuccess)
+            return UserResult.From(algo, default(IReadOnlyCollection<OrderModel>));
+
+        return UserResult.Ok<IReadOnlyCollection<OrderModel>?>(ordinary.Data.NotNull().Concat(algo.Data).ToArray());
+    }
+
+    /// <summary>Returns the highest order id in a page, as the cursor to continue a forward walk from.</summary>
+    /// <param name="orders">The page just read.</param>
+    /// <returns>The highest id, or null when the page carries no id that parses.</returns>
+    /// <remarks>
+    /// Ids are carried as strings and compared as numbers, because that is what they are: comparing them
+    /// as text makes "9" larger than "10" and stalls the walk on the wrong record.
+    /// </remarks>
+    private static string? HighestOrderId(IEnumerable<OrderModel> orders)
+    {
+        string? highest = null;
+        var highestValue = long.MinValue;
+
+        foreach (var order in orders)
+        {
+            if (!long.TryParse(order.Id, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+                continue;
+
+            if (value <= highestValue)
+                continue;
+
+            highestValue = value;
+            highest = order.Id;
+        }
+
+        return highest;
+    }
+
+    /// <summary>
+    /// Loads the conditional orders for a symbol, which the ordinary history does not contain.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Only the ones an ordinary order does not already account for survive the read: a conditional order
+    /// that triggered became an ordinary order under the same client id, and the converter drops the
+    /// record. So this adds exactly the history the other endpoint cannot have - conditional orders that
+    /// were cancelled, rejected or expired without ever firing, and the ones still waiting.
+    /// </para>
+    /// <para>
+    /// One request, not a windowed walk. The ordinary history is paged through seven-day windows because it
+    /// can run to thousands of orders; the conditional store holds what an account has open and what it
+    /// recently closed, and the exchange documents no window limit on it. If that assumption ever fails it
+    /// fails visibly - as a page filled to <see cref="OrderQueryLimit"/> - rather than as silence.
+    /// </para>
+    /// </remarks>
+    /// <param name="symbol">The instrument symbol to load conditional orders for.</param>
+    /// <param name="since">The timestamp to load from, in Unix milliseconds, or null for the latest page.</param>
+    /// <returns>A result carrying the conditional orders.</returns>
+    private async Task<UserResult<IReadOnlyCollection<OrderModel>>> LoadAlgoOrderHistoryAsync(
+        string symbol,
+        long? since
+    )
+    {
+        var request = algoOrderRequestFactory
+            .New(config.HttpApi)
+            .Get("/fapi/v1/allAlgoOrders")
+            .Param("symbol", symbol)
+            .Param("limit", OrderQueryLimit);
+
+        if (since is not null)
+            request = request.Param("startTime", since.Value);
+
+        var result = await request
+            .ReceiveWindow()
+            .Sign(signatureService)
+            .WithRateDelay1M(rateLimiter)
+            .WithLogFromWithHeaders(this, LogData.Headers)
+            .AsUserResultAsync<IReadOnlyCollection<OrderModel?>>();
+
+        if (!result.IsSuccess)
+        {
+            if (result.IsFailure)
+                this.Debug("algo history failure: {result}", result);
+
+            return UserResult.From(result, (IReadOnlyCollection<OrderModel>)[]);
+        }
+
+        var orders = result.Data.OfType<OrderModel>().ToArray();
+
+        if (result.Data.Count >= OrderQueryLimit)
+            this.Warn<string, int>(
+                "{symbol} conditional history filled the page at {limit}, so older ones were not read",
+                symbol,
+                OrderQueryLimit
+            );
+
+        return UserResult.Ok<IReadOnlyCollection<OrderModel>>(orders);
     }
 
     /// <summary>
@@ -233,8 +385,12 @@ internal class UserProvider(
 
             if (chunkResult.Data.Count == OrderQueryLimit)
             {
-                // this assumes, that orders are sorted!
-                fromOrder = chunkResult.Data.Last().Id;
+                // the highest id in the page, not its last element. Taking the last one assumed the venue
+                // returns a page sorted ascending, which it documents nowhere and which this module could
+                // not have noticed being wrong: an unsorted page does not fail, it advances the cursor to
+                // whatever happened to land last and silently skips everything above it. The maximum is
+                // the same value on a sorted page and the correct one on any other.
+                fromOrder = HighestOrderId(chunkResult.Data);
                 this.Trace<string?>("chunk limit reached, switch to cursor based load from {orderId}", fromOrder);
                 break;
             }
@@ -289,10 +445,22 @@ internal class UserProvider(
     /// <returns>A result carrying the trades, or a failure status if they could not be loaded.</returns>
     private async Task<UserResult<IReadOnlyCollection<TradeModel>?>> LoadLatestTradesAsync(string symbol)
     {
+        // bounded by time, not by limit. This endpoint truncates a page from the *start* of the window,
+        // measured 2026-09-19: asking for five trades returns the five oldest, where the order endpoint's
+        // limit returns the newest. So a page cap cannot select recency here, and asking for "the latest
+        // page" with a limit alone returns the earliest one on any account busy enough to fill it - a full
+        // page of real trades, which nothing downstream can tell from the right one.
+        //
+        // The window is what selects recency instead. An hour is far more than this path needs: it exists
+        // to attach realised PnL to a fill that has just happened, and a fill older than that has already
+        // been loaded by the history path.
+        var since = timeProvider.Now.ToUnixTimeMilliseconds() - LatestTradesWindow;
+
         var result = await getTradeRequestFactory
             .New(config.HttpApi)
             .Get("/fapi/v1/userTrades")
             .Param("symbol", symbol)
+            .Param("startTime", since)
             .Param("limit", TradeQueryLimit)
             .ReceiveWindow()
             .Sign(signatureService)

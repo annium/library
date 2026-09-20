@@ -1,3 +1,4 @@
+using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Abstractions.Domain.User.Requests;
 
 namespace Annium.Finance.Providers.Abstractions.Domain.Internal.User.Requests;
@@ -15,4 +16,7 @@ internal sealed record CancelOrderRequest : ICancelOrderRequest
 
     /// <summary>Gets the instrument symbol the order to cancel belongs to.</summary>
     public required string Symbol { get; init; }
+
+    /// <summary>Gets the type of the order to cancel.</summary>
+    public required OrderType Type { get; init; }
 }

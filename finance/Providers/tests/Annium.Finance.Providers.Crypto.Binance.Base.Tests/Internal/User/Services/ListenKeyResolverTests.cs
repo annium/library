@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
@@ -52,6 +53,15 @@ public class ListenKeyResolverTests : ProvidersTestBase
     /// How many requests the scripted server has answered.
     /// </summary>
     private int _requests;
+
+    /// <summary>The HTTP method of every request the server answered, in order.</summary>
+    private readonly System.Collections.Concurrent.ConcurrentBag<string> _methods = [];
+
+    /// <summary>The path of every request the server answered, in order.</summary>
+    private readonly System.Collections.Concurrent.ConcurrentBag<string> _paths = [];
+
+    /// <summary>Records what the resolver asked of the rate limiter.</summary>
+    private readonly RecordingRateLimiter _limiter = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ListenKeyResolverTests"/> class.
@@ -287,7 +297,7 @@ public class ListenKeyResolverTests : ProvidersTestBase
             Endpoint,
             GetKeyed<IHttpRequestFactory>(string.Empty),
             new TestSignatureService(),
-            new TestRateLimiter(),
+            _limiter,
             monitor.CreateReporter(),
             Get<ILogger>()
         );
@@ -298,14 +308,58 @@ public class ListenKeyResolverTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// Every listen key request is a <c>POST</c> to the configured endpoint, and every one goes through
+    /// the rate limiter.
+    /// </summary>
+    /// <remarks>
+    /// Three facts that a verification census found defended by nothing, all of them on the connection
+    /// path every user stream depends on. The method in particular has a documented alternative on some
+    /// venues - a separate verb for the keep-alive - and the class comment here once claimed this module
+    /// used it. It does not, and now that is asserted rather than believed.
+    /// <para>
+    /// The limiter matters beyond tidiness: this request is counted against the same budget as everything
+    /// else, so a resolver that went around the limiter would spend budget the rest of the module thinks
+    /// it still has.
+    /// </para>
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TimeoutMs)]
+    public async Task EveryRequest_IsAPostToTheEndpointThroughTheLimiter()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        await using var server = RunListenKeyServer(_ => Key("a-key"));
+        var monitor = new StatusMonitor(Get<ILogger>());
+
+        // act - one fetch, then a keep-alive confirmation, so both cadences are covered
+        await using var resolver = CreateResolver(server, monitor, out var keys, out _);
+        await keys.Reader.ReadAsync(ct);
+        await WaitRequestsAsync(2, ct);
+
+        // assert
+        var methods = _methods.Distinct().ToArray();
+        methods.Length.Is(1, $"the resolver used more than one method: {string.Join(",", methods)}");
+        methods[0].Is("POST", "the resolver used something other than POST");
+
+        var paths = _paths.Distinct().ToArray();
+        paths.Length.Is(1, $"the resolver called more than one path: {string.Join(",", paths)}");
+        paths[0].Is(Endpoint, "the resolver called something other than the configured endpoint");
+        (_limiter.Consulted >= 2).IsTrue(
+            $"the limiter was consulted {_limiter.Consulted} times for {Volatile.Read(ref _requests)} requests, so some went around it"
+        );
+    }
+
+    /// <summary>
     /// Starts a server answering listen key requests from a script, counting what it answered.
     /// </summary>
     /// <param name="respond">Builds the response for a request, given how many came before it.</param>
     /// <returns>The running server; dispose it to stop listening.</returns>
     private IServer RunListenKeyServer(Func<int, Task<(HttpStatusCode Code, string Body)>> respond) =>
         this.RunHttpServer(
-            async (_, response) =>
+            async (request, response) =>
             {
+                _methods.Add(request.HttpMethod);
+                _paths.Add(request.Url?.AbsolutePath ?? string.Empty);
                 var attempt = Interlocked.Increment(ref _requests) - 1;
                 var (code, body) = await respond(attempt);
                 var payload = Encoding.UTF8.GetBytes(body);
@@ -355,11 +409,31 @@ public class ListenKeyResolverTests : ProvidersTestBase
     /// <summary>
     /// A rate limiter that allows everything, so the test measures the resolver rather than the limiter.
     /// </summary>
-    private sealed class TestRateLimiter : IRateLimiter
+    /// <summary>
+    /// A rate limiter that allows everything and counts what it was asked, so a test can tell a request
+    /// that went through the limiter from one that went around it.
+    /// </summary>
+    /// <remarks>
+    /// The stub this replaced recorded nothing, which made the listen key's limiter accounting
+    /// unfalsifiable: deleting the limiter from the request chain broke no test. On a venue that counts
+    /// this request against the same budget as everything else, that is a fact worth keeping.
+    /// </remarks>
+    private sealed class RecordingRateLimiter : IRateLimiter
     {
-        /// <summary>Allows every request.</summary>
+        /// <summary>Gets how many times the limiter was consulted before a request went out.</summary>
+        public int Consulted => _consulted;
+
+        /// <summary>Backing counter for <see cref="Consulted"/>.</summary>
+        private int _consulted;
+
+        /// <summary>Allows every request, and records that it was asked.</summary>
         /// <returns>Always true.</returns>
-        public bool CanExecute() => true;
+        public bool CanExecute()
+        {
+            Interlocked.Increment(ref _consulted);
+
+            return true;
+        }
 
         /// <summary>Ignores the reported limit.</summary>
         /// <param name="limit">The limit reported.</param>

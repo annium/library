@@ -70,6 +70,7 @@ public static class ProviderRegistrationContextExtensions
         ctx.AddHttpRequestFactoryWithJsonSerializer(GetAccountKey, UserContracts.GetAccount);
         ctx.AddHttpRequestFactoryWithJsonSerializer(GetOrderKey, UserContracts.GetOrder);
         ctx.AddHttpRequestFactoryWithJsonSerializer(GetTradeKey, UserContracts.GetTrade);
+        ctx.AddHttpRequestFactoryWithJsonSerializer(AlgoOrderKey, UserContracts.AlgoOrder);
 
         // user data trade
         ctx.AddHttpRequestFactoryWithJsonSerializer(SetLeverageKey, UserContracts.SetLeverage);
@@ -83,6 +84,8 @@ public static class ProviderRegistrationContextExtensions
         ctx.AddJsonSerializer(AccountConfigurationUpdateKey, UserContracts.AccountConfigurationUpdate);
         ctx.AddJsonSerializer(BalanceAndPositionUpdateKey, UserContracts.BalanceAndPositionUpdate);
         ctx.AddJsonSerializer(OrderUpdateKey, UserContracts.OrderUpdate);
+        ctx.AddJsonSerializer(AlgoUpdateKey, UserContracts.AlgoUpdate);
+        ctx.AddJsonSerializer(TradeLiteKey, UserContracts.TradeLite);
 
         // services
         ctx.Container.Add<QueryProcessor>().AsSelf().Singleton();

@@ -76,10 +76,10 @@ build-tools:
 # every recipe here runs with --no-build, so build first or you test a stale binary.
 
 # the default run: every group, and in finance only the block that touches nothing outside the
-# process. See test-finance-read / test-finance-write for the rest.
+# process. See test-finance-read / test-finance-write for the rest, or test-finance-all for all three.
 
 # every group; finance limited to its offline block
-test: test-core test-server test-client test-finance test-integrations test-tools
+test: test-core test-server test-client test-finance-offline test-integrations test-tools
 
 test-core:
     @just _test core/core
@@ -102,10 +102,11 @@ test-tools:
 # what keeps a trading test from reaching the exchange is its own SkipUnless gate.
 
 # finance, offline block only - touches nothing outside the process
-test-finance:
+test-finance-offline:
     @echo "=== test finance (offline) ==="
     dotnet test --solution finance/finance.slnx -c Release --no-build --report-xunit-trx \
-        -- --filter-not-trait "block=read" --filter-not-trait "block=write"
+        -- --filter-not-trait "block=read" --filter-not-trait "block=write" \
+        --filter-not-trait "block=probe"
 
 # --ignore-exit-code 8 because most projects hold none of these tests, and a project that matched
 # nothing otherwise fails the whole run with "zero tests ran" - a green run reporting failure.
@@ -128,6 +129,35 @@ test-finance-write:
     @echo "=== test finance (write) ==="
     dotnet test --solution finance/finance.slnx -c Release --no-build --report-xunit-trx \
         -- --filter-trait "block=write" --ignore-exit-code 8
+
+# Everything test-finance-write says applies here unchanged: this places real orders on a real account,
+# so it is run deliberately, alone, after looking at the account, and never by a runner. It exists
+# because typing three recipes in order is how one of them gets forgotten - not to make the third one
+# casual.
+#
+# Ordered cheapest first, so a failure that would also fail live costs nothing to find. The read block
+# spends some of the account's rate allowance just before the trading one begins; if the trading block
+# then reports commands refused with the connector calling itself disconnected, that is the budget
+# talking - give it a minute and run test-finance-write by itself.
+
+# finance, all three blocks in order - ENDS BY PLACING REAL ORDERS. Run it alone
+test-finance-all: test-finance-offline test-finance-read test-finance-write
+
+# finance, probes - investigation tools, named one at a time. No recipe runs them as a group, which is
+# the point: a probe trades to answer a question and overwrites the captures it wrote last time.
+#
+#   dotnet test --solution finance/finance.slnx -c Release --no-build \
+#       -- --filter-class "*<the one you mean>"
+#
+# To read what a live test actually said to the exchange, run the test assembly itself rather than going
+# through `dotnet test`: request and response bodies are logged at trace level, and neither half of that
+# is reachable from here. The level comes from ANNIUM_LOG, and per-test output is only printed with the
+# runner's own -showLiveOutput, which the `dotnet test` wrapper rejects as an unknown option.
+#
+#   ANNIUM_LOG=trace <path to test assembly> -trait "block=read" -showLiveOutput -noColor
+#
+# The runner's own CLI takes -class / -trait, not the --filter-* options above. Logs from a live run hold
+# a listen key in clear text, so they stay out of the repository.
 
 # package
 
@@ -224,7 +254,7 @@ ci-test-adapters:
     just build-tools
     just test-integrations
     just test-tools
-    just test-finance
+    just test-finance-offline
 
 # The nightly has no exchange in it, and that is settled rather than pending.
 #

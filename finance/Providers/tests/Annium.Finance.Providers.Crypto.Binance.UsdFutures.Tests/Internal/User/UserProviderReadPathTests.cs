@@ -5,8 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
+using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Abstractions.Domain.User.Operations;
 using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Core.Shared.Loaders;
@@ -128,8 +130,9 @@ public class UserProviderReadPathTests : ProvidersTestBase
         // act
         await provider.LoadOrdersAsync("BTCUSDT", null);
 
-        // assert
-        calls.Is(1);
+        // assert - one call per store: the ordinary history and the conditional one, which the ordinary
+        // endpoint does not contain at all
+        calls.Is(2);
         boundedCalls.Is(0, "the latest page is not a time range and must carry no window bounds");
     }
 
@@ -239,9 +242,222 @@ public class UserProviderReadPathTests : ProvidersTestBase
 
         // assert
         result.Status.Is(UserOperationStatus.Ok);
-        paths.IsEqual(new[] { "/fapi/v1/openOrders" });
+        // two stores, so two requests. A conditional order is absent from the ordinary answer until it
+        // triggers, so reading only the first endpoint reports an account with no stop losses on it -
+        // silently, as a shorter list rather than as an error
+        paths.IsEqual(new[] { "/fapi/v1/openOrders", "/fapi/v1/openAlgoOrders" });
         bounded.Is(0, "open orders are a snapshot, not a range");
         symbolScoped.Is(0, "open orders are asked for across every symbol, not one at a time");
+    }
+
+    /// <summary>
+    /// The history cursor is the highest id in a page, not its last element, so an unsorted page does not
+    /// silently skip records.
+    /// </summary>
+    /// <remarks>
+    /// The venue documents no ordering for this endpoint and the module took one on faith - a source
+    /// comment said as much. The failure it invited is the quiet kind: an unsorted page does not error, it
+    /// advances the cursor to whatever happened to land last and everything above that id is never read
+    /// again. Here the page is deliberately returned out of order, and the cursor must still continue from
+    /// the highest id it contained.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadOrders_CursorTakesTheHighestIdNotTheLastRow()
+    {
+        // arrange - a full page, deliberately unsorted, with the highest id in the middle
+        var cursors = new List<string?>();
+        var served = 0;
+        await using var server = this.RunHttpServer(
+            async (request, response) =>
+            {
+                if ((request.Url?.AbsolutePath ?? string.Empty).Contains("Algo", StringComparison.Ordinal))
+                {
+                    await WriteJsonAsync(response, "[]");
+                    return;
+                }
+
+                cursors.Add(request.QueryString["orderId"]);
+
+                // the first page fills the limit, which is what switches the walk to a cursor; the next
+                // one is short, which ends it
+                if (Interlocked.Increment(ref served) > 1)
+                {
+                    await WriteJsonAsync(response, "[]");
+                    return;
+                }
+
+                // the highest id sits in the middle of the page and the last row is far below it,
+                // so a cursor taken from the last row is visibly wrong
+                var ids = new List<long> { 5, 99999, 12 };
+                while (ids.Count < 1000)
+                    ids.Add(ids.Count);
+
+                var rows = ids.Select(id =>
+                    $$"""
+                        {"orderId":{{id}},"clientOrderId":"{{Guid.NewGuid()}}","symbol":"BTCUSDT","type":"LIMIT",
+                         "side":"BUY","origQty":"1","price":"1","stopPrice":"0","status":"NEW","executedQty":"0",
+                         "avgPrice":"0","time":1,"updateTime":2,"positionSide":"BOTH","reduceOnly":false}
+                        """
+                );
+
+                await WriteJsonAsync(response, $"[{string.Join(",", rows)}]");
+            }
+        );
+        var provider = CreateProvider(server);
+
+        // act
+        await provider.LoadOrdersAsync("BTCUSDT", 1);
+
+        // assert - the cursor used for the follow-up read is the highest id served, not the last row's
+        var used = cursors.FirstOrDefault(x => x is not null);
+        used.Is("99999", $"the cursor continued from {used ?? "nothing"}, so records above it were skipped");
+    }
+
+    /// <summary>
+    /// The latest-trades read is bounded by time, because this endpoint's page cap selects the oldest
+    /// trades rather than the newest.
+    /// </summary>
+    /// <remarks>
+    /// Measured against the live venue on 2026-09-19: asking it for five trades returns the five
+    /// <em>oldest</em> on the account, while the order endpoint's limit returns the newest. So a page cap
+    /// cannot select recency here - and a loader asking for the latest page with a limit alone gets the
+    /// earliest one on any account busy enough to fill it, as a full page of real trades that nothing
+    /// downstream can tell from the right one. The window is what selects recency, so the window is what
+    /// this asserts.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadTrades_WithoutASince_IsBoundedByTimeNotByPageSize()
+    {
+        // arrange
+        var bounded = 0;
+        await using var server = this.RunHttpServer(
+            async (request, response) =>
+            {
+                if (request.QueryString["startTime"] is not null)
+                    bounded++;
+
+                await WriteJsonAsync(response, "[]");
+            }
+        );
+        var provider = CreateProvider(server);
+
+        // act
+        await provider.LoadTradesAsync("BTCUSDT", null);
+
+        // assert
+        bounded.Is(1, "the latest trades were asked for with a page cap and no window, which selects the oldest");
+    }
+
+    /// <summary>
+    /// Order history comes from both stores, and a conditional order that triggered is counted once - as the
+    /// ordinary order it became.
+    /// </summary>
+    /// <remarks>
+    /// The two stores overlap in exactly one way: a triggered conditional order exists in both, as a
+    /// <c>FINISHED</c> algo record and as the ordinary order it produced, under the same client id. The
+    /// ordinary one carries the fill; the algo one cannot say whether the book filled or cancelled it. So
+    /// history that merged them naively would double-count every stop loss that ever fired - and would do it
+    /// with one of the two copies carrying a made-up outcome.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadOrders_CountsATriggeredConditionalOrderOnce()
+    {
+        // arrange - the ordinary order a real trigger produced on 2026-09-19, and the algo record of the
+        // same order, carrying the same client id
+        var ordinary = """
+            [{"orderId":33877541028,"clientOrderId":"60d0f110-7316-4073-a41f-5c5c699a83ed","symbol":"DOTUSDT",
+              "type":"MARKET","side":"BUY","origQty":"4.9","price":"0","stopPrice":"0","status":"FILLED",
+              "executedQty":"4.9","avgPrice":"1.1325","time":1789826323607,"updateTime":1789826323607,
+              "positionSide":"BOTH","reduceOnly":false}]
+            """;
+        var algo = """
+            [{"algoId":4000001910368571,"clientAlgoId":"60d0f110-7316-4073-a41f-5c5c699a83ed",
+              "orderType":"STOP_MARKET","symbol":"DOTUSDT","side":"BUY","positionSide":"BOTH","quantity":"4.9",
+              "algoStatus":"FINISHED","actualOrderId":"33877541028","actualPrice":"1.1325","actualQty":"4.9",
+              "triggerPrice":"1.1322","price":"0","reduceOnly":false,
+              "createTime":1789826233630,"updateTime":1789826323611}]
+            """;
+
+        await using var server = this.RunHttpServer(
+            async (request, response) =>
+            {
+                var isAlgo = (request.Url?.AbsolutePath ?? string.Empty).Contains("Algo", StringComparison.Ordinal);
+                await WriteJsonAsync(response, isAlgo ? algo : ordinary);
+            }
+        );
+        var provider = CreateProvider(server);
+
+        // act
+        var result = await provider.LoadOrdersAsync("DOTUSDT", null);
+
+        // assert
+        result.Status.Is(UserOperationStatus.Ok);
+        var orders = result.Data.NotNull();
+        orders.Count.Is(1, "the triggered conditional order was counted twice");
+
+        var order = orders.Single();
+        order.Id.Is("33877541028", "the algo record won over the ordinary order it became");
+        order.Status.Is(OrderStatus.Filled);
+        order.ExecutedPrice.Is(1.1325m, "the surviving copy is the one that knows the fill");
+    }
+
+    /// <summary>
+    /// Open orders come back from both stores merged, with the conditional records an ordinary order already
+    /// accounts for left out.
+    /// </summary>
+    /// <remarks>
+    /// The path test above proves both endpoints are asked; this proves the answers are joined, which is the
+    /// part a caller sees. The triggered record carries the same client id as an ordinary order - the
+    /// exchange keeps the identity across a trigger - so surfacing it would show one order twice, once with
+    /// its real fill and once with a conditional record that cannot say whether the book filled or cancelled
+    /// it. Both payloads are real answers captured live on 2026-09-19.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadOpenOrders_MergesBothStoresAndDropsSupersededRecords()
+    {
+        // arrange
+        var ordinary = """
+            [{"orderId":1,"clientOrderId":"11111111-1111-1111-1111-111111111111","symbol":"BTCUSDT",
+              "type":"LIMIT","side":"BUY","origQty":"1","price":"100","stopPrice":"0","status":"NEW",
+              "executedQty":"0","avgPrice":"0","time":1,"updateTime":2,"positionSide":"BOTH","reduceOnly":false}]
+            """;
+        var algo = """
+            [{"algoId":4000001910058351,"clientAlgoId":"22222222-2222-2222-2222-222222222222",
+              "orderType":"STOP_MARKET","symbol":"DOTUSDT","side":"BUY","positionSide":"BOTH","quantity":"4.9",
+              "algoStatus":"NEW","triggerPrice":"1.1837","price":"0","reduceOnly":false,
+              "createTime":1789819033056,"updateTime":1789819033056},
+             {"algoId":4000001910368571,"clientAlgoId":"33333333-3333-3333-3333-333333333333",
+              "orderType":"STOP_MARKET","symbol":"DOTUSDT","side":"BUY","positionSide":"BOTH","quantity":"4.9",
+              "algoStatus":"FINISHED","actualOrderId":"33877541028","actualPrice":"1.1325","actualQty":"4.9",
+              "triggerPrice":"1.1322","price":"0","reduceOnly":false,
+              "createTime":1789826233630,"updateTime":1789826323611}]
+            """;
+
+        await using var server = this.RunHttpServer(
+            async (request, response) =>
+            {
+                var isAlgo = (request.Url?.AbsolutePath ?? string.Empty).Contains("Algo", StringComparison.Ordinal);
+                await WriteJsonAsync(response, isAlgo ? algo : ordinary);
+            }
+        );
+        var provider = CreateProvider(server);
+
+        // act
+        var result = await provider.LoadOpenOrdersAsync();
+
+        // assert
+        result.Status.Is(UserOperationStatus.Ok);
+        var orders = result.Data.NotNull();
+        orders.Count.Is(2, "the two stores were not merged, or a superseded record was kept");
+        orders.Count(x => x.Symbol == "BTCUSDT").Is(1, "the ordinary order is missing");
+        var conditional = orders.Single(x => x.Symbol == "DOTUSDT");
+        conditional.ClientOrderId.Is("22222222-2222-2222-2222-222222222222");
+        conditional.Type.Is(OrderType.StopLossMarket);
+        conditional.LevelPrice.Is(1.1837m, "the trigger price was not read from triggerPrice");
     }
 
     /// <summary>
@@ -350,6 +566,7 @@ public class UserProviderReadPathTests : ProvidersTestBase
             sp.ResolveHttpRequestFactory(Constants.GetAccountKey),
             sp.ResolveHttpRequestFactory(Constants.GetOrderKey),
             sp.ResolveHttpRequestFactory(Constants.GetTradeKey),
+            sp.ResolveHttpRequestFactory(Constants.AlgoOrderKey),
             sp.Resolve<IRateLimiter>(),
             Logger
         );

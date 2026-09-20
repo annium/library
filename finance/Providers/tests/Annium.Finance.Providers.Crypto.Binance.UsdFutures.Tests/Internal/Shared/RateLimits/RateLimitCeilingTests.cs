@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Core.Shared.RateLimits;
+using Annium.Finance.Providers.Crypto.Binance.UsdFutures;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Testing;
 using Xunit;
@@ -116,6 +117,41 @@ public class RateLimitCeilingTests : ProvidersTestBase
         await Expect.ToAsync(
             () => limiter.CanExecute().IsTrue("still refused after a second decay"),
             2 * DecayInterval
+        );
+    }
+
+    /// <summary>
+    /// The listen key cadences this venue registers are the ones the exchange's validity window needs.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A verification census found these defended by nothing: the resolver's own tests run on 50 ms values,
+    /// so they pin the mechanism and say nothing about the numbers production uses. The numbers are the
+    /// part that matters - a keep-alive slower than the venue's validity window loses the stream, and one
+    /// much faster spends budget for nothing.
+    /// </para>
+    /// <para>
+    /// Asserted against the window rather than as bare constants, because that is the relationship the
+    /// numbers exist to satisfy: the venue's documented listen key validity is 60 minutes, and the
+    /// keep-alive has to fit inside it with room for a failure and a retry.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void ListenKeyCadences_FitInsideTheVenuesValidityWindow()
+    {
+        // arrange - the registered configuration, not a fresh one
+        var config = Get<ProviderConfiguration>();
+
+        // act & assert
+        var validityWindow = 60 * 60 * 1000;
+        config.ListenKey.FetchInterval.IsGreater(0, "the fetch retry interval is not set");
+        config.ListenKey.ConfirmInterval.IsLess(
+            validityWindow / 2,
+            "the keep-alive interval leaves no room for a failure and a retry inside the validity window"
+        );
+        config.ListenKey.FetchInterval.IsLess(
+            config.ListenKey.ConfirmInterval,
+            "the retry after a failed fetch is slower than the keep-alive, so a lost key outlives the stream"
         );
     }
 
