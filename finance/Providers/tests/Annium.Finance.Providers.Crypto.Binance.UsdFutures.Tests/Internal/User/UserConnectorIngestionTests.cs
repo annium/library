@@ -262,6 +262,47 @@ public class UserConnectorIngestionTests : UserConnectorOfflineTestBase
     }
 
     /// <summary>
+    /// The notes about ended orders are bounded when no snapshot arrives to retire them.
+    /// </summary>
+    /// <remarks>
+    /// Notes are normally retired by the next snapshot, so a handful exist at a time. They are not
+    /// retired at all while snapshots fail - a reload refused by a rate limit does that for minutes at
+    /// a stretch, which was observed - and the stream goes on ending orders throughout. The cap is what
+    /// keeps that from growing without end.
+    ///
+    /// Dropping the oldest costs nothing: a note guards against a snapshot already in flight, and the
+    /// first snapshot to arrive after the loader recovers was sent later than every note held here, so
+    /// it lists none of them.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = Timeout)]
+    public async Task EndedOrderNotes_AreBoundedWhenNoSnapshotRetiresThem()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        await using var server = RunServer();
+        await using var connector = CreateConnector(server, out var parts);
+        var orders = Channel.CreateUnbounded<ChangeEvent<OrderModel>>();
+        using var subscription = connector.Orders.Subscribe(x => orders.Writer.TryWrite(x));
+        connector.Sync();
+
+        // act - one more order ends than the connector keeps notes for, and no snapshot arrives meanwhile
+        const int cap = 1000;
+        for (var i = 0; i <= cap; i++)
+            parts.Stream.Push(Encoding.UTF8.GetBytes(OrderUpdate("CANCELED", "0", (i + 1).ToString())));
+
+        for (var i = 0; i <= cap; i++)
+            (await ReadOrderAsync(orders, ct)).Type.Is(ChangeEventType.Delete);
+
+        // assert - the newest note still holds, the oldest has been dropped to make room for it
+        parts.OrdersLoader.Emit([OpenOrder("1"), OpenOrder((cap + 1).ToString())]);
+        var snapshot = await ReadOrderAsync(orders, ct);
+        snapshot
+            .Items.Count.Is(1, "the notes about ended orders are not bounded, so they grow without end");
+        snapshot.Items.Single().Id.Is("1", "the note dropped to stay within the bound was not the oldest");
+    }
+
+    /// <summary>
     /// Builds an open order as a snapshot would carry it.
     /// </summary>
     /// <param name="id">The exchange-assigned id.</param>
@@ -344,12 +385,13 @@ public class UserConnectorIngestionTests : UserConnectorOfflineTestBase
     /// </summary>
     /// <param name="status">The order status the event reports.</param>
     /// <param name="executedQty">The cumulative filled quantity the event reports.</param>
+    /// <param name="id">The exchange-assigned order id the event reports.</param>
     /// <returns>The event payload.</returns>
-    private static string OrderUpdate(string status, string executedQty) =>
+    private static string OrderUpdate(string status, string executedQty, string id = "1") =>
         $$$"""
             {"e":"ORDER_TRADE_UPDATE","E":1700000000000,"T":1700000000000,"o":{
             "s":"BTCUSDT","c":"2f1d4e6a-8b3c-4d5e-9f01-23456789abcd","S":"BUY","o":"LIMIT","f":"GTC",
-            "q":"1","p":"100","ap":"0","sp":"0","x":"NEW","X":"{{{status}}}","i":1,"l":"0","z":"{{{executedQty}}}",
+            "q":"1","p":"100","ap":"0","sp":"0","x":"NEW","X":"{{{status}}}","i":{{{id}}},"l":"0","z":"{{{executedQty}}}",
             "L":"0","T":1700000000000,"t":0,"b":"0","a":"0","m":false,"R":false,"wt":"CONTRACT_PRICE",
             "ot":"LIMIT","ps":"BOTH","cp":false,"rp":"0","pP":false}}
             """;

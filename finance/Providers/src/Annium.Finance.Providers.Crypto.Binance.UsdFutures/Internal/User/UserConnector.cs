@@ -35,6 +35,9 @@ namespace Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.User;
 /// </summary>
 internal class UserConnector : UserConnectorBase, IUserConnector
 {
+    /// <summary>How many ended-order notes are kept when no snapshot arrives to retire them.</summary>
+    private const int MaxEndedNotes = 1000;
+
     /// <summary>The resolved user connector configuration.</summary>
     private readonly UserConfig _config;
 
@@ -80,6 +83,9 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// cannot raise them again. See <see cref="HandleOrders"/> for why, and for how they are forgotten.
     /// </summary>
     private readonly HashSet<string> _ended = new();
+
+    /// <summary>The order <see cref="_ended"/> was added to, so the oldest note is the one that goes.</summary>
+    private readonly Queue<string> _endedOrder = new();
 
     /// <summary>Guards <see cref="_ended"/>, written from the stream and read from the loader.</summary>
     private readonly Lock _endedLocker = new();
@@ -581,8 +587,12 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             // an id this snapshot does not mention is one the venue agrees is gone, so the note about it
             // has done its work. Only the ids this very snapshot still claimed are worth carrying on.
             _ended.Clear();
+            _endedOrder.Clear();
             foreach (var id in stale)
+            {
                 _ended.Add(id);
+                _endedOrder.Enqueue(id);
+            }
 
             if (stale.Count > 0)
                 this.Trace<string, string>(
@@ -602,7 +612,21 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     private void NoteOrderIsOver(string id)
     {
         lock (_endedLocker)
-            _ended.Add(id);
+        {
+            if (!_ended.Add(id))
+                return;
+
+            _endedOrder.Enqueue(id);
+
+            // notes are retired by the next snapshot, so in ordinary running there are a handful of them.
+            // The cap is for the case where snapshots stop arriving while the stream keeps going - a
+            // reload failing against a rate limit does exactly that, for minutes - and nothing would
+            // retire anything. A note that old protects nothing anyway: it guards against a snapshot
+            // already in flight, and once the loader recovers, the snapshot it sends is newer than every
+            // note here and lists none of them.
+            while (_endedOrder.Count > MaxEndedNotes)
+                _ended.Remove(_endedOrder.Dequeue());
+        }
     }
 
     /// <summary>
