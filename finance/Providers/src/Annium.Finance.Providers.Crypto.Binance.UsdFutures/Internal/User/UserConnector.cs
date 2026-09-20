@@ -585,7 +585,11 @@ internal class UserConnector : UserConnectorBase, IUserConnector
                 _ended.Add(id);
 
             if (stale.Count > 0)
-                this.Trace<string, string>("{id} snapshot still listed {count} order(s) already over", Id, stale.Count.ToString());
+                this.Trace<string, string>(
+                    "{id} snapshot still listed {count} order(s) already over",
+                    Id,
+                    stale.Count.ToString()
+                );
 
             return kept;
         }

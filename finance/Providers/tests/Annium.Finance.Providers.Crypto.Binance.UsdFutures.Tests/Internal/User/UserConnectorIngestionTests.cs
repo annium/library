@@ -163,8 +163,7 @@ public class UserConnectorIngestionTests : UserConnectorOfflineTestBase
         // assert
         var snapshot = await ReadOrderAsync(orders, ct);
         snapshot.Type.Is(ChangeEventType.Init);
-        snapshot
-            .Items.Count.Is(1, "a cancelled order was raised again by a snapshot older than the cancellation");
+        snapshot.Items.Count.Is(1, "a cancelled order was raised again by a snapshot older than the cancellation");
         snapshot.Items.Single().Id.Is("2", "the wrong order was dropped from the snapshot");
     }
 
