@@ -248,6 +248,36 @@ returning null for a record to omit is only as good as the collection reading it
 of *nullable* elements and filter; a non-nullable element type keeps the null and hands a caller an entry
 with nothing in it. This has now been the same defect twice in one module.
 
+## Reconciling a snapshot with a stream
+
+A connector has two sources for the same state and they disagree by construction. **A snapshot is a
+statement about the past** - about the moment its request was sent, not the moment its answer arrived -
+and **a stream is a sequence that is not ordered against anything**, including itself. Published in
+arrival order, the pair produces an object that goes backwards: told an order is gone, then told it is
+open. Ask of every venue, early, which of these two you are looking at.
+
+What makes it vicious is that it does not correct itself. The record is absent from every later
+snapshot and every later event, so the last thing the caller heard is wrong permanently. A caller
+watching a protective order would believe it armed when it is not. And it is a race, so it passes most
+runs: found at one failure in four, with the window measured at a couple of hundred milliseconds.
+
+The rule that resolves it needs one property of the venue, which is worth confirming rather than
+assuming: **is a terminal state final, and are identifiers never reused?** Where both hold, the report
+earliest *in time* stands, whichever arrived last - so a record already reported as over is dropped from
+any later snapshot that still lists it, and from any later event that reports it live.
+
+Two things to get right in that fix, both of which review will ask about:
+
+- **How the note is retired, and why that is exact rather than a guess.** Read the loader before
+  choosing: where loads are serialised - the next request is sent only after the previous answer has
+  been delivered - a note has to survive exactly one in-flight snapshot, so retiring it on the first
+  snapshot that does not mention the record is precisely right. Where loads can overlap, it is not, and
+  the rule needs a different basis.
+- **What bounds it when the retirement never happens.** Notes accumulate while the stream runs and the
+  reloads fail, which is a real state and not a hypothetical one - a reload refused by a rate limit does
+  it for minutes. Cap it. Dropping the oldest costs nothing, because a note only ever guards against a
+  request already in flight.
+
 ## Mutation-checking, and the two ways it lies
 
 Every fix gets a mutation check: break the thing again, watch the test fail, put it back. It is the only
