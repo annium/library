@@ -117,7 +117,21 @@ internal class MessagingManagedSocket : IManagedSocket, ILogSubject
         finally
         {
             if (acquired)
-                _gate.Release();
+            {
+                try
+                {
+                    _gate.Release();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Dispose() disposed the gate while this send held it. Nothing needs the permit
+                    // back - the socket is being torn down - and this is the one place where letting
+                    // the exception out would not be caught: a throw from a finally passes straight
+                    // through the catch above it, so SendAsync, which answers with a status and never
+                    // throws, would throw. It reached CI as a one-in-many flake.
+                    this.Trace("{dataLength} - disposed while sending, gate release skipped", data.Length);
+                }
+            }
         }
     }
 
@@ -152,9 +166,9 @@ internal class MessagingManagedSocket : IManagedSocket, ILogSubject
         }
 
         // mark disposed BEFORE releasing _gate so a concurrent SendAsync that just passed
-        // the _isDisposed check observes the write the next time it reads the field. The
-        // remaining race (SendAsync calls _gate.WaitAsync on a disposed semaphore) is handled
-        // by the inner ObjectDisposedException catch in SendAsync.
+        // the _isDisposed check observes the write the next time it reads the field. Two races
+        // remain after that and both are handled inside SendAsync: it can be about to wait on a
+        // disposed semaphore, and it can already hold one it is about to release.
         _isDisposed = true;
 
         _gate.Dispose();
