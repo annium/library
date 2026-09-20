@@ -33,18 +33,23 @@ Some of what this skill validates places **real orders on a real account**.
 
 ### The three blocks
 
-Tests are sorted into three blocks by an xunit trait on the class or a base of it — traits inherit, so
+Tests are sorted into blocks by an xunit trait on the class or a base of it — traits inherit, so
 marking a fixture base carries every suite built on it:
 
 | recipe | block | touches |
 |---|---|---|
-| `just test-finance` | unmarked | nothing outside the process |
+| `just test-finance-offline` | unmarked | nothing outside the process |
 | `just test-finance-read` | `block=read` | real providers and real accounts, mutating nothing |
 | `just test-finance-write` | `block=write` | places and cancels real orders, opens and closes positions |
+| `just test-finance-all` | the three above, in that order | everything the trading block touches |
+| *(no recipe)* | `block=probe` | an investigation tool, named one at a time by hand |
 
-`just test` runs the offline block of every group, finance included. The three names above are the finance
-ones, and they are the names in the justfile — check them there rather than here if they ever look wrong,
-because a recipe name that has drifted in this table is a wrong command pointed at a trading block.
+`just test` runs the offline block of every group, finance included. `test-finance-all` is a convenience
+for running the three in order locally; it is not a softer way to reach the trading block, and everything
+said about `test-finance-write` applies to it unchanged.
+
+These are the names in the justfile — check them there rather than here if they ever look wrong, because
+a recipe name that has drifted in this table is a wrong command pointed at a trading block.
 
 **The trait is the only thing separating a routine run from one that trades.** A second gate — an
 environment variable each exchange test was checked against — was dropped deliberately: it protected
