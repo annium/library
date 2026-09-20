@@ -297,8 +297,7 @@ public class UserConnectorIngestionTests : UserConnectorOfflineTestBase
         // assert - the newest note still holds, the oldest has been dropped to make room for it
         parts.OrdersLoader.Emit([OpenOrder("1"), OpenOrder((cap + 1).ToString())]);
         var snapshot = await ReadOrderAsync(orders, ct);
-        snapshot
-            .Items.Count.Is(1, "the notes about ended orders are not bounded, so they grow without end");
+        snapshot.Items.Count.Is(1, "the notes about ended orders are not bounded, so they grow without end");
         snapshot.Items.Single().Id.Is("1", "the note dropped to stay within the bound was not the oldest");
     }
 
