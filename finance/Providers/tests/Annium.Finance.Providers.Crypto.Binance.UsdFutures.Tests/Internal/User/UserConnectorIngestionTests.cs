@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
@@ -127,6 +128,177 @@ public class UserConnectorIngestionTests : UserConnectorOfflineTestBase
         gone.Type.Is(ChangeEventType.Delete);
         gone.Item.Status.Is(OrderStatus.Canceled);
     }
+
+    /// <summary>
+    /// A snapshot that still lists an order the stream has already ended does not raise it again.
+    /// </summary>
+    /// <remarks>
+    /// A snapshot describes the account as it was when its request was sent, and a request sent a
+    /// fraction of a second before an order ends comes back still listing it. Published as it arrives,
+    /// it tells the caller an order it has just been told was cancelled is open - and since the order is
+    /// gone from every later snapshot, nothing ever corrects it.
+    ///
+    /// It was found as one live run in four failing on a conditional order that stayed New after being
+    /// cancelled, and on the wire the whole window was about 270ms: the cancel left, a reload's request
+    /// followed it, the venue's cancellation event arrived, and only then did the reload answer.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = Timeout)]
+    public async Task Snapshot_DoesNotRaiseAnOrderTheStreamAlreadyEnded()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        await using var server = RunServer();
+        await using var connector = CreateConnector(server, out var parts);
+        var orders = Channel.CreateUnbounded<ChangeEvent<OrderModel>>();
+        using var subscription = connector.Orders.Subscribe(x => orders.Writer.TryWrite(x));
+        connector.Sync();
+
+        parts.Stream.Push(Encoding.UTF8.GetBytes(OrderUpdate("CANCELED", "0")));
+        (await ReadOrderAsync(orders, ct)).Type.Is(ChangeEventType.Delete);
+
+        // act - the answer to a reload that was already in flight, still listing the order as open
+        parts.OrdersLoader.Emit([OpenOrder("1"), OpenOrder("2")]);
+
+        // assert
+        var snapshot = await ReadOrderAsync(orders, ct);
+        snapshot.Type.Is(ChangeEventType.Init);
+        snapshot
+            .Items.Count.Is(1, "a cancelled order was raised again by a snapshot older than the cancellation");
+        snapshot.Items.Single().Id.Is("2", "the wrong order was dropped from the snapshot");
+    }
+
+    /// <summary>
+    /// The same holds for a conditional order, which ends on an event of its own.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = Timeout)]
+    public async Task Snapshot_DoesNotRaiseAConditionalOrderTheStreamAlreadyEnded()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        await using var server = RunServer();
+        await using var connector = CreateConnector(server, out var parts);
+        var orders = Channel.CreateUnbounded<ChangeEvent<OrderModel>>();
+        using var subscription = connector.Orders.Subscribe(x => orders.Writer.TryWrite(x));
+        connector.Sync();
+
+        parts.Stream.Push(Encoding.UTF8.GetBytes(AlgoUpdate("CANCELED")));
+        (await ReadOrderAsync(orders, ct)).Type.Is(ChangeEventType.Delete);
+
+        // act
+        parts.OrdersLoader.Emit([OpenOrder("4000001912557457")]);
+
+        // assert
+        var snapshot = await ReadOrderAsync(orders, ct);
+        snapshot.Type.Is(ChangeEventType.Init);
+        snapshot.Items.IsEmpty("a cancelled conditional order was raised again by a stale snapshot");
+    }
+
+    /// <summary>
+    /// A placement event that arrives after the cancellation of the same order does not raise it.
+    /// </summary>
+    /// <remarks>
+    /// The venue's events are not ordered against each other. A placement event was measured arriving
+    /// 600ms after the order was placed, which is long enough to land after the cancellation of that
+    /// same order when the two are a second apart - and a caller told an order is cancelled and then
+    /// told it is new has been misled by the source it trusts most.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = Timeout)]
+    public async Task LateLiveEvent_DoesNotRaiseAnOrderAlreadyEnded()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        await using var server = RunServer();
+        await using var connector = CreateConnector(server, out var parts);
+        var orders = Channel.CreateUnbounded<ChangeEvent<OrderModel>>();
+        using var subscription = connector.Orders.Subscribe(x => orders.Writer.TryWrite(x));
+        connector.Sync();
+
+        parts.Stream.Push(Encoding.UTF8.GetBytes(AlgoUpdate("CANCELED")));
+        (await ReadOrderAsync(orders, ct)).Type.Is(ChangeEventType.Delete);
+
+        // act - the placement event for the same order, overtaken by its own cancellation
+        parts.Stream.Push(Encoding.UTF8.GetBytes(AlgoUpdate("NEW")));
+
+        // assert - a snapshot is pushed behind it, so this waits for something that must arrive after
+        parts.OrdersLoader.Emit([]);
+        var next = await ReadOrderAsync(orders, ct);
+        next.Type.Is(ChangeEventType.Init, "a cancelled order was raised again by a late placement event");
+    }
+
+    /// <summary>
+    /// Once a snapshot agrees an order is gone, the note about it is dropped rather than kept forever.
+    /// </summary>
+    /// <remarks>
+    /// The note exists only to outlive the one snapshot that was already in flight. Keeping it would
+    /// make the connector carry an id per order it ever saw end, for the life of the process.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = Timeout)]
+    public async Task Snapshot_ForgetsAnEndedOrderOnceTheVenueAgrees()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        await using var server = RunServer();
+        await using var connector = CreateConnector(server, out var parts);
+        var orders = Channel.CreateUnbounded<ChangeEvent<OrderModel>>();
+        using var subscription = connector.Orders.Subscribe(x => orders.Writer.TryWrite(x));
+        connector.Sync();
+
+        parts.Stream.Push(Encoding.UTF8.GetBytes(OrderUpdate("CANCELED", "0")));
+        (await ReadOrderAsync(orders, ct)).Type.Is(ChangeEventType.Delete);
+
+        // the venue stops listing it, which is what the note was waiting for
+        parts.OrdersLoader.Emit([]);
+        (await ReadOrderAsync(orders, ct)).Items.IsEmpty();
+
+        // act - an id is reused by nothing here, but a note kept forever would still filter it
+        parts.OrdersLoader.Emit([OpenOrder("1")]);
+
+        // assert
+        var snapshot = await ReadOrderAsync(orders, ct);
+        snapshot.Items.Count.Is(1, "the note about an ended order outlived the snapshot that retired it");
+    }
+
+    /// <summary>
+    /// Builds an open order as a snapshot would carry it.
+    /// </summary>
+    /// <param name="id">The exchange-assigned id.</param>
+    /// <returns>The order.</returns>
+    private static OrderModel OpenOrder(string id) =>
+        new(
+            id,
+            "2f1d4e6a-8b3c-4d5e-9f01-23456789abcd",
+            OrientationRange.Both,
+            "BTCUSDT",
+            OrderSide.Buy,
+            OrderType.Limit,
+            1m,
+            100m,
+            0m,
+            false,
+            1700000000000,
+            OrderStatus.New,
+            0m,
+            0m,
+            1700000000000
+        );
+
+    /// <summary>
+    /// Builds a Binance conditional order update event.
+    /// </summary>
+    /// <param name="status">The status the event reports.</param>
+    /// <returns>The event payload.</returns>
+    private static string AlgoUpdate(string status) =>
+        $$$"""
+            {"e":"ALGO_UPDATE","T":1700000000000,"E":1700000000000,"o":{
+            "caid":"5af8fa4d-1d36-4be4-b7cd-04fe48dcb0f5","aid":4000001912557457,"at":"CONDITIONAL",
+            "o":"STOP","s":"BTCUSDT","S":"SELL","ps":"BOTH","f":"GTC","q":"1","X":"{{{status}}}","ai":"",
+            "tp":"90","p":"89","V":"EXPIRE_MAKER","wt":"CONTRACT_PRICE","pm":"NONE","cp":false,
+            "pP":false,"R":false,"tt":0,"gtd":0,"ia":false}}
+            """;
 
     /// <summary>
     /// The stream coming up starts the loaders, and going down stops them.

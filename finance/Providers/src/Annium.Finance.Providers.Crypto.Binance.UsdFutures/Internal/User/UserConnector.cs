@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Annium.Data.Tables;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
@@ -73,6 +74,15 @@ internal class UserConnector : UserConnectorBase, IUserConnector
 
     /// <summary>Reloads the currently open orders.</summary>
     private readonly ICompositeLoader<IReadOnlyCollection<OrderModel>> _ordersLoader;
+
+    /// <summary>
+    /// Ids of orders the stream has reported as over, so that a snapshot requested before they ended
+    /// cannot raise them again. See <see cref="HandleOrders"/> for why, and for how they are forgotten.
+    /// </summary>
+    private readonly HashSet<string> _ended = new();
+
+    /// <summary>Guards <see cref="_ended"/>, written from the stream and read from the loader.</summary>
+    private readonly Lock _endedLocker = new();
 
     /// <summary>Reloads trades for a symbol, keyed by symbol and the timestamp to load trades since.</summary>
     private readonly IKeyedLoader<string, long, IReadOnlyCollection<TradeModel>> _tradesLoader;
@@ -523,12 +533,100 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     }
 
     /// <summary>
-    /// Publishes the reloaded open orders as a full-snapshot <c>Init</c> event on <see cref="IUserConnector.Orders"/>.
+    /// Publishes the reloaded open orders as a full-snapshot <c>Init</c> event on <see cref="IUserConnector.Orders"/>,
+    /// with any order the stream has already reported as over left out of it.
     /// </summary>
+    /// <remarks>
+    /// A snapshot describes the account as it was when the request was sent, and a request sent a
+    /// fraction of a second before an order ended comes back still listing it. Published as it arrives,
+    /// that raises an order the caller has just been told was cancelled - and since the order is gone
+    /// from every later snapshot, nothing ever corrects it. A caller watching a stop loss would go on
+    /// believing it was armed.
+    ///
+    /// Measured on the wire: the cancel left at :39.075, a reload's request at :39.178, the venue's
+    /// cancellation event at :39.357, and that reload's answer at :39.448 - a window of a couple of
+    /// hundred milliseconds in which the answer is stale but arrives last. It failed one run in four.
+    ///
+    /// So a terminal stream event is remembered, and the memory is dropped by the first snapshot that
+    /// agrees the order is gone. Terminal is final at this venue - nothing un-cancels an order - which
+    /// is what makes the newer of the two sources the right one every time.
+    /// </remarks>
     /// <param name="orders">The reloaded open orders.</param>
     private void HandleOrders(IReadOnlyCollection<OrderModel> orders)
     {
-        Write(ChangeEvent.Init(orders));
+        Write(ChangeEvent.Init(WithoutOrdersAlreadyOver(orders)));
+    }
+
+    /// <summary>
+    /// Removes from a snapshot the orders a stream event has already reported as over, and forgets the
+    /// ones the snapshot itself no longer lists.
+    /// </summary>
+    /// <param name="orders">The snapshot as the venue answered it.</param>
+    /// <returns>The snapshot without any order already known to be over.</returns>
+    private IReadOnlyCollection<OrderModel> WithoutOrdersAlreadyOver(IReadOnlyCollection<OrderModel> orders)
+    {
+        lock (_endedLocker)
+        {
+            if (_ended.Count == 0)
+                return orders;
+
+            var kept = new List<OrderModel>(orders.Count);
+            var stale = new List<string>();
+            foreach (var order in orders)
+                if (_ended.Contains(order.Id))
+                    stale.Add(order.Id);
+                else
+                    kept.Add(order);
+
+            // an id this snapshot does not mention is one the venue agrees is gone, so the note about it
+            // has done its work. Only the ids this very snapshot still claimed are worth carrying on.
+            _ended.Clear();
+            foreach (var id in stale)
+                _ended.Add(id);
+
+            if (stale.Count > 0)
+                this.Trace<string, string>("{id} snapshot still listed {count} order(s) already over", Id, stale.Count.ToString());
+
+            return kept;
+        }
+    }
+
+    /// <summary>
+    /// Notes that the stream has reported an order as over, so nothing older can raise it again.
+    /// </summary>
+    /// <param name="id">The exchange-assigned id of the order.</param>
+    private void NoteOrderIsOver(string id)
+    {
+        lock (_endedLocker)
+            _ended.Add(id);
+    }
+
+    /// <summary>
+    /// Says whether an order has already been reported as over.
+    /// </summary>
+    /// <remarks>
+    /// The stale snapshot is not the only way an order comes back to life. The venue's own events are
+    /// not ordered against each other either: a placement event was measured arriving 600ms after the
+    /// order was placed, which is long enough to land after the cancellation of the same order when the
+    /// two are a second apart - and a caller told an order is cancelled and then told it is new has been
+    /// told the wrong thing by exactly the source it trusts most.
+    ///
+    /// Over is final here. Nothing un-cancels an order and no id is reused, so the report that came
+    /// first in time is the one that stands, whichever arrived last.
+    /// </remarks>
+    /// <param name="id">The exchange-assigned id of the order.</param>
+    /// <returns>True when the order has already been reported as over.</returns>
+    private bool IsAlreadyOver(string id)
+    {
+        lock (_endedLocker)
+        {
+            if (!_ended.Contains(id))
+                return false;
+        }
+
+        this.Trace<string, string>("{id} ignoring a live report of order {order}, already over", Id, id);
+
+        return true;
     }
 
     /// <summary>
@@ -643,8 +741,11 @@ internal class UserConnector : UserConnectorBase, IUserConnector
         );
 
         if (e.IsSuperseded || e.Status is not (OrderStatus.New or OrderStatus.PartiallyFilled))
+        {
+            NoteOrderIsOver(order.Id);
             Write(ChangeEvent.Delete(order));
-        else
+        }
+        else if (!IsAlreadyOver(order.Id))
             Write(ChangeEvent.Set(order));
     }
 
@@ -680,10 +781,15 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             e.UpdatedAt
         );
 
-        var item = order.Status is OrderStatus.New or OrderStatus.PartiallyFilled
-            ? ChangeEvent.Set(order)
-            : ChangeEvent.Delete(order);
+        if (order.Status is OrderStatus.New or OrderStatus.PartiallyFilled)
+        {
+            if (!IsAlreadyOver(order.Id))
+                Write(ChangeEvent.Set(order));
 
-        Write(item);
+            return;
+        }
+
+        NoteOrderIsOver(order.Id);
+        Write(ChangeEvent.Delete(order));
     }
 }
