@@ -337,7 +337,7 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
   **assumed to already be one minute** — `Base/Market/Contracts/Converters/RateLimitsConverter.cs:37-44`, field names read at `:68,71`
   **[UNVERIFIED]**. A payload carrying limits but no `REQUEST_WEIGHT` entry **drops the whole exchange
   info** rather than yielding one with no ceiling — `pinned` 2026-09-17 by
-  `ExchangeInfoWithoutRequestWeightLimit_IsDropped`, because the alternative failure is a ban arriving
+  `ExchangeInfoWithoutRequestWeightLimit_IsDropped` (which lives in the **futures** test project, for a converter shared by both venues - so spot runs the pinned code without owning the test), because the alternative failure is a ban arriving
   later from code that reads as though it were respecting a limit
 - Spot instrument: `symbol`, `status` (must be `"TRADING"`), `baseAsset`, `baseAssetPrecision`,
   `quoteAsset`, `quoteAssetPrecision`, `isSpotTradingAllowed`, `filters`, `permissions[]` /
@@ -519,11 +519,14 @@ folds `PENDING_CANCEL` → `Canceled` and `EXPIRED_IN_MATCH` → `Rejected`
 (`UsdFutures/.../OrderStatuses.cs:40`) — confirmed against the documented futures status list, which has no
 `PENDING_CANCEL`.
 
-**[DRIFT] Spot documents `PENDING_NEW` and we do not map it** — an order in an order list waits in that
-state until its working order fills. Our lookup would find nothing for it. `[DEAD]` in practice, since
-the spot user path throws before any of this runs, but it is a hole in the mapping rather than a
-deliberate omission. Binance also notes `PENDING_CANCEL` is "currently unused", so our folding of it
-costs nothing and proves nothing.
+**~~[DRIFT]~~ Spot's `PENDING_NEW` is mapped as of 2026-09-21** — an order in an order list waits in
+that state until its working order fills, so it is live and unfilled, which is what `New` says. Folded
+like the `PENDING_CANCEL` beside it and `pinned` by the parse theory.
+
+Worth keeping for the shape of it: the lookup **throws** on a value it does not know, so this was not
+a status that would have arrived wrong - it was one pending leg failing the parse of the whole list it
+came in. `[DEAD]` in practice today, since the spot user path issues no requests. Binance also notes
+`PENDING_CANCEL` is "currently unused", so our folding of it costs nothing and proves nothing.
 
 **Symbol status is not a two-value question.** Spot documents `TRADING`, `END_OF_DAY`, `HALT`, `BREAK`
 and `CANCEL_ONLY`; futures documents `PENDING_TRADING`, `TRADING`, `PRE_DELIVERING`, `DELIVERING`,
@@ -1001,3 +1004,21 @@ Re-ranked 2026-09-18. What moved to the top is not a field name but a regex over
 Left this list: **error codes**, which ranked third on the strength of "three copies, one out of sync".
 There is one copy of each map now and both special cases are pinned. The entry survived a pass after it
 stopped being true, which is the ordinary fate of a ranking nobody re-derives.
+
+## Spot step-3 rules pinned on 2026-09-21
+
+Recorded as their own entries because a field list has no slot for them, and every one of them was a
+rule the code carried and no test named.
+
+| rule | where | state |
+|---|---|---|
+| an executed price is zero when nothing filled, rather than a division | spot get-order, init-order and order-update converters | `pinned`, mutation-checked on all three. Only the dividing arm had ever run, and nothing filled is what a new order looks like |
+| a trade with no order id is dropped | spot get-trade converter | `pinned`, mutation-checked |
+| a trade with no symbol or no commission asset is dropped | spot get-trade converter | **enforced by the compiler**: the model takes non-nullable strings, so removing either check fails the build. Documented by a test; a mutation of it does not exist to run |
+| an order update with no order id is dropped | spot order-update converter | `pinned`, mutation-checked. Only the wrong-event-tag half of the same condition had been driven |
+| an exchange info answer carrying one collection and not the other is dropped | spot exchange-info converter | **enforced by the compiler**, same shape as above; both arms now driven independently by a test, where one fixture used to satisfy both at once |
+| a quote with no price on either side is dropped | shared instrument-ticker converter, both venues | `pinned`, mutation-checked. The only test satisfied both halves of the condition at once, so the price half survived every mutation |
+
+Nine facts, six killed by a mutation and three held by the type system. The three are worth naming
+rather than counting as untested: a check the compiler needs cannot be quietly deleted, which is a
+stronger guarantee than a test and a weaker one than a test plus the compiler.

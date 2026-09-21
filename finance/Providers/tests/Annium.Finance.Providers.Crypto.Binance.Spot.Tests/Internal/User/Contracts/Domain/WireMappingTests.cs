@@ -38,6 +38,7 @@ public class WireMappingTests
     [InlineData("FILLED", OrderStatus.Filled)]
     [InlineData("CANCELED", OrderStatus.Canceled)]
     [InlineData("PENDING_CANCEL", OrderStatus.Canceled)]
+    [InlineData("PENDING_NEW", OrderStatus.New)]
     [InlineData("REJECTED", OrderStatus.Rejected)]
     [InlineData("EXPIRED", OrderStatus.Expired)]
     [InlineData("EXPIRED_IN_MATCH", OrderStatus.Rejected)]

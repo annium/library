@@ -5,8 +5,9 @@ namespace Annium.Finance.Providers.Crypto.Binance.Spot.Internal.User.Contracts.D
 
 /// <summary>
 /// Maps between the library's <see cref="OrderStatus"/> and the Binance <c>status</c> string values. On the
-/// read side, <c>PENDING_CANCEL</c> is folded into <see cref="OrderStatus.Canceled"/> and
-/// <c>EXPIRED_IN_MATCH</c> into <see cref="OrderStatus.Rejected"/>.
+/// read side, <c>PENDING_CANCEL</c> is folded into <see cref="OrderStatus.Canceled"/>,
+/// <c>PENDING_NEW</c> into <see cref="OrderStatus.New"/> and <c>EXPIRED_IN_MATCH</c> into
+/// <see cref="OrderStatus.Rejected"/>.
 /// </summary>
 internal static class OrderStatuses
 {
@@ -36,6 +37,11 @@ internal static class OrderStatuses
             { "FILLED", OrderStatus.Filled },
             { "CANCELED", OrderStatus.Canceled },
             { "PENDING_CANCEL", OrderStatus.Canceled },
+            // an order in an order list waits in this state until its working order fills: it exists,
+            // it is live, and nothing of it is filled - which is what New says. Unmapped until now,
+            // and that was not an omission anyone chose: the lookup throws on a value it does not
+            // know, so one pending leg would have failed the parse of the whole list it arrived in
+            { "PENDING_NEW", OrderStatus.New },
             { "REJECTED", OrderStatus.Rejected },
             { "EXPIRED", OrderStatus.Expired },
             { "EXPIRED_IN_MATCH", OrderStatus.Rejected },

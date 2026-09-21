@@ -124,4 +124,81 @@ public class OrderUpdateEventConverterTests : ProvidersTestBase
         // assert - deserialization
         deserialized.IsDefault();
     }
+
+    /// <summary>
+    /// An event the exchange tags correctly but sends without an order id is dropped.
+    /// </summary>
+    /// <remarks>
+    /// The drop joins two conditions - the wrong event tag, or no order id - and only the tag half was
+    /// ever driven, by the case above. This is the other half, and it is the one that would arrive from
+    /// a real stream rather than from a mismatched subscription.
+    /// </remarks>
+    [Fact]
+    public void SkipsAnEventWithNoOrderId()
+    {
+        // arrange - a correctly tagged event whose order id never arrived
+        var raw =
+            @"{
+            ""e"": ""executionReport"",
+            ""E"": 1499405658658,
+            ""s"": ""BTCUSDT"",
+            ""c"": ""4a1f8bb3-724f-462e-9bde-6d0120381ddd"",
+            ""S"": ""BUY"",
+            ""o"": ""LIMIT"",
+            ""f"": ""GTC"",
+            ""q"": ""1.00000000"",
+            ""p"": ""0.10264410"",
+            ""X"": ""NEW"",
+            ""z"": ""0.00000000"",
+            ""Z"": ""0.00000000"",
+            ""T"": 1499405658657,
+            ""O"": 1499405658657
+        }";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.OrderUpdateKey);
+        var deserialized = serializer.Deserialize<OrderUpdateEvent>(Encoding.UTF8.GetBytes(raw));
+
+        // assert
+        deserialized.IsDefault("an order update with no order id was handed over");
+    }
+
+    /// <summary>
+    /// An order update reporting nothing filled prices it at zero rather than dividing by zero.
+    /// </summary>
+    /// <remarks>
+    /// The third of the three converters carrying this guarded quotient, and the third whose fixtures
+    /// all filled something. On the stream this arrives every time an order is placed.
+    /// </remarks>
+    [Fact]
+    public void NothingFilled_IsAZeroPriceAndNotADivision()
+    {
+        // arrange
+        var raw =
+            @"{
+            ""e"": ""executionReport"",
+            ""E"": 1499405658658,
+            ""s"": ""BTCUSDT"",
+            ""c"": ""4a1f8bb3-724f-462e-9bde-6d0120381ddd"",
+            ""S"": ""BUY"",
+            ""o"": ""LIMIT"",
+            ""f"": ""GTC"",
+            ""q"": ""1.00000000"",
+            ""p"": ""0.10264410"",
+            ""X"": ""NEW"",
+            ""i"": 4293153,
+            ""z"": ""0.00000000"",
+            ""Z"": ""0.00000000"",
+            ""T"": 1499405658657,
+            ""O"": 1499405658657
+        }";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.OrderUpdateKey);
+        var deserialized = serializer.Deserialize<OrderUpdateEvent>(Encoding.UTF8.GetBytes(raw)).NotNull();
+
+        // assert
+        deserialized.ExecutedQty.Is(0m);
+        deserialized.ExecutedPrice.Is(0m, "an order update with no fills priced them");
+    }
 }

@@ -95,4 +95,42 @@ public class InitOrderResponseConverterTests : ProvidersTestBase
         deserialized.CreatedAt.Is(1507725176595);
         deserialized.UpdatedAt.Is(1507725178599);
     }
+
+    /// <summary>
+    /// A placement that filled nothing reports a zero executed price rather than dividing by zero.
+    /// </summary>
+    /// <remarks>
+    /// The same guarded quotient as in the get-order and order-update converters, and the same gap:
+    /// every fixture filled something, so only the dividing arm ran. An order that filled nothing is
+    /// the ordinary answer to placing a limit order away from the book.
+    /// </remarks>
+    [Fact]
+    public void NothingFilled_IsAZeroPriceAndNotADivision()
+    {
+        // arrange
+        var raw =
+            @"{
+            ""symbol"": ""BTCUSDT"",
+            ""orderId"": 28,
+            ""orderListId"": -1,
+            ""clientOrderId"": ""4a1f8bb3-724f-462e-9bde-6d0120381ddd"",
+            ""transactTime"": 1507725176595,
+            ""price"": ""10019.7"",
+            ""origQty"": ""10.5"",
+            ""executedQty"": ""0"",
+            ""cummulativeQuoteQty"": ""0"",
+            ""status"": ""NEW"",
+            ""timeInForce"": ""GTC"",
+            ""type"": ""LIMIT"",
+            ""side"": ""SELL""
+        }";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.InitOrderKey);
+        var deserialized = serializer.Deserialize<OrderModel>(Encoding.UTF8.GetBytes(raw)).NotNull();
+
+        // assert
+        deserialized.ExecutedQty.Is(0m);
+        deserialized.ExecutedPrice.Is(0m, "an order that filled nothing priced its fills");
+    }
 }
