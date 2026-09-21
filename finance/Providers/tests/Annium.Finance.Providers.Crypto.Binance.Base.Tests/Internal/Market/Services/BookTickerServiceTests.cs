@@ -49,6 +49,11 @@ public class BookTickerServiceTests : ProvidersTestBase
     private const int TimeoutMs = 60_000;
 
     /// <summary>
+    /// How long one connection in the repeated construction above may take before it counts as stuck.
+    /// </summary>
+    private static readonly TimeSpan _waitTimeout = TimeSpan.FromSeconds(10);
+
+    /// <summary>
     /// The key the ticker serializer is registered and resolved under.
     /// </summary>
     private const string SerializerKey = "book-ticker";
@@ -232,6 +237,54 @@ public class BookTickerServiceTests : ProvidersTestBase
         // assert
         var ticker = await tickers.Reader.ReadAsync(ct);
         ticker.Is(new InstrumentTicker("BTCUSDT", 1.5m, 2.5m));
+    }
+
+    /// <summary>
+    /// Connected survives the construction that follows it: a connection established while the constructor
+    /// is still running is not overwritten by the constructor's own "connecting".
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The defect this guards: the constructor used to start the connection and only then report
+    /// connecting. <c>Connect</c> returns as soon as the attempt is under way, so a connection completing in
+    /// between was reported connected by the socket's thread and then overwritten - permanently, since a
+    /// socket already connected raises no second event. The connector then reported itself connecting for
+    /// as long as it lived, with a socket that worked.
+    /// </para>
+    /// <para>
+    /// <b>This is a net, not a proof.</b> What it defends against is a window between two statements, and a
+    /// single construction crosses it rarely - the failure showed up about once in four CI runs and never
+    /// on an idle machine. Repeating the construction is what gives the window a chance; the invariant it
+    /// asserts is exact, though, and the fixed code cannot fail it however the scheduling falls.
+    /// </para>
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TimeoutMs)]
+    public async Task Connected_IsNotOverwrittenByTheConstructorsConnecting()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        for (var attempt = 0; attempt < 30; attempt++)
+        {
+            await using var server = this.RunWebSocketServer();
+            var monitor = new StatusMonitor(Get<ILogger>());
+            using var service = CreateService(server, monitor);
+
+            // a deadline of its own, well inside the test's, so the failure names what was being waited for
+            // rather than arriving as a cancelled run
+            try
+            {
+                await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct).WaitAsync(_waitTimeout, ct);
+            }
+            catch (TimeoutException)
+            {
+                throw new InvalidOperationException(
+                    $"attempt {attempt}: the connector never reported connected, and is {monitor.Status}. "
+                        + "A socket that connected before the constructor reported connecting would leave "
+                        + "exactly this state"
+                );
+            }
+        }
     }
 
     /// <summary>
