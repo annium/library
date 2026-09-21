@@ -1077,3 +1077,21 @@ the obvious and wrong way to build this.
 
 Verification axis: everything in this section is `confirmed` on the documentation axis and `none` on
 the verification axis until the read paths that call it exist and are pinned.
+
+### §10 verification — the live read run of 2026-09-21
+
+All four endpoints called against the real account, 60 responses, every one `200 OK`, no venue error
+code and no warning. So every row in §10 moves from `none` to **`live` (2026-09-21)** on the
+verification axis: the paths, the parameter spellings, the signing, and the 24-hour window - the two
+history walks made 21 and 22 requests, which is the windowing running rather than being described.
+
+**What the live assertions do not prove, and this is the census correction.** Four of the six live read
+tests assert only that the status is `Ok` and the data is not null. **Those would have passed against
+the stub**, which returned an empty success without issuing a request - so they never distinguished a
+working path from an absent one, and reading them as coverage is what let the stub sit behind a
+`gated` marking for as long as it did. The one exception is the account test, which requires at least
+one balance and therefore could not pass against nothing.
+
+What pins the behaviour is the offline suite, where the request shape, the window walk and the refusal
+are asserted and mutation-checked. The live run answers a different and narrower question - whether the
+venue accepts what we send - and it is recorded here as answering exactly that.
