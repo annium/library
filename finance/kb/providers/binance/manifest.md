@@ -1219,3 +1219,27 @@ about every symbol outside ASCII and green everywhere.
 **The weight of the subscription is not counted.** It is 2, on connect and on each retry, against a
 6000/min ceiling; the limiter's model is to report what a response header said, and this transport has
 no header. Recorded rather than plumbed through — see the backlog in `status.md`.
+
+### §11 live — measured 2026-09-21, four facts the documentation did not give
+
+The first live run of this venue's trading block. Every row below is `live` on the verification axis and
+was measured, not read.
+
+| fact | what it means for our code |
+|---|---|
+| the WebSocket API subscription is **accepted with an HMAC key**, over `userDataStream.subscribe.signature` | the whole transport works; the route that needs an Ed25519 key was never touched |
+| `DELETE /api/v3/openOrders` answers **the array of orders it cancelled** — not a `{code,msg}` envelope **[DIVERGES]** | the connector read it as the envelope, so every successful cancellation reached the caller as a parse failure. The cancellation had already happened |
+| the same endpoint is **refused** on a symbol with nothing open, under the code its reference calls `CANCEL_REJECTED` with the message "Unknown order sent." | cancel-all is **not idempotent** here. And the code cannot be folded into success: the same one carries "Market is closed." and "This account may not place or cancel orders." — the reason is in the message, not the code |
+| `PERCENT_PRICE_BY_SIDE` bounds how far from the market a limit order may be priced, against an **average of recent trades** rather than the current bid | `InstrumentModel` does not carry the bound, so no caller can compute it. Measured for one instrument: a `BUY` floor at half the reference, with a five-minute averaging window |
+
+**The last one is the gap worth naming.** The provider reads the price, lot, notional and order-count
+filters into `InstrumentModel` and drops this one, so a caller pricing an order away from the market has
+no way to know how far it may go — and the refusal names a filter rather than a bound. Left as a gap
+rather than fixed here, because adding a filter to the instrument model is step 3 and 4 work; it is in
+the backlog.
+
+**One registration is deliberately unpinned and says so.** `CancelAllOrders`'s serializer carries the
+element converter so the array parses truthfully rather than by accidental name binding, but the
+connector discards the payload — so removing the converter changes nothing a test can see. Mutation
+confirmed it survives. What *is* pinned is the response **type**: reading the array as an envelope kills
+the test.
