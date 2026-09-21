@@ -88,13 +88,13 @@ public class UserConnectorTests : SpotUserConnectorTestBase
         );
 
         // assert - the quote currency it would spend is set aside while it rests
-        await EnsureBalanceIsLocked();
+        await EnsureBalanceIsLocked(LockedResource(OrderSide.Buy));
 
         // act
         await CancelValidOrder(order, ct);
 
         // assert - and given back when it stops resting
-        await EnsureBalanceIsReleased();
+        await EnsureBalanceIsReleased(LockedResource(OrderSide.Buy));
     }
 
     /// <summary>
@@ -184,13 +184,13 @@ public class UserConnectorTests : SpotUserConnectorTestBase
             OrderStatus.New,
             ct
         );
-        await EnsureBalanceIsLocked();
+        await EnsureBalanceIsLocked(LockedResource(OrderSide.Buy));
 
         // act
         Snapshot();
         await CancelOpenOrders(ct);
 
         // assert
-        await EnsureBalanceIsReleased();
+        await EnsureBalanceIsReleased(LockedResource(OrderSide.Buy));
     }
 }

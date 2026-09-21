@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -79,8 +80,15 @@ public abstract class SpotUserConnectorTestBase : ProvidersTestBase, IAsyncLifet
     /// <summary>Everything reported on the connector's error channel.</summary>
     private readonly ConcurrentQueue<ConnectorError> _errors = new();
 
-    /// <summary>The balance as of the last <see cref="Snapshot"/>, which the locked/released checks compare against.</summary>
-    private AssetModel _balance = null!;
+    /// <summary>The balances as of the last <see cref="Snapshot"/>, which the locked/released checks compare against.</summary>
+    /// <remarks>
+    /// Every resource, not just the one an order is priced in: which asset an order locks depends on its
+    /// side. A buy sets aside the quote it would spend; a sell sets aside the base it would deliver. A
+    /// snapshot of one of them can only ever check one side.
+    /// </remarks>
+    private IReadOnlyDictionary<string, AssetModel> _balances = new Dictionary<string, AssetModel>(
+        StringComparer.Ordinal
+    );
 
     /// <summary>Everything this fixture has to tear down.</summary>
     private AsyncDisposableBox _disposable = null!;
@@ -274,7 +282,10 @@ public abstract class SpotUserConnectorTestBase : ProvidersTestBase, IAsyncLifet
     {
         this.Trace("start");
 
-        _balance = GetBalance(Instrument.Quote.Code);
+        _balances = _assets
+            .ToArray()
+            .GroupBy(x => x.Resource, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Last(), StringComparer.Ordinal);
 
         this.Trace("done");
     }
@@ -517,6 +528,23 @@ public abstract class SpotUserConnectorTestBase : ProvidersTestBase, IAsyncLifet
         return Instrument.ToValidQty(Math.Max(byNotional, Instrument.MinQty));
     }
 
+    /// <summary>
+    /// A price far enough above the market that a sell rests rather than fills, and near enough that the
+    /// venue accepts it.
+    /// </summary>
+    /// <remarks>
+    /// The mirror of <see cref="RestingPrice"/>, and bounded the same way from both sides - the venue caps
+    /// how far above the market a sell may be priced as well as how far below. Rounded down to the tick,
+    /// which here is the direction that walks away from the cap rather than towards it.
+    /// </remarks>
+    /// <returns>The price to rest a sell at.</returns>
+    protected decimal RestingSellPrice()
+    {
+        var price = Instrument.ToTickSizeDown(Ticker.AskPrice * 1.5m);
+
+        return Math.Min(price, Instrument.MaxPrice);
+    }
+
     /// <summary>Generates a fresh, random client order id for a new request.</summary>
     /// <returns>A new random client order id.</returns>
     protected string ClientOrderId() => Guid.NewGuid().ToString();
@@ -538,12 +566,26 @@ public abstract class SpotUserConnectorTestBase : ProvidersTestBase, IAsyncLifet
     }
 
     /// <summary>
-    /// Asserts that the quote balance has more locked and less free than at the last <see cref="Snapshot"/>.
+    /// The asset a resting order of the given side sets aside.
     /// </summary>
+    /// <remarks>
+    /// A buy sets aside the quote it would spend; a sell sets aside the base it would deliver. Naming it
+    /// here rather than at each call site is what keeps a sell test from asserting against the quote and
+    /// passing for the wrong reason - the quote does move, later, when something fills.
+    /// </remarks>
+    /// <param name="side">The side of the order.</param>
+    /// <returns>The resource code the order locks.</returns>
+    protected string LockedResource(OrderSide side) =>
+        side is OrderSide.Buy ? Instrument.Quote.Code : Instrument.Target.Code;
+
+    /// <summary>
+    /// Asserts that the given asset has more locked and less free than at the last <see cref="Snapshot"/>.
+    /// </summary>
+    /// <param name="resource">The asset code to check.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected ValueTask EnsureBalanceIsLocked()
+    protected ValueTask EnsureBalanceIsLocked(string resource)
     {
-        var originalBalance = _balance;
+        var originalBalance = _balances[resource];
 
         this.Trace<string>(
             "ensure current balance is locked compared to original {balance}",
@@ -552,19 +594,20 @@ public abstract class SpotUserConnectorTestBase : ProvidersTestBase, IAsyncLifet
 
         return Expect.ToAsync(() =>
         {
-            var currentBalance = GetBalance(Instrument.Quote.Code);
+            var currentBalance = GetBalance(resource);
             currentBalance.Free.IsLess(originalBalance.Free);
             currentBalance.Locked.IsGreater(originalBalance.Locked);
         });
     }
 
     /// <summary>
-    /// Asserts that the quote balance has more free and less locked than at the last <see cref="Snapshot"/>.
+    /// Asserts that the given asset has more free and less locked than at the last <see cref="Snapshot"/>.
     /// </summary>
+    /// <param name="resource">The asset code to check.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected ValueTask EnsureBalanceIsReleased()
+    protected ValueTask EnsureBalanceIsReleased(string resource)
     {
-        var originalBalance = _balance;
+        var originalBalance = _balances[resource];
 
         this.Trace<string>(
             "ensure current balance is released compared to original {balance}",
@@ -573,7 +616,7 @@ public abstract class SpotUserConnectorTestBase : ProvidersTestBase, IAsyncLifet
 
         return Expect.ToAsync(() =>
         {
-            var currentBalance = GetBalance(Instrument.Quote.Code);
+            var currentBalance = GetBalance(resource);
             currentBalance.Free.IsGreater(originalBalance.Free);
             currentBalance.Locked.IsLess(originalBalance.Locked);
         });

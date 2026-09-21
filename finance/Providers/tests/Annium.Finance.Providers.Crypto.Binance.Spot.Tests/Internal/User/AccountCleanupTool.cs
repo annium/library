@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Annium.Data.Tables;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
@@ -78,10 +80,20 @@ public class AccountCleanupTool : ProvidersTestBase
     {
         var ct = TestContext.Current.CancellationToken;
         var orders = new ConcurrentQueue<OrderModel>();
+        var assets = new ConcurrentQueue<AssetModel>();
 
         this.Trace("get user connector");
         var factory = Get<IUserConnectorFactory>();
         await using var connector = factory.Create(Settings.User);
+
+        using var assetSubscription = connector.Assets.Subscribe(x =>
+        {
+            if (x.Type is ChangeEventType.Init)
+                foreach (var item in x.Items)
+                    assets.Enqueue(item);
+            else
+                assets.Enqueue(x.Item);
+        });
 
         using var subscription = connector.Orders.Subscribe(x =>
         {
@@ -98,6 +110,16 @@ public class AccountCleanupTool : ProvidersTestBase
         // a moment for the opening snapshot to land, so what is reported below is the account and not an
         // empty queue read too early
         await Task.Delay(2000, ct);
+
+        // the account as it stands, which is the other half of what this tool is for: after something has
+        // gone wrong, "what is open" and "what is held" are the two questions, and only one of them is
+        // answered by cancelling
+        var balances = assets
+            .ToArray()
+            .GroupBy(x => x.Resource)
+            .Select(g => g.Last())
+            .Where(x => x.Free + x.Locked > 0m)
+            .ToArray();
 
         var open = orders
             .Where(x => x.Symbol == Symbol && x.Status is OrderStatus.New or OrderStatus.PartiallyFilled)
@@ -131,6 +153,25 @@ public class AccountCleanupTool : ProvidersTestBase
             .ToArray();
 
         this.Trace<string>("{count} order(s) appeared after the cancellation", left.Length.ToString());
+
+        // written to a file rather than only logged, because a passing test's log is not shown: a tool
+        // that reports by logging runs, passes, and tells nobody anything - which is the failure mode this
+        // whole family of tools exists to avoid
+        var report = new StringBuilder()
+            .AppendLine($"account report for {Symbol} at {DateTime.UtcNow:O}")
+            .AppendLine($"balances ({balances.Length}):");
+        foreach (var asset in balances)
+            report.AppendLine($"  {asset.Resource}: free={asset.Free} locked={asset.Locked}");
+
+        report.AppendLine($"open orders on {Symbol} before cancelling ({open.Length}):");
+        foreach (var order in open)
+            report.AppendLine($"  {order.Id} {order.Side} {order.TotalQty} @ {order.Price} [{order.Status}]");
+
+        report.AppendLine($"orders appearing after the cancellation: {left.Length}");
+
+        var path = Path.Combine(Path.GetTempPath(), $"annium-account-report-{Symbol}.txt");
+        await File.WriteAllTextAsync(path, report.ToString(), ct);
+        this.Warn<string>("account report written to {path}", path);
 
         // the tool's one assertion: it is reporting the account, and an account it could not read is not an
         // account it has cleared
