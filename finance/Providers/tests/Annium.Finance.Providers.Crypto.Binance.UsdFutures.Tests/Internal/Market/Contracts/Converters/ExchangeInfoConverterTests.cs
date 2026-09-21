@@ -186,6 +186,10 @@ public class ExchangeInfoConverterTests : ProvidersTestBase
                 556.8m,
                 4529764m,
                 0.1m,
+                decimal.Zero,
+                1.05m,
+                0.95m,
+                decimal.Zero,
                 5m,
                 decimal.MaxValue,
                 200

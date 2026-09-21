@@ -16,6 +16,10 @@ namespace Annium.Finance.Providers.Tests.Lib.Market;
 /// <param name="MinSum">The minimum order notional value (quantity multiplied by price).</param>
 /// <param name="MaxSum">The maximum order notional value (quantity multiplied by price).</param>
 /// <param name="MaxOrders">The maximum number of open orders allowed on the instrument.</param>
+/// <param name="MinBuyPriceRatio">The lowest price a buy order may carry as a fraction of the reference price; zero, the default, leaves that end unbounded.</param>
+/// <param name="MaxBuyPriceRatio">The highest price a buy order may carry as a fraction of the reference price; zero, the default, leaves that end unbounded.</param>
+/// <param name="MinSellPriceRatio">The lowest price a sell order may carry as a fraction of the reference price; zero, the default, leaves that end unbounded.</param>
+/// <param name="MaxSellPriceRatio">The highest price a sell order may carry as a fraction of the reference price; zero, the default, leaves that end unbounded.</param>
 public sealed record Instrument(
     string Provider,
     string Symbol,
@@ -27,7 +31,11 @@ public sealed record Instrument(
     decimal MaxPrice,
     decimal MinSum,
     decimal MaxSum,
-    int MaxOrders
+    int MaxOrders,
+    decimal MinBuyPriceRatio = decimal.Zero,
+    decimal MaxBuyPriceRatio = decimal.Zero,
+    decimal MinSellPriceRatio = decimal.Zero,
+    decimal MaxSellPriceRatio = decimal.Zero
 ) : IInstrument
 {
     /// <summary>Returns the instrument's symbol.</summary>

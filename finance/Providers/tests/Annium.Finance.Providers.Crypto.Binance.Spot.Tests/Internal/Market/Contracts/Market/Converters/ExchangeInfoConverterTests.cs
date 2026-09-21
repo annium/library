@@ -427,6 +427,10 @@ public class ExchangeInfoConverterTests : ProvidersTestBase
                 0.00001m,
                 922327m,
                 0.00001m,
+                0.2m,
+                5m,
+                0.2m,
+                5m,
                 0.0001m,
                 9_000_000m,
                 200

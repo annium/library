@@ -1,4 +1,5 @@
 using System;
+using Annium.Finance.Providers.Abstractions.Domain.User;
 
 namespace Annium.Finance.Providers.Abstractions.Domain.Market;
 
@@ -60,6 +61,67 @@ public static class InstrumentExtensions
 
         var sum = qty * price;
         return sum >= instrument.MinSum && sum <= instrument.MaxSum;
+    }
+
+    /// <summary>Gets the lowest price an order on the given side may carry, against a reference price.</summary>
+    /// <typeparam name="TInstrument">The instrument type.</typeparam>
+    /// <param name="instrument">The instrument whose price band applies.</param>
+    /// <param name="side">The side the order would be placed on.</param>
+    /// <param name="referencePrice">The provider's reference price the band is measured against.</param>
+    /// <returns>The lowest allowed price, or zero where the provider does not bound that side from below.</returns>
+    public static decimal MinSidePrice<TInstrument>(this TInstrument instrument, OrderSide side, decimal referencePrice)
+        where TInstrument : IInstrument
+    {
+        var ratio = side is OrderSide.Buy ? instrument.MinBuyPriceRatio : instrument.MinSellPriceRatio;
+
+        return ratio * referencePrice;
+    }
+
+    /// <summary>Gets the highest price an order on the given side may carry, against a reference price.</summary>
+    /// <typeparam name="TInstrument">The instrument type.</typeparam>
+    /// <param name="instrument">The instrument whose price band applies.</param>
+    /// <param name="side">The side the order would be placed on.</param>
+    /// <param name="referencePrice">The provider's reference price the band is measured against.</param>
+    /// <returns>The highest allowed price, or zero where the provider does not bound that side from above.</returns>
+    public static decimal MaxSidePrice<TInstrument>(this TInstrument instrument, OrderSide side, decimal referencePrice)
+        where TInstrument : IInstrument
+    {
+        var ratio = side is OrderSide.Buy ? instrument.MaxBuyPriceRatio : instrument.MaxSellPriceRatio;
+
+        return ratio * referencePrice;
+    }
+
+    /// <summary>Determines whether a price sits inside the instrument's price band for the given side.</summary>
+    /// <typeparam name="TInstrument">The instrument type.</typeparam>
+    /// <param name="instrument">The instrument whose price band applies.</param>
+    /// <param name="price">The order price to check.</param>
+    /// <param name="side">The side the order would be placed on.</param>
+    /// <param name="referencePrice">The provider's reference price the band is measured against.</param>
+    /// <returns>True if the price is within the band, or if the provider bounds neither end of it; false otherwise.</returns>
+    public static bool IsValidSidePrice<TInstrument>(
+        this TInstrument instrument,
+        decimal price,
+        OrderSide side,
+        decimal referencePrice
+    )
+        where TInstrument : IInstrument
+    {
+        // zero is "not bounded", the same reading the absolute price bounds get, and each end is read on its
+        // own: a provider that caps how high a buy may be priced without giving it a floor is not stating a
+        // symmetric band, and folding the two ends together would refuse resting orders far below the market
+        // that providers accept.
+        //
+        // Only the upper end needs guarding for that, though. An unstated floor reads as zero and no price
+        // is below zero, so it excludes nothing on its own; an unstated ceiling reads as zero too, and taken
+        // literally that one would refuse every price there is
+        if (price < instrument.MinSidePrice(side, referencePrice))
+            return false;
+
+        var max = instrument.MaxSidePrice(side, referencePrice);
+        if (max > 0 && price > max)
+            return false;
+
+        return true;
     }
 
     /// <summary>Rounds a price down to the nearest tick size.</summary>

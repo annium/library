@@ -280,7 +280,25 @@ public class MarketProviderBaseTests
     /// <param name="quote">The quote resource, also used as the settlement currency.</param>
     /// <returns>The instrument.</returns>
     private static InstrumentModel Instrument(string symbol, ResourceModel target, ResourceModel quote) =>
-        new(symbol, target, quote, quote, 1m, 100m, 1m, 1m, 100m, 1m, 1m, decimal.MaxValue, int.MaxValue);
+        new(
+            symbol,
+            target,
+            quote,
+            quote,
+            1m,
+            100m,
+            1m,
+            1m,
+            100m,
+            1m,
+            decimal.Zero,
+            decimal.Zero,
+            decimal.Zero,
+            decimal.Zero,
+            1m,
+            decimal.MaxValue,
+            int.MaxValue
+        );
 
     /// <summary>
     /// Builds a run of consecutive one-minute candles starting at the given moment.

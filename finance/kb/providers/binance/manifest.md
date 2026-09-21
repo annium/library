@@ -478,6 +478,7 @@ goes quiet, which is the failure mode hardest to tell from an idle account.
 | `LOT_SIZE` + `MARKET_LOT_SIZE` | merged as max-of-mins, min-of-maxes, max-of-steps **[DUPLICATED]** `Spot/.../InstrumentFiltersConverter.cs:68-72` | identical logic `UsdFutures/.../InstrumentFiltersConverter.cs:70-74` |
 | Notional **[DIVERGES]** | type `"NOTIONAL"`, fields `minNotional` and `maxNotional` — `Spot/.../InstrumentFiltersConverter.cs:96-98,137-141` | type `"MIN_NOTIONAL"`, single field `"notional"`, max **hard-coded** to `decimal.MaxValue` — `UsdFutures/.../InstrumentFiltersConverter.cs:98-100,139-140` |
 | `MAX_NUM_ORDERS` **[DIVERGES]** | field `maxNumOrders` | field `limit` |
+| Price band **[DIVERGES]**, read since 2026-09-21 | type `"PERCENT_PRICE_BY_SIDE"`, four fields — `bidMultiplierUp`, `bidMultiplierDown`, `askMultiplierUp`, `askMultiplierDown` — plus `avgPriceMins`, against an average of recent trades — `…/spot/filters.md:81-108` | type `"PERCENT_PRICE"`, two fields — `multiplierUp`, `multiplierDown` — plus `multiplierDecimal`, against the **mark price** — `…/usd-futures/common-definition.md:276-294` |
 | `MAX_NUM_ALGO_ORDERS` — **[CONTESTED]**, see below | — | `…/usd-futures/common-definition.md:265-273` vs `…/usd-futures/change-log.md:632-633` |
 
 **Citations for every filter above**, collected 2026-09-18 from
@@ -486,6 +487,30 @@ goes quiet, which is the failure mode hardest to tell from an idle account.
 with its single field `notional` and the example value `"5.0"`. Futures documents **no** `NOTIONAL`
 filter — grepped, zero hits — so the `[DIVERGES]` against spot's spelling is measured rather than
 assumed.
+
+**The price band is one filter with two spellings, and the divergence is not only in the field names.**
+Spot states both ends for each side: a buy between `bidMultiplierDown` and `bidMultiplierUp`, a sell
+between `askMultiplierDown` and `askMultiplierUp` (`…/spot/filters.md:88-96`). Futures states **one
+inequality per side** — `price <= markPrice * multiplierUp` for a buy, `price >= markPrice *
+multiplierDown` for a sell (`…/usd-futures/common-definition.md:293-294`) — which leaves a buy with no
+floor and a sell with no ceiling.
+
+Reading the futures pair as a two-sided band is the mistake this entry exists to prevent, and it is
+refuted by our own trading block rather than by argument: it rests buys at 0.7 of the market while
+`DOTUSDT` publishes `multiplierDown: 0.9500`, and the exchange has accepted them on every run. A
+symmetric reading would have the provider refuse orders that work.
+
+**Census, taken live 2026-09-21** over both public `exchangeInfo` payloads. Every symbol open for
+trading carries the band — spot 1368 of 1368 `PERCENT_PRICE_BY_SIDE`, futures 773 of 773
+`PERCENT_PRICE` — and spot's window is `avgPriceMins: 5` on all 1368, with no symbol carrying the older
+`PERCENT_PRICE`. The bands are not uniform: spot's most common quadruple is `1.2 / 0.5 / 2 / 0.8` (898
+symbols) and futures' most common pair is `1.1500 / 0.8500` (426), so a caller cannot assume a house
+default. `DOTUSDT` reads `1.2 / 0.5 / 2 / 0.8` on spot and `1.0500 / 0.9500` on futures — the spot floor
+of half the reference being exactly the refusal measured on 2026-09-21 in §11.
+
+Universal today, but read as **optional**: an absent band is representable as an unbounded one, where an
+absent price or lot filter leaves nothing to compute an order from and drops the symbol. Pinned in both
+directions, both venues, in `InstrumentFiltersConverterTests`.
 
 **~~[CONTESTED]~~ `MAX_NUM_ALGO_ORDERS` — settled live 2026-09-19, in the changelog's favour.**
 
@@ -1232,11 +1257,12 @@ was measured, not read.
 | the same endpoint is **refused** on a symbol with nothing open, under the code its reference calls `CANCEL_REJECTED` with the message "Unknown order sent." | cancel-all is **not idempotent** here. And the code cannot be folded into success: the same one carries "Market is closed." and "This account may not place or cancel orders." — the reason is in the message, not the code |
 | `PERCENT_PRICE_BY_SIDE` bounds how far from the market a limit order may be priced, against an **average of recent trades** rather than the current bid | `InstrumentModel` does not carry the bound, so no caller can compute it. Measured for one instrument: a `BUY` floor at half the reference, with a five-minute averaging window |
 
-**The last one is the gap worth naming.** The provider reads the price, lot, notional and order-count
-filters into `InstrumentModel` and drops this one, so a caller pricing an order away from the market has
-no way to know how far it may go — and the refusal names a filter rather than a bound. Left as a gap
-rather than fixed here, because adding a filter to the instrument model is step 3 and 4 work; it is in
-the backlog.
+**The last one was the gap worth naming, and it is closed as of 2026-09-21.** The provider read the
+price, lot, notional and order-count filters into `InstrumentModel` and dropped this one, so a caller
+pricing an order away from the market had no way to know how far it could go — and the refusal names a
+filter rather than a bound. `InstrumentModel` now carries the band as four ratios of the venue's
+reference price, on both market types; see §4 for the two spellings and why the futures one must not be
+read as a two-sided band.
 
 ### §11 live — lifetime and recovery, measured 2026-09-21
 

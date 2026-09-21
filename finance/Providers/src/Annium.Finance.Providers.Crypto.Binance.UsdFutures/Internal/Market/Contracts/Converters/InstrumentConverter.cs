@@ -65,6 +65,10 @@ internal class InstrumentConverter : JsonConverter<InstrumentModel>
                     filters.PriceFilter.MinPrice,
                     filters.PriceFilter.MaxPrice,
                     filters.PriceFilter.TickSize,
+                    filters.PercentPriceFilter.MinBuyRatio,
+                    filters.PercentPriceFilter.MaxBuyRatio,
+                    filters.PercentPriceFilter.MinSellRatio,
+                    filters.PercentPriceFilter.MaxSellRatio,
                     filters.NotionalFilter.MinNotional,
                     filters.NotionalFilter.MaxNotional,
                     filters.MaxOrdersFilter.MaxOrders
