@@ -19,11 +19,14 @@ actually done rather than what someone remembered a week later. Where the work c
 
 The step has two halves that fail in opposite ways.
 
-The **offline half** is ordinary work that nobody has done: as of this draft not a single line of
-`WebSocketService`, `BookTickerService`, `ListenKeyResolver` or `UserStream` is executed by any offline
-test. They are reached only by live tests that assert a ticker arrived — which says nothing about
-reconnect, resubscribe, unsubscribe, teardown or error reporting. Four classes carry the connection
-lifecycle of every stream this module runs, and they are pinned by nothing.
+The **offline half** is ordinary work that tends not to have been done. Expect to find the classes
+carrying the connection lifecycle — the socket service, the ticker service, whatever resolves and keeps
+a stream credential, the account stream — reached only by live tests that assert a message arrived.
+That says nothing about reconnect, resubscribe, unsubscribe, teardown or error reporting, and it is how
+the lifecycle of every stream a module runs ends up pinned by nothing while the suite reads as green.
+
+That was the state of the first module through this step, and the check is cheap enough to repeat on
+every one: list the lifecycle classes, and for each ask which offline test fails if it stops working.
 
 The **live half** places orders. Its failure mode is not a red test: it is an order left open on a real
 account, a position closed that someone else opened, or a run that traded because a trait was missing.
@@ -47,6 +50,12 @@ Read the parent skill's safety section first; it governs. What follows is specif
   - **no position exists** on the test symbol;
   - **no open orders** exist that the user wants to keep;
   - **margin is sufficient** for the sizes the fixture uses.
+- **Where the account holds assets rather than positions, cleanup must never sell.** A fixture that
+  "flattens" is reasonable against an account whose exposure it opened itself; against one that simply
+  holds what the user owns, the same routine is a sale of their property at market — and it runs in
+  teardown, where nobody is reading. Such a fixture cancels orders and stops there, and its assertions
+  are written around the holdings rather than over them: check that a balance became reserved and was
+  released again, not that it returned to a number the fixture chose.
 - **Run the trading suite alone.** Nothing else against the same account concurrently — not a live read
   block, not a second venue, not a host.
 - **A stage that fails does not clean up after itself.** The fixture's teardown runs at the end of a
@@ -86,10 +95,11 @@ Then **assess before building**. This step is a reconciler like the others: meas
 the target, and remediate only the drift. On a module that already has a connector, most of the code is
 there and the gap is in what pins it.
 
-## Phase 5a — the fixtures that do not exist yet
+## Phase 5a — the fixtures the offline phases need
 
-Two are missing, and both are prerequisites rather than nice-to-haves. Build them first; without them
-the offline phases below cannot be written at all.
+Three, and each is a prerequisite rather than a nice-to-have: without them the phases below cannot be
+written at all. The first two are offline; the third belongs to the live half and is described under
+*lifetime and recovery*.
 
 **An offline websocket server for the test lib.** ✅ Built: `Infrastructure/TestBaseWebSocketServerExtensions`
 — `this.RunWebSocketServer()` returns a `TestWebSocketServer` whose `WaitConnectionAsync` hands out each
@@ -137,7 +147,8 @@ imagined.
 
 ## Phase 5b — the streams, offline
 
-Each of these is a property of the connection lifecycle, and each is unpinned as of this draft:
+Each of these is a property of the connection lifecycle, and each is routinely unpinned when this step
+opens:
 
 - **Subscribe** sends one control frame per new topic, and only for topics not already tracked.
 - **Unsubscribe** sends the frame and stops tracking.
@@ -172,7 +183,8 @@ Two more things to look at rather than assume, both visible in the source at the
   is teardown, where a failed send is the expected consequence of the socket being gone — and where
   reporting is not merely noisy but throws, the reporter having been unbound. Whatever venue you are on,
   check the send's result *and* check what the teardown path does with it.
-- the listen-key resolver **switches timer cadence** on the first confirmed key, and on a *changed* key it
+- where a stream is opened on a credential fetched over the request API and kept alive on a timer, that
+  resolver **switches timer cadence** on the first confirmed key, and on a *changed* key it
   cleared the key and raised reset **without switching back** — while the failure branch beside it did
   switch back. **Decided: a changed key leaves the resolver in exactly the state it was in before its first
   key, timer included.** Anything else means the stream is closed by the reset and the replacement key is
@@ -180,9 +192,72 @@ Two more things to look at rather than assume, both visible in the source at the
   which on a real venue is minutes to half an hour. A test catches it only if the two intervals differ — with both set to the same value
   the bug is invisible, which is why the first version of the test passed.
 
-For the listen key specifically: fetch, confirm, change, failure-before-first-success, failure-after,
-and disposal mid-flight. The resolver reports status on every one of those transitions, and the status is
-what the connector's consumers see.
+For such a resolver specifically: fetch, confirm, change, failure-before-first-success, failure-after,
+and disposal mid-flight. It reports status on every one of those transitions, and the status is what the
+connector's consumers see.
+
+**And do not assume the account stream is reached that way at all.** One venue's two market types differ
+on this: one spends a fetched credential in the URL, the other opens a shared request-response socket
+and *subscribes* to the account with a signed method call, unwrapping each event from an envelope. Two
+consequences that cost a step's worth of work when they arrive as a surprise:
+
+- **A deprecation can replace the transport, not just the endpoint.** The instinct on finding a
+  mechanism retired is to look for its successor path. Where the successor is a different protocol, the
+  connector needs a second implementation of the same interface rather than a new constant — and the
+  configuration the old mechanism needed (a key path, a keep-alive cadence) stops being shared and has
+  to move out of the common base.
+- **Reporting connected is a different question on each.** Where a subscription is acknowledged by the
+  venue, *connected* means acknowledged, not socket-open; a stream that reports itself up on the
+  handshake hands its consumers a connection that delivers nothing and never says so.
+
+## Lifetime and recovery — the two properties a live suite otherwise never touches
+
+A connector is a thing that stays up. Every other live test finishes in fifteen seconds, so the suite
+can be entirely green while the two properties a consumer actually depends on — that the connection
+*lasts*, and that it *comes back* — have never been exercised once.
+
+Neither is testable offline, and neither is an excuse to skip. Two instruments, and one does not
+substitute for the other:
+
+**A hold test.** Sit on the connection for longer than the deadline the venue enforces on an idle or
+unanswering client, doing nothing, and assert that no failure and no reconnect was reported. Take the
+duration from the contract's keep-alive facts, not from taste, and put the deadline on the test to
+match. What it defends is a class of defect that is invisible at fifteen seconds: a keep-alive nobody
+answers, a credential refresh that stops, a token whose renewal was never wired.
+
+The hold test's weakness is structural and must be answered: **it asserts that something did not
+happen.** That is the shape the verification axis calls `vacuous` — it passes just as happily when
+nothing was watching. Subscribe to the status and error channels *after* the connector reports itself
+up, so the subscription cannot be the thing that is broken, and pair the test with the drop test below,
+which makes the same watcher fire on purpose.
+
+**A drop test, through a byte relay.** A venue does not cut a connection on request, so put one under
+the test's control: a local listener that accepts the client, opens its own connection upstream, and
+**copies bytes in both directions** — with a method that closes the client side on command.
+
+The relay is deliberately *not* a protocol-aware proxy, and this is the whole point rather than an
+implementation note. A proxy that understands the protocol terminates the connection at itself: it
+answers the venue's keep-alive on the client's behalf and re-issues the client's on its own, which
+masks exactly the behaviour the hold test exists to measure. Copy bytes, and the venue's liveness
+checks reach the real client.
+
+Two things to get right in the relay, both of which bite immediately:
+
+- **Read the upgrade request byte by byte** up to the end of its headers, rewrite the host, and forward
+  the rest verbatim. Anything that buffers ahead swallows the first frames of the stream; anything that
+  rewrites more than the host changes a request that may be signed or carry a credential in its path.
+- **Count accepted connections.** "It reported itself connected again" is not evidence of a new
+  connection — a connector that never noticed the drop reports nothing at all. The count is what makes
+  recovery observable from outside the component under test.
+
+Then the assertion chain is the property itself: up, cut, *reported down*, up again, and a second
+connection at the relay. Where recovery goes through more than the socket — a credential re-fetched,
+a subscription re-sent and re-acknowledged — that chain is the part no offline test can vouch for,
+because offline every one of those steps is driven by hand.
+
+**Do both on every venue and every market type, even where the mechanism looks identical.** The
+recovery chains differ precisely where the connection mechanisms differ, and a venue that has two
+market types has two chains.
 
 ## Phase 5c — the order lifecycle, offline
 
@@ -218,7 +293,7 @@ run, both about a caller being told OK and acting on it:
 
 ## Checks that pay for themselves on every venue
 
-Five questions to put to any venue, because each has produced a silent defect. Silent is the word that
+Seven questions to put to any venue, because each has produced a silent defect. Silent is the word that
 matters: none of these announce themselves, and every one looks like correct behaviour from the inside.
 
 **1. Is there more than one store?** A venue may keep a family of orders somewhere the ordinary
@@ -243,7 +318,22 @@ Moving an assertion to where the venue answers is not weakening it: a venue that
 value at all still fails, and the property asserted becomes the stronger one — that the value *reached a
 caller*, rather than that one particular response carried it.
 
-**5. Does a converter that drops records have a nullable element type to drop into?** A converter
+**5. Does a command over many records answer like the command over one?** It need not, and the two
+differences are independent. Its **success** may be the list of what it acted on rather than the
+acknowledgement envelope every single-record command returns — read as the envelope, a completed bulk
+action arrives at the caller as a parse failure, after it has already happened, which is the worst
+ordering available. And it may not be **idempotent**: asked to clear something already clear, a venue
+may refuse rather than answer "nothing to do", so a cleanup path that runs it unconditionally reports a
+failure on the tidiest possible account. Look before asking, and pin both shapes against captured
+answers.
+
+**6. Is that error code one code, or a family?** Where a venue answers a refusal with a code whose
+message varies, the code is a family and the meaning is in the message — "there was nothing to do", "the
+market is closed" and "this account may not trade" arriving under one number. It is tempting to fold
+such a code into success once you have met the harmless member of the family; doing so silently
+swallows the two that matter. Fold nothing; make the caller's path not ask.
+
+**7. Does a converter that drops records have a nullable element type to drop into?** A converter
 returning null for a record to omit is only as good as the collection reading it. Read into a collection
 of *nullable* elements and filter; a non-nullable element type keeps the null and hands a caller an entry
 with nothing in it. This has now been the same defect twice in one module.
@@ -298,6 +388,20 @@ written against the unfixed behaviour a moment earlier. Commit first, or undo th
 
 Both of these are the same shape as the rule about a command that printed nothing: **the instrument
 failed, and its failure looked like a result.**
+
+**A mutant that survives is not always a missing test.** It can also be a line that could never have
+mattered. One survivor here was a guard comparing a lower bound against zero before applying it — and
+no value can be below zero, so the guard could not fire whatever any test did. The mirror guard on the
+upper bound was load-bearing, which is how the dead one got written: symmetry reads as care. When a
+mutant lives, ask *whether the original line changed any outcome* before writing a test to defend it;
+the answer is sometimes to delete the line and say why its twin stays.
+
+**Where a timing constant is shared between tests that are about it and tests that are not, split it.**
+A retry interval set low enough to keep a retry test fast is also the interval every other test in the
+file inherits, and on a slower machine those tests race it: one assertion ran where a retry had not yet
+fired locally and had on the runner, and it failed only in CI, by tens of milliseconds. Give the tests
+that exercise the behaviour a short constant and everything else one far longer than the test can take,
+so the behaviour cannot occur where it is not the subject.
 
 ## Phase 5d — registration and configuration
 
@@ -369,6 +473,14 @@ not testing production's cost, and the cheap fallback poll may be hiding that th
 carrying the tests all along. Raise the interval and see whether anything gets slower; if nothing does,
 the stream was doing the work.
 
+**A transport with no metering header still spends the allowance.** Rate limiting is usually modelled on
+what a response header reports, so a transport that has no headers — a socket carrying request-response
+messages, say — contributes nothing to the limiter and its spending is invisible. The budget it spends is
+real: a subscription costs on connect and again on every retry, and a retry loop against a refusing venue
+is exactly the state in which the count matters. Find where that transport states its own accounting —
+replies commonly carry it in the body — and feed it to the limiter. A reply that states nothing must
+leave the limiter untouched rather than being counted as zero, which is a different claim.
+
 **A hang is not idle — it keeps billing.** A component stuck waiting goes on polling, and a five-minute
 stall spends five minutes of the account's allowance. The test that fails from it is usually not the
 test that hung; it is the next one, which now cannot send anything.
@@ -380,6 +492,15 @@ everything asked of it. Count errors from the moment the connector reports itsel
 assertion name what it found — "expected to be empty, but has 4 items" sends the reader into a log of
 tens of thousands of lines to learn what the four were.
 
+**A live check whose evidence was never captured is not a check.** Twice now the answer to "what did
+the venue actually say" has been unavailable after a run that asked it: request bodies were logged and
+response bodies were not, so a trace of a live stage recorded every question and no answer. A green
+test then proves only that the code path completed. Before a live stage that exists to *observe*
+something, confirm the answer will be written down — the body logged at the level the run uses, or the
+payload stored as a file — and remember that **a passing test shows no output at all**, so a log line
+is evidence only for a test that fails. Where the thing to observe is not an assertion, write it to a
+file rather than to the log.
+
 **Keep the probes out of the blocks the recipes run.** A probe trades to answer a question and
 overwrites the captures it wrote last time; a test asserts and is meant to be repeatable. Run in a suite,
 a probe trades in the middle of another test's account state and destroys committed evidence. Give it a
@@ -390,6 +511,9 @@ block of its own that no recipe runs.
 - Every fact this step exercises is `pinned`, and every one an approved live stage observed is `live`,
   dated — in the manifest as well as in the code.
 - Every stream event the provider sends is handled, or explicitly recorded as ignored and why.
+- **Lifetime and recovery are measured, per market type**: a hold outlasting the venue's own deadline
+  with nothing reported, and a drop through a byte relay that comes back, with the relay counting the
+  second connection.
 - Status transitions map to the domain's vocabulary; errors reach the error channel.
 - The open items this step inherited from step 4 are answered or re-recorded with a reason — notably the
   used-weight header question, which this step has to answer anyway for the order-count headers.

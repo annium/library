@@ -325,6 +325,22 @@ Where the documentation publishes **no response schema at all** for a family, sa
 than a gap: the next layer opens with a capture, and the captured answers become both the source the
 converters are written from and the fixtures their tests use.
 
+A second instrument belongs beside the capture, for facts about a *population* rather than about one
+answer: where the venue publishes a reference listing — every instrument and the rules attached to each
+— a census over the whole of it settles what a document states only by example. Whether every record
+carries a constraint, how many distinct values a field takes, whether the documented value is typical
+or universal. Hand that over the same way, and record the counts with their date, because they are a
+measurement.
+
+**A mechanism absent from the reference is a finding, not a silence.** Where our code depends on
+something the current reference does not mention at all, the sweep reports zero hits and that reads like
+a spelling mismatch. Check the changelog for its retirement before recording it as `undocumented`: a
+retired mechanism and an undocumented one look identical from a grep and mean opposite things. And when
+one is retired, **do not assume the replacement is a path**. It may be a different protocol reached a
+different way, which changes what the next layers build rather than what constant they edit — so the
+answer to record is not the new endpoint but the new *mechanism*, with the shape of what it takes and
+what it answers.
+
 ### Phase 2c — report
 
 Write `kb/providers/<provider>/<YYYY.MM>/<YYYY.MM.DD>-contract.md`, beside the snapshot it was written from. Immutable once written.
