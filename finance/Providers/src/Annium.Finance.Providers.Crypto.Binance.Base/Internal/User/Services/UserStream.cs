@@ -1,7 +1,7 @@
 using System;
+using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Core.Shared.Status;
-using Annium.Finance.Providers.Crypto.Binance.Base.User;
 using Annium.Finance.Providers.Crypto.Binance.Base.User.Services;
 using Annium.Logging;
 using Annium.Net.WebSockets;
@@ -26,8 +26,11 @@ internal class UserStream : IUserStream, ILogSubject
     /// <summary>Raised for every raw message received over the user data stream.</summary>
     public event Action<ReadOnlyMemory<byte>> OnMessage = delegate { };
 
-    /// <summary>The user configuration providing the WebSocket API and listen key URI path.</summary>
-    private readonly UserConfigBase _config;
+    /// <summary>The base URI of the user data stream WebSocket API.</summary>
+    private readonly Uri _wsApi;
+
+    /// <summary>The path appended to <see cref="_wsApi"/>, followed by the listen key, when opening the connection.</summary>
+    private readonly string _listenKeyUriPath;
 
     /// <summary>The resolver supplying and refreshing the listen key the stream connects with.</summary>
     private readonly IListenKeyResolver _listenKeyResolver;
@@ -42,19 +45,22 @@ internal class UserStream : IUserStream, ILogSubject
     private readonly DisposableBox _disposable;
 
     /// <summary>Initializes a new instance of the <see cref="UserStream"/> class and wires it to the listen key resolver's events.</summary>
-    /// <param name="config">The user configuration providing the WebSocket API and listen key URI path.</param>
+    /// <param name="wsApi">The base URI of the user data stream WebSocket API.</param>
+    /// <param name="listenKeyUriPath">The path appended to <paramref name="wsApi"/>, followed by the listen key.</param>
     /// <param name="listenKeyResolver">The resolver supplying and refreshing the listen key the stream connects with.</param>
     /// <param name="statusReporter">The reporter used to publish connection status changes.</param>
     /// <param name="logger">The logger to trace connection activity with.</param>
     public UserStream(
-        UserConfigBase config,
+        Uri wsApi,
+        string listenKeyUriPath,
         IListenKeyResolver listenKeyResolver,
         IStatusReporter statusReporter,
         ILogger logger
     )
     {
         Logger = logger;
-        _config = config;
+        _wsApi = wsApi;
+        _listenKeyUriPath = listenKeyUriPath;
         _listenKeyResolver = listenKeyResolver;
         _statusReporter = statusReporter;
         _statusReporter.Bind(this);
@@ -86,7 +92,8 @@ internal class UserStream : IUserStream, ILogSubject
     }
 
     /// <summary>Unsubscribes from the listen key resolver and WebSocket events, disposes the WebSocket, and reports the connector as disconnected.</summary>
-    public void Dispose()
+    /// <returns>A completed value task: there is nothing asynchronous to wait for here.</returns>
+    public ValueTask DisposeAsync()
     {
         this.Trace("start");
 
@@ -99,6 +106,8 @@ internal class UserStream : IUserStream, ILogSubject
         _statusReporter.Unbind();
 
         this.Trace("done");
+
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>Connects the WebSocket to the user data stream URL built from the given listen key.</summary>
@@ -109,7 +118,7 @@ internal class UserStream : IUserStream, ILogSubject
 
         _statusReporter.Connecting();
 
-        var uri = new Uri(_config.WsApi, _config.ListenKeyUriPath + listenKey);
+        var uri = new Uri(_wsApi, _listenKeyUriPath + listenKey);
         _ws.Connect(uri);
 
         this.Trace("done");

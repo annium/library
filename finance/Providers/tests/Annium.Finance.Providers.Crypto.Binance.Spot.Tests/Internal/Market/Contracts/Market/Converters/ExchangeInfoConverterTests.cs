@@ -427,6 +427,10 @@ public class ExchangeInfoConverterTests : ProvidersTestBase
                 0.00001m,
                 922327m,
                 0.00001m,
+                0.2m,
+                5m,
+                0.2m,
+                5m,
                 0.0001m,
                 9_000_000m,
                 200
@@ -452,5 +456,34 @@ public class ExchangeInfoConverterTests : ProvidersTestBase
 
         // assert - deserialization
         deserialized.IsDefault();
+    }
+
+    /// <summary>
+    /// An exchange info answer carrying one of the two collections and not the other is dropped.
+    /// </summary>
+    /// <remarks>
+    /// The drop joins two conditions and the case above satisfies both at once - a payload with
+    /// neither key present. Each case here supplies one collection and withholds the other, so the
+    /// conditions are proven independently. Handing over an exchange with no rate limits is what
+    /// earns a ban from code that believes it is respecting a limit it never read.
+    /// </remarks>
+    /// <param name="present">The collection the answer does carry.</param>
+    [Theory]
+    [InlineData("rateLimits")]
+    [InlineData("symbols")]
+    public void SkipsAnAnswerMissingEitherCollection(string present)
+    {
+        // arrange
+        var rateLimits =
+            @"""rateLimits"": [{ ""rateLimitType"": ""REQUEST_WEIGHT"", ""interval"": ""MINUTE"", ""intervalNum"": 1, ""limit"": 6000 }]";
+        var symbols = @"""symbols"": []";
+        var raw = $@"{{ {(present == "rateLimits" ? rateLimits : symbols)} }}";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.ExchangeInfoKey);
+        var deserialized = serializer.Deserialize<ExchangeInfo?>(Encoding.UTF8.GetBytes(raw));
+
+        // assert
+        deserialized.IsDefault($"an answer carrying only {present} was handed over");
     }
 }

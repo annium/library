@@ -1,4 +1,5 @@
 using Annium.Finance.Providers.Abstractions.Domain.Market;
+using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Tests.Lib.Market;
 using Annium.Testing;
 using Xunit;
@@ -180,4 +181,109 @@ public class InstrumentExtensionsTests
         instrument.IsValidQtyPrice(1m, 1m).IsTrue("an unset minimum must not reject a low price");
         instrument.IsValidQtyPrice(1m, 1_000_000m).IsTrue("an unset maximum must not reject a high price");
     }
+
+    /// <summary>
+    /// Verifies that each end of the price band is read for the side it was published for.
+    /// </summary>
+    /// <remarks>
+    /// Four different ratios, so that a band read with the sides transposed - or with one side's end mirrored
+    /// onto the other - fails here rather than in a live order the exchange refuses by naming a filter.
+    /// </remarks>
+    [Fact]
+    public void SidePrice_IsTheBandEndForThatSide()
+    {
+        // arrange - buy in [0.5, 1.2] of the reference, sell in [0.8, 2]
+        var instrument = Banded(0.5m, 1.2m, 0.8m, 2m);
+
+        // assert - against a reference price of 100
+        instrument.MinSidePrice(OrderSide.Buy, 100m).Is(50m);
+        instrument.MaxSidePrice(OrderSide.Buy, 100m).Is(120m);
+        instrument.MinSidePrice(OrderSide.Sell, 100m).Is(80m);
+        instrument.MaxSidePrice(OrderSide.Sell, 100m).Is(200m);
+    }
+
+    /// <summary>
+    /// Verifies that a price is checked against the band of the side it would be placed on, and that the ends
+    /// themselves are allowed.
+    /// </summary>
+    [Fact]
+    public void IsValidSidePrice_ChecksTheSidesBand()
+    {
+        // arrange - buy in [0.5, 1.2] of the reference, sell in [0.8, 2]
+        var instrument = Banded(0.5m, 1.2m, 0.8m, 2m);
+
+        // assert - a price valid for one side need not be valid for the other, which is the whole point of
+        // a per-side band: 60 rests inside a buy's range and below a sell's floor
+        instrument.IsValidSidePrice(60m, OrderSide.Buy, 100m).IsTrue("60 is inside the buy band");
+        instrument.IsValidSidePrice(60m, OrderSide.Sell, 100m).IsFalse("60 is below the sell floor");
+        instrument.IsValidSidePrice(150m, OrderSide.Buy, 100m).IsFalse("150 is above the buy ceiling");
+        instrument.IsValidSidePrice(150m, OrderSide.Sell, 100m).IsTrue("150 is inside the sell band");
+
+        // and the ends are inclusive, as the exchange states them
+        instrument.IsValidSidePrice(50m, OrderSide.Buy, 100m).IsTrue("the buy floor itself is valid");
+        instrument.IsValidSidePrice(120m, OrderSide.Buy, 100m).IsTrue("the buy ceiling itself is valid");
+    }
+
+    /// <summary>
+    /// Verifies that an end reported as zero is not enforced, and that the two ends are read independently.
+    /// </summary>
+    /// <remarks>
+    /// This is the shape one of the two Binance market types publishes: a buy is capped from above and given
+    /// no floor at all. Reading the missing floor as a literal zero-and-binding bound would refuse every
+    /// resting order priced away from the market - orders that market type accepts, and that our own trading
+    /// block places on every run.
+    /// </remarks>
+    [Fact]
+    public void IsValidSidePrice_UnboundedEnd_IsNotEnforced()
+    {
+        // arrange - a buy capped at 1.15 with no floor, a sell floored at 0.85 with no ceiling
+        var instrument = Banded(decimal.Zero, 1.15m, 0.85m, decimal.Zero);
+
+        // assert
+        instrument.IsValidSidePrice(1m, OrderSide.Buy, 100m).IsTrue("an unset buy floor must not reject");
+        instrument.IsValidSidePrice(116m, OrderSide.Buy, 100m).IsFalse("the buy ceiling still binds");
+        instrument.IsValidSidePrice(1_000_000m, OrderSide.Sell, 100m).IsTrue("an unset sell ceiling must not reject");
+        instrument.IsValidSidePrice(84m, OrderSide.Sell, 100m).IsFalse("the sell floor still binds");
+    }
+
+    /// <summary>
+    /// Verifies that an instrument with no band at all accepts any price on either side.
+    /// </summary>
+    [Fact]
+    public void IsValidSidePrice_NoBand_AcceptsAnything()
+    {
+        // arrange - what a symbol published without the filter reads as
+        var instrument = Banded(decimal.Zero, decimal.Zero, decimal.Zero, decimal.Zero);
+
+        // assert
+        instrument.IsValidSidePrice(1m, OrderSide.Buy, 100m).IsTrue("no band means no buy bound");
+        instrument.IsValidSidePrice(1_000_000m, OrderSide.Sell, 100m).IsTrue("no band means no sell bound");
+    }
+
+    /// <summary>
+    /// Builds an instrument whose only interesting limits are its price band.
+    /// </summary>
+    /// <param name="minBuy">The lowest price a buy may carry, as a fraction of the reference price.</param>
+    /// <param name="maxBuy">The highest price a buy may carry, as a fraction of the reference price.</param>
+    /// <param name="minSell">The lowest price a sell may carry, as a fraction of the reference price.</param>
+    /// <param name="maxSell">The highest price a sell may carry, as a fraction of the reference price.</param>
+    /// <returns>The instrument.</returns>
+    private static Instrument Banded(decimal minBuy, decimal maxBuy, decimal minSell, decimal maxSell) =>
+        new(
+            "fake",
+            "XY",
+            1m,
+            1m,
+            1m,
+            100m,
+            0m,
+            0m,
+            1m,
+            decimal.MaxValue,
+            int.MaxValue,
+            minBuy,
+            maxBuy,
+            minSell,
+            maxSell
+        );
 }

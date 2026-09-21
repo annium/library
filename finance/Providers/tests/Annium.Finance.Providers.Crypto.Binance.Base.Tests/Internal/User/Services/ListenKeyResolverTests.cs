@@ -274,18 +274,9 @@ public class ListenKeyResolverTests : ProvidersTestBase
         int confirmInterval = 50
     )
     {
-        var config = new TestUserConfig
-        {
-            Provider = "test",
-            Key = "key",
-            Secret = "secret",
-            HttpApi = server.HttpUri(),
-            WsApi = new Uri("ws://localhost"),
-            ListenKeyUriPath = "/ws/",
-            // short enough that a test does not wait on a clock, long enough that a retry loop does not
-            // drown the local server in requests while an assertion is being made
-            ListenKey = new ListenKeyConfiguration(50, confirmInterval),
-        };
+        // short enough that a test does not wait on a clock, long enough that a retry loop does not
+        // drown the local server in requests while an assertion is being made
+        var listenKeyConfig = new ListenKeyConfiguration(50, confirmInterval);
 
         var fetched = Channel.CreateUnbounded<string>();
         var reset = Channel.CreateUnbounded<int>();
@@ -293,7 +284,8 @@ public class ListenKeyResolverTests : ProvidersTestBase
         resets = reset;
 
         var resolver = new ListenKeyResolver(
-            config,
+            server.HttpUri(),
+            listenKeyConfig,
             Endpoint,
             GetKeyed<IHttpRequestFactory>(string.Empty),
             new TestSignatureService(),
@@ -469,8 +461,3 @@ public class ListenKeyResolverTests : ProvidersTestBase
         public string GetSignature(string data) => "signature";
     }
 }
-
-/// <summary>
-/// A user configuration pointed at a local server.
-/// </summary>
-file sealed record TestUserConfig : UserConfigBase;

@@ -46,7 +46,7 @@ internal class MarketProvider(
         var result = await exchangeInfoRequestFactory
             .New(config.HttpApi)
             .Get("api/v3/exchangeInfo")
-            .WithLogFromWithHeaders(this, LogData.Headers)
+            .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
             .WithRateDelay1M(rateLimiter)
             .AsMarketResultAsync<ExchangeInfo>();
 
@@ -93,7 +93,7 @@ internal class MarketProvider(
                 .Param("interval", "1m")
                 .Param("limit", count)
                 .Param("startTime", from.ToUnixTimeMilliseconds())
-                .WithLogFromWithHeaders(this, LogData.Headers)
+                .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
                 .WithRateDelay1M(rateLimiter)
                 .AsMarketResultAsync<List<CandleModel>>();
     }

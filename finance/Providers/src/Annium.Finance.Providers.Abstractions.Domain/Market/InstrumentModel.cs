@@ -13,6 +13,10 @@ namespace Annium.Finance.Providers.Abstractions.Domain.Market;
 /// <param name="MinPrice">The minimum allowed order price.</param>
 /// <param name="MaxPrice">The maximum allowed order price.</param>
 /// <param name="TickSize">The price step order prices must be a multiple of.</param>
+/// <param name="MinBuyPriceRatio">The lowest price a buy order may carry as a fraction of the provider's reference price, or zero where the provider does not bound it.</param>
+/// <param name="MaxBuyPriceRatio">The highest price a buy order may carry as a fraction of the provider's reference price, or zero where the provider does not bound it.</param>
+/// <param name="MinSellPriceRatio">The lowest price a sell order may carry as a fraction of the provider's reference price, or zero where the provider does not bound it.</param>
+/// <param name="MaxSellPriceRatio">The highest price a sell order may carry as a fraction of the provider's reference price, or zero where the provider does not bound it.</param>
 /// <param name="MinSum">The minimum order notional value (quantity multiplied by price).</param>
 /// <param name="MaxSum">The maximum order notional value (quantity multiplied by price).</param>
 /// <param name="MaxOrders">The maximum number of open orders allowed on this instrument at once.</param>
@@ -27,6 +31,10 @@ public sealed record InstrumentModel(
     decimal MinPrice,
     decimal MaxPrice,
     decimal TickSize,
+    decimal MinBuyPriceRatio,
+    decimal MaxBuyPriceRatio,
+    decimal MinSellPriceRatio,
+    decimal MaxSellPriceRatio,
     decimal MinSum,
     decimal MaxSum,
     int MaxOrders

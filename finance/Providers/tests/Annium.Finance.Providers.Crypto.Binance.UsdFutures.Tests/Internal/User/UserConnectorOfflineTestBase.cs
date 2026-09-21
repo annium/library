@@ -90,7 +90,6 @@ public abstract class UserConnectorOfflineTestBase : ProvidersTestBase
             Secret = "some_secret",
             HttpApi = server.HttpUri(),
             WsApi = new Uri("ws://unused"),
-            ListenKeyUriPath = "/unused/",
             ListenKey = new ListenKeyConfiguration(1000, 1000),
             ReloadContext = reload,
             ReloadOrders = reload,
@@ -286,7 +285,8 @@ public abstract class UserConnectorOfflineTestBase : ProvidersTestBase
         public void Push(ReadOnlyMemory<byte> payload) => OnMessage(payload);
 
         /// <summary>Does nothing; the stream holds no resources here.</summary>
-        public void Dispose() { }
+        /// <returns>A completed value task.</returns>
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 
     /// <summary>

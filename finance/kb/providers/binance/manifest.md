@@ -42,6 +42,13 @@ the ones to re-derive first.
 The **verification** axis moves independently of that date, and did most recently on 2026-09-16, when
 the read block ran with credentials for the first time.
 
+**§10 and §11 were collected on 2026-09-21 and `checked_against` still reads 2026-09-18.** That is not
+an oversight: both were read out of the snapshot pinned at `docs_revision_spot`, the same commit the
+2026-09-18 run stored, so they are that date's documentation and not a later one. What they add is
+**coverage** rather than freshness — facts this module depends on that no row of this document had,
+because the code paths needing them did not exist. §11 also added a page to that snapshot,
+`spot/web-socket-api.md`, fetched at the same commit; see its `SOURCES.md` for why it was missing.
+
 ## Where the documentation comes from
 
 Binance publishes spot and USDⓈ-M futures separately, and they must be fetched separately: a rename on
@@ -261,7 +268,7 @@ recorded here only so a future reader knows the omission is deliberate.
 | `DELETE /fapi/v1/order` | futures | `UsdFutures/Internal/User/UserConnector.cs:350` |
 | `DELETE /fapi/v1/allOpenOrders` | futures | `UsdFutures/Internal/User/UserConnector.cs:385` |
 | `POST /fapi/v1/listenKey` — the path literal moved out of the factory into `Endpoints` on 2026-09-18 (step 5d), where the other futures paths already lived | futures | `UsdFutures/Internal/Shared/Endpoints.cs:39`, issued at `UsdFutures/Internal/User/UserConnectorFactory.cs:59` |
-| Spot cancel-replace endpoint **[DEAD]** — parameters built, path never issued | spot | `Spot/Internal/User/Services/QueryProcessor.cs:68-111` |
+| Spot cancel-replace endpoint — ~~**[DEAD]**~~ **issued since 2026-09-21**, and validated live | spot | `Spot/Internal/Shared/Endpoints.cs` (`ModifyOrderUriPath`), issued at `Spot/Internal/User/UserConnector.cs:279`; parameters at `Spot/Internal/User/Services/QueryProcessor.cs:68-111` |
 
 ### WebSocket
 
@@ -316,16 +323,16 @@ Both rest on the ordering assumption recorded in §3, and neither is documented 
 parameter is documented, its use as a cursor is our inference from the order the exchange happens to
 return.
 
-### Spot orders **[DEAD]** — `Spot/Internal/User/Services/QueryProcessor.cs`
+### Spot orders — ~~**[DEAD]**~~ **live since 2026-09-21** — `Spot/Internal/User/Services/QueryProcessor.cs`
 
 Same base set minus `positionSide`/`reduceOnly` (24-28); modify via cancel-replace with
 `cancelReplaceMode="STOP_ON_FAILURE"`, `cancelOrigClientOrderId`, `newClientOrderId`,
-`timeInForce="GTC"` (72-79). Never invoked — see §9.
+`timeInForce="GTC"` (72-79). Invoked from `Spot/Internal/User/UserConnector.cs:232,279,314,367` — placement, cancel-replace, cancel and cancel-all — and exercised live on 2026-09-21.
 
 Its **response** shape is encoded too: top-level `code` / `msg` / `data`, with `data.cancelResponse`
 and `data.newOrderResponse` nested inside, and the cancel leg's error preferred over the init leg's
 when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129`,
-`ModifyOrderSuccessResponseConverter.cs:49-50`. Also `[DEAD]`.
+`ModifyOrderSuccessResponseConverter.cs:49-50`. Read by the connector's modify path since 2026-09-21.
 
 ---
 
@@ -337,7 +344,7 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
   **assumed to already be one minute** — `Base/Market/Contracts/Converters/RateLimitsConverter.cs:37-44`, field names read at `:68,71`
   **[UNVERIFIED]**. A payload carrying limits but no `REQUEST_WEIGHT` entry **drops the whole exchange
   info** rather than yielding one with no ceiling — `pinned` 2026-09-17 by
-  `ExchangeInfoWithoutRequestWeightLimit_IsDropped`, because the alternative failure is a ban arriving
+  `ExchangeInfoWithoutRequestWeightLimit_IsDropped` (which lives in the **futures** test project, for a converter shared by both venues - so spot runs the pinned code without owning the test), because the alternative failure is a ban arriving
   later from code that reads as though it were respecting a limit
 - Spot instrument: `symbol`, `status` (must be `"TRADING"`), `baseAsset`, `baseAssetPrecision`,
   `quoteAsset`, `quoteAssetPrecision`, `isSpotTradingAllowed`, `filters`, `permissions[]` /
@@ -438,8 +445,8 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
 
 | Event | Fields | Where |
 |---|---|---|
-| Spot `executionReport` **[DEAD]** | `e`,`s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`P`,`X`,`z`,`Z`,`l`,`L`,`n`,`N`,`m`,`O`,`T` | `Spot/.../OrderUpdateEventConverter.cs:99-163` |
-| Spot `outboundAccountPosition` **[DEAD]** | `e`,`u`,`B[]` with `a`,`f`,`l` | `Spot/.../AccountUpdateEventConverter.cs:63-84` |
+| Spot `executionReport` — ~~**[DEAD]**~~ ~~**[DRIFT]**~~, `live` 2026-09-21 | `e`,`s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`P`,`X`,`z`,`Z`,`l`,`L`,`n`,`N`,`m`,`O`,`T` — **the field list holds and the envelope is handled.** The converters read a bare object, and the transport unwraps `{"subscriptionId", "event": {…}}` before handing the event over — see §11. Every field above was read off a real fill on 2026-09-21, including `N` arriving **null** on the acceptance event | `Spot/.../OrderUpdateEventConverter.cs:99-163` |
+| Spot `outboundAccountPosition` — ~~**[DEAD]**~~ ~~**[DRIFT]**~~, `live` 2026-09-21 | `e`,`u`,`B[]` with `a`,`f`,`l` — same envelope, same handling. **`B[]` is a delta**: it carries only the balances that changed, so the connector reads none of them and reloads the account instead | `Spot/.../AccountUpdateEventConverter.cs:63-84` |
 | Futures `ORDER_TRADE_UPDATE` | top-level `e`, nested `o` with `s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`sp`,`R`,`X`,`z`,`ap`,`l`,`L`,`n`,`N`,`m`,`T`. Trigger price is `sp` where spot uses `P`; average price is `ap` where spot derives it. `createdAt` synthesized from `transactionTime` only when status is `New`, else `0` (spot needs no synthesis: its event carries `O`) — both halves `pinned` 2026-09-17 | `UsdFutures/.../OrderUpdateEventConverter.cs:83,104-185` |
 | Futures `ACCOUNT_CONFIG_UPDATE` **[DEAD]** | `e`,`T`,`ai` (presence ⇒ multi-assets change), `ac` (presence ⇒ leverage change), `j`,`s`,`l` | `UsdFutures/.../AccountConfigUpdateEventConverter.cs:73-98` |
 | Futures `ACCOUNT_UPDATE` **[DEAD]** | `e`,`T`,`a`, `B[]` with `a`,`wb`,`cw`,`bc`, `P[]` with `s`,`ps`,`mt`,`iw`,`pa`,`ep`,`up` | `UsdFutures/.../BalanceAndPositionUpdateEventConverter.cs:67-89` |
@@ -471,6 +478,7 @@ goes quiet, which is the failure mode hardest to tell from an idle account.
 | `LOT_SIZE` + `MARKET_LOT_SIZE` | merged as max-of-mins, min-of-maxes, max-of-steps **[DUPLICATED]** `Spot/.../InstrumentFiltersConverter.cs:68-72` | identical logic `UsdFutures/.../InstrumentFiltersConverter.cs:70-74` |
 | Notional **[DIVERGES]** | type `"NOTIONAL"`, fields `minNotional` and `maxNotional` — `Spot/.../InstrumentFiltersConverter.cs:96-98,137-141` | type `"MIN_NOTIONAL"`, single field `"notional"`, max **hard-coded** to `decimal.MaxValue` — `UsdFutures/.../InstrumentFiltersConverter.cs:98-100,139-140` |
 | `MAX_NUM_ORDERS` **[DIVERGES]** | field `maxNumOrders` | field `limit` |
+| Price band **[DIVERGES]**, read since 2026-09-21 | type `"PERCENT_PRICE_BY_SIDE"`, four fields — `bidMultiplierUp`, `bidMultiplierDown`, `askMultiplierUp`, `askMultiplierDown` — plus `avgPriceMins`, against an average of recent trades — `…/spot/filters.md:81-108` | type `"PERCENT_PRICE"`, two fields — `multiplierUp`, `multiplierDown` — plus `multiplierDecimal`, against the **mark price** — `…/usd-futures/common-definition.md:276-294` |
 | `MAX_NUM_ALGO_ORDERS` — **[CONTESTED]**, see below | — | `…/usd-futures/common-definition.md:265-273` vs `…/usd-futures/change-log.md:632-633` |
 
 **Citations for every filter above**, collected 2026-09-18 from
@@ -479,6 +487,30 @@ goes quiet, which is the failure mode hardest to tell from an idle account.
 with its single field `notional` and the example value `"5.0"`. Futures documents **no** `NOTIONAL`
 filter — grepped, zero hits — so the `[DIVERGES]` against spot's spelling is measured rather than
 assumed.
+
+**The price band is one filter with two spellings, and the divergence is not only in the field names.**
+Spot states both ends for each side: a buy between `bidMultiplierDown` and `bidMultiplierUp`, a sell
+between `askMultiplierDown` and `askMultiplierUp` (`…/spot/filters.md:88-96`). Futures states **one
+inequality per side** — `price <= markPrice * multiplierUp` for a buy, `price >= markPrice *
+multiplierDown` for a sell (`…/usd-futures/common-definition.md:293-294`) — which leaves a buy with no
+floor and a sell with no ceiling.
+
+Reading the futures pair as a two-sided band is the mistake this entry exists to prevent, and it is
+refuted by our own trading block rather than by argument: it rests buys at 0.7 of the market while
+`DOTUSDT` publishes `multiplierDown: 0.9500`, and the exchange has accepted them on every run. A
+symmetric reading would have the provider refuse orders that work.
+
+**Census, taken live 2026-09-21** over both public `exchangeInfo` payloads. Every symbol open for
+trading carries the band — spot 1368 of 1368 `PERCENT_PRICE_BY_SIDE`, futures 773 of 773
+`PERCENT_PRICE` — and spot's window is `avgPriceMins: 5` on all 1368, with no symbol carrying the older
+`PERCENT_PRICE`. The bands are not uniform: spot's most common quadruple is `1.2 / 0.5 / 2 / 0.8` (898
+symbols) and futures' most common pair is `1.1500 / 0.8500` (426), so a caller cannot assume a house
+default. `DOTUSDT` reads `1.2 / 0.5 / 2 / 0.8` on spot and `1.0500 / 0.9500` on futures — the spot floor
+of half the reference being exactly the refusal measured on 2026-09-21 in §11.
+
+Universal today, but read as **optional**: an absent band is representable as an unbounded one, where an
+absent price or lot filter leaves nothing to compute an order from and drops the symbol. Pinned in both
+directions, both venues, in `InstrumentFiltersConverterTests`.
 
 **~~[CONTESTED]~~ `MAX_NUM_ALGO_ORDERS` — settled live 2026-09-19, in the changelog's favour.**
 
@@ -519,11 +551,14 @@ folds `PENDING_CANCEL` → `Canceled` and `EXPIRED_IN_MATCH` → `Rejected`
 (`UsdFutures/.../OrderStatuses.cs:40`) — confirmed against the documented futures status list, which has no
 `PENDING_CANCEL`.
 
-**[DRIFT] Spot documents `PENDING_NEW` and we do not map it** — an order in an order list waits in that
-state until its working order fills. Our lookup would find nothing for it. `[DEAD]` in practice, since
-the spot user path throws before any of this runs, but it is a hole in the mapping rather than a
-deliberate omission. Binance also notes `PENDING_CANCEL` is "currently unused", so our folding of it
-costs nothing and proves nothing.
+**~~[DRIFT]~~ Spot's `PENDING_NEW` is mapped as of 2026-09-21** — an order in an order list waits in
+that state until its working order fills, so it is live and unfilled, which is what `New` says. Folded
+like the `PENDING_CANCEL` beside it and `pinned` by the parse theory.
+
+Worth keeping for the shape of it: the lookup **throws** on a value it does not know, so this was not
+a status that would have arrived wrong - it was one pending leg failing the parse of the whole list it
+came in. It was `[DEAD]` in practice while the spot user path issued no requests; since 2026-09-21 it does, so the lookup is reachable again. Binance also notes
+`PENDING_CANCEL` is "currently unused", so our folding of it costs nothing and proves nothing.
 
 **Symbol status is not a two-value question.** Spot documents `TRADING`, `END_OF_DAY`, `HALT`, `BREAK`
 and `CANCEL_ONLY`; futures documents `PENDING_TRADING`, `TRADING`, `PRE_DELIVERING`, `DELIVERING`,
@@ -934,7 +969,7 @@ The three cadence rows above were added 2026-09-18. They had never been recorded
 rows that decide how much weighted traffic this module generates at rest: §7's ceilings say what we are
 allowed, and these say what we spend without anybody asking for anything.
 
-**[DEAD] — the whole spot user path, and further than this said.**
+**~~[DEAD]~~ — the whole spot user path, and further than this said. Revived and validated live 2026-09-21; the paragraph below is kept as the record of what was dead and how far it reached.**
 `Spot/Internal/User/UserConnectorFactory.cs:14-31` builds a connector with no listen-key resolver and no
 user stream, and `Spot/Internal/User/UserConnector.cs:46-81` throws `NotImplementedException` for
 trading and leverage. Corrected 2026-09-18: `Spot/Internal/User/UserProvider.cs:14-64` is a **stub that
@@ -947,6 +982,15 @@ those converters and the dead `QueryProcessor`.
 Which also means the census line reading "Spot's account read paths stay `gated`" overstated the case:
 there are no spot account read paths to gate. Recorded because reviving the path revives every one of
 them at once.
+
+**And that is what happened, on 2026-09-21.** The factory builds a connector with an account stream —
+a different transport from the one this paragraph assumed, because the mechanism it named was retired
+(§11) — the connector issues placement, cancel-replace, cancel and cancel-all
+(`Spot/Internal/User/UserConnector.cs:232,279,314,367`), and `UserProvider` issues real requests on
+every load (`:72,104,132,146`). Each of the rows this paragraph listed as unreachable is reachable, and
+each was read from a live answer: the read block, the trading block, and on the same day the first
+fills. What the paragraph predicted — that reviving the path revives every one of them at once — is
+exactly how it went, which is the reason it is kept rather than deleted.
 
 ---
 
@@ -1001,3 +1045,271 @@ Re-ranked 2026-09-18. What moved to the top is not a field name but a regex over
 Left this list: **error codes**, which ranked third on the strength of "three copies, one out of sync".
 There is one copy of each map now and both special cases are pinned. The entry survived a pass after it
 stopped being true, which is the ordinary fate of a ranking nobody re-derives.
+
+## Spot step-3 rules pinned on 2026-09-21
+
+Recorded as their own entries because a field list has no slot for them, and every one of them was a
+rule the code carried and no test named.
+
+| rule | where | state |
+|---|---|---|
+| an executed price is zero when nothing filled, rather than a division | spot get-order, init-order and order-update converters | `pinned`, mutation-checked on all three. Only the dividing arm had ever run, and nothing filled is what a new order looks like |
+| a trade with no order id is dropped | spot get-trade converter | `pinned`, mutation-checked |
+| a trade with no symbol or no commission asset is dropped | spot get-trade converter | **enforced by the compiler**: the model takes non-nullable strings, so removing either check fails the build. Documented by a test; a mutation of it does not exist to run |
+| an order update with no order id is dropped | spot order-update converter | `pinned`, mutation-checked. Only the wrong-event-tag half of the same condition had been driven |
+| an exchange info answer carrying one collection and not the other is dropped | spot exchange-info converter | **enforced by the compiler**, same shape as above; both arms now driven independently by a test, where one fixture used to satisfy both at once |
+| a quote with no price on either side is dropped | shared instrument-ticker converter, both venues | `pinned`, mutation-checked. The only test satisfied both halves of the condition at once, so the price half survived every mutation |
+
+Nine facts, six killed by a mutation and three held by the type system. The three are worth naming
+rather than counting as untested: a check the compiler needs cannot be quietly deleted, which is a
+stronger guarantee than a test and a weaker one than a test plus the compiler.
+
+## Spot step-4 facts pinned on 2026-09-21 — the market half
+
+| fact | state |
+|---|---|
+| the candle request asks `api/v3/klines` and carries `symbol`, `interval`, `limit` and `startTime` | `pinned`, each of the five mutation-checked. Only the cursor had been asserted, because the paging test needed it and nothing else needed anything |
+| the exchange info request asks `api/v3/exchangeInfo` | `pinned`, mutation-checked. Offline the test server answers whatever it is asked, so the one string that must match the venue was the one nothing checked - and this venue has already lost a live run to exactly that |
+| a refused candle load yields a batch whose status is not `Ok`; a window the venue answers with no candles yields **no batch at all** | `pinned`. The two are distinguishable, which is the property that matters - though not in the shape first assumed. Worth stating because "empty answer" and "empty batch" are different things on this path |
+
+The refusal half has no local mutation: the discarding it guards against lived upstream and is fixed
+there, so there is nothing in this repository to break. The test is a regression guard against that fix
+being undone, which is what it is for.
+
+## §10 — spot user read endpoints, collected 2026-09-21
+
+Collected because §9 records the spot user path as `[DEAD]`, so step 1 had no `file:line` to anchor and
+step 2 had nothing to check: the response *shapes* were `confirmed` at tier 1 all along, and the
+**endpoints that return them were in no row of this document**. Reviving the path needs them, and a
+plausible reading of the futures venue is not a source — the two diverge on the facts that matter most
+here.
+
+Source: the stored snapshot `2026.09/2026.09.18-docs/spot/rest-api.md`, tier 1. Every row cites it.
+
+| endpoint | weight | required | optional | citation |
+|---|---|---|---|---|
+| `GET /api/v3/account` | 20 | `timestamp` | `omitZeroBalances`, `recvWindow` | `rest-api.md:4174-4190` |
+| `GET /api/v3/openOrders` | **6 with a symbol, 80 without** | `timestamp` | `symbol`, `recvWindow` | `rest-api.md:4287-4305` |
+| `GET /api/v3/allOrders` | 20 | `symbol`, `timestamp` | `orderId`, `startTime`, `endTime`, `limit`, `recvWindow` | `rest-api.md:4339-4367` |
+| `GET /api/v3/myTrades` | **20 without `orderId`, 5 with** | `symbol`, `timestamp` | `orderId`, `startTime`, `endTime`, `fromId`, `limit`, `recvWindow` | `rest-api.md:4570-4608` |
+
+### The three facts that diverge from futures **[DIVERGES]**
+
+Named separately because each is a trap for anyone porting the neighbouring venue's provider, which is
+the obvious and wrong way to build this.
+
+1. **The history window is capped at 24 hours**, on both `allOrders` and `myTrades` — "the time between
+   `startTime` and `endTime` can't be longer than 24 hours" (`rest-api.md:4367`, `:4600`). Futures pages
+   in seven-day windows. A loop written for seven days asks spot for a window it refuses.
+2. **`openOrders` costs 80 without a symbol**, against 40 on futures. A one-second reload of an
+   unscoped open-order list is 4800 a minute against a 6000 ceiling — the whole allowance for one list.
+3. **`myTrades` returns the most recent trades when `fromId` is absent** (`rest-api.md:4598-4599`),
+   where the futures trade endpoint's page cap selects the **oldest**. The same parameter name, the
+   opposite end. `undocumented` on futures and `confirmed` here, which is exactly backwards from how it
+   feels.
+
+### Cursor semantics
+
+- `allOrders` with `orderId` returns orders **>= that id**; without it, the most recent
+  (`rest-api.md:4364-4365`).
+- `myTrades` with `fromId` returns trades **>= that id**; without it, the most recent
+  (`rest-api.md:4598-4599`).
+- `limit` on both: default 500, maximum 1000.
+
+Verification axis: everything in this section is `confirmed` on the documentation axis and `none` on
+the verification axis until the read paths that call it exist and are pinned.
+
+### §10 verification — the live read run of 2026-09-21
+
+All four endpoints called against the real account, 60 responses, every one `200 OK`, no venue error
+code and no warning. So every row in §10 moves from `none` to **`live` (2026-09-21)** on the
+verification axis: the paths, the parameter spellings, the signing, and the 24-hour window - the two
+history walks made 21 and 22 requests, which is the windowing running rather than being described.
+
+**What the live assertions do not prove, and this is the census correction.** Four of the six live read
+tests assert only that the status is `Ok` and the data is not null. **Those would have passed against
+the stub**, which returned an empty success without issuing a request - so they never distinguished a
+working path from an absent one, and reading them as coverage is what let the stub sit behind a
+`gated` marking for as long as it did. The one exception is the account test, which requires at least
+one balance and therefore could not pass against nothing.
+
+What pins the behaviour is the offline suite, where the request shape, the window walk and the refusal
+are asserted and mutation-checked. The live run answers a different and narrower question - whether the
+venue accepts what we send - and it is recorded here as answering exactly that.
+
+## §11 — spot order lifecycle and user stream, collected 2026-09-21
+
+Collected for the same reason as §10 and in the same way: the spot connector **was** a stub when this
+section was opened, so step 1 had no `file:line` for any of it, and none of these endpoints appeared in
+a row of this document. It is not one since later the same day - every row below now has code behind it
+and an answer read from the venue. Step 5 needs
+them, and the futures connector is not a source — **every one of the four divergences below would be
+wrong if ported**, and two of them silently.
+
+Source for the REST rows: `2026.09/2026.09.18-docs/spot/rest-api.md`, tier 1. Source for the stream
+rows: `2026.09/2026.09.18-docs/spot/web-socket-api.md` and `spot/user-data-stream.md`, same commit, the
+first added to the snapshot on 2026-09-21 — see that snapshot's `SOURCES.md`.
+
+### Order lifecycle over REST
+
+| endpoint | weight | unfilled-order count | required | citation |
+|---|---|---|---|---|
+| `POST /api/v3/order` | 1 | 1 | `symbol`, `side`, `type`, `timestamp`, plus a per-type set | `rest-api.md:2128` |
+| `DELETE /api/v3/order` | 1 | 0 | `symbol`, `timestamp`, and **one of** `orderId` / `origClientOrderId` | `rest-api.md:2380` |
+| `DELETE /api/v3/openOrders` | 1 | 0 | `symbol`, `timestamp` | `rest-api.md:2453` |
+| `PUT /api/v3/order/amend/keepPriority` | 4 | 0 | `symbol`, `newQty`, `timestamp`, and one of `orderId` / `origClientOrderId` | `rest-api.md:2993` |
+| `POST /api/v3/order/cancelReplace` | 1 | 1 | `symbol`, `side`, `type`, `cancelReplaceMode`, `timestamp`, one of `cancelOrderId` / `cancelOrigClientOrderId` | `rest-api.md:2578` |
+
+`DELETE /api/v3/openOrders` requires a symbol; there is no unscoped cancel-all.
+
+### The four facts that diverge from futures **[DIVERGES]**
+
+1. **There is no general amend.** Spot's amend endpoint *reduces quantity only*: "Reduce the quantity of
+   an existing open order", and `newQty` "must be greater than 0 and less than the order's quantity"
+   (`rest-api.md:2993`, `:3018`). A price change, or any quantity increase, is not an amendment on this
+   venue — it is `cancelReplace`, which is a new order at the back of the queue and costs an unfilled-order
+   count. Futures amends price and quantity through one endpoint. **A ported `ModifyOrderAsync` would
+   refuse half the modifications it is asked for, or silently reprice by replacing.**
+2. **Placement is counted against a second, separate limit.** `POST /api/v3/order` costs weight 1 and
+   **unfilled order count 1** — a budget distinct from request weight, which the module's rate limiter
+   does not model at all. `cancelReplace` charges it even when the new order was never attempted
+   (`rest-api.md:2585`). Cancels charge 0.
+3. **The user stream is a different transport**, not a different URL — see below.
+4. **The stream event is wrapped.** Every spot user event now arrives as
+   `{"subscriptionId": <int>, "event": {…}}` (`web-socket-api.md:337-366`, and every payload in
+   `user-data-stream.md`), where the futures stream delivers the event object bare.
+
+### The user data stream — listen keys are gone **[DRIFT]** `contested`
+
+| fact | state | citation |
+|---|---|---|
+| Listen-key user streams on `wss://stream.binance.com` are **deprecated** | `confirmed` | `CHANGELOG.md:953` |
+| All listen-key documentation for that endpoint has been **removed** | `confirmed` | `CHANGELOG.md:594` |
+| `POST /api/v3/userDataStream` and siblings are no longer in the REST reference | `confirmed` — the string `userDataStream` has **0 occurrences** in `rest-api.md`, and `listenKey` 0 likewise | `rest-api.md` (census) |
+| The features "remain available until a future retirement announcement" | `confirmed` | `CHANGELOG.md:600` |
+
+Marked `contested` rather than settled because the two readings genuinely disagree and neither is
+stale: the changelog says the mechanism still works, and the reference no longer describes it. Nothing
+in the snapshot says when it stops. What would settle it is a retirement announcement, or a live
+attempt — and a live attempt answers only "today".
+
+**What this means for our code.** `Spot/Constants.cs:50`, `Spot/ProviderConfiguration.cs:11`,
+`Spot/Internal/User/Contracts/UserContracts.cs:61-64`, `Spot/ProviderRegistrationContextExtensions.cs:76`
+and `Spot/Internal/User/Profiles/UserConfigProfile.cs:37-38` all configure the listen-key mechanism, and
+`Base/Internal/User/Services/{ListenKeyResolver,UserStream}.cs` implement it. **Nothing in spot resolves
+any of it** — `Spot/Internal/User/UserConnector.cs` builds no stream at all — so today this is registered,
+unused machinery for a mechanism the venue has stopped documenting. The cost of not noticing was zero
+only because the connector was never written.
+
+### The replacement mechanism
+
+Base endpoint **`wss://ws-api.binance.com:443/ws-api/v3`** (`web-socket-api.md:102`) — a
+request/response WebSocket API, and **not** the market-stream endpoint this module already connects to.
+A connection is valid for 24 hours (`:105`); the server pings every 20s and disconnects if no pong
+arrives within a minute (`:111-114`).
+
+Two routes to a subscription (`web-socket-api.md:8174-8182`):
+
+| route | method | weight | key type | params |
+|---|---|---|---|---|
+| authenticated session | `session.logon`, then `userDataStream.subscribe` | 2 | **Ed25519 only** (`:1299`) | none on subscribe |
+| per-request signature | `userDataStream.subscribe.signature` | 2 | HMAC, RSA or Ed25519 (`:107`) | `apiKey`, `timestamp`, `signature`, optional `recvWindow` |
+
+Both answer `{"result": {"subscriptionId": <int>}}`. `userDataStream.unsubscribe` takes an optional
+`subscriptionId` and closes all subscriptions when given none (`:8236-8262`). Limits: one subscription
+per account per connection; 1,000 active and 65,535 lifetime per session (`:8185-8191`).
+
+**The second route is the one that matters for this module**, because it does not require Ed25519 — the
+account's existing HMAC key signs it, the same key §10's read paths already use. Choosing the first
+route would make the stream depend on a key type the account may not have, which is a configuration
+change on the user's side rather than a code change on ours.
+
+`eventStreamTerminated` is sent when a logon subscription ends after `session.logout`, or when the
+subscription is stopped (`user-data-stream.md:325-343`). It is the signal a reconnect keys on, and it
+has no counterpart in the listen-key mechanism, where expiry was inferred from a closed socket.
+
+### §11 verification — pinned 2026-09-21
+
+Everything below is `pinned`: an offline test fails if it changes, and each one was mutation-checked.
+Nothing here is `live` — this venue's trading block does not exist, so no fact in §11 has been observed
+against the exchange.
+
+| fact | what pins it |
+|---|---|
+| the signature payload is the parameters **sorted by name** | the venue's own worked example, reproduced exactly (`WsApiRequestBuilderTests`) |
+| values go into the payload **raw**, encoded UTF-8 | the venue's second worked example, whose symbol is non-ASCII |
+| a number is a JSON number and text a JSON string in the frame | `ANumberIsANumber_AndTextIsAString` |
+| a method taking no parameters sends **no** `params` member | `AMethodWithNoParameters_SendsNoParamsMember` |
+| the subscription method is the **signature** variant | `WsApiUserStreamTests.Connected_SendsASignedSubscription` |
+| the event envelope is `{subscriptionId, event}` and the event is what a consumer gets | `AnEvent_ArrivesUnwrappedFromItsEnvelope` |
+| `eventStreamTerminated` ends a subscription without ending the connection | `ATerminatedStream_IsSubscribedAgainOnTheSameConnection` |
+| `POST /api/v3/order`, `POST /api/v3/order/cancelReplace`, `DELETE /api/v3/order`, `DELETE /api/v3/openOrders` | `UserConnectorCommandTests.EachCommand_GoesToItsDocumentedEndpoint`, a theory over all four |
+| `cancelReplaceMode=STOP_ON_FAILURE` on a replacement | `Modify_StopsOnAFailedCancelRatherThanReplacingRegardless` |
+| a spot account has no leverage to set | `SetLeverage_IsRefusedAndSendsNothing` |
+
+**The two golden signatures are worth their length and one of them is worth more than the other.**
+Percent-encoding every value passes the ASCII example and fails only the non-ASCII one — measured, by
+mutating the builder to escape its values. A contract pinned only by the first example would be wrong
+about every symbol outside ASCII and green everywhere.
+
+**The weight of the subscription is not counted.** It is 2, on connect and on each retry, against a
+6000/min ceiling; the limiter's model is to report what a response header said, and this transport has
+no header. Recorded rather than plumbed through — see the backlog in `status.md`.
+
+### §11 live — measured 2026-09-21, four facts the documentation did not give
+
+The first live run of this venue's trading block. Every row below is `live` on the verification axis and
+was measured, not read.
+
+| fact | what it means for our code |
+|---|---|
+| the WebSocket API subscription is **accepted with an HMAC key**, over `userDataStream.subscribe.signature` | the whole transport works; the route that needs an Ed25519 key was never touched |
+| `DELETE /api/v3/openOrders` answers **the array of orders it cancelled** — not a `{code,msg}` envelope **[DIVERGES]** | the connector read it as the envelope, so every successful cancellation reached the caller as a parse failure. The cancellation had already happened |
+| the same endpoint is **refused** on a symbol with nothing open, under the code its reference calls `CANCEL_REJECTED` with the message "Unknown order sent." | cancel-all is **not idempotent** here. And the code cannot be folded into success: the same one carries "Market is closed." and "This account may not place or cancel orders." — the reason is in the message, not the code |
+| `PERCENT_PRICE_BY_SIDE` bounds how far from the market a limit order may be priced, against an **average of recent trades** rather than the current bid | `InstrumentModel` does not carry the bound, so no caller can compute it. Measured for one instrument: a `BUY` floor at half the reference, with a five-minute averaging window |
+
+**The last one was the gap worth naming, and it is closed as of 2026-09-21.** The provider read the
+price, lot, notional and order-count filters into `InstrumentModel` and dropped this one, so a caller
+pricing an order away from the market had no way to know how far it could go — and the refusal names a
+filter rather than a bound. `InstrumentModel` now carries the band as four ratios of the venue's
+reference price, on both market types; see §4 for the two spellings and why the futures one must not be
+read as a two-sided band.
+
+### §11 live — lifetime and recovery, measured 2026-09-21
+
+| fact | how |
+|---|---|
+| a connection **survives past the venue's keep-alive deadline** — it pings every 20s and closes what does not answer within a minute | held for 150s, never left connected. The answer is the framework's rather than ours, which was the reasoning before and is now the observation |
+| a cut connection is **noticed, re-established, and subscribed again** — the venue accepts a second signed subscription on a new connection | cut on purpose through a byte relay, which is the only way to make a venue drop one |
+
+The relay is not a WebSocket proxy, deliberately: one that understood the protocol would answer the
+venue's ping itself, and the long-connection property would be masked by the instrument measuring it.
+
+**Still unmeasured on this axis:** the 24-hour session limit the venue documents. It cannot be reached by
+a test suite, and what stands in for it is the reconnect path above, which is now measured.
+
+### §11 live — execution, measured 2026-09-21
+
+The first fills on this market type. Two real round trips on `DOTUSDT`, one at market and one with a
+limit priced through the book, captured in
+[`2026.09/2026.09.21-spot-fill/`](2026.09.21-spot-fill/README.md) — every row below is `live` and was
+read from those bytes.
+
+| fact | what it means for our code |
+|---|---|
+| an order raises **two events**: `x:"NEW"`/`X:"NEW"` on acceptance, then `x:"TRADE"`/`X:"FILLED"` carrying the execution | the fill is its own event, so ingestion keyed on the first one sees an order that was accepted and never filled. Ours keys on the status and reloads trades on `PartiallyFilled` or `Filled` |
+| the acceptance event carries **`"N":null`** and **`"n":"0"`** | a null commission asset, and an amount spelled bare rather than padded. Every fixture before this capture spelled both otherwise, so neither had been read. Now pinned by `OrderUpdateEventConverterTests` |
+| a **marketable limit fills at the book's price**, not at its own — placed at `1.202`, filled at `1.19700000` | `price` is what was asked for and `cummulativeQuoteQty / executedQty` is what it cost. The three converters that compute the quotient are right, and this is the payload that can tell them from one reading `price` |
+| the **fee's asset depends on the side**: the base asset on a buy (`"N":"DOT"`), the quote asset on a sell (`"N":"USDT"`) | a buy credits less of the asset than it filled, so selling back the filled quantity is refused for insufficient balance. Anything returning a position has to subtract the fee and re-align to the lot step |
+| **`outboundAccountPosition` carries only the balances that changed** — three assets, on an account holding five **[DIVERGES from its own name]** | it is a delta, not a snapshot. Our connector reads none of its balances and treats the event as a signal to reload the account, which is what makes this harmless. Publishing from it directly would erase every balance it does not mention |
+| the stream's `executionReport` and the placement's `fills` **agree** on price, quantity, fee and trade id | either could be a trade's source, so the choice is ours to make once. The connector uses neither and asks for the symbol's trades, so a fill reaches a caller exactly once |
+
+**Not settled by this capture:** whether the executed price is the average over several fills rather
+than the last one. Both round trips filled in a single trade, where the two readings coincide. The
+distinction is pinned offline instead, by a fixture whose cumulative and last prices differ.
+
+**One registration is deliberately unpinned and says so.** `CancelAllOrders`'s serializer carries the
+element converter so the array parses truthfully rather than by accidental name binding, but the
+connector discards the payload — so removing the converter changes nothing a test can see. Mutation
+confirmed it survives. What *is* pinned is the response **type**: reading the array as an envelope kills
+the test.

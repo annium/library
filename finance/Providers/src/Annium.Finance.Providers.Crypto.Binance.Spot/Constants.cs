@@ -46,9 +46,6 @@ public static class Constants
     internal const string CancelAllOrdersKey = $"{Provider}_{nameof(CancelAllOrdersKey)}";
 
     // user data updates
-    /// <summary>Registration key for the listen key (user data stream token) request factory and serializer.</summary>
-    internal const string ListenKeyKey = $"{Provider}_{nameof(ListenKeyKey)}";
-
     /// <summary>Registration key for the account update (<c>outboundAccountPosition</c>) user data stream event serializer.</summary>
     internal const string AccountUpdateKey = $"{Provider}_{nameof(AccountUpdateKey)}";
 

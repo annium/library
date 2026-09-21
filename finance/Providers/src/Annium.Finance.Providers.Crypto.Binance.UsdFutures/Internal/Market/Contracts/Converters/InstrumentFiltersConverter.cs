@@ -14,8 +14,9 @@ namespace Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.Market.Con
 internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
 {
     /// <summary>
-    /// Reads the <c>PRICE_FILTER</c>, <c>LOT_SIZE</c>, <c>MARKET_LOT_SIZE</c>, <c>MIN_NOTIONAL</c> and
-    /// <c>MAX_NUM_ORDERS</c> filter entries, combining the two lot size filters into their intersection.
+    /// Reads the <c>PRICE_FILTER</c>, <c>LOT_SIZE</c>, <c>MARKET_LOT_SIZE</c>, <c>MIN_NOTIONAL</c>,
+    /// <c>PERCENT_PRICE</c> and <c>MAX_NUM_ORDERS</c> filter entries, combining the two lot size filters into
+    /// their intersection.
     /// </summary>
     /// <param name="reader">The UTF-8 JSON reader positioned at the start of the filters array.</param>
     /// <param name="typeToConvert">The type being converted.</param>
@@ -38,6 +39,11 @@ internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
         NotionalFilter? notionalFilter = default;
         MaxOrdersFilter? maxOrdersFilter = default;
 
+        // the only optional one: every trading symbol carries it today, but its absence is representable -
+        // an unbounded band - where a missing price or lot filter leaves nothing to compute with, so it does
+        // not join the set whose absence drops the instrument
+        var percentPriceFilter = new PercentPriceFilter(decimal.Zero, decimal.Zero, decimal.Zero, decimal.Zero);
+
         var filterType = string.Empty;
 
         var minPrice = decimal.Zero;
@@ -49,6 +55,9 @@ internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
         var stepSize = decimal.Zero;
 
         var minNotional = decimal.Zero;
+
+        var multiplierUp = decimal.Zero;
+        var multiplierDown = decimal.Zero;
 
         var maxOrders = 0;
 
@@ -72,7 +81,13 @@ internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
                     Math.Min(limitLotSizeFilter.MaxQty, marketLotSizeFilter.MaxQty),
                     Math.Max(limitLotSizeFilter.StepSize, marketLotSizeFilter.StepSize)
                 );
-                var result = new InstrumentFilters(lotSizeFilter, priceFilter, notionalFilter, maxOrdersFilter);
+                var result = new InstrumentFilters(
+                    lotSizeFilter,
+                    priceFilter,
+                    notionalFilter,
+                    percentPriceFilter,
+                    maxOrdersFilter
+                );
 
                 return result;
             }
@@ -97,6 +112,18 @@ internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
                         break;
                     case "MIN_NOTIONAL":
                         notionalFilter = new NotionalFilter(minNotional, decimal.MaxValue);
+                        break;
+                    case "PERCENT_PRICE":
+                        // this market type states one inequality per side, not a band per side: the upper
+                        // multiplier caps a buy and the lower one floors a sell, and the other two ends are
+                        // left unbounded. Our own trading block rests buys far below the lower multiplier
+                        // and the exchange takes them, so the ends left at zero are the exchange's reading
+                        percentPriceFilter = new PercentPriceFilter(
+                            decimal.Zero,
+                            multiplierUp,
+                            multiplierDown,
+                            decimal.Zero
+                        );
                         break;
                     case "MAX_NUM_ORDERS":
                         maxOrdersFilter = new MaxOrdersFilter(maxOrders);
@@ -134,6 +161,13 @@ internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
                         break;
                     case "stepSize":
                         stepSize = reader.GetDecimalFromString();
+                        break;
+
+                    case "multiplierUp":
+                        multiplierUp = reader.GetDecimalFromString();
+                        break;
+                    case "multiplierDown":
+                        multiplierDown = reader.GetDecimalFromString();
                         break;
 
                     case "notional":

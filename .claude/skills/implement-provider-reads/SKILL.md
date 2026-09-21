@@ -120,10 +120,29 @@ Cheapest and least authenticated first, so that a failure is attributable:
 
 Nothing here places an order. That is what makes it the safe half of validation.
 
+**Confirm the answers will be recorded before running a stage that exists to observe one.** A live read
+whose response body is never logged leaves a trace full of questions and no answers, and the green test
+then proves only that the path completed — so "we checked" becomes unsupportable a day later when
+someone asks what the venue said. Log the body at the level the run uses, or store it as a file, and
+bound what is logged so a large payload cannot drown the trace.
+
 **Expect the first live run to fail on something the offline suite could not see**, because that is
 its purpose. What it found once: a path pinned at a version the provider had moved on from — marked
 in the contract as an oddity and never checked, so every offline fixture agreed with the code and
 both were wrong about the world. Fix, then pin, so the same failure cannot return silently.
+
+**Where a reference payload lists everything, census it rather than reading one record.** A reference
+response — the catalogue of instruments and their rules — answers questions no document does, and
+answers them over the whole population rather than the one example a capture holds: which constraints
+every tradable record carries, which are absent, how many distinct values a field takes, whether a
+value the documentation shows as typical is in fact universal. It costs one request and a short script,
+it settles design questions that would otherwise be decided by assumption — required or optional,
+uniform or not — and the numbers belong in the contract, dated, because they are a measurement and will
+decay.
+
+One caution that makes it evidence rather than an impression: **count over what the code would accept**,
+not over the whole payload. A population that includes records the provider filters out answers a
+different question than the one being asked.
 
 **A live run passing is not convergence.** This step was once called converged on the strength of a
 green live run while its checklist still had three items open. The live run answers one question —

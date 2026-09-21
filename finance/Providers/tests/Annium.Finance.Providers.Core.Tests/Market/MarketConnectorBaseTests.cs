@@ -74,6 +74,10 @@ public class MarketConnectorBaseTests : ProvidersTestBase
                 1m,
                 100000m,
                 0.01m,
+                decimal.Zero,
+                decimal.Zero,
+                decimal.Zero,
+                decimal.Zero,
                 10m,
                 1000000m,
                 100

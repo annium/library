@@ -81,8 +81,8 @@ public class EndpointsTests : ProvidersTestBase
                 }
             );
 
-        // act - exactly as UserStream composes it, listen key and all
-        var uri = new Uri(config.WsApi, config.ListenKeyUriPath + "SOME_LISTEN_KEY");
+        // act - exactly as the connector factory composes it, listen key and all
+        var uri = new Uri(config.WsApi, Endpoints.UserWsUriPath + "SOME_LISTEN_KEY");
 
         // assert
         uri.ToString().Is("wss://fstream.binance.com/private/ws/SOME_LISTEN_KEY");

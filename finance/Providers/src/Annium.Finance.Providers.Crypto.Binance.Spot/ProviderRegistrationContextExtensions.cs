@@ -73,7 +73,6 @@ public static class ProviderRegistrationContextExtensions
         ctx.AddHttpRequestFactoryWithJsonSerializer(CancelAllOrdersKey, UserContracts.CancelAllOrders);
 
         // user data updates
-        ctx.AddHttpRequestFactoryWithJsonSerializer(ListenKeyKey, UserContracts.ListenKey);
         ctx.AddJsonSerializer(AccountUpdateKey, UserContracts.AccountUpdate);
         ctx.AddJsonSerializer(OrderUpdateKey, UserContracts.OrderUpdate);
 

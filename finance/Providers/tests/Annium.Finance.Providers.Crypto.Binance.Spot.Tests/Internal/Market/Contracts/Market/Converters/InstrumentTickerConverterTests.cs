@@ -77,4 +77,35 @@ public class InstrumentTickerConverterTests : ProvidersTestBase
         // assert - deserialization
         deserialized.IsDefault();
     }
+
+    /// <summary>
+    /// A quote naming an instrument but carrying no price on either side is dropped too.
+    /// </summary>
+    /// <remarks>
+    /// The converter drops on two independent conditions joined in one line - no symbol, or both sides
+    /// zero - and the case above satisfies both at once, because a payload with an empty symbol has no
+    /// prices either. So deleting the price half changed nothing that any test could see, on either
+    /// venue. This is the half that matters in production: the symbol is always there on a real quote,
+    /// and a zero on both sides is what an empty book looks like.
+    /// </remarks>
+    [Fact]
+    public void SkipsAQuoteWithNoPriceOnEitherSide()
+    {
+        // arrange
+        var raw =
+            @"{
+            ""s"": ""BTCUSDT"",
+            ""b"": ""0"",
+            ""B"": ""1"",
+            ""a"": ""0"",
+            ""A"": ""1""
+        }";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.InstrumentTickerKey);
+        var deserialized = serializer.Deserialize<InstrumentTicker?>(Encoding.UTF8.GetBytes(raw));
+
+        // assert
+        deserialized.IsDefault("a quote with no price on either side was published");
+    }
 }

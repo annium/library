@@ -248,12 +248,12 @@ public class QueryProcessorTests : ProvidersTestBase
         var data = processor.BuildModifyOrderQuery(request).Unwrap().As<IReadOnlyDictionary<string, string>>();
 
         // assert
-        data.Has(9);
+        data.Has(8);
         data.At("symbol").Is(request.Order.Symbol);
         data.At("side").Is("BUY");
         data.At("type").Is("MARKET");
         data.At("cancelReplaceMode").Is("STOP_ON_FAILURE");
-        data.At("timeInForce").Is("GTC");
+        data.ContainsKey("timeInForce").IsFalse("a market order carried a time in force");
         data.At("newOrderRespType").Is("RESULT");
         data.At("quantity").Is("11.3");
         data.At("cancelOrigClientOrderId").Is(request.Order.ClientOrderId);
@@ -276,12 +276,12 @@ public class QueryProcessorTests : ProvidersTestBase
         var data = processor.BuildModifyOrderQuery(request).Unwrap().As<IReadOnlyDictionary<string, string>>();
 
         // assert
-        data.Has(10);
+        data.Has(9);
         data.At("symbol").Is(request.Order.Symbol);
         data.At("side").Is("SELL");
         data.At("type").Is("STOP_LOSS");
         data.At("cancelReplaceMode").Is("STOP_ON_FAILURE");
-        data.At("timeInForce").Is("GTC");
+        data.ContainsKey("timeInForce").IsFalse("a market-triggered order carried a time in force");
         data.At("newOrderRespType").Is("RESULT");
         data.At("quantity").Is("11.3");
         data.At("stopPrice").Is("12.7");
@@ -305,12 +305,12 @@ public class QueryProcessorTests : ProvidersTestBase
         var data = processor.BuildModifyOrderQuery(request).Unwrap().As<IReadOnlyDictionary<string, string>>();
 
         // assert
-        data.Has(10);
+        data.Has(9);
         data.At("symbol").Is(request.Order.Symbol);
         data.At("side").Is("SELL");
         data.At("type").Is("TAKE_PROFIT");
         data.At("cancelReplaceMode").Is("STOP_ON_FAILURE");
-        data.At("timeInForce").Is("GTC");
+        data.ContainsKey("timeInForce").IsFalse("a market-triggered order carried a time in force");
         data.At("newOrderRespType").Is("RESULT");
         data.At("quantity").Is("11.3");
         data.At("stopPrice").Is("12.7");

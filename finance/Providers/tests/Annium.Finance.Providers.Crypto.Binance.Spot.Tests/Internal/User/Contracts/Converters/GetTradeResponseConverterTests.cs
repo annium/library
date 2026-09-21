@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using Annium.Finance.Providers.Abstractions.Domain.User;
 using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Tests.Lib;
@@ -69,5 +70,54 @@ public class GetTradeResponseConverterTests : ProvidersTestBase
         deserialized.CommissionAmount.Is(10.1m);
         deserialized.Maker.IsTrue();
         deserialized.Moment.Is(1499865549590);
+    }
+
+    /// <summary>
+    /// A trade missing any of the three fields the domain needs is dropped rather than handed over.
+    /// </summary>
+    /// <remarks>
+    /// Three independent conditions joined in one line, and nothing exercised any of them - so each
+    /// case here omits one field and leaves the rest whole, which is what makes them independent.
+    /// Omits rather than blanks: the rule is about a value that never arrived, and a zero is a value.
+    /// A trade handed over without an order to attach it to, without an instrument, or without the
+    /// asset its commission was taken in is one the next layer reads fields off and gets defaults.
+    /// </remarks>
+    /// <param name="missing">The field left out of the payload.</param>
+    [Theory]
+    [InlineData("orderId")]
+    [InlineData("symbol")]
+    [InlineData("commissionAsset")]
+    public void SkipsATradeMissingWhatTheDomainNeeds(string missing)
+    {
+        // arrange - one field omitted, the rest of a real answer left intact
+        var fields = new Dictionary<string, string>
+        {
+            ["symbol"] = @"""symbol"": ""BNBBTC""",
+            ["orderId"] = @"""orderId"": 100234",
+            ["commissionAsset"] = @"""commissionAsset"": ""BNB""",
+        };
+        fields.Remove(missing);
+
+        var raw =
+            $@"{{
+            {string.Join(",\n            ", fields.Values)},
+            ""id"": 28457,
+            ""orderListId"": -1,
+            ""price"": ""4.00000100"",
+            ""qty"": ""12.00070000"",
+            ""quoteQty"": ""48.000012"",
+            ""commission"": ""10.10000000"",
+            ""time"": 1499865549590,
+            ""isBuyer"": true,
+            ""isMaker"": true,
+            ""isBestMatch"": true
+        }}";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.GetTradeKey);
+        var deserialized = serializer.Deserialize<TradeModel?>(Encoding.UTF8.GetBytes(raw));
+
+        // assert
+        deserialized.IsDefault($"a trade with no {missing} was handed over");
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Tests.Lib;
@@ -45,4 +46,31 @@ public class UserConnectorReadTests : UserConnectorReadTestBase
     )]
     public Task ConnectsAndDelivers() =>
         UserConnectorReadBaseAsync(Settings.User, TestContext.Current.CancellationToken);
+
+    /// <summary>
+    /// The connection is held open long enough to outlive whatever would quietly end it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This venue keeps its account stream alive differently from the other one: a key fetched over REST
+    /// and refreshed on a timer, rather than an answer to a protocol ping. So the thing that can go wrong
+    /// is different too - a refresh that stops happening, or one the venue does not accept - and the
+    /// symptom is the same either way, a connector that reconnects forever and from outside looks like one
+    /// that works.
+    /// </para>
+    /// <para>
+    /// Two and a half minutes does not outlive this venue's key lifetime, which is measured in tens of
+    /// minutes; what it outlives is the refresh interval, so a refresh that fails is seen here. The key's
+    /// own expiry stays beyond what a suite can wait for, and the reconnect path is what stands in for it.
+    /// </para>
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(
+        Timeout = TestBlock.HoldTimeoutMs,
+        Skip = "needs exchange credentials in test.env",
+        SkipUnless = nameof(Exchange.HasCredentials),
+        SkipType = typeof(Exchange)
+    )]
+    public Task HoldsTheConnection() =>
+        UserConnectorHoldBaseAsync(Settings.User, TimeSpan.FromSeconds(150), TestContext.Current.CancellationToken);
 }

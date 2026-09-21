@@ -56,13 +56,19 @@ internal class UserConnectorFactory(IServiceProvider sp) : IUserConnectorInstanc
         var cancelAllOrdersRequestFactory = sp.ResolveHttpRequestFactory(CancelAllOrdersKey);
         var algoOrderRequestFactory = sp.ResolveHttpRequestFactory(AlgoOrderKey);
         var listenKeyResolver = sp.CreateListenKeyResolver(
-            config,
+            config.HttpApi,
+            config.ListenKey,
             Endpoints.ListenKeyUriPath,
             ListenKeyKey,
             signatureService,
             monitor
         );
-        var userStream = sp.CreateUserStream(config, listenKeyResolver, monitor);
+        var userStream = sp.CreateListenKeyUserStream(
+            config.WsApi,
+            Endpoints.UserWsUriPath,
+            listenKeyResolver,
+            monitor
+        );
         var orderUpdateEventSerializer = sp.ResolveSerializer<ReadOnlyMemory<byte>>(
             OrderUpdateKey,
             MediaTypeNames.Application.Json

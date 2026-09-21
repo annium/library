@@ -58,6 +58,17 @@ public static class TestBlock
     public const int ReadTimeoutMs = 120_000;
 
     /// <summary>
+    /// How long a <see cref="Read"/> test that deliberately holds a connection open may run, in milliseconds.
+    /// </summary>
+    /// <remarks>
+    /// Its own constant because <see cref="ReadTimeoutMs"/> is shorter than the thing being measured, and
+    /// a deadline below the duration under test turns every run into a timeout. A venue that pings a
+    /// connection and drops it for want of an answer does so on the order of a minute, so a test of that
+    /// has to outlive a minute by enough to be sure - and its deadline has to outlive the test.
+    /// </remarks>
+    public const int HoldTimeoutMs = 240_000;
+
+    /// <summary>
     /// How long a <see cref="Write"/> test may run before xUnit fails it, in milliseconds.
     /// </summary>
     /// <remarks>

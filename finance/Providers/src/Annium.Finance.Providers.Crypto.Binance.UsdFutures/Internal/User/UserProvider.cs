@@ -85,7 +85,7 @@ internal class UserProvider(
             .Sign(signatureService)
             .WithRateDelay1M(rateLimiter)
             // .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
-            .WithLogFromWithHeaders(this, LogData.Headers)
+            .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
             .AsUserResultAsync<AccountResponse>();
 
         if (!result.IsSuccess)
@@ -120,7 +120,7 @@ internal class UserProvider(
             .Sign(signatureService)
             .WithRateDelay1M(rateLimiter)
             // .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
-            .WithLogFromWithHeaders(this, LogData.Headers)
+            .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
             .AsUserResultAsync<IReadOnlyCollection<OrderModel>>();
 
         if (!result.IsSuccess)
@@ -163,7 +163,7 @@ internal class UserProvider(
             .ReceiveWindow()
             .Sign(signatureService)
             .WithRateDelay1M(rateLimiter)
-            .WithLogFromWithHeaders(this, LogData.Headers)
+            .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
             .AsUserResultAsync<IReadOnlyCollection<OrderModel?>>();
 
         if (!result.IsSuccess)
@@ -270,7 +270,7 @@ internal class UserProvider(
             .ReceiveWindow()
             .Sign(signatureService)
             .WithRateDelay1M(rateLimiter)
-            .WithLogFromWithHeaders(this, LogData.Headers)
+            .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
             .AsUserResultAsync<IReadOnlyCollection<OrderModel?>>();
 
         if (!result.IsSuccess)

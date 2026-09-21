@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.HttpExtensions;
 using Annium.Finance.Providers.Tests.Lib;
@@ -103,5 +104,112 @@ public class HttpRequestLogExtensionsTests : ProvidersTestBase
 
         logged.Contains("response ").IsTrue("the response was not logged at all");
         logged.Contains("x-mbx-used-weight-1m").IsFalse("headers were logged without being asked for");
+    }
+
+    /// <summary>
+    /// A response body reaches the log when it is asked for.
+    /// </summary>
+    /// <remarks>
+    /// Asked for on the read paths as of 2026-09-21, because the log of a live run is the only record of
+    /// what the venue answered - and an attempt to read an account back from one proved nothing at all
+    /// when the bodies were not in it.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task WithTheResponseFlag_TheBodyReachesTheLog()
+    {
+        // arrange
+        OverrideLogLevel(LogLevel.Trace);
+
+        await using var server = this.RunHttpServer(
+            async (_, response) =>
+            {
+                response.Ok();
+                await response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes("""{"answer":"in the body"}"""));
+            }
+        );
+
+        // act
+        await this.CreateHttpRequest(server)
+            .Get("log")
+            .WithLogFromWithHeaders(this, LogData.Response)
+            .RunAsync(TestContext.Current.CancellationToken);
+
+        // assert
+        var logged = string.Join("\n", Logs.Select(x => x.Message));
+
+        logged.Contains("in the body").IsTrue("the body did not reach the log");
+    }
+
+    /// <summary>
+    /// Without asking for it, the body is not logged.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task WithoutTheResponseFlag_TheBodyDoesNotReachTheLog()
+    {
+        // arrange
+        OverrideLogLevel(LogLevel.Trace);
+
+        await using var server = this.RunHttpServer(
+            async (_, response) =>
+            {
+                response.Ok();
+                await response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes("""{"answer":"in the body"}"""));
+            }
+        );
+
+        // act
+        await this.CreateHttpRequest(server)
+            .Get("log")
+            .WithLogFromWithHeaders(this, LogData.Headers)
+            .RunAsync(TestContext.Current.CancellationToken);
+
+        // assert
+        var logged = string.Join("\n", Logs.Select(x => x.Message));
+
+        logged.Contains("response ").IsTrue("the response was not logged at all");
+        logged.Contains("in the body").IsFalse("the body was logged without being asked for");
+    }
+
+    /// <summary>
+    /// A body larger than the cap is cut, and the log says how much was cut.
+    /// </summary>
+    /// <remarks>
+    /// The reason body logging is safe to turn on everywhere. A reference payload from this venue runs to
+    /// megabytes, and a log line that size is not read - it is scrolled past, taking the lines around it
+    /// with it. Saying how much was cut is what lets a reader tell a truncated body from a short one.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task ALargeBody_IsCutAndSaysSo()
+    {
+        // arrange
+        OverrideLogLevel(LogLevel.Trace);
+
+        // comfortably past the cap, and made of one repeated character so the assertion below is about
+        // the length rather than about where a boundary happened to land
+        const int size = 40 * 1024;
+        var payload = new string('x', size);
+
+        await using var server = this.RunHttpServer(
+            async (_, response) =>
+            {
+                response.Ok();
+                await response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes(payload));
+            }
+        );
+
+        // act
+        await this.CreateHttpRequest(server)
+            .Get("log")
+            .WithLogFromWithHeaders(this, LogData.Response)
+            .RunAsync(TestContext.Current.CancellationToken);
+
+        // assert
+        var logged = string.Join("\n", Logs.Select(x => x.Message));
+
+        logged.Length.IsLess(size, "the whole body reached the log, so nothing was cut");
+        logged.Contains($"of {size}").IsTrue("the cut did not say how much there was");
     }
 }

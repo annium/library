@@ -9,7 +9,8 @@ namespace Annium.Finance.Providers.Crypto.Binance.Spot.Internal.Market.Contracts
 /// <summary>
 /// Deserializes a Binance symbol's <c>filters</c> array into an <see cref="InstrumentFilters"/>. Spot symbols
 /// carry separate <c>LOT_SIZE</c> (limit order) and <c>MARKET_LOT_SIZE</c> (market order) filters, which are
-/// merged into a single, most permissive-on-both-ends lot size filter.
+/// merged into a single, most permissive-on-both-ends lot size filter, and a <c>PERCENT_PRICE_BY_SIDE</c>
+/// filter giving both ends of the price band for each side.
 /// </summary>
 internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
 {
@@ -35,6 +36,11 @@ internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
         NotionalFilter? notionalFilter = default;
         MaxOrdersFilter? maxOrdersFilter = default;
 
+        // the only optional one: every trading symbol carries it today, but its absence is representable -
+        // an unbounded band - where a missing price or lot filter leaves nothing to compute with, so it does
+        // not join the set whose absence drops the instrument
+        var percentPriceFilter = new PercentPriceFilter(decimal.Zero, decimal.Zero, decimal.Zero, decimal.Zero);
+
         var filterType = string.Empty;
 
         var minPrice = decimal.Zero;
@@ -47,6 +53,11 @@ internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
 
         var minNotional = decimal.Zero;
         var maxNotional = decimal.Zero;
+
+        var bidMultiplierUp = decimal.Zero;
+        var bidMultiplierDown = decimal.Zero;
+        var askMultiplierUp = decimal.Zero;
+        var askMultiplierDown = decimal.Zero;
 
         var maxOrders = 0;
 
@@ -70,7 +81,13 @@ internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
                     Math.Min(limitLotSizeFilter.MaxQty, marketLotSizeFilter.MaxQty),
                     Math.Max(limitLotSizeFilter.StepSize, marketLotSizeFilter.StepSize)
                 );
-                var result = new InstrumentFilters(lotSizeFilter, priceFilter, notionalFilter, maxOrdersFilter);
+                var result = new InstrumentFilters(
+                    lotSizeFilter,
+                    priceFilter,
+                    notionalFilter,
+                    percentPriceFilter,
+                    maxOrdersFilter
+                );
 
                 return result;
             }
@@ -95,6 +112,14 @@ internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
                         break;
                     case "NOTIONAL":
                         notionalFilter = new NotionalFilter(minNotional, maxNotional);
+                        break;
+                    case "PERCENT_PRICE_BY_SIDE":
+                        percentPriceFilter = new PercentPriceFilter(
+                            bidMultiplierDown,
+                            bidMultiplierUp,
+                            askMultiplierDown,
+                            askMultiplierUp
+                        );
                         break;
                     case "MAX_NUM_ORDERS":
                         maxOrdersFilter = new MaxOrdersFilter(maxOrders);
@@ -139,6 +164,19 @@ internal class InstrumentFiltersConverter : JsonConverter<InstrumentFilters>
                         break;
                     case "maxNotional":
                         maxNotional = reader.GetDecimalFromString();
+                        break;
+
+                    case "bidMultiplierUp":
+                        bidMultiplierUp = reader.GetDecimalFromString();
+                        break;
+                    case "bidMultiplierDown":
+                        bidMultiplierDown = reader.GetDecimalFromString();
+                        break;
+                    case "askMultiplierUp":
+                        askMultiplierUp = reader.GetDecimalFromString();
+                        break;
+                    case "askMultiplierDown":
+                        askMultiplierDown = reader.GetDecimalFromString();
                         break;
 
                     case "maxNumOrders":

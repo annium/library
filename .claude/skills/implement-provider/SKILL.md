@@ -378,7 +378,9 @@ code — a test written and not recorded leaves the manifest understating what w
 same defect as overstating it, pointed the other way.
 
 Every field in the contract is read; every field read is in the contract — the second direction is
-what catches the fields we invented. Enumerations map every documented value in both directions.
+what catches the fields we invented. Every constraint the venue publishes either reaches the domain
+model or is recorded as deliberately dropped: one read and discarded costs a caller that cannot compute
+what it may ask for, and it pays that cost in another layer. Enumerations map every documented value in both directions.
 Positional payloads have their indices pinned, because there the index *is* the contract and nothing
 else protects it. Every conditional has both arms driven, and every drop rule is an entry rather than
 an implication. Tests green.
@@ -422,7 +424,10 @@ symbol which the fixture would close as "cleanup", and sufficient margin. Run th
 **alone** — nothing else against the same account concurrently.
 
 **Done.** Facts this step exercises become `pinned`, and those an approved live stage observed become
-`live`, dated — including the ones only a placed order can settle. Every stream event handled. Status transitions map to the domain's vocabulary. Errors reach
+`live`, dated — including the ones only a placed order can settle. **A connection's lifetime and its
+recovery are measured rather than argued**: every other live test finishes in seconds, so a suite can
+be green while the two properties a consumer depends on — that it lasts, and that it comes back — have
+never run. The child skill carries the two instruments. Every stream event handled. Status transitions map to the domain's vocabulary. Errors reach
 the connector's error channel rather than a log line — a connector that fails silently is
 indistinguishable from one that is merely reconnecting. Tests green; the live stages pass, each
 approved in turn.

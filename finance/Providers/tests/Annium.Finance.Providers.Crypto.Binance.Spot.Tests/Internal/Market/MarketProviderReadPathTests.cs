@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Annium.Core.DependencyInjection;
+using Annium.Finance.Providers.Abstractions.Domain.Market;
 using Annium.Finance.Providers.Abstractions.Domain.Market.Operations;
 using Annium.Finance.Providers.Core;
 using Annium.Finance.Providers.Core.Shared.RateLimits;
@@ -228,6 +231,188 @@ public class MarketProviderReadPathTests : ProvidersTestBase
         // assert
         result.Status.IsNot(MarketOperationStatus.Ok, "a refused exchange info load must not read as success");
         result.Data.IsDefault("an exchange that could not be read is not an exchange with no instruments");
+    }
+
+    /// <summary>
+    /// The candle request carries every parameter the contract names, and asks the documented path.
+    /// </summary>
+    /// <remarks>
+    /// Only the cursor was asserted before, because the paging test needed it and nothing else needed
+    /// anything. That leaves the other three free to be wrong: a mutated symbol fetches another
+    /// instrument's candles and still returns a full page, which is exactly what the caller expected
+    /// to see. The path is here for the same reason - the local server answers anything, so a typo or
+    /// a wrong version is invisible offline and surfaces only against the venue.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadCandles_AsksTheDocumentedPathWithEveryParameter()
+    {
+        // arrange
+        var start = Instant.FromUnixTimeMilliseconds(1_700_000_000_000);
+        var paths = new List<string>();
+        var queries = new List<NameValueCollection>();
+
+        await using var server = this.RunHttpServer(
+            async (request, response) =>
+            {
+                paths.Add(request.Url!.AbsolutePath);
+                queries.Add(request.QueryString);
+                await WriteJsonAsync(response, "[]");
+            }
+        );
+        var provider = CreateProvider(server);
+
+        // act
+        await foreach (
+            var _ in provider.LoadCandlesAsync(
+                "BTCUSDT",
+                start,
+                start + Duration.FromMinutes(1),
+                TestContext.Current.CancellationToken
+            )
+        ) { }
+
+        // assert
+        paths.Count.IsGreaterOrEqual(1, "no candle request was made");
+        paths[0].Is("/api/v3/klines", "the candle path is not the one the contract names");
+
+        var query = queries[0];
+        query["symbol"].Is("BTCUSDT", "the candle request asked for another instrument");
+        query["interval"].Is("1m", "the candle request asked for another interval");
+        query["limit"].IsNotDefault("the candle request sent no page size");
+        query["startTime"].Is(start.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>
+    /// A refused candle page is a failure, and an empty one is not.
+    /// </summary>
+    /// <remarks>
+    /// The success type here is a collection, which is the shape that used to swallow an exchange
+    /// error and hand the caller an empty list instead. The futures venue re-pinned that at its own
+    /// call sites after the upstream fix; this path never was. The two outcomes are asserted together
+    /// on purpose: what matters is not that a refusal fails, it is that a refusal and a quiet minute
+    /// do not look the same. They do not, and not in the way first assumed - a window the venue
+    /// answers with no candles yields **no batch at all**, while a refusal yields one carrying a
+    /// status the caller can act on. Distinguishable, which is the property; worth writing down,
+    /// because "empty answer" and "empty batch" are not the same thing here.
+    ///
+    /// Each provider gets a limiter of its own, because a refusal is not free of consequences: it
+    /// stands the limiter down, and the container's is shared, so the next load is refused locally
+    /// before it is sent and answers TooManyRequests without the server hearing about it. That is the
+    /// limiter doing its job, and it would have made this test assert the wrong thing about the
+    /// provider. Found by asserting on the status rather than on a boolean, which is the only reason
+    /// the cause was visible at all.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadCandles_ThatIsRefused_IsAFailureAndNotAnEmptyPage()
+    {
+        // arrange
+        var start = Instant.FromUnixTimeMilliseconds(1_700_000_000_000);
+
+        await using var refusing = this.RunHttpServer(
+            async (_, response) =>
+            {
+                var payload = Encoding.UTF8.GetBytes(@"{ ""code"": -1003, ""msg"": ""Too many requests."" }");
+                response.StatusCode(HttpStatusCode.TooManyRequests);
+                response.ContentType = MediaTypeNames.Application.Json;
+                response.ContentLength64 = payload.Length;
+                await response.OutputStream.WriteAsync(payload);
+            }
+        );
+        await using var quiet = this.RunHttpServer(async (_, response) => await WriteJsonAsync(response, "[]"));
+
+        // act
+        var refused = await ReadFirstBatchAsync(CreateProvider(refusing, new AlwaysAllowingRateLimiter()), start);
+        var empty = await ReadFirstBatchAsync(CreateProvider(quiet, new AlwaysAllowingRateLimiter()), start);
+
+        // assert
+        refused
+            .NotNull("a refused candle load yielded nothing, so nothing can act on it")
+            .Status.IsNot(MarketOperationStatus.Ok, "a refused candle page read as success");
+        empty.IsDefault("a window the venue answered with no candles yielded a batch");
+    }
+
+    /// <summary>
+    /// Reads the first batch a candle load yields, or null when it yields none.
+    /// </summary>
+    /// <param name="provider">The provider to read through.</param>
+    /// <param name="start">The instant to read from.</param>
+    /// <returns>The first batch, or null.</returns>
+    private static async Task<MarketResult<IReadOnlyCollection<CandleModel>?>?> ReadFirstBatchAsync(
+        MarketProvider provider,
+        Instant start
+    )
+    {
+        await foreach (
+            var batch in provider.LoadCandlesAsync(
+                "BTCUSDT",
+                start,
+                start + Duration.FromMinutes(1),
+                TestContext.Current.CancellationToken
+            )
+        )
+            return batch;
+
+        return null;
+    }
+
+    /// <summary>
+    /// The exchange info request asks the documented path.
+    /// </summary>
+    /// <remarks>
+    /// Same reason as the candle path above: the test server answers whatever it is asked, so the one
+    /// string that has to match the venue is the one nothing was checking. This venue has already lost
+    /// a live run to exactly that - a path pinned at a version the exchange had moved on from.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Fact]
+    public async Task LoadContext_AsksTheDocumentedPath()
+    {
+        // arrange
+        var paths = new List<string>();
+
+        await using var server = this.RunHttpServer(
+            async (request, response) =>
+            {
+                paths.Add(request.Url!.AbsolutePath);
+                await WriteJsonAsync(response, @"{ ""rateLimits"": [], ""symbols"": [] }");
+            }
+        );
+        var provider = CreateProvider(server);
+
+        // act
+        await provider.LoadContextAsync();
+
+        // assert
+        paths.Count.Is(1, "the exchange info load did not make exactly one request");
+        paths[0].Is("/api/v3/exchangeInfo", "the exchange info path is not the one the contract names");
+    }
+
+    /// <summary>
+    /// A rate limiter that permits everything and remembers nothing, so a test about the provider is
+    /// not also a test about the limiter's memory of a refusal.
+    /// </summary>
+    private sealed class AlwaysAllowingRateLimiter : IRateLimiter
+    {
+        /// <summary>Always allows the request.</summary>
+        /// <returns>Always true.</returns>
+        public bool CanExecute() => true;
+
+        /// <summary>Ignores the reported ceiling.</summary>
+        /// <param name="limit">Ignored.</param>
+        public void UpdateLimit(int limit) { }
+
+        /// <summary>Ignores the reported weight.</summary>
+        /// <param name="weight">Ignored.</param>
+        public void UsedWeight(int weight) { }
+
+        /// <summary>Ignores the requested pause, which is the whole point.</summary>
+        /// <param name="duration">Ignored.</param>
+        public void Block(TimeSpan duration) { }
+
+        /// <summary>Holds nothing to release.</summary>
+        public void Dispose() { }
     }
 
     /// <summary>

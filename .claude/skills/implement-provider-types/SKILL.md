@@ -134,6 +134,39 @@ Budget for a fix inside this step. A fact at `none` that turns out to be wrong w
 and **review is not repeatable** — repairing it without a test returns it to exactly the state it was
 found in.
 
+## Phase 3c2 — constraints reach the model, or are recorded as dropped
+
+A venue publishes the rules an order must satisfy, and this layer decides which of them the domain gets
+to know. **A constraint read and discarded is the worst of the three options** — worse than one never
+read, because the code demonstrably had it. Its cost is paid elsewhere and looks like nothing to do
+with this layer: the caller cannot compute what it may ask for, so it learns the bound by being
+refused, and the refusal names a rule rather than a number. That is hours spent in the wrong file, and
+it has happened.
+
+So, per constraint: it reaches the model, or the contract carries an entry saying it was dropped
+deliberately and what a caller is expected to do instead. "The converter reads the four filters we
+needed" is not a coverage statement; the question is what the venue publishes, not what we consumed.
+
+Three rules for the ones that do reach it:
+
+- **Do not tidy an asymmetric constraint into a symmetric one.** Where a venue states one inequality
+  per side, it is not stating a band on both — and reading it as one makes the model refuse orders the
+  venue accepts, locally, with nothing on the wire to explain it. The tidy reading is the one to
+  distrust, because it is the one that looks like the other venue's.
+- **Decide required versus optional by whether absence is representable.** A constraint whose absence
+  says something — no bound — is optional, and a record missing it stays usable. One whose absence
+  leaves nothing to compute with is required, and a record missing it is dropped entirely. Getting this
+  backwards either invents a bound nobody stated or silently deletes a tradable record.
+- **Model it in the domain's vocabulary where the venues disagree on the wire's.** Two market types of
+  one venue spelling the same constraint differently have no shared wire name to borrow, and a record
+  named after one of them teaches the reader that venue's spelling. This is the exception to *a name in
+  the contract is the name in the code*, and it is narrow: it applies where there is no single contract
+  name, not where one is merely inconvenient.
+
+**Pin the mapping per end, with values that differ.** A fixture whose bounds repeat — the same number
+on both sides, or one number reused for both ends — passes just as well when the sides are transposed.
+Four different numbers is the whole test.
+
 ## Mutation-check every fact you claim to have pinned
 
 Break the thing, watch the test fail, put it back. Without it a test is an assertion that some code
@@ -148,6 +181,12 @@ failing one — it certifies a test that guards nothing:
 - **Restore by reversing the edit, not by reverting the file** — unless the fix is already committed.
   Reverting returns the file to the last commit, which on uncommitted work throws the fix away along
   with the mutation, silently, and the next run then tests unfixed code and passes.
+
+And one thing a survivor can mean besides a missing test: **the mutated line changed no outcome.** A
+guard that cannot fire, a branch whose arms agree, a default that is unreachable — these survive every
+mutation because there is nothing there to break. Before writing a test to kill a survivor, ask whether
+the original line was doing anything; sometimes the finding is that it was not, and the answer is to
+remove it and say why the line it was modelled on stays.
 
 ## Phase 3d — write back
 

@@ -23,7 +23,10 @@ internal class UserConfigProfile : Profile
     private static UserConfig MapSettingsToConfig(IServiceProvider sp, UserSettings settings)
     {
         var httpApi = Endpoints.HttpApi;
-        var wsApi = Endpoints.WsApi;
+
+        // the WebSocket API host, not the market stream one: they are different endpoints speaking
+        // different protocols, and the account's events only come over this one
+        var wsApi = Endpoints.UserWsApi;
 
         var providerConfig = sp.Resolve<ProviderConfiguration>();
 
@@ -34,8 +37,7 @@ internal class UserConfigProfile : Profile
             Secret = settings.Secret,
             HttpApi = httpApi,
             WsApi = wsApi,
-            ListenKeyUriPath = Endpoints.UserWsUriPath,
-            ListenKey = providerConfig.ListenKey,
+            SubscribeRetryInterval = providerConfig.SubscribeRetryInterval,
             ReloadContext = providerConfig.ReloadContext,
             ReloadOrders = providerConfig.ReloadOrders,
             ReloadTrades = providerConfig.ReloadTrades,

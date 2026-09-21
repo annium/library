@@ -1,10 +1,16 @@
 using System;
 using Annium.Finance.Providers.Abstractions.Domain.User;
-using Annium.Finance.Providers.Crypto.Binance.Base.User.Services;
 
 namespace Annium.Finance.Providers.Crypto.Binance.Base.User;
 
-/// <summary>Base configuration for a Binance account/trading connector: credentials, the user HTTP/WebSocket API endpoints, and listen key polling.</summary>
+/// <summary>Base configuration for a Binance account/trading connector: credentials and the user HTTP/WebSocket API endpoints.</summary>
+/// <remarks>
+/// It carries no user-stream mechanism, and deliberately so: the venues do not share one. One reaches its
+/// account stream through a key fetched over REST and spent in a URL, the other through a signed subscription
+/// on a request/response socket, and a base holding either of them makes the other venue configure machinery
+/// it never resolves. That is what it did until 2026-09-21, on the venue that had not implemented a stream
+/// at all - which is exactly the case where nothing says so.
+/// </remarks>
 public abstract record UserConfigBase
 {
     /// <summary>Gets the name of the provider to connect to.</summary>
@@ -21,12 +27,6 @@ public abstract record UserConfigBase
 
     /// <summary>Gets the base URI of the user data stream WebSocket API.</summary>
     public required Uri WsApi { get; init; }
-
-    /// <summary>Gets the relative path appended to <see cref="WsApi"/>, followed by the listen key, when opening the user data stream connection.</summary>
-    public required string ListenKeyUriPath { get; init; }
-
-    /// <summary>Gets the polling intervals used to fetch and keep the user data stream listen key alive.</summary>
-    public required ListenKeyConfiguration ListenKey { get; init; }
 }
 
 /// <summary>Extension methods for converting a <see cref="UserConfigBase"/> into a <see cref="UserSettings"/>.</summary>

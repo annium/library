@@ -58,7 +58,6 @@ public class ProviderRegistrationTests : ProvidersTestBase
             ModifyOrderKey,
             CancelOrderKey,
             CancelAllOrdersKey,
-            ListenKeyKey,
         ];
 
         // act
@@ -92,7 +91,6 @@ public class ProviderRegistrationTests : ProvidersTestBase
             ModifyOrderKey,
             CancelOrderKey,
             CancelAllOrdersKey,
-            ListenKeyKey,
             AccountUpdateKey,
             OrderUpdateKey,
         ];

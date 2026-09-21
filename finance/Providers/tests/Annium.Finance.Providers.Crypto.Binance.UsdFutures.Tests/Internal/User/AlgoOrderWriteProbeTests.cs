@@ -325,7 +325,6 @@ public class AlgoOrderWriteProbeTests : ProvidersTestBase
             Secret = Settings.User.Secret,
             HttpApi = Endpoints.HttpApi,
             WsApi = Endpoints.WsApi,
-            ListenKeyUriPath = Endpoints.UserWsUriPath,
             ListenKey = new Annium.Finance.Providers.Crypto.Binance.Base.User.Services.ListenKeyConfiguration(
                 60_000,
                 5_000
@@ -354,13 +353,14 @@ public class AlgoOrderWriteProbeTests : ProvidersTestBase
         };
 
         var resolver = sp.CreateListenKeyResolver(
-            config,
+            config.HttpApi,
+            config.ListenKey,
             Endpoints.ListenKeyUriPath,
             Constants.ListenKeyKey,
             signatureService,
             monitor
         );
-        using var stream = sp.CreateUserStream(config, resolver, monitor);
+        await using var stream = sp.CreateListenKeyUserStream(config.WsApi, Endpoints.UserWsUriPath, resolver, monitor);
         stream.OnMessage += data => messages.Enqueue(System.Text.Encoding.UTF8.GetString(data.Span));
 
         await Task.Delay(10_000, ct);

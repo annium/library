@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Converters;
-using Annium.Finance.Providers.Crypto.Binance.Base.User.Contracts.Converters;
 using Annium.Finance.Providers.Crypto.Binance.Spot.Internal.User.Contracts.Converters;
 using Annium.Serialization.Json;
 
@@ -54,14 +53,16 @@ internal static class UserContracts
             .AddConverter<OperationResultConverter>();
 
     /// <summary>Serializer options for the cancel-all-open-orders endpoint.</summary>
+    /// <remarks>
+    /// It reads the same element the single cancel does, because this venue answers a cancel-all with the
+    /// <b>list of orders it cancelled</b> rather than with an acknowledgement envelope. The other venue
+    /// answers the envelope, and a serializer carried across from it parses nothing here: the cancellation
+    /// succeeds on the exchange and the caller is told it failed. Found on the first live run, 2026-09-21.
+    /// </remarks>
     public static JsonSerializerOptions CancelAllOrders { get; } =
-        new JsonSerializerOptions().ResetConverters().AddConverter<OperationResultConverter>();
-
-    /// <summary>Serializer options for the listen key (user data stream token) endpoint.</summary>
-    public static JsonSerializerOptions ListenKey { get; } =
         new JsonSerializerOptions()
             .ResetConverters()
-            .AddConverter<ListenKeyResponseConverter>()
+            .AddConverter<CancelOrderResponseConverter>()
             .AddConverter<OperationResultConverter>();
 
     /// <summary>Serializer options for the <c>outboundAccountPosition</c> user data stream event.</summary>
