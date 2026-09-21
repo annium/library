@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
@@ -38,7 +39,20 @@ public static class StatusMonitorTestExtensions
             if (monitor.Status == target)
                 reached.TrySetResult();
 
-            await reached.Task.WaitAsync(ct);
+            try
+            {
+                await reached.Task.WaitAsync(ct);
+            }
+            catch (OperationCanceledException)
+            {
+                // what the deadline killed, said out loud. Without this the run reports a cancelled task
+                // and nothing else, and a status that never arrived is indistinguishable from a test host
+                // that was shut down - which cost a CI investigation that had to start by guessing
+                throw new InvalidOperationException(
+                    $"waited for {target} and the monitor is {monitor.Status}",
+                    new TaskCanceledException()
+                );
+            }
         }
         finally
         {

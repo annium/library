@@ -69,8 +69,17 @@ internal abstract class WebSocketService : IDisposable, ILogSubject
         _statusReporter = statusReporter;
         _statusReporter.Bind(this);
 
-        _socket.Connect(new Uri(config.WsApi, config.WsUriPath));
+        // connecting is reported before the socket is asked to connect, and the order is the whole point.
+        // Connect returns as soon as the attempt is under way, so with these two the other way round a
+        // connection that completes in between is reported connected by the socket's own thread and then
+        // overwritten here - permanently, because a socket already connected raises no second event. The
+        // connector then reports itself connecting for as long as it lives while its socket works fine,
+        // which is indistinguishable from a venue that is simply slow.
+        //
+        // Found as a test that hung once in four CI runs waiting for connected; the two user streams beside
+        // this one always had the order right, which is why only the market side ever showed it
         _statusReporter.Connecting();
+        _socket.Connect(new Uri(config.WsApi, config.WsUriPath));
     }
 
     /// <summary>Disconnects and disposes the underlying WebSocket, reporting the connector as disconnected.</summary>
