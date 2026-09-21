@@ -1034,3 +1034,46 @@ stronger guarantee than a test and a weaker one than a test plus the compiler.
 The refusal half has no local mutation: the discarding it guards against lived upstream and is fixed
 there, so there is nothing in this repository to break. The test is a regression guard against that fix
 being undone, which is what it is for.
+
+## §10 — spot user read endpoints, collected 2026-09-21
+
+Collected because §9 records the spot user path as `[DEAD]`, so step 1 had no `file:line` to anchor and
+step 2 had nothing to check: the response *shapes* were `confirmed` at tier 1 all along, and the
+**endpoints that return them were in no row of this document**. Reviving the path needs them, and a
+plausible reading of the futures venue is not a source — the two diverge on the facts that matter most
+here.
+
+Source: the stored snapshot `2026.09/2026.09.18-docs/spot/rest-api.md`, tier 1. Every row cites it.
+
+| endpoint | weight | required | optional | citation |
+|---|---|---|---|---|
+| `GET /api/v3/account` | 20 | `timestamp` | `omitZeroBalances`, `recvWindow` | `rest-api.md:4174-4190` |
+| `GET /api/v3/openOrders` | **6 with a symbol, 80 without** | `timestamp` | `symbol`, `recvWindow` | `rest-api.md:4287-4305` |
+| `GET /api/v3/allOrders` | 20 | `symbol`, `timestamp` | `orderId`, `startTime`, `endTime`, `limit`, `recvWindow` | `rest-api.md:4339-4367` |
+| `GET /api/v3/myTrades` | **20 without `orderId`, 5 with** | `symbol`, `timestamp` | `orderId`, `startTime`, `endTime`, `fromId`, `limit`, `recvWindow` | `rest-api.md:4570-4608` |
+
+### The three facts that diverge from futures **[DIVERGES]**
+
+Named separately because each is a trap for anyone porting the neighbouring venue's provider, which is
+the obvious and wrong way to build this.
+
+1. **The history window is capped at 24 hours**, on both `allOrders` and `myTrades` — "the time between
+   `startTime` and `endTime` can't be longer than 24 hours" (`rest-api.md:4367`, `:4600`). Futures pages
+   in seven-day windows. A loop written for seven days asks spot for a window it refuses.
+2. **`openOrders` costs 80 without a symbol**, against 40 on futures. A one-second reload of an
+   unscoped open-order list is 4800 a minute against a 6000 ceiling — the whole allowance for one list.
+3. **`myTrades` returns the most recent trades when `fromId` is absent** (`rest-api.md:4598-4599`),
+   where the futures trade endpoint's page cap selects the **oldest**. The same parameter name, the
+   opposite end. `undocumented` on futures and `confirmed` here, which is exactly backwards from how it
+   feels.
+
+### Cursor semantics
+
+- `allOrders` with `orderId` returns orders **>= that id**; without it, the most recent
+  (`rest-api.md:4364-4365`).
+- `myTrades` with `fromId` returns trades **>= that id**; without it, the most recent
+  (`rest-api.md:4598-4599`).
+- `limit` on both: default 500, maximum 1000.
+
+Verification axis: everything in this section is `confirmed` on the documentation axis and `none` on
+the verification axis until the read paths that call it exist and are pinned.
