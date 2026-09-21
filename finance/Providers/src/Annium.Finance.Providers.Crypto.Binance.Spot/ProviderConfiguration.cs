@@ -1,3 +1,4 @@
+using System;
 using Annium.Finance.Providers.Core.Shared.Loaders;
 using Annium.Finance.Providers.Core.Shared.TimeSync;
 
@@ -6,6 +7,21 @@ namespace Annium.Finance.Providers.Crypto.Binance.Spot;
 /// <summary>User-configurable timing settings for the Binance spot provider, with defaults suited to typical usage.</summary>
 public sealed record ProviderConfiguration
 {
+    /// <summary>Gets the base URI of the account/trading HTTP API, or null to use the exchange's own.</summary>
+    /// <remarks>
+    /// The exchange publishes a testnet with its own hosts, and a caller that wants one is configuring an
+    /// endpoint rather than patching a constant. Each of the three is overridden on its own, because the
+    /// reasons to move them do not arrive together: a testnet moves all three, while a test that needs to
+    /// cut a connection moves only the socket it means to cut and leaves the rest pointed at the venue.
+    /// </remarks>
+    public Uri? HttpApi { get; init; }
+
+    /// <summary>Gets the base URI of the market data stream, or null to use the exchange's own.</summary>
+    public Uri? MarketWsApi { get; init; }
+
+    /// <summary>Gets the endpoint of the WebSocket API carrying the account stream, or null to use the exchange's own.</summary>
+    public Uri? UserWsApi { get; init; }
+
     /// <summary>Gets how often a refused account-stream subscription is attempted again, in milliseconds.</summary>
     /// <remarks>
     /// The subscription is cheap and the socket it runs on is not, so a refusal is retried rather than
