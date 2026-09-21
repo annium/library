@@ -88,6 +88,14 @@ public abstract class SpotUserConnectorTestBase : ProvidersTestBase, IAsyncLifet
     /// <summary>Whether the connector was built, and therefore whether there is anything to clean up with.</summary>
     private bool _connectorBuilt;
 
+    /// <summary>Completes when the orders loader has delivered its first snapshot.</summary>
+    /// <remarks>
+    /// Needed because an empty snapshot and a snapshot that has not arrived look identical from the queue:
+    /// neither enqueues anything. The difference decides whether there is anything to cancel, and asking
+    /// the venue to cancel nothing is an error on this venue rather than a no-op.
+    /// </remarks>
+    private readonly TaskCompletionSource _ordersSnapshot = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
     /// <summary>
     /// Initializes a new instance of the <see cref="SpotUserConnectorTestBase"/> class.
     /// </summary>
@@ -144,7 +152,12 @@ public abstract class SpotUserConnectorTestBase : ProvidersTestBase, IAsyncLifet
 
         this.Trace("subscribe to connector data");
         _disposable += Connector.Assets.Subscribe(x => Collect(_assets, x));
-        _disposable += Connector.Orders.Subscribe(x => Collect(_orders, x));
+        _disposable += Connector.Orders.Subscribe(x =>
+        {
+            Collect(_orders, x);
+            if (x.Type is ChangeEventType.Init)
+                _ordersSnapshot.TrySetResult();
+        });
 
         this.Trace("await until user connector is ready");
         await Connector.WhenConnectedAsync(TestContext.Current.CancellationToken);
@@ -379,12 +392,48 @@ public abstract class SpotUserConnectorTestBase : ProvidersTestBase, IAsyncLifet
     {
         this.Trace("cancel all orders - start");
 
+        // the venue refuses a cancel-all on a symbol with nothing open - measured 2026-09-21, HTTP 400 with
+        // the code its reference calls CANCEL_REJECTED and a message saying the order could not be found.
+        // That code is a family rather than a reason: the same one carries "market is closed" and "this
+        // account may not place or cancel orders", so it cannot be folded into success without swallowing
+        // the two failures a cleanup path least wants swallowed. Asking only when there is something to
+        // cancel is the honest way round it
+        await _ordersSnapshot.Task.WaitAsync(ct);
+
+        var open = CurrentlyOpenOrders();
+        if (open.Length == 0)
+        {
+            this.Trace<string>("skip cancel all orders - nothing open on {symbol}", Symbol);
+
+            return;
+        }
+
+        this.Trace<string, string>("cancel {count} open order(s) on {symbol}", open.Length.ToString(), Symbol);
+
         await Connector.CancelAllOrdersAsync(Symbol).UnwrapAsync().WaitAsync(ct);
 
         EnsureNoErrors();
 
         this.Trace("cancel all orders - done");
     }
+
+    /// <summary>
+    /// The orders on <see cref="Symbol"/> that the connector last reported as open.
+    /// </summary>
+    /// <remarks>
+    /// Taken as the last state reported per id rather than as everything reported, because the queue keeps
+    /// the whole history: an order placed and then cancelled appears twice, and only the second says where
+    /// it ended up.
+    /// </remarks>
+    /// <returns>The orders currently open.</returns>
+    private OrderModel[] CurrentlyOpenOrders() =>
+        [
+            .. _orders
+                .Where(x => x.Symbol == Symbol)
+                .GroupBy(x => x.Id)
+                .Select(g => g.Last())
+                .Where(x => x.Status is OrderStatus.New or OrderStatus.PartiallyFilled),
+        ];
 
     /// <summary>
     /// Waits until the connector has reported at least one asset balance, plus a grace period for further
@@ -404,18 +453,49 @@ public abstract class SpotUserConnectorTestBase : ProvidersTestBase, IAsyncLifet
     }
 
     /// <summary>
-    /// A price far enough below the market that an order at it rests rather than fills.
+    /// A price far enough below the market that an order at it rests rather than fills, and near enough
+    /// that the venue accepts it.
     /// </summary>
     /// <remarks>
-    /// Half the current bid, which on any instrument this suite would be pointed at is many hours of
-    /// movement away, and clamped to the instrument's own minimum so the venue does not refuse it. The
-    /// distance is the safety property: every order this fixture places is priced here, which is what makes
-    /// the block exercise the order lifecycle without buying anything.
+    /// <para>
+    /// The distance is bounded from <b>both</b> sides, which is the part that is easy to miss: a venue
+    /// limits how far from the market a limit order may be priced, and an order too far away is refused by
+    /// a filter rather than left to rest. Measured on the first live run of this block - half the market
+    /// was refused outright.
+    /// </para>
+    /// <para>
+    /// Three things made that failure exact rather than marginal, and all three are worth stating because
+    /// only the first is obvious. The bound was <em>exactly</em> half. It is applied against an average of
+    /// recent trade prices rather than against the bid this is computed from, so dividing the bid by the
+    /// bound's own factor lands on the wrong side of it whenever the average is above the bid. And rounding
+    /// down to the tick, which is the safe direction for not filling, is the unsafe direction for this.
+    /// </para>
+    /// <para>
+    /// So this leaves room rather than aiming at the bound: well inside whatever the venue allows, and
+    /// still far enough below the market that a test measured in minutes will not see it filled. The bound
+    /// itself is not in <see cref="InstrumentModel"/> - the provider does not read that filter - so it
+    /// cannot be computed here, and that gap is recorded in the provider manifest rather than guessed at.
+    /// </para>
     /// </remarks>
     /// <returns>The price to rest at.</returns>
     protected decimal RestingPrice()
     {
-        var price = Instrument.ToTickSizeDown(Ticker.BidPrice / 2m);
+        var price = Instrument.ToTickSizeDown(Ticker.BidPrice * 0.6m);
+
+        return Math.Max(price, Instrument.MinPrice);
+    }
+
+    /// <summary>
+    /// A second resting price, distinct from <see cref="RestingPrice"/>, for a replacement to move to.
+    /// </summary>
+    /// <remarks>
+    /// Above the first rather than below it: the bound this has to stay inside is a floor, so moving up
+    /// walks away from it. The order is still far enough below the market not to fill.
+    /// </remarks>
+    /// <returns>The price to move a replacement to.</returns>
+    protected decimal ReplacementPrice()
+    {
+        var price = Instrument.ToTickSizeDown(Ticker.BidPrice * 0.7m);
 
         return Math.Max(price, Instrument.MinPrice);
     }

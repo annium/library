@@ -26,8 +26,8 @@ public class UserProviderTests : UserProviderTestBase
         : base(Settings.User, "BTCUSDT", outputHelper) { }
 
     /// <summary>
-    /// Registers the Binance Spot provider, with tight reload-loader intervals, so the user provider under
-    /// test is resolved from its actual registration.
+    /// Registers the Binance Spot provider, with the scheduled reload slow enough to fit the weight budget,
+    /// so the user provider under test is resolved from its actual registration.
     /// </summary>
     /// <param name="ctx">The fluent context to register providers into.</param>
     protected override void RegisterProvider(ProviderRegistrationContext ctx)
@@ -35,9 +35,9 @@ public class UserProviderTests : UserProviderTestBase
         ctx.WithBinanceSpot(
             new ProviderConfiguration
             {
-                ReloadContext = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
-                ReloadOrders = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
-                ReloadTrades = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
+                ReloadContext = new CompositeLoaderConfig(200, 5, 1000, 5_000, 100),
+                ReloadOrders = new CompositeLoaderConfig(200, 5, 1000, 15_000, 100),
+                ReloadTrades = new CompositeLoaderConfig(200, 5, 1000, 15_000, 100),
             }
         );
     }

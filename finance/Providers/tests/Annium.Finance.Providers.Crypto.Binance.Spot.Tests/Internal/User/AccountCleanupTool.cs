@@ -43,7 +43,7 @@ namespace Annium.Finance.Providers.Crypto.Binance.Spot.Tests.Internal.User;
 public class AccountCleanupTool : ProvidersTestBase
 {
     /// <summary>The symbol to clear.</summary>
-    private const string Symbol = "BTCUSDT";
+    private const string Symbol = "DOTUSDT";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AccountCleanupTool"/> class.
@@ -53,8 +53,8 @@ public class AccountCleanupTool : ProvidersTestBase
         : base(outputHelper) { }
 
     /// <summary>
-    /// Registers the Binance spot provider with tight reload intervals, so the order snapshot arrives
-    /// promptly and the tool can report what it is about to cancel.
+    /// Registers the Binance spot provider, with the scheduled reload slow enough to fit the weight budget.
+    /// The tool is run after something has gone wrong, which is when the budget is least likely to be free.
     /// </summary>
     /// <param name="ctx">The fluent context to register providers into.</param>
     protected override void RegisterProvider(ProviderRegistrationContext ctx)
@@ -62,9 +62,9 @@ public class AccountCleanupTool : ProvidersTestBase
         ctx.WithBinanceSpot(
             new ProviderConfiguration
             {
-                ReloadContext = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
-                ReloadOrders = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
-                ReloadTrades = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
+                ReloadContext = new CompositeLoaderConfig(200, 5, 1000, 5_000, 100),
+                ReloadOrders = new CompositeLoaderConfig(200, 5, 1000, 15_000, 100),
+                ReloadTrades = new CompositeLoaderConfig(200, 5, 1000, 15_000, 100),
             }
         );
     }
@@ -108,8 +108,19 @@ public class AccountCleanupTool : ProvidersTestBase
         foreach (var order in open)
             this.Trace<string, string>("open: {id} {order}", order.Id, order.ToString());
 
-        this.Trace<string>("cancel all orders on {symbol}", Symbol);
-        await connector.CancelAllOrdersAsync(Symbol).UnwrapAsync().WaitAsync(ct);
+        if (open.Length == 0)
+        {
+            // the venue refuses a cancel-all on a symbol with nothing open - measured 2026-09-21, HTTP 400
+            // under the code its reference calls CANCEL_REJECTED. That code is a family rather than a
+            // reason, carrying "market is closed" and "this account may not place or cancel orders" too,
+            // so it cannot be read as success. Nothing to do here is not a failure either
+            this.Trace<string>("nothing open on {symbol}, nothing to cancel", Symbol);
+        }
+        else
+        {
+            this.Trace<string>("cancel all orders on {symbol}", Symbol);
+            await connector.CancelAllOrdersAsync(Symbol).UnwrapAsync().WaitAsync(ct);
+        }
 
         await Task.Delay(2000, ct);
 

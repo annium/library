@@ -285,6 +285,61 @@ public class UserConnectorCommandTests : UserConnectorOfflineTestBase
     }
 
     /// <summary>
+    /// Cancelling all orders is reported as a success when the venue answers with what it cancelled.
+    /// </summary>
+    /// <remarks>
+    /// The fixture below is the venue's real answer, recorded off the wire on 2026-09-21. It matters
+    /// because the other venue answers a cancel-all with an acknowledgement envelope and this one answers
+    /// the <b>list of orders it cancelled</b>: read as the envelope, every successful cancellation came
+    /// back to the caller as a failure to parse. The cancellation had already happened on the exchange,
+    /// which is the half that makes it worth a test rather than a fix - a caller told it failed either
+    /// retries into a refusal or believes orders are still open.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = Timeout)]
+    public async Task CancelAll_ReadsTheListOfCancelledOrders()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        var log = new RequestLog();
+        await using var server = RunServer(log, _ => (HttpStatusCode.OK, CancelAllResponse));
+        await using var connector = CreateConnector(server, out _);
+
+        // act
+        var result = await connector.CancelAllOrdersAsync("DOTUSDT");
+
+        // assert
+        result.Status.Is(UserOperationStatus.Ok, $"the venue's own answer was read as {result.Status}");
+        (await log.Answered.Reader.ReadAsync(ct)).Path.Is("/api/v3/openOrders");
+    }
+
+    /// <summary>
+    /// The venue's answer to a cancel-all, recorded off the wire on 2026-09-21.
+    /// </summary>
+    private const string CancelAllResponse = """
+        [
+            {
+                "symbol": "DOTUSDT",
+                "origClientOrderId": "87f263d8-0c6e-4aec-9f4f-80eea9996601",
+                "orderId": 6205116330,
+                "orderListId": -1,
+                "clientOrderId": "oZxIAGe3LR6MnCw26VGpgk",
+                "transactTime": 1789975849417,
+                "price": "0.68900000",
+                "origQty": "7.98000000",
+                "executedQty": "0.00000000",
+                "origQuoteOrderQty": "0.00000000",
+                "cummulativeQuoteQty": "0.00000000",
+                "status": "CANCELED",
+                "timeInForce": "GTC",
+                "type": "LIMIT",
+                "side": "BUY",
+                "selfTradePreventionMode": "EXPIRE_MAKER"
+            }
+        ]
+        """;
+
+    /// <summary>
     /// A recorded answer to a placement, used wherever a command needs to succeed.
     /// </summary>
     private const string OrderResponse = """

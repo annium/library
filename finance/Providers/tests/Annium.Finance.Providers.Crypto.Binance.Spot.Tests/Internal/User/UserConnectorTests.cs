@@ -32,16 +32,16 @@ namespace Annium.Finance.Providers.Crypto.Binance.Spot.Tests.Internal.User;
 public class UserConnectorTests : SpotUserConnectorTestBase
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="UserConnectorTests"/> class, targeting BTCUSDT under the
+    /// Initializes a new instance of the <see cref="UserConnectorTests"/> class, targeting DOTUSDT under the
     /// configured <see cref="Settings.User"/> account.
     /// </summary>
     /// <param name="outputHelper">The xUnit output helper to route trace logging to.</param>
     public UserConnectorTests(ITestOutputHelper outputHelper)
-        : base(Settings.User, "BTCUSDT", outputHelper) { }
+        : base(Settings.User, "DOTUSDT", outputHelper) { }
 
     /// <summary>
-    /// Registers the Binance spot provider with tight reload intervals, so account changes are observed
-    /// without the test waiting on a poll.
+    /// Registers the Binance spot provider. Account changes are observed through the debounce rather than
+    /// through the scheduled reload, so the schedule can be slow enough to fit the weight budget.
     /// </summary>
     /// <param name="ctx">The fluent context to register providers into.</param>
     protected override void RegisterProvider(ProviderRegistrationContext ctx)
@@ -49,9 +49,16 @@ public class UserConnectorTests : SpotUserConnectorTestBase
         ctx.WithBinanceSpot(
             new ProviderConfiguration
             {
-                ReloadContext = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
-                ReloadOrders = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
-                ReloadTrades = new CompositeLoaderConfig(200, 5, 1000, 1000, 100),
+                // the debounce is what these tests actually run on: a command and a stream event each ask
+                // for a reload, and it arrives within it. The scheduled interval is the opposite concern -
+                // it is what runs when nothing is happening, and on this venue the open-order list costs 80
+                // because the connector asks for every symbol. At one second that is 4800 a minute against
+                // a ceiling of 6000, which the contract states outright and a config copied from the other
+                // venue walks straight into: the first run of this block spent the budget and the next
+                // request was refused by the local limiter before it was sent
+                ReloadContext = new CompositeLoaderConfig(200, 5, 1000, 5_000, 100),
+                ReloadOrders = new CompositeLoaderConfig(200, 5, 1000, 15_000, 100),
+                ReloadTrades = new CompositeLoaderConfig(200, 5, 1000, 15_000, 100),
             }
         );
     }
@@ -112,8 +119,9 @@ public class UserConnectorTests : SpotUserConnectorTestBase
             ct
         );
 
-        // act - a lower price, so the replacement still cannot fill
-        var newPrice = Instrument.ToTickSizeDown(price * 0.9m);
+        // act - a different resting price, still far below the market and still inside the venue's own
+        // limit on how far a limit order may be priced from it
+        var newPrice = ReplacementPrice();
         var replaced = await ModifyValidOrder(
             ModifyToLimitOrder(order, OrderSide.Buy, RestingQty(newPrice), newPrice),
             OrderStatus.New,
@@ -133,9 +141,17 @@ public class UserConnectorTests : SpotUserConnectorTestBase
     /// the caller.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The cheapest live refusal there is, and the one worth having: the connector's success type for a
     /// placement is an order, and the defect this module has already met once is an exchange error being
     /// discarded whenever the caller's type can represent "nothing".
+    /// </para>
+    /// <para>
+    /// The price is the same resting price the other cases use, which matters: on the first live run this
+    /// case passed while the venue was refusing every order in the block for an unrelated filter. A test
+    /// that asserts only "it was refused" passes on any refusal, so what it is priced at is the difference
+    /// between asserting the notional and asserting nothing in particular.
+    /// </para>
     /// </remarks>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(Timeout = TestBlock.WriteTimeoutMs)]
@@ -144,8 +160,8 @@ public class UserConnectorTests : SpotUserConnectorTestBase
         var ct = TestContext.Current.CancellationToken;
         var price = RestingPrice();
 
-        // a single lot at half the market, which on any instrument with a meaningful minimum notional is
-        // below it. Sized from the instrument rather than from a number written here
+        // a single lot, which against any meaningful minimum notional is below it. Sized from the
+        // instrument rather than from a number written here
         await InitInvalidOrder(
             InitLimitOrder(ClientOrderId(), Range(), Symbol, OrderSide.Buy, Instrument.MinQty, price),
             ct

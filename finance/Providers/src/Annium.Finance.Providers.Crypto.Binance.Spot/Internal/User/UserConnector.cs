@@ -328,8 +328,22 @@ internal class UserConnector : UserConnectorBase, IUserConnector
     /// Cancels every open order on the given symbol.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The symbol is required by the venue: there is no unscoped cancel-all here, so a caller wanting the
     /// whole account cleared has to ask symbol by symbol.
+    /// </para>
+    /// <para>
+    /// The answer is the <b>list of orders cancelled</b>, not an acknowledgement envelope - which is what
+    /// the other venue answers, and reading it as one here reported every successful cancellation as a
+    /// failure. Read into a collection of nullable elements because the converter declines an element it
+    /// cannot read, and a non-nullable one would keep the decline as a default rather than as nothing.
+    /// </para>
+    /// <para>
+    /// A symbol with nothing open is <b>refused</b> rather than answered with an empty list. The code it is
+    /// refused under is a family rather than a reason - the same one carries "market is closed" and "this
+    /// account may not place or cancel orders" - so it is not folded into success here, and a caller that
+    /// wants cancel-all to be idempotent has to look before it asks.
+    /// </para>
     /// </remarks>
     /// <param name="symbol">The instrument symbol to cancel orders for.</param>
     /// <returns>A result indicating whether the cancellation succeeded.</returns>
@@ -356,7 +370,7 @@ internal class UserConnector : UserConnectorBase, IUserConnector
             .Sign(_signatureService)
             .WithRateDelay1M(_rateLimiter)
             .WithLogFromWithHeaders(this, LogData.Headers | LogData.Response)
-            .AsUserResultAsync<OperationResult>();
+            .AsUserResultAsync<IReadOnlyCollection<CancelOrderResponse?>>();
 
         HandleTradeResult(result.IsSuccess);
 
