@@ -268,7 +268,7 @@ recorded here only so a future reader knows the omission is deliberate.
 | `DELETE /fapi/v1/order` | futures | `UsdFutures/Internal/User/UserConnector.cs:350` |
 | `DELETE /fapi/v1/allOpenOrders` | futures | `UsdFutures/Internal/User/UserConnector.cs:385` |
 | `POST /fapi/v1/listenKey` — the path literal moved out of the factory into `Endpoints` on 2026-09-18 (step 5d), where the other futures paths already lived | futures | `UsdFutures/Internal/Shared/Endpoints.cs:39`, issued at `UsdFutures/Internal/User/UserConnectorFactory.cs:59` |
-| Spot cancel-replace endpoint **[DEAD]** — parameters built, path never issued | spot | `Spot/Internal/User/Services/QueryProcessor.cs:68-111` |
+| Spot cancel-replace endpoint — ~~**[DEAD]**~~ **issued since 2026-09-21**, and validated live | spot | `Spot/Internal/Shared/Endpoints.cs` (`ModifyOrderUriPath`), issued at `Spot/Internal/User/UserConnector.cs:279`; parameters at `Spot/Internal/User/Services/QueryProcessor.cs:68-111` |
 
 ### WebSocket
 
@@ -323,16 +323,16 @@ Both rest on the ordering assumption recorded in §3, and neither is documented 
 parameter is documented, its use as a cursor is our inference from the order the exchange happens to
 return.
 
-### Spot orders **[DEAD]** — `Spot/Internal/User/Services/QueryProcessor.cs`
+### Spot orders — ~~**[DEAD]**~~ **live since 2026-09-21** — `Spot/Internal/User/Services/QueryProcessor.cs`
 
 Same base set minus `positionSide`/`reduceOnly` (24-28); modify via cancel-replace with
 `cancelReplaceMode="STOP_ON_FAILURE"`, `cancelOrigClientOrderId`, `newClientOrderId`,
-`timeInForce="GTC"` (72-79). Never invoked — see §9.
+`timeInForce="GTC"` (72-79). Invoked from `Spot/Internal/User/UserConnector.cs:232,279,314,367` — placement, cancel-replace, cancel and cancel-all — and exercised live on 2026-09-21.
 
 Its **response** shape is encoded too: top-level `code` / `msg` / `data`, with `data.cancelResponse`
 and `data.newOrderResponse` nested inside, and the cancel leg's error preferred over the init leg's
 when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129`,
-`ModifyOrderSuccessResponseConverter.cs:49-50`. Also `[DEAD]`.
+`ModifyOrderSuccessResponseConverter.cs:49-50`. Read by the connector's modify path since 2026-09-21.
 
 ---
 
@@ -445,8 +445,8 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
 
 | Event | Fields | Where |
 |---|---|---|
-| Spot `executionReport` **[DEAD]** **[DRIFT]** | `e`,`s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`P`,`X`,`z`,`Z`,`l`,`L`,`n`,`N`,`m`,`O`,`T` — **the field list still holds; the envelope does not.** Both converters read these off a bare object, and the venue now wraps every user event as `{"subscriptionId", "event": {…}}` — see §11 | `Spot/.../OrderUpdateEventConverter.cs:99-163` |
-| Spot `outboundAccountPosition` **[DEAD]** **[DRIFT]** | `e`,`u`,`B[]` with `a`,`f`,`l` — same envelope drift | `Spot/.../AccountUpdateEventConverter.cs:63-84` |
+| Spot `executionReport` — ~~**[DEAD]**~~ ~~**[DRIFT]**~~, `live` 2026-09-21 | `e`,`s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`P`,`X`,`z`,`Z`,`l`,`L`,`n`,`N`,`m`,`O`,`T` — **the field list holds and the envelope is handled.** The converters read a bare object, and the transport unwraps `{"subscriptionId", "event": {…}}` before handing the event over — see §11. Every field above was read off a real fill on 2026-09-21, including `N` arriving **null** on the acceptance event | `Spot/.../OrderUpdateEventConverter.cs:99-163` |
+| Spot `outboundAccountPosition` — ~~**[DEAD]**~~ ~~**[DRIFT]**~~, `live` 2026-09-21 | `e`,`u`,`B[]` with `a`,`f`,`l` — same envelope, same handling. **`B[]` is a delta**: it carries only the balances that changed, so the connector reads none of them and reloads the account instead | `Spot/.../AccountUpdateEventConverter.cs:63-84` |
 | Futures `ORDER_TRADE_UPDATE` | top-level `e`, nested `o` with `s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`sp`,`R`,`X`,`z`,`ap`,`l`,`L`,`n`,`N`,`m`,`T`. Trigger price is `sp` where spot uses `P`; average price is `ap` where spot derives it. `createdAt` synthesized from `transactionTime` only when status is `New`, else `0` (spot needs no synthesis: its event carries `O`) — both halves `pinned` 2026-09-17 | `UsdFutures/.../OrderUpdateEventConverter.cs:83,104-185` |
 | Futures `ACCOUNT_CONFIG_UPDATE` **[DEAD]** | `e`,`T`,`ai` (presence ⇒ multi-assets change), `ac` (presence ⇒ leverage change), `j`,`s`,`l` | `UsdFutures/.../AccountConfigUpdateEventConverter.cs:73-98` |
 | Futures `ACCOUNT_UPDATE` **[DEAD]** | `e`,`T`,`a`, `B[]` with `a`,`wb`,`cw`,`bc`, `P[]` with `s`,`ps`,`mt`,`iw`,`pa`,`ep`,`up` | `UsdFutures/.../BalanceAndPositionUpdateEventConverter.cs:67-89` |
@@ -557,7 +557,7 @@ like the `PENDING_CANCEL` beside it and `pinned` by the parse theory.
 
 Worth keeping for the shape of it: the lookup **throws** on a value it does not know, so this was not
 a status that would have arrived wrong - it was one pending leg failing the parse of the whole list it
-came in. `[DEAD]` in practice today, since the spot user path issues no requests. Binance also notes
+came in. It was `[DEAD]` in practice while the spot user path issued no requests; since 2026-09-21 it does, so the lookup is reachable again. Binance also notes
 `PENDING_CANCEL` is "currently unused", so our folding of it costs nothing and proves nothing.
 
 **Symbol status is not a two-value question.** Spot documents `TRADING`, `END_OF_DAY`, `HALT`, `BREAK`
@@ -969,7 +969,7 @@ The three cadence rows above were added 2026-09-18. They had never been recorded
 rows that decide how much weighted traffic this module generates at rest: §7's ceilings say what we are
 allowed, and these say what we spend without anybody asking for anything.
 
-**[DEAD] — the whole spot user path, and further than this said.**
+**~~[DEAD]~~ — the whole spot user path, and further than this said. Revived and validated live 2026-09-21; the paragraph below is kept as the record of what was dead and how far it reached.**
 `Spot/Internal/User/UserConnectorFactory.cs:14-31` builds a connector with no listen-key resolver and no
 user stream, and `Spot/Internal/User/UserConnector.cs:46-81` throws `NotImplementedException` for
 trading and leverage. Corrected 2026-09-18: `Spot/Internal/User/UserProvider.cs:14-64` is a **stub that
@@ -982,6 +982,15 @@ those converters and the dead `QueryProcessor`.
 Which also means the census line reading "Spot's account read paths stay `gated`" overstated the case:
 there are no spot account read paths to gate. Recorded because reviving the path revives every one of
 them at once.
+
+**And that is what happened, on 2026-09-21.** The factory builds a connector with an account stream —
+a different transport from the one this paragraph assumed, because the mechanism it named was retired
+(§11) — the connector issues placement, cancel-replace, cancel and cancel-all
+(`Spot/Internal/User/UserConnector.cs:232,279,314,367`), and `UserProvider` issues real requests on
+every load (`:72,104,132,146`). Each of the rows this paragraph listed as unreachable is reachable, and
+each was read from a live answer: the read block, the trading block, and on the same day the first
+fills. What the paragraph predicted — that reviving the path revives every one of them at once — is
+exactly how it went, which is the reason it is kept rather than deleted.
 
 ---
 
@@ -1130,8 +1139,10 @@ venue accepts what we send - and it is recorded here as answering exactly that.
 
 ## §11 — spot order lifecycle and user stream, collected 2026-09-21
 
-Collected for the same reason as §10 and in the same way: the spot connector is a stub, so step 1 had no
-`file:line` for any of it, and none of these endpoints appeared in a row of this document. Step 5 needs
+Collected for the same reason as §10 and in the same way: the spot connector **was** a stub when this
+section was opened, so step 1 had no `file:line` for any of it, and none of these endpoints appeared in
+a row of this document. It is not one since later the same day - every row below now has code behind it
+and an answer read from the venue. Step 5 needs
 them, and the futures connector is not a source — **every one of the four divergences below would be
 wrong if ported**, and two of them silently.
 
@@ -1276,6 +1287,26 @@ venue's ping itself, and the long-connection property would be masked by the ins
 
 **Still unmeasured on this axis:** the 24-hour session limit the venue documents. It cannot be reached by
 a test suite, and what stands in for it is the reconnect path above, which is now measured.
+
+### §11 live — execution, measured 2026-09-21
+
+The first fills on this market type. Two real round trips on `DOTUSDT`, one at market and one with a
+limit priced through the book, captured in
+[`2026.09/2026.09.21-spot-fill/`](2026.09.21-spot-fill/README.md) — every row below is `live` and was
+read from those bytes.
+
+| fact | what it means for our code |
+|---|---|
+| an order raises **two events**: `x:"NEW"`/`X:"NEW"` on acceptance, then `x:"TRADE"`/`X:"FILLED"` carrying the execution | the fill is its own event, so ingestion keyed on the first one sees an order that was accepted and never filled. Ours keys on the status and reloads trades on `PartiallyFilled` or `Filled` |
+| the acceptance event carries **`"N":null`** and **`"n":"0"`** | a null commission asset, and an amount spelled bare rather than padded. Every fixture before this capture spelled both otherwise, so neither had been read. Now pinned by `OrderUpdateEventConverterTests` |
+| a **marketable limit fills at the book's price**, not at its own — placed at `1.202`, filled at `1.19700000` | `price` is what was asked for and `cummulativeQuoteQty / executedQty` is what it cost. The three converters that compute the quotient are right, and this is the payload that can tell them from one reading `price` |
+| the **fee's asset depends on the side**: the base asset on a buy (`"N":"DOT"`), the quote asset on a sell (`"N":"USDT"`) | a buy credits less of the asset than it filled, so selling back the filled quantity is refused for insufficient balance. Anything returning a position has to subtract the fee and re-align to the lot step |
+| **`outboundAccountPosition` carries only the balances that changed** — three assets, on an account holding five **[DIVERGES from its own name]** | it is a delta, not a snapshot. Our connector reads none of its balances and treats the event as a signal to reload the account, which is what makes this harmless. Publishing from it directly would erase every balance it does not mention |
+| the stream's `executionReport` and the placement's `fills` **agree** on price, quantity, fee and trade id | either could be a trade's source, so the choice is ours to make once. The connector uses neither and asks for the symbol's trades, so a fill reaches a caller exactly once |
+
+**Not settled by this capture:** whether the executed price is the average over several fills rather
+than the last one. Both round trips filled in a single trade, where the two readings coincide. The
+distinction is pinned offline instead, by a fixture whose cumulative and last prices differ.
 
 **One registration is deliberately unpinned and says so.** `CancelAllOrders`'s serializer carries the
 element converter so the array parses truthfully rather than by accidental name binding, but the

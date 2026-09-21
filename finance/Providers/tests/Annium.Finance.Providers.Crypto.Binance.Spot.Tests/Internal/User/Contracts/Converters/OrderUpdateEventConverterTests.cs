@@ -201,4 +201,89 @@ public class OrderUpdateEventConverterTests : ProvidersTestBase
         deserialized.ExecutedQty.Is(0m);
         deserialized.ExecutedPrice.Is(0m, "an order update with no fills priced them");
     }
+
+    /// <summary>
+    /// The event the venue sends when an order is accepted carries a null commission asset, and reads as
+    /// no commission rather than throwing.
+    /// </summary>
+    /// <remarks>
+    /// Recorded off the wire on 2026-09-21, the first time anything on this venue was made to fill. Every
+    /// fixture here until then was assembled by hand from the documentation, and each of them spelled the
+    /// commission asset as a string and the amount as a padded decimal — so `null` and the bare `"0"` the
+    /// venue actually sends had never been read. Both are in this payload exactly as it arrived.
+    /// </remarks>
+    [Fact]
+    public void TheAcceptanceEvent_CarriesNoCommissionAsset()
+    {
+        // arrange - the NEW event of a market buy, verbatim
+        var raw =
+            @"{
+            ""e"":""executionReport"",""E"":1789988980861,""s"":""DOTUSDT"",
+            ""c"":""e08e515ba11f4c8bbb88be28ac3045f7"",""S"":""BUY"",""o"":""MARKET"",""f"":""GTC"",
+            ""q"":""5.85000000"",""p"":""0.00000000"",""P"":""0.00000000"",""F"":""0.00000000"",""g"":-1,
+            ""C"":"""",""x"":""NEW"",""X"":""NEW"",""r"":""NONE"",""i"":6205396248,""l"":""0.00000000"",
+            ""z"":""0.00000000"",""L"":""0.00000000"",""n"":""0"",""N"":null,""T"":1789988980861,""t"":-1,
+            ""I"":12853160421,""w"":true,""m"":false,""M"":false,""O"":1789988980861,""Z"":""0.00000000"",
+            ""Y"":""0.00000000"",""Q"":""0.00000000"",""W"":1789988980861,""V"":""EXPIRE_MAKER""
+        }";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.OrderUpdateKey);
+        var deserialized = serializer.Deserialize<OrderUpdateEvent>(Encoding.UTF8.GetBytes(raw)).NotNull();
+
+        // assert
+        deserialized.Status.Is(OrderStatus.New);
+        deserialized.CommissionAsset.Is(string.Empty, "a null commission asset must read as none");
+        deserialized.CommissionAmount.Is(0m);
+        deserialized.ExecutedQty.Is(0m);
+    }
+
+    /// <summary>
+    /// A fill is priced by what it cost, not by what the order asked for.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The event of a limit buy that crossed the book, recorded off the wire on 2026-09-21. It is the
+    /// payload that distinguishes the two readings: the order was priced at 1.202 and filled at 1.197,
+    /// because a marketable limit takes the book's price rather than its own. A converter reading the
+    /// order's price as its execution price passes every fixture where the two agree — which is every
+    /// fixture a resting order produces.
+    /// </para>
+    /// <para>
+    /// It also pins that the fill arrives as its own event: the acceptance carries <c>NEW</c> and this one
+    /// carries the execution, so a caller that reads only the first of the two sees an order that was
+    /// accepted and never filled.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void AFill_IsPricedByWhatItCostAndNotByTheOrdersPrice()
+    {
+        // arrange - the TRADE event of a limit buy priced through the book, verbatim
+        var raw =
+            @"{
+            ""e"":""executionReport"",""E"":1789989040123,""s"":""DOTUSDT"",
+            ""c"":""9c1d0b4a0c1a4a1bb1a0a7f9a3c2d5e1"",""S"":""BUY"",""o"":""LIMIT"",""f"":""GTC"",
+            ""q"":""5.85000000"",""p"":""1.20200000"",""P"":""0.00000000"",""F"":""0.00000000"",""g"":-1,
+            ""C"":"""",""x"":""TRADE"",""X"":""FILLED"",""r"":""NONE"",""i"":6205396571,
+            ""l"":""5.85000000"",""z"":""5.85000000"",""L"":""1.19700000"",""n"":""0.00585000"",""N"":""DOT"",
+            ""T"":1789989040122,""t"":446186485,""I"":12853160900,""w"":false,""m"":false,""M"":true,
+            ""O"":1789989040122,""Z"":""7.00245000"",""Y"":""7.00245000"",""Q"":""0.00000000"",
+            ""W"":1789989040122,""V"":""EXPIRE_MAKER""
+        }";
+
+        // act
+        var serializer = this.GetJsonSerializer(Constants.OrderUpdateKey);
+        var deserialized = serializer.Deserialize<OrderUpdateEvent>(Encoding.UTF8.GetBytes(raw)).NotNull();
+
+        // assert
+        deserialized.Status.Is(OrderStatus.Filled);
+        deserialized.Price.Is(1.202m, "the price the order was placed at");
+        deserialized.ExecutedPrice.Is(
+            1.197m,
+            "the execution was priced by the order rather than by what it actually cost"
+        );
+        deserialized.ExecutedQty.Is(5.85m);
+        deserialized.CommissionAmount.Is(0.00585m);
+        deserialized.CommissionAsset.Is("DOT", "the fee on a buy is taken in the asset bought");
+    }
 }
