@@ -22,9 +22,27 @@ Fetched with `curl -sSL https://raw.githubusercontent.com/binance/binance-spot-a
 | `spot/rest-api.md` | 181189 | identical |
 | `spot/user-data-stream.md` | 13170 | identical |
 | `spot/web-socket-streams.md` | 22958 | identical |
+| `spot/web-socket-api.md` | 277511 | **added 2026-09-21** — see below |
 
 Six of seven byte-identical across seventeen days, and the seventh changed only in SBE and FIX
 retirement notices — neither of which this module touches. Spot is quiet.
+
+### The page that was missing, and why nobody noticed
+
+`web-socket-api.md` was added on **2026-09-21**, at the **same pinned commit** as the rest of the spot
+snapshot, so it is the file this run would have fetched had it asked for it — not a later revision
+slipped in beside older ones.
+
+It was omitted because the rule is to snapshot only what the manifest references, and the manifest
+referenced nothing in it: this module reaches the venue over REST and over the market stream endpoint,
+and the WebSocket API is a third transport it has never used. That was true right up until the page
+became the *only* place the user data stream is documented — at which point an unreferenced page was
+carrying a mechanism the module depends on.
+
+The rule is not wrong, but it has a blind spot worth stating: **a page we do not reference can become
+load-bearing without any page we do reference changing.** Six spot files byte-identical is exactly the
+reading that hides it. What caught it here was going to the snapshot for an endpoint and finding the
+snapshot did not have one — the census, not the diff.
 
 ## usd-futures — tier 2 (docs site, markdown source)
 

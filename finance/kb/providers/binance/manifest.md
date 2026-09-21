@@ -42,6 +42,13 @@ the ones to re-derive first.
 The **verification** axis moves independently of that date, and did most recently on 2026-09-16, when
 the read block ran with credentials for the first time.
 
+**§10 and §11 were collected on 2026-09-21 and `checked_against` still reads 2026-09-18.** That is not
+an oversight: both were read out of the snapshot pinned at `docs_revision_spot`, the same commit the
+2026-09-18 run stored, so they are that date's documentation and not a later one. What they add is
+**coverage** rather than freshness — facts this module depends on that no row of this document had,
+because the code paths needing them did not exist. §11 also added a page to that snapshot,
+`spot/web-socket-api.md`, fetched at the same commit; see its `SOURCES.md` for why it was missing.
+
 ## Where the documentation comes from
 
 Binance publishes spot and USDⓈ-M futures separately, and they must be fetched separately: a rename on
@@ -438,8 +445,8 @@ when only one failed — `Spot/.../ModifyOrderFailureResponseConverter.cs:60-129
 
 | Event | Fields | Where |
 |---|---|---|
-| Spot `executionReport` **[DEAD]** | `e`,`s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`P`,`X`,`z`,`Z`,`l`,`L`,`n`,`N`,`m`,`O`,`T` | `Spot/.../OrderUpdateEventConverter.cs:99-163` |
-| Spot `outboundAccountPosition` **[DEAD]** | `e`,`u`,`B[]` with `a`,`f`,`l` | `Spot/.../AccountUpdateEventConverter.cs:63-84` |
+| Spot `executionReport` **[DEAD]** **[DRIFT]** | `e`,`s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`P`,`X`,`z`,`Z`,`l`,`L`,`n`,`N`,`m`,`O`,`T` — **the field list still holds; the envelope does not.** Both converters read these off a bare object, and the venue now wraps every user event as `{"subscriptionId", "event": {…}}` — see §11 | `Spot/.../OrderUpdateEventConverter.cs:99-163` |
+| Spot `outboundAccountPosition` **[DEAD]** **[DRIFT]** | `e`,`u`,`B[]` with `a`,`f`,`l` — same envelope drift | `Spot/.../AccountUpdateEventConverter.cs:63-84` |
 | Futures `ORDER_TRADE_UPDATE` | top-level `e`, nested `o` with `s`,`t`,`i`,`c`,`o`,`S`,`q`,`p`,`sp`,`R`,`X`,`z`,`ap`,`l`,`L`,`n`,`N`,`m`,`T`. Trigger price is `sp` where spot uses `P`; average price is `ap` where spot derives it. `createdAt` synthesized from `transactionTime` only when status is `New`, else `0` (spot needs no synthesis: its event carries `O`) — both halves `pinned` 2026-09-17 | `UsdFutures/.../OrderUpdateEventConverter.cs:83,104-185` |
 | Futures `ACCOUNT_CONFIG_UPDATE` **[DEAD]** | `e`,`T`,`ai` (presence ⇒ multi-assets change), `ac` (presence ⇒ leverage change), `j`,`s`,`l` | `UsdFutures/.../AccountConfigUpdateEventConverter.cs:73-98` |
 | Futures `ACCOUNT_UPDATE` **[DEAD]** | `e`,`T`,`a`, `B[]` with `a`,`wb`,`cw`,`bc`, `P[]` with `s`,`ps`,`mt`,`iw`,`pa`,`ep`,`up` | `UsdFutures/.../BalanceAndPositionUpdateEventConverter.cs:67-89` |
@@ -1095,3 +1102,94 @@ one balance and therefore could not pass against nothing.
 What pins the behaviour is the offline suite, where the request shape, the window walk and the refusal
 are asserted and mutation-checked. The live run answers a different and narrower question - whether the
 venue accepts what we send - and it is recorded here as answering exactly that.
+
+## §11 — spot order lifecycle and user stream, collected 2026-09-21
+
+Collected for the same reason as §10 and in the same way: the spot connector is a stub, so step 1 had no
+`file:line` for any of it, and none of these endpoints appeared in a row of this document. Step 5 needs
+them, and the futures connector is not a source — **every one of the four divergences below would be
+wrong if ported**, and two of them silently.
+
+Source for the REST rows: `2026.09/2026.09.18-docs/spot/rest-api.md`, tier 1. Source for the stream
+rows: `2026.09/2026.09.18-docs/spot/web-socket-api.md` and `spot/user-data-stream.md`, same commit, the
+first added to the snapshot on 2026-09-21 — see that snapshot's `SOURCES.md`.
+
+### Order lifecycle over REST
+
+| endpoint | weight | unfilled-order count | required | citation |
+|---|---|---|---|---|
+| `POST /api/v3/order` | 1 | 1 | `symbol`, `side`, `type`, `timestamp`, plus a per-type set | `rest-api.md:2128` |
+| `DELETE /api/v3/order` | 1 | 0 | `symbol`, `timestamp`, and **one of** `orderId` / `origClientOrderId` | `rest-api.md:2380` |
+| `DELETE /api/v3/openOrders` | 1 | 0 | `symbol`, `timestamp` | `rest-api.md:2453` |
+| `PUT /api/v3/order/amend/keepPriority` | 4 | 0 | `symbol`, `newQty`, `timestamp`, and one of `orderId` / `origClientOrderId` | `rest-api.md:2993` |
+| `POST /api/v3/order/cancelReplace` | 1 | 1 | `symbol`, `side`, `type`, `cancelReplaceMode`, `timestamp`, one of `cancelOrderId` / `cancelOrigClientOrderId` | `rest-api.md:2578` |
+
+`DELETE /api/v3/openOrders` requires a symbol; there is no unscoped cancel-all.
+
+### The four facts that diverge from futures **[DIVERGES]**
+
+1. **There is no general amend.** Spot's amend endpoint *reduces quantity only*: "Reduce the quantity of
+   an existing open order", and `newQty` "must be greater than 0 and less than the order's quantity"
+   (`rest-api.md:2993`, `:3018`). A price change, or any quantity increase, is not an amendment on this
+   venue — it is `cancelReplace`, which is a new order at the back of the queue and costs an unfilled-order
+   count. Futures amends price and quantity through one endpoint. **A ported `ModifyOrderAsync` would
+   refuse half the modifications it is asked for, or silently reprice by replacing.**
+2. **Placement is counted against a second, separate limit.** `POST /api/v3/order` costs weight 1 and
+   **unfilled order count 1** — a budget distinct from request weight, which the module's rate limiter
+   does not model at all. `cancelReplace` charges it even when the new order was never attempted
+   (`rest-api.md:2585`). Cancels charge 0.
+3. **The user stream is a different transport**, not a different URL — see below.
+4. **The stream event is wrapped.** Every spot user event now arrives as
+   `{"subscriptionId": <int>, "event": {…}}` (`web-socket-api.md:337-366`, and every payload in
+   `user-data-stream.md`), where the futures stream delivers the event object bare.
+
+### The user data stream — listen keys are gone **[DRIFT]** `contested`
+
+| fact | state | citation |
+|---|---|---|
+| Listen-key user streams on `wss://stream.binance.com` are **deprecated** | `confirmed` | `CHANGELOG.md:953` |
+| All listen-key documentation for that endpoint has been **removed** | `confirmed` | `CHANGELOG.md:594` |
+| `POST /api/v3/userDataStream` and siblings are no longer in the REST reference | `confirmed` — the string `userDataStream` has **0 occurrences** in `rest-api.md`, and `listenKey` 0 likewise | `rest-api.md` (census) |
+| The features "remain available until a future retirement announcement" | `confirmed` | `CHANGELOG.md:600` |
+
+Marked `contested` rather than settled because the two readings genuinely disagree and neither is
+stale: the changelog says the mechanism still works, and the reference no longer describes it. Nothing
+in the snapshot says when it stops. What would settle it is a retirement announcement, or a live
+attempt — and a live attempt answers only "today".
+
+**What this means for our code.** `Spot/Constants.cs:50`, `Spot/ProviderConfiguration.cs:11`,
+`Spot/Internal/User/Contracts/UserContracts.cs:61-64`, `Spot/ProviderRegistrationContextExtensions.cs:76`
+and `Spot/Internal/User/Profiles/UserConfigProfile.cs:37-38` all configure the listen-key mechanism, and
+`Base/Internal/User/Services/{ListenKeyResolver,UserStream}.cs` implement it. **Nothing in spot resolves
+any of it** — `Spot/Internal/User/UserConnector.cs` builds no stream at all — so today this is registered,
+unused machinery for a mechanism the venue has stopped documenting. The cost of not noticing was zero
+only because the connector was never written.
+
+### The replacement mechanism
+
+Base endpoint **`wss://ws-api.binance.com:443/ws-api/v3`** (`web-socket-api.md:102`) — a
+request/response WebSocket API, and **not** the market-stream endpoint this module already connects to.
+A connection is valid for 24 hours (`:105`); the server pings every 20s and disconnects if no pong
+arrives within a minute (`:111-114`).
+
+Two routes to a subscription (`web-socket-api.md:8174-8182`):
+
+| route | method | weight | key type | params |
+|---|---|---|---|---|
+| authenticated session | `session.logon`, then `userDataStream.subscribe` | 2 | **Ed25519 only** (`:1299`) | none on subscribe |
+| per-request signature | `userDataStream.subscribe.signature` | 2 | HMAC, RSA or Ed25519 (`:107`) | `apiKey`, `timestamp`, `signature`, optional `recvWindow` |
+
+Both answer `{"result": {"subscriptionId": <int>}}`. `userDataStream.unsubscribe` takes an optional
+`subscriptionId` and closes all subscriptions when given none (`:8236-8262`). Limits: one subscription
+per account per connection; 1,000 active and 65,535 lifetime per session (`:8185-8191`).
+
+**The second route is the one that matters for this module**, because it does not require Ed25519 — the
+account's existing HMAC key signs it, the same key §10's read paths already use. Choosing the first
+route would make the stream depend on a key type the account may not have, which is a configuration
+change on the user's side rather than a code change on ours.
+
+`eventStreamTerminated` is sent when a logon subscription ends after `session.logout`, or when the
+subscription is stopped (`user-data-stream.md:325-343`). It is the signal a reconnect keys on, and it
+has no counterpart in the listen-key mechanism, where expiry was inferred from a closed socket.
+
+Verification axis: everything in §11 is `none`. Nothing in this repository calls any of it.
