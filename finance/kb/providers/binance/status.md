@@ -29,8 +29,8 @@ created: 2026-09-01
 | 1 — derive existing state | **converged, re-run 2026-09-18** | re-anchored against the tree after steps 3-5: of 107 line-anchored facts 76 resolved and 31 had moved, no file gone. 21 facts present in the code and absent from the manifest were added, three new `[DEAD]` entries recorded, and the verification census corrected in ~13 places. The manifest asserted the opposite of the code in one place — "Nothing reads `Retry-After`" — and contradicted itself in another, over the decay constants | none on this axis. The four test defects it turned up are queued below for step 5 |
 | 2 — collect facts, compute drift | **converged, re-run 2026-09-18, with one accepted gap** | 13 futures pages, 7 spot files, both Postman collections, the per-endpoint API reference and one page reached by following a link out of the changelog. Every category given an outcome **with a citation into the snapshot** — the new rule, added to the skill during this run. Three mechanical sweeps ran before any reading by judgment | **one accepted gap**: the nested user-data-stream payloads (~20 short field names, now including `ALGO_UPDATE`'s) are `unretrievable` — they render from a schema embed present in neither index file. The `avgPrice` gap is **closed**, settled from documentation rather than by a live order. One `contested` left, `MAX_NUM_ALGO_ORDERS`, settleable by logging one `exchangeInfo` response |
 | 3 — wire types and serialization | **converged** | assessed 2026-09-17 against the manifest by a fresh verifier: field coverage holds in both directions (every documented field read, no field read that is not documented), all five enumeration tables map both ways, the kline indices are pinned by six distinct values. Two branch gaps and one defect remediated the same day — see the run report | none |
-| 4 — provider, read paths (+ registration, config, read-only live validation) | **converged** | every read path on both venues driven offline, failure paths included; endpoints pinned; **live read block green on 2026-09-16: 20 tests, 14 passed, 6 skipped, none failed** — and this time with credentials present, so the two signature tests ran rather than skipping | none. The upstream defect found here — an exchange error discarded when the success type is a collection — was fixed in `Annium.Net.Http` 1.1.49 and taken up with the package bump; the test that pinned the loss now pins the reason. The six still skipped are Spot's `UserProviderTests`, marked `Not implemented`, which is about the tests and not about access |
-| 5 — connector, streams and orders (+ registration, config, trading live validation) | **converged 2026-09-20** | the test lib gained a websocket server; the streams are pinned by 20 offline tests, the order lifecycle by 13 more, and every registration key by two. Six defects found and fixed in the process — see the [run report](2026.09/2026.09.18-step-5.md) | none. **5f's fourth stage went green on 2026-09-19** once the conditional-order migration landed, and the whole write block then ran end to end **three times clean** - 8 of 8 each time, no connector errors, the account flat after each, and the three runs identical in what they traded. See [the run report](2026.09/2026.09.19-trading-runs.md). **5e validated live on 2026-09-18**: 21 tests, 15 passed, 6 skipped, none failed, run twice - including a new read-only user connector test that connects, takes a listen key, opens the stream and receives the account snapshot without placing anything. The two behaviours that needed a decision have one: a refused leverage change now reaches the caller, and one the exchange accepts without applying is refused by the connector itself; a limit order asked to become a market order stays refused |
+| 4 — provider, read paths (+ registration, config, read-only live validation) | **converged on usd-futures; NOT converged on spot** | every read path on both venues driven offline, failure paths included; endpoints pinned; **live read block green on 2026-09-16: 20 tests, 14 passed, 6 skipped, none failed** — and this time with credentials present, so the two signature tests ran rather than skipping | none. The upstream defect found here — an exchange error discarded when the success type is a collection — was fixed in `Annium.Net.Http` 1.1.49 and taken up with the package bump; the test that pinned the loss now pins the reason. The six still skipped are Spot's `UserProviderTests`, marked `Not implemented`, which is about the tests and not about access |
+| 5 — connector, streams and orders (+ registration, config, trading live validation) | **converged 2026-09-20 on usd-futures; not started on spot** | the test lib gained a websocket server; the streams are pinned by 20 offline tests, the order lifecycle by 13 more, and every registration key by two. Six defects found and fixed in the process — see the [run report](2026.09/2026.09.18-step-5.md) | spot, which has no connector to speak of - see the spot assessment below. On usd-futures: none. **5f's fourth stage went green on 2026-09-19** once the conditional-order migration landed, and the whole write block then ran end to end **three times clean** - 8 of 8 each time, no connector errors, the account flat after each, and the three runs identical in what they traded. See [the run report](2026.09/2026.09.19-trading-runs.md). **5e validated live on 2026-09-18**: 21 tests, 15 passed, 6 skipped, none failed, run twice - including a new read-only user connector test that connects, takes a listen key, opens the stream and receives the account snapshot without placing anything. The two behaviours that needed a decision have one: a refused leverage change now reaches the caller, and one the exchange accepts without applying is refused by the connector itself; a limit order asked to become a market order stays refused |
 ## Queued work
 
 Open items only. Two things that used to live here are settled and their reasoning is where it belongs
@@ -127,3 +127,54 @@ Carried out of step 5 deliberately rather than left implied. None of them blocks
 | the nested user-data-stream payloads are `unretrievable` | ~20 short field names that render from a schema embed present in neither index file. Closed in practice by live capture - every event this module reads is pinned against a payload recorded off the wire - but the documentation axis stays `unretrievable`, and a future pass should not mistake that for unchecked |
 | the filter converters have no test file | covered through the exchange-info fixture. A missing file, not a missing fact |
 | spot is a step behind | the trading block covers futures only, and spot's `UserProviderTests` are marked `Not implemented` - the six skipped tests in the read block. This is step 5 for spot, not a defect in it |
+
+## Spot assessment — 2026-09-21
+
+Two fresh verifiers, one per step, against the step's own done-checklist. Read-only; no live run. The
+headline was confirmed by hand afterwards rather than taken on the verifiers' word, because everything
+below rests on it.
+
+**Spot is at step 4, not step 5.** The step table used to read as though the venue trailed only in
+trading validation. It does not: four of its six read paths do not exist.
+
+`Spot/Internal/User/UserProvider.cs:14-64` issues **no HTTP at all** — `LoadContextAsync`,
+`LoadOpenOrdersAsync`, `LoadOrdersAsync` and `LoadTradesAsync` each return an empty success,
+synchronously. `Spot/Internal/User/UserConnector.cs` throws `NotImplementedException` in five places.
+The manifest records this as `[DEAD]` and is right; what was wrong was the step table, which is
+corrected above.
+
+The cost, stated plainly because it is easy to read this as merely missing work: a caller asking spot
+for its account, open orders or trades is told, with an `Ok` status, that there are none. **A wrong API
+key, an IP ban and a signing defect are all indistinguishable from an empty account, permanently**,
+because no request is ever attempted to fail.
+
+### What that makes of the converters
+
+Spot's user-side converters, enumeration tables and query processor are well built and genuinely
+pinned — and parse nothing, because nothing calls them. Two consequences worth keeping:
+
+- "Pinned" is true of the suite and irrelevant to production for that whole domain. The verification
+  axis says nothing about whether a fact is reachable, and here it should be read alongside `[DEAD]`.
+- One landmine waits there. `executedQty != 0 ? executedSum / executedQty : 0m` appears in three spot
+  converters and **only the non-zero arm is ever driven** — a brand-new unfilled order is exactly the
+  zero case, and collapsing the guard would be a divide-by-zero on the commonest order state. Inert
+  today; a first-day crash when the path is revived.
+
+### Drift found in spot's live code — the market domain
+
+This part is reachable today and the findings are real:
+
+| drift | cost |
+|---|---|
+| ~~the ticker drop rule's price half was pinned by nothing~~ — **closed 2026-09-21** | two independent conditions joined in one line, and the only test satisfied both at once, so deleting the price half survived every test on both venues. It backs the live book-ticker stream: a quote with no price on either side would have reached subscribers. Now pinned separately on both venues, mutation-checked |
+| the candle request is pinned only by `startTime` | `symbol`, `interval` and `limit` are never asserted on the wire, so fetching the wrong instrument's candles, or an unbounded page, passes every test |
+| the candle failure path is unverified on spot | the success type is a collection - the exact shape that swallowed exchange errors before the upstream fix. Futures re-pinned it at its own call sites; spot did not |
+| the two endpoints this step drives are never asserted as composed URLs | the test server answers any path, so a typo or a wrong version is invisible until a live run - which is how the version defect in `/time` was actually found |
+| three more drop rules have no negative test, and one OR is satisfied by a single fixture | low today, and exactly what a fixture rewrite breaks silently |
+
+### The question this stops at
+
+Reviving spot's user path is not a repair, it is a feature: four read paths, their offline tests, their
+live read validation, and only then a connector. **Whether spot needs a user path at all is the
+decision, and it is not ours.** Nothing else about spot is blocked on it - the market side works and is
+being improved above.
