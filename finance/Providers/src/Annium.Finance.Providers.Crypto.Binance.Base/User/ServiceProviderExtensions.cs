@@ -74,10 +74,18 @@ public static class ServiceProviderExtensions
         IStatusMonitor monitor
     )
     {
+        var rateLimiter = sp.Resolve<IRateLimiter>();
         var statusReporter = monitor.CreateReporter();
         var logger = sp.Resolve<ILogger>();
 
-        return new WsApiUserStream(wsApi, subscribeRetryInterval, signatureService, statusReporter, logger);
+        return new WsApiUserStream(
+            wsApi,
+            subscribeRetryInterval,
+            signatureService,
+            rateLimiter,
+            statusReporter,
+            logger
+        );
     }
 
     /// <summary>Creates a <see cref="ListenKeyResolver"/> that fetches and keeps alive a listen key from the given endpoint.</summary>

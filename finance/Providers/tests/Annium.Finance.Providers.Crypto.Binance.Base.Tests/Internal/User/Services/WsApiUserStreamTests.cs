@@ -1,8 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
+using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Crypto.Binance.Base.Internal.User.Services;
 using Annium.Finance.Providers.Crypto.Binance.Base.User.Services;
@@ -363,13 +366,116 @@ public class WsApiUserStreamTests : ProvidersTestBase
     }
 
     /// <summary>
+    /// The account's used weight, as the venue states it in a reply, reaches the limiter.
+    /// </summary>
+    /// <remarks>
+    /// This transport has no headers, so the accounting the HTTP paths do from one had nowhere to come
+    /// from and the subscription's weight was spent and counted nowhere. Harmless while the subscription
+    /// is healthy and exactly wrong when it is not: a refused one retries on an interval, which is the
+    /// moment an account can least afford traffic nothing is accounting for.
+    ///
+    /// The numbers below are the venue's own, recorded off the wire on 2026-09-21.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TimeoutMs)]
+    public async Task TheVenuesStatedWeight_ReachesTheLimiter()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        await using var server = this.RunWebSocketServer();
+        var monitor = new StatusMonitor(Get<ILogger>());
+
+        await using var stream = CreateStream(server, monitor);
+        var connection = await server.WaitConnectionAsync(ct);
+        var id = Parse(await connection.WaitMessageAsync(ct)).GetProperty("id").GetString().NotNull();
+
+        // act
+        await connection.SendAsync(
+            "{\"id\":\""
+                + id
+                + "\",\"status\":200,\"result\":{\"subscriptionId\":0},\"rateLimits\":[{\"rateLimitType\":\"REQUEST_WEIGHT\","
+                + "\"interval\":\"MINUTE\",\"intervalNum\":1,\"limit\":6000,\"count\":4}]}",
+            ct
+        );
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
+
+        // assert
+        _rateLimiter.ReportedWeights.Contains(4).IsTrue("the stated weight did not reach the limiter");
+        _rateLimiter.ReportedLimits.Contains(6000).IsTrue("the stated ceiling did not reach the limiter");
+    }
+
+    /// <summary>
+    /// A reply carrying no rate limits leaves the limiter as it was.
+    /// </summary>
+    /// <remarks>
+    /// Absent and none are different, and only one of them means there is budget. Read as zero, a reply
+    /// that simply did not state the weight would hand the account's whole allowance back.
+    /// </remarks>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Fact(Timeout = TimeoutMs)]
+    public async Task AReplyWithoutRateLimits_TellsTheLimiterNothing()
+    {
+        // arrange
+        var ct = TestContext.Current.CancellationToken;
+        await using var server = this.RunWebSocketServer();
+        var monitor = new StatusMonitor(Get<ILogger>());
+
+        await using var stream = CreateStream(server, monitor);
+        var connection = await server.WaitConnectionAsync(ct);
+        var id = Parse(await connection.WaitMessageAsync(ct)).GetProperty("id").GetString().NotNull();
+
+        // act
+        await connection.SendAsync(Acknowledgement(id), ct);
+        await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
+
+        // assert
+        _rateLimiter.ReportedWeights.Count.Is(0, "a reply stating no weight was read as stating zero");
+    }
+
+    /// <summary>
     /// Builds a stream pointed at the given local server.
     /// </summary>
     /// <param name="server">The local server the stream connects to.</param>
     /// <param name="monitor">The monitor the stream reports into.</param>
     /// <returns>The stream under test.</returns>
     private WsApiUserStream CreateStream(TestWebSocketServer server, StatusMonitor monitor) =>
-        new(server.Uri, RetryMs, new TestSignatureService(), monitor.CreateReporter(), Get<ILogger>());
+        new(server.Uri, RetryMs, new TestSignatureService(), _rateLimiter, monitor.CreateReporter(), Get<ILogger>());
+
+    /// <summary>
+    /// The limiter the stream reports the venue's stated weight into, so a test can read it back.
+    /// </summary>
+    private readonly RecordingRateLimiter _rateLimiter = new();
+
+    /// <summary>
+    /// A limiter that allows everything and remembers what it was told.
+    /// </summary>
+    private sealed class RecordingRateLimiter : IRateLimiter
+    {
+        /// <summary>Gets the weights reported, in order.</summary>
+        public List<int> ReportedWeights { get; } = new();
+
+        /// <summary>Gets the limits reported, in order.</summary>
+        public List<int> ReportedLimits { get; } = new();
+
+        /// <summary>Allows every request.</summary>
+        /// <returns>Always true.</returns>
+        public bool CanExecute() => true;
+
+        /// <summary>Records the reported limit.</summary>
+        /// <param name="limit">The limit reported.</param>
+        public void UpdateLimit(int limit) => ReportedLimits.Add(limit);
+
+        /// <summary>Records the reported weight.</summary>
+        /// <param name="weight">The weight reported.</param>
+        public void UsedWeight(int weight) => ReportedWeights.Add(weight);
+
+        /// <summary>Ignores the block.</summary>
+        /// <param name="duration">The duration to block for.</param>
+        public void Block(TimeSpan duration) { }
+
+        /// <summary>Does nothing; the limiter holds no resources here.</summary>
+        public void Dispose() { }
+    }
 
     /// <summary>
     /// The venue's answer to an accepted subscription.

@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
+using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Crypto.Binance.Base.User.Services;
 using Annium.Logging;
@@ -45,6 +46,12 @@ internal class WsApiUserStream : IUserStream, ILogSubject
     /// <summary>The event the venue sends when a subscription has ended and the socket has not.</summary>
     private const string StreamTerminatedEvent = "eventStreamTerminated";
 
+    /// <summary>The rate-limit row naming the request-weight budget.</summary>
+    private const string RequestWeightLimit = "REQUEST_WEIGHT";
+
+    /// <summary>The interval of the request-weight budget the limiter models.</summary>
+    private const string MinuteInterval = "MINUTE";
+
     /// <summary>Gets the logger used to trace connection and subscription activity.</summary>
     public ILogger Logger { get; }
 
@@ -65,6 +72,15 @@ internal class WsApiUserStream : IUserStream, ILogSubject
 
     /// <summary>Signs the subscription request.</summary>
     private readonly ISignatureService _signatureService;
+
+    /// <summary>The limiter this stream's requests are counted against.</summary>
+    /// <remarks>
+    /// The subscription is cheap and easy to leave uncounted, and leaving it uncounted is exactly wrong
+    /// when it is not healthy: a refused subscription retries on an interval, which is the moment the
+    /// account can least afford traffic nothing is accounting for. The venue states the account's used
+    /// weight in the reply, which is the same thing the HTTP paths read from a header.
+    /// </remarks>
+    private readonly IRateLimiter _rateLimiter;
 
     /// <summary>The reporter used to publish connection status changes.</summary>
     private readonly IStatusReporter _statusReporter;
@@ -99,12 +115,14 @@ internal class WsApiUserStream : IUserStream, ILogSubject
     /// <param name="wsApi">The endpoint of the WebSocket API.</param>
     /// <param name="subscribeRetryInterval">How often a refused subscription is attempted again, in milliseconds.</param>
     /// <param name="signatureService">Signs the subscription request.</param>
+    /// <param name="rateLimiter">The limiter this stream's requests are counted against.</param>
     /// <param name="statusReporter">The reporter used to publish connection status changes.</param>
     /// <param name="logger">The logger to trace through.</param>
     public WsApiUserStream(
         Uri wsApi,
         int subscribeRetryInterval,
         ISignatureService signatureService,
+        IRateLimiter rateLimiter,
         IStatusReporter statusReporter,
         ILogger logger
     )
@@ -113,6 +131,7 @@ internal class WsApiUserStream : IUserStream, ILogSubject
         _wsApi = wsApi;
         _subscribeRetryInterval = subscribeRetryInterval;
         _signatureService = signatureService;
+        _rateLimiter = rateLimiter;
 
         _statusReporter = statusReporter;
         _statusReporter.Bind(this);
@@ -262,6 +281,13 @@ internal class WsApiUserStream : IUserStream, ILogSubject
     /// <param name="raw">The raw UTF-8 text payload received.</param>
     private void HandleData(ReadOnlyMemory<byte> raw)
     {
+        // guarded on the level, not only written at it: decoding the frame is the whole payload, and an
+        // argument is evaluated before anything looks at whether the line would be discarded. The HTTP
+        // side logs its bodies; without this the half of the account that arrives over a socket was the
+        // half no log ever recorded
+        if (LogConfig.IsEnabled(LogLevel.Trace))
+            this.Trace<string>("frame: {frame}", Encoding.UTF8.GetString(raw.Span));
+
         try
         {
             using var document = JsonDocument.Parse(raw);
@@ -303,6 +329,10 @@ internal class WsApiUserStream : IUserStream, ILogSubject
     {
         var status = root.TryGetProperty("status", out var statusElement) ? statusElement.GetInt32() : 0;
 
+        // read from every reply, refusals included: a refusal costs weight too, and the retry that
+        // follows it is the traffic most worth accounting for
+        ReportUsedWeight(root);
+
         if (status is not 200)
         {
             // reported whether or not it matches a pending request: a refusal carries why, and the commonest
@@ -343,6 +373,46 @@ internal class WsApiUserStream : IUserStream, ILogSubject
 
         OnConnected();
         _statusReporter.Connected();
+    }
+
+    /// <summary>
+    /// Reports the account's used weight, as the venue states it in a reply.
+    /// </summary>
+    /// <remarks>
+    /// The same accounting the HTTP paths do from a response header, for a transport that has no headers.
+    /// Only the one-minute request-weight row is read, because that is the budget the limiter models; a
+    /// reply that carries none leaves the limiter as it was rather than being read as zero, since absent
+    /// and none are different and only one of them means there is budget.
+    /// </remarks>
+    /// <param name="root">The reply frame.</param>
+    private void ReportUsedWeight(JsonElement root)
+    {
+        if (!root.TryGetProperty("rateLimits", out var limits) || limits.ValueKind is not JsonValueKind.Array)
+            return;
+
+        foreach (var limit in limits.EnumerateArray())
+        {
+            if (
+                !limit.TryGetProperty("rateLimitType", out var type)
+                || type.GetString() != RequestWeightLimit
+                || !limit.TryGetProperty("interval", out var interval)
+                || interval.GetString() != MinuteInterval
+                || !limit.TryGetProperty("intervalNum", out var intervalNum)
+                || intervalNum.GetInt32() != 1
+            )
+                continue;
+
+            if (limit.TryGetProperty("limit", out var ceiling))
+                _rateLimiter.UpdateLimit(ceiling.GetInt32());
+
+            if (limit.TryGetProperty("count", out var used))
+            {
+                this.Trace<string>("used weight reported as {used}", used.GetInt32().ToString());
+                _rateLimiter.UsedWeight(used.GetInt32());
+            }
+
+            return;
+        }
     }
 
     /// <summary>Unwraps an account event and hands it on, or re-subscribes if it says the stream has ended.</summary>
