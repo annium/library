@@ -1238,6 +1238,19 @@ no way to know how far it may go — and the refusal names a filter rather than 
 rather than fixed here, because adding a filter to the instrument model is step 3 and 4 work; it is in
 the backlog.
 
+### §11 live — lifetime and recovery, measured 2026-09-21
+
+| fact | how |
+|---|---|
+| a connection **survives past the venue's keep-alive deadline** — it pings every 20s and closes what does not answer within a minute | held for 150s, never left connected. The answer is the framework's rather than ours, which was the reasoning before and is now the observation |
+| a cut connection is **noticed, re-established, and subscribed again** — the venue accepts a second signed subscription on a new connection | cut on purpose through a byte relay, which is the only way to make a venue drop one |
+
+The relay is not a WebSocket proxy, deliberately: one that understood the protocol would answer the
+venue's ping itself, and the long-connection property would be masked by the instrument measuring it.
+
+**Still unmeasured on this axis:** the 24-hour session limit the venue documents. It cannot be reached by
+a test suite, and what stands in for it is the reconnect path above, which is now measured.
+
 **One registration is deliberately unpinned and says so.** `CancelAllOrders`'s serializer carries the
 element converter so the array parses truthfully rather than by accidental name binding, but the
 connector discards the payload — so removing the converter changes nothing a test can see. Mutation
