@@ -50,7 +50,7 @@ public class UserStreamTests : ProvidersTestBase
         await using var server = this.RunWebSocketServer();
         var monitor = new StatusMonitor(Get<ILogger>());
         var resolver = new TestListenKeyResolver();
-        using var stream = CreateStream(server, resolver, monitor);
+        await using var stream = CreateStream(server, resolver, monitor);
 
         // act
         resolver.Fetch("abc");
@@ -73,7 +73,7 @@ public class UserStreamTests : ProvidersTestBase
         await using var server = this.RunWebSocketServer();
         var monitor = new StatusMonitor(Get<ILogger>());
         var resolver = new TestListenKeyResolver();
-        using var stream = CreateStream(server, resolver, monitor);
+        await using var stream = CreateStream(server, resolver, monitor);
         resolver.Fetch("abc");
         var connection = await server.WaitConnectionAsync(ct);
         await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
@@ -97,7 +97,7 @@ public class UserStreamTests : ProvidersTestBase
         await using var server = this.RunWebSocketServer();
         var monitor = new StatusMonitor(Get<ILogger>());
         var resolver = new TestListenKeyResolver();
-        using var stream = CreateStream(server, resolver, monitor);
+        await using var stream = CreateStream(server, resolver, monitor);
         var disconnects = Channel.CreateUnbounded<int>();
         stream.OnDisconnected += () => disconnects.Writer.TryWrite(0);
         resolver.Fetch("abc");
@@ -124,7 +124,7 @@ public class UserStreamTests : ProvidersTestBase
         await using var server = this.RunWebSocketServer();
         var monitor = new StatusMonitor(Get<ILogger>());
         var resolver = new TestListenKeyResolver();
-        using var stream = CreateStream(server, resolver, monitor);
+        await using var stream = CreateStream(server, resolver, monitor);
         var messages = Channel.CreateUnbounded<string>();
         stream.OnMessage += raw => messages.Writer.TryWrite(Encoding.UTF8.GetString(raw.Span));
         resolver.Fetch("abc");
@@ -167,10 +167,7 @@ public class UserStreamTests : ProvidersTestBase
         await monitor.WaitStatusAsync(ConnectorStatus.Connected, ct);
 
         // act
-        // VSTHRD103: the stream's teardown is synchronous, and disposing it is the act under test
-#pragma warning disable VSTHRD103
-        stream.Dispose();
-#pragma warning restore VSTHRD103
+        await stream.DisposeAsync();
 
         // assert
         await connection.WhenClosed.WaitAsync(ct);
@@ -188,18 +185,7 @@ public class UserStreamTests : ProvidersTestBase
     /// <returns>The stream under test.</returns>
     private UserStream CreateStream(TestWebSocketServer server, IListenKeyResolver resolver, StatusMonitor monitor)
     {
-        var config = new TestUserConfig
-        {
-            Provider = "test",
-            Key = "key",
-            Secret = "secret",
-            HttpApi = new Uri("http://localhost"),
-            WsApi = server.Uri,
-            ListenKeyUriPath = "ws/",
-            ListenKey = new ListenKeyConfiguration(50, 50),
-        };
-
-        return new UserStream(config, resolver, monitor.CreateReporter(), Get<ILogger>());
+        return new UserStream(server.Uri, "ws/", resolver, monitor.CreateReporter(), Get<ILogger>());
     }
 
     /// <summary>
@@ -231,8 +217,3 @@ public class UserStreamTests : ProvidersTestBase
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 }
-
-/// <summary>
-/// A user configuration pointed at a local server.
-/// </summary>
-file sealed record TestUserConfig : UserConfigBase;

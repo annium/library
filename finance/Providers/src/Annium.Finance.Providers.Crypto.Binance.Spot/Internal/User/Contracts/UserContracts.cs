@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.Contracts.Converters;
-using Annium.Finance.Providers.Crypto.Binance.Base.User.Contracts.Converters;
 using Annium.Finance.Providers.Crypto.Binance.Spot.Internal.User.Contracts.Converters;
 using Annium.Serialization.Json;
 
@@ -56,13 +55,6 @@ internal static class UserContracts
     /// <summary>Serializer options for the cancel-all-open-orders endpoint.</summary>
     public static JsonSerializerOptions CancelAllOrders { get; } =
         new JsonSerializerOptions().ResetConverters().AddConverter<OperationResultConverter>();
-
-    /// <summary>Serializer options for the listen key (user data stream token) endpoint.</summary>
-    public static JsonSerializerOptions ListenKey { get; } =
-        new JsonSerializerOptions()
-            .ResetConverters()
-            .AddConverter<ListenKeyResponseConverter>()
-            .AddConverter<OperationResultConverter>();
 
     /// <summary>Serializer options for the <c>outboundAccountPosition</c> user data stream event.</summary>
     public static JsonSerializerOptions AccountUpdate { get; } =

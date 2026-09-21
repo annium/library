@@ -82,13 +82,14 @@ public class AlgoUpdateStreamProbeTests : ProvidersTestBase
         var monitor = new StatusMonitor(Logger);
 
         var resolver = sp.CreateListenKeyResolver(
-            config,
+            config.HttpApi,
+            config.ListenKey,
             Endpoints.ListenKeyUriPath,
             Constants.ListenKeyKey,
             signatureService,
             monitor
         );
-        using var stream = sp.CreateUserStream(config, resolver, monitor);
+        await using var stream = sp.CreateListenKeyUserStream(config.WsApi, Endpoints.UserWsUriPath, resolver, monitor);
 
         stream.OnMessage += data => messages.Enqueue(Encoding.UTF8.GetString(data.Span));
 
@@ -166,7 +167,6 @@ public class AlgoUpdateStreamProbeTests : ProvidersTestBase
             Secret = Settings.User.Secret,
             HttpApi = Endpoints.HttpApi,
             WsApi = Endpoints.WsApi,
-            ListenKeyUriPath = Endpoints.UserWsUriPath,
             ListenKey = new ListenKeyConfiguration(60_000, 5_000),
             ReloadContext = new Core.Shared.Loaders.CompositeLoaderConfig(1000, 5, 5000, 1000, 100),
             ReloadOrders = new Core.Shared.Loaders.CompositeLoaderConfig(1000, 5, 5000, 1000, 100),

@@ -14,8 +14,8 @@ using Annium.Finance.Providers.Core.Shared.Loaders;
 using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Crypto.Binance.Base.User.Services;
-using Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.User;
-using Annium.Finance.Providers.Crypto.Binance.UsdFutures.Internal.User.Services;
+using Annium.Finance.Providers.Crypto.Binance.Spot.Internal.User;
+using Annium.Finance.Providers.Crypto.Binance.Spot.Internal.User.Services;
 using Annium.Finance.Providers.Tests.Lib;
 using Annium.Logging;
 using Annium.Net.Http;
@@ -23,17 +23,18 @@ using Annium.Net.Servers.Web;
 using Annium.Serialization.Abstractions;
 using Xunit;
 
-namespace Annium.Finance.Providers.Crypto.Binance.UsdFutures.Tests.Internal.User;
+namespace Annium.Finance.Providers.Crypto.Binance.Spot.Tests.Internal.User;
 
 /// <summary>
-/// Builds a USD-M futures user connector by hand, against a local HTTP server and fakes for everything the
+/// Builds a Binance spot user connector by hand, against a local HTTP server and fakes for everything the
 /// connector only talks to through an interface, so its command and ingestion paths can be driven offline.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The live block reaches the happy path of four commands and nothing else. Everything a real exchange will
-/// not produce on demand - a refusal, a query that does not build, a disconnected connector, a stream event
-/// of a chosen shape - is only reachable here.
+/// For this venue the live trading block does not exist yet, so everything the connector does is pinned
+/// here or nowhere. That makes this the whole of its coverage rather than the half a live run cannot reach,
+/// and the tests are written accordingly: each command's composed path and method are asserted, not only
+/// its outcome, because offline there is no exchange to refuse a wrong endpoint.
 /// </para>
 /// <para>
 /// Two things make this possible without DI. The connector binds itself to the monitor as connected and
@@ -62,13 +63,13 @@ public abstract class UserConnectorOfflineTestBase : ProvidersTestBase
         : base(outputHelper) { }
 
     /// <summary>
-    /// Registers the USD-M futures provider, which is what puts the keyed request factories and serializers
+    /// Registers the Binance spot provider, which is what puts the keyed request factories and serializers
     /// the connector resolves into the container.
     /// </summary>
     /// <param name="ctx">The fluent context to register providers into.</param>
     protected override void RegisterProvider(ProviderRegistrationContext ctx)
     {
-        ctx.WithBinanceUsdFutures();
+        ctx.WithBinanceSpot();
     }
 
     /// <summary>
@@ -90,7 +91,7 @@ public abstract class UserConnectorOfflineTestBase : ProvidersTestBase
             Secret = "some_secret",
             HttpApi = server.HttpUri(),
             WsApi = new Uri("ws://unused"),
-            ListenKey = new ListenKeyConfiguration(1000, 1000),
+            SubscribeRetryInterval = 1000,
             ReloadContext = reload,
             ReloadOrders = reload,
             ReloadTrades = reload,
@@ -104,20 +105,17 @@ public abstract class UserConnectorOfflineTestBase : ProvidersTestBase
             built.Provider,
             new QueryProcessor(),
             new StubSignatureService(),
-            sp.ResolveHttpRequestFactory(Constants.SetLeverageKey),
             sp.ResolveHttpRequestFactory(Constants.InitOrderKey),
             sp.ResolveHttpRequestFactory(Constants.ModifyOrderKey),
             sp.ResolveHttpRequestFactory(Constants.CancelOrderKey),
             sp.ResolveHttpRequestFactory(Constants.CancelAllOrdersKey),
-            sp.ResolveHttpRequestFactory(Constants.AlgoOrderKey),
             new StubRateLimiter(),
             built.ContextLoader,
             built.OrdersLoader,
             built.TradesLoader,
             built.Stream,
             sp.ResolveSerializer<ReadOnlyMemory<byte>>(Constants.OrderUpdateKey, MediaTypeNames.Application.Json),
-            sp.ResolveSerializer<ReadOnlyMemory<byte>>(Constants.AlgoUpdateKey, MediaTypeNames.Application.Json),
-            sp.ResolveSerializer<ReadOnlyMemory<byte>>(Constants.TradeLiteKey, MediaTypeNames.Application.Json),
+            sp.ResolveSerializer<ReadOnlyMemory<byte>>(Constants.AccountUpdateKey, MediaTypeNames.Application.Json),
             statusMonitor.CreateReporter(),
             statusMonitor,
             Disposable.AsyncBox(logger),

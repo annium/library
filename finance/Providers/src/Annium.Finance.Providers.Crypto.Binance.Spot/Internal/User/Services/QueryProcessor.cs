@@ -73,14 +73,17 @@ internal class QueryProcessor
         result["side"] = OrderSides.ValueToString[request.Side];
         result["type"] = OrderTypes.ValueToString[request.Type];
         result["cancelReplaceMode"] = "STOP_ON_FAILURE";
-        result["timeInForce"] = "GTC";
         result["newOrderRespType"] = "RESULT";
         result["cancelOrigClientOrderId"] = request.Order.ClientOrderId;
         result["newClientOrderId"] = request.Order.ClientOrderId;
 
+        // the replacement half takes the same per-type parameters as a fresh placement, which is why the
+        // time in force is set per type here rather than once above. Sent on a market order it is a
+        // parameter the venue did not ask for, and the venue refuses those by name rather than ignoring them
         switch (request.Type)
         {
             case OrderType.Limit:
+                result["timeInForce"] = "GTC";
                 result["quantity"] = request.Qty.ToGeneralInvariantString();
                 result["price"] = request.Price.ToGeneralInvariantString();
                 break;
@@ -96,11 +99,13 @@ internal class QueryProcessor
                 result["stopPrice"] = request.LevelPrice.ToGeneralInvariantString();
                 break;
             case OrderType.StopLossLimit:
+                result["timeInForce"] = "GTC";
                 result["quantity"] = request.Qty.ToGeneralInvariantString();
                 result["price"] = request.Price.ToGeneralInvariantString();
                 result["stopPrice"] = request.LevelPrice.ToGeneralInvariantString();
                 break;
             case OrderType.TakeProfitLimit:
+                result["timeInForce"] = "GTC";
                 result["quantity"] = request.Qty.ToGeneralInvariantString();
                 result["price"] = request.Price.ToGeneralInvariantString();
                 result["stopPrice"] = request.LevelPrice.ToGeneralInvariantString();

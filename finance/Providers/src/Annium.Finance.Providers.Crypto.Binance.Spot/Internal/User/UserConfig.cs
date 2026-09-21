@@ -6,6 +6,9 @@ namespace Annium.Finance.Providers.Crypto.Binance.Spot.Internal.User;
 /// <summary>Resolved account connection settings for the Binance spot user connector.</summary>
 internal sealed record UserConfig : UserConfigBase
 {
+    /// <summary>Gets how often a refused account-stream subscription is attempted again, in milliseconds.</summary>
+    public required int SubscribeRetryInterval { get; init; }
+
     /// <summary>Gets the schedule for reloading account balances.</summary>
     public required CompositeLoaderConfig ReloadContext { get; init; }
 

@@ -552,7 +552,6 @@ public class UserProviderReadPathTests : ProvidersTestBase
             Secret = "some_secret",
             HttpApi = server.HttpUri(),
             WsApi = new Uri("wss://unused"),
-            ListenKeyUriPath = "/unused/",
             ListenKey = new ListenKeyConfiguration(1000, 1000),
             ReloadContext = reload,
             ReloadOrders = reload,

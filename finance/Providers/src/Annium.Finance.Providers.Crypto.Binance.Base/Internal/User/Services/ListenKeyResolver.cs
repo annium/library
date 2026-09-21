@@ -6,7 +6,6 @@ using Annium.Finance.Providers.Core.Shared.RateLimits;
 using Annium.Finance.Providers.Core.Shared.Status;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.HttpExtensions;
 using Annium.Finance.Providers.Crypto.Binance.Base.Shared.User.HttpExtensions;
-using Annium.Finance.Providers.Crypto.Binance.Base.User;
 using Annium.Finance.Providers.Crypto.Binance.Base.User.Contracts.Domain;
 using Annium.Finance.Providers.Crypto.Binance.Base.User.Services;
 using Annium.Logging;
@@ -30,8 +29,11 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
     /// <summary>Raised when the current listen key is invalidated and must be re-fetched.</summary>
     public event Action OnListenKeyReset = () => { };
 
-    /// <summary>The user configuration providing the HTTP API and listen key fetch/confirm intervals.</summary>
-    private readonly UserConfigBase _config;
+    /// <summary>The base URI of the account HTTP API the listen key is fetched from.</summary>
+    private readonly Uri _httpApi;
+
+    /// <summary>The fetch and confirm intervals driving this resolver's timer.</summary>
+    private readonly ListenKeyConfiguration _listenKeyConfig;
 
     /// <summary>The relative path of the listen key endpoint.</summary>
     private readonly string _endpoint;
@@ -64,7 +66,8 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
     private string _listenKey = string.Empty;
 
     /// <summary>Initializes a new instance of the <see cref="ListenKeyResolver"/> class and starts the listen key fetch timer.</summary>
-    /// <param name="config">The user configuration providing the HTTP API and listen key fetch/confirm intervals.</param>
+    /// <param name="httpApi">The base URI of the account HTTP API the listen key is fetched from.</param>
+    /// <param name="listenKeyConfig">The fetch and confirm intervals driving this resolver's timer.</param>
     /// <param name="endpoint">The relative path of the listen key endpoint.</param>
     /// <param name="httpRequestFactory">The factory used to build listen key HTTP requests.</param>
     /// <param name="signatureService">The service used to sign the listen key request.</param>
@@ -72,7 +75,8 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
     /// <param name="statusReporter">The reporter used to publish connection status changes.</param>
     /// <param name="logger">The logger to trace listen key activity with.</param>
     public ListenKeyResolver(
-        UserConfigBase config,
+        Uri httpApi,
+        ListenKeyConfiguration listenKeyConfig,
         string endpoint,
         IHttpRequestFactory httpRequestFactory,
         ISignatureService signatureService,
@@ -82,7 +86,8 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
     )
     {
         Logger = logger;
-        _config = config;
+        _httpApi = httpApi;
+        _listenKeyConfig = listenKeyConfig;
         _endpoint = endpoint;
         _httpRequestFactory = httpRequestFactory;
         _signatureService = signatureService;
@@ -95,7 +100,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
         _disposable = Disposable.AsyncBox(logger);
         // a timer is both IDisposable and IAsyncDisposable now, so the box's operators are ambiguous
         // without saying which teardown is wanted - the async one, since the box is async
-        _timer = Timers.Async(GetListenKeyAsync, 0, _config.ListenKey.FetchInterval, logger);
+        _timer = Timers.Async(GetListenKeyAsync, 0, _listenKeyConfig.FetchInterval, logger);
         _disposable += (IAsyncDisposable)_timer;
     }
 
@@ -123,7 +128,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
 
         _listenKey = string.Empty;
         _statusReporter.Connecting();
-        _timer.Change(0, _config.ListenKey.FetchInterval);
+        _timer.Change(0, _listenKeyConfig.FetchInterval);
 
         this.Trace("done");
     }
@@ -141,7 +146,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
 
             // try get listen key - timer is not expected to be switched off at this moment
             result = await _httpRequestFactory
-                .New(_config.HttpApi)
+                .New(_httpApi)
                 .Post(_endpoint)
                 .Key(_signatureService)
                 .WithRateDelay1M(_rateLimiter)
@@ -191,7 +196,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
 
             _statusReporter.Connected();
 
-            _timer.Change(_config.ListenKey.ConfirmInterval, _config.ListenKey.ConfirmInterval);
+            _timer.Change(_listenKeyConfig.ConfirmInterval, _listenKeyConfig.ConfirmInterval);
 
             this.Trace("done");
 
@@ -218,7 +223,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
         // stream, and this state is the one before the first key rather than a keep-alive. Left in
         // confirm mode, the replacement key was not asked for until a keep-alive period had passed -
         // half an hour on Binance - with nothing connected in the meantime
-        _timer.Change(_config.ListenKey.FetchInterval, _config.ListenKey.FetchInterval);
+        _timer.Change(_listenKeyConfig.FetchInterval, _listenKeyConfig.FetchInterval);
 
         this.Trace("done");
     }
@@ -253,7 +258,7 @@ internal class ListenKeyResolver : IListenKeyResolver, ILogSubject
 
         OnListenKeyReset();
 
-        _timer.Change(_config.ListenKey.FetchInterval, _config.ListenKey.FetchInterval);
+        _timer.Change(_listenKeyConfig.FetchInterval, _listenKeyConfig.FetchInterval);
 
         this.Trace("done");
     }
