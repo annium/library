@@ -32,12 +32,25 @@ public class WsApiUserStreamTests : ProvidersTestBase
     /// <summary>How long any test here may run before xUnit fails it, in milliseconds.</summary>
     private const int TimeoutMs = 60_000;
 
-    /// <summary>How often the stream retries a refused subscription, in milliseconds.</summary>
+    /// <summary>How often the stream retries, for the tests that are about retrying.</summary>
     /// <remarks>
     /// Short, so a retry test does not wait on a clock, and not zero, so a refusal does not spin the local
     /// server while an assertion is being made.
     /// </remarks>
     private const int RetryMs = 50;
+
+    /// <summary>How often the stream retries, for every test that is not about retrying.</summary>
+    /// <remarks>
+    /// Long enough that no retry can fire while a test is doing its own steps - a race the short interval
+    /// above quietly created for every other test here. They read the subscribe request, make an assertion
+    /// or two, then answer it; if a retry went out in between, the answer names an id that is no longer
+    /// pending and is correctly ignored, so the test waits for a status that will never come and dies on
+    /// its deadline.
+    ///
+    /// It passed locally and failed on a slower machine, which is the whole character of it: the margin
+    /// was tens of milliseconds and nothing in the test said so.
+    /// </remarks>
+    private const int NoRetryMs = 30_000;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WsApiUserStreamTests"/> class.
@@ -129,7 +142,7 @@ public class WsApiUserStreamTests : ProvidersTestBase
         await using var server = this.RunWebSocketServer();
         var monitor = new StatusMonitor(Get<ILogger>());
 
-        await using var stream = CreateStream(server, monitor);
+        await using var stream = CreateStream(server, monitor, RetryMs);
         var connection = await server.WaitConnectionAsync(ct);
         var id = Parse(await connection.WaitMessageAsync(ct)).GetProperty("id").GetString().NotNull();
 
@@ -201,7 +214,7 @@ public class WsApiUserStreamTests : ProvidersTestBase
         var errors = Channel.CreateUnbounded<ConnectorError>();
         monitor.OnError += error => errors.Writer.TryWrite(error);
 
-        await using var stream = CreateStream(server, monitor);
+        await using var stream = CreateStream(server, monitor, RetryMs);
         var connection = await server.WaitConnectionAsync(ct);
         var id = Parse(await connection.WaitMessageAsync(ct)).GetProperty("id").GetString().NotNull();
 
@@ -437,9 +450,10 @@ public class WsApiUserStreamTests : ProvidersTestBase
     /// </summary>
     /// <param name="server">The local server the stream connects to.</param>
     /// <param name="monitor">The monitor the stream reports into.</param>
+    /// <param name="retryMs">How often it retries an unacknowledged subscription, in milliseconds.</param>
     /// <returns>The stream under test.</returns>
-    private WsApiUserStream CreateStream(TestWebSocketServer server, StatusMonitor monitor) =>
-        new(server.Uri, RetryMs, new TestSignatureService(), _rateLimiter, monitor.CreateReporter(), Get<ILogger>());
+    private WsApiUserStream CreateStream(TestWebSocketServer server, StatusMonitor monitor, int retryMs = NoRetryMs) =>
+        new(server.Uri, retryMs, new TestSignatureService(), _rateLimiter, monitor.CreateReporter(), Get<ILogger>());
 
     /// <summary>
     /// The limiter the stream reports the venue's stated weight into, so a test can read it back.
