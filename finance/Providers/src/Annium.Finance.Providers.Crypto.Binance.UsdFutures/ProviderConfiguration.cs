@@ -1,3 +1,4 @@
+using System;
 using Annium.Finance.Providers.Core.Shared.Loaders;
 using Annium.Finance.Providers.Core.Shared.TimeSync;
 using Annium.Finance.Providers.Crypto.Binance.Base.User.Services;
@@ -12,6 +13,26 @@ namespace Annium.Finance.Providers.Crypto.Binance.UsdFutures;
 /// </summary>
 public sealed record ProviderConfiguration
 {
+    /// <summary>Gets the base URI of the account/trading HTTP API, or null to use the exchange's own.</summary>
+    /// <remarks>
+    /// The exchange publishes a testnet with its own hosts, and a caller that wants one is configuring an
+    /// endpoint rather than patching a constant. Each of the three is overridden on its own, because the
+    /// reasons to move them do not arrive together: a testnet moves all three, while a test that needs to
+    /// cut a connection moves only the socket it means to cut and leaves the rest pointed at the venue.
+    /// </remarks>
+    public Uri? HttpApi { get; init; }
+
+    /// <summary>Gets the base URI of the market data stream, or null to use the exchange's own.</summary>
+    public Uri? MarketWsApi { get; init; }
+
+    /// <summary>Gets the base URI the account stream is opened on, or null to use the exchange's own.</summary>
+    /// <remarks>
+    /// The same host as the market stream on this market type, and a separate setting all the same: the two
+    /// are one endpoint by the venue's choice rather than by ours, and a test relaying the account stream
+    /// must not silently relay market data with it.
+    /// </remarks>
+    public Uri? UserWsApi { get; init; }
+
     /// <summary>The listen key ping interval and expiration handling.</summary>
     public ListenKeyConfiguration ListenKey { get; init; } = new(5_000, 60_000);
 

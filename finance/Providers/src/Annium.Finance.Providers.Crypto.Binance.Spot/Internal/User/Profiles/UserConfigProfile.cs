@@ -22,13 +22,13 @@ internal class UserConfigProfile : Profile
     /// <returns>The resolved user config.</returns>
     private static UserConfig MapSettingsToConfig(IServiceProvider sp, UserSettings settings)
     {
-        var httpApi = Endpoints.HttpApi;
+        var providerConfig = sp.Resolve<ProviderConfiguration>();
+
+        var httpApi = providerConfig.HttpApi ?? Endpoints.HttpApi;
 
         // the WebSocket API host, not the market stream one: they are different endpoints speaking
         // different protocols, and the account's events only come over this one
-        var wsApi = Endpoints.UserWsApi;
-
-        var providerConfig = sp.Resolve<ProviderConfiguration>();
+        var wsApi = providerConfig.UserWsApi ?? Endpoints.UserWsApi;
 
         return new UserConfig
         {

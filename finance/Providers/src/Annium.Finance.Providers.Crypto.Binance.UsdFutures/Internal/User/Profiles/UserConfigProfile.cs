@@ -32,10 +32,10 @@ internal class UserConfigProfile : Profile
     /// <returns>The resolved user configuration.</returns>
     private static UserConfig MapSettingsToConfig(IServiceProvider sp, UserSettings settings)
     {
-        var httpApi = Endpoints.HttpApi;
-        var wsApi = Endpoints.WsApi;
-
         var providerConfig = sp.Resolve<ProviderConfiguration>();
+
+        var httpApi = providerConfig.HttpApi ?? Endpoints.HttpApi;
+        var wsApi = providerConfig.UserWsApi ?? Endpoints.WsApi;
 
         return new UserConfig
         {

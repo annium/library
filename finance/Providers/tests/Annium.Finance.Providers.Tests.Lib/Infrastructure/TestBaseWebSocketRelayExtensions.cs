@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
@@ -32,7 +33,44 @@ public static class TestBaseWebSocketRelayExtensions
     {
         var sp = test.Get<IServiceProvider>();
 
-        return new TestWebSocketRelay(sp, upstream, sp.Resolve<ILogger>());
+        return new TestWebSocketRelay(sp, upstream, 0, sp.Resolve<ILogger>());
+    }
+
+    /// <summary>
+    /// Starts a relay on a port the caller already knows.
+    /// </summary>
+    /// <remarks>
+    /// For the case the overload above cannot serve: routing a whole connector through the relay, where the
+    /// connector is built by the container and configured while it is being built, so its endpoint has to be
+    /// known before anything the relay needs exists. Reserving the port first inverts that — the address is
+    /// decided by the test, the provider is configured with it, and the relay opens on it afterwards.
+    /// </remarks>
+    /// <param name="test">The test instance the relay resolves its services from.</param>
+    /// <param name="upstream">The venue endpoint to relay to.</param>
+    /// <param name="port">The port to listen on, as returned by <see cref="ReserveLocalPort"/>.</param>
+    /// <returns>The running relay; dispose it to stop listening.</returns>
+    public static TestWebSocketRelay RunWebSocketRelay(this TestBase test, Uri upstream, ushort port)
+    {
+        var sp = test.Get<IServiceProvider>();
+
+        return new TestWebSocketRelay(sp, upstream, port, sp.Resolve<ILogger>());
+    }
+
+    /// <summary>
+    /// Picks a free local port by opening a listener on any port and reading which one the system gave.
+    /// </summary>
+    /// <remarks>
+    /// The listener is closed immediately, so what comes back is a port that was free a moment ago rather
+    /// than one that is held — nothing else here can guarantee more, and the window is a few milliseconds on
+    /// a loopback interface. Said plainly because a reserved-sounding name would suggest otherwise.
+    /// </remarks>
+    /// <returns>The port number.</returns>
+    public static ushort ReserveLocalPort()
+    {
+        using var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+
+        return (ushort)((IPEndPoint)listener.LocalEndPoint.NotNull()).Port;
     }
 }
 
@@ -106,12 +144,16 @@ public sealed class TestWebSocketRelay : IAsyncDisposable, ILogSubject
     /// </summary>
     /// <param name="sp">The service provider the server is built from.</param>
     /// <param name="upstream">The venue endpoint to relay to.</param>
+    /// <param name="port">The port to listen on, or zero to let the system pick one.</param>
     /// <param name="logger">The logger to trace through.</param>
-    internal TestWebSocketRelay(IServiceProvider sp, Uri upstream, ILogger logger)
+    internal TestWebSocketRelay(IServiceProvider sp, Uri upstream, ushort port, ILogger logger)
     {
         Logger = logger;
         _upstream = upstream;
-        _server = ServerBuilder.New(sp).WithHandler(new RelayHandler(this)).Start().NotNull();
+        _server = (port is 0 ? ServerBuilder.New(sp) : ServerBuilder.New(sp, port))
+            .WithHandler(new RelayHandler(this))
+            .Start()
+            .NotNull();
 
         this.Trace("started relay at port {port}", _server.Port);
     }

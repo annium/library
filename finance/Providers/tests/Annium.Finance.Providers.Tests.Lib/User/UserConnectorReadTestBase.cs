@@ -7,6 +7,7 @@ using Annium.Data.Tables;
 using Annium.Finance.Providers.Abstractions.Connectors.Shared;
 using Annium.Finance.Providers.Abstractions.Connectors.User;
 using Annium.Finance.Providers.Abstractions.Domain.User;
+using Annium.Finance.Providers.Tests.Lib.Infrastructure;
 using Annium.Logging;
 using Annium.Testing;
 using Xunit;
@@ -166,6 +167,83 @@ public abstract class UserConnectorReadTestBase : ProvidersTestBase
             connector.OnStatusChanged -= statuses.Enqueue;
             connector.OnError -= errors.Enqueue;
         }
+
+        this.Trace("done");
+    }
+
+    /// <summary>
+    /// Connects a live user connector through a relay the test can cut, cuts it, and asserts that the whole
+    /// connector comes back — not merely the socket under it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The difference from the stream-level drop test is the layers in between. That one proves the venue
+    /// accepts a second connection; it says nothing about the sync cycle restarting, the loaders being
+    /// stopped and started, or state being published again — all of which are pinned offline against a
+    /// stub and have never run against a real reconnection.
+    /// </para>
+    /// <para>
+    /// So the assertion is not "connected again" but "delivering again": a snapshot that arrives after the
+    /// cut, counted from zero at the moment of it. A connector that reported itself connected and published
+    /// nothing would pass the first and fail this.
+    /// </para>
+    /// <para>
+    /// Errors are deliberately not asserted to be absent. A cut connection is an error, and the test causes
+    /// it on purpose — what matters is what happened afterwards.
+    /// </para>
+    /// </remarks>
+    /// <param name="settings">The account credentials the connector authenticates with.</param>
+    /// <param name="relay">The relay the connector's account stream runs through.</param>
+    /// <param name="ct">The test's cancellation token, which its deadline signals.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    protected async Task UserConnectorDropBaseAsync(
+        UserSettings settings,
+        TestWebSocketRelay relay,
+        CancellationToken ct
+    )
+    {
+        this.Trace("start");
+
+        var factory = Get<IUserConnectorFactory>();
+
+        this.Trace("create connector, whose account stream is configured to the relay");
+        await using var connector = factory.Create(settings);
+
+        var assetsAfterDrop = new ConcurrentQueue<AssetModel>();
+        var collecting = false;
+        using var subscription = connector.Assets.Subscribe(x =>
+        {
+            if (Volatile.Read(ref collecting))
+                Collect(assetsAfterDrop, x);
+        });
+
+        this.Trace("await until connector is ready");
+        await connector.WhenConnectedAsync(ct);
+
+        var connectionsBeforeDrop = relay.AcceptedConnections;
+        connectionsBeforeDrop.IsGreaterOrEqual(
+            1,
+            "the connector reached connected without the relay seeing a connection, so its stream went "
+                + "straight to the venue and this test measures nothing"
+        );
+
+        this.Trace("cut the connection");
+        Volatile.Write(ref collecting, true);
+        relay.Drop();
+
+        this.Trace("await until the connector notices");
+        await Expect.ToAsync(() => connector.Status.IsNotEqual(ConnectorStatus.Connected), 60_000);
+
+        this.Trace("await until it is back");
+        await connector.WhenConnectedAsync(ct);
+
+        relay.AcceptedConnections.IsGreater(
+            connectionsBeforeDrop,
+            "the connector reported itself connected again without the relay seeing a new connection"
+        );
+
+        this.Trace("await for the account snapshot the recovery must republish");
+        await Expect.ToAsync(() => assetsAfterDrop.Count.IsGreaterOrEqual(1), 60_000);
 
         this.Trace("done");
     }
