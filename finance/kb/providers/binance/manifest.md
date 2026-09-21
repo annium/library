@@ -1022,3 +1022,15 @@ rule the code carried and no test named.
 Nine facts, six killed by a mutation and three held by the type system. The three are worth naming
 rather than counting as untested: a check the compiler needs cannot be quietly deleted, which is a
 stronger guarantee than a test and a weaker one than a test plus the compiler.
+
+## Spot step-4 facts pinned on 2026-09-21 — the market half
+
+| fact | state |
+|---|---|
+| the candle request asks `api/v3/klines` and carries `symbol`, `interval`, `limit` and `startTime` | `pinned`, each of the five mutation-checked. Only the cursor had been asserted, because the paging test needed it and nothing else needed anything |
+| the exchange info request asks `api/v3/exchangeInfo` | `pinned`, mutation-checked. Offline the test server answers whatever it is asked, so the one string that must match the venue was the one nothing checked - and this venue has already lost a live run to exactly that |
+| a refused candle load yields a batch whose status is not `Ok`; a window the venue answers with no candles yields **no batch at all** | `pinned`. The two are distinguishable, which is the property that matters - though not in the shape first assumed. Worth stating because "empty answer" and "empty batch" are different things on this path |
+
+The refusal half has no local mutation: the discarding it guards against lived upstream and is fixed
+there, so there is nothing in this repository to break. The test is a regression guard against that fix
+being undone, which is what it is for.
