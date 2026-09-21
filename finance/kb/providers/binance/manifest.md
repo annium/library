@@ -1192,4 +1192,30 @@ change on the user's side rather than a code change on ours.
 subscription is stopped (`user-data-stream.md:325-343`). It is the signal a reconnect keys on, and it
 has no counterpart in the listen-key mechanism, where expiry was inferred from a closed socket.
 
-Verification axis: everything in §11 is `none`. Nothing in this repository calls any of it.
+### §11 verification — pinned 2026-09-21
+
+Everything below is `pinned`: an offline test fails if it changes, and each one was mutation-checked.
+Nothing here is `live` — this venue's trading block does not exist, so no fact in §11 has been observed
+against the exchange.
+
+| fact | what pins it |
+|---|---|
+| the signature payload is the parameters **sorted by name** | the venue's own worked example, reproduced exactly (`WsApiRequestBuilderTests`) |
+| values go into the payload **raw**, encoded UTF-8 | the venue's second worked example, whose symbol is non-ASCII |
+| a number is a JSON number and text a JSON string in the frame | `ANumberIsANumber_AndTextIsAString` |
+| a method taking no parameters sends **no** `params` member | `AMethodWithNoParameters_SendsNoParamsMember` |
+| the subscription method is the **signature** variant | `WsApiUserStreamTests.Connected_SendsASignedSubscription` |
+| the event envelope is `{subscriptionId, event}` and the event is what a consumer gets | `AnEvent_ArrivesUnwrappedFromItsEnvelope` |
+| `eventStreamTerminated` ends a subscription without ending the connection | `ATerminatedStream_IsSubscribedAgainOnTheSameConnection` |
+| `POST /api/v3/order`, `POST /api/v3/order/cancelReplace`, `DELETE /api/v3/order`, `DELETE /api/v3/openOrders` | `UserConnectorCommandTests.EachCommand_GoesToItsDocumentedEndpoint`, a theory over all four |
+| `cancelReplaceMode=STOP_ON_FAILURE` on a replacement | `Modify_StopsOnAFailedCancelRatherThanReplacingRegardless` |
+| a spot account has no leverage to set | `SetLeverage_IsRefusedAndSendsNothing` |
+
+**The two golden signatures are worth their length and one of them is worth more than the other.**
+Percent-encoding every value passes the ASCII example and fails only the non-ASCII one — measured, by
+mutating the builder to escape its values. A contract pinned only by the first example would be wrong
+about every symbol outside ASCII and green everywhere.
+
+**The weight of the subscription is not counted.** It is 2, on connect and on each retry, against a
+6000/min ceiling; the limiter's model is to report what a response header said, and this transport has
+no header. Recorded rather than plumbed through — see the backlog in `status.md`.
