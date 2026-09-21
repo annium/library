@@ -15,6 +15,15 @@ namespace Annium.Net.Http;
 public static class HttpRequestLogExtensions
 {
     /// <summary>
+    /// How much of a response body is written to the log.
+    /// </summary>
+    /// <remarks>
+    /// Generous enough for an account, an order list or an error, which is what body logging is for, and
+    /// far below a reference payload, which is what it must not become.
+    /// </remarks>
+    private const int MaxLoggedBodyLength = 8 * 1024;
+
+    /// <summary>
     /// Adds logging capabilities to the HTTP request
     /// </summary>
     /// <typeparam name="T">The type of the log subject</typeparam>
@@ -94,11 +103,34 @@ public static class HttpRequestLogExtensions
                         headers
                     );
 
-                    if (log.HasFlag(LogData.Response))
-                        subject.Trace<string>("response body: {body}", await response.Content.ReadAsStringAsync());
+                    // guarded on the level, not only on the flag: reading the content materialises the
+                    // whole body as a string, and an argument is evaluated before anything looks at
+                    // whether the level would discard it. Unguarded, asking for body logging costs the
+                    // allocation on every response whether or not a single line is ever written
+                    if (log.HasFlag(LogData.Response) && LogConfig.IsEnabled(LogLevel.Trace))
+                    {
+                        var body = await response.Content.ReadAsStringAsync();
+                        subject.Trace<string>("response body: {body}", Truncate(body));
+                    }
                 }
             }
         });
+
+    /// <summary>
+    /// Caps a logged body, so one large answer cannot turn a log into the answer.
+    /// </summary>
+    /// <remarks>
+    /// A reference payload can run to megabytes, and a log line that size is not read by anyone - it is
+    /// scrolled past, and it makes the lines around it unreadable too. The cut says how much was cut, so
+    /// a reader can tell a truncated body from a short one. Where the whole payload is the point, a probe
+    /// that writes it to a file is the tool for that rather than the log.
+    /// </remarks>
+    /// <param name="body">The body as read.</param>
+    /// <returns>The body, or its first part with a note saying so.</returns>
+    private static string Truncate(string body) =>
+        body.Length <= MaxLoggedBodyLength
+            ? body
+            : $"{body[..MaxLoggedBodyLength]}… [{body.Length - MaxLoggedBodyLength} more chars of {body.Length}]";
 }
 
 /// <summary>
