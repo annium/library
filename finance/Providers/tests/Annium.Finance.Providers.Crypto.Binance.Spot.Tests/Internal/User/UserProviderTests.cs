@@ -9,10 +9,12 @@ namespace Annium.Finance.Providers.Crypto.Binance.Spot.Tests.Internal.User;
 
 /// <summary>
 /// Runs <see cref="UserProviderTestBase"/>'s context/orders/trades checks against the real Binance Spot user
-/// provider for BTCUSDT. Currently disabled outright (not gated by
-/// the read block like the USD-M futures counterpart):
-/// every case is skipped with "Not implemented".
+/// provider for BTCUSDT; in the <b>read</b> block, which it inherits from the base.
 /// </summary>
+/// <remarks>
+/// Every case here was skipped with "Not implemented" until 2026-09-21, because the four read paths it
+/// drives returned an empty success without issuing a request. They exist now and these run.
+/// </remarks>
 public class UserProviderTests : UserProviderTestBase
 {
     /// <summary>
