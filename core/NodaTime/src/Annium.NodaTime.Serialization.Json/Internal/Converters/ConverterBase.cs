@@ -7,8 +7,14 @@ namespace Annium.NodaTime.Serialization.Json.Internal.Converters;
 
 /// <summary>
 /// Base class for all the Json converters which handle value types (which is most of them).
-/// This deals handles all the boilerplate code dealing with nullity.
+/// This handles the boilerplate code dealing with nullity.
 /// </summary>
+/// <remarks>
+/// A converter claims its own type only. The nullable form of a value type is the serializer's to handle: it wraps
+/// the converter for <typeparamref name="T"/> and deals with a null itself. A converter that claimed <c>T?</c> as
+/// well was refused by the serializer outright, since a <see cref="JsonConverter{T}"/> of <typeparamref name="T"/>
+/// cannot read or write a <c>T?</c> - and with it every type that has a <c>T?</c> member anywhere in it.
+/// </remarks>
 /// <typeparam name="T">The type to convert to/from JSON.</typeparam>
 internal abstract class ConverterBase<T> : JsonConverter<T>
 {
@@ -21,11 +27,10 @@ internal abstract class ConverterBase<T> : JsonConverter<T>
     );
 
     /// <summary>
-    /// The nullable version of type T, used for null value handling during JSON conversion.
+    /// Whether a null - a null token or an empty string - can be read: for a reference type, as a missing value. For a
+    /// value type it cannot, because the serializer never hands a null meant for <c>T?</c> to this converter.
     /// </summary>
-    private static readonly Type _nullableT = typeof(T).GetTypeInfo().IsValueType
-        ? typeof(Nullable<>).MakeGenericType(typeof(T))
-        : typeof(T);
+    private static readonly bool _acceptsNull = !typeof(T).GetTypeInfo().IsValueType;
 
     /// <summary>
     /// Determines whether this converter can convert the specified object type.
@@ -34,7 +39,6 @@ internal abstract class ConverterBase<T> : JsonConverter<T>
     /// <returns>true if this converter can convert the specified type; otherwise, false.</returns>
     public override bool CanConvert(Type objectType) =>
         objectType == typeof(T)
-        || objectType == _nullableT
         || _checkAssignableFrom && typeof(T).GetTypeInfo().IsAssignableFrom(objectType.GetTypeInfo());
 
     /// <summary>
@@ -48,8 +52,8 @@ internal abstract class ConverterBase<T> : JsonConverter<T>
     {
         if (reader.TokenType == JsonTokenType.Null)
         {
-            Preconditions.CheckData(typeToConvert == _nullableT, $"Cannot convert null value to {typeToConvert}");
-            return default!; // nullable target verified above; default(T) boxes back to the requested null T?
+            Preconditions.CheckData(_acceptsNull, $"Cannot convert null value to {typeToConvert}");
+            return default!; // a reference type, verified above
         }
 
         // Handle empty strings automatically
@@ -58,16 +62,15 @@ internal abstract class ConverterBase<T> : JsonConverter<T>
             var value = reader.GetString();
             if (value == string.Empty)
             {
-                Preconditions.CheckData(typeToConvert == _nullableT, $"Cannot convert null value to {typeToConvert}");
-                return default!; // nullable target verified above; default(T) boxes back to the requested null T?
+                Preconditions.CheckData(_acceptsNull, $"Cannot convert null value to {typeToConvert}");
+                return default!; // a reference type, verified above
             }
         }
 
         try
         {
             // Delegate to the concrete subclass. At this point we know that we don't want to return null, so we
-            // can ask the subclass to return a T, which we will box. That will be valid even if objectType is
-            // T? because the boxed form of a non-null T? value is just the boxed value itself.
+            // can ask the subclass to return a T.
 
             // Note that we don't currently pass existingValue down; we could change this if we ever found a use for it.
             return ReadImplementation(ref reader, typeToConvert, options);
